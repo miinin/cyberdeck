@@ -64,3 +64,20 @@ Rakennetaan ohut päästä päähän toimiva versio: sovellus hakee Cyberpunk TC
 - K1 ja K2 (UX): käyttäjä ei vielä vastannut. Edetään UX.md:n oletuksilla ("Hinta", tyypit englanniksi). Kyse on tekstimuutoksesta, jonka voi vaihtaa myöhemmin.
 - R-4 (julkaisuavain): avoin, ei blokkaa T-001:tä.
 - R-4 PM:n ehdotus käyttäjälle: prod ja test ovat samassa Firebase-projektissa, joten mikä tahansa avain, jolla voi julkaista testiin, voi julkaista myös tuotantoon. GitHubin asetus ei poista riskiä. Varsinainen korjaus on erillinen Firebase-projekti testille (D-003 vaihtoehto C), joka tehdään joka tapauksessa, kun sovellus alkaa tallentaa dataa. Siihen asti riski pysyy Mediumina, koska repoon pääsevät vain käyttäjä ja agentit ja fork-PR:t on estetty.
+
+### Luovutus 2026-09-30 · Arkkitehti → Koodari
+- Mitä tehtiin: Teknologia- ja rakennepäätös D-005 (Vite 8 + React 19 + TypeScript 6, Vitest 5 + jsdom 29 + Testing Library, ESLint 10) ja `docs/ARCHITECTURE.md`. Toolchain ja versiot todennettiin yhteensopiviksi scratchpadissa (asennus, jsdom-testi, tsc, eslint, vite build → dist/, npm audit 0).
+- Mitä pyydän: Toteutus ARCHITECTURE.md:n lukujen 3–9 mukaan: hakemistot ja moduulit, `fetchAllCards`, `mapCard`, `CardApiError`, `useCardCatalog`, npm-skriptit, tarkat riippuvuusversiot (luku 7 / D-005) ja pakolliset testit (luku 8). Kerrosraja valvotaan ESLintin `no-restricted-imports`-säännöllä.
+- Mistä katsoa: `docs/ARCHITECTURE.md`, `docs/DECISIONS.md` D-005.
+- Tunnetut rajoitteet ja riskit: Lataus on noin 1,4 Mt ja noin 4–6 s ilman välimuistia (T-003). Testit eivät ole CI:ssä (T-004). Lintissä ei ole saavutettavuussääntöjä (T-005, UX:n axe-ajo korvaa). TypeScript 7 ja jsdom 30 eivät käy (typescript-eslint, Node 24.14).
+- Testit: Sovelluskoodia ei kirjoitettu. Toolchain-kokeilu scratchpadissa meni läpi.
+
+### Checkpoint 2026-09-30 · PM (suunnittelu valmis, päätökset)
+- D-005 hyväksytty (PM). D-006 kirjattu (käyttäjä: data rajapinnasta, kuvat myöhemmin).
+- **Ristiriita UX ↔ Arkkitehti ratkaistu (PM):** Jos yksikin sivu epäonnistuu, näytetään VIRHE-tila ja Yritä uudelleen (Arkkitehti, yksinkertaisempi). UX:n OSITTAINEN-tila näytetään, kun kaikki sivut onnistuivat mutta näytettäviä kortteja on vähemmän kuin `total` (esim. `mapCard` ohitti virheellisiä kortteja, `skipped` > 0). Automaattisia uusintayrityksiä ei tarvita (SR-5 sallii enintään yhden). Käyttäjä voi yrittää uudelleen painikkeesta.
+- "Hinta" = pelin sisäinen kustannus (`cost`), ei raha. Sarakkeen nimi on UX.md:n mukainen ("Hinta"), ja käyttäjä voi muuttaa sen myöhemmin (K1).
+- Turvallisuusotsakkeet (Arkkitehdin K3): Digiturva vaatii ne (SR-2, SR-3), joten Koodari lisää ne `firebase.json`iin.
+- Korttien järjestys (Arkkitehdin K4): rajapinnan järjestys riittää MVP-0:aan. Muut K4:n kohdat on määritelty UX.md:ssä.
+- K5 (seurataanko kokoelmassa kortteja vai painoksia) on MVP-1:n tuotekysymys käyttäjälle. Se ei estä T-001:tä.
+- Jatkotehtävät kirjattu: T-003, T-004, T-005.
+- Seuraava askel: Koodari toteuttaa.
