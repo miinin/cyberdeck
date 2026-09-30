@@ -81,3 +81,10 @@ Rakennetaan ohut päästä päähän toimiva versio: sovellus hakee Cyberpunk TC
 - K5 (seurataanko kokoelmassa kortteja vai painoksia) on MVP-1:n tuotekysymys käyttäjälle. Se ei estä T-001:tä.
 - Jatkotehtävät kirjattu: T-003, T-004, T-005.
 - Seuraava askel: Koodari toteuttaa.
+
+### Suunnitelma 2026-09-30 · Koodari
+1. Projektin runko: package.json (tarkat versiot D-005), .npmrc, tsconfig, vite.config.ts, eslint.config.js (kerrosraja + SR-1-säännöt), index.html, testien setup (verkon esto). Build → dist/.
+2. domain/card.ts ja api/: errors, mapCard, netdeckClient (sivutus, aikakatkaisu, validointi) + yksikkötestit (ARCHITECTURE luku 8, SR-4, SR-5).
+3. ui/: texts.ts, useCardCatalog, CardList, CatalogView (tilat UX.md 4.5 + PM:n ratkaisu VIRHE/OSITTAINEN), App, styles.css (tokenit) + testit (SR-1 XSS-testi).
+4. firebase.json: CSP ja turvallisuusotsakkeet (SR-2, SR-3). Workflowt: permissions-lohkot (SR-8).
+5. Koodikatselmointi, audit, ajo-ohje STATUS.md:hen, ARCHITECTURE.md:n toteutusosa, luovutus, PR.
