@@ -1,7 +1,7 @@
 # STATUS · päivitetty 2026-09-30 (PM)
 
 ## Yhdellä lauseella
-Projekti on alustettu (repo, Firebase-projekti, julkaisuputki, agenttipohjat). PROJECT.md on hyväksytty (D-004). MVP-0:n T-001 (kävelevä luuranko) on suunnitteluvaiheessa.
+Projekti on alustettu (repo, Firebase-projekti, julkaisuputki, agenttipohjat). PROJECT.md on hyväksytty (D-004). MVP-0:n T-001 (kävelevä luuranko) on toteutuksessa (suunnittelu valmis: D-005, UX.md, SECURITY.md).
 
 ## MVP-taso
 Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
@@ -9,7 +9,7 @@ Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-001 | Arkkitehti, UX, Digiturva | Ready (suunnittelu) | Teknologia-ADR, näkymämäärittely ja uhkamalli, katso kortti |
+| T-001 | Koodari | In Progress | Toteutus ARCHITECTURE.md:n, UX.md:n ja SR-vaatimusten mukaan, katso kortti |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -17,6 +17,7 @@ Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
 ## Kysymykset käyttäjälle (ei blokkaa, edetään oletuksella)
 - R-4 Tuotantojulkaisun suojaus: katso PM:n ehdotus T-001-kortissa. Oletus: ei muutoksia ennen erillistä testiprojektia.
 - K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi. Oletus: UX.md:n mukaan.
+- K5 (MVP-1, ei blokkaa T-001:tä): seurataanko kokoelmassa kortteja vai painoksia (alt-artit, beta, ranskankieliset)? Arkkitehdin alustava suositus: korttitaso (`slug`).
 
 ## Toimintatapa, kun käyttäjä on poissa (sovittu 2026-09-30)
 - PM vie tehtävää eteenpäin agenttien työnkulun mukaan (suunnittelu → Koodari → katselmoinnit → testikäyttäjä → dokumentointi → PR testiin).

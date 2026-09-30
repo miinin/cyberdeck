@@ -1,5 +1,5 @@
 # T-001 · Kävelevä luuranko: korttilista rajapinnasta näytölle
-**Tila:** Ready · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
+**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☐ (teknologia ja rakenne, ADR) · Digiturva ☐ (ulkoinen rajapinta, korttikuvien käyttöoikeus) · UX ☐ (korttilistan näkymä ja tilat)
 **Katselmoinnit:** Koodikatselmointi ☐ · Arkkitehti ☐ · Digiturva ☐ · UX ☐ · Testikäyttäjä ☐ · Dokumentoija ☐
 **Riippuvuudet:** T-000 (Done). Julkaisuputken workflowt ovat jo haarassa `t-001-kaveleva-luuranko`.
