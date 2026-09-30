@@ -1,7 +1,7 @@
 # STATUS · päivitetty 2026-09-30 (PM)
 
 ## Yhdellä lauseella
-Projekti on alustettu (repo, Firebase-projekti, julkaisuputki, agenttipohjat). Visiota ei ole vielä määritelty.
+Projekti on alustettu (repo, Firebase-projekti, julkaisuputki, agenttipohjat). PROJECT.md on luonnoksena: ominaisuudet on sovittu, ja MVP-tasot, mittarit ja rajaukset odottavat käyttäjän hyväksyntää.
 
 ## MVP-taso
 Työn alla: MVP-0 · Valmiina: 0/0 tehtävää
@@ -9,10 +9,11 @@ Työn alla: MVP-0 · Valmiina: 0/0 tehtävää
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | PM | – | Haastattele käyttäjä ja kirjoita PROJECT.md |
+| – | PM | Odottaa käyttäjää | Käyttäjä hyväksyy PROJECT.md:n MVP-tasot, mittarit ja rajaukset |
 
 ## Blokkerit
-- Ei blokkereita.
+- PROJECT.md:n MVP-tasojen hyväksyntä, käyttäjä (2026-09-30)
+- `gh`-komentorivityökalua ei löydy PM:n ympäristöstä, joten PR:ien listaus ja luonti eivät onnistu. Käyttäjä (2026-09-30)
 
 ## Viimeksi valmistuneet
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
