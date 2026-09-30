@@ -12,7 +12,18 @@ Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
 | T-001 | Arkkitehti, UX, Digiturva | Ready (suunnittelu) | Teknologia-ADR, näkymämäärittely ja uhkamalli, katso kortti |
 
 ## Blokkerit
-- `gh`-komentorivityökalua ei löydy PM:n ympäristöstä, joten PR:ien listaus ja luonti eivät onnistu. Käyttäjä (2026-09-30)
+- Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
+
+## Kysymykset käyttäjälle (ei blokkaa, edetään oletuksella)
+- R-4 Tuotantojulkaisun suojaus: katso PM:n ehdotus T-001-kortissa. Oletus: ei muutoksia ennen erillistä testiprojektia.
+- K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi. Oletus: UX.md:n mukaan.
+
+## Toimintatapa, kun käyttäjä on poissa (sovittu 2026-09-30)
+- PM vie tehtävää eteenpäin agenttien työnkulun mukaan (suunnittelu → Koodari → katselmoinnit → testikäyttäjä → dokumentointi → PR testiin).
+- Tekstit, nimet ja pienet käytettävyysvalinnat: valitaan suunnittelijan oletus, kirjataan tälle listalle, ja käyttäjä voi muuttaa ne myöhemmin.
+- Tuotepäätös, riskin hyväksyntä, maksullinen palvelu tai peruuttamaton toimenpide: ei arvata. Kysymys kirjataan tälle listalle, kyseinen osa parkkeerataan, ja PM jatkaa muulla työllä.
+- Ei koskaan ilman käyttäjää: main-haara, tuotantojulkaisu, `gh pr merge`, force push.
+- Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
