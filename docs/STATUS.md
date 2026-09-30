@@ -1,26 +1,25 @@
 # STATUS · päivitetty 2026-09-30 (PM)
 
 ## Yhdellä lauseella
-Projekti on alustettu (repo, Firebase-projekti, julkaisuputki, agenttipohjat). PROJECT.md on luonnoksena: ominaisuudet on sovittu, ja MVP-tasot, mittarit ja rajaukset odottavat käyttäjän hyväksyntää.
+Projekti on alustettu (repo, Firebase-projekti, julkaisuputki, agenttipohjat). PROJECT.md on hyväksytty (D-004). MVP-0:n T-001 (kävelevä luuranko) on suunnitteluvaiheessa.
 
 ## MVP-taso
-Työn alla: MVP-0 · Valmiina: 0/0 tehtävää
+Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | PM | Odottaa käyttäjää | Käyttäjä hyväksyy PROJECT.md:n MVP-tasot, mittarit ja rajaukset |
+| T-001 | Arkkitehti, UX, Digiturva | Ready (suunnittelu) | Teknologia-ADR, näkymämäärittely ja uhkamalli, katso kortti |
 
 ## Blokkerit
-- PROJECT.md:n MVP-tasojen hyväksyntä, käyttäjä (2026-09-30)
 - `gh`-komentorivityökalua ei löydy PM:n ympäristöstä, joten PR:ien listaus ja luonti eivät onnistu. Käyttäjä (2026-09-30)
 
 ## Viimeksi valmistuneet
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. PROJECT.md: visio, kohderyhmä ja MVP-tasot → käyttäjän hyväksyntä
-2. T-001 Kävelevä luuranko haarassa `t-001-kaveleva-luuranko`. Julkaisuputken workflow-tiedostot ovat jo siinä haarassa. Ensimmäinen PR testaa koko putken (build → esikatselu-URL).
+1. T-001 suunnittelu (Arkkitehti, UX ja Digiturva rinnakkain), sitten toteutus (Koodari). Ensimmäinen PR testaa koko putken (build → esikatselu-URL).
+2. MVP-1:n tehtävien pilkkominen T-001:n arkkitehtuurin pohjalta (PM)
 
 ## Julkaisuputki
 - GitHub: https://github.com/miinin/cyberdeck
