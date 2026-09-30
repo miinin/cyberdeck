@@ -151,14 +151,20 @@ function remainingOffsets(total: number, pageLimit: number): number[] {
 async function fetchRemainingPages(offsets: number[], options: PageRequestOptions): Promise<NetdeckPage[]> {
   const pages: (NetdeckPage | undefined)[] = new Array(offsets.length);
   let next = 0;
-  let sawEmptyPage = false;
+  let stop = false;
 
   async function worker(): Promise<void> {
-    while (!sawEmptyPage && next < offsets.length) {
+    while (!stop && next < offsets.length) {
       const index = next++;
-      const page = await fetchPage(offsets[index] as number, options);
-      pages[index] = page;
-      if (page.items.length === 0) sawEmptyPage = true;
+      try {
+        const page = await fetchPage(offsets[index] as number, options);
+        pages[index] = page;
+        if (page.items.length === 0) stop = true;
+      } catch (error) {
+        // The whole load has failed: the other workers must not start new requests.
+        stop = true;
+        throw error;
+      }
     }
   }
 

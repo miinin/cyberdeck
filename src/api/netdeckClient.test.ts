@@ -213,6 +213,24 @@ describe('fetchAllCards: errors (SR-5)', () => {
     expect(error.status).toBe(404);
   });
 
+  it('starts no new page requests after a page has failed', async () => {
+    const pages: PageMap = {};
+    for (let offset = 0; offset < 20; offset += 1) pages[offset] = page([rawCard(offset)], 20, 1, offset);
+    const fetchFn = vi.fn<typeof fetch>(async (input) => {
+      const offset = offsetOf(input);
+      if (offset === 1) return new Response('fail', { status: 500 });
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return jsonResponse(pages[offset]);
+    });
+
+    const error = await expectApiError(fetchAllCards({ fetchFn }));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(error.status).toBe(500);
+    // First page + the requests already in flight when offset 1 failed.
+    expect(fetchFn.mock.calls.length).toBeLessThanOrEqual(1 + MAX_CONCURRENT_REQUESTS);
+  });
+
   it('maps a fetch TypeError to kind "network"', async () => {
     const fetchFn = vi.fn<typeof fetch>(async () => {
       throw new TypeError('Failed to fetch');
