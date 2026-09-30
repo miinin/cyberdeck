@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "cyberdeck-tcg"
+  },
+  "targets": {
+    "cyberdeck-tcg": {
+      "hosting": {
+        "prod": ["cyberdeck-tcg"],
+        "test": ["cyberdeck-tcg-test"]
+      }
+    }
+  }
+}
