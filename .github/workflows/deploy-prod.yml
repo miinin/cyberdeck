@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - main
+# Least privilege (SR-8). The deploy action only uses a GitHub token on pull requests,
+# so live deploys get no repoToken and read-only repository access.
+permissions:
+  contents: read
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -17,7 +21,6 @@ jobs:
       - run: npm ci && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG }}
           projectId: cyberdeck-tcg
           target: prod
