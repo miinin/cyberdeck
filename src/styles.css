@@ -539,8 +539,10 @@ main {
     border-bottom: 1px solid var(--color-border);
   }
 
+  /* .col-fit sets width: 1% for the wide table; grid cells size by their content instead. */
   .card-table tbody th,
-  .card-table tbody td {
+  .card-table tbody td,
+  .card-table tbody .col-fit {
     padding: 0;
     border: 0;
     width: auto;

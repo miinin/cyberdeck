@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
+import { countOf } from '../domain/collection';
 import { isStoragePersisted, requestPersistentStorage } from '../storage';
 import type { Repositories } from '../storage';
 import {
@@ -17,7 +18,6 @@ import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardFilters } from './CardFilters';
 import { CardList } from './CardList';
 import type { OwnedColumn } from './CardList';
-import { countOf } from '../domain/collection';
 import { CollectionNotices, loadNotices } from './CollectionNotices';
 import { countIn } from './collectionStore';
 import type { CollectionSnapshot } from './collectionStore';

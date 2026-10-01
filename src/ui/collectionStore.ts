@@ -197,6 +197,7 @@ export function createCollectionStore(repository: CollectionRepository): Collect
         queue.clear();
         const kind: SaveErrorKind = error instanceof StorageError ? error.kind : 'unknown';
         if (kind === 'newer-version') {
+          // The version is never shown to the user (UX.md 6.8), so it is not known or needed here.
           lock({ kind: 'newer-version', version: 0 });
         } else {
           update({ targets: new Map(), saveError: kind });
