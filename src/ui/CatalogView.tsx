@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
+import type { Repositories } from '../storage';
 import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
@@ -13,7 +14,12 @@ import {
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardFilters } from './CardFilters';
 import { CardList } from './CardList';
+import type { OwnedColumn } from './CardList';
+import { countIn } from './collectionStore';
+import type { CollectionSnapshot } from './collectionStore';
+import { useCollection } from './useCollection';
 import { cardCount, texts } from './texts';
+import { countOf } from '../domain/collection';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
 import type { Announcement } from './useDelayedAnnouncement';
 import type { CatalogState } from './useCardCatalog';
@@ -85,12 +91,36 @@ function describeResult(active: boolean, shown: number, all: number): Announceme
   return { key: `some:${shown}`, text: texts.filteredLive(shown, all) };
 }
 
-export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: () => void }) {
+/** Summary of the whole collection, counted only from cards in the loaded list (UX.md 6.5, A3). */
+function collectionSummary(snapshot: CollectionSnapshot, cards: readonly Card[]): string {
+  let distinct = 0;
+  let total = 0;
+  for (const card of cards) {
+    const count = countOf(snapshot.saved, card.key);
+    if (count > 0) {
+      distinct += 1;
+      total += count;
+    }
+  }
+  return distinct === 0 ? texts.collectionEmpty : texts.collectionSummary(distinct, total);
+}
+
+export function CatalogView({
+  state,
+  onRetry,
+  repositories,
+}: {
+  state: CatalogState;
+  onRetry: () => void;
+  /** Created once in App (a stable reference). */
+  repositories: Repositories;
+}) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   // Lives here, above the form, so it survives a retry (UX.md 5.8, WCAG 3.3.7).
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
   const view = toViewModel(state);
+  const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection, () => {});
   const allCards = view.cards;
 
   const filtered = useMemo(() => filterCards(allCards, criteria), [allCards, criteria]);
@@ -147,6 +177,22 @@ export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: 
     </button>
   ) : null;
 
+  const owned: OwnedColumn | undefined =
+    collection.phase === 'unavailable'
+      ? undefined
+      : {
+          mode: collection.phase,
+          countOf: (card) => countIn(collection, card.key),
+          onChange: (card, count) => collectionStore.setCount(card.key, count),
+          onLimit: () => {},
+        };
+  const summary =
+    collection.phase === 'loading'
+      ? texts.collectionLoading
+      : collection.phase === 'ready'
+        ? collectionSummary(collection, allCards)
+        : null;
+
   const status = showFilters && filterActive ? texts.filteredStatus(filtered.length, allCards.length) : view.status;
   const noResults = showFilters && filtered.length === 0;
 
@@ -158,6 +204,11 @@ export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: 
       <p id="card-status" className="status-line" hidden={status === ''}>
         {status}
       </p>
+      {showFilters && summary !== null && (
+        <p id="collection-summary" className="status-line">
+          {summary}
+        </p>
+      )}
       {/* Stays mounted across all states so screen readers announce each change. */}
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {announcer.text ?? loadedLive}
@@ -215,7 +266,11 @@ export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: 
       )}
 
       {filtered.length > 0 && (
-        <CardList cards={filtered} caption={filterActive ? texts.tableCaptionFiltered : texts.tableCaption} />
+        <CardList
+          cards={filtered}
+          caption={filterActive ? texts.tableCaptionFiltered : texts.tableCaption}
+          owned={owned}
+        />
       )}
     </>
   );

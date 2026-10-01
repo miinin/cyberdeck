@@ -1,0 +1,108 @@
+import { useLayoutEffect, useRef } from 'react';
+import type { Card } from '../domain/card';
+import { MAX_COLLECTION_COUNT } from '../domain/collection';
+import { CardName } from './CardName';
+import { copiesSuffix, texts } from './texts';
+
+export type CountControlMode = 'loading' | 'ready' | 'locked';
+
+export interface CountControlProps {
+  card: Card;
+  /** The count on screen: the newest target, or the saved count. */
+  count: number;
+  mode: CountControlMode;
+  onChange: (card: Card, count: number) => void;
+  /** "+" pressed at the maximum count. */
+  onLimit: (card: Card) => void;
+}
+
+/**
+ * "[−] n [+]" for one card row (UX.md 6.4). "+" is always the last child and keeps its position
+ * in the children list, so React keeps the same element (and focus) when "−" appears or goes.
+ */
+export function CountControl({ card, count, mode, onChange, onLimit }: CountControlProps) {
+  const plusRef = useRef<HTMLButtonElement>(null);
+  /** Which button of this row had focus last. */
+  const lastFocused = useRef<'minus' | 'plus' | null>(null);
+
+  // "−" disappeared while focused (another tab, or a rollback): keep focus in the row (UX.md 6.9).
+  useLayoutEffect(() => {
+    if (count !== 0 || lastFocused.current !== 'minus') return;
+    lastFocused.current = null;
+    const active = document.activeElement;
+    if (active === null || active === document.body) plusRef.current?.focus();
+  }, [count]);
+
+  if (mode === 'loading') {
+    return (
+      <div className="count-control">
+        <span className="visually-hidden">{texts.countLoading}</span>
+      </div>
+    );
+  }
+  if (mode === 'locked') {
+    return (
+      <div className="count-control">
+        <span aria-hidden="true">{texts.missingValue}</span>
+        <span className="visually-hidden">{texts.notEditable}</span>
+      </div>
+    );
+  }
+
+  const atMax = count >= MAX_COLLECTION_COUNT;
+
+  const decrease = () => {
+    if (count === 1) {
+      // Move focus before "−" is removed (UX.md 6.4.2).
+      lastFocused.current = 'plus';
+      plusRef.current?.focus();
+    }
+    onChange(card, count - 1);
+  };
+
+  const increase = () => {
+    if (atMax) onLimit(card);
+    else onChange(card, count + 1);
+  };
+
+  return (
+    <div className="count-control">
+      {count > 0 && (
+        <button
+          type="button"
+          className="step step-minus"
+          onFocus={() => (lastFocused.current = 'minus')}
+          onClick={decrease}
+        >
+          <span className="visually-hidden">
+            {texts.decreaseOne}
+            <CardName card={card} />
+          </span>
+          <span aria-hidden="true">{texts.minusSymbol}</span>
+        </button>
+      )}
+      {count > 0 && (
+        <span className="count">
+          <span className="visually-hidden">{texts.countPrefix}</span>
+          {count}
+          <span className="visually-hidden">{copiesSuffix(count)}</span>
+        </span>
+      )}
+      {count === 0 && <span className="visually-hidden">{texts.notOwned}</span>}
+      <button
+        ref={plusRef}
+        type="button"
+        className="step step-plus"
+        aria-disabled={atMax ? 'true' : undefined}
+        onFocus={() => (lastFocused.current = 'plus')}
+        onClick={increase}
+      >
+        <span className="visually-hidden">
+          {texts.increaseOne}
+          <CardName card={card} />
+        </span>
+        <span aria-hidden="true">+</span>
+      </button>
+    </div>
+  );
+}

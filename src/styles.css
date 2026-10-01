@@ -386,6 +386,206 @@ main {
   background: var(--color-card-unknown);
 }
 
+/* Secondary button (UX.md 6.4.3): "Sulje", "Lue kokoelma uudelleen", "Pyydä pysyvää tallennusta". */
+.button-secondary {
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.button-secondary:hover {
+  text-decoration: underline;
+}
+
+.button-secondary[aria-disabled='true'] {
+  cursor: progress;
+}
+
+.notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Browser-only reminder and persistent storage (UX.md 6.7) */
+.storage-reminder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.storage-reminder .button-secondary {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+/* "Vain omistetut" (UX.md 6.6) */
+.owned-only {
+  margin-block-start: var(--space-2);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Count control (UX.md 6.4) */
+.card-table .col-control {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.count-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  /* Reserved for "[−] n [+]" so the name column keeps its width (UX.md 6.4.4). */
+  min-width: calc(3 * var(--target-min) + 2 * var(--space-2));
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0;
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.step-plus {
+  border: 0;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.step-plus:hover {
+  box-shadow: inset 0 0 0 2px var(--color-on-accent);
+}
+
+.step-plus[aria-disabled='true'] {
+  opacity: 0.5;
+  outline: 2px dashed var(--color-border-strong);
+  outline-offset: -2px;
+  cursor: not-allowed;
+}
+
+.step-plus[aria-disabled='true']:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.step-minus {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.step-minus:hover {
+  background: var(--color-surface);
+}
+
+.count {
+  min-width: 2.5ch;
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* Decorative "·" between type, color and cost: only in the narrow card layout. */
+.card-table .separator {
+  display: none;
+}
+
+/* Narrow screens: each row is a card-like grid (UX.md 6.4.4, A1). Roles are explicit in CardList. */
+@media (max-width: 39.99rem) {
+  .card-table,
+  .card-table tbody {
+    display: block;
+  }
+
+  .card-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .card-table tbody tr {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas:
+      'name name name control'
+      'type cost . control';
+    column-gap: var(--space-2);
+    padding-block: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .card-table tbody th,
+  .card-table tbody td {
+    padding: 0;
+    border: 0;
+    width: auto;
+  }
+
+  .card-table tbody .card-name {
+    grid-area: name;
+  }
+
+  .card-table tbody .col-type {
+    grid-area: type;
+    white-space: normal;
+  }
+
+  .card-table tbody .col-type .card-color {
+    display: inline;
+    font-size: inherit;
+  }
+
+  .card-table tbody .col-type,
+  .card-table tbody .col-cost {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  .card-table tbody .col-cost {
+    grid-area: cost;
+    text-align: left;
+  }
+
+  .card-table tbody .col-cost::before {
+    content: attr(data-label) ' ';
+  }
+
+  .card-table tbody .col-control {
+    grid-area: control;
+    align-self: center;
+  }
+
+  .card-table .separator {
+    display: inline;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

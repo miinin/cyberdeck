@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CardCatalog } from '../api';
 import type { Card } from '../domain/card';
+import { createMemoryRepositories } from '../storage';
 import { CatalogView } from './CatalogView';
 import type { CatalogState } from './useCardCatalog';
 
@@ -27,7 +28,7 @@ function ready(cards: Card[], reportedTotal = cards.length, skipped = 0): Catalo
 
 function renderView(state: CatalogState) {
   const onRetry = vi.fn();
-  const { container } = render(<CatalogView state={state} onRetry={onRetry} />);
+  const { container } = render(<CatalogView state={state} onRetry={onRetry} repositories={createMemoryRepositories()} />);
   return { onRetry, container };
 }
 
@@ -35,6 +36,17 @@ function statusLine(container: HTMLElement): HTMLElement {
   const element = container.querySelector<HTMLElement>('#card-status');
   if (element === null) throw new Error('#card-status is missing');
   return element;
+}
+
+/** Cell text without the decorative "·" separators of the narrow layout (aria-hidden, UX.md 6.4.4). */
+function textWithoutSeparators(cell: HTMLElement | undefined): string | undefined {
+  if (cell === undefined) return undefined;
+  const copy = cell.cloneNode(true) as HTMLElement;
+  copy.querySelectorAll('.separator').forEach((separator) => {
+    expect(separator).toHaveAttribute('aria-hidden', 'true');
+    separator.remove();
+  });
+  return copy.textContent?.replace(/\s+/g, ' ');
 }
 
 describe('CatalogView', () => {
@@ -62,7 +74,7 @@ describe('CatalogView', () => {
     const headers = within(table)
       .getAllByRole('columnheader')
       .map((cell) => cell.textContent);
-    expect(headers).toEqual(['Nimi', 'Tyyppi ja väri', 'Hinta']);
+    expect(headers).toEqual(['Nimi', 'Tyyppi ja väri', 'Hinta', 'Omistan']);
 
     const rows = within(table).getAllByRole('row').slice(1) as HTMLElement[];
     expect(rows).toHaveLength(3);
@@ -110,7 +122,7 @@ describe('CatalogView', () => {
     const typeCells = within(screen.getByRole('table'))
       .getAllByRole('row')
       .slice(1)
-      .map((row) => within(row).getAllByRole('cell')[0]?.textContent?.replace(/\s+/g, ' '));
+      .map((row) => textWithoutSeparators(within(row).getAllByRole('cell')[0]));
     expect(typeCells).toEqual([
       'Unit, Punainen',
       'Gear, Keltainen',
