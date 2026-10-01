@@ -83,7 +83,7 @@
 **Odotettu ja havaittu:** Toimii SR-11:n ja SR-13:n mukaisesti (dataa ei menetetä), mutta käyttäjä ei voi toipua sovelluksessa.
 **Vaikutus:** Saatavuus. Tilanne vaatii, että live-data on rikkinäinen ja tallennustila täynnä. Sovellus ei itse voi tuottaa liian suurta tai rikkinäistä dataa, koska validointi estää sen.
 **Korjausehdotus:** Ei koodimuutosta T-011:een. T-012:n UX huomioi ilmoituksen `reset` + `backupKey: null` ja kertoo, että tallennus ei onnistu. Palautus- ja vientipolku on jo IDEAS.md:ssä (varmuuskopioiden palautuksen käyttöliittymä).
-**Tila:** Avoin (T-012:n UX)
+**Tila:** Avoin (T-012:n UX) → Korjattu (T-012, commit 611af55: sulkematon ilmoitus `reset` + `backupKey: null`, tallennusvirheet `kind`-kentän mukaan, `backupKey`tä ei näytetä) → Varmistettu (Digiturva 2026-10-01, `reports/SEC-003-t012-katselmointi.md`). Ohjetekstin tarkennus: SEC-012.
 
 ### SEC-008 · Teoreettinen enimmäisdata ylittää localStoragen kiintiön · Info
 **Sijainti:** `src/domain/deck.ts` (rajat) · **Tehtävä:** T-011
