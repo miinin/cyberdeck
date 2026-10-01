@@ -4,7 +4,8 @@ export type CardKey = string;
 export const MAX_CARD_KEY_LENGTH = 100;
 
 const CARD_KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const RESERVED_KEYS: ReadonlySet<string> = new Set(['__proto__', 'constructor', 'prototype']);
+/** Object keys that must never be accepted as identifiers from stored or imported data (SR-11). */
+export const RESERVED_OBJECT_KEYS: ReadonlySet<string> = new Set(['__proto__', 'constructor', 'prototype']);
 
 /**
  * Turns any card name into its comparison form. The same function produces stored keys
@@ -31,6 +32,6 @@ export function isCardKey(value: unknown): value is CardKey {
     value.length >= 1 &&
     value.length <= MAX_CARD_KEY_LENGTH &&
     CARD_KEY_PATTERN.test(value) &&
-    !RESERVED_KEYS.has(value)
+    !RESERVED_OBJECT_KEYS.has(value)
   );
 }
