@@ -1,7 +1,21 @@
-import { useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import type { Card } from '../domain/card';
+import {
+  EMPTY_CRITERIA,
+  KNOWN_CARD_COLORS,
+  KNOWN_CARD_TYPES,
+  filterCards,
+  filterOptions,
+  isFilterActive,
+  toggleValue,
+} from '../domain/cardSearch';
+import type { CardFilterCriteria } from '../domain/cardSearch';
+import { CardFilters } from './CardFilters';
 import { CardList } from './CardList';
 import { cardCount, texts } from './texts';
+import { useDelayedAnnouncement } from './useDelayedAnnouncement';
+import type { Announcement } from './useDelayedAnnouncement';
 import type { CatalogState } from './useCardCatalog';
 
 interface ViewModel {
@@ -12,7 +26,10 @@ interface ViewModel {
   notice: { tone: 'danger' | 'warning'; title: string; body: string } | null;
   emptyMessage: string | null;
   showRetry: boolean;
-  cards: Parameters<typeof CardList>[0]['cards'];
+  /** Loaded cards that can be searched. Empty in every state without a list (UX.md 5.8). */
+  cards: readonly Card[];
+  /** Fewer usable cards than the API reported (the PARTIAL state). */
+  missingCards: boolean;
 }
 
 /**
@@ -21,7 +38,7 @@ interface ViewModel {
  * cards than the API's total (e.g. invalid cards were skipped).
  */
 function toViewModel(state: CatalogState): ViewModel {
-  const base = { notice: null, emptyMessage: null, showRetry: false, cards: [] };
+  const base = { notice: null, emptyMessage: null, showRetry: false, cards: [], missingCards: false };
   switch (state.status) {
     case 'loading':
       return { ...base, status: texts.loading, live: texts.loading };
@@ -43,6 +60,7 @@ function toViewModel(state: CatalogState): ViewModel {
           notice: { tone: 'warning', title: texts.partialTitle, body: texts.partialBody },
           showRetry: true,
           cards,
+          missingCards: true,
         };
       }
       if (cards.length === 0) {
@@ -60,14 +78,67 @@ function toViewModel(state: CatalogState): ViewModel {
   }
 }
 
+/** What the live region says about a filter result (UX.md 5.6). The key identifies state + count. */
+function describeResult(active: boolean, shown: number, all: number): Announcement {
+  if (!active) return { key: `all:${all}`, text: texts.allShownLive(all) };
+  if (shown === 0) return { key: 'none', text: texts.noResultsLive };
+  return { key: `some:${shown}`, text: texts.filteredLive(shown, all) };
+}
+
 export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: () => void }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  // Lives here, above the form, so it survives a retry (UX.md 5.8, WCAG 3.3.7).
+  const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
   const view = toViewModel(state);
+  const allCards = view.cards;
+
+  const filtered = useMemo(() => filterCards(allCards, criteria), [allCards, criteria]);
+  const filterActive = isFilterActive(criteria);
+  const showFilters = allCards.length > 0;
+
+  // The search is kept over a retry (5.8), so the loaded message tells the filter result of the
+  // criteria in use when this state arrived (K9, UX-002). Frozen per state: later changes are
+  // announced with the delay, not by rewriting the loaded message.
+  const [loadedWith, setLoadedWith] = useState({ state, criteria });
+  if (loadedWith.state !== state) setLoadedWith({ state, criteria });
+  const loadResult = describeResult(
+    isFilterActive(loadedWith.criteria),
+    filterCards(allCards, loadedWith.criteria).length,
+    allCards.length,
+  );
+  const loadedFiltered = showFilters && isFilterActive(loadedWith.criteria);
+  const loadedLive = !loadedFiltered
+    ? view.live
+    : view.missingCards
+      ? texts.partialFilteredLive(loadResult.text)
+      : texts.loadedFilteredLive(allCards.length, loadResult.text);
+
+  // The loaded message already told this result, so the same result is not announced again.
+  const announcer = useDelayedAnnouncement(state, showFilters ? loadResult.key : null);
+
+  const updateCriteria = (next: CardFilterCriteria, when: 'later' | 'now' | 'never') => {
+    setCriteria(next);
+    const announcement = describeResult(
+      isFilterActive(next),
+      filterCards(allCards, next).length,
+      allCards.length,
+    );
+    if (when === 'later') announcer.announceLater(announcement);
+    else if (when === 'now') announcer.announceNow(announcement, true);
+    else announcer.cancel();
+  };
 
   const handleRetry = () => {
     // The retry button disappears while loading; keep focus from falling to <body> (UX.md 4.6).
     headingRef.current?.focus();
     onRetry();
+  };
+
+  const handleClearFilters = () => {
+    updateCriteria(EMPTY_CRITERIA, 'now');
+    // The button disappears with the empty result; the search field is the natural next step (UX.md 5.7).
+    searchInputRef.current?.focus();
   };
 
   const retryButton: ReactNode = view.showRetry ? (
@@ -76,17 +147,20 @@ export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: 
     </button>
   ) : null;
 
+  const status = showFilters && filterActive ? texts.filteredStatus(filtered.length, allCards.length) : view.status;
+  const noResults = showFilters && filtered.length === 0;
+
   return (
     <>
       <h1 ref={headingRef} tabIndex={-1}>
         {texts.heading}
       </h1>
-      <p id="card-status" className="status-line" hidden={view.status === ''}>
-        {view.status}
+      <p id="card-status" className="status-line" hidden={status === ''}>
+        {status}
       </p>
       {/* Stays mounted across all states so screen readers announce each change. */}
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
-        {view.live}
+        {announcer.text ?? loadedLive}
       </div>
 
       {view.notice !== null && (
@@ -104,7 +178,45 @@ export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: 
         </div>
       )}
 
-      {view.cards.length > 0 && <CardList cards={view.cards} />}
+      {showFilters && (
+        <CardFilters
+          criteria={criteria}
+          typeOptions={filterOptions(
+            KNOWN_CARD_TYPES,
+            allCards.map((card) => card.type),
+            criteria.types,
+          )}
+          colorOptions={filterOptions(
+            KNOWN_CARD_COLORS,
+            allCards.map((card) => card.color),
+            criteria.colors,
+          )}
+          searchInputRef={searchInputRef}
+          onQueryChange={(query, composing) =>
+            updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
+          }
+          onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
+          onToggleColor={(color) =>
+            updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
+          }
+          onSearchSubmit={() =>
+            announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))
+          }
+        />
+      )}
+
+      {noResults && (
+        <div className="empty">
+          <p>{texts.noResultsBody}</p>
+          <button type="button" className="button-primary" onClick={handleClearFilters}>
+            {texts.clearFilters}
+          </button>
+        </div>
+      )}
+
+      {filtered.length > 0 && (
+        <CardList cards={filtered} caption={filterActive ? texts.tableCaptionFiltered : texts.tableCaption} />
+      )}
     </>
   );
 }

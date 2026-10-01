@@ -12,3 +12,4 @@ Parkkipaikka uusille ideoille. Kaikki lisäävät, PM priorisoi (rules.md 0.7).
 | 2026-10-01 | Pitkän listan kiinnitetty otsikkorivi mobiilissa ja latauksen edistyminen (B-008) | Testikäyttäjä | MVP-1/MVP-2 |
 | 2026-10-01 | "Poista kaikki tiedot tästä selaimesta" -toiminto (PRIVACY.md luku 5) | Digiturva | MVP-1:n jälkeen tai T-015:n yhteydessä |
 | 2026-10-01 | Varmuuskopioiden palautus (D-008:n varmuuskopioavaimet) käyttöliittymässä | Arkkitehti | MVP-1:n jälkeen |
+| 2026-10-01 | "Takaisin hakuun" -linkki pitkän listan loppuun (B-012) | Testikäyttäjä | MVP-2:n mobiilityön yhteydessä |
