@@ -34,7 +34,9 @@ describe('App', () => {
     expect(screen.getByRole('banner')).toHaveTextContent('Cyberdeck');
     expect(screen.getByRole('main')).toBeInTheDocument();
     const footer = screen.getByRole('contentinfo');
-    expect(footer).toHaveTextContent('Epävirallinen fanityökalu');
+    expect(footer).toHaveTextContent(
+      'Cyberdeck on epävirallinen Cyberpunk TCG -fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä.',
+    );
     expect(footer).toHaveTextContent('Korttitiedot: Netdeck.gg');
     expect(await screen.findByRole('table')).toBeInTheDocument();
   });

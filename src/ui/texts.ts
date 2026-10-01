@@ -1,5 +1,5 @@
-// User-facing texts. Source: docs/UX.md luku 4.5 (UX Designer). The footer draft is based on
-// UX.md 4.3 and SECURITY.md luku 7; the Content Producer reviews it later.
+// User-facing texts. Source: docs/UX.md luku 4.5 (UX Designer). The footer is based on
+// UX.md 4.3 and SECURITY.md luku 7. Reviewed in docs/reports/TXT-001-t001-tarkastus.md.
 
 const numberFormat = new Intl.NumberFormat('fi-FI');
 
@@ -18,7 +18,8 @@ export const texts = {
   loaded: (count: number) => `${cardCount(count)} ladattu.`,
 
   emptyStatus: cardCount(0),
-  emptyBody: 'Kortteja ei löytynyt. Korttitietokanta on juuri nyt tyhjä. Yritä myöhemmin uudelleen.',
+  emptyBody:
+    'Kortteja ei löytynyt. Korttitietojen lähde ei juuri nyt palauttanut yhtään korttia. Yritä hetken päästä uudelleen.',
   emptyLive: 'Kortteja ei löytynyt.',
 
   errorTitle: 'Korttien haku epäonnistui',
@@ -27,10 +28,11 @@ export const texts = {
 
   partialStatus: (received: number, total: number) =>
     `${numberFormat.format(received)} / ${numberFormat.format(total)} korttia`,
-  partialTitle: 'Kaikkia kortteja ei saatu',
-  partialBody: 'Osa korttitiedoista jäi hakematta. Lista on puutteellinen. Yritä uudelleen hakeaksesi kaikki kortit.',
+  partialTitle: 'Kaikkia kortteja ei saatu näkyviin',
+  partialBody:
+    'Osa korteista puuttuu listasta, koska niiden tietoja ei saatu tai ne olivat puutteellisia. Voit yrittää hakea kortit uudelleen.',
   partialLive: (received: number, total: number) =>
-    `Näytetään ${numberFormat.format(received)} / ${numberFormat.format(total)} korttia. Osa korttitiedoista jäi hakematta.`,
+    `Näytetään ${numberFormat.format(received)} / ${numberFormat.format(total)} korttia. Osa korteista puuttuu listasta.`,
 
   tableCaption: 'Kaikki kortit',
   columnName: 'Nimi',
@@ -40,6 +42,6 @@ export const texts = {
   noCost: 'ei hintaa',
 
   footerUnofficial:
-    'Epävirallinen fanityökalu. Ei WeirdCon, Netdeck.gg:n eikä CD PROJEKT REDin hyväksymä tai tukema.',
+    'Cyberdeck on epävirallinen Cyberpunk TCG -fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä.',
   footerSource: 'Korttitiedot: Netdeck.gg',
 } as const;

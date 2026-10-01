@@ -112,7 +112,9 @@ describe('CatalogView', () => {
 
     expect(statusLine(container)).toHaveTextContent(/^0 korttia$/);
     expect(
-      screen.getByText('Kortteja ei löytynyt. Korttitietokanta on juuri nyt tyhjä. Yritä myöhemmin uudelleen.'),
+      screen.getByText(
+        'Kortteja ei löytynyt. Korttitietojen lähde ei juuri nyt palauttanut yhtään korttia. Yritä hetken päästä uudelleen.',
+      ),
     ).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Kortteja ei löytynyt.');
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
@@ -152,9 +154,16 @@ describe('CatalogView', () => {
     const { container } = renderView(ready([card(1), card(2)], 151, 149));
 
     expect(statusLine(container)).toHaveTextContent(/^2 \/ 151 korttia$/);
-    expect(screen.getByRole('heading', { level: 2, name: 'Kaikkia kortteja ei saatu' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Kaikkia kortteja ei saatu näkyviin' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Osa korteista puuttuu listasta, koska niiden tietoja ei saatu tai ne olivat puutteellisia. Voit yrittää hakea kortit uudelleen.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent(
-      'Näytetään 2 / 151 korttia. Osa korttitiedoista jäi hakematta.',
+      /^Näytetään 2 \/ 151 korttia\. Osa korteista puuttuu listasta\.$/,
     );
     expect(screen.getByRole('button', { name: 'Yritä uudelleen' })).toBeInTheDocument();
     expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(3);
@@ -166,7 +175,9 @@ describe('CatalogView', () => {
   it('shows the partial warning without an empty table when no usable cards were received', () => {
     renderView(ready([], 151, 151));
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Kaikkia kortteja ei saatu' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Kaikkia kortteja ei saatu näkyviin' }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
