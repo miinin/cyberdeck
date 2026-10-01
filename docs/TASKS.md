@@ -16,7 +16,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-009 | Hostingin kovennus: noscript, välimuistiotsakkeet ja puuttuvien assettien 404 (B-004), Firebase-API-avaimen rajaus (B-010) ennen datatallennusta | 1 | Should | Koodari | Backlog | Digiturva (SR-9) |
 | T-010 | Haku ja suodatus korttilistaan (nimi, tyyppi, väri) | 1 | Must | Koodari | Done | UX, Sisällöntuottaja, Testikäyttäjä |
 | T-011 | Tietomalli ja paikallinen tallennuskerros (kokoelma, pakat), valmius Firebaseen ja painoksiin (D-007) | 1 | Must | Arkkitehti → Koodari | Done | Arkkitehti, Digiturva |
-| T-012 | Kokoelma: omistettujen korttien ja määrien merkintä helposti, ilmoitus "tiedot vain tässä selaimessa" (R-10) sekä newer-version-, reset- ja kirjoitus estetty -ilmoitukset (SEC-007) | 1 | Must | Koodari | Backlog (T-011) | UX, Sisällöntuottaja, Testikäyttäjä, Digiturva |
+| T-012 | Kokoelma: omistettujen korttien ja määrien merkintä helposti, ilmoitus "tiedot vain tässä selaimessa" (R-10) sekä newer-version-, reset- ja kirjoitus estetty -ilmoitukset (SEC-007) | 1 | Must | Koodari | Ready | UX, Digiturva (Testikäyttäjä ja Dokumentoija MVP-1:n lopussa, D-009) |
 | T-013 | Pakat: luonti, muokkaus, poisto ja kortin kohdalla näkyvät pakat | 1 | Must | Koodari | Backlog (T-011, T-012) | UX, Sisällöntuottaja, Testikäyttäjä |
 | T-014 | Pakkalistan tuonti (teksti ja .txt) ja raportti: puuttuvat kortit ja missä pakoissa tarvittavat kortit ovat (SR-17) | 1 | Must | Koodari | Backlog (T-013) | UX, Digiturva, Sisällöntuottaja, Testikäyttäjä |
 | T-015 | Pakan vienti ja tuonti .json- ja .txt-muodossa (varmuuskopio ja jakaminen, SR-18–SR-19) | 1 | Must | Koodari | Backlog (T-013, T-014) | Arkkitehti, Digiturva, UX, Testikäyttäjä |
