@@ -40,7 +40,8 @@ const storageInternals = {
   message: "Import the storage layer only through its public index ('../storage').",
 };
 
-// SR-12: only src/storage/ may use browser storage, so the UI cannot bypass validation and backups.
+// SR-12, D-008: only storage/keyValueStore.ts may use browser storage, so nothing bypasses validation,
+// backups and the in-memory fallback (ARCH-008).
 const browserStorageApis = ['localStorage', 'sessionStorage', 'indexedDB'];
 const browserStorageMessage = 'SR-12: use the storage layer (src/storage) instead of browser storage.';
 
@@ -107,7 +108,7 @@ export default defineConfig(
   },
   {
     files: ['**/*.{ts,tsx}'],
-    ignores: ['src/storage/**', 'src/test/**'],
+    ignores: ['src/storage/keyValueStore.ts', 'src/storage/keyValueStore.test.ts', 'src/test/**'],
     rules: {
       'no-restricted-globals': [
         'error',
