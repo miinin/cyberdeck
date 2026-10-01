@@ -1,7 +1,7 @@
 # T-001 · Kävelevä luuranko: korttilista rajapinnasta näytölle
 **Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☐ (teknologia ja rakenne, ADR) · Digiturva ☐ (ulkoinen rajapinta, korttikuvien käyttöoikeus) · UX ☐ (korttilistan näkymä ja tilat)
-**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☐ · Testikäyttäjä ☐ · Dokumentoija ☐
+**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☑ · Sisällöntuottaja ☑ (korjaukset kesken) · Testikäyttäjä ☐ · Dokumentoija ☐
 **Riippuvuudet:** T-000 (Done). Julkaisuputken workflowt ovat jo haarassa `t-001-kaveleva-luuranko`.
 **Haara:** `t-001-kaveleva-luuranko`
 
@@ -158,3 +158,15 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 
 ### Checkpoint 2026-10-01 · PM (SEC-päätökset)
 - SEC-003 (`persist-credentials: false`) liitetty T-004:ään. SEC-002 (lint-kiertotiet) on uusi tehtävä T-007, joka tehdään ennen kuin `rules_text`iä muotoillaan.
+
+### Luovutus 2026-10-01 · UX Designer → PM
+- Mitä tehtiin: UX-katselmointi esikatselu-URL:ssa (kaikki tilat pakotettuina, vaalea ja tumma teema): axe-core 0 rikkomusta, näppäimistöpolku, fokuksen hallinta, saavutettavuuspuu, live-alueen aikajana, 320/640/1280 px, tekstin välistys ja kontrastit. Koodarin live-alueen poikkeama hyväksytty (UX-001), ja UX.md päivitetty v0.2:ksi (4.3, 4.4, 4.9).
+- Mitä pyydän: PM merkitsee UX-katselmoinnin tehdyksi. Päätös UX-003:sta. Alatunnisteen taivutushavainto Sisällöntuottajalle.
+- Mistä katsoa: docs/reports/UX-001-t001-katselmointi.md, docs/UX.md (v0.2).
+- Tunnetut rajoitteet ja riskit: Ei testattu oikealla ruudunlukijalla, mobiililaitteella, forced colors -tilassa eikä Safarilla tai Firefoxilla.
+- Testit: axe-core 4.13 neljässä tilassa × 2 teemaa: 0 rikkomusta. Veto: ei.
+
+### Checkpoint 2026-10-01 · PM (katselmoinnit valmiit)
+- Kaikki neljä katselmointia valmiit, ei vetoja. Avoimet korjattavat: TXT-001 (Medium), TXT-002 ja TXT-004 (Low). TXT-002:n ehdotus korjaa myös UX:n huomaaman taivutuksen.
+- UX-003 (vaakavieritys yli WCAG-vaatimusten, 320 px ja 200 % fontti) kirjattu IDEAS.md:hen.
+- Seuraava askel: Koodari korjaa TXT-001, TXT-002 ja TXT-004. Sen jälkeen Testikäyttäjä ja Sisällöntuottajan varmistus rinnakkain.

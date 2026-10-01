@@ -9,7 +9,7 @@ Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-001 | Koodari → katselmoijat | Review | Toteutus valmis, PR testiin. Katselmoinnit: Digiturva, UX, Arkkitehti ja Sisällöntuottaja, sitten Testikäyttäjä (katso kortin luovutus 2026-09-30) |
+| T-001 | Koodari | Review (korjauskierros) | Tekstikorjaukset TXT-001, TXT-002 ja TXT-004, sitten Testikäyttäjä |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
