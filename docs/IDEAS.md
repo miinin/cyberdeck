@@ -10,3 +10,4 @@ Parkkipaikka uusille ideoille. Kaikki lisäävät, PM priorisoi (rules.md 0.7).
 | 2026-10-01 | Tyyppi- ja Hinta-sarakkeiden rivitys, kun 320 px ja 200 % perusfontti tai pitkä tyyppi (UX-003, B-002) | UX Designer | Backlog-ehdokas MVP-2:n mobiilityöhön |
 | 2026-10-01 | 404-sivu tuntemattomille poluille ja otsikko linkiksi etusivulle (B-005) | Testikäyttäjä | MVP-1:n reitityksen yhteydessä |
 | 2026-10-01 | Pitkän listan kiinnitetty otsikkorivi mobiilissa ja latauksen edistyminen (B-008) | Testikäyttäjä | MVP-1/MVP-2 |
+| 2026-10-01 | "Takaisin hakuun" -linkki pitkän listan loppuun (B-012) | Testikäyttäjä | MVP-2:n mobiilityön yhteydessä |

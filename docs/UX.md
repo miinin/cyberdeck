@@ -2,6 +2,7 @@
 
 > Omistaja: UX Designer. Versio 0.2 · 2026-10-01 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
 > Muutos 0.3 · 2026-10-01 (T-010, MVP-1): uusi luku 5 (haku ja suodatus), korttien väritokenit (3.1.1) sekä tekstikenttä ja valintaruutu (3.4). Luvun 4 kohtiin, joita luku 5 muuttaa, on lisätty viittaus.
+> Muutos 0.4 · 2026-10-01 (T-010, katselmointi UX-002): K9 ratkaistu (latausviesti suodatettuna, 5.6), tyhjennyspainikkeen ilmoitus ja toistokielto (5.6), OSITTAINEN ilman kortteja (5.8). Raportti `docs/reports/UX-002-t010-katselmointi.md`.
 > Tämä on minimitason design-järjestelmä, joka riittää MVP-0:aan. MVP-1 laajentaa sitä (lomakkeet, navigaatio, haku, kokoelman merkintä). Määrittely ei sido kehykseen: tokenit ovat CSS-muuttujia, ja rakenne kuvataan semanttisena HTML:nä.
 
 ---
@@ -648,6 +649,15 @@ Taulukon rakenne (4.4) säilyy, mutta kolme asiaa muuttuu:
 - Viive: **750 ms viimeisestä muutoksesta** (näppäily, valinta, valinnan poisto, selaimen tyhjennysruksi, Esc). Jokainen uusi muutos nollaa ajastimen. Nopea kirjoittaja kuulee yhden ilmoituksen, kun hän pysähtyy, eikä ilmoitusta jokaisesta merkistä.
 - Enter hakukentässä antaa ilmoituksen heti (ajastin puretaan) eikä tee muuta.
 - Ilmoitusta ei anneta, jos tulos (tila ja n) on sama kuin edellisessä ilmoituksessa. Esimerkki: käyttäjä lisää merkin, eikä korttien määrä muutu → ei uutta ilmoitusta.
+- Toistokielto koskee viiveellisiä ja Enterin ilmoituksia. `Tyhjennä haku ja suodattimet` ilmoittaa aina heti, koska se on käyttäjän nimenomainen toiminto ja painike katoaa painettaessa (UX-004).
+- **Lataus, kun haku tai valinta on käytössä (K9, UX-002).** Hakutila säilyy uudelleenyrityksen yli (5.8), joten latauksen päättyessä lista voi olla suodatettu. Silloin live-alueen latausviesti yhdistää latauksen ja suodatuksen tuloksen, jotta ruudunlukija kuulee saman kuin tilarivillä näkyy:
+
+  | Tila latauksen jälkeen | n ≥ 1 | n = 0 |
+  |---|---|---|
+  | ONNISTUMINEN | `{kaikki} korttia ladattu. Näytetään {n} / {kaikki} korttia.` | `{kaikki} korttia ladattu. Valintoja vastaavia kortteja ei löytynyt.` |
+  | OSITTAINEN | `Näytetään {n} / {kaikki} korttia. Osa korteista puuttuu listasta.` | `Valintoja vastaavia kortteja ei löytynyt. Osa korteista puuttuu listasta.` |
+
+  `{kaikki}` = saatujen korttien määrä kuten tilarivillä. Ilman hakua ja valintoja latausviestit ovat ennallaan (4.5). Tämä viesti on toistokiellon lähtökohta: jos seuraavan muutoksen tulos on sama, siitä ei ilmoiteta uudelleen.
 - Ajastin perutaan, jos näkymä siirtyy LATAUS-tilaan (uudelleenyritys) tai komponentti poistuu. Vanhentunut ilmoitus ei saa ylikirjoittaa latausilmoitusta.
 - Kun kirjoitetaan syöttömenetelmällä (IME-koostaminen kesken), ilmoitusta ei anneta ennen kuin koostaminen päättyy.
 - Käytetään olemassa olevaa `role="status"`-aluetta (4.3). Toista live-aluetta ei lisätä, eikä `aria-live="assertive"` ole sallittu.
@@ -680,7 +690,7 @@ OSITTAINEN-tilassa `Yritä uudelleen` (varoituslaatikossa) on ennen hakukenttä�
 | LATAUS | **Ei näytetä** (ei renderöidä). Ei `disabled`-kenttiä: käytöstä poistetut kentät hämmentävät ruudunlukijan ja näppäimistön käyttäjää, eikä suodatettavaa ole. |
 | VIRHE | Ei näytetä. |
 | TYHJÄ (`total` = 0) | Ei näytetä. |
-| OSITTAINEN | Näytetään. Suodattaa saatuja kortteja. |
+| OSITTAINEN | Näytetään, jos saatuja kortteja on vähintään yksi. Suodattaa saatuja kortteja. Jos yhtään korttia ei saatu, lomaketta ei näytetä (ei suodatettavaa), mutta hakutila säilyy taustalla (UX-003). |
 | ONNISTUMINEN | Näytetään. |
 
 - **Hakutila säilyy uudelleenyrityksen yli:** jos käyttäjä on OSITTAINEN-tilassa kirjoittanut hakusanan tai valinnut suodattimia ja painaa `Yritä uudelleen`, hakusana ja valinnat ovat samat, kun lista on taas ladattu (WCAG 3.3.7, tietoa ei pyydetä uudelleen). Tila säilytetään siis lomaketta ylemmällä tasolla. Sivun uudelleenlataus tyhjentää sen (rajaus: ei tallennusta).
@@ -791,3 +801,4 @@ OSITTAINEN-tilassa `Yritä uudelleen` (varoituslaatikossa) on ennen hakukenttä�
 - **K6 · Värien kieli.** Oletus: värit suomeksi (Punainen, Keltainen, Vihreä, Sininen), koska niitä ei ole painettu kortteihin sanoina, toisin kuin tyypit (K2). Vaihtoehto: englanniksi kuten rajapinnassa (Red, Yellow, Green, Blue). Sisällöntuottaja lisää valitut termit CONTENT.md:n sanastoon. Muutos on pelkkä tekstimuutos `texts.ts`:ssä.
 - **K7 · "Haku"-sanan kaksi merkitystä.** Oletus: hakukentän label on vakiintunut `Hae nimellä`, ja latausviestit säilyvät ennallaan, koska ne eivät näy samaan aikaan (5.8). Sisällöntuottaja päivittää CONTENT.md:n sanaston (rivi "hakea / haku").
 - **K8 · Sarake "Tyyppi ja väri".** Oletus tämä. Vaihtoehto: erillinen Väri-sarake vain ≥ 640 px:ssä, mutta silloin eri leveydet olisivat epäjohdonmukaisia.
+- **K9 · Latausviesti, kun lista on suodatettu.** Ratkaistu 2026-10-01 (UX-002): yhdistetty viesti, katso 5.6.

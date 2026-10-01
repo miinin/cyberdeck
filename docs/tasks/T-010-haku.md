@@ -72,3 +72,22 @@ Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. T
 - Testit: `npm test` 7 tiedostoa, 125 testiä läpi (T-001: 93 → T-010: 125). `npm run lint` 0 virhettä ja varoitusta. `npm run build` onnistui. `npm audit --audit-level=high` 0 haavoittuvuutta. T-001:n testeistä päivitettiin sarakeotsikko ("Tyyppi ja väri") ja rajattiin kolme tekstikyselyä taulukkoon (sama teksti on nyt myös suodatinvaihtoehtona). Mitään testiä ei poistettu eikä heikennetty. Mutaatiotarkistus: ajastimen peruutuksen ja IME-käsittelyn poisto kaatoi vastaavat testit.
 - Koodikatselmointi: tehty · Pakollisia korjattu 1 (tyhjennyspainike ei ilmoittanut, jos tulos oli sama kuin latausviesti: korjattu `force`-lipulla ennen committia 8f26d7c) · Suosituksia 2 (K9 yllä UX:lle; user-event ja valeajastimet kirjattu LESSONS L-002:ksi)
 - STATUS.md:tä ei päivitetty (rinnakkaisajo, PM päivittää).
+
+### Luovutus 2026-10-01 · Sisällöntuottaja → PM
+- Kielitarkastus tehty, CONTENT.md v0.2 (K6–K8 ja uudet termit). Raportti docs/reports/TXT-002-t010-tarkastus.md. Veto: ei. Low: TXT-008 ("Hakua vastaavia…" + testit + UX.md 5.6), TXT-009 (yksikkö "1 kortti"), TXT-010 (CHANGELOGin sanamuoto). Korjataan korjauskierroksella.
+
+### Luovutus 2026-10-01 · UX Designer → PM
+- UX-katselmointi esikatselussa: axe 0 rikkomusta 13 ajossa (myös OSITTAINEN + SUODATETTU), ei vaakavieritystä, näppäimistö ja live-alueen hillintä toimivat. UX.md v0.4. Raportti docs/reports/UX-002-t010-katselmointi.md. Veto: ei.
+- UX-002 (Medium, K9): latausviesti uusintayrityksen jälkeen kertoo suodattamattoman määrän. Korjaus: yhdistetty viesti UX.md 5.6:n taulukon mukaan, baseline = suodatuksen tuloksen avain, näkymätesti. UX-003 ja UX-004 hyväksytty (ei koodimuutosta).
+
+### Checkpoint 2026-10-01 · PM
+- Ristiriita: UX-002:n n = 0 -viesti käyttää sanaa "Valintoja vastaavia", TXT-008 sanaa "Hakua vastaavia". Päätös: "Hakua vastaavia" (Sisällöntuottaja, CONTENT.md-sanasto). UX.md 5.6 päivitetään vastaavasti korjauskierroksella.
+- Korjauskierros odottaa Testikäyttäjää: UX-002, TXT-008, TXT-009, TXT-010.
+
+### Luovutus 2026-10-01 · Testikäyttäjä → PM
+- Rikkomistestaus PR #3:n esikatselussa (HEAD 8d5f8f9), raportti docs/reports/BREAK-002-t010.md. Arvio: Kestää, veto: ei. B-011 (Medium: 320 × 568 px:ssä tulos jää näkymän alapuolelle), B-012–B-016 (Low).
+
+### Checkpoint 2026-10-01 · PM (korjauskierroksen sisältö)
+- Korjataan nyt: UX-002 (= B-015, yhdistetty latausviesti UX.md 5.6:n mukaan), TXT-008 ("Hakua vastaavia…"), TXT-009 ("1 kortti"), TXT-010 (CHANGELOG), B-013 (haku sanoittain: välimerkit välilyönneiksi, jokaisen sanan on löydyttävä) ja B-014 (`\p{Cf}`-merkit pois hakusanasta). PM osoittaa Koodarille luvan päivittää UX.md 5.6:n tekstin TXT-008:n mukaiseksi.
+- Backlogiin: B-011 → T-018 (mobiilin kompakti suodatinlomake, MVP-2:n mobiilityö, yhdessä UX-003:n kanssa). B-016 → T-008. B-012 → IDEAS.md.
+- D-009: korjausten varmistus Koodarin testeillä ja PM:n tarkistuksella. Erillistä uutta katselmointikierrosta ei tehdä, koska kaikki löydökset ovat Low tai Medium eikä blokkaavia ole.
