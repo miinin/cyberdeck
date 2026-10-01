@@ -10,3 +10,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-003 | Korttidatan välimuisti (vaatii ADR:n) | 1 | Should | Arkkitehti → Koodari | Backlog | Arkkitehti, Digiturva |
 | T-004 | [velka] `npm test` ja `npm run lint` PR-workflowhun | 1 | Should | Koodari | Backlog | Digiturva (SR-9) |
 | T-005 | [velka] ESLintin saavutettavuusliitännäinen, kun ESLint 10 -yhteensopiva versio on saatavilla | 2 | Could | Koodari | Backlog | UX |
+| T-006 | [velka] Keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen ja testityyppien erottaminen sovelluksen tsconfigista | 1 | Could | Koodari | Backlog | – |
