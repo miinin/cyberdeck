@@ -1,7 +1,7 @@
 # T-001 · Kävelevä luuranko: korttilista rajapinnasta näytölle
 **Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☐ (teknologia ja rakenne, ADR) · Digiturva ☐ (ulkoinen rajapinta, korttikuvien käyttöoikeus) · UX ☐ (korttilistan näkymä ja tilat)
-**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☐ · UX ☐ · Testikäyttäjä ☐ · Dokumentoija ☐
+**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☐ · Testikäyttäjä ☐ · Dokumentoija ☐
 **Riippuvuudet:** T-000 (Done). Julkaisuputken workflowt ovat jo haarassa `t-001-kaveleva-luuranko`.
 **Haara:** `t-001-kaveleva-luuranko`
 
@@ -147,3 +147,14 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 - Tunnetut rajoitteet ja riskit: ARCH-001–ARCH-005 ovat Low-tasoa. ARCH-001 on korjattu dokumentaatioon, ARCH-002 on T-006:ssa ja MAX_PAGES-katto (1200 korttia) tarkistetaan T-003:ssa.
 - Testit: npx vitest run 71/71 läpi, npx eslint . --max-warnings 0 läpi (2026-10-01).
 - Veto: ei.
+
+### Luovutus 2026-10-01 · Digiturva → PM
+- Mitä tehtiin: Tietoturvakatselmointi SR-1–SR-10, riippuvuudet (npm audit, lisenssit, install-skriptit, lähteet), workflowt ja firebase.json (SR-9), otsakkeet esikatselusta (curl -sI), CSP selaimessa (headless Chrome, ei virheitä, 151 riviä) ja salaisuushaku git-historiasta. SECURITY.md päivitetty: R-2 hyväksytty (D-006), R-1 päivitetty, uudet R-8 ja R-9.
+- Tulos: Ei Critical-, High- eikä Medium-löydöksiä. Low 2 (SEC-002 lint-kiertotiet, SEC-003 persist-credentials), Info 1 (SEC-004). Digiturva ei blokkaa Done-tilaa.
+- Mitä pyydän: SEC-002 ja SEC-003 velaksi. Hyväksymiskriteeri 6 (testisivusto) todennetaan test-haaraan yhdistämisen jälkeen.
+- Mistä katsoa: docs/reports/SEC-001-t001-katselmointi.md, docs/SECURITY.md luvut 6, 9, 10 ja 11.
+- Tunnetut rajoitteet ja riskit: R-3 ja R-4 ennallaan.
+- Testit: npm test 71/71, lint 0, build ok, npm audit 0 (myös --omit=dev).
+
+### Checkpoint 2026-10-01 · PM (SEC-päätökset)
+- SEC-003 (`persist-credentials: false`) liitetty T-004:ään. SEC-002 (lint-kiertotiet) on uusi tehtävä T-007, joka tehdään ennen kuin `rules_text`iä muotoillaan.

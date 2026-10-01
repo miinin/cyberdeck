@@ -1,6 +1,6 @@
 # SECURITY · cyberdeck
 
-> Omistaja: Digiturva. Päivitetty 2026-09-30 (T-001, suunnittelu ennen toteutusta).
+> Omistaja: Digiturva. Päivitetty 2026-10-01 (T-001, katselmointi toteutuksen jälkeen, katso `docs/reports/SEC-001-t001-katselmointi.md`).
 > Uhkamalli kattaa tällä hetkellä **MVP-0:n**: staattinen sivusto Firebase Hostingissa, selain hakee korttidatan suoraan Netdeck.gg:n julkisesta rajapinnasta, julkaisu GitHub Actionsilla. Malli päivitetään, kun mukaan tulee tallennus, kirjautuminen tai jaettavat linkit (MVP-1/MVP-2).
 
 ## 1. Järjestelmä MVP-0:ssa
@@ -24,7 +24,7 @@ Todennettu 2026-09-30 (curl, vain luku):
 - `Cache-Control: private, no-store` eli selain ei välimuistita vastausta.
 - `rules_text` sisältää merkintöjä kuten `{Call}` ja `{Go Solo}` sekä rivinvaihtoja. Niitä on houkuttelevaa muuttaa HTML:ksi (ikonit, lihavoinnit), mikä on XSS-riskin tyypillinen syntykohta.
 - `image_url` on allekirjoitettu, aikarajattu CloudFront-linkki (`dstcynss47vun.cloudfront.net`).
-- Firebase Hosting lähettää jo `Strict-Transport-Security: max-age=31556926; includeSubDomains; preload` (*.web.app on HSTS-preload-listalla). Muita turvallisuusotsakkeita ei ole asetettu.
+- Firebase Hosting lähettää jo `Strict-Transport-Security: max-age=31556926; includeSubDomains; preload` (*.web.app on HSTS-preload-listalla). ~~Muita turvallisuusotsakkeita ei ole asetettu.~~ → T-001 lisäsi CSP:n ja SR-3:n otsakkeet `firebase.json`iin. Todennettu esikatselusta 2026-10-01 (SEC-001).
 
 ## 2. Suojattavat asiat
 
@@ -136,6 +136,8 @@ upgrade-insecure-requests
 
 **SR-9 · Workflow- ja julkaisuasetusten muutokset katselmoidaan aina.** Jokainen muutos `.github/workflows/`-hakemistoon, `firebase.json`:iin tai `.firebaserc`:hen vaatii Digiturvan katselmoinnin, vaikka tehtävä ei muuten olisi riskialtis.
 
+**Toteutuksen tila 2026-10-01:** SR-1–SR-10 täyttyvät T-001:n toteutuksessa (SEC-001). Avoimet puolustuksen syventämisen löydökset: SEC-002 (SR-1:n lint-kiertotiet, Low, R-8) ja SEC-003 (`persist-credentials`, Low, R-9).
+
 **SR-10 · Salaisuudet.** Ei salaisuuksia repoon, koodiin, lokeihin tai dokumentaatioon (rules.md 10). CI:ssä ei tulosteta ympäristömuuttujia (`env`, `printenv`, `set -x` salaisuuksien kanssa). Firebase-verkkosovelluksen konfiguraatio (apiKey ym.) ei ole salaisuus, mutta MVP-0 ei sitä tarvitse, eikä Firebase JS SDK:ta oteta käyttöön ennen kuin sille on tehtävä.
 
 ## 7. Korttidata ja korttikuvat: käyttöoikeus
@@ -169,20 +171,27 @@ Huomiot:
 
 | ID | Riski | Vakavuus | Omistaja | Tila / torjunta |
 |---|---|---|---|---|
-| R-1 | Korttikuvien käyttöoikeus tuntematon | Medium (oikeudellinen/maine) | Käyttäjä päättää | Avoin. Kuvat pois, kunnes lupa tai ehdot löytyvät (kohta 7). |
-| R-2 | Korttidatan käyttöehdot epäselvät (cyberpunktcg.com kieltää scrapingin, Netdeckin ehtoja ei löydy) | Medium | Käyttäjä päättää | Avoin. Maltillinen kutsumäärä, merkinnät, ei kaupallisuutta. Kysymys käyttäjälle. |
+| R-1 | Korttikuvien käyttöoikeus tuntematon | Medium (oikeudellinen/maine) | Käyttäjä päättää | Avoin. Käyttäjän päätös (D-006): kuvia ei näytetä T-001:ssä, vaan käyttäjä tuo kuvat käyttöön myöhemmin omana tehtävänään. Siihen asti kuvat pois (T-001 todennettu: `image_url` ei pääse malliin, CSP `img-src 'self' data:`). Kuvatehtävä vaatii Digiturvan suunnittelun: kuvien lähde ja käyttöoikeus, `img-src`-muutos (SR-2) ja ettei rajapinnan URL-kenttää käytetä tarkistamatta (SR-1). |
+| R-2 | Korttidatan käyttöehdot epäselvät (cyberpunktcg.com kieltää scrapingin, Netdeckin ehtoja ei löydy) | Medium | Käyttäjä | ~~Avoin~~ → **Hyväksytty** (käyttäjä, D-006, 2026-09-30). Katso luku 10. |
 | R-3 | Actionit tagilla (`@v4`, `@v0`), ei SHA-lukitusta | Low | Koodari (velka) | Avoin. Ehdotus: `[velka]`-tehtävä, Dependabot. |
 | R-4 | Palvelutilin avain on kaikkien workflowjen käytössä. Tehtävähaaran PR voi muuttaa `preview.yml`:ää ja julkaista `channelId: live` tuotantoon. | Medium | PM / käyttäjä | Avoin. Torjunta nyt: SR-9 (workflow-muutokset aina katselmointiin) ja suojaushook. Ehdotus: GitHub Environment `production` (vain main-haara, käyttäjän hyväksyntä) ja erillinen salaisuus prod-julkaisulle. Vaatii käyttäjän toimenpiteen GitHubin asetuksissa. |
 | R-5 | Build-jobissa ajetaan npm-pakettien install-skriptejä samassa jobissa kuin julkaisusalaisuus | Low–Medium | Koodari / Arkkitehti | Avoin. Riippuvuuksien minimointi, `npm audit`, lukitus (SR-6). Myöhemmin mahdollisesti build ja julkaisu eri jobeihin (artefaktin välitys). |
 | R-6 | Netdeck.gg-rajapinta muuttuu tai katoaa (PROJECT.md) | Medium (saatavuus) | Arkkitehti | Avoin. Eristetty rajapintakerros ja skeemantarkistus (SR-4). |
-| R-7 | Rajapinta sallii evästeet mille tahansa originille (`ACAO` heijastettu + `Allow-Credentials: true`). Koskee Netdeckin omia käyttäjiä, ei meitä, kunhan emme lähetä tunnisteita. | Info | – | Havainto. Ei testattu eikä hyödynnetty. SR-4 estää meidän osuutemme. |
+| R-7 | Rajapinta sallii evästeet mille tahansa originille (`ACAO` heijastettu + `Allow-Credentials: true`). Koskee Netdeckin omia käyttäjiä, ei meitä, kunhan emme lähetä tunnisteita. | Info | – | Havainto. Ei testattu eikä hyödynnetty. SR-4 estää meidän osuutemme (T-001: `credentials: 'omit'` todennettu testillä). |
+| R-8 | SR-1:n lint-säännöt eivät tunnista kaikkia HTML-nieluja (SEC-002). Ei hyödynnettävissä nykyisellä koodilla. | Low | Koodari (velka) | Avoin. Korjattava ennen tehtävää, joka muotoilee `rules_text`iä. |
+| R-9 | `actions/checkout` jättää GITHUB_TOKENin `.git/config`iin npm-skriptien ajaksi (SEC-003) | Low | Koodari (velka) | Avoin. `persist-credentials: false` kaikkiin workflowihin, esim. T-004:n yhteydessä. |
 
 ## 10. Hyväksytyt riskit
 
-Ei yhtään. Vain käyttäjä voi hyväksyä riskin (rules.md 8).
+Vain käyttäjä voi hyväksyä riskin (rules.md 8).
+
+| ID | Riski | Hyväksyjä ja päivä | Peruste | Ehdot, joiden on pysyttävä voimassa |
+|---|---|---|---|---|
+| R-2 | Korttidata haetaan Netdeck.gg:n julkisesta rajapinnasta käyttäjän selaimessa, vaikka käyttöehdot ovat epäselvät | Käyttäjä, 2026-09-30 (D-006) | Sovellus on ei-kaupallinen, siinä on epävirallisuusmerkintä, ja rajapintaa kutsutaan maltillisesti | Ei kaupallisuutta eikä mainoksia. Epävirallisuusmerkintä ja lähdemaininta näkyvissä. Kutsumäärä maltillinen (SR-5: sivukatto, rinnakkaisuus enintään 3, ei automaattisia uusintayrityksiä). Dataa ei kopioida omaan Hostingiin. Hyväksyntä arvioidaan uudelleen, jos WeirdCo tai Netdeck.gg julkaisee ehdot tai pyytää lopettamaan, tai kun välimuisti (T-003) muuttaa datan tallennusta. |
 
 ## 11. Muutosloki
 
 | Päivä | Muutos | Tehtävä |
 |---|---|---|
 | 2026-09-30 | Ensimmäinen versio: MVP-0:n uhkamalli, turvavaatimukset SR-1–SR-10, korttikuvien ja -datan käyttöoikeusarvio, avoimet riskit R-1–R-7 | T-001 |
+| 2026-10-01 | Katselmointi SEC-001: SR-1–SR-10 täyttyvät. R-2 hyväksytty (D-006) ja kirjattu lukuun 10. R-1 päivitetty: käyttäjä tuo kuvat myöhemmin. Uudet riskit R-8 (SEC-002) ja R-9 (SEC-003). Luvun 1 otsakehavainto päivitetty. | T-001 |
