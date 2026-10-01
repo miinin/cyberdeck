@@ -40,6 +40,14 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 - Sisällöntuottaja: ei erillistä katselmointia (D-009: mikrokopio kuuluu UX:lle). Koodari lisää UX.md 6.14:n termit CONTENT.md:n sanastoon (sovittu tässä kortissa).
 - Seuraava askel: Koodari toteuttaa UX.md:n luvun 6 mukaan.
 
+### Suunnitelma 2026-10-01 · Koodari
+1. A2: `isStoragePersisted()` tallennuskerrokseen (`keyValueStore.ts` + `index.ts`) testeineen.
+2. Kokoelman ohjain `src/ui/collectionStore.ts` (puhdas TS): lataus, peräkkäiset tallennukset, tavoitemäärät, palautus virheessä, `subscribe`. Yksikkötestit muistivaraisella ja viivästetyllä/virheellisellä repolla.
+3. Määräkontrolli: sarake `Omistan`, `+`/`−`, ARIA-roolit ja korttimainen asettelu < 40 rem, yhteenveto, `App` → `CatalogView` repositories-propsi.
+4. "Vain omistetut" -suodatin, rivin pysyvyys nollauksessa ja tyhjän kokoelman tila.
+5. Ilmoituslaatikot (load notices, `persistent: false`, EI SAATAVILLA, LUKITTU, tallennusvirheet), selainmuistutus ja pysyvä tallennus, live-ilmoitukset (500 ms hillintä, 1,5 s ilmoitukset, toinen välilehti).
+6. CONTENT.md-sanasto, CHANGELOG, ARCHITECTURE.md:n toteutusosa, koodikatselmointi, luovutus.
+
 ## Luovutukset
 
 ### Luovutus 2026-10-01 · UX Designer → Koodari
