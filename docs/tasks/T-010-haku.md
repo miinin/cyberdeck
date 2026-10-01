@@ -30,7 +30,7 @@ Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. T
 - Kesken: ei mitään.
 - Seuraava askel: katselmoinnit (UX, Sisällöntuottaja), sitten Testikäyttäjä ja Dokumentoija.
 - Avoimet kysymykset: K9 (UX:lle, ks. luovutus).
-- Muutetut tiedostot: src/domain/cardSearch.ts (+test), src/ui/CardFilters.tsx, src/ui/CardColor.tsx, src/ui/useDelayedAnnouncement.ts, src/ui/CatalogView.tsx (+CatalogView.filters.test.tsx, CatalogView.test.tsx), src/ui/CardList.tsx, src/ui/texts.ts, src/styles.css, src/App.test.tsx, CHANGELOG.md, docs/ARCHITECTURE.md (toteutusosa), docs/LESSONS.md (L-002).
+- Muutetut tiedostot: src/domain/cardSearch.ts (+test), src/ui/CardFilters.tsx, src/ui/CardColor.tsx, src/ui/useDelayedAnnouncement.ts, src/ui/CatalogView.tsx (+CatalogView.filters.test.tsx, CatalogView.test.tsx), src/ui/CardList.tsx, src/ui/texts.ts, src/styles.css, src/App.test.tsx, CHANGELOG.md, docs/ARCHITECTURE.md (toteutusosa), docs/LESSONS.md (L-003, alun perin L-002).
 
 ## Luovutukset
 ### Luovutus 2026-10-01 · UX Designer → Koodari
@@ -70,7 +70,7 @@ Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. T
   - Tyhjennyspainike ilmoittaa aina heti, myös jos sama tulos on jo ilmoitettu (UX 5.6:n "ilmoittaa heti" on ensisijainen toistokieltoon nähden).
   - axe ajettiin Chrome-selaimessa paikallista `vite preview` -palvelinta vasten. Playwright-core ja axe-core asennettiin väliaikaisesti scratchpad-kansioon, ei projektin riippuvuuksiksi. Ei uusia riippuvuuksia projektiin.
 - Testit: `npm test` 7 tiedostoa, 125 testiä läpi (T-001: 93 → T-010: 125). `npm run lint` 0 virhettä ja varoitusta. `npm run build` onnistui. `npm audit --audit-level=high` 0 haavoittuvuutta. T-001:n testeistä päivitettiin sarakeotsikko ("Tyyppi ja väri") ja rajattiin kolme tekstikyselyä taulukkoon (sama teksti on nyt myös suodatinvaihtoehtona). Mitään testiä ei poistettu eikä heikennetty. Mutaatiotarkistus: ajastimen peruutuksen ja IME-käsittelyn poisto kaatoi vastaavat testit.
-- Koodikatselmointi: tehty · Pakollisia korjattu 1 (tyhjennyspainike ei ilmoittanut, jos tulos oli sama kuin latausviesti: korjattu `force`-lipulla ennen committia 8f26d7c) · Suosituksia 2 (K9 yllä UX:lle; user-event ja valeajastimet kirjattu LESSONS L-002:ksi)
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (tyhjennyspainike ei ilmoittanut, jos tulos oli sama kuin latausviesti: korjattu `force`-lipulla ennen committia 8f26d7c) · Suosituksia 2 (K9 yllä UX:lle; user-event ja valeajastimet kirjattu LESSONS L-003:ksi (alun perin L-002))
 - STATUS.md:tä ei päivitetty (rinnakkaisajo, PM päivittää).
 
 ### Luovutus 2026-10-01 · Sisällöntuottaja → PM
@@ -105,4 +105,9 @@ Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. T
 - Mistä katsoa: commitit a6890e9 ja 74404fe, PR #3:n esikatselu.
 - Tunnetut rajoitteet: sanahaku tekee yhdestä kirjaimesta laajan osuman (esim.  löytää kaikki kortit, joissa on v-kirjain), kuten ennenkin.
 - Testit: `npx vitest run --dir src` 136/136 läpi, `npm run lint` ja `npm run build` läpi.
-- Koodikatselmointi: tehty · Pakollisia korjattu 1 (testin tyyppivirhe buildissa) · Suosituksia 0- Preview-ajo ei käynnistynyt e531b05:lle: PR #3 on konfliktissa testin kanssa (mergeable: CONFLICTING), koska T-011 yhdistettiin testiin. GitHub ei aja pull_request-workflow'ta konfliktissa olevalle PR:lle. Konfliktit: docs/ARCHITECTURE.md, docs/IDEAS.md, docs/LESSONS.md (lisäykset tiedostojen loppuun). Molemmat haarat lisäsivät opin tunnisteella L-002, joten toinen on numeroitava uudelleen (ehdotus: T-010:n user-event-oppi → L-003). Odottaa PM:n päätöstä: yhdistetäänkö test t-010-haku-haaraan (git merge origin/test) ja numeroidaanko oppi uudelleen.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (testin tyyppivirhe buildissa) · Suosituksia 0
+- Preview-ajo ei käynnistynyt e531b05:lle: PR #3 on konfliktissa testin kanssa (mergeable: CONFLICTING), koska T-011 yhdistettiin testiin. GitHub ei aja pull_request-workflow'ta konfliktissa olevalle PR:lle. Konfliktit: docs/ARCHITECTURE.md, docs/IDEAS.md, docs/LESSONS.md (lisäykset tiedostojen loppuun). Molemmat haarat lisäsivät opin tunnisteella L-002, joten toinen on numeroitava uudelleen (ehdotus: T-010:n user-event-oppi → L-003). Odottaa PM:n päätöstä: yhdistetäänkö test t-010-haku-haaraan (git merge origin/test) ja numeroidaanko oppi uudelleen.
+
+### Checkpoint 2026-10-01 · PM (konflikti)
+- PM yhdisti testin t-010-haku-haaraan ja ratkaisi konfliktit (ARCHITECTURE.md, IDEAS.md, LESSONS.md: molempien lisäykset säilytetty). T-010:n user-event-oppi numeroitu L-003:ksi.
+- UX.md 5.3:n suodatussäännöt kuvaavat vielä vanhaa hakusääntöä (ennen B-013:a ja B-014:ää). Päivitetään MVP-1:n lopun UX-auditoinnissa.

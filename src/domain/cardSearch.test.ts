@@ -14,6 +14,7 @@ import type { CardFilterCriteria } from './cardSearch';
 function card(slug: string, name: string, subname: string | null, type: string, color: string | null): Card {
   return {
     id: `id-${slug}`,
+    key: `key-${slug}`,
     slug,
     name,
     subname,

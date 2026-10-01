@@ -16,6 +16,7 @@ const catalog: CardCatalog = {
       type: 'Legend',
       color: 'Red',
       cost: null,
+      key: 'v-streetkid',
     },
   ],
   reportedTotal: 1,
@@ -65,6 +66,7 @@ describe('App', () => {
   it('keeps the search text and filters when the user retries a partial list (UX.md 5.8)', async () => {
     const unit = (slug: string, name: string): Card => ({
       id: `id-${slug}`,
+      key: `key-${slug}`,
       slug,
       name,
       subname: null,

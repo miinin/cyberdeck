@@ -7,7 +7,12 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 **Miksi:** Prosessi pysäytettiin portin perusteella eikä oman käynnistetyn prosessin tunnisteen perusteella.
 **Jatkossa:** Älä koskaan pysäytä prosessia portin tai nimen perusteella. Pysäytä vain itse käynnistämäsi prosessi (PID). Käytä testeissä vapaata porttia (`--port 0` tai `--strictPort` tarkistuksella) äläkä koske toisten projektien prosesseihin.
 
-## L-002 · 2026-10-01 · user-event jumittuu Vitestin valeajastimien kanssa
+## L-002 · 2026-10-01 · Unicode-escapet muuttuivat näkymättömiksi merkeiksi lähdekoodissa
+**Mitä tapahtui:** Koodari (T-011) kirjoitti tiedostoon merkkijonoja ja regexin, joissa oli `\u`-escapeja (suunnanohjausmerkit U+202A–U+202E ja U+2066–U+2069 sekä yhdistyvä merkki U+0308). Työkaluketju muutti osan escapeista oikeiksi merkeiksi, joten lähdekoodiin päätyi näkymättömiä suunnanohjausmerkkejä (Trojan Source -riski). Testit menivät silti läpi, joten virhe ei näkynyt.
+**Miksi:** Kirjoitustyökalun syöte tulkitsi `\uXXXX`-jaksot. Näkymättömiä merkkejä ei huomaa diffistä.
+**Jatkossa:** Kun kirjoitat ohjaus-, suunnanohjaus- tai yhdistyviä merkkejä koodiin, tarkista tiedosto skriptillä, joka etsii merkit U+0080–U+009F, U+200B–U+200F, U+202A–U+202E, U+2066–U+2069 ja U+0300–U+036F, ja korjaa ne escapeiksi. Escapen voi tuottaa skriptissä esim. `String.fromCharCode(92) + 'u…'`.
+
+## L-003 · 2026-10-01 · user-event jumittuu Vitestin valeajastimien kanssa
 **Mitä tapahtui:** T-010:n live-alueen testit (`vi.useFakeTimers()` + `userEvent.setup({ advanceTimers })`) aikakatkaistiin 5 s:n jälkeen.
 **Miksi:** Testing Libraryn async-kääre odottaa jokaisen toiminnon jälkeen oikeaa `setTimeout(0)`:aa ja siirtää aikaa vain Jestin valeajastimilla (`jest`-globaali). Vitestissä ajastin ei koskaan laukea.
 **Jatkossa:** Ajastinriippuvaisissa näkymätesteissä käytä `fireEvent`iä ja `act(() => vi.advanceTimersByTime(ms))`. Käytä user-eventiä testeissä, joissa ajastimet ovat oikeita.

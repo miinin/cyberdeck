@@ -13,4 +13,6 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  // Stored data must not leak from one test to the next (ARCHITECTURE.md 12.8).
+  localStorage.clear();
 });

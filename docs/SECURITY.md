@@ -1,7 +1,7 @@
 # SECURITY · cyberdeck
 
-> Omistaja: Digiturva. Päivitetty 2026-10-01 (T-001, katselmointi toteutuksen jälkeen, katso `docs/reports/SEC-001-t001-katselmointi.md`).
-> Uhkamalli kattaa tällä hetkellä **MVP-0:n**: staattinen sivusto Firebase Hostingissa, selain hakee korttidatan suoraan Netdeck.gg:n julkisesta rajapinnasta, julkaisu GitHub Actionsilla. Malli päivitetään, kun mukaan tulee tallennus, kirjautuminen tai jaettavat linkit (MVP-1/MVP-2).
+> Omistaja: Digiturva. Päivitetty 2026-10-01 (T-011, MVP-1:n suunnittelu: paikallinen tallennus, tiedostojen tuonti ja vienti).
+> Luvut 1–10 kattavat **MVP-0:n**: staattinen sivusto Firebase Hostingissa, selain hakee korttidatan suoraan Netdeck.gg:n julkisesta rajapinnasta, julkaisu GitHub Actionsilla. **Luku 11** laajentaa mallin MVP-1:een (kokoelma ja pakat selaimen tallennustilassa, .txt- ja .json-tuonti ja -vienti, SR-11–SR-19). **Luku 12** ennakoi MVP-2:n Firebase-kirjautumisen (avoimet vaatimukset). Tietosuoja: `docs/PRIVACY.md`.
 
 ## 1. Järjestelmä MVP-0:ssa
 
@@ -160,7 +160,7 @@ Digiturva ei anna oikeudellista neuvontaa. Alla on se, mitä julkisista lähteis
 
 ## 8. Tietosuoja MVP-0:ssa
 
-MVP-0 **ei käsittele henkilötietoja**: ei kirjautumista, lomakkeita, evästeitä, analytiikkaa eikä selaimen tallennustilaa. Siksi `docs/PRIVACY.md`:tä ei vielä luoda.
+MVP-0 **ei käsittele henkilötietoja**: ei kirjautumista, lomakkeita, evästeitä, analytiikkaa eikä selaimen tallennustilaa. ~~Siksi `docs/PRIVACY.md`:tä ei vielä luoda.~~ → `docs/PRIVACY.md` luotu 2026-10-01 (T-011), ja se kattaa myös alla olevat huomiot.
 
 Huomiot:
 - Käyttäjän selain ottaa suoraan yhteyttä `api.netdeck.gg`:hen, jolloin Netdeck näkee käyttäjän IP-osoitteen ja selaimen tiedot. Tämä on kolmannen osapuolen tiedonsaanti, joka kirjataan PRIVACY.md:hen, kun se luodaan. `Referrer-Policy: no-referrer` ja `credentials: 'omit'` minimoivat vuotavaa tietoa.
@@ -180,6 +180,13 @@ Huomiot:
 | R-7 | Rajapinta sallii evästeet mille tahansa originille (`ACAO` heijastettu + `Allow-Credentials: true`). Koskee Netdeckin omia käyttäjiä, ei meitä, kunhan emme lähetä tunnisteita. | Info | – | Havainto. Ei testattu eikä hyödynnetty. SR-4 estää meidän osuutemme (T-001: `credentials: 'omit'` todennettu testillä). |
 | R-8 | SR-1:n lint-säännöt eivät tunnista kaikkia HTML-nieluja (SEC-002). Ei hyödynnettävissä nykyisellä koodilla. | Low | Koodari (velka) | Avoin. Korjattava ennen tehtävää, joka muotoilee `rules_text`iä. |
 | R-9 | `actions/checkout` jättää GITHUB_TOKENin `.git/config`iin npm-skriptien ajaksi (SEC-003) | Low | Koodari (velka) | Avoin. `persist-credentials: false` kaikkiin workflowihin, esim. T-004:n yhteydessä. |
+| R-10 | Paikallinen data katoaa ilman käyttäjän toimea: selaimen tietojen tyhjennys, yksityinen ikkuna, toinen laite tai selain sekä Safarin (WebKit ITP) käytäntö poistaa skriptin kirjoittaman tallennustilan, jos sivustolla ei ole käyty noin 7 vuorokauteen | Medium (tietojen menetys) | PM / UX | Avoin. Torjunta MVP-1:ssä: vienti varmuuskopioksi (T-015), käyttäjälle kerrotaan, että tiedot ovat vain tässä selaimessa (UX-mikrokopio), SR-13 (`navigator.storage.persist()` pyydetään, jos tuettu). Pysyvä ratkaisu: pilvitallennus MVP-2:ssa. |
+| R-11 | Usean välilehden kilpailutilanne: kaksi välilehteä kirjoittaa saman avaimen, ja myöhempi kirjoitus hävittää ensimmäisen muutokset | Low–Medium (tietojen menetys) | Arkkitehti / Koodari | Avoin, minimoitu (T-011, SEC-002-katselmointi): tuore luku ennen jokaista kirjoitusta ilman awaitia välissä, muutokset kohdistuvat riviin tai yhteen pakkaan, `storage`-tapahtuman tilaus. Jäljelle jää: vanhentuneessa näkymässä oleva välilehti voi tallentaa pakan vanhan sisällön. T-012 ja T-013 lataavat näkymän uudelleen `subscribe`-kutsun kautta. |
+| R-12 | Korttidatan välimuisti (T-003) ja käyttäjän data jakavat saman origin-kohtaisen kiintiön (localStorage noin 5 Mt). Välimuisti voi täyttää tilan, jolloin kokoelman tallennus epäonnistuu. | Low–Medium | Arkkitehti | Avoin. Torjunta SR-13: käyttäjän data ensin, välimuisti poistetaan ensimmäisenä kiintiövirheessä, eri avaimet. |
+| R-13 | Kaverilta saatu .json- tai .txt-tiedosto on epäluotettava syöte (XSS, jättitiedosto, prototyypin saastutus, olemassa olevan pakan ylikirjoitus) | Medium (ennen torjuntaa) | Koodari | Avoin. Torjunta SR-17–SR-19 (T-014, T-015). |
+| R-14 | Firebase-projektin web-konfiguraatio on luettavissa osoitteesta `/__/firebase/init.json` (B-010). API-avainta ei ole rajattu. | Low nyt, High jos Auth tai Firestore otetaan käyttöön ilman rajauksia | Käyttäjä / Koodari (T-009) | Avoin. Ei hyödynnettävissä MVP-1:ssä, koska sovellus ei käytä Firebase-palveluita Hostingin lisäksi. Ehto ennen MVP-2:ta: luvun 12 vaatimukset MVP2-1–MVP2-3. Polkua ei voi poistaa Hostingista, joten tieto hyväksytään julkiseksi; suojaus perustuu rajauksiin ja sääntöihin. |
+| R-15 | Nimistä jää poistamatta LRM, RLM, ALM, U+2028, U+2029 ja U+FEFF (SEC-005, raportti SEC-002-t011) | Low | Koodari | Avoin. Korjaus ennen T-012:ta tai viimeistään T-015:ssä (SR-19). |
+| R-16 | Kiintiövirhe koetallennuksessa vaihtaa sovelluksen muistinvaraiseen tilaan ja piilottaa tallennetun datan (SEC-006, raportti SEC-002-t011) | Low (kasvaa T-003:n myötä, R-12) | Koodari | Avoin. Korjaus ennen T-012:ta tai viimeistään T-003:ssa. |
 
 ## 10. Hyväksytyt riskit
 
@@ -189,9 +196,145 @@ Vain käyttäjä voi hyväksyä riskin (rules.md 8).
 |---|---|---|---|---|
 | R-2 | Korttidata haetaan Netdeck.gg:n julkisesta rajapinnasta käyttäjän selaimessa, vaikka käyttöehdot ovat epäselvät | Käyttäjä, 2026-09-30 (D-006) | Sovellus on ei-kaupallinen, siinä on epävirallisuusmerkintä, ja rajapintaa kutsutaan maltillisesti | Ei kaupallisuutta eikä mainoksia. Epävirallisuusmerkintä ja lähdemaininta näkyvissä. Kutsumäärä maltillinen (SR-5: sivukatto, rinnakkaisuus enintään 3, ei automaattisia uusintayrityksiä). Dataa ei kopioida omaan Hostingiin. Hyväksyntä arvioidaan uudelleen, jos WeirdCo tai Netdeck.gg julkaisee ehdot tai pyytää lopettamaan, tai kun välimuisti (T-003) muuttaa datan tallennusta. |
 
-## 11. Muutosloki
+## 11. MVP-1: paikallinen tallennus ja tiedostot (T-011, T-014, T-015)
+
+### 11.1 Järjestelmän muutos
+
+```
+ Käyttäjän selain (origin esim. https://cyberdeck-tcg.web.app)
+   ├─ UI ──► tallennuskerros (src/storage, repository-rajapinta, T-011)
+   │            └─► localStorage tai IndexedDB (Arkkitehdin ADR)   ← pysyvä, salaamaton, origin-kohtainen
+   ├─ Tuonti: tekstikenttä tai .txt-tiedosto (T-014) ──► jäsennin ──► validointi ──► tallennuskerros
+   ├─ Tuonti: .json- tai .txt-tiedosto kaverilta (T-015) ──► validointi ──► esikatselu ──► tallennuskerros
+   └─ Vienti: tallennuskerros ──► Blob ──► ladattava tiedosto (.json/.txt) ──► käyttäjä jakaa sen itse
+```
+
+Ei palvelinta, ei kirjautumista, ei verkkoliikennettä tallennukseen liittyen. Tuotanto (`cyberdeck-tcg.web.app`), testi (`cyberdeck-tcg-test.web.app`) ja jokainen esikatselukanava ovat eri origineja, joten niiden tallennustilat ovat automaattisesti erillään (testidata ei sekoitu tuotantodataan MVP-1:ssä).
+
+### 11.2 Uudet suojattavat asiat
+
+| Asia | Miksi tärkeä | Missä |
+|---|---|---|
+| Käyttäjän kokoelma ja pakat | Käyttäjän tekemä työ. Menetys tai muuttuminen on käyttäjälle vakavin haitta (ei luottamuksellista, mutta eheys ja saatavuus tärkeitä). | Selaimen tallennustila |
+| Sovelluksen toimintakyky | Rikkinäinen tallennettu data ei saa estää sovelluksen käynnistymistä pysyvästi (käyttäjä ei osaa tyhjentää tallennustilaa) | Selain |
+
+### 11.3 Uudet luottamusrajat
+
+5. **Selaimen tallennustila → sovellus.** Tallennettu data on omaa, mutta sitä on pidettävä **epäluotettavana luettaessa**: vanha skeemaversio, keskeytynyt kirjoitus, käyttäjän tai selainlaajennuksen muokkaus, aiempi bugi tai XSS-hyökkäyksen jättämä sisältö (pysyvä XSS-vektori, jos SR-1 pettää).
+6. **Tiedosto tai liitetty teksti → sovellus.** Käyttäjän liittämä teksti, valitsema tiedosto ja erityisesti kaverilta saatu tiedosto ovat **täysin epäluotettavia**. Käyttäjä ei tarkista tiedoston sisältöä ennen tuontia.
+
+### 11.4 Uudet hyökkääjäprofiilit
+
+- **Ilkeä tai kepposteleva kaveri:** lähettää muokatun .json- tai .txt-tiedoston (HTML nimissä, jättimäiset luvut, 100 000 pakkaa, `__proto__`-avaimet, pakan id, joka osuu vastaanottajan olemassa olevaan pakkaan).
+- **Jaettu tietokone:** seuraava käyttäjä näkee edellisen käyttäjän kokoelman ja pakat (data on salaamatonta ja origin-kohtaista, ei käyttäjäkohtaista).
+
+### 11.5 STRIDE MVP-1:n lisäykset
+
+| Luokka | Uhka | Todennäköisyys / vaikutus | Torjunta |
+|---|---|---|---|
+| **S** | Tuotu tiedosto esittää kortin nimeä, jota ei ole, tai väärää nimeä tunnetulle id:lle | Keskisuuri / Pieni | Kortin nimi näytetään aina omasta korttidatasta id:n perusteella, ei tiedostosta (SR-18) |
+| **T** | Tallennettu tai tuotu pakan nimi sisältää HTML:ää → pysyvä XSS | Pieni (SR-1 voimassa) / Suuri | SR-1 koskee myös käyttäjän dataa (SR-14), validointi luettaessa (SR-11) |
+| **T** | Prototyypin saastutus: tiedoston tai tallennetun datan avain `__proto__`, `constructor` tai `prototype` päätyy objektiin, jota käytetään hakutauluna | Pieni / Keskisuuri | Avainten muototarkistus, `Map` tai `Object.create(null)`, ei `Object.assign`/spread-yhdistämistä jäsennettyyn dataan (SR-11, SR-18) |
+| **T** | Pakan nimi sisältää rivinvaihdon ja osio-otsikon (esim. `\n// Units (99)`) → .txt-vienti tuottaa muun pakan kuin näytetty | Keskisuuri / Pieni | Ohjausmerkit pois nimistä (SR-11), viennin muotoilu (SR-19) |
+| **T** | Tuonti ylikirjoittaa olemassa olevan pakan tai kokoelman hiljaa (id-törmäys) | Keskisuuri / Keskisuuri (tietojen menetys) | Tuonti luo aina uuden pakan omalla id:llä, korvaaminen vain vahvistuksella (SR-18) |
+| **R** | – | – | Ei relevantti: data on vain käyttäjän omassa selaimessa |
+| **I** | Jaettu tietokone, selainlaajennus tai XSS lukee kokoelman | Pieni / Pieni | Ei henkilötietoja eikä salaisuuksia tallennustilaan (SR-16). PRIVACY.md kertoo, että data on salaamatonta ja laitteella. |
+| **I** | Viety tiedosto sisältää enemmän kuin pakan (laite- tai käyttäjätietoja, koko kokoelman) | Pieni / Pieni | Vienti sisältää vain valitun pakan sallitut kentät (SR-19) |
+| **D** | Rikkinäinen tai tuntemattoman version tallennettu data kaataa sovelluksen joka käynnistyksellä | Keskisuuri / Suuri (käyttäjä ei pääse eteenpäin) | SR-11 |
+| **D** | Kiintiö täynnä, tallennus estetty (Safari yksityinen tila, selainasetus, `SecurityError`) | Keskisuuri / Keskisuuri | SR-13 |
+| **D** | Jättitiedosto, miljoona riviä, katastrofaalinen regex (ReDoS) jäädyttää välilehden | Pieni / Keskisuuri | Koko-, rivi- ja pituusrajat ennen jäsennystä, lineaariset regexit (SR-17, SR-18) |
+| **D** | Data katoaa (selaimen siivous, ITP, toinen laite) tai välilehtien kilpailutilanne | Keskisuuri / Keskisuuri | R-10, R-11, SR-13, vienti (T-015) |
+| **E** | XSS tallennetusta tai tuodusta datasta → kaikki sivun oikeudet | Pieni / Suuri | SR-1, SR-2, SR-14 |
+
+### 11.6 Turvavaatimukset MVP-1 (SR-11–SR-19)
+
+Kohdetehtävä on merkitty jokaiseen vaatimukseen. Rajat ovat Digiturvan ehdotuksia: Arkkitehti voi muuttaa lukuja tietomallin perusteella, kunhan jokaisella listalla ja merkkijonolla on yläraja.
+
+**SR-11 · Tallennettu data validoidaan luettaessa, eikä rikkinäinen data kaada sovellusta eikä katoa (T-011).**
+- Tallennettu dokumentti sisältää skeemaversion (esim. `schemaVersion: 1`). Luettaessa: tunnettu vanhempi versio → migraatio; tuntematon tai uudempi versio → sovellus ei kirjoita dataa yli (käyttäjä voi palata uudempaan versioon) ja näyttää yleisen ilmoituksen.
+- Validointi tehdään ajonaikaisesti (ei pelkkä TypeScript-tyyppi tai `as`-muunnos): tyyppi, pakolliset kentät, sallitut arvot ja rajat. Hyväksytty data rakennetaan **uudeksi olioksi sallituista kentistä** (whitelist). Tuntemattomat kentät hylätään. Jäsennettyä dataa ei yhdistetä tilaan `Object.assign`illa, spreadilla tai syväyhdistämisellä.
+- Ehdotetut rajat: määrä kokonaisluku 0–999 (kokoelma) ja 1–99 (pakka); pakkoja enintään 200; eri kortteja enintään 500 per pakka ja 5 000 kokoelmassa; pakan nimi 1–100 merkkiä trimmauksen jälkeen; kortin avain tiukalla muodolla (esim. `^[A-Za-z0-9_-]{1,64}$` tai UUID, Arkkitehdin avainpäätöksen mukaan).
+- Merkkijonoista poistetaan tai hylätään ohjausmerkit (C0 ja C1, myös rivinvaihdot nimistä) ja suunnanohjausmerkit (U+202A–U+202E, U+2066–U+2069), jotta nimi ei voi huijata näytössä tai rikkoa .txt-vientiä. Unicode normalisoidaan NFC-muotoon.
+- Kortin avaimilla indeksoidut hakutaulut ovat `Map`eja (tai `Object.create(null)`-olioita), ja avaimet `__proto__`, `constructor` ja `prototype` hylätään erikseen. Pelkkä avaimen muototarkistus ei riitä, koska esim. `constructor` täyttää muodon `^[A-Za-z0-9_-]+$`.
+- Rikkinäinen kohta käsitellään mahdollisimman pienenä: virheellinen rivi tai pakka ohitetaan ja kirjataan `console.warn`iin, muu data säilyy. Jos koko dokumentti on lukukelvoton (virheellinen JSON), **alkuperäistä raakadataa ei poisteta eikä ylikirjoiteta automaattisesti**: se siirretään varakopioavaimeen (esim. `cyberdeck:backup:<aikaleima>`) ennen kuin tyhjä tila otetaan käyttöön, ja käyttäjälle näytetään yleinen ilmoitus.
+- Sama validointifunktio käytetään tallennetun datan lukemiseen ja tiedostotuontiin (T-015), jotta tarkistuksia ei ole kahta eri tasoista versiota.
+- Yksikkötestit: virheellinen JSON, väärä tyyppi joka kentässä, negatiivinen, desimaali-, `NaN`- ja ylisuuri määrä, ylipitkä nimi, ohjausmerkit, `__proto__`- ja `constructor`-avaimet (testi todentaa, ettei `({}).polluted` synny), tuntematon skeemaversio (data ei muutu), osittain rikkinäinen data (ehjä osa säilyy).
+
+**SR-12 · Tallennus vain tallennuskerroksen kautta (T-011).**
+- Vain `src/storage/` käyttää `localStorage`a, `sessionStorage`a tai `indexedDB`:tä. Lint-sääntö (`no-restricted-globals` ja `no-restricted-properties` muualla kuin tallennuskerroksessa) estää suoran käytön.
+- Avaimet nimiavaruudessa ja versioituna (esim. `cyberdeck:v1:collection`, `cyberdeck:v1:decks`), jotta välimuisti (T-003) ja käyttäjän data eivät sekoitu.
+  - **Päivitys 2026-10-01 (T-011, katselmointi SEC-002-t011):** Toteutuksessa avaimet ovat `cyberdeck:collection`, `cyberdeck:decks` ja `cyberdeck:backup:<kokonaisuus>:<aika>`, ja versio on kääreen `schemaVersion`-kentässä (D-008). Digiturva hyväksyy poikkeaman, koska nimiavaruus säilyy ja kääreessä oleva versio estää vanhaa sovellusversiota ylikirjoittamasta uudemman version dataa. Jos versio olisi avaimen nimessä, vanha koodi kirjoittaisi rinnakkaiseen avaimeen hiljaa. T-003:n välimuisti saa oman etuliitteensä (esim. `cyberdeck:cache:`).
+- Ei evästeitä. `sessionStorage`a ei tarvita.
+
+**SR-13 · Tallennusvirheet ja tietojen menetyksen torjunta (T-011).**
+- Jokainen tallennustilan kutsu on `try/catch`-lohkossa, myös pelkkä `window.localStorage`-ominaisuuden lukeminen (heittää `SecurityError`in, kun tallennus on estetty). Tallennustilan puuttuessa sovellus toimii muistinvaraisesti ja näyttää yleisen ilmoituksen ("Tiedot eivät tallennu tässä selaimessa", UX:n mikrokopio). Ei stack tracea käyttäjälle.
+- `QuotaExceededError`: tallennus epäonnistuu hallitusti, käyttäjälle kerrotaan, eikä edellinen tallennettu tila katoa. Jos välimuisti (T-003) on samassa tallennustilassa, se poistetaan ensin ja käyttäjän dataa ei koskaan poisteta tilan vapauttamiseksi (R-12).
+- Kirjoitus on atominen: yksi looginen muutos on yksi `setItem` tai yksi IndexedDB-transaktio, jotta keskeytys ei jätä puolikasta tilaa.
+- Usean välilehden kilpailutilanne (R-11): kerros kuuntelee `storage`-tapahtumaa (localStorage) tai `BroadcastChannel`ia (IndexedDB) ja lukee tilan uudelleen, tai vähintään lukee tuoreen tilan ennen jokaista kirjoitusta. Arkkitehti valitsee keinon ADR:ssä.
+- Suositus (ei blokkaa): `navigator.storage.persist()` pyydetään, jos tuettu, jotta selain ei siivoa dataa tilan loppuessa (R-10). Pyyntö ei saa näyttää lupakyselyä ilman käyttäjän toimea.
+
+**SR-14 · SR-1 koskee myös käyttäjän dataa (T-011–T-015).** Pakan nimi, tuodut rivit, tunnistamattomat korttinimet ja kaikki tallennettu tai tuotu teksti renderöidään vain tekstinä. Yksikkötesti: pakan nimi `<img src=x onerror=alert(1)>` näkyy kirjaimellisena tekstinä (testi kuuluu ensimmäiseen tehtävään, joka näyttää pakan nimen, T-013).
+
+**SR-15 · Ei verkkoliikennettä tallennetusta tai tuodusta datasta (T-011–T-015).** Tallennettu tai tuotu data ei koskaan päädy URL:iin, fetch-kutsuun, `href`- tai `src`-attribuuttiin. Tiedostojen sisältöä ei lähetetä minnekään. CSP:n `connect-src` pysyy ennallaan.
+
+**SR-16 · Ei henkilötietoja eikä salaisuuksia selaimen tallennustilaan (T-011).** Tallennetaan vain kortin avaimet, määrät, pakkojen nimet ja tietomallin tarvitsemat tekniset kentät (id, skeemaversio, tarvittaessa muokkausaika). Ei käyttäjätunnisteita, laitetunnisteita, sähköposteja eikä tokeneita. Uusi kenttä tietomalliin = PRIVACY.md:n inventaarion päivitys (Digiturva katselmoi).
+
+**SR-17 · Tekstin ja .txt-tiedoston tuonti (T-014).**
+- Tiedoston koko tarkistetaan `File.size`:sta **ennen lukemista**: enintään 64 kt. Liitetylle tekstille sama raja merkkimääränä koodissa (`maxlength` ei riitä, koska sen voi ohittaa).
+- Rivejä enintään 300 ja rivin pituus enintään 300 merkkiä. Yli menevä tuonti keskeytetään yleisellä virheilmoituksella, ei osittain.
+- Tiedosto luetaan tekstinä (`file.text()`, UTF-8). BOM poistetaan, rivinvaihdot normalisoidaan (`\r\n`, `\r`), NFC-normalisointi ja SR-11:n ohjausmerkkien käsittely.
+- Tiedoston tyyppi ei ole turvaraja: `accept=".txt,text/plain"` on vain käytettävyyttä. Jäsennin hyväksyy vain viitemuodon (D-007) ja hylkää muun rivikohtaisesti.
+- Määrä: `^\d{1,2}$` ja arvo 1–99. Jäsennyksen regexit ankkuroidaan (`^…$`) eikä niissä ole sisäkkäisiä toistoja (ReDoS). Testi: 10 000 merkin rivi ja 300 riviä jäsentyvät alle 100 ms:ssa.
+- Korttinimet täsmätään korttidataan normalisoidulla merkkijonovertailulla. **Käyttäjän syötteestä ei rakenneta regexiä** (`new RegExp(userInput)` kielletty).
+- Pakan nimi `# `-riviltä käsitellään SR-11:n nimisääntöjen mukaan.
+- Virheilmoitus ei toista koko syötettä. Tunnistamattomat rivit voidaan näyttää käyttäjälle tekstinä (SR-14) katkaistuna 100 merkkiin.
+- Raahaa ja pudota -tuonti (jos toteutetaan) käyttää samaa polkua ja samoja rajoja.
+
+**SR-18 · .json-tuonti on epäluotettava syöte (T-015).**
+- Koko tarkistetaan ennen lukemista (enintään 256 kt). `JSON.parse` `try/catch`-lohkossa, ilman `reviver`-funktiota, joka tekisi muuta kuin hylkäisi avaimia.
+- Tiedostossa on muodon tunniste ja versio (esim. `{"format": "cyberdeck-deck", "version": 1, …}`). Väärä tai puuttuva tunniste → yleinen virhe "Tiedosto ei ole cyberdeckin pakka".
+- Validointi SR-11:n samalla funktiolla ja samoilla rajoilla. Uusi olio rakennetaan sallituista kentistä. `__proto__`-, `constructor`- ja `prototype`-avaimet eivät vaikuta mihinkään (testi).
+- **Tiedoston id:tä ei käytetä:** tuotu pakka saa aina uuden, sovelluksen luoman id:n. Tuonti ei koskaan ylikirjoita olemassa olevaa pakkaa tai kokoelmaa ilman käyttäjän erillistä vahvistusta. Pakkatuonti ei muuta kokoelmaa.
+- Kortin nimi näytetään omasta korttidatasta kortin avaimen perusteella. Tiedostossa mahdollisesti oleva nimi on vain varateksti tunnistamattomalle kortille (SR-14).
+- Tiedoston URL-kenttiä, HTML:ää tai muita ylimääräisiä kenttiä ei käytetä mihinkään (SR-15).
+- Ennen tallennusta näytetään esikatselu (pakan nimi, korttimäärä, tunnistamattomat kortit), ja käyttäjä vahvistaa (UX suunnittelee).
+- .txt-tuonti T-015:ssä käyttää T-014:n jäsennintä ja SR-17:n rajoja.
+- Ei allekirjoitusta eikä eheystarkistetta: tiedostoa voi muokata vapaasti. Tämä on hyväksyttävää, koska tiedosto sisältää vain pakkalistan ja se validoidaan kuten mikä tahansa syöte.
+
+**SR-19 · Vienti (T-015).**
+- .json-vienti sisältää vain muodon tunnisteen, version ja valitun pakan sallitut kentät (nimi, kortin avaimet, määrät; korttinimet saa lisätä luettavuuden vuoksi). Ei koko kokoelmaa ilman, että käyttäjä valitsee sen erikseen, ei laite- tai selaintietoja eikä sisäisiä aikaleimoja ilman tarvetta.
+- .txt-vienti tuottaa viitemuodon (D-007). Pakan nimestä on poistettu rivinvaihdot ja ohjausmerkit (SR-11), joten nimi ei voi lisätä rivejä tai osio-otsikoita. Testi: vienti → tuonti palauttaa saman pakan (round trip), myös nimellä, joka sisältää `//`, `#` ja erikoismerkkejä.
+- Tiedostonimi muodostetaan pakan nimestä turvallisesti: poistetaan `/ \ : * ? " < > |`, ohjausmerkit ja suunnanohjausmerkit, pituus enintään 60 merkkiä, tyhjälle oletusnimi (esim. `pakka.json`).
+- Lataus tehdään `Blob`illa ja `a[download]`-linkillä (`application/json` tai `text/plain;charset=utf-8`), ja `URL.revokeObjectURL` kutsutaan latauksen jälkeen. Jos CSP estää latauksen, CSP:tä ei laajenneta ilman Digiturvan katselmointia (SR-9).
+
+### 11.7 Tehtäväkohtainen yhteenveto
+
+| Tehtävä | Sitovat vaatimukset |
+|---|---|
+| T-011 | SR-11, SR-12, SR-13, SR-16 (SR-14 ja SR-15 periaatteina) |
+| T-012, T-013 | SR-14 (pakan nimi tekstinä, testi), SR-1 |
+| T-014 | SR-17, SR-14, SR-15 |
+| T-015 | SR-18, SR-19, SR-17 (.txt), SR-14, SR-15 |
+
+## 12. MVP-2: ennakoidut vaatimukset Firebase-kirjautumiselle (avoimet)
+
+Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-2:n suunnittelu ottavat ne huomioon. Digiturva tekee MVP-2:n uhkamallin ja tarkentaa nämä ennen ensimmäistä MVP-2-tehtävää. Tila kaikilla: **Avoin**.
+
+- **MVP2-1 · Erillinen testiprojekti (D-003, CLAUDE.md).** Testisivusto ja esikatselut käyttävät omaa Firebase-projektia (oma Auth, Firestore ja API-avain) ennen kuin mitään dataa tallennetaan pilveen. Tuotannon dataan ei pääse testi- tai esikatselukoodista. Palvelutilit erikseen kummallekin projektille (liittyy R-4:ään).
+- **MVP2-2 · API-avaimen rajaus (B-010, R-14, T-009).** Google Cloud Consolessa kummankin projektin selainavain rajataan HTTP-referreriin (oman projektin `*.web.app`- ja `*.firebaseapp.com`-osoitteet, testiprojektissa myös esikatselukanavat) ja vain tarvittaviin rajapintoihin (esim. Identity Toolkit, Token Service, Cloud Firestore). Auth-palvelun valtuutetut verkkotunnukset (Authorized domains) vain omat osoitteet; `localhost` vain testiprojektiin. App Checkin käyttöönotto arvioidaan.
+- **MVP2-3 · Firestore-säännöt oletuksena kiinni.** Ei koskaan `allow read, write: if true`, ei edes väliaikaisesti. Käyttäjän data polussa `users/{uid}/…`, ehto `request.auth.uid == uid`. Säännöt validoivat kenttien tyypit, koot ja sallitut avaimet (samat rajat kuin SR-11). Sääntötestit Firebase-emulaattorilla (`@firebase/rules-unit-testing`) ajetaan CI:ssä, ja sääntömuutokset kuuluvat SR-9:n piiriin.
+- **MVP2-4 · Jaetut vaihtolistat (ominaisuus 3).** Jakolinkin tunniste on arvaamaton (vähintään 128 bittiä satunnaisuutta), linkillä saa lukea vain jaetun listan, ei kokoelmaa eikä käyttäjän tietoja. Jaon voi perua. Ei sähköpostia tai oikeaa nimeä julkisessa dokumentissa. `Referrer-Policy: no-referrer` säilyy (SR-3).
+- **MVP2-5 · CSP ja COOP Firebase Authille.** `connect-src`iin tarvittavat Googlen osoitteet ja kirjautumistavasta riippuen `frame-src` authDomainille. **Epävarma, vaatii varmistuksen:** nykyinen `Cross-Origin-Opener-Policy: same-origin` (SR-3) estää todennäköisesti `signInWithPopup`-kirjautumisen; vaihtoehdot ovat uudelleenohjauskirjautuminen tai `same-origin-allow-popups`. Muutos katselmoidaan (SR-9).
+- **MVP2-6 · Kirjautumistapa ja tunnisteet.** Ei omia salasanoja (Firebase Auth hoitaa). Tokeneita ei tallenneta itse `localStorage`en (SDK hallitsee istunnon). Uloskirjautuminen tyhjentää välimuistit, joissa on käyttäjän pilvidataa, erityisesti jaetulla tietokoneella.
+- **MVP2-7 · Paikallisen datan siirto pilveen.** Ensimmäisellä kirjautumisella paikallinen data validoidaan (SR-11) ennen lähetystä, ja ristiriita pilvidatan kanssa ratkaistaan käyttäjän vahvistuksella, ei hiljaa ylikirjoittamalla.
+- **MVP2-8 · Kustannus ja palvelunesto.** Firestoren luku- ja kirjoitusmäärät rajataan säännöillä ja sivutuksella. Jos Blaze-plan otetaan käyttöön, budjettihälytys on pakollinen (käyttäjän päätös, maksullinen palvelu).
+- **MVP2-9 · Tietosuoja.** Kirjautuminen tuo henkilötiedot (sähköposti tai Google-tili, uid) ja mahdollisesti alaikäiset käyttäjät (pelikaverit). Firestoren sijainti EU:ssa (valitaan projektin luonnissa, ei muutettavissa). Tilin ja datan poisto käyttäjän pyynnöstä. Katso PRIVACY.md luku 7.
+
+## 13. Muutosloki
 
 | Päivä | Muutos | Tehtävä |
 |---|---|---|
 | 2026-09-30 | Ensimmäinen versio: MVP-0:n uhkamalli, turvavaatimukset SR-1–SR-10, korttikuvien ja -datan käyttöoikeusarvio, avoimet riskit R-1–R-7 | T-001 |
 | 2026-10-01 | Katselmointi SEC-001: SR-1–SR-10 täyttyvät. R-2 hyväksytty (D-006) ja kirjattu lukuun 10. R-1 päivitetty: käyttäjä tuo kuvat myöhemmin. Uudet riskit R-8 (SEC-002) ja R-9 (SEC-003). Luvun 1 otsakehavainto päivitetty. | T-001 |
+| 2026-10-01 | MVP-1:n uhkamalli (luku 11): paikallinen tallennus, .txt- ja .json-tuonti ja vienti. Turvavaatimukset SR-11–SR-19. Uudet riskit R-10–R-14 (B-010 → R-14). MVP-2:n ennakoidut vaatimukset MVP2-1–MVP2-9 (luku 12, avoimet). PRIVACY.md luotu. Muutosloki siirretty lukuun 13. | T-011 |
+| 2026-10-01 | Katselmointi `reports/SEC-002-t011-katselmointi.md`: SR-11, SR-12, SR-13 ja SR-16 täyttyvät. SR-12:n avainmuodon poikkeama (versio kääreessä) hyväksytty. Löydökset SEC-005 ja SEC-006 (Low, riskit R-15 ja R-16) sekä SEC-007–SEC-010 (Info). R-11:n tila päivitetty. | T-011 |

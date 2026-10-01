@@ -4,13 +4,12 @@
 MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). MVP-1 on pilkottu tehtäviksi T-010–T-015 (D-007).
 
 ## MVP-taso
-Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
+Työn alla: MVP-1 · Valmiina: 1/6 tehtävää (T-010–T-015). MVP-0 valmis.
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-010 | UX → Koodari | Ready (suunnittelu) | Hakunäkymän suunnittelu, katso kortti |
-| T-011 | Arkkitehti, Digiturva → Koodari | Ready (suunnittelu) | Tallennus-ADR ja tietomalli, katso kortti |
+| T-010 | UX, Sisällöntuottaja, Testikäyttäjä | Review | PR #3. Katselmoinnit ajetaan uudelleen (keskeytyivät käyttörajaan 2026-10-01) |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -20,6 +19,13 @@ Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi: UX ja Sisällöntuottaja suosittelevat molemmat näitä, joten ne on toteutettu näin.
 - TXT-003: tarvitaanko alatunnisteeseen myös englanninkielinen fanisisältömerkintä (CD PROJEKT RED:n ohje)? Oletus: ei MVP-0:ssa.
 - ~~K5~~ → ratkaistu, D-007 (korttitaso, valmius painoksille).
+- T-014 (vastaus tarvitaan ennen T-014:ää): kun liität pakkalistan, tallennetaanko se aina omaksi pakakseen, vai riittääkö pelkkä raportti puuttuvista korteista ja niiden sijainnista? Tarvitaanko pakoille tila "koottu / suunnitelma"?
+- K-P1–K-P4 (tietosuoja, ei blokkaa MVP-1:tä): rekisterinpitäjä ja käsittelyperuste IP-osoitteille (ehdotus: sinä, oikeutettu etu), riittääkö ilmoitus ilman suostumusbanneria (ehdotus: kyllä), voivatko MVP-2:n käyttäjät olla alaikäisiä (selvitettävä ennen MVP-2:ta) ja Hosting-lokien säilytysaika (Firebase-konsoli). Katso PRIVACY.md.
+
+## Kulutus (D-009, 2026-10-01)
+- Katselmoinnit riskin mukaan (agents.md v1.3). Testikäyttäjä ja Dokumentoija MVP-tason lopussa.
+- Opus: Koodari, Arkkitehti, Digiturva. Sonnet: UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija (Agent-kutsussa `model: "sonnet"`).
+- Enintään kaksi agenttia kerrallaan. PM tyhjentää istunnon (`/clear`) tehtävien välissä ja jatkaa komennolla `/jatka`.
 
 ## Toimintatapa, kun käyttäjä on poissa (sovittu 2026-09-30)
 - PM vie tehtävää eteenpäin agenttien työnkulun mukaan (suunnittelu → Koodari → katselmoinnit → testikäyttäjä → dokumentointi → PR testiin).
@@ -31,6 +37,7 @@ Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-011 Tietomalli ja paikallinen tallennuskerros (2026-10-01)
 - T-001 Kävelevä luuranko: korttilista rajapinnasta näytölle (2026-10-01)
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 

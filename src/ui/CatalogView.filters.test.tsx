@@ -7,7 +7,7 @@ import type { CatalogState } from './useCardCatalog';
 import { ANNOUNCE_DELAY_MS } from './useDelayedAnnouncement';
 
 function card(slug: string, name: string, subname: string | null, type: string, color: string | null): Card {
-  return { id: `id-${slug}`, slug, name, subname, displayName: name, type, color, cost: 1 };
+  return { id: `id-${slug}`, key: `key-${slug}`, slug, name, subname, displayName: name, type, color, cost: 1 };
 }
 
 const cards: Card[] = [
