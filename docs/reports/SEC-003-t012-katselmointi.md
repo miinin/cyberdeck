@@ -14,7 +14,7 @@
 | Low | 2 (SEC-011, SEC-012) |
 | Info | 1 (SEC-013) |
 
-**Veto: ei.** Ei Critical- eikä High-löydöksiä, joten Done-tila ei esty tietoturvan tai tietosuojan perusteella. SR-12, SR-13, SR-14, SR-15 ja SR-16 täyttyvät. SEC-007 (T-011) on käsitelty käyttöliittymässä ja suljettu. Molemmat Low-löydökset koskevat ilmoitustekstejä, jotka voivat ohjata käyttäjän poistamaan oman kokoelmansa. Ne ovat pieniä tekstikorjauksia ja kannattaa tehdä tämän tehtävän korjauskierroksella, mutta SEC-011 on viimeistään korjattava ennen ensimmäistä skeemaversion nostoa.
+**Veto: ei.** Ei Critical- eikä High-löydöksiä, joten Done-tila ei esty tietoturvan tai tietosuojan perusteella. SR-12, SR-13, SR-14, SR-15 ja SR-16 täyttyvät. SEC-007 (T-011) on käsitelty käyttöliittymässä ja suljettu. Molemmat Low-löydökset koskevat ilmoitustekstejä, jotka voivat ohjata käyttäjän poistamaan oman kokoelmansa. Ne ovat pieniä tekstikorjauksia ja kannattaa tehdä tämän tehtävän korjauskierroksella, mutta SEC-011 on viimeistään korjattava ennen ensimmäistä skeemaversion nostoa. **Päivitys 2026-10-01:** SEC-011 ja SEC-012 korjattu (commit b206790) ja varmistettu. Avoinna vain SEC-013 (Info).
 
 ## Ajetut tarkistukset
 
@@ -73,7 +73,7 @@
 **Odotettu:** Ohje ei voi johtaa tallennettujen tietojen poistamiseen. · **Havaittu:** Ohje voi johtaa siihen, että käyttäjä poistaa juuri sen kokoelman, jota LUKITTU-tila suojaa. Teksti on lisäksi ristiriidassa `persistentDenied`-tekstin kanssa ("Älä tyhjennä selaimen tietoja").
 **Vaikutus:** Koko kokoelman (ja T-013:n jälkeen pakkojen) menetys käyttäjän omalla toimella. Todennäköisyys on nyt hyvin pieni, koska skeemaversioita on vain yksi eikä `newer-version` voi syntyä ennen ensimmäistä skeemaversion nostoa. Siksi Low.
 **Korjausehdotus:** 1) Muuta teksti muotoon, joka ei ohjaa tietojen tyhjennykseen, esim. "Päivitä sivu. Jos ilmoitus ei katoa, sulje kaikki tämän sivuston välilehdet ja avaa sivu uudelleen. Älä tyhjennä selaimen tietoja, koska kokoelma poistuisi." (UX:n mikrokopio, päivitys myös UX.md 6.8:aan). 2) Erillisenä tehtävänä (PM): `firebase.json`iin `Cache-Control: no-cache` `index.html`:lle (hajautetut `assets/`-tiedostot voivat säilyttää pitkän välimuistin), jotta päivitys hakee aina uusimman version. Muutos koskee `firebase.json`ia, joten se katselmoidaan (SR-9).
-**Tila:** Avoin → Korjattu (commit b206790)
+**Tila:** Avoin → Korjattu (commit b206790: teksti kehottaa sulkemaan sivuston välilehdet eikä tyhjentämään selaimen tietoja; testi todentaa tekstin ja sen, ettei "välimuisti" esiinny) → Varmistettu (Digiturva 2026-10-01: `texts.ts` ja UX.md 6.8 tarkistettu, `npm test` 425/425). Cache-Control-otsake siirretty T-009:ään (PM).
 
 ### SEC-012 · SEC-007:n ohje "Vapauta selaimen tallennustilaa" on monitulkintainen · Low
 **Sijainti:** `src/ui/texts.ts` (`resetNoBackupBody`), lähde `docs/UX.md` 6.8 · **Tehtävä:** T-012
@@ -81,7 +81,7 @@
 **Odotettu:** Ohje kertoo, mistä tilaa vapautetaan, kuten `saveFailedQuotaBody` ("poistamalla selaimen tietoja muilta sivustoilta"). · **Havaittu:** Käyttäjä voi tulkita ohjeen niin, että hän poistaa tämän sivuston tiedot. Silloin lukukelvoton raakadata (jota tallennuskerros on nimenomaan säästänyt mahdollista myöhempää palautusta varten) ja T-013:n jälkeen myös pakat katoavat.
 **Vaikutus:** Tietojen menetys käyttäjän toimella harvinaisessa tilanteessa (vaatii sekä rikkinäisen datan että täyden tallennustilan). Low.
 **Korjausehdotus:** Yhdenmukaista teksti `saveFailedQuotaBody`n kanssa, esim. "Vapauta tilaa poistamalla selaimen tietoja muilta sivustoilta ja päivitä sivu." (UX:n mikrokopio, päivitys myös UX.md 6.8:aan).
-**Tila:** Avoin → Korjattu (commit b206790)
+**Tila:** Avoin → Korjattu (commit b206790: "Vapauta tilaa poistamalla selaimen tietoja muilta sivustoilta ja päivitä sivu."; testi todentaa tekstin) → Varmistettu (Digiturva 2026-10-01: `texts.ts` ja UX.md 6.8 tarkistettu, `npm test` 425/425).
 
 ### SEC-013 · Vanhentuneesta näkymästä tallennetaan absoluuttinen määrä · Info
 **Sijainti:** `src/ui/collectionStore.ts` (`setCount`), `src/ui/CountControl.tsx` · **Tehtävä:** T-012
