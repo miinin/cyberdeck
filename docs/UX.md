@@ -157,11 +157,14 @@ Yhteinen kaikille tiloille:
     …tilakohtainen sisältö…
   </main>
   <footer>                     <!-- contentinfo -->
-    Korttitiedot: Netdeck.gg
+    <p>Cyberdeck on epävirallinen Cyberpunk TCG -fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä.</p>
+    <p>Korttitiedot: Netdeck.gg</p>
   </footer>
 </body>
 </html>
 ```
+
+- ~~Alatunnisteessa vain `Korttitiedot: Netdeck.gg`.~~ → 2026-10-01 (TXT-002, commit 6667d77): alatunnisteessa on kaksi kappaletta (`--font-size-sm`, `--color-text-muted`) tässä järjestyksessä: epävirallisuusmerkintä `Cyberdeck on epävirallinen Cyberpunk TCG -fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä.` ja lähdemaininta `Korttitiedot: Netdeck.gg`. Merkinnän perusta: SECURITY.md luku 7. Englanninkielinen lisämerkintä odottaa PM:n päätöstä (TXT-003).
 
 - ~~`role="status"`-alue on DOM:ssa **heti sivun latautuessa tyhjänä**, ja siihen vaihdetaan vain teksti.~~ → tarkennettu 2026-10-01 (UX-001): `role="status"`-alue on DOM:ssa ensimmäisestä renderöinnistä asti, ja sama elementti säilyy kaikissa tiloissa. Siihen vaihdetaan vain teksti. Alue saa sisältää lataustekstin (`Haetaan kortteja…`) jo ensimmäisessä renderöinnissä. Silloin ruudunlukija ei välttämättä ilmoita lataustekstiä, mikä on hyväksyttävää, koska sama teksti on näkyvällä tilarivillä. Kaikki myöhemmät muutokset (tulos, virhe, uudelleenyrityksen lataus) on ilmoitettava. Aluetta ei saa lisätä DOM:iin vasta tilan vaihtuessa eikä vaihtaa toiseen elementtiin, koska silloin ruudunlukija ei välttämättä ilmoita muutosta.
 - Otsikkorakenne: yksi `h1` ("Kortit"). Virhe- ja varoituslaatikon otsikko on `h2`. Ei muita otsikkotasoja.
@@ -181,18 +184,28 @@ Yhteinen kaikille tiloille:
 │ ┌────────────────────────────┐ │
 │ │ Nimi          Tyyppi  Hinta│ │ thead, surface-tausta
 │ ├────────────────────────────┤ │
-│ │ V             Legend     – │ │
+│ │ V             Legend     5 │ │
 │ │ Streetkid                  │ │ subname, sm + muted
 │ ├────────────────────────────┤ │
 │ │ Swordwise     Unit       3 │ │
 │ │ Huscle                     │ │ pitkä nimi rivittyy
 │ ├────────────────────────────┤ │
+│ │ (kortti ilman Legend     – │ │ cost = null → "–"
+│ │  hintaa)                   │ │
+│ ├────────────────────────────┤ │
 │ │ …                          │ │
 │ └────────────────────────────┘ │
 │                                │
-│ Korttitiedot: Netdeck.gg       │ footer (sm, muted)
+│ Cyberdeck on epävirallinen     │ footer (sm, muted)
+│ Cyberpunk TCG -fanityökalu.    │
+│ WeirdCo, Netdeck.gg ja CD      │
+│ PROJEKT RED eivät ole          │
+│ hyväksyneet tai tukeneet sitä. │
+│ Korttitiedot: Netdeck.gg       │
 └────────────────────────────────┘
 ```
+
+~~Rautalangan rivi `V · Legend · –`~~ → 2026-10-01 (TXT-007): rajapinnassa V Streetkidillä on hinta 5. Osalla Legendeistä on hinta (8 / 27 tarkastushetkellä), osalla ei. Puuttuva hinta on esitetty yleisenä esimerkkirivinä. ~~Alatunnisteessa vain lähdemaininta~~ → TXT-002, katso 4.3.
 
 #### Rautalanka, onnistuminen, ≥ 640 px
 
@@ -220,16 +233,23 @@ Kortit esitetään **semanttisena taulukkona** (`<table>`), koska jokaisella kor
         <span class="card-subname" lang="en">Streetkid</span>
       </th>
       <td lang="en">Legend</td>
-      <td><span aria-hidden="true">–</span><span class="visually-hidden">ei hintaa</span></td>
+      <td>5</td>
     </tr>
     <tr>
       <th scope="row"><span lang="en">Swordwise Huscle</span></th>
       <td lang="en">Unit</td>
       <td>3</td>
     </tr>
+    <tr>
+      <th scope="row"><span lang="en">{kortti, jolla cost = null}</span></th>
+      <td lang="en">Legend</td>
+      <td><span aria-hidden="true">–</span><span class="visually-hidden">ei hintaa</span></td>
+    </tr>
   </tbody>
 </table>
 ```
+
+~~Esimerkissä V Streetkidin hinta-solu oli "–" + "ei hintaa".~~ → 2026-10-01 (TXT-007): V Streetkidillä on hinta 5. Puuttuvan hinnan merkintätapa on esitetty erillisellä esimerkkirivillä. Merkintätapa ei muuttunut.
 
 **Kentät ja niiden lähteet (TUTKIMUS.md):**
 
@@ -237,7 +257,7 @@ Kortit esitetään **semanttisena taulukkona** (`<table>`), koska jokaisella kor
 |---|---|---|---|
 | Nimi | `name` + `subname` | `name` lihavoituna. Jos `subname` on olemassa, se näkyy omalla rivillään (`--font-size-sm`, `--color-text-muted`, normaali paino). Ruudunlukija lukee "V, Streetkid". | ~~`name` puuttuu → "Nimetön kortti".~~ → 2026-10-01 (UX-001): kortti, jolta puuttuu `name`, jätetään pois (ARCHITECTURE.md 5.5, `skipped`), ja näkymä näyttää OSITTAINEN-tilan. `subname` puuttuu → rivi jätetään pois. |
 | Tyyppi | `card_type` | Sellaisenaan (Legend, Unit, Gear, Program), `lang="en"`. | ~~"–" + piilotettu "ei tyyppiä"~~ → 2026-10-01 (UX-001): kortti, jolta puuttuu tyyppi, jätetään pois kuten nimetön kortti (OSITTAINEN-tila). |
-| Hinta | `cost` | Kokonaisluku, `tabular-nums`, tasattu oikealle. Pelin sisäinen hinta, ei rahallinen arvo. | `null`/puuttuu (esim. Legend) → "–" + piilotettu "ei hintaa". Arvo 0 näytetään "0". |
+| Hinta | `cost` | Kokonaisluku, `tabular-nums`, tasattu oikealle. Pelin sisäinen hinta, ei rahallinen arvo. | `null`/puuttuu ~~(esim. Legend)~~ → "–" + piilotettu "ei hintaa". Arvo 0 näytetään "0". 2026-10-01 (TXT-007): hinta voi puuttua minkä tahansa tyyppiseltä kortilta. Osalla Legendeistä on hinta (esim. V Streetkid 5), joten tyyppi ei ratkaise esitystä, vaan `cost`-kentän arvo. |
 
 - Rivin otsikko (`th scope="row"`) on kortin nimi, jotta ruudunlukija kertoo taulukossa liikuttaessa, minkä kortin tietoja luetaan.
 - Järjestys: rajapinnan palauttama järjestys. Järjestäminen ja haku ovat MVP-1:tä.
@@ -250,7 +270,7 @@ Kortit esitetään **semanttisena taulukkona** (`<table>`), koska jokaisella kor
 
 ### 4.5 Tilat ja tarkat tekstit
 
-Tekstit ovat lopullisia MVP-0:aan. Sisällöntuottaja voi tarkistaa ne katselmoinnissa.
+Tekstit ovat lopullisia MVP-0:aan. ~~Sisällöntuottaja voi tarkistaa ne katselmoinnissa.~~ → 2026-10-01: Sisällöntuottaja tarkisti tekstit (`docs/reports/TXT-001-t001-tarkastus.md`). TYHJÄ-, OSITTAINEN- ja alatunnistetekstit päivitettiin raportin mukaisiksi (commit 6667d77). Toteutuksen lähde on `src/ui/texts.ts`.
 
 #### LATAUS
 
@@ -277,18 +297,19 @@ Haetaan kortteja…
 Kortit
 0 korttia
 
-Kortteja ei löytynyt. Korttitietokanta on juuri nyt tyhjä.
-Yritä myöhemmin uudelleen.
+Kortteja ei löytynyt. Korttitietojen lähde ei
+juuri nyt palauttanut yhtään korttia. Yritä
+hetken päästä uudelleen.
 [ Yritä uudelleen ]
 ```
 
 - Tilarivi: `0 korttia`
-- Kappale: `Kortteja ei löytynyt. Korttitietokanta on juuri nyt tyhjä. Yritä myöhemmin uudelleen.`
+- Kappale: ~~`Kortteja ei löytynyt. Korttitietokanta on juuri nyt tyhjä. Yritä myöhemmin uudelleen.`~~ → 2026-10-01 (TXT-004, commit 6667d77): `Kortteja ei löytynyt. Korttitietojen lähde ei juuri nyt palauttanut yhtään korttia. Yritä hetken päästä uudelleen.` (Ei viittausta tietokantaan, jota käyttäjä ei tunne, eikä ristiriitaa välittömän uudelleenyrityspainikkeen kanssa.)
 - Painike: `Yritä uudelleen`
 - Live-alue: `Kortteja ei löytynyt.`
 - Ei ilmoituslaatikkoa (tämä ei ole virhe). Taulukkoa ei näytetä.
 
-#### VIRHE (ensimmäinen sivu epäonnistui, verkkovirhe, aikakatkaisu, ei-2xx-vastaus tai jäsentämätön vastaus)
+#### VIRHE (~~ensimmäinen sivu epäonnistui~~ → 2026-10-01, PM:n ratkaisu T-001-kortissa: mikä tahansa sivu epäonnistui; verkkovirhe, aikakatkaisu, ei-2xx-vastaus tai jäsentämätön vastaus)
 
 ```
 Kortit
@@ -310,17 +331,19 @@ Kortit
 - Sama teksti kaikille virhetyypeille. Käyttäjälle ei koskaan näytetä HTTP-koodia, virheolion viestiä, URL:ia eikä stack tracea. Tekninen tieto saa mennä selaimen konsoliin (Koodarin ja Digiturvan päätös).
 - Selain on offline-tilassa (`navigator.onLine === false`): sama teksti riittää MVP-0:ssa.
 
-#### OSITTAINEN (osa sivuista saatiin, mutta vähintään yksi sivu epäonnistui, tai saatujen korttien määrä < `total`)
+#### OSITTAINEN (~~osa sivuista saatiin, mutta vähintään yksi sivu epäonnistui, tai saatujen korttien määrä < `total`~~ → 2026-10-01, PM:n ratkaisu T-001-kortissa: kaikki sivut saatiin, mutta näytettävien korttien määrä < `total`)
 
 ```
 Kortit
 120 / 151 korttia
 
 ┌ Kaikkia kortteja ei saatu ─────┐   ← h2, warning-laatikko
-│ Osa korttitiedoista jäi        │
-│ hakematta. Lista on            │
-│ puutteellinen. Yritä uudelleen │
-│ hakeaksesi kaikki kortit.      │
+│ näkyviin                       │     (otsikko rivittyy 320 px:ssä)
+│ Osa korteista puuttuu          │
+│ listasta, koska niiden         │
+│ tietoja ei saatu tai ne olivat │
+│ puutteellisia. Voit yrittää    │
+│ hakea kortit uudelleen.        │
 │ [ Yritä uudelleen ]            │
 └────────────────────────────────┘
 
@@ -328,10 +351,11 @@ Kortit
 ```
 
 - Tilarivi: `{saatu} / {total} korttia` (esim. `120 / 151 korttia`). Välilyönnit kauttaviivan ympärillä.
-- h2: `Kaikkia kortteja ei saatu`
-- Kappale: `Osa korttitiedoista jäi hakematta. Lista on puutteellinen. Yritä uudelleen hakeaksesi kaikki kortit.`
+- h2: ~~`Kaikkia kortteja ei saatu`~~ → 2026-10-01 (TXT-001, commit 6667d77): `Kaikkia kortteja ei saatu näkyviin`
+- Kappale: ~~`Osa korttitiedoista jäi hakematta. Lista on puutteellinen. Yritä uudelleen hakeaksesi kaikki kortit.`~~ → 2026-10-01 (TXT-001): `Osa korteista puuttuu listasta, koska niiden tietoja ei saatu tai ne olivat puutteellisia. Voit yrittää hakea kortit uudelleen.`
 - Painike: `Yritä uudelleen`
-- Live-alue: `Näytetään {saatu} / {total} korttia. Osa korttitiedoista jäi hakematta.` (Kauttaviivamuoto välttää lukusanan taivutuksen, esim. "151:stä".)
+- Live-alue: ~~`Näytetään {saatu} / {total} korttia. Osa korttitiedoista jäi hakematta.`~~ → 2026-10-01 (TXT-001): `Näytetään {saatu} / {total} korttia. Osa korteista puuttuu listasta.` (Kauttaviivamuoto välttää lukusanan taivutuksen, esim. "151:stä".)
+- Perustelu muutokselle (TXT-001): PM:n ratkaisun jälkeen yksikin epäonnistunut sivu on VIRHE. OSITTAINEN syntyy käytännössä, kun kaikki sivut saatiin mutta osa korteista ohitettiin puutteellisina (ARCHITECTURE.md 5.5, `skipped`) tai lähde palautti vähemmän kortteja kuin `total`. Uusi haku ei siksi välttämättä tuo puuttuvia kortteja, eikä teksti saa luvata sitä.
 - Varoituslaatikko on **ennen** taulukkoa, jotta käyttäjä näkee sen ennen kuin alkaa lukea listaa.
 - Saadut kortit näytetään taulukossa normaalisti.
 - Jos saatujen korttien määrä on **suurempi** kuin `total` (rajapinnan epäjohdonmukaisuus), näytetään ONNISTUMINEN saatujen korttien määrällä. Päällekkäiset kortit (sama `id` kahdesti sivujen rajalla) poistetaan ennen laskentaa, jos Arkkitehti niin päättää. UX:n vaatimus on vain, että näkyvä luku vastaa näkyvien rivien määrää.
@@ -354,8 +378,8 @@ Kortit
 3. main, otsikko taso 1: "Kortit"
 4. "151 korttia"
 5. taulukko "Kaikki kortit", 3 saraketta, 152 riviä: Nimi, Tyyppi, Hinta
-6. rivit: "V, Streetkid" · "Legend" · "ei hintaa" …
-7. contentinfo: "Korttitiedot: Netdeck.gg"
+6. rivit: ~~"V, Streetkid" · "Legend" · "ei hintaa"~~ → 2026-10-01 (TXT-007): "V, Streetkid" · "Legend" · "5" … (kortti, jolla ei ole hintaa: "{nimi}" · "{tyyppi}" · "ei hintaa")
+7. contentinfo: ~~"Korttitiedot: Netdeck.gg"~~ → 2026-10-01 (TXT-002): "Cyberdeck on epävirallinen Cyberpunk TCG -fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä." · "Korttitiedot: Netdeck.gg"
 
 Lisäksi live-alue ilmoittaa "151 korttia ladattu." kerran, kun haku valmistuu.
 
