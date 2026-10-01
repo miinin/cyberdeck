@@ -37,3 +37,11 @@ Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. T
 - K6 (värit suomeksi), K7 (label "Hae nimellä") ja K8 (yhdistetty sarake "Tyyppi ja väri"): UX:n oletukset hyväksytty. Ne ovat tekstivalintoja, jotka käyttäjä voi muuttaa myöhemmin.
 - Hakusanan enimmäispituus: 100 merkkiä.
 - Seuraava askel: Koodari toteuttaa worktreessä `.claude/worktrees/t-010`.
+
+### Suunnitelma 2026-10-01 · Koodari
+1. `src/domain/cardSearch.ts`: puhdas hakulogiikka (normalisointi, `filterCards`, vaihtoehtolistat) + yksikkötestit.
+2. Taulukko: sarake "Tyyppi ja väri", värin teksti ja koristeellinen näyte (`CardColor`), caption propsina. T-001:n testit päivitetään sarakemuutoksen osalta.
+3. Lomake `CardFilters` (search-maamerkki, hakukenttä, kaksi fieldsetiä) ja tyylit tokeneista (UX.md 3.1.1, 3.4).
+4. `CatalogView`: suodatustila (säilyy uudelleenyrityksen yli), tilarivi, EI TULOKSIA -tila, tyhjennys ja fokus, Esc ja Enter.
+5. Live-alueen hillintä 750 ms (dedupe, peruutus LATAUS-tilassa ja purussa, IME) + testit fake timereilla.
+6. Koko sarja, lint, build, audit, koodikatselmointi, CHANGELOG, ARCHITECTURE-toteutusosa, luovutus ja PR.
