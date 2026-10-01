@@ -1,7 +1,7 @@
 # T-001 · Kävelevä luuranko: korttilista rajapinnasta näytölle
 **Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☐ (teknologia ja rakenne, ADR) · Digiturva ☐ (ulkoinen rajapinta, korttikuvien käyttöoikeus) · UX ☐ (korttilistan näkymä ja tilat)
-**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☑ · Sisällöntuottaja ☑ · Testikäyttäjä ☐ · Dokumentoija ☑
+**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☑ · Sisällöntuottaja ☑ · Testikäyttäjä ☑ · Dokumentoija ☑
 **Riippuvuudet:** T-000 (Done). Julkaisuputken workflowt ovat jo haarassa `t-001-kaveleva-luuranko`.
 **Haara:** `t-001-kaveleva-luuranko`
 
@@ -186,3 +186,15 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 - Mitä tehtiin: README.md kirjoitettu (mikä, kenelle, URL:t, pikakäynnistys, rakenne, julkaisu, docs-linkit). CHANGELOG.md:n [Julkaisematon]-osioon ensimmäisen version merkinnät käyttäjän kielellä. .env.example ja docs/guides/ eivät ole tarpeen MVP-0:ssa.
 - Testit: puhdas klooni (commit 9101b7a), Node 24.14.0: npm ci ok, npm test 71/71, lint 0, build ok, npm audit 0, npm run dev käynnistyy.
 - Tunnetut rajoitteet ja riskit: Ei DOC-löydöksiä. Dokumentoija pysäytti testatessaan todennäköisesti käyttäjän toisen projektin kehityspalvelimen portista 5173 (`npx kill-port`), katso LESSONS L-001.
+
+### Luovutus 2026-10-01 · Testikäyttäjä → PM
+- Mitä tehtiin: Rikkomistestaus PR #1:n esikatselussa neljällä persoonalla, noin 45 skenaariota (rajapintavastaukset siepattu: virheet, viiveet, vihamielinen data; syvälinkit, hostingin polut, otsakkeet, näppäimistö, päivitys, takaisin-painike, 320 px ja kierto) ja lopuksi koodiluku.
+- Mitä pyydän: PM päättää Low-löydösten B-001–B-010 jatkon.
+- Mistä katsoa: docs/reports/BREAK-001-t001.md
+- Tunnetut rajoitteet ja riskit: Vain headless Chrome ja emuloitu mobiili. Ei oikeaa laitetta, Safaria, Firefoxia eikä ruudunlukijaa. Testisivustoa ei testattu.
+- Testit: Arvio Kestää. Ei blokkaavia bugeja, 10 Low-löydöstä. Veto: ei.
+
+### Checkpoint 2026-10-01 · PM (BREAK-päätökset)
+- B-001, B-003, B-006 ja B-009 → T-008 (virhe- ja osittaisen tilan parannukset, MVP-1).
+- B-004 ja B-010 → T-009 (Hostingin kovennus ja Firebase-API-avaimen rajaus ennen datatallennusta, Digiturva).
+- B-002 yhdistetty IDEAS.md:n UX-003-riviin. B-005 ja B-008 → IDEAS.md (MVP-1:n reititys ja mobiililista). B-007 = K1, käyttäjän kysymys STATUS.md:ssä.
