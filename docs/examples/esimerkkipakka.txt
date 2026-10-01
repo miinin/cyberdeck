@@ -1,0 +1,24 @@
+# Esimerkkipakka
+// Legends (3)
+1 Dum Dum - Maelstrom Triggerman
+1 Panam Palmer - Nomad Cavalry
+1 V - Streetkid
+// Units (31)
+3 Japantown Jonin
+3 Ruthless Lowlife
+3 La Llorona - Ghost of the Past
+3 Swordwise Huscle
+3 6th Street Recruits
+3 Kerry Eurodyne - The Last Rockerboy
+3 Chrome Fang
+1 Royce - Don't Call Me Simon
+3 Wraith Marauders
+3 Johnny Silverhand - Never Stop Fighting
+3 Trauma Team Operatives
+// Gears (6)
+3 Satori - Sword of Saburo
+3 Zetatech Faceplate
+// Programs (9)
+3 Detonate
+3 Corporate Surveillance
+3 We Gotta Live Together

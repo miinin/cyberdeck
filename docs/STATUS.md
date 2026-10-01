@@ -1,15 +1,16 @@
 # STATUS · päivitetty 2026-10-01 (PM)
 
 ## Yhdellä lauseella
-MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). Seuraavaksi MVP-1:n suunnittelu.
+MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). MVP-1 on pilkottu tehtäviksi T-010–T-015 (D-007).
 
 ## MVP-taso
-Työn alla: MVP-0 · Valmiina: 2/2 tehtävää (T-000, T-001). Seuraavaksi MVP-1.
+Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | PM | Odottaa käyttäjää | Käyttäjä kokeilee 0.1.0:aa ja vastaa K5:een, jonka jälkeen PM pilkkoo MVP-1:n |
+| T-010 | UX → Koodari | Ready (suunnittelu) | Hakunäkymän suunnittelu, katso kortti |
+| T-011 | Arkkitehti, Digiturva → Koodari | Ready (suunnittelu) | Tallennus-ADR ja tietomalli, katso kortti |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -18,7 +19,7 @@ Työn alla: MVP-0 · Valmiina: 2/2 tehtävää (T-000, T-001). Seuraavaksi MVP-1
 - R-4 Tuotantojulkaisun suojaus: katso PM:n ehdotus T-001-kortissa. Oletus: ei muutoksia ennen erillistä testiprojektia.
 - K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi: UX ja Sisällöntuottaja suosittelevat molemmat näitä, joten ne on toteutettu näin.
 - TXT-003: tarvitaanko alatunnisteeseen myös englanninkielinen fanisisältömerkintä (CD PROJEKT RED:n ohje)? Oletus: ei MVP-0:ssa.
-- K5 (MVP-1, ei blokkaa T-001:tä): seurataanko kokoelmassa kortteja vai painoksia (alt-artit, beta, ranskankieliset)? Arkkitehdin alustava suositus: korttitaso (`slug`).
+- ~~K5~~ → ratkaistu, D-007 (korttitaso, valmius painoksille).
 
 ## Toimintatapa, kun käyttäjä on poissa (sovittu 2026-09-30)
 - PM vie tehtävää eteenpäin agenttien työnkulun mukaan (suunnittelu → Koodari → katselmoinnit → testikäyttäjä → dokumentointi → PR testiin).
@@ -34,7 +35,8 @@ Työn alla: MVP-0 · Valmiina: 2/2 tehtävää (T-000, T-001). Seuraavaksi MVP-1
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. MVP-1:n tehtävien pilkkominen (PM). Ensin käyttäjän vastaus K5:een (kortit vai painokset). Backlogissa T-002–T-009.
+1. T-010 ja T-011 rinnakkain (eri tiedostot, omat haarat). Sitten T-012 → T-013 → T-014 → T-015.
+2. Backlogissa T-002–T-009 (velka ja parannukset), T-003 (välimuisti) ennen T-012:ta, jos lataus häiritsee.
 
 ## Julkaisuputki
 - GitHub: https://github.com/miinin/cyberdeck
