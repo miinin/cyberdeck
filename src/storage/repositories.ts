@@ -24,6 +24,7 @@ import {
   MAX_BACKUPS_PER_AGGREGATE,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
+import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS } from './migrations';
 import type { CollectionRepository, DeckRepository, Loaded, LoadNotice, Repositories } from './types';
 
 export interface RepositoryOptions {
@@ -57,14 +58,16 @@ interface Change<T, R> {
 
 /**
  * Test migrations replace the real chain, and the version they lead to becomes the current
- * version (migrations[i] goes from i + 1 to i + 2). Without them the version comes from keys.ts.
+ * version (migrations[i] goes from i + 1 to i + 2). Without them the production chain from
+ * migrations.ts and the version from keys.ts are used.
  */
 function specWith<T>(
   version: number,
+  migrations: readonly Migration[],
   testMigrations: readonly Migration[] | undefined,
   parse: (data: unknown) => Parsed<T> | null,
 ): EnvelopeSpec<T> {
-  if (testMigrations === undefined) return { currentVersion: version, migrations: [], parse };
+  if (testMigrations === undefined) return { currentVersion: version, migrations, parse };
   return { currentVersion: testMigrations.length + 1, migrations: testMigrations, parse };
 }
 
@@ -77,7 +80,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const collectionAggregate: Aggregate<Collection> = {
     name: 'collection',
     key: COLLECTION_KEY,
-    spec: specWith(COLLECTION_SCHEMA_VERSION, options.migrations?.collection, parseCollection),
+    spec: specWith(COLLECTION_SCHEMA_VERSION, COLLECTION_MIGRATIONS, options.migrations?.collection, parseCollection),
     empty: EMPTY_COLLECTION,
     toData: (collection) => ({ entries: collection.entries }),
   };
@@ -85,7 +88,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const decksAggregate: Aggregate<Deck[]> = {
     name: 'decks',
     key: DECKS_KEY,
-    spec: specWith(DECKS_SCHEMA_VERSION, options.migrations?.decks, parseDeckList),
+    spec: specWith(DECKS_SCHEMA_VERSION, DECKS_MIGRATIONS, options.migrations?.decks, parseDeckList),
     empty: [],
     toData: (decks) => ({ decks }),
   };
