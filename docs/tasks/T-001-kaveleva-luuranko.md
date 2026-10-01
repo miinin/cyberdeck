@@ -1,5 +1,5 @@
 # T-001 · Kävelevä luuranko: korttilista rajapinnasta näytölle
-**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☐ (teknologia ja rakenne, ADR) · Digiturva ☐ (ulkoinen rajapinta, korttikuvien käyttöoikeus) · UX ☐ (korttilistan näkymä ja tilat)
 **Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☑ · Sisällöntuottaja ☑ · Testikäyttäjä ☑ · Dokumentoija ☑
 **Riippuvuudet:** T-000 (Done). Julkaisuputken workflowt ovat jo haarassa `t-001-kaveleva-luuranko`.
@@ -9,26 +9,26 @@
 Rakennetaan ohut päästä päähän toimiva versio: sovellus hakee Cyberpunk TCG:n kortit Netdeck.gg:n julkisesta rajapinnasta ja näyttää ne listana. Samalla todennetaan, että build, testit ja julkaisuputki (PR → esikatselu-URL → test) toimivat. Kaikki MVP-1:n työ rakentuu tämän päälle.
 
 ## Hyväksymiskriteerit
-- [ ] Teknologia- ja rakennepäätös on kirjattu ADR:ksi DECISIONS.md:hen ja ARCHITECTURE.md:hen. Päätöksessä on vähintään kaksi vaihtoehtoa, ja build tuottaa `dist/`-kansion, jota workflowt odottavat.
-- [ ] `npm ci`, `npm run build`, `npm test` ja `npm run lint` menevät läpi puhtaasta kloonista. Ajo-ohje on STATUS.md:ssä.
-- [ ] Sovellus näyttää kaikki rajapinnan kortit (kaikki sivut, ei vain ensimmäiset 60) nimellä, tyypillä ja hinnalla. Korttimäärä vastaa rajapinnan `total`-kenttää.
-- [ ] Näkymässä on lataus-, virhe- ja tyhjä tila. Kun rajapinta ei vastaa, käyttäjä näkee ymmärrettävän virheilmoituksen eikä teknistä tietoa.
-- [ ] Rajapintakutsut on eristetty omaan kerrokseensa (PROJECT.md:n riski), ja kerroksella on yksikkötestit, jotka eivät kutsu oikeaa rajapintaa.
+- [x] Teknologia- ja rakennepäätös on kirjattu ADR:ksi DECISIONS.md:hen ja ARCHITECTURE.md:hen. Päätöksessä on vähintään kaksi vaihtoehtoa, ja build tuottaa `dist/`-kansion, jota workflowt odottavat.
+- [x] `npm ci`, `npm run build`, `npm test` ja `npm run lint` menevät läpi puhtaasta kloonista. Ajo-ohje on STATUS.md:ssä.
+- [x] Sovellus näyttää kaikki rajapinnan kortit (kaikki sivut, ei vain ensimmäiset 60) nimellä, tyypillä ja hinnalla. Korttimäärä vastaa rajapinnan `total`-kenttää.
+- [x] Näkymässä on lataus-, virhe- ja tyhjä tila. Kun rajapinta ei vastaa, käyttäjä näkee ymmärrettävän virheilmoituksen eikä teknistä tietoa.
+- [x] Rajapintakutsut on eristetty omaan kerrokseensa (PROJECT.md:n riski), ja kerroksella on yksikkötestit, jotka eivät kutsu oikeaa rajapintaa.
 - [ ] PR testiin tuottaa toimivan esikatselu-URL:n, ja yhdistäminen testiin päivittää testisivuston https://cyberdeck-tcg-test.web.app.
 
 ### Turvavaatimukset (Digiturva, tarkemmin docs/SECURITY.md kohta 6)
-- [ ] **SR-1:** Rajapinnan data tulostetaan vain tekstinä. Ei `innerHTML`/`insertAdjacentHTML`/`dangerouslySetInnerHTML`/`v-html`/`eval`-käyttöä, ja lint-sääntö estää ne. Yksikkötesti: nimi `<img src=x onerror=alert(1)>` näkyy kirjaimellisena tekstinä.
-- [ ] **SR-2:** `firebase.json`issa on molemmille sivustoille CSP ilman `unsafe-inline`- ja `unsafe-eval`-lähteitä (`connect-src 'self' https://api.netdeck.gg`, `img-src 'self' data:`). Esikatselussa ei CSP-virheitä konsolissa.
-- [ ] **SR-3:** Otsakkeet `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`, `Permissions-Policy` (camera, microphone, geolocation, payment, usb pois) ja `Cross-Origin-Opener-Policy: same-origin`.
-- [ ] **SR-4:** Rajapinnan osoite on vakiona yhdessä paikassa. `fetch`: `credentials: 'omit'` ja `referrerPolicy: 'no-referrer'`. Vastauksen muoto tarkistetaan, ja virheellinen kortti ohitetaan.
-- [ ] **SR-5:** Aikakatkaisu 10–15 s per pyyntö ja enintään yksi uusintayritys. Sivutuksella on kova yläraja, ja se pysähtyy tyhjään sivuun tai `offset`iin, joka ei kasva. Yksikkötestit: aikakatkaisu, HTTP 500, virheellinen JSON ja `total` > todellinen määrä.
-- [ ] **SR-6:** Uudet suorat riippuvuudet kirjataan korttiin (versio, lisenssi, ylläpito, perustelu). `package-lock.json` commitoidaan. `npm audit --audit-level=high` ei löydä High- tai Critical-haavoittuvuuksia tuotantoriippuvuuksista.
-- [ ] **SR-7:** Build ei hae mitään verkosta (ei etäfontteja, CDN:ää tai analytiikkaa).
-- [ ] **SR-8:** Jokaisessa workflowssa on `permissions`-lohko. `preview.yml`:n fork-ehto säilyy, ei `pull_request_target`-triggeriä, eikä `run:`-komennoissa käytetä käyttäjän syötettä.
-- [ ] **SR-9:** Muutokset hakemistoon `.github/workflows/`, `firebase.json`iin ja `.firebaserc`:hen menevät Digiturvan katselmointiin.
-- [ ] **SR-10:** Ei salaisuuksia repossa tai lokeissa. Firebase JS SDK:ta ei käytetä MVP-0:ssa.
-- [ ] Korttikuvia ei näytetä, ladata eikä kopioida (R-1).
-- [ ] Sivun alaosassa on epävirallisuusmerkintä ja lähdemaininta (Netdeck.gg). Tekstin muotoilee Sisällöntuottaja.
+- [x] **SR-1:** Rajapinnan data tulostetaan vain tekstinä. Ei `innerHTML`/`insertAdjacentHTML`/`dangerouslySetInnerHTML`/`v-html`/`eval`-käyttöä, ja lint-sääntö estää ne. Yksikkötesti: nimi `<img src=x onerror=alert(1)>` näkyy kirjaimellisena tekstinä.
+- [x] **SR-2:** `firebase.json`issa on molemmille sivustoille CSP ilman `unsafe-inline`- ja `unsafe-eval`-lähteitä (`connect-src 'self' https://api.netdeck.gg`, `img-src 'self' data:`). Esikatselussa ei CSP-virheitä konsolissa.
+- [x] **SR-3:** Otsakkeet `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`, `Permissions-Policy` (camera, microphone, geolocation, payment, usb pois) ja `Cross-Origin-Opener-Policy: same-origin`.
+- [x] **SR-4:** Rajapinnan osoite on vakiona yhdessä paikassa. `fetch`: `credentials: 'omit'` ja `referrerPolicy: 'no-referrer'`. Vastauksen muoto tarkistetaan, ja virheellinen kortti ohitetaan.
+- [x] **SR-5:** Aikakatkaisu 10–15 s per pyyntö ja enintään yksi uusintayritys. Sivutuksella on kova yläraja, ja se pysähtyy tyhjään sivuun tai `offset`iin, joka ei kasva. Yksikkötestit: aikakatkaisu, HTTP 500, virheellinen JSON ja `total` > todellinen määrä.
+- [x] **SR-6:** Uudet suorat riippuvuudet kirjataan korttiin (versio, lisenssi, ylläpito, perustelu). `package-lock.json` commitoidaan. `npm audit --audit-level=high` ei löydä High- tai Critical-haavoittuvuuksia tuotantoriippuvuuksista.
+- [x] **SR-7:** Build ei hae mitään verkosta (ei etäfontteja, CDN:ää tai analytiikkaa).
+- [x] **SR-8:** Jokaisessa workflowssa on `permissions`-lohko. `preview.yml`:n fork-ehto säilyy, ei `pull_request_target`-triggeriä, eikä `run:`-komennoissa käytetä käyttäjän syötettä.
+- [x] **SR-9:** Muutokset hakemistoon `.github/workflows/`, `firebase.json`iin ja `.firebaserc`:hen menevät Digiturvan katselmointiin.
+- [x] **SR-10:** Ei salaisuuksia repossa tai lokeissa. Firebase JS SDK:ta ei käytetä MVP-0:ssa.
+- [x] Korttikuvia ei näytetä, ladata eikä kopioida (R-1).
+- [x] Sivun alaosassa on epävirallisuusmerkintä ja lähdemaininta (Netdeck.gg). Tekstin muotoilee Sisällöntuottaja.
 
 ## Rajaukset (ei kuulu tähän)
 - Kokoelman merkintä, pakat ja haku (MVP-1)
@@ -198,3 +198,10 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 - B-001, B-003, B-006 ja B-009 → T-008 (virhe- ja osittaisen tilan parannukset, MVP-1).
 - B-004 ja B-010 → T-009 (Hostingin kovennus ja Firebase-API-avaimen rajaus ennen datatallennusta, Digiturva).
 - B-002 yhdistetty IDEAS.md:n UX-003-riviin. B-005 ja B-008 → IDEAS.md (MVP-1:n reititys ja mobiililista). B-007 = K1, käyttäjän kysymys STATUS.md:ssä.
+
+### Checkpoint 2026-10-01 · PM (Definition of Done)
+- Hyväksymiskriteerit 1–5 ja SR-1–SR-10 todennettu: PM ajoi itse npm test 71/71, lint 0 ja build ok. Puhdas klooni: Dokumentoija. PR #1:n tarkistukset (build_and_preview, Deploy Preview): pass.
+- Kriteeri 6: esikatselu toimii. Testisivuston päivitys todennetaan heti test-yhdistämisen jälkeen.
+- Katselmoinnit: Koodikatselmointi, Arkkitehti, Digiturva, UX, Sisällöntuottaja, Testikäyttäjä ja Dokumentoija tehty. Ei vetoja, ei avoimia Critical-, High- tai Medium-löydöksiä. Low-löydökset ovat tehtävissä T-002–T-009 ja IDEAS.md:ssä.
+- Dokumentaatio: README, CHANGELOG, ARCHITECTURE, UX, SECURITY ja CONTENT päivitetty.
+- Päätös: **Done** (PM). Yhdistetään test-haaraan.
