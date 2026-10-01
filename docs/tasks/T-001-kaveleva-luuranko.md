@@ -14,7 +14,7 @@ Rakennetaan ohut päästä päähän toimiva versio: sovellus hakee Cyberpunk TC
 - [x] Sovellus näyttää kaikki rajapinnan kortit (kaikki sivut, ei vain ensimmäiset 60) nimellä, tyypillä ja hinnalla. Korttimäärä vastaa rajapinnan `total`-kenttää.
 - [x] Näkymässä on lataus-, virhe- ja tyhjä tila. Kun rajapinta ei vastaa, käyttäjä näkee ymmärrettävän virheilmoituksen eikä teknistä tietoa.
 - [x] Rajapintakutsut on eristetty omaan kerrokseensa (PROJECT.md:n riski), ja kerroksella on yksikkötestit, jotka eivät kutsu oikeaa rajapintaa.
-- [ ] PR testiin tuottaa toimivan esikatselu-URL:n, ja yhdistäminen testiin päivittää testisivuston https://cyberdeck-tcg-test.web.app.
+- [x] PR testiin tuottaa toimivan esikatselu-URL:n, ja yhdistäminen testiin päivittää testisivuston https://cyberdeck-tcg-test.web.app.
 
 ### Turvavaatimukset (Digiturva, tarkemmin docs/SECURITY.md kohta 6)
 - [x] **SR-1:** Rajapinnan data tulostetaan vain tekstinä. Ei `innerHTML`/`insertAdjacentHTML`/`dangerouslySetInnerHTML`/`v-html`/`eval`-käyttöä, ja lint-sääntö estää ne. Yksikkötesti: nimi `<img src=x onerror=alert(1)>` näkyy kirjaimellisena tekstinä.
@@ -205,3 +205,4 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 - Katselmoinnit: Koodikatselmointi, Arkkitehti, Digiturva, UX, Sisällöntuottaja, Testikäyttäjä ja Dokumentoija tehty. Ei vetoja, ei avoimia Critical-, High- tai Medium-löydöksiä. Low-löydökset ovat tehtävissä T-002–T-009 ja IDEAS.md:ssä.
 - Dokumentaatio: README, CHANGELOG, ARCHITECTURE, UX, SECURITY ja CONTENT päivitetty.
 - Päätös: **Done** (PM). Yhdistetään test-haaraan.
+- Kriteeri 6 todennettu 2026-10-01: Deploy test -ajo 36822069398 onnistui, ja https://cyberdeck-tcg-test.web.app näyttää "Kortit · Cyberdeck" CSP-otsakkeineen. PR #1 on merkitty yhdistetyksi.
