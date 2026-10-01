@@ -1,0 +1,27 @@
+# Production: every push/merge to main deploys to the live production site.
+# Only /julkaise merges into main (D-001).
+name: Deploy production (main)
+on:
+  push:
+    branches:
+      - main
+# Least privilege (SR-8). The deploy action only uses a GitHub token on pull requests,
+# so live deploys get no repoToken and read-only repository access.
+permissions:
+  contents: read
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci && npm run build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG }}
+          projectId: cyberdeck-tcg
+          target: prod
+          channelId: live

@@ -1,7 +1,7 @@
 # PROJECT · cyberdeck
 
 > PM täyttää käyttäjän haastattelun perusteella. MVP-tasot vaativat käyttäjän hyväksynnän.
-> **Luonnos 2026-09-30:** kohdat, joissa lukee "käyttäjä päätti", on sovittu käyttäjän kanssa projektin perustamiskeskustelussa. Merkityt avoimet kohdat PM tarkentaa käyttäjän kanssa.
+> **Hyväksytty 2026-09-30 (D-004):** käyttäjä hyväksyi tavoitteet, rajaukset ja MVP-tasot 0–2 sellaisenaan. MVP-3:n sisältö päätetään myöhemmin.
 
 ## Ongelma
 Cyberpunk TCG:n pelaajalla on useita pakkoja ja kasa kortteja. On vaikea pysyä perillä siitä, mitä kortteja omistaa, missä pakassa mikäkin kortti on ja voiko uuden pakan koota purkamatta toista. Olemassa olevat työkalut (ripperdeck, ExBurst ym., katso TUTKIMUS.md) seuraavat kokoelmaa ja pakkoja, mutta mikään ei kerro, **missä omassa pakassasi puuttuva kortti on**.
@@ -16,10 +16,10 @@ Käyttäjä itse (aloitteleva Cyberpunk TCG -pelaaja) ja hänen pelikaverinsa.
 4. **Nostotodennäköisyydet:** pakkanäkymässä laskuri, esim. "todennäköisyys, että kortti X on kädessä vuorolla 3".
 
 ## Tavoitteet ja onnistumisen mittarit
-_Avoin, PM tarkentaa._ Ehdotus: pakan lisääminen ja puuttuvien korttien raportti onnistuvat alle minuutissa ilman ohjeita. Kortin sijainnin näkee yhdellä haulla.
+Käyttäjä hyväksyi (D-004): pakan lisääminen ja puuttuvien korttien raportti onnistuvat alle minuutissa ilman ohjeita. Kortin sijainnin näkee yhdellä haulla.
 
 ## Rajaukset (mitä emme tee)
-_Avoin, PM tarkentaa._ Ehdotus: ei hintaseurantaa, ei korttiskannausta kameralla eikä pelisimulaattoria. Nämä menevät IDEAS.md:hen.
+Käyttäjä hyväksyi (D-004): ei hintaseurantaa, ei korttiskannausta kameralla eikä pelisimulaattoria. Nämä menevät IDEAS.md:hen.
 
 ## Rajoitteet
 - Korttidata haetaan Netdeck.gg:n julkisesta rajapinnasta (TUTKIMUS.md). Korttikuvien linkit ovat aikarajattuja, eikä kuvien käyttöehtoja ole vielä tarkistettu (Digiturva ja Arkkitehti).
@@ -27,11 +27,11 @@ _Avoin, PM tarkentaa._ Ehdotus: ei hintaseurantaa, ei korttiskannausta kameralla
 - Vaihtolista (ominaisuus 3) vaatii kirjautumisen ja tietokannan. Silloin testille tulee oma Firebase-projekti (D-003), ja kavereiden tiedot kuuluvat Digiturvan tietosuoja-arviointiin.
 - Käyttäjä haluaa, että hänen ei tarvitse tehdä teknisiä toimenpiteitä, ja agentit hoitavat kaiken. Käyttäjältä kysytään vain tuotepäätökset ja hyväksynnät.
 
-## MVP-tasot (ehdotus, vaatii käyttäjän hyväksynnän)
+## MVP-tasot (käyttäjä hyväksyi, D-004)
 - **MVP-0 · Kävelevä luuranko:** build, testit, julkaisuputki ja korttilistan haku rajapinnasta näytölle.
 - **MVP-1 · Ydinarvo:** ominaisuudet 1 ja 2 (kokoelma, pakat, kortin sijainti, pakkalistan tuonti ja puuttuvien korttien raportti).
 - **MVP-2 · Käyttökelpoinen:** ominaisuudet 3 ja 4 (vaihtolista ja nostotodennäköisyydet), kirjautuminen, virheenkäsittely ja mobiilikäyttö.
-- **MVP-3 · Viimeistelty:** _täytetään_
+- **MVP-3 · Viimeistelty:** _päätetään MVP-2:n jälkeen_
 
 ## Riskit
 | Riski | Todennäköisyys | Vaikutus | Torjunta |
