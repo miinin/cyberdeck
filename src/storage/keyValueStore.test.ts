@@ -2,6 +2,7 @@ import { createMemoryRepositories, openBrowserRepositories } from './index';
 import { COLLECTION_KEY, DECKS_KEY } from './keys';
 import {
   createMemoryStore,
+  isStoragePersisted,
   openBrowserStore,
   requestPersistentStorage,
   subscribeToBrowserStorage,
@@ -180,5 +181,40 @@ describe('requestPersistentStorage', () => {
     });
     stubStorageManager({ persist });
     expect(await requestPersistentStorage()).toBe(false);
+  });
+});
+
+describe('isStoragePersisted', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(navigator, 'storage');
+  });
+
+  it('returns false without navigator.storage', async () => {
+    expect('storage' in navigator).toBe(false);
+    expect(await isStoragePersisted()).toBe(false);
+  });
+
+  it('returns false when persisted is not supported', async () => {
+    stubStorageManager({});
+    expect(await isStoragePersisted()).toBe(false);
+  });
+
+  it('returns the browser answer and never asks for persistence', async () => {
+    const persist = vi.fn(async () => true);
+    const persisted = vi.fn(async () => true);
+    stubStorageManager({ persist, persisted });
+    expect(await isStoragePersisted()).toBe(true);
+    persisted.mockResolvedValueOnce(false);
+    expect(await isStoragePersisted()).toBe(false);
+    expect(persist).not.toHaveBeenCalled();
+  });
+
+  it('returns false when the browser throws', async () => {
+    stubStorageManager({
+      persisted: vi.fn(async () => {
+        throw new Error('blocked');
+      }),
+    });
+    expect(await isStoragePersisted()).toBe(false);
   });
 });

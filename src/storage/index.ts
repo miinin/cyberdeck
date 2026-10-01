@@ -8,7 +8,7 @@ import type { Repositories } from './types';
 export type { CollectionRepository, DeckRepository, Repositories, Loaded, LoadNotice } from './types';
 export { StorageError } from './errors';
 export type { StorageErrorKind } from './errors';
-export { requestPersistentStorage } from './keyValueStore';
+export { isStoragePersisted, requestPersistentStorage } from './keyValueStore';
 
 /** localStorage when it works, otherwise an in-memory store with `persistent: false` (SR-13). */
 export function openBrowserRepositories(): Repositories {

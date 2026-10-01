@@ -92,3 +92,18 @@ export async function requestPersistentStorage(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Read-only check whether the browser has already granted persistent storage
+ * (navigator.storage.persisted). Never asks the user, so it may run at startup (T-012 A2).
+ * Returns false when unsupported or on error.
+ */
+export async function isStoragePersisted(): Promise<boolean> {
+  try {
+    const storageManager: StorageManager | undefined = navigator.storage;
+    if (typeof storageManager?.persisted !== 'function') return false;
+    return (await storageManager.persisted()) === true;
+  } catch {
+    return false;
+  }
+}

@@ -1,10 +1,15 @@
+import { useState } from 'react';
+import { openBrowserRepositories } from './storage';
+import type { Repositories } from './storage';
 import { CatalogView } from './ui/CatalogView';
 import { texts } from './ui/texts';
 import { useCardCatalog } from './ui/useCardCatalog';
 import type { LoadCatalog } from './ui/useCardCatalog';
 
-export function App({ loadCatalog }: { loadCatalog?: LoadCatalog }) {
+export function App({ loadCatalog, repositories }: { loadCatalog?: LoadCatalog; repositories?: Repositories }) {
   const { state, retry } = useCardCatalog(loadCatalog);
+  // Opened once per page load; tests pass in-memory repositories.
+  const [openRepositories] = useState(() => repositories ?? openBrowserRepositories());
 
   return (
     <>
@@ -12,7 +17,7 @@ export function App({ loadCatalog }: { loadCatalog?: LoadCatalog }) {
         <div className="container">{texts.appName}</div>
       </header>
       <main className="container">
-        <CatalogView state={state} onRetry={retry} />
+        <CatalogView state={state} onRetry={retry} repositories={openRepositories} />
       </main>
       <footer className="site-footer">
         <div className="container">

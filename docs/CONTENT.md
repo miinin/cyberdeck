@@ -1,6 +1,6 @@
 # CONTENT · cyberdeck
 
-> Omistaja: Sisällöntuottaja. Versio 0.2 · 2026-10-01 (0.1: T-001, MVP-0 · 0.2: T-010 haku ja suodatus, sanasto K6–K8).
+> Omistaja: Sisällöntuottaja. Versio 0.3 · 2026-10-01 (0.1: T-001, MVP-0 · 0.2: T-010 haku ja suodatus, sanasto K6–K8 · 0.3: T-012 kokoelman termit UX.md 6.14:n mukaan, lisännyt Koodari PM:n luvalla).
 > Kohderyhmä, kielitaso, äänensävy, sanasto, sisältöjen sijainti ja oikeudet. Mikrokopion rakenne ja tilakohtaiset tekstit ovat `docs/UX.md`:n luvuissa 2 ja 4.5. Tämä tiedosto määrää sanaston ja kielen.
 
 ---
@@ -61,6 +61,11 @@ Yksi käsite = yksi termi. Uusi termi lisätään tähän heti, kun sitä käyte
 | **valinta** | Suodattimessa valittu vaihtoehto (valintaruutu) | – | "Valitse yksi tai useampi", "poista valintoja". |
 | **hakua vastaavat kortit** | Tulos, kun hakusana tai valinta on käytössä | – | Taulukon kuvateksti "Hakua vastaavat kortit" ja tyhjä tila "Hakua vastaavia kortteja ei löytynyt." (TXT-008). Tässä "haku" kattaa hakusanan ja valinnat, kuten maamerkki "Hae ja suodata kortteja". |
 | **Yritä uudelleen** | Painike, joka hakee kaikki kortit alusta | – | Aina sama teksti. |
+| **kokoelma** | Käyttäjän omat kortit ja niiden määrät tässä selaimessa | `Collection` | T-012 (UX.md 6.14). "Kokoelmassa 3 eri korttia, yhteensä 5 kappaletta." Otsikko "Kortit" pysyy ennallaan. Ei "tallennuskerros", "avain" tai "localStorage" käyttäjälle. |
+| **omistaa / omistetut** | Kortti, jota käyttäjällä on vähintään yksi kappale | – | T-012. Sarakeotsikko "Omistan", suodatin "Vain omistetut". |
+| **kappale** | Yksi fyysinen kortti | `count` | T-012. Taivutus: "1 kappale", "2 kappaletta". Ei "kopio" eikä "kpl" käyttöliittymätekstissä. |
+| **eri kortti** | Kokoelman yksittäinen kortti määrästä riippumatta | – | T-012. "1 eri kortti", "3 eri korttia". |
+| **pysyvä tallennus** | Pyyntö selaimelle säilyttää tiedot, vaikka laitteen tallennustila vähenee | `navigator.storage.persist` | T-012. Painike "Pyydä pysyvää tallennusta". Ei lupaa, että tiedot säilyvät selaimen tietojen tyhjennyksessä. |
 
 Suomenkieliset vastineet (legenda, yksikkö, varuste, ohjelma) ovat tässä vain selitykseksi. Käyttöliittymässä käytetään englanninkielisiä tyyppejä, kunnes käyttäjä päättää toisin (K2). Värit sen sijaan ovat suomeksi (K6). K6–K8 ovat tekstivalintoja, jotka käyttäjä voi muuttaa myöhemmin (T-010:n kortti, PM:n checkpoint 2026-10-01).
 
@@ -71,7 +76,7 @@ Suomenkieliset vastineet (legenda, yksikkö, varuste, ohjelma) ovat tässä vain
 | Käyttöliittymätekstit (myös värien nimet `colorNames`) | `src/ui/texts.ts` | Koodari Sisällöntuottajan raportin (TXT-*) perusteella, tai Sisällöntuottaja, jos PM osoittaa tiedoston kortissa |
 | Sivun otsikko ja kieli | `index.html` (`<title>`, `lang="fi"`) | Koodari |
 | Korttien nimet, tyypit ja hinnat | Netdeck.gg:n rajapinta ajonaikaisesti, ei tallenneta repoon | – |
-| Tilakohtaiset tekstit (määrittely) | `docs/UX.md` 4.5 ja 5.6 | UX Designer, kieli Sisällöntuottaja |
+| Tilakohtaiset tekstit (määrittely) | `docs/UX.md` 4.5, 5.6 ja 6.5–6.9 | UX Designer, kieli Sisällöntuottaja |
 
 ## 6. Sisältöjen oikeudet ja lähteet
 

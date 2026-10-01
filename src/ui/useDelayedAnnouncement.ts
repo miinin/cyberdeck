@@ -22,10 +22,13 @@ interface Current extends Announcement {
 export function useDelayedAnnouncement(owner: unknown, baseline: string | null) {
   const [current, setCurrent] = useState<Current | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** Grows on every announce or cancel, so a caller can tell whether someone else spoke since. */
+  const generation = useRef(0);
 
   const cancel = useCallback(() => {
     clearTimeout(timer.current);
     timer.current = undefined;
+    generation.current += 1;
   }, []);
 
   // A new owner or unmount cancels anything pending.
@@ -43,16 +46,27 @@ export function useDelayedAnnouncement(owner: unknown, baseline: string | null) 
     [owner, baseline, cancel],
   );
 
+  /**
+   * Announces after `delayMs` unless something else is announced or cancelled first. A function
+   * is called when the time is up and may return null to announce nothing (T-012: a save still runs).
+   */
   const announceLater = useCallback(
-    (announcement: Announcement) => {
+    (announcement: Announcement | (() => Announcement | null), delayMs = ANNOUNCE_DELAY_MS) => {
       cancel();
-      timer.current = setTimeout(() => announceNow(announcement), ANNOUNCE_DELAY_MS);
+      timer.current = setTimeout(() => {
+        timer.current = undefined;
+        const value = typeof announcement === 'function' ? announcement() : announcement;
+        if (value !== null) announceNow(value);
+      }, delayMs);
     },
     [announceNow, cancel],
   );
 
+  /** Changes whenever anything is announced, scheduled or cancelled. */
+  const token = useCallback(() => generation.current, []);
+
   /** Text announced for the current owner, or null when the owner's own message stands. */
   const text = current !== null && current.owner === owner ? current.text : null;
 
-  return { text, announceNow, announceLater, cancel };
+  return { text, announceNow, announceLater, cancel, token };
 }

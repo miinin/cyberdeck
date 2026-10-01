@@ -9,6 +9,10 @@ Käyttäjälle näkyvät muutokset versioittain.
 - Listan yläpuolella näkyy, montako korttia haku ja valinnat löysivät (esim. "2 / 151 korttia"). Jos mikään kortti ei vastaa, näet ohjeen ja painikkeen, joka tyhjentää haun ja valinnat.
 - Taulukossa näkyy nyt myös kortin väri tekstinä ja pienenä värinäytteenä. Sarakkeen nimi on "Tyyppi ja väri".
 - Haku toimii näppäimistöllä (Esc tyhjentää hakukentän) ja kapealla puhelimen näytöllä. Ruudunlukija kertoo tulosten määrän, kun lopetat kirjoittamisen, eikä jokaisesta näppäilystä erikseen.
+- Kokoelma: merkitse omistamasi kortit listaan. Uusi sarake "Omistan": yksi painallus +-painikkeesta merkitsee kortin omistetuksi, ja määrää voi muuttaa +- ja −-painikkeilla (0–999). Listan yläpuolella näkyy, montako eri korttia ja kappaletta kokoelmassasi on.
+- "Vain omistetut" -valinta näyttää vain kortit, joita sinulla on. Se toimii yhdessä haun ja muiden valintojen kanssa.
+- Kokoelma tallentuu tähän selaimeen ja säilyy, kun avaat sivun uudelleen. Se ei siirry toiselle laitteelle. Voit pyytää selainta säilyttämään kokoelman pysyvästi. Jos tallennus ei onnistu, sivu kertoo sen, eikä näytä määrää, jota ei tallennettu.
+- Puhelimen kapealla näytöllä jokainen kortti näkyy omana korttinaan, jotta painikkeet mahtuvat.
 
 ## [0.1.0] · 2026-10-01
 
