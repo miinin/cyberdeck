@@ -15,6 +15,7 @@ function card(index: number, overrides: Partial<Card> = {}): Card {
     type: 'Unit',
     color: null,
     cost: index,
+    key: `card-${index}`,
     ...overrides,
   };
 }

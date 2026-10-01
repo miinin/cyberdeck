@@ -12,6 +12,7 @@ describe('mapCard', () => {
       type: 'Legend',
       color: 'Red',
       cost: null,
+      key: 'v-streetkid',
     });
   });
 
@@ -34,6 +35,21 @@ describe('mapCard', () => {
       'V — Streetkid',
     );
     expect(mapCard(rawCard(1, { name: 'Solo', subname: null, canonical_name: '' }))?.displayName).toBe('Solo');
+  });
+
+  it('derives the card key from name and subname, not from the slug', () => {
+    expect(mapCard(rawCard(1, { name: 'Judy Álvarez', subname: 'Braindance Maestro', slug: 'judy-a-lvarez' }))?.key).toBe(
+      'judy-alvarez-braindance-maestro',
+    );
+    expect(mapCard(rawCard(1, { name: 'Detonate', subname: null }))?.key).toBe('detonate');
+  });
+
+  it.each([
+    ['has no latin letters or digits', '—', null],
+    ['gives a reserved key', 'Constructor', null],
+    ['gives a key over 100 characters', 'a'.repeat(101), null],
+  ])('returns null when the name %s', (_label, name, subname) => {
+    expect(mapCard(rawCard(1, { name, subname }))).toBeNull();
   });
 
   it.each(['id', 'slug', 'name', 'card_type'])('returns null when required field %s is missing', (field) => {

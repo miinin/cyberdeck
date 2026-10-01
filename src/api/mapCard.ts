@@ -1,4 +1,5 @@
 import type { Card } from '../domain/card';
+import { cardKey, isCardKey } from '../domain/cardKey';
 import type { NetdeckCardFields } from './netdeckTypes';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -31,6 +32,9 @@ export function mapCard(raw: unknown): Card | null {
   if (id === null || slug === null || name === null || type === null) return null;
 
   const subname = nonEmptyString(fields.subname);
+  // D-008: a card whose name gives no valid key cannot be stored or referenced, so it is skipped.
+  const key = cardKey(name, subname);
+  if (!isCardKey(key)) return null;
   const displayName =
     nonEmptyString(fields.canonical_name) ?? (subname === null ? name : `${name} — ${subname}`);
 
@@ -43,5 +47,6 @@ export function mapCard(raw: unknown): Card | null {
     type,
     color: nonEmptyString(fields.color),
     cost: finiteNumber(fields.cost),
+    key,
   };
 }

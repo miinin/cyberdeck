@@ -33,6 +33,15 @@ Kokoelma (T-012) ja pakat (T-013) tarvitsevat tietomallin ja tallennuksen, joka 
 ### Checkpoint 2026-10-01 · PM
 - Kortti määritelty, tila Ready. Seuraava askel: Arkkitehti tekee ADR:n ja tietomallin, Digiturva arvioi tallennuksen rinnakkain.
 
+### Checkpoint 2026-10-01 · Koodari (suunnitelma)
+- Suunnitelma ARCHITECTURE.md 12.9:n mukaan. Jokaisen askeleen jälkeen testit, lint, commit ja push:
+  1. `domain/cardKey.ts` ja testit, `Card.key`, `mapCard` ja Card-fixtuurit.
+  2. `domain/collection.ts`, `domain/deck.ts` ja `domain/validate.ts` testeineen.
+  3. `storage/keys.ts`, `errors.ts` ja `envelope.ts` testeineen.
+  4. `storage/keyValueStore.ts`, `types.ts`, `repositories.ts` ja `index.ts` testeineen, `localStorage.clear()` setupiin.
+  5. ESLint-rajat (luku 4) ja kokeilu, että lint estää `localStorage`n `src/ui/`:ssa.
+- Lopuksi koodikatselmointi, ARCHITECTURE.md:n toteutusosa, luovutus ja PR testiin.
+
 ## Luovutukset
 ### Luovutus 2026-10-01 · Digiturva → PM, Arkkitehti, Koodari
 - Mitä tehtiin: MVP-1:n uhkamalli ja STRIDE (SECURITY.md luku 11), turvavaatimukset SR-11–SR-19, riskit R-10–R-14, MVP-2:n ennakoidut vaatimukset MVP2-1–MVP2-9 (luku 12) ja uusi docs/PRIVACY.md.
