@@ -33,6 +33,13 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 - Kortti määritelty, tila Ready, haara `t-012-kokoelma` tehty test-haarasta.
 - Seuraava askel: UX suunnittelee kokoelmanäkymän (UX.md:n uusi luku 6). Sen jälkeen Koodari toteuttaa.
 
+### Checkpoint 2026-10-01 · PM (UX:n avoimet kysymykset ratkaistu)
+- A1, A3, A5, A6 ja A7: UX:n oletukset hyväksytty. Ne ovat käytettävyysvalintoja, jotka käyttäjä voi muuttaa myöhemmin.
+- A2: sallittu. `navigator.storage.persisted()` lisätään tallennuskerroksen julkiseen rajapintaan (`src/storage/keyValueStore.ts` + `index.ts`, kuten `requestPersistentStorage`), ei käyttöliittymään suoraan (SR-12). Pieni rajapintalisäys ilman rakennemuutosta, joten Arkkitehtia ei tarvita.
+- A4: tarkistettu koodista (`repositories.ts`, `backup` → `toStorageError`). Kun varmuuskopio epäonnistuu, `setCount` heittää virheen `quota` tai `unavailable` alkuperäisen syyn mukaan. Käyttöliittymä valitsee tekstin `kind`-kentän perusteella (UX.md 6.8), eikä erillistä lajia tarvita.
+- Sisällöntuottaja: ei erillistä katselmointia (D-009: mikrokopio kuuluu UX:lle). Koodari lisää UX.md 6.14:n termit CONTENT.md:n sanastoon (sovittu tässä kortissa).
+- Seuraava askel: Koodari toteuttaa UX.md:n luvun 6 mukaan.
+
 ## Luovutukset
 
 ### Luovutus 2026-10-01 · UX Designer → Koodari
