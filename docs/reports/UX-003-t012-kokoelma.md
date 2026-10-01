@@ -79,7 +79,7 @@ Chrome (`C:\Program Files\Google\Chrome`, headless) ohjattuna puppeteer-core-kir
 **Havaittu:** `Legend · ■ Hinta 5` ja sen alla `Punainen ·`. Värin neliö on erossa värin nimestä, hinta tulee ennen värin nimeä, ja rivin lopussa on orpo erotin `·`. Sama kaikilla rivityksillä, koska tyyppi/väri-solu ja hintasolu ovat omissa ruudukon sarakkeissaan, ja kontrolli (132 px) jättää niille vain noin 148 px.
 **Vaikutus:** Tieto säilyy, ja ruudunlukija lukee oikein (erottimet ovat `aria-hidden`), mutta jokaisen rivin rakenne näyttää rikkinäiseltä ja selattavuus heikkenee juuri ensisijaisella mobiilinäkymällä. Rivi on myös tarpeettoman korkea (noin 104 px). Syy on määrittelyssäni: 6.4.4:n rautalanka oletti, että kolme tietoa mahtuu riville, mikä ei pidä 320 px:ssä.
 **Korjausehdotus:** Älä jaa tyyppiä/väriä ja hintaa eri ruudukon sarakkeisiin. Vaihtoehto A: `grid-template-areas: 'name control' 'type control' 'cost control'` (kolme riviä: nimi, `Legend · ■ Punainen`, `Hinta 5`) ja poista erotin `type`-solun lopusta (`.separator:last-child { display: none }`). Vaihtoehto B: pidä `type` ja `cost` yhdessä flex-rivissä, jossa `.card-color { white-space: nowrap }` estää neliön ja nimen erottumisen. Poista joka tapauksessa solun jälkimmäinen `.separator`, jos hinta tulee uudelle riville. Päivitän UX.md 6.4.4:n rautalangan, kun valinta on tehty.
-**Tila:** Avoin → Korjattu (commit b206790)
+**Tila:** Avoin → Korjattu (commit b206790) → Varmistettu (UX 2026-10-01): 320 px:ssä rivi on nyt `Legend · ■ Punainen` ja sen alla `Hinta 5`, ei orpoa erotinta, axe 0 rikkomusta, ei vaakavieritystä.
 
 ### UX-006 · Ensimmäinen kortti on kapealla näytöllä kaukana ruudun alla · Low
 **Sijainti:** `src/ui/CatalogView.tsx` (sivun rakenne, selainmuistutus ja suodattimet ennen taulukkoa) · **Tehtävä:** T-012
@@ -103,3 +103,9 @@ Chrome (`C:\Program Files\Google\Chrome`, headless) ohjattuna puppeteer-core-kir
 ## Veto-päätös
 
 **Veto: ei.** Ydinpolku (kortin merkitseminen omistetuksi, määrän muutos, suodatus, pysyvyys) toimii näppäimistöllä, kosketuskoossa ja ilman saavutettavuusrikkomuksia. Löydökset UX-005 (Medium, kosmeettinen rivitys) ja UX-006 (Low) eivät estä Done-tilaa. Sisällön ja mikrokopion osalta UX ei löytänyt muutettavaa; Sisällöntuottajan erillistä katselmointia ei tarvita (D-009).
+
+## Uusintatarkistus 2026-10-01 (UX-005 ja uudet tekstit)
+
+- UX-005 varmistettu (ks. löydös). axe 0 rikkomusta oletustilassa, `newer-version`- ja `reset`-tilassa; ei vaakavieritystä 320 px:ssä.
+- `newerVersionBody` (nähty selaimessa): selkeä, kertoo syyn, korjausohjeen ja varoituksen (`Älä tyhjennä selaimen tietoja, koska kokoelma poistuisi.`). Hyväksytty.
+- `resetNoBackupBody` luettu `texts.ts`:stä ja vertailtu UX.md 6.8:aan, tekstit täsmäävät. Tilaa ei saatu pakotettua selaimessa (kokeilu tuotti varmuuskopion), joten sitä ei nähty ruudulla. Teksti on ymmärrettävä ja sisältää korjausohjeen. Hyväksytty.

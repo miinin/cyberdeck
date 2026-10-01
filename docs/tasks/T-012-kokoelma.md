@@ -1,7 +1,7 @@
 # T-012 · Kokoelma: omistettujen korttien merkintä
-**Tila:** Review · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Suunnittelu:** UX ☑ (docs/UX.md luku 6, 2026-10-01) (näkymä, tilat, mikrokopio, saavutettavuus)
-**Katselmoinnit (D-009):** Koodikatselmointi ☑ · UX ☐ (käytettävyys, saavutettavuus, mikrokopio) · Digiturva ☐ (tallennettu data, syöte, SEC-007) · Testikäyttäjä: MVP-1:n lopussa · Dokumentoija: MVP-1:n lopussa
+**Katselmoinnit (D-009):** Koodikatselmointi ☑ · UX ☑ (UX-003) · Digiturva ☑ (SEC-003) (tallennettu data, syöte, SEC-007) · Testikäyttäjä: MVP-1:n lopussa · Dokumentoija: MVP-1:n lopussa
 **Riippuvuudet:** T-011 (Done), T-010 (Done)
 **Haara:** `t-012-kokoelma`
 
@@ -9,12 +9,12 @@
 Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamalla painalluksella, ja tieto säilyy selaimessa. Tämä on PROJECT.md:n ominaisuuden 1 ensimmäinen puolisko ("korttilistaus, johon on äärimmäisen helppo merkitä omistetut kortit") ja pohja pakoille (T-013) ja puuttuvien korttien raportille (T-014).
 
 ## Hyväksymiskriteerit
-- [ ] Jokaisen kortin rivillä on omistettujen kappaleiden määrä ja tapa muuttaa sitä (+1 ja −1 tai vastaava UX:n määrittelemä kontrolli). Yhden kortin merkitseminen omistetuksi vaatii enintään yhden painalluksen hakutuloksesta. Määrä on 0–999 (D-008), ja 0 poistaa kortin kokoelmasta.
-- [ ] Määrät tallentuvat `src/storage/index.ts`:n `CollectionRepository`n kautta (SR-12) ja säilyvät sivun uudelleenlatauksessa. Toisessa välilehdessä tehty muutos päivittyy näkymään (`subscribe`).
-- [ ] Listaa voi suodattaa "Vain omistetut" -valinnalla, joka toimii yhdessä T-010:n haun ja suodattimien kanssa. Näkymässä näkyy kokoelman yhteenveto (esim. eri korttien ja kappaleiden määrä).
-- [ ] Näkymässä kerrotaan, että tiedot ovat vain tässä selaimessa (R-10), ja käyttäjän toimesta pyydetään pysyvä tallennus (`requestPersistentStorage`, SR-13). Pyyntö ei käynnisty automaattisesti sivun latautuessa.
-- [ ] Tallennuskerroksen ilmoitukset ja virheet näytetään ymmärrettävinä teksteinä ilman teknisiä tietoja: `persistent: false` (tiedot eivät tallennu), `notices`: `reset` (myös `backupKey: null`, SEC-007), `repaired`, `newer-version`, sekä `StorageError`-lajit `quota`, `unavailable` ja `newer-version` muutoksen yhteydessä. Epäonnistunut tallennus ei näytä näytöllä määrää, jota ei tallennettu.
-- [ ] Määrän muutos ilmoitetaan ruudunlukijalle, kontrollit toimivat näppäimistöllä ja 320 px:n leveydellä (kosketusalue vähintään 24 × 24 px, tavoite 44 × 44 px), ja axe ei löydä virheitä. Yksikkö- ja näkymätestit kattavat tallennuksen, virhetilat (muistivarainen tallennus `createMemoryRepositories`) ja nopeat peräkkäiset painallukset.
+- [x] Jokaisen kortin rivillä on omistettujen kappaleiden määrä ja tapa muuttaa sitä (+1 ja −1 tai vastaava UX:n määrittelemä kontrolli). Yhden kortin merkitseminen omistetuksi vaatii enintään yhden painalluksen hakutuloksesta. Määrä on 0–999 (D-008), ja 0 poistaa kortin kokoelmasta.
+- [x] Määrät tallentuvat `src/storage/index.ts`:n `CollectionRepository`n kautta (SR-12) ja säilyvät sivun uudelleenlatauksessa. Toisessa välilehdessä tehty muutos päivittyy näkymään (`subscribe`).
+- [x] Listaa voi suodattaa "Vain omistetut" -valinnalla, joka toimii yhdessä T-010:n haun ja suodattimien kanssa. Näkymässä näkyy kokoelman yhteenveto (esim. eri korttien ja kappaleiden määrä).
+- [x] Näkymässä kerrotaan, että tiedot ovat vain tässä selaimessa (R-10), ja käyttäjän toimesta pyydetään pysyvä tallennus (`requestPersistentStorage`, SR-13). Pyyntö ei käynnisty automaattisesti sivun latautuessa.
+- [x] Tallennuskerroksen ilmoitukset ja virheet näytetään ymmärrettävinä teksteinä ilman teknisiä tietoja: `persistent: false` (tiedot eivät tallennu), `notices`: `reset` (myös `backupKey: null`, SEC-007), `repaired`, `newer-version`, sekä `StorageError`-lajit `quota`, `unavailable` ja `newer-version` muutoksen yhteydessä. Epäonnistunut tallennus ei näytä näytöllä määrää, jota ei tallennettu.
+- [x] Määrän muutos ilmoitetaan ruudunlukijalle, kontrollit toimivat näppäimistöllä ja 320 px:n leveydellä (kosketusalue vähintään 24 × 24 px, tavoite 44 × 44 px), ja axe ei löydä virheitä. Yksikkö- ja näkymätestit kattavat tallennuksen, virhetilat (muistivarainen tallennus `createMemoryRepositories`) ja nopeat peräkkäiset painallukset.
 
 ## Rajaukset (ei kuulu tähän)
 - Painokset (alt-artit, kieliversiot), D-007
@@ -105,3 +105,8 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 - Mistä katsoa: commit b206790 (`src/styles.css`, `src/ui/CardList.tsx`, `src/ui/texts.ts`).
 - Tunnetut rajoitteet ja riskit: asettelua ei tarkistettu oikeassa selaimessa (jsdom), joten UX:n varmistus on tarpeen.
 - Testit: uudet testit tarkistavat SEC-011:n ja SEC-012:n tekstit (ei sanaa "välimuisti") ja sen, että erottimia on yksi, tyypin ja värin välissä. `npm test` 17 tiedostoa ja 425 testiä, kaikki läpi. `npm run lint` 0 virhettä ja 0 varoitusta. `npm run build` onnistui.
+
+### Checkpoint 2026-10-01 · PM (Done)
+- Definition of Done tarkistettu: hyväksymiskriteerit todennettu (testit 425/425, UX:n selaintarkistus esikatselussa: axe 0 rikkomusta, 320 px, 400 %, 44 × 44 px), lint ja build läpi, koodikatselmointi tehty, Digiturva (SEC-003) ja UX (UX-003) ilman avoimia blokkaavia löydöksiä, UX-005, SEC-011 ja SEC-012 korjattu ja varmistettu. CHANGELOG, CONTENT.md, UX.md ja ARCHITECTURE.md päivitetty.
+- Avoinna ilman toimenpiteitä: SEC-013 (Info, R-11). Siirretty: UX-006 → T-018, `index.html` Cache-Control → T-009, velka T-019 ja T-020. Testikäyttäjä ja Dokumentoija MVP-1:n lopussa (D-009).
+- Tila Done, yhdistetty test-haaraan.
