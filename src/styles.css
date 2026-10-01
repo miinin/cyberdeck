@@ -16,6 +16,13 @@
   --color-warning-surface: #fff6db;
   --color-focus: var(--color-accent);
 
+  /* Card colors (UX.md 3.1.1): only for the decorative swatch, never for text. */
+  --color-card-red: #c62828;
+  --color-card-yellow: #e0b000;
+  --color-card-green: #2e7d32;
+  --color-card-blue: #1565c0;
+  --color-card-unknown: transparent;
+
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-size-base: 1rem;
   --font-size-sm: 0.875rem;
@@ -55,6 +62,11 @@
     --color-danger-surface: #3a1414;
     --color-warning: #f2c14e;
     --color-warning-surface: #33290f;
+
+    --color-card-red: #ff6b6b;
+    --color-card-yellow: #f2c94c;
+    --color-card-green: #5ccf6a;
+    --color-card-blue: #64a8ff;
   }
 }
 
@@ -238,9 +250,50 @@ main {
   white-space: nowrap;
 }
 
+/* "Tyyppi ja väri": the header may wrap so the column width follows the cells (UX.md 5.5). */
+.card-table th.col-wrap-header {
+  white-space: normal;
+}
+
+.card-color {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .card-table .col-number {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+/* Decorative color swatch, always next to the color name (UX.md 3.1.1, 5.4). */
+.color-swatch {
+  display: inline-block;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.color-swatch-red {
+  background: var(--color-card-red);
+}
+
+.color-swatch-yellow {
+  background: var(--color-card-yellow);
+}
+
+.color-swatch-green {
+  background: var(--color-card-green);
+}
+
+.color-swatch-blue {
+  background: var(--color-card-blue);
+}
+
+.color-swatch-unknown {
+  background: var(--color-card-unknown);
 }
 
 @media (prefers-reduced-motion: reduce) {
