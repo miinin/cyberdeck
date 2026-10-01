@@ -138,3 +138,11 @@ Päätöksessä on kuusi osaa. Rakenne ja allekirjoitukset ovat ARCHITECTURE.md:
 - ESLint estää selaimen tallennus-API:t (`localStorage`, `sessionStorage`, `indexedDB`) kaikkialla paitsi `src/storage/keyValueStore.ts`:ssä sekä `storage`-kerroksen sisäiset tuonnit sen ulkopuolelta.
 - T-012–T-015 käyttävät vain `src/storage/index.ts`:n julkista rajapintaa.
 - Avoin PM:lle: tallennetaanko T-014:ssä tuotu pakkalista aina pakaksi, ja tarvitaanko pakalle tila "koottu / suunnitelma" (PROJECT.md: "missä omassa pakassasi kortti on"). Malli sallii molemmat myöhemmin valinnaisena kenttänä ilman migraatiota.
+
+## D-009 · Kevennetty katselmointimalli ja halvemmat mallit kevyille rooleille · 2026-10-01 · Päättäjä: käyttäjä
+**Tila:** Voimassa
+**Konteksti:** Jokainen aliagentti käytti 80 000–220 000 tokenia, ja viisi rinnakkaista agenttia kulutti noin 21 % viiden tunnin kiintiöstä minuutissa. T-010:n katselmoinnit keskeytyivät käyttörajaan. Jokainen tehtävä sai 5–7 katselmointia riippumatta riskistä.
+**Vaihtoehdot:** A) Ennallaan B) Katselmoinnit riskin mukaan, Testikäyttäjä ja Dokumentoija MVP-tason lopussa, Sonnet kevyille rooleille ja enintään kaksi rinnakkaista agenttia C) Ei aliagentteja, PM tekee kaiken
+**Päätös:** B. Käyttäjä pyysi tekemään kulutuksesta siedettävämpää ("liikaa tarkasteluja, etenkin näin alkuvaiheessa").
+**Perustelu:** Laadun kannalta tärkeimmät tarkistukset (Koodarin katselmointi, UX käyttäjälle näkyviin muutoksiin ja Digiturva riskialttiisiin) säilyvät. Rikkomistestaus ja dokumentaatio ovat tehokkaampia koko MVP-tasolle kerralla. Sonnet riittää teksti- ja selaintarkastuksiin.
+**Seuraukset:** agents.md v1.3 ("Yhteispeli" → oletukset). rules.md 7.2:n Definition of Done tulkitaan näin: Testikäyttäjä- ja Dokumentoija-kohdat täyttyvät MVP-tason lopussa. PM tyhjentää oman istuntonsa (`/clear`) tehtävien välissä, koska tila on tiedostoissa. Käynnissä olevat T-010:n ja T-011:n katselmoinnit viedään loppuun.

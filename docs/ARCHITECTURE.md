@@ -112,7 +112,7 @@ Testit ovat testattavan tiedoston vieressä (`*.test.ts(x)`). Ei `components/`-,
   - `src/ui/**`, `src/App.tsx` ja `src/main.tsx` saavat tuoda tallennuskerroksesta vain `storage/index.ts`:n (`'../storage'`). Kielletty malli: `**/storage/*`.
   - `src/domain/**`: kielletään myös `**/storage` ja `**/storage/**`.
   - `src/storage/**`: kielletään `react`, `**/ui`, `**/ui/**`, `**/api` ja `**/api/**`.
-  - Kaikkialla paitsi `src/storage/**`:ssa ja `src/test/**`:ssa: `no-restricted-globals` (`localStorage`, `sessionStorage`, `indexedDB`) ja `no-restricted-properties` (`window` ja `globalThis` × samat kolme ominaisuutta). Näin käyttöliittymä ei voi käyttää selaimen tallennusta suoraan.
+  - Kaikkialla paitsi `src/storage/**`:ssa ja `src/test/**`:ssa: `no-restricted-globals` (`localStorage`, `sessionStorage`, `indexedDB`) ja `no-restricted-properties` (`window`, `globalThis` ja `self` × samat kolme ominaisuutta; `self` lisättiin toteutuksessa, ARCH-002-raportti). Näin käyttöliittymä ei voi käyttää selaimen tallennusta suoraan.
   - **Huom. flat config:** saman säännön (`no-restricted-imports`) myöhempi lohko korvaa aiemman eikä yhdistä niitä. API- ja storage-mallit on siksi annettava samassa lohkossa (`patterns: [apiInternals, storageInternals]`).
 
 ## 5. Rajapintakerros (`src/api/`)
@@ -309,6 +309,8 @@ export function App(props: { loadCatalog?: (signal: AbortSignal) => Promise<Card
 
 4. **Keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen ja testityyppien (`vitest/globals`) erottaminen sovelluksen tsconfigista** (T-006).
 5. **`firebase.json`:n otsakkeiden yhdenmukaisuus** (ARCH-003): pieni testi, joka varmistaa, että prod- ja test-lohkojen otsakkeet ovat samat ja että CSP:n `connect-src` sisältää `NETDECK_CARDS_URL`:n originin. Ehdotus PM:lle.
+6. **Migraatioketjun kytkentä ja invarianttitesti** (ARCH-007, T-011:n katselmointi): tuotannon migraatioketju on nyt `repositories.ts`:ssä kovakoodattu tyhjä taulukko. Ennen ensimmäistä oikeaa migraatiota (tai jo nyt pienenä velkatehtävänä) ketjut siirretään `storage/migrations.ts`:ään, ja testi varmistaa `MIGRATIONS.length + 1 === SCHEMA_VERSION` kummallekin kokonaisuudelle. Ilman sitä version nosto ilman ketjua tulkitsisi kaiken datan rikkinäiseksi (varmuuskopio syntyy, mutta käyttäjä näkee tyhjän tilan).
+7. **Tallennuskiintiön kokonaisbudjetti** (ARCH-006): SR-11:n rajojen pahin tapaus (200 pakkaa × 500 riviä) ja kolme varmuuskopiota voisivat ylittää `localStorage`n noin 5 MiB:n kiintiön. Nykyisellä korttimäärällä (151) tämä ei ole realistista. Tarkistetaan T-003:n välimuistin ADR:ssä, kun kiintiö jaetaan.
 
 ## 12. Tietomalli ja tallennuskerros (T-011, D-008)
 
@@ -336,7 +338,7 @@ MVP-2:ssa `storage/firestore/` toteuttaa samat `CollectionRepository`- ja `DeckR
 |---|---|
 | `cyberdeck:collection` | `{"schemaVersion":1,"savedAt":"2026-10-01T12:00:00.000Z","data":{"entries":[{"card":"v-streetkid","count":2}]}}` |
 | `cyberdeck:decks` | `{"schemaVersion":1,"savedAt":"…","data":{"decks":[{"id":"<uuid>","name":"Esimerkkipakka","sections":[{"name":"Legends","cards":[{"card":"v-streetkid","count":1}]}],"createdAt":"…","updatedAt":"…"}]}}` |
-| `cyberdeck:backup:<collection\|decks>:<ISO-aikaleima>` | alkuperäinen raaka merkkijono sellaisenaan (luku 12.6) |
+| `cyberdeck:backup:<collection\|decks>:<ISO-aikaleima>[:<n>]` | alkuperäinen raaka merkkijono sellaisenaan (luku 12.7). Pääte `:<n>` (1, 2, …) lisätään vain, jos samalla millisekunnilla on jo varmuuskopio. |
 
 - `keys.ts`: `COLLECTION_KEY`, `DECKS_KEY`, `BACKUP_PREFIX = 'cyberdeck:backup:'`, `COLLECTION_SCHEMA_VERSION = 1`, `DECKS_SCHEMA_VERSION = 1`, `MAX_BACKUPS_PER_AGGREGATE = 3`.
 - Versio on kääreessä, ei avaimen nimessä (SR-12:n `cyberdeck:v1:…` oli esimerkki): migraatio ei vaadi avaimen vaihtoa, ja vanha data löytyy aina samasta paikasta. Nimiavaruus `cyberdeck:` erottaa käyttäjän datan T-003:n välimuistista (jonka avain on eri, esim. `cyberdeck:cache:…`).
@@ -511,6 +513,7 @@ export interface RepositoryOptions {
   newId?: () => string;                                    // oletus () => crypto.randomUUID()
   subscribe?: (keys: readonly string[], listener: () => void) => () => void;  // oletus: ei tapahtumia
   migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[] };  // vain testit; oletus []
+  //   annettu ketju korvaa oletusketjun, ja nykyinen versio on silloin ketju.length + 1 (ARCH-007)
 }
 export function createRepositories(options: RepositoryOptions): Repositories;
 
@@ -536,14 +539,14 @@ export function createMemoryRepositories(options?: { initial?: Readonly<Record<s
    - `corrupt` → varmuuskopio (alla). Kun se onnistuu, `store.removeItem(key)` → ilmoitus `reset` ja varmuuskopion avain. Jos varmuuskopio epäonnistuu, live-avainta ei poisteta, ilmoitus on `reset` ja `backupKey: null`, ja kirjoitukset epäonnistuvat seuraavassa kohdassa, kunnes tilaa on.
    - `newer` → tyhjä arvo ja ilmoitus `newer-version`. Mitään ei kirjoiteta.
 
-**Kirjoitus** (`setCount`, `create`, `update`, `remove`), yksi looginen muutos = yksi `setItem` (SR-13):
+**Kirjoitus** (`setCount`, `create`, `update`, `remove`), yksi looginen muutos = yksi `setItem` (SR-13). Kirjoitus kutsuu `now()`:ia kerran, ja samaa arvoa käytetään `savedAt`-, `createdAt`- ja `updatedAt`-kentissä sekä varmuuskopioavaimessa:
 1. Validoi kutsujan syöte (`isCardKey`, määrä, `parseDeckContent`, jonka `dropped` on oltava 0) → muuten `invalid-input`. `cleanText` saa siistiä nimen (ohjausmerkit, trimmaus), ja palautettu arvo näyttää siistityn nimen.
 2. **Lue tuore tila tallennustilasta joka kerta** (ei välimuistia instanssissa) ja dekoodaa. Näin toisen välilehden muutokset eivät katoa (R-11, SR-13). Kaikki tapahtuu samassa synkronisessa osassa ilman `await`ia lukemisen ja kirjoittamisen välissä.
-3. `newer` → `StorageError('newer-version')`. `corrupt` tai `ok` vanhemmalla versiolla → varmuuskopio ensin (epäonnistuu → `quota` tai `unavailable`, eikä päälle kirjoiteta).
-4. Laske uusi arvo puhtailla funktioilla (`withCount` jne.) ja tarkista rajat (`limit-reached`).
+3. `newer` → `StorageError('newer-version')`. `corrupt`, `ok` vanhemmalla versiolla tai `ok`, josta pudotettiin rivejä (`dropped > 0`) → varmuuskopio ensin (epäonnistuu → `quota` tai `unavailable`, eikä päälle kirjoiteta). Näin korjauksessa pudotetut rivit eivät katoa ensimmäisessä tallennuksessa.
+4. Laske uusi arvo puhtailla funktioilla (`withCount` jne.) ja tarkista rajat (`limit-reached`). Jos muutos palauttaa saman olion (esim. `remove` tuntemattomalla id:llä), mitään ei kirjoiteta eikä varmuuskopioida. `create`: jos `newId()` palauttaa virheellisen tai jo käytetyn id:n → `unavailable`, eikä olemassa olevaa pakkaa ylikirjoiteta.
 5. `store.setItem(key, encodeEnvelope(value, current, now()))`. `QuotaExceededError` → `quota`, muu virhe → `unavailable`. Edellinen arvo säilyy, koska `setItem` ei kirjoita osittain.
 
-**Varmuuskopio:** `store.setItem('cyberdeck:backup:<aggregate>:<now().toISOString()>', raw)`. Sen jälkeen poistetaan saman kokonaisuuden vanhimmat varmuuskopiot niin, että jäljelle jää `MAX_BACKUPS_PER_AGGREGATE` (järjestys avaimen mukaan, ISO-aikaleima järjestyy aakkosittain). Karsinta koskee vain `cyberdeck:backup:`-alkuisia avaimia, ei koskaan käyttäjän live-dataa (SR-13, R-12). Varmuuskopioiden palautuksen käyttöliittymä ei kuulu T-011:een (ehdotus IDEAS.md:hen).
+**Varmuuskopio:** `store.setItem('cyberdeck:backup:<aggregate>:<now().toISOString()>', raw)`. Varmuuskopio ei koskaan ylikirjoita toista (törmäyksessä pääte `:1`, `:2` …). Sen jälkeen poistetaan saman kokonaisuuden vanhimmat varmuuskopiot niin, että jäljelle jää `MAX_BACKUPS_PER_AGGREGATE` (järjestys avaimen mukaan, ISO-aikaleima järjestyy aakkosittain). Juuri kirjoitettua varmuuskopiota ei karsita koskaan, vaikka kello olisi siirtynyt taaksepäin, eikä karsinnan epäonnistuminen kaada kirjoitusta. Karsinta koskee vain `cyberdeck:backup:`-alkuisia avaimia, ei koskaan käyttäjän live-dataa (SR-13, R-12). Varmuuskopioiden palautuksen käyttöliittymä ei kuulu T-011:een (ehdotus IDEAS.md:hen).
 
 **Välilehdet:** `subscribe` kuuntelee `storage`-tapahtumaa (vain muut välilehdet laukaisevat sen). Kuuntelija (T-012:n hook) lukee tilan uudelleen. Saman välilehden kirjoitukset palauttavat uuden arvon suoraan.
 
@@ -601,7 +604,7 @@ Toteutus noudattaa lukuja 3–9. Poikkeamat ja tarkennukset perusteluineen:
 
 ### T-011 · Koodari 2026-10-01
 
-Toteutus noudattaa lukua 12 ja luvun 4 T-011-kohtia. Poikkeamat ja tarkennukset perusteluineen (Arkkitehti arvioi katselmoinnissa):
+Toteutus noudattaa lukua 12 ja luvun 4 T-011-kohtia. Poikkeamat ja tarkennukset perusteluineen. **Arkkitehti hyväksyi kaikki 2026-10-01 (ARCH-002-raportti) ja kirjasi ne lukuihin 4, 12.2, 12.6 ja 12.7.** Testimigraatioiden jatkotoimi on luvun 11 kohdassa 6 (ARCH-007).
 
 - **Yksi aikaleima per kirjoitus:** `mutate` kutsuu `now()`:ia kerran, ja samaa arvoa käytetään kääreen `savedAt`-kenttään, pakan `createdAt`/`updatedAt`-kenttiin ja saman kirjoituksen varmuuskopioavaimeen. Näin arvot täsmäävät, ja testien kello on ennustettava.
 - **Varmuuskopio myös korjatusta datasta** (laajennus 12.7:n kohtaan 3): jos luettu data oli kelvollista mutta siitä pudotettiin rivejä (`dropped > 0`), alkuperäinen raaka merkkijono kopioidaan varmuuskopioon ennen ensimmäistä päällekirjoitusta. Perustelu: muuten pudotetut rivit katoaisivat lopullisesti ensimmäisessä tallennuksessa (SR-11: ei tietojen menetystä). Seuraavalla kerralla data on jo ehjää, eikä uutta varmuuskopiota synny.

@@ -1,7 +1,7 @@
 # T-011 · Tietomalli ja paikallinen tallennuskerros
 **Tila:** In Progress · **Omistaja:** Arkkitehti (suunnittelu) → Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☑ (D-008) · Digiturva ☑ (paikallinen tallennus, PRIVACY.md)
-**Katselmoinnit:** Koodikatselmointi ☐ · Arkkitehti ☐ · Digiturva ☐ · Dokumentoija ☐ (ARCHITECTURE)
+**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · Dokumentoija: MVP-1:n lopussa (D-009)
 **Riippuvuudet:** T-001 (Done), D-007. Ei käyttöliittymää, joten UX ja Testikäyttäjä eivät katselmoi.
 **Haara:** `t-011-tallennuskerros`
 
@@ -90,3 +90,13 @@ Kokoelma (T-012) ja pakat (T-013) tarvitsevat tietomallin ja tallennuksen, joka 
 ### Checkpoint 2026-10-01 · PM
 - Koodari valmis, PR #4 (Preview vihreä). Katselmoinnit: Arkkitehti (rakenne ja poikkeamat) ja Digiturva (SR-11–SR-13, SR-16, versio kääreessä).
 - Koodarin ehdotukset: `.claude/**` pois testeistä ja lintistä → T-016, mapCardin apufunktiot → T-017. Kunnes T-016 on tehty, pääkansiossa ajetaan `npx vitest run --dir src`.
+
+### Luovutus 2026-10-01 · Arkkitehti → PM
+- ARCH-002-t011-katselmointi.md: rakenne D-008:n mukainen, Koodarin viisi poikkeamaa hyväksytty (ARCHITECTURE.md 4, 11, 12.2, 12.6, 12.7). Testit 281/281, eslint ja tsc OK. Veto: ei. Low: ARCH-006 (kiintiö, T-003), ARCH-007 (migraatioketjun invarianttitesti), ARCH-008 (lint-poikkeus vain keyValueStore.ts:ään).
+
+### Luovutus 2026-10-01 · Digiturva → PM
+- SEC-002-t011-katselmointi.md: SR-11, SR-12, SR-13 ja SR-16 täyttyvät. Versio kääreessä hyväksytty. Testit 281/281, lint OK, npm audit 0, salaisuushaku ei osumia. Veto: ei. Low: SEC-005 (puuttuvat näkymättömät merkit nimien siivouksessa), SEC-006 (kiintiövirhe koetallennuksessa piilottaa datan). Info SEC-007–SEC-010. Ehto T-012:lle: newer-version- ja reset-ilmoitukset näytetään käyttäjälle.
+
+### Checkpoint 2026-10-01 · PM
+- Korjauskierros ennen Donea (pienet, tarvitaan ennen T-012:ta): SEC-005, SEC-006, ARCH-007 (migrations.ts + invarianttitesti) ja ARCH-008 (lint-poikkeus). ARCH-006 ja SEC-008 → T-003. SEC-007 ja T-012:n ilmoitusehdot → T-012:n korttiin. SEC-009 ja SEC-010 → T-016:n yhteyteen (valinnaisia).
+- D-009: Testikäyttäjä ja Dokumentoija tehdään MVP-1:n lopussa koko tasolle.

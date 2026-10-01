@@ -10,7 +10,7 @@ Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
 | T-010 | UX, Sisällöntuottaja, Testikäyttäjä | Review | PR #3. Katselmoinnit ajetaan uudelleen (keskeytyivät käyttörajaan 2026-10-01) |
-| T-011 | Arkkitehti, Digiturva | Review | PR #4. Katselmoinnit |
+| T-011 | Koodari | Review (korjauskierros) | SEC-005, SEC-006, ARCH-007, ARCH-008, katso kortti |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -22,6 +22,11 @@ Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - ~~K5~~ → ratkaistu, D-007 (korttitaso, valmius painoksille).
 - T-014 (vastaus tarvitaan ennen T-014:ää): kun liität pakkalistan, tallennetaanko se aina omaksi pakakseen, vai riittääkö pelkkä raportti puuttuvista korteista ja niiden sijainnista? Tarvitaanko pakoille tila "koottu / suunnitelma"?
 - K-P1–K-P4 (tietosuoja, ei blokkaa MVP-1:tä): rekisterinpitäjä ja käsittelyperuste IP-osoitteille (ehdotus: sinä, oikeutettu etu), riittääkö ilmoitus ilman suostumusbanneria (ehdotus: kyllä), voivatko MVP-2:n käyttäjät olla alaikäisiä (selvitettävä ennen MVP-2:ta) ja Hosting-lokien säilytysaika (Firebase-konsoli). Katso PRIVACY.md.
+
+## Kulutus (D-009, 2026-10-01)
+- Katselmoinnit riskin mukaan (agents.md v1.3). Testikäyttäjä ja Dokumentoija MVP-tason lopussa.
+- Opus: Koodari, Arkkitehti, Digiturva. Sonnet: UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija (Agent-kutsussa `model: "sonnet"`).
+- Enintään kaksi agenttia kerrallaan. PM tyhjentää istunnon (`/clear`) tehtävien välissä ja jatkaa komennolla `/jatka`.
 
 ## Toimintatapa, kun käyttäjä on poissa (sovittu 2026-09-30)
 - PM vie tehtävää eteenpäin agenttien työnkulun mukaan (suunnittelu → Koodari → katselmoinnit → testikäyttäjä → dokumentointi → PR testiin).
