@@ -609,7 +609,7 @@ Taulukon rakenne (4.4) säilyy, mutta kolme asiaa muuttuu:
 |---|---|---|---|---|
 | **EI SUODATUSTA** | haku tyhjä, ei valintoja | `{kaikki} korttia` (kuten 4.5) | latauksen jälkeen `{kaikki} korttia ladattu.` (4.5), suodatuksen poiston jälkeen `Näytetään kaikki {kaikki} korttia.` | taulukko, caption `Kaikki kortit` |
 | **SUODATETTU** | haku tai valinta käytössä, n ≥ 1 | `{n} / {kaikki} korttia` (esim. `2 / 151 korttia`) | `Näytetään {n} / {kaikki} korttia.` | taulukko, caption `Hakua vastaavat kortit` |
-| **EI TULOKSIA** | haku tai valinta käytössä, n = 0 | `0 / {kaikki} korttia` | `Valintoja vastaavia kortteja ei löytynyt.` | tyhjä tila (alla), ei taulukkoa |
+| **EI TULOKSIA** | haku tai valinta käytössä, n = 0 | `0 / {kaikki} korttia` | `Hakua vastaavia kortteja ei löytynyt.` | tyhjä tila (alla), ei taulukkoa |
 
 - Osuusmuodossa `korttia` ei taivu luvun mukaan (`1 / 151 korttia`), kuten CONTENT.md:n luvussa 3.
 - OSITTAINEN-tilassa varoituslaatikko pysyy näkyvissä suodatuksen aikana, ja tilarivin osuus lasketaan saaduista korteista (esim. `12 / 120 korttia`). Varoitus kertoo, että kortteja puuttuu.
@@ -629,16 +629,16 @@ Taulukon rakenne (4.4) säilyy, mutta kolme asiaa muuttuu:
 │ └────────────────────────────┘ │
 │ …suodattimet (5.9)…            │
 │                                │
-│ Valintoja vastaavia kortteja   │ p (tyhjä tila, ei laatikkoa)
-│ ei löytynyt. Tarkista          │
-│ hakusana tai poista valintoja  │
+│ Hakua vastaavia kortteja ei    │ p (tyhjä tila, ei laatikkoa)
+│ löytynyt. Tarkista hakusana    │
+│ tai poista valintoja           │
 │ suodattimista.                 │
 │ [ Tyhjennä haku ja           ] │ ensisijainen painike
 │ [ suodattimet                ] │
 └────────────────────────────────┘
 ```
 
-- Kappale: `Valintoja vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.`
+- Kappale: `Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.`
 - Painike: `Tyhjennä haku ja suodattimet` (ensisijainen painike, 3.4). Se tyhjentää hakukentän, poistaa kaikki valinnat ja siirtää fokuksen hakukenttään. Live-alue ilmoittaa heti (ilman viivettä) `Näytetään kaikki {kaikki} korttia.`
 - Tyhjä tila ei ole virhe: ei ilmoituslaatikkoa eikä `h2`:ta. Sama tyyli kuin TYHJÄ-tilassa (4.5, luokka `empty`).
 - Hakusana jää kenttään, jotta käyttäjä näkee, mitä kirjoitti, ja voi korjata sen.
@@ -654,8 +654,8 @@ Taulukon rakenne (4.4) säilyy, mutta kolme asiaa muuttuu:
 
   | Tila latauksen jälkeen | n ≥ 1 | n = 0 |
   |---|---|---|
-  | ONNISTUMINEN | `{kaikki} korttia ladattu. Näytetään {n} / {kaikki} korttia.` | `{kaikki} korttia ladattu. Valintoja vastaavia kortteja ei löytynyt.` |
-  | OSITTAINEN | `Näytetään {n} / {kaikki} korttia. Osa korteista puuttuu listasta.` | `Valintoja vastaavia kortteja ei löytynyt. Osa korteista puuttuu listasta.` |
+  | ONNISTUMINEN | `{kaikki} korttia ladattu. Näytetään {n} / {kaikki} korttia.` | `{kaikki} korttia ladattu. Hakua vastaavia kortteja ei löytynyt.` |
+  | OSITTAINEN | `Näytetään {n} / {kaikki} korttia. Osa korteista puuttuu listasta.` | `Hakua vastaavia kortteja ei löytynyt. Osa korteista puuttuu listasta.` |
 
   `{kaikki}` = saatujen korttien määrä kuten tilarivillä. Ilman hakua ja valintoja latausviestit ovat ennallaan (4.5). Tämä viesti on toistokiellon lähtökohta: jos seuraavan muutoksen tulos on sama, siitä ei ilmoiteta uudelleen.
 - Ajastin perutaan, jos näkymä siirtyy LATAUS-tilaan (uudelleenyritys) tai komponentti poistuu. Vanhentunut ilmoitus ei saa ylikirjoittaa latausilmoitusta.

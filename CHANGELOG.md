@@ -5,8 +5,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 ## [Julkaisematon]
 
 ### Lisätty
-- Haku ja suodatus korttilistaan (T-010): voit hakea korttia nimen tai alaotsikon osalla, eikä kirjainkoolla tai aksenteilla ole väliä ("alvarez" löytää Judy Álvarezin). Listaa voi rajata korttityypin (Legend, Unit, Gear, Program) ja värin mukaan, ja haku ja valinnat toimivat yhdessä.
-- Listan yläpuolella näkyy, montako korttia valinnat löysivät (esim. "2 / 151 korttia"). Jos mikään kortti ei vastaa, näet ohjeen ja painikkeen, joka tyhjentää haun ja valinnat.
+- Haku ja suodatus korttilistaan: voit hakea korttia nimen tai alaotsikon osalla, eikä kirjainkoolla tai aksenteilla ole väliä ("alvarez" löytää Judy Álvarezin). Listaa voi rajata korttityypin (Legend, Unit, Gear, Program) ja värin mukaan, ja haku ja valinnat toimivat yhdessä.
+- Listan yläpuolella näkyy, montako korttia haku ja valinnat löysivät (esim. "2 / 151 korttia"). Jos mikään kortti ei vastaa, näet ohjeen ja painikkeen, joka tyhjentää haun ja valinnat.
 - Taulukossa näkyy nyt myös kortin väri tekstinä ja pienenä värinäytteenä. Sarakkeen nimi on "Tyyppi ja väri".
 - Haku toimii näppäimistöllä (Esc tyhjentää hakukentän) ja kapealla puhelimen näytöllä. Ruudunlukija kertoo tulosten määrän, kun lopetat kirjoittamisen, eikä jokaisesta näppäilystä erikseen.
 
