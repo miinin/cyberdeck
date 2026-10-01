@@ -1,6 +1,7 @@
 # UX · cyberdeck
 
 > Omistaja: UX Designer. Versio 0.2 · 2026-10-01 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
+> Muutos 0.3 · 2026-10-01 (T-010, MVP-1): uusi luku 5 (haku ja suodatus), korttien väritokenit (3.1.1) sekä tekstikenttä ja valintaruutu (3.4). Luvun 4 kohtiin, joita luku 5 muuttaa, on lisätty viittaus.
 > Tämä on minimitason design-järjestelmä, joka riittää MVP-0:aan. MVP-1 laajentaa sitä (lomakkeet, navigaatio, haku, kokoelman merkintä). Määrittely ei sido kehykseen: tokenit ovat CSS-muuttujia, ja rakenne kuvataan semanttisena HTML:nä.
 
 ---
@@ -51,6 +52,20 @@ Kontrastit on laskettu WCAG 2.x -kaavalla 2026-09-30. Kaikki tekstiparit ylittä
 Säännöt:
 - Tieto ei välity pelkällä värillä. Virhe- ja varoituslaatikoissa on aina otsikko tekstinä ("Korttien haku epäonnistui"), ei pelkkä punainen reuna.
 - Uusi väri lisätään tänne tokeniksi kontrastilaskelman kanssa ennen käyttöä.
+
+#### 3.1.1 Korttien värit (T-010)
+
+Pelin neljä väriä (rajapinnan `color`, katso 5.2). Niitä käytetään **vain** koristeellisessa värinäytteessä (`.color-swatch`), joka on aina värin nimen vieressä ja `aria-hidden="true"`. Tieto välittyy tekstinä, joten näyte ei ole informatiivinen grafiikka. Näytteellä on silti 1 px:n reuna `--color-border-strong` (4.1 / 5.0 taustaa vasten), jotta vaalea keltainen erottuu valkoisesta taustasta.
+
+| Token | Vaalea | Tumma | Kontrasti taustaa vasten (vaalea / tumma), tiedoksi |
+|---|---|---|---|
+| `--color-card-red` | `#c62828` | `#ff6b6b` | 5.6 / 6.8 |
+| `--color-card-yellow` | `#e0b000` | `#f2c94c` | 2.0 / 11.9 (reuna erottaa näytteen) |
+| `--color-card-green` | `#2e7d32` | `#5ccf6a` | 5.1 / 9.5 |
+| `--color-card-blue` | `#1565c0` | `#64a8ff` | 5.7 / 7.7 |
+| `--color-card-unknown` | `transparent` | `transparent` | Tuntematon väri: pelkkä reuna |
+
+Näitä tokeneita ei käytetä tekstin värinä eikä tekstin taustana.
 
 ### 3.2 Typografia
 
@@ -106,6 +121,19 @@ Säännöt:
 **Fokus yleisesti**
 - Selaimen oletusfokusta ei poisteta ilman korvaavaa `--focus-ring`-tyyliä.
 - Mikään kiinnitetty (sticky) elementti ei saa peittää fokusoitua elementtiä (2.4.11). MVP-0:ssa ei käytetä sticky-elementtejä.
+
+**Tekstikenttä** (T-010)
+- Näkyvä `<label>` kentän yläpuolella (`--font-weight-bold`). Placeholderia ei käytetä labelin tai ohjeen korvikkeena.
+- Ohjeteksti labelin ja kentän välissä (`--font-size-sm`, `--color-text-muted`), liitetty kenttään `aria-describedby`-attribuutilla.
+- Kenttä: korkeus vähintään `--target-min`, leveys 100 % (enintään `24rem`, kun leveys on ≥ 640 px), tausta `--color-bg`, teksti `--color-text`, reuna 1 px `--color-border-strong`, `--radius`, sisäväli `--space-2` `--space-3`, fonttikoko `--font-size-base` (16 px estää iOS:n automaattisen zoomauksen).
+- Fokus: `--focus-ring`.
+
+**Valintaruutu ja valintaryhmä** (T-010)
+- Natiivi `<input type="checkbox">` labelin sisällä yhdessä tekstin kanssa. Koko label on klikattava alue: vähintään `--target-min` korkea ja vähintään 44 px leveä. Ruudun koko `1.25rem`, `accent-color: var(--color-accent)`.
+- Valittu tila näkyy natiivina ruksina, ei pelkkänä värinä. Hover: labelin teksti alleviivataan.
+- Fokus: `--focus-ring` ruudussa (`input:focus-visible`). Fokusrengas ei saa leikkautua (ei `overflow: hidden` vanhemmissa).
+- Ryhmä on `<fieldset>`, jonka nimi on `<legend>` (`--font-weight-bold`). Fieldsetin oletusreuna poistetaan, ja sisäväli on 0.
+- Vaihtoehdot rivitetään: `display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4)`.
 
 **Visuaalisesti piilotettu teksti** (`.visually-hidden`)
 - Ruudunlukijalle tarkoitettu teksti, joka ei näy. Käytetään vakiintunutta clip-toteutusta (ei `display: none` eikä `visibility: hidden`, jotka piilottavat myös ruudunlukijalta).
@@ -260,12 +288,13 @@ Kortit esitetään **semanttisena taulukkona** (`<table>`), koska jokaisella kor
 | Hinta | `cost` | Kokonaisluku, `tabular-nums`, tasattu oikealle. Pelin sisäinen hinta, ei rahallinen arvo. | `null`/puuttuu ~~(esim. Legend)~~ → "–" + piilotettu "ei hintaa". Arvo 0 näytetään "0". 2026-10-01 (TXT-007): hinta voi puuttua minkä tahansa tyyppiseltä kortilta. Osalla Legendeistä on hinta (esim. V Streetkid 5), joten tyyppi ei ratkaise esitystä, vaan `cost`-kentän arvo. |
 
 - Rivin otsikko (`th scope="row"`) on kortin nimi, jotta ruudunlukija kertoo taulukossa liikuttaessa, minkä kortin tietoja luetaan.
-- Järjestys: rajapinnan palauttama järjestys. Järjestäminen ja haku ovat MVP-1:tä.
+- Järjestys: rajapinnan palauttama järjestys. Järjestäminen ja haku ovat MVP-1:tä. → 2026-10-01: haku ja suodatus luvussa 5 (T-010). Järjestäminen ei kuulu T-010:een.
+- 2026-10-01 (T-010): Tyyppi-sarake muuttuu sarakkeeksi "Tyyppi ja väri", ja taulukon kuvateksti (caption) vaihtuu suodatettaessa. Katso 5.5.
 - Rivien erotus: 1 px `--color-border` -viiva rivien välissä. Vuorottelevat taustavärit eivät ole pakollisia.
 - Solujen sisäväli: `--space-2` pystysuunnassa, `--space-2` vaakasuunnassa (320 px:ssä), `--space-3` ≥ 640 px.
 - Sarakeleveydet: Nimi vie jäljelle jäävän tilan. Tyyppi ja Hinta mitoittuvat sisältönsä mukaan (`width: 1%; white-space: nowrap`). Nimi rivittyy (`overflow-wrap: anywhere`), jotta pitkä nimi ei aiheuta vaakavieritystä.
 - Taulukon otsikkorivi ei ole sticky MVP-0:ssa.
-- Taulukko ei ole fokusoitava eikä rivit ole interaktiivisia. Näppäimistön käyttäjälle sivulla on MVP-0:ssa fokusoitavaa vain virhe- ja osittaisessa tilassa (painike).
+- Taulukko ei ole fokusoitava eikä rivit ole interaktiivisia. ~~Näppäimistön käyttäjälle sivulla on MVP-0:ssa fokusoitavaa vain virhe- ja osittaisessa tilassa (painike).~~ → 2026-10-01 (T-010): fokusjärjestys luvussa 5.7.
 - Kaikki kortit näytetään yhdellä sivulla (151 riviä). Sivutusta tai virtualisointia ei tehdä MVP-0:ssa.
 
 ### 4.5 Tilat ja tarkat tekstit
@@ -415,6 +444,350 @@ Lisäksi live-alue ilmoittaa "151 korttia ladattu." kerran, kun haku valmistuu.
 ### 4.10 Rajaukset (ei MVP-0:ssa)
 
 - Korttikuvat (käyttöoikeus selvittämättä, T-001-rajaus)
-- Haku, suodatus, järjestäminen, kortin yksityiskohtanäkymä
-- Muut kentät (väri, teho, RAM, harvinaisuus, setti). Lisätään MVP-1:ssä tarpeen mukaan.
+- ~~Haku, suodatus,~~ järjestäminen, kortin yksityiskohtanäkymä (haku ja suodatus → luku 5, T-010)
+- Muut kentät (~~väri,~~ teho, RAM, harvinaisuus, setti). Lisätään MVP-1:ssä tarpeen mukaan. (Väri → luku 5.5, T-010)
 - Teemavalitsin, ohituslinkki, sticky-otsikkorivi
+
+---
+
+## 5. Haku ja suodatus korttilistassa (T-010, MVP-1)
+
+### 5.1 Käyttäjä ja tavoite
+
+Pelaaja etsii pelipöydän ääressä tiettyä korttia, yleensä puhelimella. Hän muistaa nimen tai osan siitä ("silver") tai haluaa nähdä esimerkiksi kaikki punaiset Unitit. Tavoite: oikea kortti näkyy muutamassa sekunnissa ilman 151 rivin vierittämistä.
+
+Rajaukset (T-010-kortin mukaan): hakutilaa ei tallenneta URL:iin eikä selaimeen, listaa ei järjestetä, eikä sääntötekstejä (`rules_text`) haeta. Lisäksi tästä määrittelystä on jätetty pois vaihtoehtokohtaiset lukumäärät ("Legend (27)"), lomakkeen oma tyhjennyspainike ja suodattimien piilottaminen (`<details>`). Ne kirjataan tarvittaessa IDEAS.md:hen.
+
+### 5.2 Rajapinnan `color`- ja `card_type`-arvot (tarkistettu 2026-10-01)
+
+Haettu `https://api.netdeck.gg/api/cards/cyberpunk?limit=100&offset=0|100|200`: `total` = 151, saatu 151.
+
+| `color` | Kortteja | | `card_type` | Kortteja |
+|---|---|---|---|---|
+| `"Red"` | 38 | | `"Legend"` | 27 |
+| `"Yellow"` | 37 | | `"Unit"` | 73 |
+| `"Green"` | 38 | | `"Gear"` | 17 |
+| `"Blue"` | 38 | | `"Program"` | 34 |
+
+- Jokaisella kortilla on väri. `null`-arvoa ei esiintynyt, mutta sovellusmalli sallii sen (`Card.color: string | null`, `src/domain/card.ts`), joten se määritellään alla.
+- Jokainen väri esiintyy jokaisessa tyypissä, joten mikään tyyppi + väri -yhdistelmä ei ole valmiiksi tyhjä.
+- Nimissä on aksentteja ja erikoismerkkejä: `Judy Álvarez`, `El Sombrerón`, `Les Élémens`, heittomerkki, väliviiva ja sulkeet. Pisin nimi + alaotsikko: `Viktor Vektor` / `You Might Feel a Little Pinch`.
+
+**Värin esitys.** Värin nimi näytetään aina **tekstinä** suomeksi, ja sen vieressä on koristeellinen värinäyte (3.1.1). Väri ei siis koskaan välity pelkällä värillä (WCAG 1.4.1). Tieto säilyy myös värisokealle, harmaasävynäytöllä ja Windowsin suuren kontrastin tilassa (näyte voi kadota, teksti jää).
+
+| `color` | Teksti käyttöliittymässä | Näytteen token |
+|---|---|---|
+| `Red` | Punainen | `--color-card-red` |
+| `Yellow` | Keltainen | `--color-card-yellow` |
+| `Green` | Vihreä | `--color-card-green` |
+| `Blue` | Sininen | `--color-card-blue` |
+| muu merkkijono (uusi väri) | rajapinnan arvo sellaisenaan, `lang="en"` | `--color-card-unknown` |
+| `null` | "–" (`aria-hidden`) + piilotettu `ei väriä` | ei näytettä |
+
+Perustelu suomenkielisille nimille: korttityypit näytetään englanniksi, koska ne on painettu kortteihin (K2). Värejä ei ole painettu kortteihin sanoina, vaan ne ovat yleiskieltä. Katso avoin kysymys K6 (5.12).
+
+### 5.3 Polku
+
+```
+ONNISTUMINEN tai OSITTAINEN (4.5): lista, haku ja suodattimet näkyvät
+  │
+  ├─ Käyttäjä kirjoittaa hakukenttään ─┐
+  ├─ Käyttäjä valitsee tai poistaa      ├─→ lista suodattuu heti (jokaisella näppäilyllä)
+  │  tyypin tai värin                   │   tilarivi päivittyy heti: "{n} / {kaikki} korttia"
+  │                                     │   live-alue ilmoittaa 750 ms:n viiveellä (5.6)
+  │                                     │
+  │                                     ├─ n ≥ 1 → SUODATETTU (taulukossa n riviä)
+  │                                     └─ n = 0 → EI TULOKSIA
+  │                                          → [Tyhjennä haku ja suodattimet]
+  │                                          → kaikki kortit, fokus hakukenttään
+  │
+  └─ Käyttäjä tyhjentää haun ja poistaa valinnat itse → koko lista (EI SUODATUSTA)
+
+LATAUS, VIRHE, TYHJÄ (4.5): hakua ja suodattimia ei näytetä (5.8)
+```
+
+**Suodatussäännöt (odotettu toiminta, Koodari toteuttaa):**
+
+- Haku kohdistuu kortin nimeen ja alaotsikkoon. Kortti vastaa hakua, jos hakusana löytyy osana jostakin merkkijonoista `name`, `subname` tai `"{name} {subname}"`. Esimerkit: `silver` → molemmat Johnny Silverhand -kortit, `v streetkid` → V Streetkid, `renegade` → Johnny Silverhand Rocking Renegade.
+- Kirjainkoolla ei ole väliä. Aksenteilla ei ole väliä: `alvarez` löytää `Judy Álvarez` (Unicode-normalisointi NFD ja yhdistävien merkkien poisto molemmista puolista).
+- Hakusanan alusta ja lopusta poistetaan välilyönnit, ja peräkkäiset välilyönnit tiivistetään yhdeksi. Pelkistä välilyönneistä koostuva hakusana = ei hakua.
+- Kaikki merkit ovat tavallista tekstiä (ei säännöllisiä lausekkeita eikä jokerimerkkejä). `*`, `(` ja `<script>` haetaan kirjaimellisesti, ja ne johtavat yleensä EI TULOKSIA -tilaan.
+- Tyypit: yksi tai useampi valittu → näytetään kortit, joiden tyyppi on jokin valituista (TAI). Ei valintoja → kaikki tyypit.
+- Värit: sama logiikka kuin tyypeissä.
+- Haku, tyypit ja värit yhdistetään JA-ehdolla.
+- Vaihtoehdot: neljä tunnettua tyyppiä ja väriä aina tässä järjestyksessä (Legend, Unit, Gear, Program · Punainen, Keltainen, Vihreä, Sininen). Jos ladatuissa korteissa on tuntematon tyyppi tai väri, se lisätään vaihtoehdoksi tunnettujen perään rajapinnan arvolla (`lang="en"`). Kortti, jonka väri on `null`, näkyy vain, kun yhtään väriä ei ole valittu.
+- Hakusanan enimmäispituus on Koodarin ja Digiturvan päätös. UX ehdottaa `maxlength="100"`. Rajasta ei tarvitse näyttää ilmoitusta.
+
+### 5.4 Sivun rakenne
+
+Luvun 4.3 rakenne säilyy. Uusi lomake tulee tilarivin, live-alueen ja OSITTAINEN-tilan varoituslaatikon jälkeen ja ennen taulukkoa:
+
+```html
+<main>
+  <h1 tabindex="-1">Kortit</h1>
+  <p id="card-status">2 / 151 korttia</p>                     <!-- tilarivi, päivittyy heti -->
+  <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+  <!-- OSITTAINEN: varoituslaatikko (4.5) tähän -->
+
+  <form role="search" aria-label="Hae ja suodata kortteja" class="card-filters">
+    <div class="field">
+      <label for="card-search">Hae nimellä</label>
+      <p id="card-search-hint" class="hint">Kortin nimi tai alaotsikko. Osa sanasta riittää.</p>
+      <input id="card-search" type="search" aria-describedby="card-search-hint"
+             autocomplete="off" spellcheck="false" autocapitalize="none" enterkeyhint="search">
+    </div>
+
+    <p id="filter-hint" class="hint">Valitse yksi tai useampi. Ilman valintaa näytetään kaikki.</p>
+
+    <fieldset aria-describedby="filter-hint">
+      <legend>Tyyppi</legend>
+      <div class="options">
+        <label><input type="checkbox" name="type" value="Legend"> <span lang="en">Legend</span></label>
+        <label><input type="checkbox" name="type" value="Unit"> <span lang="en">Unit</span></label>
+        <label><input type="checkbox" name="type" value="Gear"> <span lang="en">Gear</span></label>
+        <label><input type="checkbox" name="type" value="Program"> <span lang="en">Program</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset aria-describedby="filter-hint">
+      <legend>Väri</legend>
+      <div class="options">
+        <label><input type="checkbox" name="color" value="Red">
+          <span class="color-swatch color-swatch-red" aria-hidden="true"></span> Punainen</label>
+        <label><input type="checkbox" name="color" value="Yellow">
+          <span class="color-swatch color-swatch-yellow" aria-hidden="true"></span> Keltainen</label>
+        <label><input type="checkbox" name="color" value="Green">
+          <span class="color-swatch color-swatch-green" aria-hidden="true"></span> Vihreä</label>
+        <label><input type="checkbox" name="color" value="Blue">
+          <span class="color-swatch color-swatch-blue" aria-hidden="true"></span> Sininen</label>
+      </div>
+    </fieldset>
+  </form>
+
+  <!-- EI SUODATUSTA / SUODATETTU: taulukko (5.5) · EI TULOKSIA: tyhjä tila (5.6) -->
+</main>
+```
+
+- Maamerkki: `form role="search"` (search-maamerkki), nimi `Hae ja suodata kortteja`. Muita maamerkkejä ei lisätä.
+- Otsikot: lomakkeelle ei lisätä otsikkoa. Otsikkorakenne säilyy: `h1` + tarvittaessa ilmoituslaatikon `h2`.
+- Lomake ei lähetä mitään: `onSubmit` estää oletustoiminnon (Enter ei lataa sivua uudelleen, katso 5.7).
+- Hakukenttä on `type="search"`, ei `type="text"`. Selaimen oma tyhjennysruksi saa näkyä.
+- Värinäyte `.color-swatch`: `display: inline-block; inline-size: 0.875rem; block-size: 0.875rem; border: 1px solid var(--color-border-strong); border-radius: 2px; vertical-align: middle;`, taustana värin token. Aina `aria-hidden="true"`.
+- Valintaruutujen järjestys DOM:ssa on sama kuin näkyvä järjestys.
+
+### 5.5 Taulukko suodatettuna
+
+Taulukon rakenne (4.4) säilyy, mutta kolme asiaa muuttuu:
+
+1. **Sarake "Tyyppi" → "Tyyppi ja väri".** Väri näytetään tyypin alla omalla rivillään samaan tapaan kuin alaotsikko nimen alla (`--font-size-sm`, `--color-text-muted`), värinäytteen kanssa. Erillistä neljättä saraketta ei tehdä, koska se ei mahdu 320 px:iin kaventamatta nimisaraketta liikaa. Ilman värisaraketta käyttäjä ei näkisi, miksi kortti on suodatuksen tuloksessa.
+
+```html
+<th scope="col" class="col-fit col-wrap-header">Tyyppi ja väri</th>
+…
+<td class="col-fit">
+  <span lang="en">Unit</span>
+  <span class="visually-hidden">, </span>
+  <span class="card-color">
+    <span class="color-swatch color-swatch-red" aria-hidden="true"></span> Punainen
+  </span>
+</td>
+```
+
+   - Ruudunlukija lukee solun "Unit, Punainen".
+   - Otsikkosolu saa rivittyä (`white-space: normal`), jotta sarakkeen leveys määräytyy solujen sisällöstä ("Program", "Keltainen" + näyte), ei otsikosta. 320 px:ssä otsikko on kahdella rivillä.
+   - Väri `null`: `<span aria-hidden="true">–</span><span class="visually-hidden">ei väriä</span>`.
+   - Väri näkyy kaikissa tiloissa, myös ilman suodatusta.
+2. **Taulukon piilotettu kuvateksti (caption)** vaihtuu: ei hakua eikä valintoja → `Kaikki kortit`. Haku tai valinta käytössä → `Hakua vastaavat kortit`.
+3. **Rivien määrä** on suodatuksen tulos. Rivit näytetään rajapinnan järjestyksessä.
+
+### 5.6 Tilat ja tarkat tekstit
+
+`{n}` = näkyvien korttien määrä. `{kaikki}` = ladattujen korttien määrä (ONNISTUMINEN-tilassa sama kuin `total`, OSITTAINEN-tilassa saatujen korttien määrä). Luvut muotoillaan `Intl.NumberFormat('fi-FI')`:lla kuten 4.5:ssä.
+
+| Tila | Milloin | Tilarivi (näkyvä, päivittyy heti) | Live-alue (viiveellä, ks. alla) | Muu sisältö |
+|---|---|---|---|---|
+| **EI SUODATUSTA** | haku tyhjä, ei valintoja | `{kaikki} korttia` (kuten 4.5) | latauksen jälkeen `{kaikki} korttia ladattu.` (4.5), suodatuksen poiston jälkeen `Näytetään kaikki {kaikki} korttia.` | taulukko, caption `Kaikki kortit` |
+| **SUODATETTU** | haku tai valinta käytössä, n ≥ 1 | `{n} / {kaikki} korttia` (esim. `2 / 151 korttia`) | `Näytetään {n} / {kaikki} korttia.` | taulukko, caption `Hakua vastaavat kortit` |
+| **EI TULOKSIA** | haku tai valinta käytössä, n = 0 | `0 / {kaikki} korttia` | `Valintoja vastaavia kortteja ei löytynyt.` | tyhjä tila (alla), ei taulukkoa |
+
+- Osuusmuodossa `korttia` ei taivu luvun mukaan (`1 / 151 korttia`), kuten CONTENT.md:n luvussa 3.
+- OSITTAINEN-tilassa varoituslaatikko pysyy näkyvissä suodatuksen aikana, ja tilarivin osuus lasketaan saaduista korteista (esim. `12 / 120 korttia`). Varoitus kertoo, että kortteja puuttuu.
+
+**EI TULOKSIA, rautalanka 320 px**
+
+```
+┌────────────────────────────────┐
+│ Kortit                         │ h1
+│ 0 / 151 korttia                │ tilarivi
+│                                │
+│ Hae nimellä                    │ label
+│ Kortin nimi tai alaotsikko.    │ ohje (sm, muted)
+│ Osa sanasta riittää.           │
+│ ┌────────────────────────────┐ │
+│ │ silverhandd             ✕ │ │ input type=search
+│ └────────────────────────────┘ │
+│ …suodattimet (5.9)…            │
+│                                │
+│ Valintoja vastaavia kortteja   │ p (tyhjä tila, ei laatikkoa)
+│ ei löytynyt. Tarkista          │
+│ hakusana tai poista valintoja  │
+│ suodattimista.                 │
+│ [ Tyhjennä haku ja           ] │ ensisijainen painike
+│ [ suodattimet                ] │
+└────────────────────────────────┘
+```
+
+- Kappale: `Valintoja vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.`
+- Painike: `Tyhjennä haku ja suodattimet` (ensisijainen painike, 3.4). Se tyhjentää hakukentän, poistaa kaikki valinnat ja siirtää fokuksen hakukenttään. Live-alue ilmoittaa heti (ilman viivettä) `Näytetään kaikki {kaikki} korttia.`
+- Tyhjä tila ei ole virhe: ei ilmoituslaatikkoa eikä `h2`:ta. Sama tyyli kuin TYHJÄ-tilassa (4.5, luokka `empty`).
+- Hakusana jää kenttään, jotta käyttäjä näkee, mitä kirjoitti, ja voi korjata sen.
+
+**Live-ilmoitusten hillintä (debounce)**
+
+- Taulukko ja tilarivi päivittyvät heti jokaisella muutoksella. Vain live-alueen teksti päivitetään viiveellä.
+- Viive: **750 ms viimeisestä muutoksesta** (näppäily, valinta, valinnan poisto, selaimen tyhjennysruksi, Esc). Jokainen uusi muutos nollaa ajastimen. Nopea kirjoittaja kuulee yhden ilmoituksen, kun hän pysähtyy, eikä ilmoitusta jokaisesta merkistä.
+- Enter hakukentässä antaa ilmoituksen heti (ajastin puretaan) eikä tee muuta.
+- Ilmoitusta ei anneta, jos tulos (tila ja n) on sama kuin edellisessä ilmoituksessa. Esimerkki: käyttäjä lisää merkin, eikä korttien määrä muutu → ei uutta ilmoitusta.
+- Ajastin perutaan, jos näkymä siirtyy LATAUS-tilaan (uudelleenyritys) tai komponentti poistuu. Vanhentunut ilmoitus ei saa ylikirjoittaa latausilmoitusta.
+- Kun kirjoitetaan syöttömenetelmällä (IME-koostaminen kesken), ilmoitusta ei anneta ennen kuin koostaminen päättyy.
+- Käytetään olemassa olevaa `role="status"`-aluetta (4.3). Toista live-aluetta ei lisätä, eikä `aria-live="assertive"` ole sallittu.
+- Hakukenttää ei liitetä tilariviin `aria-describedby`-attribuutilla (ruudunlukija lukisi luvun aina, kun kenttä saa fokuksen). Live-alue riittää.
+
+### 5.7 Fokus ja näppäimistö
+
+Sarkainjärjestys (DOM-järjestys) ONNISTUMINEN-tilassa:
+
+1. Hakukenttä `Hae nimellä`
+2. Valintaruudut `Legend` → `Unit` → `Gear` → `Program` (jokainen oma sarkainpysähdys, natiivit valintaruudut)
+3. Valintaruudut `Punainen` → `Keltainen` → `Vihreä` → `Sininen`
+4. EI TULOKSIA -tilassa: `Tyhjennä haku ja suodattimet`
+5. Alatunnisteen linkit (jos on)
+
+OSITTAINEN-tilassa `Yritä uudelleen` (varoituslaatikossa) on ennen hakukenttää.
+
+- Välilyönti valitsee valintaruudun ja poistaa valinnan (natiivi toiminta). Nuolinäppäimiä ei tarvita.
+- Esc hakukentässä tyhjentää kentän, jos siinä on tekstiä. Tämä toteutetaan itse, jotta toiminta on sama kaikissa selaimissa (Firefox ei tee sitä itse). Fokus pysyy kentässä.
+- Enter hakukentässä ei lähetä lomaketta eikä lataa sivua (katso 5.6).
+- Suodatus ei koskaan siirrä fokusta. Ainoa ohjelmallinen fokussiirto on `Tyhjennä haku ja suodattimet` → hakukenttä, koska painike katoaa painettaessa.
+- Uudelleenyritys (4.6) siirtää fokuksen edelleen `h1`:een.
+- Hakukenttää ei fokusoida automaattisesti sivun latautuessa (ei `autofocus`): mobiilissa se avaisi näppäimistön, joka peittäisi listan, ja ruudunlukija ohittaisi otsikon.
+- Sticky-elementtejä ei käytetä, joten mikään ei peitä fokusta (2.4.11).
+
+### 5.8 Haku muissa tiloissa
+
+| Tila (4.5) | Haku ja suodattimet |
+|---|---|
+| LATAUS | **Ei näytetä** (ei renderöidä). Ei `disabled`-kenttiä: käytöstä poistetut kentät hämmentävät ruudunlukijan ja näppäimistön käyttäjää, eikä suodatettavaa ole. |
+| VIRHE | Ei näytetä. |
+| TYHJÄ (`total` = 0) | Ei näytetä. |
+| OSITTAINEN | Näytetään. Suodattaa saatuja kortteja. |
+| ONNISTUMINEN | Näytetään. |
+
+- **Hakutila säilyy uudelleenyrityksen yli:** jos käyttäjä on OSITTAINEN-tilassa kirjoittanut hakusanan tai valinnut suodattimia ja painaa `Yritä uudelleen`, hakusana ja valinnat ovat samat, kun lista on taas ladattu (WCAG 3.3.7, tietoa ei pyydetä uudelleen). Tila säilytetään siis lomaketta ylemmällä tasolla. Sivun uudelleenlataus tyhjentää sen (rajaus: ei tallennusta).
+- Sana "haku" tarkoittaa nyt kahta asiaa: korttien hakemista lähteestä (`Haetaan kortteja…`, `Korttien haku epäonnistui`) ja nimellä hakemista. Ne eivät näy samaan aikaan, koska hakukenttä on piilossa LATAUS- ja VIRHE-tiloissa. Katso K7.
+
+### 5.9 Rautalanka ja responsiivisuus
+
+**320 px (ja 400 % zoom 1280 px:n ikkunassa), SUODATETTU**
+
+```
+┌────────────────────────────────┐
+│ Cyberdeck                      │ header
+├────────────────────────────────┤
+│ Kortit                         │ h1
+│ 2 / 151 korttia                │ tilarivi
+│                                │
+│ Hae nimellä                    │ label (bold)
+│ Kortin nimi tai alaotsikko.    │ ohje (sm, muted)
+│ Osa sanasta riittää.           │
+│ ┌────────────────────────────┐ │
+│ │ silver                  ✕ │ │ vähintään 44 px korkea
+│ └────────────────────────────┘ │
+│                                │ --space-4
+│ Valitse yksi tai useampi.      │ ohje (sm, muted)
+│ Ilman valintaa näytetään       │
+│ kaikki.                        │
+│ Tyyppi                         │ legend (bold)
+│ [☐ Legend]  [☐ Unit]           │ 44 px rivit, rivittyy
+│ [☐ Gear]    [☐ Program]        │
+│ Väri                           │ legend
+│ [☑ ■ Punainen] [☐ ■ Keltainen] │
+│ [☐ ■ Vihreä]   [☐ ■ Sininen]   │
+│                                │ --space-6
+│ ┌────────────────────────────┐ │
+│ │ Nimi        Tyyppi    Hinta│ │ thead
+│ │             ja väri        │ │
+│ ├────────────────────────────┤ │
+│ │ Johnny      Legend       – │ │
+│ │ Silverhand  ■ Punainen     │ │
+│ │ Rocking                    │ │ subname
+│ │ Renegade                   │ │
+│ ├────────────────────────────┤ │
+│ │ Johnny      Unit         6 │ │
+│ │ Silverhand  ■ Punainen     │ │
+│ │ Never Stop                 │ │
+│ │ Fighting                   │ │
+│ └────────────────────────────┘ │
+└────────────────────────────────┘
+```
+
+- Lomake vie 320 px:ssä noin 380 px korkeutta. Taulukko jää puhelimessa osin näkymän alle, mutta tilarivi kertoo tulosten määrän heti otsikon alla. Tämä on hyväksytty kompromissi (suodattimien piilotus olisi lisäominaisuus, katso 5.1).
+- Valintaruudut rivittyvät vapaasti: 320 px:ssä yleensä kaksi riville, 400 % zoomilla tai suurella tekstillä yksi riville. Ei vaakavieritystä.
+- Välistys: label → ohje `--space-1`, ohje → kenttä `--space-2`, kenttä → suodatinohje `--space-4`, legend → vaihtoehdot `--space-1`, fieldset → fieldset `--space-3`, lomake → taulukko tai tyhjä tila `--space-6`.
+
+**≥ 640 px (40 rem)**
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ Kortit                                                   │
+│ 2 / 151 korttia                                          │
+│                                                          │
+│ Hae nimellä                                              │
+│ Kortin nimi tai alaotsikko. Osa sanasta riittää.         │
+│ ┌──────────────────────────────┐                         │ enintään 24 rem
+│ │ silver                    ✕ │                         │
+│ └──────────────────────────────┘                         │
+│ Valitse yksi tai useampi. Ilman valintaa näytetään kaikki.│
+│ Tyyppi                                                   │
+│ [☐ Legend] [☐ Unit] [☐ Gear] [☐ Program]                 │
+│ Väri                                                     │
+│ [☑ ■ Punainen] [☐ ■ Keltainen] [☐ ■ Vihreä] [☐ ■ Sininen] │
+│                                                          │
+│ taulukko                                                 │
+└──────────────────────────────────────────────────────────┘
+```
+
+- Fieldsetit pysyvät allekkain (ei kahta saraketta), jotta lukujärjestys ja visuaalinen järjestys ovat samat kaikilla leveyksillä.
+- 200 % tekstin suurennus ja WCAG 1.4.12 -välistys: label- ja ohjetekstit rivittyvät. Kentällä ja valintaruuduilla ei ole kiinteää korkeutta (vain `min-height`).
+
+### 5.10 Saavutettavuusvaatimukset (tarkistuslista Koodarille)
+
+- [ ] Lomake `form role="search" aria-label="Hae ja suodata kortteja"`, `onSubmit` estää lähetyksen
+- [ ] Hakukenttä `type="search"`, näkyvä `<label for>` `Hae nimellä`, ohje liitetty `aria-describedby`:llä, ei placeholderia labelina, ei `autofocus`
+- [ ] Tyyppi ja väri omina `<fieldset>`-ryhminä, `<legend>` `Tyyppi` ja `Väri`, ryhmäohje `aria-describedby`:llä
+- [ ] Natiivit valintaruudut labelin sisällä. Koko label vähintään 44 × 44 px (WCAG 2.5.8 vaatii 24 px, UX.md 44 px).
+- [ ] Korttityypit `lang="en"`. Värit suomeksi tekstinä. Värinäyte `aria-hidden="true"`, reuna `--color-border-strong`.
+- [ ] Taulukon sarake `Tyyppi ja väri`, solussa tyyppi + piilotettu `, ` + väri. Caption vaihtuu: `Kaikki kortit` ↔ `Hakua vastaavat kortit`.
+- [ ] Tilarivi päivittyy heti. Live-alue (sama `role="status"` kuin 4.3) päivittyy 750 ms:n viiveellä, ei toista samaa tulosta ja perutaan LATAUS-tilassa.
+- [ ] EI TULOKSIA: kappale + `Tyhjennä haku ja suodattimet`, joka tyhjentää kaiken ja siirtää fokuksen hakukenttään
+- [ ] Esc tyhjentää hakukentän. Enter ei lähetä lomaketta.
+- [ ] Suodatus ei siirrä fokusta
+- [ ] Haku ja suodattimet eivät renderöidy LATAUS-, VIRHE- ja TYHJÄ-tiloissa. Hakutila säilyy uudelleenyrityksen yli.
+- [ ] Haku ei riipu kirjainkoosta eikä aksenteista. Erikoismerkit ja `<script>alert(1)</script>` käsitellään tavallisena tekstinä, eikä hakusanaa renderöidä koskaan HTML:nä (SR-1).
+- [ ] Kaikki värit tokeneista (3.1, 3.1.1). Ei uusia animaatioita eikä siirtymiä. Jos hover- tai fokussiirtymä lisätään, se poistetaan `prefers-reduced-motion: reduce` -tilassa.
+- [ ] Ei vaakavieritystä 320 px:ssä eikä 400 % zoomilla pisimmällä nimellä (`Viktor Vektor` / `You Might Feel a Little Pinch`) ja pisimmällä värillä (`Keltainen`)
+- [ ] axe-core: 0 rikkomusta tiloissa EI SUODATUSTA, SUODATETTU, EI TULOKSIA ja OSITTAINEN + SUODATETTU
+
+### 5.11 Ruudunlukija: odotettu kulku
+
+1. Sarkain hakukenttään: "Hae nimellä, hakukenttä, Kortin nimi tai alaotsikko. Osa sanasta riittää."
+2. Käyttäjä kirjoittaa "silver" ja pysähtyy → 750 ms:n kuluttua: "Näytetään 2 / 151 korttia."
+3. Sarkain: "Tyyppi, ryhmä, Valitse yksi tai useampi. Ilman valintaa näytetään kaikki. Legend, valintaruutu, ei valittu."
+4. Sarkain neljä kertaa: "Väri, ryhmä … Punainen, valintaruutu, ei valittu." Välilyönti: "valittu", ja 750 ms:n kuluttua tulosilmoitus.
+5. Taulukossa: "Hakua vastaavat kortit, taulukko, 3 saraketta …", rivi "Johnny Silverhand, Rocking Renegade" · "Legend, Punainen" · "ei hintaa".
+
+### 5.12 Avoimet kysymykset
+
+- **K6 · Värien kieli.** Oletus: värit suomeksi (Punainen, Keltainen, Vihreä, Sininen), koska niitä ei ole painettu kortteihin sanoina, toisin kuin tyypit (K2). Vaihtoehto: englanniksi kuten rajapinnassa (Red, Yellow, Green, Blue). Sisällöntuottaja lisää valitut termit CONTENT.md:n sanastoon. Muutos on pelkkä tekstimuutos `texts.ts`:ssä.
+- **K7 · "Haku"-sanan kaksi merkitystä.** Oletus: hakukentän label on vakiintunut `Hae nimellä`, ja latausviestit säilyvät ennallaan, koska ne eivät näy samaan aikaan (5.8). Sisällöntuottaja päivittää CONTENT.md:n sanaston (rivi "hakea / haku").
+- **K8 · Sarake "Tyyppi ja väri".** Oletus tämä. Vaihtoehto: erillinen Väri-sarake vain ≥ 640 px:ssä, mutta silloin eri leveydet olisivat epäjohdonmukaisia.
