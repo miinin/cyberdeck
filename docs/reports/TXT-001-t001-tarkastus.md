@@ -44,7 +44,7 @@ Tarkistettu, ei löydöksiä: `lang="fi"`, `<title>`, otsikko "Kortit", lataus (
 | `partialStatus` | {r} / {t} korttia | ei muutosta |
 
 Perustelu: teksti on totta kummassakin OSITTAINEN-tilan syyssä, kertoo mitä tapahtui ja mitä voi tehdä, eikä lupaa varmaa korjausta. Testit (`CatalogView.test.tsx`), jotka hakevat tekstiä, päivitetään samalla. UX.md 4.5:n OSITTAINEN-tekstit on syytä päivittää vastaamaan (UX Designer).
-**Tila:** Avoin → Korjattu (commit 6667d77)
+**Tila:** Avoin → Korjattu (commit 6667d77) → Varmistettu (Sisällöntuottaja 2026-10-01)
 
 ### TXT-002 · Epävirallisuusmerkintä: genetiivi "WeirdCon", lausefragmentti, peliä ei mainita · Low
 **Sijainti:** `src/ui/texts.ts` `footerUnofficial` · **Tehtävä:** T-001
@@ -59,7 +59,7 @@ Perustelu: teksti on totta kummassakin OSITTAINEN-tilan syyssä, kertoo mitä ta
 Yhdysmerkki "Cyberpunk TCG -fanityökalu" on oikein (monisanainen nimi + yleissana, välilyönti ennen yhdysmerkkiä). Vaihtoehto ilman pelin nimeä, jos Digiturva tai PM haluaa välttää tavaramerkin mainitsemisen: "Cyberdeck on epävirallinen fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä."
 `footerSource` "Korttitiedot: Netdeck.gg" on hyvä sellaisenaan.
 Lähteet: SECURITY.md luku 7 (WeirdCo julkaisijana, cyberpunktcg.com:n ehdot; suositeltu merkintä). Lisäksi texts.ts:n kommentti "the Content Producer reviews it later" päivitetään muotoon, joka viittaa tähän raporttiin.
-**Tila:** Avoin → Korjattu (commit 6667d77, ensisijainen vaihtoehto pelin nimen kanssa)
+**Tila:** Avoin → Korjattu (commit 6667d77, ensisijainen vaihtoehto pelin nimen kanssa) → Varmistettu (Sisällöntuottaja 2026-10-01)
 
 ### TXT-003 · Tarkistettava: CD PROJEKT RED:n fanisisältöohjeen englanninkielinen merkintä · Low
 **Sijainti:** alatunniste · **Tehtävä:** T-001
@@ -74,7 +74,7 @@ Lähteet: SECURITY.md luku 7 (WeirdCo julkaisijana, cyberpunktcg.com:n ehdot; su
 **Havainto:** Teksti käskee yrittämään myöhemmin, mutta heti alla on painike "Yritä uudelleen". "Korttitietokanta" viittaa järjestelmään, jota käyttäjä ei tunne (sovelluksella ei ole omaa tietokantaa).
 **Ehdotettu:** "Kortteja ei löytynyt. Korttitietojen lähde ei juuri nyt palauttanut yhtään korttia. Yritä hetken päästä uudelleen."
 Perustelu: kertoo, mistä kortit tulevat, ja "hetken päästä" sopii yhteen painikkeen kanssa. `emptyStatus` ja `emptyLive` pysyvät ennallaan.
-**Tila:** Avoin → Korjattu (commit 6667d77)
+**Tila:** Avoin → Korjattu (commit 6667d77) → Varmistettu (Sisällöntuottaja 2026-10-01)
 
 ### TXT-005 · K1: sarakeotsikko "Hinta" · Info (suositus)
 **Sijainti:** `texts.columnCost`, `texts.noCost`
@@ -117,3 +117,20 @@ footerUnofficial:
 ```
 
 Lisäksi tiedoston alun kommentti: viittaus "the Content Producer reviews it later" → "Reviewed in docs/reports/TXT-001-t001-tarkastus.md". TXT-003 odottaa PM:n päätöstä. Sisällöntuottaja varmistaa korjaukset esikatselusta (tai paketista) ja sulkee löydökset.
+
+---
+
+## Korjausten varmistus 2026-10-01 · Sisällöntuottaja
+
+**Kohde:** commit 6667d77 (`src/ui/texts.ts`), esikatselu https://cyberdeck-tcg-test--pr1-t-001-kaveleva-luura-wj9wvfxt.web.app
+**Menetelmä:** diff luettiin ja verrattiin ehdotuksiin. Esikatselun HTML ja JS-paketti haettiin `curl`illa, ja jokaisen korjatun merkkijonon esiintyminen tarkistettiin sellaisenaan. Vanhojen sanamuotojen ("Korttitietokanta", "WeirdCon", "hakeaksesi") todettiin poistuneen paketista. Selainta ei edelleenkään ollut käytössä (sama rajoite kuin alussa), joten renderöity ulkoasu jää UX:n ja Testikäyttäjän tarkistettavaksi.
+
+| ID | Tulos |
+|---|---|
+| TXT-001 | `partialTitle`, `partialBody` ja `partialLive` vastaavat ehdotusta merkki merkiltä, `partialStatus` ennallaan. Näkyy esikatselussa. **Varmistettu.** |
+| TXT-002 | `footerUnofficial` vastaa ensisijaista ehdotusta. Yhdysmerkki ("Cyberpunk TCG -fanityökalu") ja nimien perusmuodot oikein. Tiedoston alun kommentti viittaa tähän raporttiin. Näkyy esikatselussa. **Varmistettu.** |
+| TXT-004 | `emptyBody` vastaa ehdotusta. `emptyStatus` ja `emptyLive` ennallaan. Näkyy esikatselussa. **Varmistettu.** |
+| TXT-003 | Ei kuulunut korjauskierrokseen. Avoin, PM:n tai käyttäjän päätettävä. |
+
+Kieliasu: ei uusia löydöksiä. `lang="fi"` ja `<title>Kortit · Cyberdeck</title>` ennallaan.
+**Veto: ei.**

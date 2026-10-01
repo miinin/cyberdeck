@@ -1,7 +1,7 @@
 # T-001 · Kävelevä luuranko: korttilista rajapinnasta näytölle
 **Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☐ (teknologia ja rakenne, ADR) · Digiturva ☐ (ulkoinen rajapinta, korttikuvien käyttöoikeus) · UX ☐ (korttilistan näkymä ja tilat)
-**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☑ · Sisällöntuottaja ☑ (korjaukset kesken) · Testikäyttäjä ☐ · Dokumentoija ☐
+**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☑ · Sisällöntuottaja ☑ · Testikäyttäjä ☐ · Dokumentoija ☐
 **Riippuvuudet:** T-000 (Done). Julkaisuputken workflowt ovat jo haarassa `t-001-kaveleva-luuranko`.
 **Haara:** `t-001-kaveleva-luuranko`
 
@@ -178,3 +178,6 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 - Tunnetut rajoitteet ja riskit: UX.md 4.5:n OSITTAINEN- ja TYHJÄ-tekstit ovat vielä vanhat (UX Designerin tiedosto, ei muokattu).
 - Testit: `npm test` 71/71, `npm run lint` 0 virhettä ja 0 varoitusta, `npm run build` ok. Preview-workflow (run 36820974748) onnistui.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
+
+### Luovutus 2026-10-01 · Sisällöntuottaja → PM (korjausten varmistus)
+- TXT-001, TXT-002 ja TXT-004 varmistettu (commit 6667d77, diff ja esikatselun JS-paketti). Ei uusia löydöksiä. TXT-003 avoinna käyttäjän kysymyksenä (ei blokkaa). Veto: ei.
