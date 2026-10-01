@@ -55,6 +55,12 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 - Avoimet kysymykset: ei blokkaavia. Velkaehdotukset PM:lle luovutuksessa.
 - Muutetut tiedostot: `src/storage/keyValueStore.ts`, `index.ts`, `keyValueStore.test.ts`; `src/App.tsx`; `src/ui/` `CatalogView.tsx`, `CardList.tsx`, `CardFilters.tsx`, `texts.ts`, `useDelayedAnnouncement.ts`, uudet `collectionStore.ts` (+ testi), `useCollection.ts`, `useCollectionAnnouncements.ts`, `CountControl.tsx`, `CardName.tsx`, `CollectionNotices.tsx`, `StorageReminder.tsx`, `CatalogView.collection.test.tsx`; testien apufunktiot `CatalogView.test.tsx`, `CatalogView.filters.test.tsx`; `src/styles.css`; `docs/CONTENT.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`.
 
+### Checkpoint 2026-10-01 · Koodari (korjauskierros)
+- Tehty: UX-005, SEC-011 ja SEC-012 korjattu (commit b206790). UX.md 6.4.4 (rautalanka, ruudukko) ja 6.8 (tekstit) päivitetty PM:n luvalla. Raportteihin merkitty "Korjattu".
+- Kesken: ei mitään.
+- Seuraava askel: UX varmistaa UX-005:n ja Digiturva SEC-011:n ja SEC-012:n.
+- Muutetut tiedostot: `src/styles.css`, `src/ui/CardList.tsx`, `src/ui/texts.ts`, `src/ui/CatalogView.collection.test.tsx`, `docs/UX.md`, raportit UX-003 ja SEC-003.
+
 ## Luovutukset
 
 ### Luovutus 2026-10-01 · UX Designer → Koodari
@@ -92,3 +98,10 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 - UX: `docs/reports/UX-003-t012-kokoelma.md`. Veto: ei. Medium: UX-005 (320 px:n korttirivin rivitys, orpo erotin). Low: UX-006 (ensimmäinen kortti kaukana 320 px:ssä) → T-018. axe 0 rikkomusta kaikissa tarkistetuissa tiloissa.
 - PM:n päätös: UX-005, SEC-011 ja SEC-012 korjataan tällä kierroksella. Koodari saa päivittää UX.md:n kohdat 6.4.4 (rautalanka) ja 6.8 (tekstit) löydösten korjausehdotusten mukaisesti (PM:n lupa, rules.md 3).
 - Seuraava askel: Koodari korjaa, sitten UX ja Digiturva varmistavat korjaukset.
+
+### Luovutus 2026-10-01 · Koodari → UX Designer ja Digiturva (korjausten varmistus)
+- Mitä tehtiin: **UX-005:** kapea korttirivi on nyt kolmella ruudukkorivillä (`'name control' 'type control' 'cost control'`, sarakkeet `1fr auto`): nimi, `Legend · ■ Punainen`, `Hinta 5`. Hinnan edessä ollut jälkimmäinen `.separator` poistettiin, ja `.card-color` on `nowrap`, jotta värinäyte pysyy värin nimen vieressä. **SEC-011:** `newerVersionBody`: "… Päivitä sivu. Jos ilmoitus ei katoa, sulje kaikki tämän sivuston välilehdet ja avaa sivu uudelleen. Älä tyhjennä selaimen tietoja, koska kokoelma poistuisi." **SEC-012:** `resetNoBackupBody`: "… Vapauta tilaa poistamalla selaimen tietoja muilta sivustoilta ja päivitä sivu." UX.md 6.4.4 ja 6.8 vastaavat korjauksia.
+- Mitä pyydän: UX varmistaa UX-005:n esikatselussa (320 px, myös pisin nimi ja `Keltainen`). Digiturva varmistaa SEC-011:n ja SEC-012:n tekstit. Raportin SEC-011 kohta 2 (`Cache-Control` `firebase.json`iin) on PM:n erillinen tehtävä, eikä sitä ole tehty tässä.
+- Mistä katsoa: commit b206790 (`src/styles.css`, `src/ui/CardList.tsx`, `src/ui/texts.ts`).
+- Tunnetut rajoitteet ja riskit: asettelua ei tarkistettu oikeassa selaimessa (jsdom), joten UX:n varmistus on tarpeen.
+- Testit: uudet testit tarkistavat SEC-011:n ja SEC-012:n tekstit (ei sanaa "välimuisti") ja sen, että erottimia on yksi, tyypin ja värin välissä. `npm test` 17 tiedostoa ja 425 testiä, kaikki läpi. `npm run lint` 0 virhettä ja 0 varoitusta. `npm run build` onnistui.
