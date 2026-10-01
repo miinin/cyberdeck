@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: 2/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-012 | UX Designer | Ready (suunnittelu) | UX suunnittelee kokoelmanäkymän (UX.md luku 6), sitten Koodari. Haara `t-012-kokoelma`. |
+| T-012 | Koodari | In Progress | Toteutus UX.md:n luvun 6 mukaan. Haara `t-012-kokoelma`. |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)

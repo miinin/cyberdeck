@@ -1,5 +1,5 @@
 # T-012 · Kokoelma: omistettujen korttien merkintä
-**Tila:** Ready · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Suunnittelu:** UX ☑ (docs/UX.md luku 6, 2026-10-01) (näkymä, tilat, mikrokopio, saavutettavuus)
 **Katselmoinnit (D-009):** Koodikatselmointi ☐ · UX ☐ (käytettävyys, saavutettavuus, mikrokopio) · Digiturva ☐ (tallennettu data, syöte, SEC-007) · Testikäyttäjä: MVP-1:n lopussa · Dokumentoija: MVP-1:n lopussa
 **Riippuvuudet:** T-011 (Done), T-010 (Done)
