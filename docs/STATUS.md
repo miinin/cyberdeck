@@ -1,7 +1,7 @@
 # STATUS · päivitetty 2026-10-01 (PM)
 
 ## Yhdellä lauseella
-MVP-0 on valmis: T-001 (kävelevä luuranko, versio 0.1.0) on Done ja toiminnassa testisivustolla. Tuotantojulkaisu odottaa julkaisu-PR:n yhdistämistä.
+MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). Seuraavaksi MVP-1:n suunnittelu.
 
 ## MVP-taso
 Työn alla: MVP-0 · Valmiina: 2/2 tehtävää (T-000, T-001). Seuraavaksi MVP-1.
@@ -9,7 +9,7 @@ Työn alla: MVP-0 · Valmiina: 2/2 tehtävää (T-000, T-001). Seuraavaksi MVP-1
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| Julkaisu 0.1.0 | PM → käyttäjä | Odottaa | Julkaisu-PR test → main odottaa yhdistämistä (suojaushook vaatii käyttäjän luvan) |
+| – | PM | Odottaa käyttäjää | Käyttäjä kokeilee 0.1.0:aa ja vastaa K5:een, jonka jälkeen PM pilkkoo MVP-1:n |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -34,8 +34,7 @@ Työn alla: MVP-0 · Valmiina: 2/2 tehtävää (T-000, T-001). Seuraavaksi MVP-1
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. Julkaisu 0.1.0 tuotantoon (käyttäjän hyväksyntä)
-2. MVP-1:n tehtävien pilkkominen (PM). Ensin käyttäjän vastaus K5:een (kortit vai painokset). Backlogissa T-002–T-009.
+1. MVP-1:n tehtävien pilkkominen (PM). Ensin käyttäjän vastaus K5:een (kortit vai painokset). Backlogissa T-002–T-009.
 
 ## Julkaisuputki
 - GitHub: https://github.com/miinin/cyberdeck
