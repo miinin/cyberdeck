@@ -503,7 +503,7 @@ main {
   text-align: center;
 }
 
-/* Decorative "·" between type, color and cost: only in the narrow card layout. */
+/* Decorative "·" between type and color: only in the narrow card layout. */
 .card-table .separator {
   display: none;
 }
@@ -530,10 +530,12 @@ main {
 
   .card-table tbody tr {
     display: grid;
-    grid-template-columns: auto auto 1fr auto;
+    /* Three lines: name, type and color, cost (UX-005). */
+    grid-template-columns: 1fr auto;
     grid-template-areas:
-      'name name name control'
-      'type cost . control';
+      'name control'
+      'type control'
+      'cost control';
     column-gap: var(--space-2);
     padding-block: var(--space-2);
     border-bottom: 1px solid var(--color-border);
@@ -560,6 +562,8 @@ main {
   .card-table tbody .col-type .card-color {
     display: inline;
     font-size: inherit;
+    /* Keeps the swatch next to the color name (UX-005). */
+    white-space: nowrap;
   }
 
   .card-table tbody .col-type,

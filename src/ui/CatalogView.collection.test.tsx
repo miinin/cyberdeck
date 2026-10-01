@@ -87,6 +87,16 @@ describe('CatalogView collection: count control', () => {
     expect(within(plus('V, Streetkid')).getByText('+')).toHaveAttribute('aria-hidden', 'true');
   });
 
+  it('has one decorative separator, between type and color, and none before the cost (UX-005)', async () => {
+    await renderView();
+    const [typeCell, costCell] = within(row('V, Streetkid')).getAllByRole('cell');
+    const separators = typeCell?.querySelectorAll('.separator') ?? [];
+    expect(separators).toHaveLength(1);
+    expect(separators[0]).toHaveAttribute('aria-hidden', 'true');
+    expect(separators[0]?.nextElementSibling).toHaveClass('card-color');
+    expect(costCell?.querySelector('.separator')).toBeNull();
+  });
+
   it('marks a card owned with one press and keeps it in storage', async () => {
     const user = userEvent.setup();
     const { container, repositories } = await renderView();
@@ -415,6 +425,12 @@ describe('CatalogView collection: notices', () => {
     await renderView(withNotices([{ kind: 'reset', backupKey: null }]));
     const box = screen.getByRole('heading', { name: 'Vanhoja kokoelmatietoja ei voitu käsitellä' }).parentElement;
     expect(box).toHaveClass('notice-danger');
+    // SEC-012: free space from other sites, never this site's data.
+    expect(
+      within(box as HTMLElement).getByText(
+        'Tallennetut kokoelmatiedot olivat vioittuneet, eikä niistä saatu kopiota. Vanhoja tietoja ei ole poistettu, joten uusia merkintöjä ei voi tallentaa, ennen kuin selain sallii tallennuksen. Vapauta tilaa poistamalla selaimen tietoja muilta sivustoilta ja päivitä sivu.',
+      ),
+    ).toBeInTheDocument();
     expect(within(box as HTMLElement).queryByRole('button')).toBeNull();
     expect(plus('V, Streetkid')).toBeInTheDocument();
   });
@@ -454,6 +470,13 @@ describe('CatalogView collection: notices', () => {
       createMemoryRepositories({ initial: { [COLLECTION_KEY]: stored([{ card: 'v-streetkid', count: 1 }], 99) } }),
     );
     expect(heading2()).toContain('Kokoelma on tallennettu uudemmalla versiolla');
+    // SEC-011: the advice must not lead to clearing the browser data that holds the collection.
+    expect(
+      screen.getByText(
+        'Selaimeen tallennetut tiedot ovat peräisin sovelluksen uudemmasta versiosta. Kokoelmaa ei näytetä eikä sitä voi muokata, jotta tiedot eivät vioitu. Päivitä sivu. Jos ilmoitus ei katoa, sulje kaikki tämän sivuston välilehdet ja avaa sivu uudelleen. Älä tyhjennä selaimen tietoja, koska kokoelma poistuisi.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/välimuisti/)).toBeNull();
     expect(within(row('V, Streetkid')).queryByRole('button')).toBeNull();
     expect(controlCell('V, Streetkid')).toHaveTextContent('–ei muokattavissa');
     expect(summary(container)).toBeNull();

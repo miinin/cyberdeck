@@ -948,22 +948,25 @@ Neljä saraketta ja kaksi 44 px:n painiketta eivät mahdu 288 px:iin. Siksi alle
 │ ┌────────────────────────────┐ │
 │ │ V                [−]  2 [+]│ │ nimi (rivittyy) | kontrolli, keskitetty pystysuunnassa
 │ │ Streetkid                  │ │ subname
-│ │ Legend · ■ Punainen · Hinta 5││ tyyppi + väri, hinta
+│ │ Legend · ■ Punainen        │ │ tyyppi + väri
+│ │ Hinta 5                    │ │ hinta omalla rivillään (UX-005)
 │ ├────────────────────────────┤ │
 │ │ Swordwise Huscle       [+] │ │ määrä 0: vain [+]
-│ │ Unit · ■ Sininen · Hinta 3 │ │
+│ │ Unit · ■ Sininen           │ │
+│ │ Hinta 3                    │ │
 │ ├────────────────────────────┤ │
 │ │ Viktor Vektor    [−]  1 [+]│ │
 │ │ You Might Feel a Little    │ │ pitkä alaotsikko rivittyy
 │ │ Pinch                      │ │
-│ │ Program · ■ Keltainen · Hinta – │ hinta puuttuu: "–" kuten 4.4
+│ │ Program · ■ Keltainen      │ │
+│ │ Hinta –                    │ │ hinta puuttuu: "–" kuten 4.4
 │ └────────────────────────────┘ │
 └────────────────────────────────┘
 ```
 
-- Ruudukko `< 40rem`: `grid-template-columns: auto auto 1fr auto; grid-template-areas: "name name name control" "type cost . control"`. Kontrollin leveys on vakio `calc(3 * var(--target-min) + 2 * var(--space-2))` (132 px), jotta nimen leveys ei vaihtele rivien välillä. Kontrolli on pystysuunnassa keskitetty.
+- Ruudukko `< 40rem` (korjattu UX-005, 2026-10-01): `grid-template-columns: 1fr auto; grid-template-areas: "name control" "type control" "cost control"`, eli kolme riviä: nimi, tyyppi ja väri, hinta. Alkuperäinen kahden rivin malli (tyyppi, väri ja hinta samalla rivillä) ei mahtunut 320 px:iin. Kontrollin leveys on vakio `calc(3 * var(--target-min) + 2 * var(--space-2))` (132 px), jotta nimen leveys ei vaihtele rivien välillä. Kontrolli on pystysuunnassa keskitetty.
 - Hinta-solun eteen tulee **näkyvä** teksti `Hinta ` (CSS `::before`, koska otsikkorivi on piilotettu). Ruudunlukija voi lukea sen sarakeotsikon lisäksi, mikä on hyväksytty.
-- Tyyppi ja väri -solun sisältö ja tekstit ennallaan (5.5). Tyypin, värin ja hinnan välinen erotin `·` on koriste (`aria-hidden`).
+- Tyyppi ja väri -solun sisältö ja tekstit ennallaan (5.5). Tyypin ja värin välinen erotin `·` on koriste (`aria-hidden`). Hinnan edessä ei ole erotinta, koska hinta on omalla rivillään.
 - Rivien erotus 1 px `--color-border`, rivin pystysisäväli `--space-2`.
 - 320 px:ssä nimelle jää noin 144 px. Nimi rivittyy (`overflow-wrap: anywhere`, kuten 4.4). Ei vaakavieritystä 400 % zoomilla eikä pisimmällä nimellä.
 
@@ -1086,10 +1089,10 @@ Useampi ilmoitus samaan aikaan: allekkain järjestyksessä newer-version, reset,
 |---|---|---|---|---|---|
 | `persistent: false` | warning | `Tietoja ei voi tallentaa` | `Selain ei salli tietojen tallentamista tälle sivustolle. Voit merkitä kortteja, mutta merkinnät häviävät, kun suljet tai päivität sivun. Tarkista selaimen yksityisyysasetukset tai avaa sivu tavallisessa selausikkunassa.` | ei | `Tietoja ei voi tallentaa.` |
 | `reset`, `backupKey` on merkkijono | warning | `Vanhat kokoelmatiedot eivät olleet luettavissa` | `Tallennetut kokoelmatiedot olivat vioittuneet, joten kokoelma aloitettiin tyhjänä. Vanhoista tiedoista on otettu kopio selaimeen, mutta sovellus ei vielä osaa palauttaa sitä.` | kyllä | `Vanhat kokoelmatiedot eivät olleet luettavissa.` |
-| `reset`, `backupKey: null` (SEC-007) | danger | `Vanhoja kokoelmatietoja ei voitu käsitellä` | `Tallennetut kokoelmatiedot olivat vioittuneet, eikä niistä saatu kopiota. Vanhoja tietoja ei ole poistettu, joten uusia merkintöjä ei voi tallentaa, ennen kuin selain sallii tallennuksen. Vapauta selaimen tallennustilaa ja päivitä sivu.` | ei | `Vanhoja kokoelmatietoja ei voitu käsitellä.` |
+| `reset`, `backupKey: null` (SEC-007) | danger | `Vanhoja kokoelmatietoja ei voitu käsitellä` | `Tallennetut kokoelmatiedot olivat vioittuneet, eikä niistä saatu kopiota. Vanhoja tietoja ei ole poistettu, joten uusia merkintöjä ei voi tallentaa, ennen kuin selain sallii tallennuksen. Vapauta tilaa poistamalla selaimen tietoja muilta sivustoilta ja päivitä sivu. (SEC-012)` | ei | `Vanhoja kokoelmatietoja ei voitu käsitellä.` |
 | `repaired`, `dropped` = 1 | warning | `Osa kokoelman tiedoista oli vioittunut` | `Yhtä merkintää ei voitu lukea, ja se jätettiin pois. Muut merkinnät ovat tallessa. Tarkista kokoelmasi.` | kyllä | `Osa kokoelman tiedoista oli vioittunut.` |
 | `repaired`, `dropped` = n > 1 | warning | sama | `{n} merkintää ei voitu lukea, ja ne jätettiin pois. Muut merkinnät ovat tallessa. Tarkista kokoelmasi.` | kyllä | sama |
-| `newer-version` | warning | `Kokoelma on tallennettu uudemmalla versiolla` | `Selaimeen tallennetut tiedot ovat peräisin sovelluksen uudemmasta versiosta. Kokoelmaa ei näytetä eikä sitä voi muokata, jotta tiedot eivät vioitu. Päivitä sivu. Jos tämä ei auta, tyhjennä selaimen välimuisti ja yritä uudelleen.` | ei | `Kokoelma on tallennettu uudemmalla versiolla.` |
+| `newer-version` | warning | `Kokoelma on tallennettu uudemmalla versiolla` | `Selaimeen tallennetut tiedot ovat peräisin sovelluksen uudemmasta versiosta. Kokoelmaa ei näytetä eikä sitä voi muokata, jotta tiedot eivät vioitu. Päivitä sivu. Jos ilmoitus ei katoa, sulje kaikki tämän sivuston välilehdet ja avaa sivu uudelleen. Älä tyhjennä selaimen tietoja, koska kokoelma poistuisi. (SEC-011)` | ei | `Kokoelma on tallennettu uudemmalla versiolla.` |
 
 - **LUKITTU (newer-version):** kokoelma näytetään tyhjänä, ja kirjoitus on estetty. Kontrollisarakkeessa **ei ole painikkeita**: solussa `<span aria-hidden="true">–</span><span class="visually-hidden">ei muokattavissa</span>`. Yhteenveto ja "Vain omistetut" eivät renderöidy. Sama tila syntyy, jos `setCount` heittää `StorageError('newer-version')` (toinen välilehti on päivittänyt tiedot uudempaan versioon): rivin määrä palaa viimeksi tallennettuun ja näkymä siirtyy LUKITTU-tilaan.
 - `backupKey: null` -tilassa painikkeet pysyvät käytössä, ja tallennus epäonnistuu tallennusvirheenä (alla). Katso A4.

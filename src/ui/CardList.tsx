@@ -71,9 +71,6 @@ export function CardList({
               <span className="card-color">
                 <CardColor color={card.color} />
               </span>
-              <span className="separator" aria-hidden="true">
-                {' · '}
-              </span>
             </td>
             <td role="cell" className="col-fit col-number col-cost" data-label={texts.columnCost}>
               {card.cost === null ? (

@@ -143,7 +143,7 @@ export const texts = {
 
   resetNoBackupTitle: 'Vanhoja kokoelmatietoja ei voitu käsitellä',
   resetNoBackupBody:
-    'Tallennetut kokoelmatiedot olivat vioittuneet, eikä niistä saatu kopiota. Vanhoja tietoja ei ole poistettu, joten uusia merkintöjä ei voi tallentaa, ennen kuin selain sallii tallennuksen. Vapauta selaimen tallennustilaa ja päivitä sivu.',
+    'Tallennetut kokoelmatiedot olivat vioittuneet, eikä niistä saatu kopiota. Vanhoja tietoja ei ole poistettu, joten uusia merkintöjä ei voi tallentaa, ennen kuin selain sallii tallennuksen. Vapauta tilaa poistamalla selaimen tietoja muilta sivustoilta ja päivitä sivu.',
   resetNoBackupLive: 'Vanhoja kokoelmatietoja ei voitu käsitellä.',
 
   repairedTitle: 'Osa kokoelman tiedoista oli vioittunut',
@@ -155,7 +155,7 @@ export const texts = {
 
   newerVersionTitle: 'Kokoelma on tallennettu uudemmalla versiolla',
   newerVersionBody:
-    'Selaimeen tallennetut tiedot ovat peräisin sovelluksen uudemmasta versiosta. Kokoelmaa ei näytetä eikä sitä voi muokata, jotta tiedot eivät vioitu. Päivitä sivu. Jos tämä ei auta, tyhjennä selaimen välimuisti ja yritä uudelleen.',
+    'Selaimeen tallennetut tiedot ovat peräisin sovelluksen uudemmasta versiosta. Kokoelmaa ei näytetä eikä sitä voi muokata, jotta tiedot eivät vioitu. Päivitä sivu. Jos ilmoitus ei katoa, sulje kaikki tämän sivuston välilehdet ja avaa sivu uudelleen. Älä tyhjennä selaimen tietoja, koska kokoelma poistuisi.',
   newerVersionLive: 'Kokoelma on tallennettu uudemmalla versiolla.',
 
   saveFailedTitle: 'Muutosta ei voitu tallentaa',
