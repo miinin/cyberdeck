@@ -88,9 +88,10 @@ describe('CatalogView', () => {
   it('marks English card names and types with lang="en"', () => {
     renderView(ready([card(1, { name: 'V', subname: 'Streetkid', type: 'Legend' })]));
 
-    expect(screen.getByText('V')).toHaveAttribute('lang', 'en');
-    expect(screen.getByText('Streetkid')).toHaveAttribute('lang', 'en');
-    expect(screen.getByText('Legend')).toHaveAttribute('lang', 'en');
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('V')).toHaveAttribute('lang', 'en');
+    expect(within(table).getByText('Streetkid')).toHaveAttribute('lang', 'en');
+    expect(within(table).getByText('Legend')).toHaveAttribute('lang', 'en');
   });
 
   it('shows the color in Finnish under the type, with a decorative swatch (UX.md 5.5)', () => {
@@ -127,8 +128,9 @@ describe('CatalogView', () => {
       'color-swatch color-swatch-unknown',
     ]);
     swatches.forEach((swatch) => expect(swatch).toHaveAttribute('aria-hidden', 'true'));
-    expect(screen.getByText('Purple')).toHaveAttribute('lang', 'en');
-    expect(screen.getByText('Punainen')).not.toHaveAttribute('lang');
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('Purple')).toHaveAttribute('lang', 'en');
+    expect(within(table).getByText('Punainen')).not.toHaveAttribute('lang');
   });
 
   it('renders HTML in card data as literal text (SR-1)', () => {
