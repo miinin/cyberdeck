@@ -9,8 +9,8 @@ Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-010 | Koodari (worktree .claude/worktrees/t-010) | In Progress | Toteutus UX.md luvun 5 mukaan, sitten PR |
-| T-011 | Koodari (pääkansio) | In Progress | Toteutus ARCHITECTURE.md 12.9:n mukaan, D-008 |
+| T-010 | UX, Sisällöntuottaja, Testikäyttäjä | Review | PR #3. Katselmoinnit ajetaan uudelleen (keskeytyivät käyttörajaan 2026-10-01) |
+| T-011 | Arkkitehti, Digiturva | Review | PR #4. Katselmoinnit |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)

@@ -86,3 +86,7 @@ Kokoelma (T-012) ja pakat (T-013) tarvitsevat tietomallin ja tallennuksen, joka 
   1. Vitest ja ESLint käyvät läpi myös `.claude/worktrees/`-hakemiston. Ajon aikana T-010:n keskeneräinen testi epäonnistui pääkansion `npm test`-ajossa, vaikka T-011:n koodi oli kunnossa. Ehdotus: lisätään `.claude/**` Vitestin `test.exclude`-listaan ja ESLintin `globalIgnores`iin omana pienenä tehtävänään (en muuttanut, koska tehtävä ei kuulu T-011:een ja T-010 voisi muuttaa samoja tiedostoja).
   2. Hyväksymiskriteerien rasteja en merkinnyt, koska PM todentaa ne. Toteutus kattaa kriteerit 3–4 ja SR-11, SR-12, SR-13 sekä SR-16:n toteutusosan. ADR, ARCHITECTURE ja Digiturvan arvio olivat jo valmiina.
   3. STATUS.md:tä en päivittänyt (rinnakkaisajo, PM päivittää).
+
+### Checkpoint 2026-10-01 · PM
+- Koodari valmis, PR #4 (Preview vihreä). Katselmoinnit: Arkkitehti (rakenne ja poikkeamat) ja Digiturva (SR-11–SR-13, SR-16, versio kääreessä).
+- Koodarin ehdotukset: `.claude/**` pois testeistä ja lintistä → T-016, mapCardin apufunktiot → T-017. Kunnes T-016 on tehty, pääkansiossa ajetaan `npx vitest run --dir src`.
