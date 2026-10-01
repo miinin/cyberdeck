@@ -27,10 +27,11 @@ export const EPOCH_TIMESTAMP = '1970-01-01T00:00:00.000Z';
 
 const DECK_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const ISO_TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
-// C0 and C1 control characters (including line breaks and DEL) and bidirectional controls.
-// Matching control characters is the purpose of this pattern (SR-11).
+// C0 and C1 control characters (including line breaks and DEL), bidirectional controls and marks
+// (ALM, LRM, RLM), line and paragraph separators and BOM. ZWJ and ZWNJ stay: emoji sequences and
+// some scripts need them. Matching control characters is the purpose of this pattern (SR-11, SEC-005).
 // eslint-disable-next-line no-control-regex
-const UNSAFE_CHARACTERS = /[\u0000-\u001F\u007F-\u009F\u202A-\u202E\u2066-\u2069]/g;
+const UNSAFE_CHARACTERS = /[\u0000-\u001F\u007F-\u009F\u061C\u200E\u200F\u2028\u2029\u202A-\u202E\u2066-\u2069\uFEFF]/g;
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

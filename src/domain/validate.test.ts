@@ -42,6 +42,17 @@ describe('cleanText', () => {
     expect(cleanText('abc\u202Edef\u2066g\u2069', 1, 100)).toBe('abcdefg');
   });
 
+  it('removes invisible direction marks, line and paragraph separators and BOM (SEC-005)', () => {
+    expect(cleanText('a‎b‏c؜d e f﻿g', 1, 100)).toBe('abcdefg');
+    expect(cleanText('‏ ﻿', 1, 100)).toBeNull();
+  });
+
+  it('keeps zero-width joiners and non-joiners that emoji and scripts need', () => {
+    const family = '\u{1F468}‍\u{1F469}‍\u{1F467}';
+    expect(cleanText(family, 1, 100)).toBe(family);
+    expect(cleanText('a‌b', 1, 100)).toBe('a‌b');
+  });
+
   it('normalises to NFC', () => {
     const decomposed = 'A\u0308'; // A + combining diaeresis
     expect(cleanText(decomposed, 1, 100)).toBe('\u00C4');
