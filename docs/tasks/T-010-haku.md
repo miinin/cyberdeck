@@ -105,4 +105,4 @@ Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. T
 - Mistä katsoa: commitit a6890e9 ja 74404fe, PR #3:n esikatselu.
 - Tunnetut rajoitteet: sanahaku tekee yhdestä kirjaimesta laajan osuman (esim.  löytää kaikki kortit, joissa on v-kirjain), kuten ennenkin.
 - Testit: `npx vitest run --dir src` 136/136 läpi, `npm run lint` ja `npm run build` läpi.
-- Koodikatselmointi: tehty · Pakollisia korjattu 1 (testin tyyppivirhe buildissa) · Suosituksia 0
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (testin tyyppivirhe buildissa) · Suosituksia 0- Preview-ajo ei käynnistynyt e531b05:lle: PR #3 on konfliktissa testin kanssa (mergeable: CONFLICTING), koska T-011 yhdistettiin testiin. GitHub ei aja pull_request-workflow'ta konfliktissa olevalle PR:lle. Konfliktit: docs/ARCHITECTURE.md, docs/IDEAS.md, docs/LESSONS.md (lisäykset tiedostojen loppuun). Molemmat haarat lisäsivät opin tunnisteella L-002, joten toinen on numeroitava uudelleen (ehdotus: T-010:n user-event-oppi → L-003). Odottaa PM:n päätöstä: yhdistetäänkö test t-010-haku-haaraan (git merge origin/test) ja numeroidaanko oppi uudelleen.
