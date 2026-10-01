@@ -88,3 +88,41 @@ Rakennetaan ohut päästä päähän toimiva versio: sovellus hakee Cyberpunk TC
 3. ui/: texts.ts, useCardCatalog, CardList, CatalogView (tilat UX.md 4.5 + PM:n ratkaisu VIRHE/OSITTAINEN), App, styles.css (tokenit) + testit (SR-1 XSS-testi).
 4. firebase.json: CSP ja turvallisuusotsakkeet (SR-2, SR-3). Workflowt: permissions-lohkot (SR-8).
 5. Koodikatselmointi, audit, ajo-ohje STATUS.md:hen, ARCHITECTURE.md:n toteutusosa, luovutus, PR.
+
+### Riippuvuudet (SR-6) · Koodari 2026-09-30
+Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`), ja `package-lock.json` on commitoitu. Versiot noudattavat D-005:tä. Ylläpito: jokainen paketti on npm-rekisterin uusin versio (`latest`) 2026-09-30, paitsi TypeScript (uusin 7.0.2) ja jsdom (uusin 30.1.1), jotka on rajattu D-005:n perusteella. Ei `preinstall`-, `install`- eikä `postinstall`-skriptejä (`npm query ':attr(scripts, [postinstall])'` ym. tyhjä). `npm audit --audit-level=high`: 0 haavoittuvuutta (myös `--omit=dev`: 0).
+
+| Paketti | Versio | Tyyppi | Lisenssi | Perustelu |
+|---|---|---|---|---|
+| react | 19.3.0 | tuotanto | MIT | Käyttöliittymä (D-005) |
+| react-dom | 19.3.0 | tuotanto | MIT | Reactin DOM-renderöinti |
+| vite | 8.3.1 | kehitys | MIT | Build ja kehityspalvelin → `dist/` |
+| @vitejs/plugin-react | 6.1.1 | kehitys | MIT | JSX Vitessä |
+| typescript | 6.0.3 | kehitys | Apache-2.0 | Tyyppitarkistus (TS 7 ei käy typescript-eslintin kanssa) |
+| vitest | 5.0.3 | kehitys | MIT | Testiajuri |
+| jsdom | 29.1.1 | kehitys | MIT | DOM testeissä (jsdom 30 vaatii Node 24.15:n) |
+| @testing-library/react | 16.3.3 | kehitys | MIT | Komponenttitestit roolikyselyillä |
+| @testing-library/dom | 10.4.2 | kehitys | MIT | Edellisen vertaisriippuvuus |
+| @testing-library/jest-dom | 7.0.1 | kehitys | MIT | DOM-matcherit |
+| @testing-library/user-event | 14.6.7 | kehitys | MIT | Käyttäjän toiminnot testeissä |
+| @types/react, @types/react-dom | 19.3.0 | kehitys | MIT | Tyypit |
+| eslint | 10.11.0 | kehitys | MIT | Lint (SR-1, kerrosraja) |
+| @eslint/js | 10.0.1 | kehitys | MIT | ESLintin perussäännöt |
+| typescript-eslint | 8.71.0 | kehitys | MIT | TypeScript-säännöt |
+| eslint-plugin-react-hooks | 7.1.1 | kehitys | MIT | Hookien säännöt |
+| globals | 17.12.0 | kehitys | MIT | Globaalit muuttujat ESLintille |
+
+### Checkpoint 2026-09-30 · Koodari
+- Tehty: runko ja rajapintakerros (18f4b37), näkymä ja tilat (1cbaa58), CSP, otsakkeet ja workflowjen oikeudet (commit "Add CSP and security headers"), koodikatselmoinnin korjaus (commit "Stop starting page requests once a page has failed"). ARCHITECTURE.md:n toteutusosa ja STATUS.md:n ajo-ohje on päivitetty.
+- Kesken: ei mitään. PR testiin ja esikatselun tarkistus, katso luovutus.
+- Seuraava askel: katselmoinnit (Digiturva, UX, Arkkitehti, Sisällöntuottaja) esikatselu-URL:ssa.
+- Avoimet kysymykset: katso luovutus.
+- Muutetut tiedostot: `package.json`, `package-lock.json`, `.npmrc`, `tsconfig.json`, `vite.config.ts`, `eslint.config.js`, `index.html`, `src/**`, `firebase.json`, `.github/workflows/deploy-prod.yml`, `.github/workflows/deploy-test.yml`, `docs/ARCHITECTURE.md`, `docs/STATUS.md`, tämä kortti.
+
+### Luovutus 2026-09-30 · Koodari → Digiturva, UX, Arkkitehti, Sisällöntuottaja (PM ohjaa)
+- **Mitä tehtiin:** ARCHITECTURE.md:n mukainen Vite + React + TypeScript -sovellus. `src/api/` hakee kaikki sivut (rajattu rinnakkaisuus 3, aikakatkaisu 15 s per pyyntö, ei automaattisia uusintayrityksiä, sivukatto 20, pysähtyy tyhjään sivuun tai väärään offsetiin, muodon tarkistus, `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`). `src/ui/` näyttää taulukon (Nimi, Tyyppi, Hinta) ja UX.md 4.5:n tilat PM:n ratkaisun mukaan: yksikin epäonnistunut sivu = VIRHE, kortteja vähemmän kuin `total` = OSITTAINEN. `firebase.json` sai CSP:n ja SR-3:n otsakkeet molemmille sivustoille. Deploy-workflowt saivat `permissions: contents: read`, ja käyttämätön `repoToken` poistettiin live-julkaisuista. Alatunniste: "Epävirallinen fanityökalu. Ei WeirdCon, Netdeck.gg:n eikä CD PROJEKT REDin hyväksymä tai tukema." ja "Korttitiedot: Netdeck.gg" (luonnos SECURITY.md 7:n ja UX.md 4.3:n pohjalta, Sisällöntuottaja tarkistaa).
+- **Mitä pyydän:** Digiturva: SEC-katselmointi (SR-1–SR-10, `firebase.json`, workflowt SR-9, riippuvuudet yllä, CSP-virheet selaimen konsolissa esikatselussa). UX: näkymä, tilat, näppäimistö, axe ja live-alueen poikkeama (ARCHITECTURE.md → Toteutuksen yksityiskohdat). Arkkitehti: rakenne ja poikkeamat (oma aikakatkaisu, rajattu rinnakkaisuus). Sisällöntuottaja: alatunnisteen teksti ja muut käyttöliittymätekstit (`src/ui/texts.ts`). Testikäyttäjä katselmointien jälkeen.
+- **Mistä katsoa:** PR testiin (URL alla), esikatselu-URL PR:n kommentissa. Koodi: `src/api/netdeckClient.ts`, `src/api/mapCard.ts`, `src/ui/CatalogView.tsx`, `src/ui/CardList.tsx`, `src/ui/texts.ts`, `src/styles.css`, `firebase.json`, `eslint.config.js`. Ajo: `npm ci && npm run dev`. Virhetilan saa näkyviin paikallisesti esim. estämällä `api.netdeck.gg`:n selaimen kehitystyökaluissa (Network → Block request domain).
+- **Tunnetut rajoitteet ja riskit:** Lataus kestää noin 6 s (3 sivua, ei välimuistia, T-003). Epäonnistuneen sivun jälkeen jo lähteneet (enintään 2) pyynnöt valmistuvat taustalla, ja tulos hylätään. CSP-virheitä ei ole tarkistettu oikeassa selaimessa (ei selainta tässä ympäristössä). Otsakkeet tarkistetaan esikatselusta `curl -sI`:llä. Tyylejä ei ole tarkistettu visuaalisesti eikä axe-ajolla. Testit ja lint eivät ole CI:ssä (T-004).
+- **Testit:** `npm test` 71/71 läpi (5 tiedostoa: rajapintakerros 27, mapCard 20, CatalogView 15, useCardCatalog 5, App 4). `npm run lint` 0 virhettä ja 0 varoitusta. `npm run build` → `dist/` (JS 71,7 kt gzip, ei inline-skriptejä). `npm audit --audit-level=high` 0. Puhdas klooni (`npm ci`, build, test, lint) läpi. Lint-säännöt todennettu väliaikaisella tiedostolla: SR-1-rakenteet ja kerrosrajan ohitus antavat virheen. Oikea rajapinta kerran käsin: 151 / 151.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (epäonnistuneen sivun jälkeen aloitettiin uusia pyyntöjä, regressiotesti lisätty) · Suosituksia 2: (1) keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen, (2) `tsconfig.json`:n `vitest/globals`-tyypit näkyvät myös sovelluskoodille, joten testit ja sovelluskoodi voisi erottaa omiin tsconfigeihin. Molemmat ovat pieniä. Ehdotan PM:lle yhteistä `[velka]`-tehtävää.

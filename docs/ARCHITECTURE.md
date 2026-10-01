@@ -268,3 +268,19 @@ export function App(props: { loadCatalog?: (signal: AbortSignal) => Promise<Card
 ## Toteutuksen yksityiskohdat
 
 _Koodari täydentää T-001:n toteutuksen jälkeen (poikkeamat suunnitelmasta perusteluineen)._
+
+### T-001 · Koodari 2026-09-30
+
+Toteutus noudattaa lukuja 3–9. Poikkeamat ja tarkennukset perusteluineen:
+
+- **Aikakatkaisu omalla `AbortController`illa ja `setTimeout`illa**, ei `AbortSignal.any`/`AbortSignal.timeout`-yhdistelmällä (5.4). Perustelu: `AbortSignal.any` puuttuu Safarista ennen versiota 17.4, ja oma `timedOut`-lippu erottaa aikakatkaisun kutsujan peruutuksesta ilman virheen nimeen luottamista. Käyttäytyminen on sama kuin 5.5:n taulukossa.
+- **Rinnakkaisuus rajattu** (5.3 kohta 3 + SR-5): loput sivut haetaan enintään `MAX_CONCURRENT_REQUESTS = 3` pyyntöä kerrallaan (ei rajatonta `Promise.all`ia). Uusia pyyntöjä ei aloiteta, kun jokin sivu on epäonnistunut tai palauttanut tyhjän `items`-taulukon (SR-5: sivutus pysähtyy tyhjään sivuun).
+- **`offset`-tarkistus:** jos sivun palauttama `offset` ei vastaa pyydettyä, heitetään `invalid-response` (SR-5: offset, joka ei kasva). `parsePage` vaatii myös `offset`in ei-negatiiviseksi kokonaisluvuksi.
+- **Tyhjä ensimmäinen sivu** lopettaa haun, vaikka `total` olisi suurempi (ei turhia pyyntöjä). Näkymä näyttää silloin OSITTAINEN-tilan ilman tyhjää taulukkoa.
+- **`fetch`-asetuksissa myös `referrerPolicy: 'no-referrer'`** (SR-4).
+- **`mapCard` trimmaa merkkijonot:** pelkkiä välilyöntejä sisältävä kenttä tulkitaan puuttuvaksi.
+- **Tilojen valinta** (`ui/CatalogView.tsx`, `toViewModel`): PM:n päätös 2026-09-30. `error` → VIRHE. `ready` ja `cards.length < reportedTotal` → OSITTAINEN. `ready` ja 0 korttia → TYHJÄ. Muuten ONNISTUMINEN saatujen korttien määrällä (myös, jos korttien määrä on suurempi kuin `total`).
+- **Live-alue** (`role="status"`) on DOM:ssa ensimmäisestä renderöinnistä asti, ja sen sisältö on silloin jo "Haetaan kortteja…" (UX.md 4.3 pyytää tyhjää aluetta). Alue pysyy samana elementtinä kaikissa tiloissa, joten tilamuutokset ilmoitetaan. Sivun latautuessa lataustekstin ilmoittaminen ei ole välttämätöntä, koska se näkyy myös tilarivillä. UX tarkistaa katselmoinnissa.
+- **Lint (SR-1):** `no-restricted-syntax` estää `dangerouslySetInnerHTML`:n, `innerHTML`/`outerHTML`-sijoitukset, `insertAdjacentHTML`:n, `document.write`:n ja merkkijonoajastimet. `no-eval`, `no-implied-eval` ja `no-new-func` ovat päällä. Kerrosraja valvotaan luvun 4 mukaan (myös `src/main.tsx`).
+- **Workflowt (SR-8):** `deploy-prod.yml` ja `deploy-test.yml` saivat `permissions: contents: read`. `repoToken` poistettiin live-julkaisuista, koska `action-hosting-deploy` käyttää tokenia vain PR-ajoissa (tarkistettu lähdekoodista `src/index.ts`).
+- **Todennettu oikeaa rajapintaa vasten** kerran käsin 2026-09-30 (ei testisarjassa): 151 / 151 korttia, 0 ohitettua, noin 6 s.

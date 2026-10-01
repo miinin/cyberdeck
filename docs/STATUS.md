@@ -9,7 +9,7 @@ Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-001 | Koodari | In Progress | Toteutus ARCHITECTURE.md:n, UX.md:n ja SR-vaatimusten mukaan, katso kortti |
+| T-001 | Koodari → katselmoijat | Review | Toteutus valmis, PR testiin. Katselmoinnit: Digiturva, UX, Arkkitehti ja Sisällöntuottaja, sitten Testikäyttäjä (katso kortin luovutus 2026-09-30) |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -43,4 +43,18 @@ Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
 - Workflowt ajavat `npm ci && npm run build` ja julkaisevat `dist/`-kansion.
 
 ## Ajo-ohje
-Ei vielä sovelluskoodia. Koodari täydentää T-001:ssä.
+Vaatii Node 22.13:n tai uudemman (workflowt: Node 22, kehityskone: Node 24.14).
+
+```
+npm ci              # riippuvuudet package-lock.jsonin mukaan
+npm run dev         # kehityspalvelin, http://localhost:5173
+npm test            # kaikki yksikkötestit kerran (Vitest, ei verkkokutsuja)
+npm run test:watch  # testit tarkkailutilassa
+npm run lint        # ESLint, 0 varoitusta sallittu
+npm run build       # tyyppitarkistus + tuotantobuild → dist/
+npm run preview     # dist/ paikallisesti (ilman firebase.jsonin otsakkeita)
+npm audit --audit-level=high
+```
+
+- Sovellus hakee kortit selaimesta suoraan `https://api.netdeck.gg`:stä. Avaimia tai ympäristömuuttujia ei tarvita.
+- CSP ja muut turvallisuusotsakkeet tulevat `firebase.json`ista, joten ne näkyvät vain Firebase Hostingissa (esikatselu ja testisivusto), ei `npm run dev`:ssä.
