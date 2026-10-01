@@ -5,6 +5,11 @@ import type { Card } from '../domain/card';
 import { createMemoryRepositories } from '../storage';
 import { CatalogView } from './CatalogView';
 import type { CatalogState } from './useCardCatalog';
+
+/** In-memory storage that behaves like working browser storage (no "Tietoja ei voi tallentaa" box). */
+function browserLikeRepositories() {
+  return { ...createMemoryRepositories(), persistent: true };
+}
 import { ANNOUNCE_DELAY_MS } from './useDelayedAnnouncement';
 
 function card(slug: string, name: string, subname: string | null, type: string, color: string | null): Card {
@@ -27,7 +32,7 @@ function ready(list: Card[] = cards, reportedTotal = list.length): CatalogState 
 
 function renderView(state: CatalogState = ready()) {
   const onRetry = vi.fn();
-  const result = render(<CatalogView state={state} onRetry={onRetry} repositories={createMemoryRepositories()} />);
+  const result = render(<CatalogView state={state} onRetry={onRetry} repositories={browserLikeRepositories()} />);
   return { ...result, onRetry };
 }
 
@@ -391,7 +396,7 @@ describe('CatalogView search and filters: live region', () => {
     const { rerender } = renderView();
 
     typeText('judy');
-    rerender(<CatalogView state={{ status: 'loading' }} onRetry={vi.fn()} repositories={createMemoryRepositories()} />);
+    rerender(<CatalogView state={{ status: 'loading' }} onRetry={vi.fn()} repositories={browserLikeRepositories()} />);
     expect(vi.getTimerCount()).toBe(0);
     wait(ANNOUNCE_DELAY_MS * 2);
 
@@ -407,14 +412,14 @@ describe('CatalogView search and filters: live region', () => {
 
     typeText('');
     wait(ANNOUNCE_DELAY_MS);
-    rerender(<CatalogView state={ready()} onRetry={vi.fn()} repositories={createMemoryRepositories()} />);
+    rerender(<CatalogView state={ready()} onRetry={vi.fn()} repositories={browserLikeRepositories()} />);
     expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\.$/);
   });
 
   // UX-002 (K9, UX.md 5.6): the loaded message also tells the filter result when a search is kept over a retry.
   const reload = (rerender: ReturnType<typeof render>['rerender'], state: CatalogState) => {
-    rerender(<CatalogView state={{ status: 'loading' }} onRetry={vi.fn()} repositories={createMemoryRepositories()} />);
-    rerender(<CatalogView state={state} onRetry={vi.fn()} repositories={createMemoryRepositories()} />);
+    rerender(<CatalogView state={{ status: 'loading' }} onRetry={vi.fn()} repositories={browserLikeRepositories()} />);
+    rerender(<CatalogView state={state} onRetry={vi.fn()} repositories={browserLikeRepositories()} />);
   };
 
   it('combines the loaded message with the filter result after a successful retry (UX-002)', () => {

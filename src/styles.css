@@ -408,12 +408,6 @@ main {
   cursor: progress;
 }
 
-.notice-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
 /* Browser-only reminder and persistent storage (UX.md 6.7) */
 .storage-reminder {
   display: flex;
@@ -422,6 +416,11 @@ main {
   gap: var(--space-2);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+/* The result takes focus programmatically after the request (UX.md 6.7), like the heading. */
+.storage-result:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .storage-reminder .button-secondary {

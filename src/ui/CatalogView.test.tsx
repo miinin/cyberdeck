@@ -6,6 +6,11 @@ import { createMemoryRepositories } from '../storage';
 import { CatalogView } from './CatalogView';
 import type { CatalogState } from './useCardCatalog';
 
+/** In-memory storage that behaves like working browser storage (no "Tietoja ei voi tallentaa" box). */
+function browserLikeRepositories() {
+  return { ...createMemoryRepositories(), persistent: true };
+}
+
 function card(index: number, overrides: Partial<Card> = {}): Card {
   return {
     id: `id-${index}`,
@@ -28,7 +33,7 @@ function ready(cards: Card[], reportedTotal = cards.length, skipped = 0): Catalo
 
 function renderView(state: CatalogState) {
   const onRetry = vi.fn();
-  const { container } = render(<CatalogView state={state} onRetry={onRetry} repositories={createMemoryRepositories()} />);
+  const { container } = render(<CatalogView state={state} onRetry={onRetry} repositories={browserLikeRepositories()} />);
   return { onRetry, container };
 }
 

@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
+import { isStoragePersisted, requestPersistentStorage } from '../storage';
 import type { Repositories } from '../storage';
 import {
   EMPTY_CRITERIA,
@@ -16,11 +17,15 @@ import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardFilters } from './CardFilters';
 import { CardList } from './CardList';
 import type { OwnedColumn } from './CardList';
+import { countOf } from '../domain/collection';
+import { CollectionNotices, loadNotices } from './CollectionNotices';
 import { countIn } from './collectionStore';
 import type { CollectionSnapshot } from './collectionStore';
-import { useCollection } from './useCollection';
+import { StorageReminder, persistenceResultText } from './StorageReminder';
+import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
-import { countOf } from '../domain/collection';
+import { useCollection } from './useCollection';
+import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
 import type { Announcement } from './useDelayedAnnouncement';
 import type { CatalogState } from './useCardCatalog';
@@ -127,7 +132,11 @@ export function CatalogView({
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const view = toViewModel(state);
-  const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection, () => {});
+  const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
+  const [persistence, setPersistence] = useState<PersistenceState>('idle');
+  const persistenceResultRef = useRef<HTMLParagraphElement>(null);
+  /** Set by the button: the result paragraph takes focus once it is rendered. */
+  const focusPersistenceResult = useRef(false);
   const allCards = view.cards;
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
@@ -166,6 +175,46 @@ export function CatalogView({
 
   // The loaded message already told this result, so the same result is not announced again.
   const announcer = useDelayedAnnouncement(state, showFilters ? loadResult.key : null);
+  const collectionAnnouncer = useCollectionAnnouncements(announcer, collectionStore, allCards, collection.saveError);
+  const collectionNotices = showFilters ? loadNotices(collection, repositories.persistent) : [];
+  useLoadNoticeAnnouncement(
+    announcer,
+    state,
+    collection.loadCount,
+    collectionNotices.map((notice) => notice.live).join(' '),
+  );
+
+  // Read-only check: never asks the user, so it may run on load (A2). The request itself waits for the button (SR-13).
+  useEffect(() => {
+    if (!repositories.persistent) return;
+    let active = true;
+    void isStoragePersisted().then((persisted) => {
+      if (active && persisted) setPersistence((current) => (current === 'idle' ? 'already' : current));
+    });
+    return () => {
+      active = false;
+    };
+  }, [repositories]);
+
+  const handleRequestPersistence = () => {
+    setPersistence('busy');
+    void requestPersistentStorage().then((granted) => {
+      const result: PersistenceState = granted ? 'granted' : 'denied';
+      focusPersistenceResult.current = true;
+      setPersistence(result);
+      collectionAnnouncer.announce(persistenceResultText(result) ?? '');
+    });
+  };
+
+  useEffect(() => {
+    // The button is replaced by the result; keep focus from falling to <body> (UX.md 6.7).
+    if (focusPersistenceResult.current && persistenceResultText(persistence) !== null) {
+      focusPersistenceResult.current = false;
+      persistenceResultRef.current?.focus();
+    }
+  }, [persistence]);
+
+  const focusHeading = () => headingRef.current?.focus();
 
   /** Any change of the search, a selection or "Vain omistetut" (UX.md 5.6, 6.6). */
   const updateFilters = (
@@ -218,7 +267,7 @@ export function CatalogView({
             if (ownedOnly) setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
             collectionStore.setCount(card.key, count);
           },
-          onLimit: () => {},
+          onLimit: collectionAnnouncer.announceLimit,
         };
   const summary =
     collection.phase === 'loading'
@@ -261,6 +310,33 @@ export function CatalogView({
           <p>{view.notice.body}</p>
           {retryButton}
         </div>
+      )}
+
+      {showFilters && (
+        <CollectionNotices
+          snapshot={collection}
+          persistent={repositories.persistent}
+          onDismiss={(kind) => {
+            collectionStore.dismissNotice(kind);
+            focusHeading();
+          }}
+          onDismissSaveError={() => {
+            collectionStore.dismissSaveError();
+            focusHeading();
+          }}
+          onReload={() => {
+            focusHeading();
+            collectionStore.reload();
+          }}
+        />
+      )}
+
+      {showFilters && collection.phase === 'ready' && repositories.persistent && (
+        <StorageReminder
+          state={persistence}
+          resultRef={persistenceResultRef}
+          onRequest={handleRequestPersistence}
+        />
       )}
 
       {view.emptyMessage !== null && (
