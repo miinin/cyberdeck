@@ -1,7 +1,7 @@
 # ARCHITECTURE · cyberdeck
 
 > Omistaja: Arkkitehti. Koodari päivittää toteutuksen yksityiskohdat (osio "Toteutuksen yksityiskohdat").
-> Päivitetty 2026-09-30 (Arkkitehti, T-001). Teknologiapäätös: D-005 (tila: Ehdotettu).
+> Päivitetty 2026-10-01 (Arkkitehti, T-001:n katselmointi ARCH-001: poikkeamat hyväksytty ja kirjattu lukuihin 3, 5, 7 ja 9). Teknologiapäätös: D-005 (tila: Voimassa).
 
 ## 1. Yleiskuva
 
@@ -50,7 +50,7 @@ Cyberdeck on selaimessa toimiva yhden sivun sovellus (SPA). MVP-0:ssa ja MVP-1:s
 ├── tsconfig.json              yksi konfiguraatio: src/ + vite.config.ts
 ├── vite.config.ts             Vite + Vitest-asetukset (test.environment = jsdom)
 ├── eslint.config.js           flat config, kerrosrajan valvonta (luku 4)
-├── firebase.json              ennallaan
+├── firebase.json              hosting (prod, test) + CSP ja turvallisuusotsakkeet (SR-2, SR-3)
 └── src/
     ├── main.tsx               createRoot + <App /> (StrictMode)
     ├── App.tsx                ylin komponentti: useCardCatalog → CatalogView
@@ -60,7 +60,7 @@ Cyberdeck on selaimessa toimiva yhden sivun sovellus (SPA). MVP-0:ssa ja MVP-1:s
     ├── api/
     │   ├── index.ts           JULKINEN rajapinta: fetchAllCards, CardApiError, tyypit
     │   ├── netdeckClient.ts   HTTP, sivutus, aikakatkaisu, virheiden luokittelu
-    │   ├── netdeckTypes.ts    Netdeck.gg:n raakamuodon tyypit (vain api/:n sisällä)
+    │   ├── netdeckTypes.ts    Netdeck.gg:n raakamuodon tyypit: NetdeckPage, NetdeckCardFields (vain api/:n sisällä)
     │   ├── mapCard.ts         raaka kortti (unknown) → Card | null
     │   ├── errors.ts          CardApiError ja virhetyypit
     │   ├── netdeckClient.test.ts
@@ -74,6 +74,7 @@ Cyberdeck on selaimessa toimiva yhden sivun sovellus (SPA). MVP-0:ssa ja MVP-1:s
     │   ├── texts.ts           käyttöliittymätekstit (UX ja Sisällöntuottaja)
     │   ├── CatalogView.test.tsx
     │   └── useCardCatalog.test.tsx
+    ├── App.test.tsx
     └── test/
         └── setup.ts           jest-dom-matcherit + oikean verkon esto
 ```
@@ -111,7 +112,8 @@ export type { CardCatalog, FetchAllCardsOptions } from './netdeckClient';
 export const NETDECK_CARDS_URL = 'https://api.netdeck.gg/api/cards/cyberpunk';
 export const PAGE_SIZE = 60;
 export const DEFAULT_TIMEOUT_MS = 15_000;
-export const MAX_PAGES = 20;            // suojaa loputtomalta silmukalta
+export const MAX_PAGES = 20;            // suojaa loputtomalta silmukalta (= 1200 korttia, katso 5.3)
+export const MAX_CONCURRENT_REQUESTS = 3; // rinnakkaisia sivupyyntöjä enintään (SR-5, ARCH-001)
 
 export interface CardCatalog {
   cards: Card[];          // rajapinnan järjestyksessä, duplikaatit (sama id) poistettu
@@ -136,14 +138,18 @@ function parsePage(json: unknown): NetdeckPage;  // heittää CardApiError('inva
 
 1. Hae sivu `offset=0, limit=PAGE_SIZE`. Lue `total` ja palautettu `limit`.
 2. Jos `total <= items.length`, valmis. Muuten laske loput offsetit: `limit, 2*limit, …` niin kauan kuin `offset < total`. Käytä palautettua `limit`-arvoa, ei omaa oletusta (jos rajapinta pienentää sivukokoa, kortteja ei jää väliin). Jos `limit <= 0` tai sivuja tulisi yli `MAX_PAGES`, heitä `invalid-response`.
-3. Hae loput sivut rinnakkain (`Promise.all`). Nopeuttaa latausta, koska yksi sivu kestää noin 2 s. Yksikin epäonnistunut sivu = koko lataus epäonnistuu (ei osittaista listaa MVP-0:ssa).
+3. ~~Hae loput sivut rinnakkain (`Promise.all`).~~ → tarkennettu katselmoinnissa ARCH-001: hae loput sivut rinnakkain, mutta **enintään `MAX_CONCURRENT_REQUESTS = 3` pyyntöä kerrallaan** (työjono, jossa on `min(3, sivujen määrä)` työntekijää). Nopeuttaa latausta, koska yksi sivu kestää noin 2 s, ja pitää kuorman Netdeck.gg:lle maltillisena, vaikka `total` kasvaisi tai olisi virheellinen (SR-5, D-006). Nykyisellä 151 kortilla loppuja sivuja on 2, joten raja ei hidasta latausta. Yksikin epäonnistunut sivu = koko lataus epäonnistuu (ei osittaista listaa MVP-0:ssa), eikä uusia pyyntöjä aloiteta sen jälkeen. Myös tyhjä sivu lopettaa uusien pyyntöjen aloittamisen (SR-5). Jo lähteneet pyynnöt (enintään 2) valmistuvat taustalla, ja niiden tulos hylätään. Niiden peruutus on velkatehtävä T-006.
+   - `MAX_PAGES` on kova katto: jos `total` vaatisi yli 20 sivua (yli 1200 korttia sivukoolla 60), koko lataus epäonnistuu `invalid-response`-virheeseen. Raja on noin 8-kertainen nykyiseen korttimäärään nähden. Se tarkistetaan viimeistään välimuistin ADR:ssä (T-003) tai kun korttimäärä ylittää 600.
 4. Yhdistä sivujen `items` järjestyksessä, muunna `mapCard`-funktiolla, poista duplikaatit `id`:n perusteella ja laske hylätyt `skipped`-kenttään.
 5. Palauta `{ cards, reportedTotal: total, skipped }`. Kun data on eheää, `cards.length === reportedTotal` (hyväksymiskriteeri). Jos ne poikkeavat, kirjaa `console.warn` luvuilla (ei muuta dataa) ja näytä kortit silti.
 
 ### 5.4 Pyynnön asetukset
 
-- `fetchFn(url, { method: 'GET', headers: { Accept: 'application/json' }, credentials: 'omit', signal })`
-- `signal = AbortSignal.any([AbortSignal.timeout(timeoutMs), options.signal].filter(Boolean))`
+- `fetchFn(url, { method: 'GET', headers: { Accept: 'application/json' }, credentials: 'omit', referrerPolicy: 'no-referrer', signal })` (SR-4)
+- Vastauksen `offset` on oltava sama kuin pyydetty, muuten `invalid-response` (SR-5).
+- ~~`signal = AbortSignal.any([AbortSignal.timeout(timeoutMs), options.signal].filter(Boolean))`~~ → korvattu katselmoinnissa ARCH-001: jokaisella pyynnöllä on oma `AbortController`. `setTimeout(timeoutMs)` asettaa `timedOut`-lipun ja peruuttaa ohjaimen. Kutsujan `signal`in `abort`-tapahtuma peruuttaa saman ohjaimen. `finally`-lohko tyhjentää ajastimen ja poistaa kuuntelijan. Aikakatkaisu kattaa myös vastauksen rungon lukemisen (`response.json()`).
+  - Perustelu: `AbortSignal.any` on Safarissa vasta versiosta 17.4 ja Firefoxissa versiosta 124, mutta Vite 8:n oletuskohde (`build.target`, baseline-widely-available) on `chrome111`, `edge111`, `firefox114`, `safari16.4`, `ios16.4` (tarkistettu `node_modules/vite`:sta 2026-10-01). Vite ei lisää polyfillejä, joten `AbortSignal.any` kaatuisi osassa kohdeselaimia. Oma `timedOut`-lippu erottaa aikakatkaisun kutsujan peruutuksesta luotettavammin kuin virheen nimi (`TimeoutError` tai `AbortError`), joka vaihtelee selaimittain ja testiympäristöissä.
+  - Sääntö jatkoon: selaimen API:t valitaan Viten oletuskohteen mukaan. Uudempaa API:a käytetään vain ominaisuustunnistuksen ja varapolun kanssa, tai kohteen nostosta tehdään päätös.
 - URL rakennetaan `new URL(NETDECK_CARDS_URL)` + `searchParams.set(...)`. Merkkijonoja ei liimata yhteen.
 
 ### 5.5 Virheenkäsittely
@@ -162,8 +168,8 @@ export class CardApiError extends Error {
 | Tilanne | Tunnistus | Tulos |
 |---|---|---|
 | Ei yhteyttä, DNS, CORS-esto | `fetch` heittää `TypeError` | `CardApiError('network')` |
-| Aikakatkaisu | `DOMException`, `name === 'TimeoutError'` | `CardApiError('timeout')` |
-| Kutsuja peruutti (`options.signal`) | `name === 'AbortError'` | heitetään alkuperäinen virhe **sellaisenaan**. Hook ohittaa sen, eikä käyttäjälle näytetä virhettä. |
+| Aikakatkaisu | oma `timedOut`-lippu (5.4), ei virheen nimeä | `CardApiError('timeout')` |
+| Kutsuja peruutti (`options.signal`) | `options.signal.aborted` | heitetään alkuperäinen virhe **sellaisenaan**. Hook ohittaa sen, eikä käyttäjälle näytetä virhettä. |
 | HTTP ei 2xx | `!response.ok` | `CardApiError('http', …, { status })` |
 | JSON ei jäsenny tai muoto väärä (`items` ei taulukko, `total`/`limit` ei ei-negatiivinen kokonaisluku) | `parsePage` | `CardApiError('invalid-response')` |
 | Yksittäinen kortti puutteellinen | `mapCard` palauttaa `null` | kortti jätetään pois, `skipped += 1` |
@@ -221,6 +227,8 @@ export function useCardCatalog(load?: (signal: AbortSignal) => Promise<CardCatal
 };
 // oletus load = (signal) => fetchAllCards({ signal })
 // useEffect + AbortController: purku peruuttaa pyynnön (StrictMode ajaa efektin kahdesti kehitystilassa)
+// Sopimus (ARCH-001): `load` on vakaa viite (moduulitason funktio, useCallback tai propsi, joka ei vaihdu
+// renderöinnissä). Joka renderöinnillä uusi funktio käynnistäisi latauksen joka kerta uudelleen.
 // AbortError ohitetaan. Muu kuin CardApiError → kind 'network' + console.error.
 
 // CatalogView.tsx
@@ -250,7 +258,9 @@ export function App(props: { loadCatalog?: (signal: AbortSignal) => Promise<Card
 
 - `npm run build` = tyyppitarkistus + `vite build` → `dist/`. Tyyppivirhe rikkoo buildin, jolloin workflow ei julkaise.
 - Workflowt (`.github/workflows/`) ajavat vain `npm ci && npm run build`. Testit ja lint ajetaan paikallisesti ennen luovutusta (rules.md 6). Niiden lisääminen PR-workflowhun on suositeltu jatkotehtävä.
-- `firebase.json` ei muutu. Turvallisuusotsakkeet (esim. CSP `connect-src https://api.netdeck.gg`) ovat Digiturvan päätettävissä, ja ne lisätään `firebase.json`:n `headers`-osioon.
+- ~~`firebase.json` ei muutu.~~ → T-001: `firebase.json`:n molemmilla sivustoilla (prod, test) on sama `headers`-osio: CSP (`connect-src 'self' https://api.netdeck.gg`, ei `unsafe-inline`- eikä `unsafe-eval`-lähteitä) ja SR-3:n otsakkeet. Sisällöstä päättää Digiturva (SR-2, SR-3, SR-9).
+  - Kytkökset, jotka on pidettävä yhdenmukaisina: CSP:n `connect-src` ↔ `NETDECK_CARDS_URL` (`api/netdeckClient.ts`) sekä prod- ja test-lohkojen otsakkeet keskenään (JSON ei salli yhteistä lohkoa). Jos rajapinnan osoite vaihtuu, myös CSP:tä on muutettava, muuten selain estää haun. Katso ARCH-001, löydös ARCH-003.
+  - `vite.config.ts`: `assetsInlineLimit: 0`, jotta CSP ei tarvitse `data:`-lähteitä skripteille.
 
 ## 10. Ulkoiset palvelut
 
@@ -262,8 +272,11 @@ export function App(props: { loadCatalog?: (signal: AbortSignal) => Promise<Card
 ## 11. Tunnettu rakenteellinen velka ja jatkotehtäväehdotukset (PM priorisoi)
 
 1. **Korttidatan välimuisti** (MVP-1:n alussa): yksi lataus on noin 1,4 Mt ja noin 4–6 s. Muunnettujen `Card`-olioiden tallennus `localStorage`en aikaleimalla ja taustapäivitys. Pienentää myös rajapinnan sulkeutumisen riskiä. Oma ADR.
-2. **Testit ja lint CI:hin:** `npm test && npm run lint` preview-workflowhun ennen buildia.
-3. **ESLint-saavutettavuusliitännäinen,** kun ESLint 10:n kanssa yhteensopiva versio on saatavilla (eslint-plugin-jsx-a11y 6.10.2 tukee vain ESLint 9:ää).
+2. **Testit ja lint CI:hin** (T-004): `npm test && npm run lint` preview-workflowhun ennen buildia.
+3. **ESLint-saavutettavuusliitännäinen** (T-005), kun ESLint 10:n kanssa yhteensopiva versio on saatavilla (eslint-plugin-jsx-a11y 6.10.2 tukee vain ESLint 9:ää).
+
+4. **Keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen ja testityyppien (`vitest/globals`) erottaminen sovelluksen tsconfigista** (T-006).
+5. **`firebase.json`:n otsakkeiden yhdenmukaisuus** (ARCH-003): pieni testi, joka varmistaa, että prod- ja test-lohkojen otsakkeet ovat samat ja että CSP:n `connect-src` sisältää `NETDECK_CARDS_URL`:n originin. Ehdotus PM:lle.
 
 ## Toteutuksen yksityiskohdat
 
@@ -273,8 +286,8 @@ _Koodari täydentää T-001:n toteutuksen jälkeen (poikkeamat suunnitelmasta pe
 
 Toteutus noudattaa lukuja 3–9. Poikkeamat ja tarkennukset perusteluineen:
 
-- **Aikakatkaisu omalla `AbortController`illa ja `setTimeout`illa**, ei `AbortSignal.any`/`AbortSignal.timeout`-yhdistelmällä (5.4). Perustelu: `AbortSignal.any` puuttuu Safarista ennen versiota 17.4, ja oma `timedOut`-lippu erottaa aikakatkaisun kutsujan peruutuksesta ilman virheen nimeen luottamista. Käyttäytyminen on sama kuin 5.5:n taulukossa.
-- **Rinnakkaisuus rajattu** (5.3 kohta 3 + SR-5): loput sivut haetaan enintään `MAX_CONCURRENT_REQUESTS = 3` pyyntöä kerrallaan (ei rajatonta `Promise.all`ia). Uusia pyyntöjä ei aloiteta, kun jokin sivu on epäonnistunut tai palauttanut tyhjän `items`-taulukon (SR-5: sivutus pysähtyy tyhjään sivuun).
+- **Aikakatkaisu omalla `AbortController`illa ja `setTimeout`illa** (Arkkitehti hyväksyi 2026-10-01, ARCH-001, kirjattu lukuun 5.4), ei `AbortSignal.any`/`AbortSignal.timeout`-yhdistelmällä (5.4). Perustelu: `AbortSignal.any` puuttuu Safarista ennen versiota 17.4, ja oma `timedOut`-lippu erottaa aikakatkaisun kutsujan peruutuksesta ilman virheen nimeen luottamista. Käyttäytyminen on sama kuin 5.5:n taulukossa.
+- **Rinnakkaisuus rajattu** (5.3 kohta 3 + SR-5, Arkkitehti hyväksyi 2026-10-01, ARCH-001, kirjattu lukuun 5.3): loput sivut haetaan enintään `MAX_CONCURRENT_REQUESTS = 3` pyyntöä kerrallaan (ei rajatonta `Promise.all`ia). Uusia pyyntöjä ei aloiteta, kun jokin sivu on epäonnistunut tai palauttanut tyhjän `items`-taulukon (SR-5: sivutus pysähtyy tyhjään sivuun).
 - **`offset`-tarkistus:** jos sivun palauttama `offset` ei vastaa pyydettyä, heitetään `invalid-response` (SR-5: offset, joka ei kasva). `parsePage` vaatii myös `offset`in ei-negatiiviseksi kokonaisluvuksi.
 - **Tyhjä ensimmäinen sivu** lopettaa haun, vaikka `total` olisi suurempi (ei turhia pyyntöjä). Näkymä näyttää silloin OSITTAINEN-tilan ilman tyhjää taulukkoa.
 - **`fetch`-asetuksissa myös `referrerPolicy: 'no-referrer'`** (SR-4).

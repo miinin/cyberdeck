@@ -16,7 +16,8 @@ Työn alla: MVP-0 · Valmiina: 1/2 tehtävää
 
 ## Kysymykset käyttäjälle (ei blokkaa, edetään oletuksella)
 - R-4 Tuotantojulkaisun suojaus: katso PM:n ehdotus T-001-kortissa. Oletus: ei muutoksia ennen erillistä testiprojektia.
-- K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi. Oletus: UX.md:n mukaan.
+- K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi: UX ja Sisällöntuottaja suosittelevat molemmat näitä, joten ne on toteutettu näin.
+- TXT-003: tarvitaanko alatunnisteeseen myös englanninkielinen fanisisältömerkintä (CD PROJEKT RED:n ohje)? Oletus: ei MVP-0:ssa.
 - K5 (MVP-1, ei blokkaa T-001:tä): seurataanko kokoelmassa kortteja vai painoksia (alt-artit, beta, ranskankieliset)? Arkkitehdin alustava suositus: korttitaso (`slug`).
 
 ## Toimintatapa, kun käyttäjä on poissa (sovittu 2026-09-30)

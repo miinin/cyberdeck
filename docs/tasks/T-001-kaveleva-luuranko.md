@@ -1,7 +1,7 @@
 # T-001 · Kävelevä luuranko: korttilista rajapinnasta näytölle
 **Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☐ (teknologia ja rakenne, ADR) · Digiturva ☐ (ulkoinen rajapinta, korttikuvien käyttöoikeus) · UX ☐ (korttilistan näkymä ja tilat)
-**Katselmoinnit:** Koodikatselmointi ☐ · Arkkitehti ☐ · Digiturva ☐ · UX ☐ · Testikäyttäjä ☐ · Dokumentoija ☐
+**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☐ · UX ☐ · Testikäyttäjä ☐ · Dokumentoija ☐
 **Riippuvuudet:** T-000 (Done). Julkaisuputken workflowt ovat jo haarassa `t-001-kaveleva-luuranko`.
 **Haara:** `t-001-kaveleva-luuranko`
 
@@ -127,3 +127,23 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 - **Testit:** `npm test` 71/71 läpi (5 tiedostoa: rajapintakerros 27, mapCard 20, CatalogView 15, useCardCatalog 5, App 4). `npm run lint` 0 virhettä ja 0 varoitusta. `npm run build` → `dist/` (JS 71,7 kt gzip, ei inline-skriptejä). `npm audit --audit-level=high` 0. Puhdas klooni (`npm ci`, build, test, lint) läpi. Lint-säännöt todennettu väliaikaisella tiedostolla: SR-1-rakenteet ja kerrosrajan ohitus antavat virheen. Oikea rajapinta kerran käsin: 151 / 151.
 - Koodikatselmointi: tehty · Pakollisia korjattu 1 (epäonnistuneen sivun jälkeen aloitettiin uusia pyyntöjä, regressiotesti lisätty) · Suosituksia 2: (1) keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen, (2) `tsconfig.json`:n `vitest/globals`-tyypit näkyvät myös sovelluskoodille, joten testit ja sovelluskoodi voisi erottaa omiin tsconfigeihin. Molemmat ovat pieniä. Ehdotan PM:lle yhteistä `[velka]`-tehtävää.
 - **PR ja esikatselu (2026-10-01):** PR https://github.com/miinin/cyberdeck/pull/1 (base `test`). Preview-workflow onnistui (`build_and_preview` ja Deploy Preview läpi). Esikatselu: https://cyberdeck-tcg-test--pr1-t-001-kaveleva-luura-wj9wvfxt.web.app (voimassa 14 päivää). `curl -sI` näyttää CSP:n ja kaikki SR-3:n otsakkeet (myös Firebasen HSTS). `index.html`:ssä ei ole inline-skriptejä. Rajapinta vastaa esikatselun originille `Access-Control-Allow-Origin`-otsakkeella. Selaimen konsolia (CSP-virheet) ei ole tarkistettu, koska tässä ympäristössä ei ole selainta (Digiturva ja UX tarkistavat).
+
+### Luovutus 2026-10-01 · Sisällöntuottaja → Koodari, PM
+- Mitä tehtiin: Sisältö- ja kielitarkastus (texts.ts, index.html, alatunniste). Luotiin docs/CONTENT.md (kohderyhmä, kielitaso, äänensävy, sanasto, sisältöjen sijainti ja oikeudet). Raportti docs/reports/TXT-001-t001-tarkastus.md.
+- Mitä pyydän: Koodari päivittää texts.ts:n raportin lopun mukaan (TXT-001, TXT-002, TXT-004) ja vastaavat testit. PM päättää TXT-003:sta sekä K1:stä ja K2:sta (suositus: Hinta ja englanninkieliset tyypit säilyvät). UX päivittää UX.md 4.4:n ja 4.5:n (TXT-007, TXT-001).
+- Mistä katsoa: docs/reports/TXT-001-t001-tarkastus.md, docs/CONTENT.md
+- Tunnetut rajoitteet ja riskit: Tekstejä ei nähty renderöitynä, koska selainta ei ole. Veto: ei. Avoimet: TXT-001 Medium, TXT-002–004 Low.
+- Testit: ei koodimuutoksia. curl esikatseluun ja rajapintaan.
+
+### Checkpoint 2026-10-01 · PM (TXT-päätökset)
+- K1 ja K2: Sisällöntuottajan suositus vahvistaa UX:n oletuksen ("Hinta", tyypit englanniksi). Pidetään. Käyttäjä voi muuttaa myöhemmin.
+- TXT-001, TXT-002 ja TXT-004 menevät Koodarin korjauskierrokseen yhdessä muiden katselmointien löydösten kanssa.
+- TXT-003 (englanninkielinen fanisisältömerkintä): ei blokkaa. Kirjattu STATUS.md:n kysymyksiin käyttäjälle.
+
+### Luovutus 2026-10-01 · Arkkitehti → PM
+- Mitä tehtiin: Arkkitehtuurikatselmointi (diff origin/test...HEAD, b0e1916). Rakenne noudattaa ARCHITECTURE.md:tä ja D-005:tä. Koodarin poikkeamat hyväksytty: (1) oma AbortController + setTimeout, koska AbortSignal.any puuttuu Viten oletuskohteesta (Safari 16.4, Firefox 114); (2) enintään 3 rinnakkaista sivuhakua (SR-5, D-006). ARCHITECTURE.md päivitetty (luvut 3, 5.2–5.5, 7, 9, 11).
+- Mitä pyydän: PM commitoi ARCHITECTURE.md:n ja raportin. ARCH-003 (firebase.json-otsakkeiden ja CSP:n yhdenmukaisuustesti) liitetään T-004:ään.
+- Mistä katsoa: docs/reports/ARCH-001-t001-katselmointi.md, docs/ARCHITECTURE.md.
+- Tunnetut rajoitteet ja riskit: ARCH-001–ARCH-005 ovat Low-tasoa. ARCH-001 on korjattu dokumentaatioon, ARCH-002 on T-006:ssa ja MAX_PAGES-katto (1200 korttia) tarkistetaan T-003:ssa.
+- Testit: npx vitest run 71/71 läpi, npx eslint . --max-warnings 0 läpi (2026-10-01).
+- Veto: ei.
