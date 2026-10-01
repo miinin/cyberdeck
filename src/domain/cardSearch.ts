@@ -20,17 +20,23 @@ export interface CardFilterCriteria {
 export const EMPTY_CRITERIA: CardFilterCriteria = { query: '', types: [], colors: [] };
 
 const COMBINING_MARKS = /\p{M}/gu;
+/** Invisible format characters such as zero-width spaces and direction marks (B-014). */
+const FORMAT_CHARACTERS = /\p{Cf}/gu;
+/** Punctuation separates words, so "V: Streetkid" matches "V Streetkid" (B-013). */
+const PUNCTUATION = /\p{P}/gu;
 const WHITESPACE_RUN = /\s+/g;
 
 /**
- * Case- and accent-insensitive form of a text: "  Judy  Álvarez " → "judy alvarez".
+ * Case-, accent- and punctuation-insensitive form of a text: "  Judy  Álvarez: " → "judy alvarez".
  * Plain text only: the result is compared with `includes`, never used as a pattern.
  */
 export function normalizeForSearch(text: string): string {
   return text
     .normalize('NFD')
     .replace(COMBINING_MARKS, '')
+    .replace(FORMAT_CHARACTERS, '')
     .toLowerCase()
+    .replace(PUNCTUATION, ' ')
     .replace(WHITESPACE_RUN, ' ')
     .trim();
 }
@@ -41,21 +47,22 @@ export function isFilterActive(criteria: CardFilterCriteria): boolean {
 }
 
 /**
- * Cards matching all of: the search text (part of "name subname"), one of the selected
- * types (OR), one of the selected colors (OR). An empty group does not filter.
- * The original order is kept.
+ * Cards matching all of: every word of the search text (each a part of "name subname", in any
+ * order, B-013), one of the selected types (OR), one of the selected colors (OR). An empty group
+ * does not filter. The original order is kept.
  */
 export function filterCards(cards: readonly Card[], criteria: CardFilterCriteria): Card[] {
-  const query = normalizeForSearch(criteria.query);
+  const normalizedQuery = normalizeForSearch(criteria.query);
+  const words = normalizedQuery === '' ? [] : normalizedQuery.split(' ');
   const types = new Set(criteria.types);
   const colors = new Set(criteria.colors);
 
   return cards.filter((card) => {
     if (types.size > 0 && !types.has(card.type)) return false;
     if (colors.size > 0 && (card.color === null || !colors.has(card.color))) return false;
-    if (query === '') return true;
-    const searchable = card.subname === null ? card.name : `${card.name} ${card.subname}`;
-    return normalizeForSearch(searchable).includes(query);
+    if (words.length === 0) return true;
+    const searchable = normalizeForSearch(card.subname === null ? card.name : `${card.name} ${card.subname}`);
+    return words.every((word) => searchable.includes(word));
   });
 }
 

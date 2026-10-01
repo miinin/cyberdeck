@@ -51,6 +51,17 @@ describe('normalizeForSearch', () => {
   it('turns whitespace-only text into an empty string', () => {
     expect(normalizeForSearch(' \n\t ')).toBe('');
   });
+
+  it('turns punctuation into spaces (B-013)', () => {
+    expect(normalizeForSearch('Judy Álvarez: Nothing to Doubt')).toBe('judy alvarez nothing to doubt');
+    expect(normalizeForSearch('Mystery (Prototype), Rogue-Edge!')).toBe('mystery prototype rogue edge');
+  });
+
+  it('removes invisible format characters (B-014)', () => {
+    expect(normalizeForSearch('jud​y')).toBe('judy');
+    expect(normalizeForSearch('‮judy‎')).toBe('judy');
+    expect(normalizeForSearch('​')).toBe('');
+  });
 });
 
 describe('filterCards: search text', () => {
@@ -89,12 +100,38 @@ describe('filterCards: search text', () => {
   it('matches special characters literally, not as patterns', () => {
     expect(search('(prototype)')).toEqual(['mystery']);
     expect(search("rogue's")).toEqual(['mystery']);
-    expect(search('.*')).toEqual([]);
-    expect(search('*')).toEqual([]);
-    expect(search('(')).toEqual(['mystery']);
-    expect(search('[')).toEqual([]);
-    expect(search('\\')).toEqual([]);
     expect(search('$')).toEqual([]);
+    expect(search('^')).toEqual([]);
+    expect(search('+')).toEqual([]);
+    expect(search('|')).toEqual([]);
+    expect(search('a$')).toEqual([]);
+  });
+
+  it('treats punctuation-only search text as no search, like an empty field (B-013)', () => {
+    // Punctuation is a word separator, so these contain no words (and are never regex patterns).
+    for (const query of ['.*', '*', '(', '[', '\\', ': -']) {
+      expect(search(query)).toEqual(slugs(cards));
+      expect(isFilterActive({ ...EMPTY_CRITERIA, query })).toBe(false);
+    }
+  });
+
+  it('finds a card by its name pasted as "Name: Subname" (B-013)', () => {
+    expect(search('V: Streetkid')).toEqual(['v-streetkid']);
+    expect(search('Judy Álvarez: Braindance Prodigy')).toEqual(['judy']);
+    expect(search('Johnny Silverhand — Rocking Renegade')).toEqual(['johnny-renegade']);
+  });
+
+  it('requires every word but not their order or adjacency (B-013)', () => {
+    expect(search('johnny rocking')).toEqual(['johnny-renegade']);
+    expect(search('renegade johnny')).toEqual(['johnny-renegade']);
+    expect(search('johnny streetkid')).toEqual([]);
+  });
+
+  it('ignores invisible characters in the search text (B-014)', () => {
+    expect(search('jud​y')).toEqual(['judy']);
+    expect(search('‮judy')).toEqual(['judy']);
+    expect(search('​')).toEqual(slugs(cards));
+    expect(isFilterActive({ ...EMPTY_CRITERIA, query: '​' })).toBe(false);
   });
 
   it('treats an XSS string as plain text (SR-1)', () => {

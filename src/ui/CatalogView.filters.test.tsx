@@ -187,7 +187,7 @@ describe('CatalogView search and filters: no results', () => {
 
     expect(
       screen.getByText(
-        'Valintoja vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.',
+        'Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.',
       ),
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
@@ -304,7 +304,7 @@ describe('CatalogView search and filters: live region', () => {
 
     typeText('xyz');
     wait(ANNOUNCE_DELAY_MS);
-    expect(liveRegion()).toHaveTextContent(/^Valintoja vastaavia kortteja ei löytynyt\.$/);
+    expect(liveRegion()).toHaveTextContent(/^Hakua vastaavia kortteja ei löytynyt\.$/);
 
     typeText('');
     wait(ANNOUNCE_DELAY_MS);
@@ -402,10 +402,86 @@ describe('CatalogView search and filters: live region', () => {
 
     typeText('judy');
     wait(ANNOUNCE_DELAY_MS);
-    expect(liveRegion()).toHaveTextContent('Näytetään 1 / 6 korttia.');
+    expect(liveRegion()).toHaveTextContent(/^Näytetään 1 \/ 6 korttia\.$/);
 
+    typeText('');
+    wait(ANNOUNCE_DELAY_MS);
     rerender(<CatalogView state={ready()} onRetry={vi.fn()} />);
     expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\.$/);
+  });
+
+  // UX-002 (K9, UX.md 5.6): the loaded message also tells the filter result when a search is kept over a retry.
+  const reload = (rerender: ReturnType<typeof render>['rerender'], state: CatalogState) => {
+    rerender(<CatalogView state={{ status: 'loading' }} onRetry={vi.fn()} />);
+    rerender(<CatalogView state={state} onRetry={vi.fn()} />);
+  };
+
+  it('combines the loaded message with the filter result after a successful retry (UX-002)', () => {
+    const { rerender, container } = renderView(ready(cards, 8));
+    typeText('johnny');
+    wait(ANNOUNCE_DELAY_MS);
+
+    reload(rerender, ready());
+    expect(statusText(container)).toBe('2 / 6 korttia');
+    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\. Näytetään 2 \/ 6 korttia\.$/);
+
+    typeText('xyz');
+    reload(rerender, ready());
+    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\. Hakua vastaavia kortteja ei löytynyt\.$/);
+  });
+
+  it('combines the partial message with the filter result after a retry (UX-002)', () => {
+    const { rerender, container } = renderView(ready(cards, 8));
+    typeText('johnny');
+    wait(ANNOUNCE_DELAY_MS);
+
+    reload(rerender, ready(cards, 8));
+    expect(statusText(container)).toBe('2 / 6 korttia');
+    expect(liveRegion()).toHaveTextContent(/^Näytetään 2 \/ 6 korttia\. Osa korteista puuttuu listasta\.$/);
+
+    typeText('xyz');
+    reload(rerender, ready(cards, 8));
+    expect(liveRegion()).toHaveTextContent(
+      /^Hakua vastaavia kortteja ei löytynyt\. Osa korteista puuttuu listasta\.$/,
+    );
+  });
+
+  it('does not repeat the filter result right after the combined loaded message (UX-002)', () => {
+    const { rerender } = renderView();
+    typeText('johnny');
+    wait(ANNOUNCE_DELAY_MS);
+    reload(rerender, ready());
+
+    typeText('johnny silver');
+    wait(ANNOUNCE_DELAY_MS);
+    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\. Näytetään 2 \/ 6 korttia\.$/);
+
+    typeText('');
+    wait(ANNOUNCE_DELAY_MS);
+    expect(liveRegion()).toHaveTextContent(/^Näytetään kaikki 6 korttia\.$/);
+  });
+
+  it('keeps the loaded message unchanged while typing, until the delay passes', () => {
+    const { rerender } = renderView();
+    typeText('johnny');
+    wait(ANNOUNCE_DELAY_MS);
+    reload(rerender, ready());
+
+    typeText('judy');
+    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\. Näytetään 2 \/ 6 korttia\.$/);
+    wait(ANNOUNCE_DELAY_MS);
+    expect(liveRegion()).toHaveTextContent(/^Näytetään 1 \/ 6 korttia\.$/);
+  });
+
+  it('says "1 kortti" when all of a single received card is shown again (TXT-009)', () => {
+    renderView(ready(cards.slice(3, 4), 151));
+
+    typeText('xyz');
+    wait(ANNOUNCE_DELAY_MS);
+    typeText('');
+    wait(ANNOUNCE_DELAY_MS);
+
+    expect(liveRegion()).toHaveTextContent(/^Näytetään 1 kortti\.$/);
   });
 
   it('cancels a pending announcement on unmount', () => {

@@ -28,6 +28,8 @@ interface ViewModel {
   showRetry: boolean;
   /** Loaded cards that can be searched. Empty in every state without a list (UX.md 5.8). */
   cards: readonly Card[];
+  /** Fewer usable cards than the API reported (the PARTIAL state). */
+  missingCards: boolean;
 }
 
 /**
@@ -36,7 +38,7 @@ interface ViewModel {
  * cards than the API's total (e.g. invalid cards were skipped).
  */
 function toViewModel(state: CatalogState): ViewModel {
-  const base = { notice: null, emptyMessage: null, showRetry: false, cards: [] };
+  const base = { notice: null, emptyMessage: null, showRetry: false, cards: [], missingCards: false };
   switch (state.status) {
     case 'loading':
       return { ...base, status: texts.loading, live: texts.loading };
@@ -58,6 +60,7 @@ function toViewModel(state: CatalogState): ViewModel {
           notice: { tone: 'warning', title: texts.partialTitle, body: texts.partialBody },
           showRetry: true,
           cards,
+          missingCards: true,
         };
       }
       if (cards.length === 0) {
@@ -94,8 +97,25 @@ export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: 
   const filterActive = isFilterActive(criteria);
   const showFilters = allCards.length > 0;
 
-  // The loaded message ("151 korttia ladattu.") already told the unfiltered count.
-  const announcer = useDelayedAnnouncement(state, showFilters ? `all:${allCards.length}` : null);
+  // The search is kept over a retry (5.8), so the loaded message tells the filter result of the
+  // criteria in use when this state arrived (K9, UX-002). Frozen per state: later changes are
+  // announced with the delay, not by rewriting the loaded message.
+  const [loadedWith, setLoadedWith] = useState({ state, criteria });
+  if (loadedWith.state !== state) setLoadedWith({ state, criteria });
+  const loadResult = describeResult(
+    isFilterActive(loadedWith.criteria),
+    filterCards(allCards, loadedWith.criteria).length,
+    allCards.length,
+  );
+  const loadedFiltered = showFilters && isFilterActive(loadedWith.criteria);
+  const loadedLive = !loadedFiltered
+    ? view.live
+    : view.missingCards
+      ? texts.partialFilteredLive(loadResult.text)
+      : texts.loadedFilteredLive(allCards.length, loadResult.text);
+
+  // The loaded message already told this result, so the same result is not announced again.
+  const announcer = useDelayedAnnouncement(state, showFilters ? loadResult.key : null);
 
   const updateCriteria = (next: CardFilterCriteria, when: 'later' | 'now' | 'never') => {
     setCriteria(next);
@@ -140,7 +160,7 @@ export function CatalogView({ state, onRetry }: { state: CatalogState; onRetry: 
       </p>
       {/* Stays mounted across all states so screen readers announce each change. */}
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
-        {announcer.text ?? view.live}
+        {announcer.text ?? loadedLive}
       </div>
 
       {view.notice !== null && (

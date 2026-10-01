@@ -13,6 +13,9 @@ function cardShare(shown: number, all: number): string {
   return `${numberFormat.format(shown)} / ${numberFormat.format(all)} korttia`;
 }
 
+const loaded = (count: number) => `${cardCount(count)} ladattu.`;
+const partialMissing = 'Osa korteista puuttuu listasta.';
+
 export const texts = {
   appName: 'Cyberdeck',
   heading: 'Kortit',
@@ -20,7 +23,7 @@ export const texts = {
 
   loading: 'Haetaan kortteja…',
 
-  loaded: (count: number) => `${cardCount(count)} ladattu.`,
+  loaded,
 
   emptyStatus: cardCount(0),
   emptyBody:
@@ -35,8 +38,7 @@ export const texts = {
   partialTitle: 'Kaikkia kortteja ei saatu näkyviin',
   partialBody:
     'Osa korteista puuttuu listasta, koska niiden tietoja ei saatu tai ne olivat puutteellisia. Voit yrittää hakea kortit uudelleen.',
-  partialLive: (received: number, total: number) =>
-    `Näytetään ${cardShare(received, total)}. Osa korteista puuttuu listasta.`,
+  partialLive: (received: number, total: number) => `Näytetään ${cardShare(received, total)}. ${partialMissing}`,
 
   tableCaption: 'Kaikki kortit',
   tableCaptionFiltered: 'Hakua vastaavat kortit',
@@ -56,9 +58,14 @@ export const texts = {
   colorLegend: 'Väri',
   filteredStatus: (shown: number, all: number) => cardShare(shown, all),
   filteredLive: (shown: number, all: number) => `Näytetään ${cardShare(shown, all)}.`,
-  allShownLive: (all: number) => `Näytetään kaikki ${numberFormat.format(all)} korttia.`,
-  noResultsLive: 'Valintoja vastaavia kortteja ei löytynyt.',
-  noResultsBody: 'Valintoja vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.',
+  // TXT-009: a single card is "1 kortti", not "kaikki 1 korttia".
+  allShownLive: (all: number) =>
+    all === 1 ? `Näytetään ${cardCount(1)}.` : `Näytetään kaikki ${numberFormat.format(all)} korttia.`,
+  noResultsLive: 'Hakua vastaavia kortteja ei löytynyt.',
+  noResultsBody: 'Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.',
+  /** Loaded message when a search or selection was kept over a retry (UX.md 5.6, K9, UX-002). */
+  loadedFilteredLive: (all: number, filterResult: string) => `${loaded(all)} ${filterResult}`,
+  partialFilteredLive: (filterResult: string) => `${filterResult} ${partialMissing}`,
   clearFilters: 'Tyhjennä haku ja suodattimet',
 
   footerUnofficial:
