@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CardCatalog } from '../api';
 import type { Card } from '../domain/card';
@@ -6,6 +6,7 @@ import { createMemoryRepositories } from '../storage';
 import type { Repositories } from '../storage';
 import { CatalogView } from './CatalogView';
 import type { CatalogState } from './useCardCatalog';
+import { ANNOUNCE_DELAY_MS } from './useDelayedAnnouncement';
 
 const COLLECTION_KEY = 'cyberdeck:collection';
 
@@ -208,3 +209,115 @@ describe('CatalogView collection: loading states', () => {
   });
 });
 
+
+const ownedOnlyBox = () => screen.getByRole('checkbox', { name: 'Vain omistetut' });
+const rowNames = () =>
+  within(screen.getByRole('table'))
+    .getAllByRole('rowheader')
+    .map((cell) => cell.textContent);
+const statusText = (container: HTMLElement) => container.querySelector('#card-status')?.textContent;
+
+describe('CatalogView collection: "Vain omistetut"', () => {
+  it('sits in the search form right after the search field, unchecked', async () => {
+    await renderView();
+    const form = screen.getByRole('search');
+    const box = within(form).getByRole('checkbox', { name: 'Vain omistetut' });
+    expect(box).not.toBeChecked();
+    expect(box.closest('fieldset')).toBeNull();
+    const inputs = Array.from(form.querySelectorAll('input'));
+    expect(inputs[0]).toHaveAttribute('type', 'search');
+    expect(inputs[1]).toBe(box);
+    expect(box.closest('label')).toHaveTextContent('Vain omistetut');
+  });
+
+  it('shows only owned cards together with the search and updates caption and status', async () => {
+    const user = userEvent.setup();
+    const { container } = await renderView(
+      withCollection([
+        { card: 'v-streetkid', count: 1 },
+        { card: 'viktor-vektor-pinch', count: 2 },
+      ]),
+    );
+    await user.click(ownedOnlyBox());
+    expect(rowNames()).toEqual(['V, Streetkid', 'Viktor Vektor, You Might Feel a Little Pinch']);
+    expect(screen.getByRole('table', { name: 'Hakua vastaavat kortit' })).toBeInTheDocument();
+    expect(statusText(container)).toBe('2 / 3 korttia');
+
+    await user.type(screen.getByRole('searchbox', { name: 'Hae nimellä' }), 'viktor');
+    expect(rowNames()).toEqual(['Viktor Vektor, You Might Feel a Little Pinch']);
+  });
+
+  it('keeps a row whose count goes to 0 until the conditions change, and focus stays', async () => {
+    const user = userEvent.setup();
+    const { container } = await renderView(withCollection([{ card: 'v-streetkid', count: 1 }]));
+    await user.click(ownedOnlyBox());
+    await user.click(minus('V, Streetkid') as HTMLElement);
+    await settle();
+
+    expect(rowNames()).toEqual(['V, Streetkid']);
+    expect(plus('V, Streetkid')).toHaveFocus();
+    expect(statusText(container)).toBe('1 / 3 korttia');
+    expect(container.querySelector('#collection-summary')).toHaveTextContent('Kokoelmassa ei ole vielä kortteja.');
+
+    // Undo with "+", then remove again: still kept.
+    await user.click(plus('V, Streetkid'));
+    await settle();
+    expect(controlCell('V, Streetkid')).toHaveTextContent('Kokoelmassa 1 kappale');
+
+    await user.click(minus('V, Streetkid') as HTMLElement);
+    await settle();
+    await user.click(screen.getByRole('checkbox', { name: 'Legend' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Legend' }));
+    expect(screen.queryByRole('table')).toBeNull();
+  });
+
+  it('with an empty collection shows its own text and "Näytä kaikki kortit" moves focus to the checkbox', async () => {
+    vi.useFakeTimers();
+    try {
+      await renderView();
+      fireEvent.click(ownedOnlyBox());
+      expect(screen.queryByRole('table')).toBeNull();
+      expect(
+        screen.getByText(
+          'Kokoelmassa ei ole vielä kortteja. Poista "Vain omistetut" -valinta ja merkitse omistamasi kortit listasta.',
+        ),
+      ).toBeInTheDocument();
+      act(() => vi.advanceTimersByTime(ANNOUNCE_DELAY_MS));
+      expect(screen.getByRole('status')).toHaveTextContent('Hakua vastaavia kortteja ei löytynyt.');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Näytä kaikki kortit' }));
+      expect(ownedOnlyBox()).not.toBeChecked();
+      expect(ownedOnlyBox()).toHaveFocus();
+      expect(rowNames()).toHaveLength(3);
+      expect(screen.getByRole('status')).toHaveTextContent('Näytetään kaikki 3 korttia.');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('with other conditions and no match, "Tyhjennä haku ja suodattimet" also clears "Vain omistetut"', async () => {
+    const user = userEvent.setup();
+    await renderView(withCollection([{ card: 'v-streetkid', count: 1 }]));
+    await user.click(ownedOnlyBox());
+    await user.type(screen.getByRole('searchbox', { name: 'Hae nimellä' }), 'swordwise');
+    expect(
+      screen.getByText('Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.'),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Tyhjennä haku ja suodattimet' }));
+    expect(ownedOnlyBox()).not.toBeChecked();
+    expect(rowNames()).toHaveLength(3);
+  });
+
+  it('is not rendered while the collection loads or when it is locked', async () => {
+    const loading = createMemoryRepositories();
+    vi.spyOn(loading.collection, 'load').mockReturnValue(new Promise(() => {}));
+    const { unmount } = await renderView(loading);
+    expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
+    unmount();
+
+    await renderView(
+      createMemoryRepositories({ initial: { [COLLECTION_KEY]: stored([{ card: 'v-streetkid', count: 1 }], 99) } }),
+    );
+    expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
+  });
+});

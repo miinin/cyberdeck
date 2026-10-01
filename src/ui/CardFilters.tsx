@@ -11,6 +11,10 @@ export interface CardFiltersProps {
   typeOptions: readonly string[];
   colorOptions: readonly string[];
   searchInputRef: Ref<HTMLInputElement>;
+  /** "Vain omistetut" checked state; undefined leaves the checkbox out (collection not ready, UX.md 6.6). */
+  ownedOnly?: boolean;
+  ownedOnlyRef: Ref<HTMLInputElement>;
+  onToggleOwnedOnly: () => void;
   /** Search text changed. `composing` is true while an IME composition is in progress. */
   onQueryChange: (query: string, composing: boolean) => void;
   onToggleType: (type: string) => void;
@@ -25,6 +29,9 @@ export function CardFilters({
   typeOptions,
   colorOptions,
   searchInputRef,
+  ownedOnly,
+  ownedOnlyRef,
+  onToggleOwnedOnly,
   onQueryChange,
   onToggleType,
   onToggleColor,
@@ -81,6 +88,21 @@ export function CardFilters({
           onKeyDown={handleKeyDown}
         />
       </div>
+
+      {ownedOnly !== undefined && (
+        <div className="field owned-only">
+          <label className="option">
+            <input
+              ref={ownedOnlyRef}
+              type="checkbox"
+              name="owned-only"
+              checked={ownedOnly}
+              onChange={onToggleOwnedOnly}
+            />{' '}
+            {texts.ownedOnly}
+          </label>
+        </div>
+      )}
 
       <p id="filter-hint" className="hint filter-hint">
         {texts.filterHint}

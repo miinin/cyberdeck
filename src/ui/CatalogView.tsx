@@ -1,6 +1,7 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
+import type { CardKey } from '../domain/cardKey';
 import type { Repositories } from '../storage';
 import {
   EMPTY_CRITERIA,
@@ -91,6 +92,8 @@ function describeResult(active: boolean, shown: number, all: number): Announceme
   return { key: `some:${shown}`, text: texts.filteredLive(shown, all) };
 }
 
+const NO_KEYS: ReadonlySet<CardKey> = new Set();
+
 /** Summary of the whole collection, counted only from cards in the loaded list (UX.md 6.5, A3). */
 function collectionSummary(snapshot: CollectionSnapshot, cards: readonly Card[]): string {
   let distinct = 0;
@@ -119,25 +122,42 @@ export function CatalogView({
   const searchInputRef = useRef<HTMLInputElement>(null);
   // Lives here, above the form, so it survives a retry (UX.md 5.8, WCAG 3.3.7).
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
+  const ownedOnlyRef = useRef<HTMLInputElement>(null);
+  const [ownedOnlyChecked, setOwnedOnly] = useState(false);
+  /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
+  const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const view = toViewModel(state);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection, () => {});
   const allCards = view.cards;
 
-  const filtered = useMemo(() => filterCards(allCards, criteria), [allCards, criteria]);
-  const filterActive = isFilterActive(criteria);
+  // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
+  if (ownedOnlyChecked && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
+    setOwnedOnly(false);
+  }
+  const ownedOnly = ownedOnlyChecked && collection.phase === 'ready';
+  const visibleCards = (next: CardFilterCriteria, nextOwnedOnly: boolean, nextKept: ReadonlySet<CardKey>) => {
+    const matching = filterCards(allCards, next);
+    if (!nextOwnedOnly) return matching;
+    return matching.filter((card) => countIn(collection, card.key) > 0 || nextKept.has(card.key));
+  };
+  const isActive = (next: CardFilterCriteria, nextOwnedOnly: boolean) => isFilterActive(next) || nextOwnedOnly;
+
+  const filtered = visibleCards(criteria, ownedOnly, kept);
+  const filterActive = isActive(criteria, ownedOnly);
   const showFilters = allCards.length > 0;
 
   // The search is kept over a retry (5.8), so the loaded message tells the filter result of the
   // criteria in use when this state arrived (K9, UX-002). Frozen per state: later changes are
   // announced with the delay, not by rewriting the loaded message.
-  const [loadedWith, setLoadedWith] = useState({ state, criteria });
-  if (loadedWith.state !== state) setLoadedWith({ state, criteria });
+  const [loadedWith, setLoadedWith] = useState({ state, criteria, ownedOnly });
+  if (loadedWith.state !== state) setLoadedWith({ state, criteria, ownedOnly });
+  const loadedActive = isActive(loadedWith.criteria, loadedWith.ownedOnly);
   const loadResult = describeResult(
-    isFilterActive(loadedWith.criteria),
-    filterCards(allCards, loadedWith.criteria).length,
+    loadedActive,
+    visibleCards(loadedWith.criteria, loadedWith.ownedOnly, NO_KEYS).length,
     allCards.length,
   );
-  const loadedFiltered = showFilters && isFilterActive(loadedWith.criteria);
+  const loadedFiltered = showFilters && loadedActive;
   const loadedLive = !loadedFiltered
     ? view.live
     : view.missingCards
@@ -147,17 +167,28 @@ export function CatalogView({
   // The loaded message already told this result, so the same result is not announced again.
   const announcer = useDelayedAnnouncement(state, showFilters ? loadResult.key : null);
 
-  const updateCriteria = (next: CardFilterCriteria, when: 'later' | 'now' | 'never') => {
+  /** Any change of the search, a selection or "Vain omistetut" (UX.md 5.6, 6.6). */
+  const updateFilters = (
+    next: CardFilterCriteria,
+    nextOwnedOnly: boolean,
+    when: 'later' | 'now' | 'never',
+    force = false,
+  ) => {
     setCriteria(next);
+    setOwnedOnly(nextOwnedOnly);
+    // New conditions: rows whose count went to 0 are no longer kept.
+    setKept(NO_KEYS);
     const announcement = describeResult(
-      isFilterActive(next),
-      filterCards(allCards, next).length,
+      isActive(next, nextOwnedOnly),
+      visibleCards(next, nextOwnedOnly, NO_KEYS).length,
       allCards.length,
     );
     if (when === 'later') announcer.announceLater(announcement);
-    else if (when === 'now') announcer.announceNow(announcement, true);
+    else if (when === 'now') announcer.announceNow(announcement, force);
     else announcer.cancel();
   };
+  const updateCriteria = (next: CardFilterCriteria, when: 'later' | 'now' | 'never') =>
+    updateFilters(next, ownedOnly, when);
 
   const handleRetry = () => {
     // The retry button disappears while loading; keep focus from falling to <body> (UX.md 4.6).
@@ -166,7 +197,7 @@ export function CatalogView({
   };
 
   const handleClearFilters = () => {
-    updateCriteria(EMPTY_CRITERIA, 'now');
+    updateFilters(EMPTY_CRITERIA, false, 'now', true);
     // The button disappears with the empty result; the search field is the natural next step (UX.md 5.7).
     searchInputRef.current?.focus();
   };
@@ -183,7 +214,10 @@ export function CatalogView({
       : {
           mode: collection.phase,
           countOf: (card) => countIn(collection, card.key),
-          onChange: (card, count) => collectionStore.setCount(card.key, count),
+          onChange: (card, count) => {
+            if (ownedOnly) setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
+            collectionStore.setCount(card.key, count);
+          },
           onLimit: () => {},
         };
   const summary =
@@ -195,6 +229,13 @@ export function CatalogView({
 
   const status = showFilters && filterActive ? texts.filteredStatus(filtered.length, allCards.length) : view.status;
   const noResults = showFilters && filtered.length === 0;
+  // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
+  const noOwnedCards = noResults && ownedOnly && !isFilterActive(criteria);
+
+  const handleShowAll = () => {
+    updateFilters(criteria, false, 'now', true);
+    ownedOnlyRef.current?.focus();
+  };
 
   return (
     <>
@@ -243,6 +284,9 @@ export function CatalogView({
             criteria.colors,
           )}
           searchInputRef={searchInputRef}
+          ownedOnly={collection.phase === 'ready' ? ownedOnly : undefined}
+          ownedOnlyRef={ownedOnlyRef}
+          onToggleOwnedOnly={() => updateFilters(criteria, !ownedOnly, 'later')}
           onQueryChange={(query, composing) =>
             updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
           }
@@ -258,9 +302,13 @@ export function CatalogView({
 
       {noResults && (
         <div className="empty">
-          <p>{texts.noResultsBody}</p>
-          <button type="button" className="button-primary" onClick={handleClearFilters}>
-            {texts.clearFilters}
+          <p>{noOwnedCards ? texts.ownedOnlyEmptyBody : texts.noResultsBody}</p>
+          <button
+            type="button"
+            className="button-primary"
+            onClick={noOwnedCards ? handleShowAll : handleClearFilters}
+          >
+            {noOwnedCards ? texts.showAllCards : texts.clearFilters}
           </button>
         </div>
       )}
