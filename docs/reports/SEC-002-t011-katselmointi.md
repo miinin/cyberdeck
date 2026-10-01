@@ -67,7 +67,7 @@
 **Odotettu:** SR-11:n mukaan ohjausmerkit ja suunnanohjausmerkit poistetaan, jotta nimi ei voi huijata näytössä eikä rikkoa .txt-vientiä. · **Havaittu:** Poistetaan vain C0, C1, U+202A–U+202E ja U+2066–U+2069.
 **Vaikutus:** Pieni. React renderöi nimen tekstinä, joten XSS-riskiä ei ole. LRM, RLM ja ALM voivat siirtää välimerkkejä näytössä. U+2028 ja U+2029 näkyvät monissa editoreissa rivinvaihtoina, joten T-015:n .txt-vientiin tuleva nimi voi näyttää ylimääräiseltä riviltä tai osio-otsikolta (SR-19). T-014:n jäsennin ei kuitenkaan tulkitse niitä rivinvaihdoiksi.
 **Korjausehdotus:** Lisää säännölliseen lausekkeeseen `؜‎‏  ﻿`, esim. `/[\u0000-\u001F\u007F-\u009F؜‎‏ -‮⁦-⁩﻿]/g`. ZWJ (U+200D) ja ZWNJ (U+200C) jätetään ennalleen, koska emojisarjat (👨‍👩‍👧) ja jotkin kirjoitusjärjestelmät tarvitsevat niitä. Lisää testi validate.test.ts:n ohjausmerkkitesteihin. Korjaus ennen T-012:ta tai viimeistään T-015:ssä (SR-19).
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 15812ba)
 
 ### SEC-006 · Kiintiövirhe koetallennuksessa piilottaa olemassa olevan datan · Low
 **Sijainti:** `src/storage/keyValueStore.ts:38–46` (`openBrowserStore`) ja `src/storage/index.ts:15–20` · **Tehtävä:** T-011
@@ -75,7 +75,7 @@
 **Odotettu:** Tallennettu kokoelma näkyy, ja vain uudet tallennukset epäonnistuvat hallitusti (`quota`). · **Havaittu:** `openBrowserStore` palauttaa `null`, joten käyttöön otetaan muistinvarainen tallennus. Käyttäjä näkee tyhjän kokoelman ja ilmoituksen "tiedot eivät tallennu", vaikka data on tallessa.
 **Vaikutus:** Data ei katoa, eikä sitä ylikirjoiteta. Käyttäjä kuitenkin luulee tietojensa kadonneen ja voi esimerkiksi tyhjentää selaimen tiedot korjatakseen tilanteen, jolloin data katoaa oikeasti (SR-13: "edellinen tallennettu tila ei katoa").
 **Korjausehdotus:** Erottele virheet koetallennuksessa: jos `window.localStorage`-ominaisuuden luku tai `getItem` epäonnistuu (SecurityError), palautetaan `null` kuten nyt. Jos vain `setItem` heittää kiintiövirheen, palautetaan oikea tallennustila (luku toimii, kirjoitukset antavat `quota`-virheen). Lisää testi, jossa koetallennus heittää `QuotaExceededError`in ja olemassa oleva data luetaan. Korjaus ennen T-012:ta tai viimeistään T-003:ssa.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 7dc05c5)
 
 ### SEC-007 · Epäonnistunut varmuuskopio estää kirjoitukset pysyvästi ilman toipumispolkua · Info
 **Sijainti:** `src/storage/repositories.ts` (`resetCorrupt`, `mutate`) · **Tehtävä:** T-011 → T-012

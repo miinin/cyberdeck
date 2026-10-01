@@ -100,3 +100,10 @@ Kokoelma (T-012) ja pakat (T-013) tarvitsevat tietomallin ja tallennuksen, joka 
 ### Checkpoint 2026-10-01 · PM
 - Korjauskierros ennen Donea (pienet, tarvitaan ennen T-012:ta): SEC-005, SEC-006, ARCH-007 (migrations.ts + invarianttitesti) ja ARCH-008 (lint-poikkeus). ARCH-006 ja SEC-008 → T-003. SEC-007 ja T-012:n ilmoitusehdot → T-012:n korttiin. SEC-009 ja SEC-010 → T-016:n yhteyteen (valinnaisia).
 - D-009: Testikäyttäjä ja Dokumentoija tehdään MVP-1:n lopussa koko tasolle.
+
+### Luovutus 2026-10-01 · Koodari → PM (korjauskierros)
+- Mitä tehtiin: SEC-005 (15812ba) nimien siivous poistaa myös U+061C, U+200E, U+200F, U+2028, U+2029 ja U+FEFF, ZWJ/ZWNJ säilyvät. SEC-006 (7dc05c5) koetallennuksen kiintiövirhe palauttaa oikean tallennustilan (data näkyy, kirjoitukset → `quota`), luku- tai muu virhe → muistinvarainen tila; `isQuotaError` vietiin errors.ts:stä. ARCH-007 (61c17e3) `src/storage/migrations.ts` + invarianttitesti `migrations.test.ts`, `specWith` käyttää tuotantoketjua. ARCH-008 (4a22b96) tallennus-API-lint-poikkeus vain keyValueStore.ts:lle, sen testille ja src/test/**:lle (todennettu: localStorage muussa src/storage-tiedostossa → lint-virhe).
+- Regressiotestit kirjoitettiin ensin ja todettiin epäonnistuviksi (3 kpl). Vanha testi "returns null when writing fails" muutettiin SEC-006:n mukaiseksi (SecurityError → null, kiintiö → tallennustila).
+- Mitä pyydän: Digiturva varmistaa SEC-005/006, Arkkitehti ARCH-007/008.
+- Testit: `npx vitest run --dir src` 288/288, eslint OK, build OK.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0

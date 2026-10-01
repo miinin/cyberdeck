@@ -57,7 +57,7 @@ Lisäksi tarkistettu, ei löydöksiä: luku–validointi–kirjoitus tapahtuu yh
 **Odotettu:** testi tai tyyppi estää version noston ilman ketjua. · **Havaittu:** `decodeEnvelope` ei löydä `migrations[0]`:aa → `corrupt` → kaikkien käyttäjien data siirtyy varmuuskopioon, ja sovellus näyttää tyhjän tilan. Data ei katoa, mutta käyttäjä näkee sen kadonneen.
 **Vaikutus:** ansa ensimmäiselle oikealle migraatiolle. Ei vaikutusta nyt (versio 1, ei migraatioita).
 **Korjausehdotus:** pieni velkatehtävä tai ensimmäisen migraation yhteydessä: `storage/migrations.ts` (`COLLECTION_MIGRATIONS`, `DECKS_MIGRATIONS`), `specWith` käyttää niitä oletuksena, ja testi varmistaa `MIGRATIONS.length + 1 === SCHEMA_VERSION` kummallekin kokonaisuudelle. Kirjattu ARCHITECTURE.md:n lukuun 11 kohtaan 6.
-**Tila:** Avoin (PM priorisoi, [velka]-ehdotus)
+**Tila:** Avoin → Korjattu (commit 61c17e3)
 
 ### ARCH-008 · D-008:n seuraukset ja toteutus eroavat tallennus-API:en sallitussa alueessa · Low
 **Sijainti:** `docs/DECISIONS.md` D-008 → Seuraukset ("kaikkialla paitsi `src/storage/keyValueStore.ts`:ssä") ↔ `eslint.config.js` (`ignores: ['src/storage/**', 'src/test/**']`) ja ARCHITECTURE.md luku 4 · **Tehtävä:** T-011
@@ -65,7 +65,7 @@ Lisäksi tarkistettu, ei löydöksiä: luku–validointi–kirjoitus tapahtuu yh
 **Odotettu (D-008):** virhe. · **Havaittu:** ei virhettä. Toteutus vastaa ARCHITECTURE.md:n lukua 4 ja SR-12:ta ("vain `src/storage/`"), mutta ei D-008:n tarkempaa sanamuotoa eikä `keyValueStore.ts`:n kommenttia "The only module that touches the browser's storage APIs".
 **Vaikutus:** pieni. Repository voisi ohittaa `KeyValueStore`n, jolloin muistinvarainen varapolku ja testattavuus heikkenisivät. Nykyinen koodi ei tee niin.
 **Korjausehdotus:** suositus on kiristää lint vastaamaan D-008:aa: tallennus-API-lohkon `ignores` muotoon `['src/storage/keyValueStore.ts', 'src/storage/keyValueStore.test.ts', 'src/test/**']` (yksi rivi, Koodari, voi tehdä T-011:ssä tai T-016:n yhteydessä). Vaihtoehtoisesti PM lisää D-008:aan tarkennuksen, että raja on `src/storage/**`.
-**Tila:** Avoin (PM päättää)
+**Tila:** Avoin → Korjattu (commit 4a22b96, lint kiristetty D-008:n mukaiseksi)
 
 ## Havaintoja jatkotehtäville (ei löydöksiä)
 
