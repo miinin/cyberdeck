@@ -55,7 +55,7 @@ Koodista tarkistettu: `form role="search"` + `aria-label`, label `for`, ohje `ar
 | OSITTAINEN | `Näytetään {n} / {kaikki} korttia. Osa korteista puuttuu listasta.` | `Valintoja vastaavia kortteja ei löytynyt. Osa korteista puuttuu listasta.` |
 
 `{kaikki}` = saatujen korttien määrä kuten tilarivillä. Ilman suodatusta viestit ennallaan (4.5). `useDelayedAnnouncement`-hookin `baseline`-avaimeksi annetaan suodatuksen tuloksen avain (`describeResult(...).key`), jotta sama tulos ei toistu heti seuraavalla muutoksella. Lisää näkymätesti molemmille tapauksille.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit a6890e9)
 
 ### UX-003 · OSITTAINEN-tila ilman yhtään saatua korttia: lomake piilossa · Low
 **Sijainti:** `src/ui/CatalogView.tsx` (`showFilters = allCards.length > 0`) · **Tehtävä:** T-010

@@ -91,3 +91,18 @@ Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. T
 - Korjataan nyt: UX-002 (= B-015, yhdistetty latausviesti UX.md 5.6:n mukaan), TXT-008 ("Hakua vastaavia…"), TXT-009 ("1 kortti"), TXT-010 (CHANGELOG), B-013 (haku sanoittain: välimerkit välilyönneiksi, jokaisen sanan on löydyttävä) ja B-014 (`\p{Cf}`-merkit pois hakusanasta). PM osoittaa Koodarille luvan päivittää UX.md 5.6:n tekstin TXT-008:n mukaiseksi.
 - Backlogiin: B-011 → T-018 (mobiilin kompakti suodatinlomake, MVP-2:n mobiilityö, yhdessä UX-003:n kanssa). B-016 → T-008. B-012 → IDEAS.md.
 - D-009: korjausten varmistus Koodarin testeillä ja PM:n tarkistuksella. Erillistä uutta katselmointikierrosta ei tehdä, koska kaikki löydökset ovat Low tai Medium eikä blokkaavia ole.
+
+### Checkpoint 2026-10-01 · Koodari (korjauskierros)
+- Tehty: a6890e9 (koodi ja testit: UX-002/B-015, TXT-008, TXT-009, B-013, B-014), 74404fe (UX.md 5.6 "Hakua vastaavia", ARCHITECTURE.md toteutusosa, CHANGELOG TXT-010). Raportteihin merkitty Korjattu.
+- Testit kirjoitettu ensin ja todettu epäonnistuviksi (13 kpl), sitten korjaus.
+- Testimuutos: cardSearch.test.ts:n erikoismerkkitestistä siirrettiin .*, *, (, [, \ uuteen testiin, koska B-013:n mukaan välimerkit ovat sanaerottimia: pelkistä välimerkeistä koostuva hakusana = ei hakua (kuten B-014 c). Kirjaimellisuus testataan edelleen symboleilla $ ^ + |. "drops an earlier announcement" -testi tyhjentää haun ennen uutta dataa, koska K9:n mukaan aktiivisella haulla latausviesti on nyt yhdistetty.
+- Avoin (PM/UX): UX.md 5.3:n suodatussäännöt kuvaavat vielä vanhaa sääntöä (yksi osamerkkijono; * ja ( haetaan kirjaimellisesti). Päivitys B-013:n ja B-014:n mukaiseksi kuuluu UX:lle (ei lupaa minulle).
+- Muutetut tiedostot: src/domain/cardSearch.ts, src/domain/cardSearch.test.ts, src/ui/texts.ts, src/ui/CatalogView.tsx, src/ui/CatalogView.filters.test.tsx, docs/UX.md, docs/ARCHITECTURE.md, CHANGELOG.md, docs/reports/UX-002-*, TXT-002-*, BREAK-002-*.
+
+### Luovutus 2026-10-01 · Koodari → PM
+- Mitä tehtiin: korjauskierroksen löydökset UX-002 (= B-015), TXT-008, TXT-009, TXT-010, B-013, B-014.
+- Mitä pyydän: D-009:n mukainen tarkistus ja Done-päätös. UX:lle UX.md 5.3:n päivitys (yllä).
+- Mistä katsoa: commitit a6890e9 ja 74404fe, PR #3:n esikatselu.
+- Tunnetut rajoitteet: sanahaku tekee yhdestä kirjaimesta laajan osuman (esim.  löytää kaikki kortit, joissa on v-kirjain), kuten ennenkin.
+- Testit: `npx vitest run --dir src` 136/136 läpi, `npm run lint` ja `npm run build` läpi.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (testin tyyppivirhe buildissa) · Suosituksia 0

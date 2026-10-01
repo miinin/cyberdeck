@@ -27,7 +27,7 @@
 - `noResultsBody`: "Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista."
 - `noResultsLive`: "Hakua vastaavia kortteja ei löytynyt."
 **Perustelu:** Tavallisin tapa päätyä tyhjään tilaan on pelkkä hakusana. Silloin käyttäjä ei ole valinnut mitään, joten "Valintoja vastaavia" on epätarkka. Lisäksi jokainen väri esiintyy jokaisessa tyypissä (UX.md 5.2), joten pelkillä valinnoilla tulos ei nykydatalla voi olla tyhjä. Sama tilanne kuvataan nyt kahdella eri sanalla: taulukon kuvateksti on "Hakua vastaavat kortit", tyhjä tila "Valintoja vastaavia kortteja". Yksi käsite = yksi termi (CONTENT.md 4). "Haku" kattaa tässä myös valinnat samoin kuin maamerkki "Hae ja suodata kortteja", ja jälkimmäinen lause neuvoo kummankin korjaamisen. Testit (`CatalogView.filters.test.tsx`) ja UX.md 5.6 päivitetään samalla tekstillä (UX:n omistama tiedosto, PM osoittaa).
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit a6890e9), UX.md 5.6 (commit 74404fe)
 
 ### TXT-009 · "Näytetään kaikki 1 korttia" yhden kortin tapauksessa · Low
 **Sijainti:** `src/ui/texts.ts`: `allShownLive` · **Tehtävä:** T-010
@@ -35,7 +35,7 @@
 **Nykyinen teksti:** `` `Näytetään kaikki ${numberFormat.format(all)} korttia.` ``
 **Ehdotettu teksti:** kun `all === 1`: "Näytetään 1 kortti." Muuten ennallaan. Esim. `all === 1 ? \`Näytetään ${cardCount(1)}.\` : \`Näytetään kaikki ${…} korttia.\``
 **Perustelu:** CONTENT.md 3: lukumäärät taivutetaan ("1 kortti"). Osuusmuodon poikkeus ("1 / 151 korttia") ei koske tätä lausetta. Tapaus on harvinainen, joten Low.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit a6890e9)
 
 ### TXT-010 · CHANGELOG: "valinnat löysivät" ja sisäinen tehtävätunniste · Low (Dokumentoijalle)
 **Sijainti:** `CHANGELOG.md`, `[Julkaisematon]` → Lisätty · **Tehtävä:** T-010
@@ -46,7 +46,7 @@
 - "Haku ja suodatus korttilistaan: voit hakea…"
 - "Listan yläpuolella näkyy, montako korttia haku ja valinnat löysivät (esim. "2 / 151 korttia")."
 **Perustelu:** Määrä päivittyy myös pelkällä hakusanalla. Tehtävätunniste ei kerro käyttäjälle mitään (CHANGELOG on "käyttäjälle näkyvät muutokset", 0.1.0-osiossa ei tunnisteita). Lisäksi 0.1.0-osio käyttää sanaa "haku" merkityksessä korttien lataus ("Haku kestää muutaman sekunnin"). Julkaistua osiota ei muuteta, mutta jatkossa merkitys (1) kirjoitetaan "korttien haku" (CONTENT.md 4). Dokumentoija päättää muotoilun julkaisun yhteydessä.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 74404fe)
 
 ### TXT-011 · Suodatinohje "Valitse yksi tai useampi." · Info (ei muutosta)
 **Sijainti:** `src/ui/texts.ts`: `filterHint`
