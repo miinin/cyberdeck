@@ -1,8 +1,9 @@
 # UX · cyberdeck
 
-> Omistaja: UX Designer. Versio 0.2 · 2026-10-01 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
+> Omistaja: UX Designer. Versio 0.5 · 2026-10-01 (T-012). Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
 > Muutos 0.3 · 2026-10-01 (T-010, MVP-1): uusi luku 5 (haku ja suodatus), korttien väritokenit (3.1.1) sekä tekstikenttä ja valintaruutu (3.4). Luvun 4 kohtiin, joita luku 5 muuttaa, on lisätty viittaus.
 > Muutos 0.4 · 2026-10-01 (T-010, katselmointi UX-002): K9 ratkaistu (latausviesti suodatettuna, 5.6), tyhjennyspainikkeen ilmoitus ja toistokielto (5.6), OSITTAINEN ilman kortteja (5.8). Raportti `docs/reports/UX-002-t010-katselmointi.md`.
+> Muutos 0.5 · 2026-10-01 (T-012, MVP-1): uusi luku 6 (kokoelma): määräkontrolli korttirivillä, korttimainen rivi alle 40 rem:ssä, "Vain omistetut" -suodatin, kokoelman yhteenveto, selainmuistutus ja pysyvän tallennuksen pyyntö, tallennuskerroksen ilmoitukset ja virheet, ruudunlukijailmoitukset ja tarkistuslista. Uudet komponentit: määräpainike ja toissijainen painike (6.4.3).
 > Tämä on minimitason design-järjestelmä, joka riittää MVP-0:aan. MVP-1 laajentaa sitä (lomakkeet, navigaatio, haku, kokoelman merkintä). Määrittely ei sido kehykseen: tokenit ovat CSS-muuttujia, ja rakenne kuvataan semanttisena HTML:nä.
 
 ---
@@ -802,3 +803,415 @@ OSITTAINEN-tilassa `Yritä uudelleen` (varoituslaatikossa) on ennen hakukenttä�
 - **K7 · "Haku"-sanan kaksi merkitystä.** Oletus: hakukentän label on vakiintunut `Hae nimellä`, ja latausviestit säilyvät ennallaan, koska ne eivät näy samaan aikaan (5.8). Sisällöntuottaja päivittää CONTENT.md:n sanaston (rivi "hakea / haku").
 - **K8 · Sarake "Tyyppi ja väri".** Oletus tämä. Vaihtoehto: erillinen Väri-sarake vain ≥ 640 px:ssä, mutta silloin eri leveydet olisivat epäjohdonmukaisia.
 - **K9 · Latausviesti, kun lista on suodatettu.** Ratkaistu 2026-10-01 (UX-002): yhdistetty viesti, katso 5.6.
+
+---
+
+## 6. Kokoelma (T-012, MVP-1)
+
+### 6.1 Käyttäjä ja tavoite
+
+Pelaaja istuu pelipöydän ääressä puhelimen kanssa ja käy korttilistaa läpi. Hän haluaa merkitä omistamansa kortit ja niiden määrät **muutamalla painalluksella** ja nähdä myöhemmin, mitä hänellä on. Yhden kortin merkitseminen omistetuksi on **yksi painallus** hakutuloksesta. Tieto säilyy selaimessa (D-008). Pakat (T-013), puuttuvien korttien raportti (T-014), vienti ja tuonti (T-015), painokset (D-007) ja mobiilin kompakti lomake (T-018) eivät kuulu tähän.
+
+Termit (Sisällöntuottaja lisää CONTENT.md:n sanastoon, katso 6.14): **kokoelma** (omat kortit), **omistetut** (kortit, joita on vähintään yksi), **kappale** (yksi fyysinen kortti). Käyttäjälle ei puhuta "tallennuskerroksesta", "avaimista", "skeemasta" eikä "localStoragesta".
+
+### 6.2 Polku
+
+```
+ONNISTUMINEN tai OSITTAINEN (4.5), vähintään yksi kortti
+  │
+  ├─ Kokoelma luetaan selaimesta (nopea, paikallinen)
+  │    ├─ onnistui                      → KOKOELMA VALMIS (6.5)
+  │    ├─ onnistui + ilmoituksia        → VALMIS + ilmoituslaatikot (6.8)
+  │    ├─ newer-version                 → LUKITTU (6.8, ei muokattavissa)
+  │    └─ lukeminen epäonnistui         → EI SAATAVILLA (6.8)
+  │
+  ├─ Käyttäjä painaa [+] kortin rivillä      → määrä 0 → 1 (omistettu), yksi painallus
+  │  Käyttäjä painaa [+] / [−] uudelleen     → määrä muuttuu 1 kerrallaan (0–999)
+  │  [−] kun määrä on 1                      → määrä 0 = kortti poistuu kokoelmasta
+  │        │
+  │        ├─ tallennus onnistui    → ilmoitus ruudunlukijalle (6.9), yhteenveto päivittyy
+  │        └─ tallennus epäonnistui → rivin määrä palaa viimeksi tallennettuun,
+  │                                   virheilmoitus (6.8) + ilmoitus ruudunlukijalle
+  │
+  ├─ Käyttäjä valitsee "Vain omistetut"      → lista rajautuu (JA muiden suodattimien kanssa, 6.6)
+  ├─ Käyttäjä painaa "Pyydä pysyvää tallennusta" → selaimen lupapyyntö (6.7)
+  └─ Muutos toisessa välilehdessä            → määrät päivittyvät itsestään (6.9)
+```
+
+- Kokoelmaa ei näytetä, kun lista on LATAUS-, VIRHE- tai TYHJÄ-tilassa (ei kortteja, joihin merkitä). Pysyvän tallennuksen pyyntö (`requestPersistentStorage`) käynnistyy **vain painikkeesta**, ei koskaan sivun latautuessa (SR-13).
+
+### 6.3 Sivun rakenne
+
+DOM-järjestys `main`:ssa (uudet osat merkitty UUSI):
+
+```html
+<main>
+  <h1 tabindex="-1">Kortit</h1>
+  <p id="card-status">…</p>                                  <!-- 5.6 -->
+  <p id="collection-summary" class="status-line">…</p>        <!-- UUSI: yhteenveto, 6.5 -->
+  <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">…</div>  <!-- sama alue kuin 4.3 -->
+  <!-- OSITTAINEN-varoituslaatikko (4.5) -->
+  <!-- UUSI: kokoelman ilmoituslaatikot (6.8): newer-version, reset, repaired, persistent:false, tallennusvirhe -->
+  <!-- UUSI: selainmuistutus ja pysyvän tallennuksen painike (6.7) -->
+  <form role="search" aria-label="Hae ja suodata kortteja">
+    <!-- Hae nimellä (5.4) -->
+    <!-- UUSI: valintaruutu "Vain omistetut" (6.6) -->
+    <!-- Tyyppi, Väri (5.4) -->
+  </form>
+  <!-- taulukko (6.4) tai EI TULOKSIA -tila (6.6) -->
+</main>
+```
+
+- Otsikot: ei uusia tasoja. Kokoelman ilmoituslaatikoiden otsikko on `h2` kuten muissakin ilmoituslaatikoissa (3.4). Selainmuistutus ja yhteenveto ovat kappaleita.
+- Maamerkit ja `<title>` ennallaan. Samaa `role="status"`-aluetta käytetään kaikkiin ilmoituksiin. Toista live-aluetta ei lisätä eikä `assertive` ole sallittu (5.6).
+
+### 6.4 Korttirivin määräkontrolli
+
+#### 6.4.1 Taulukon rakenne
+
+Taulukkoon tulee **neljäs sarake `Omistan`** (`th scope="col"`, `col-fit`, tasattu oikealle). Muut sarakkeet, niiden sisältö ja tekstit pysyvät ennallaan (4.4, 5.5).
+
+```html
+<th scope="col" class="col-fit col-control">Omistan</th>
+…
+<td class="col-fit col-control">
+  <div class="count-control">
+    <button type="button" class="step step-minus">   <!-- renderöidään vain, kun määrä ≥ 1 -->
+      <span class="visually-hidden">Vähennä yksi kappale: <span lang="en">V</span>, <span lang="en">Streetkid</span></span>
+      <span aria-hidden="true">−</span>              <!-- U+2212 -->
+    </button>
+    <span class="count">                             <!-- renderöidään vain, kun määrä ≥ 1 -->
+      <span class="visually-hidden">Kokoelmassa </span>2<span class="visually-hidden"> kappaletta</span>
+    </span>
+    <span class="visually-hidden">Ei kokoelmassa</span>   <!-- vain kun määrä 0 -->
+    <button type="button" class="step step-plus">
+      <span class="visually-hidden">Lisää yksi kappale: <span lang="en">V</span>, <span lang="en">Streetkid</span></span>
+      <span aria-hidden="true">+</span>
+    </button>
+  </div>
+</td>
+```
+
+Ruudunlukija lukee rivin: "V, Streetkid · Legend, Punainen · 5 · Vähennä yksi kappale: V, Streetkid, painike · Kokoelmassa 2 kappaletta · Lisää yksi kappale: V, Streetkid, painike". Määrällä 0: "Ei kokoelmassa · Lisää yksi kappale: V, Streetkid, painike".
+
+#### 6.4.2 Käyttäytyminen
+
+| Tila | Näkyvä | Kontrolli |
+|---|---|---|
+| Määrä 0 | vain `[ + ]` | Yksi painallus → määrä 1 (kortti omistetuksi). |
+| Määrä 1–998 | `[ − ]  n  [ + ]` | `+` lisää 1, `−` vähentää 1. |
+| Määrä 1 ja `−` | | Määrä 0: kortti poistuu kokoelmasta. Ei vahvistuskyselyä (yhden kappaleen merkintä palautuu yhdellä `+`-painalluksella, ja kysely hidastaisi). |
+| Määrä 999 | `[ − ]  999  [ + ]` | `+` on `aria-disabled="true"` (ei `disabled`, jotta fokus ei katoa) ja himmennetty. Painallus ei tee mitään, ja live-alue ilmoittaa `Enimmäismäärä 999 on täynnä: {nimi}.` |
+
+- **Sijainti ei hyppää.** Kontrolli on tasattu oikealle, ja `+` on aina oikeanpuoleisin. Kun `−` ja määrä ilmestyvät `+`:n vasemmalle puolelle, `+` pysyy paikallaan ja on sama DOM-elementti (vakaa React-avain). Peräkkäiset painallukset osuvat samaan kohtaan, ja fokus säilyy.
+- **Fokus, kun `−` katoaa.** Jos `−` poistuu DOM:ista (määrä 1 → 0), fokus siirretään saman rivin `+`-painikkeeseen ennen poistamista.
+- **Määrä vain painikkeilla.** Suoraa numerosyöttöä, pitkää painallusta tai kiihtyvää toistoa ei tässä tehtävässä (IDEAS.md). Enter pohjassa selaimen oma toisto on sallittu.
+- **Nopeat peräkkäiset painallukset.** Näytöllä oleva määrä päivittyy heti jokaisella painalluksella (tavoitemäärä). Tallennukset suoritetaan **yksi kerrallaan**: kun edellinen `setCount` on kesken, uusin tavoitemäärä odottaa ja tallennetaan heti sen jälkeen (välissä olevia arvoja ei tarvitse tallentaa). Vanhempi vastaus ei saa ylikirjoittaa uudempaa tavoitemäärää näytöllä.
+- **Epäonnistunut tallennus.** Rivin määrä palaa viimeksi **onnistuneesti tallennettuun** arvoon (tallennettu `Collection` tulee edellisestä `setCount`-vastauksesta tai `load()`:sta), mikä täyttää ehdon "näytöllä ei ole määrää, jota ei tallennettu". Odottavat tavoitemäärät hylätään. Virheilmoitus: 6.8.
+- **Yhteenveto ja määrät luetaan tallennetusta `Collection`:ista**, ei lasketa erikseen.
+- **Tuntemattomat avaimet** (kokoelmassa on avain, jota korttiluettelossa ei ole, esim. nimen errata): niitä **ei näytetä, ei lasketa yhteenvetoon eikä poisteta**. Katso A3.
+
+#### 6.4.3 Visuaalinen määrittely
+
+Uusi komponentti **määräpainike** (`.step`), käyttää vain olemassa olevia tokeneita:
+
+- Koko vähintään `--target-min` × `--target-min` (44 × 44 px), `border-radius: var(--radius)`, fonttikoko `--font-size-lg`, `line-height: 1`. Painikkeiden väli `--space-2`.
+- `+`: tausta `--color-accent`, teksti `--color-on-accent` (kuten ensisijainen painike, 3.4).
+- `−`: tausta `--color-bg`, teksti `--color-text`, reuna 1 px `--color-border-strong`.
+- Hover: `+`: 2 px:n sisäreuna `--color-on-accent`. `−`: tausta `--color-surface`. Kursori `pointer`. (Alleviivaus ei toimi symbolissa.)
+- Fokus: `:focus-visible { outline: var(--focus-ring); }`. Ei `overflow: hidden` vanhemmissa, jotta rengas ei leikkaudu.
+- Määrä (`.count`): `--font-weight-bold`, `font-variant-numeric: tabular-nums`, `min-width: 2.5ch`, keskitetty.
+- Himmennetty `+` (999): `opacity: 0.5` ja katkoviivareuna, jotta tila ei välity pelkällä himmennyksellä.
+- Ei animaatioita eikä siirtymiä. Jos Koodari lisää, ne poistetaan `prefers-reduced-motion: reduce` -tilassa.
+
+Uusi **toissijainen painike** (`.button-secondary`, käytössä 6.7 ja 6.8): vähimmäiskoko `--target-min`, tausta `--color-bg`, teksti `--color-text`, reuna 1 px `--color-border-strong`, lihavoitu, `--radius`, sisäväli `--space-2` `--space-4`, hover alleviivaus, fokus `--focus-ring`.
+
+#### 6.4.4 Rautalanka, 320 px
+
+Neljä saraketta ja kaksi 44 px:n painiketta eivät mahdu 288 px:iin. Siksi alle 40 rem:n leveydellä taulukon rivi esitetään **korttimaisena ruudukkona**. Taulukon semantiikka säilytetään: `table`, `thead`, `tbody`, `tr`, `th` ja `td` saavat **eksplisiittiset ARIA-roolit** (`table`, `rowgroup`, `row`, `columnheader`, `rowheader`, `cell`), koska `display: grid` poistaa natiivin taulukkosemantiikan Chromessa ja Safarissa. `thead` piilotetaan `.visually-hidden`-tyylillä (ei `display: none`), jotta sarakeotsikot säilyvät ruudunlukijalle.
+
+```
+┌────────────────────────────────┐
+│ Kortit                         │ h1
+│ 151 korttia                    │ tilarivi
+│ Kokoelmassa 3 eri korttia,     │ yhteenveto (sm, muted)
+│ yhteensä 5 kappaletta.         │
+│                                │
+│ Kokoelma tallentuu vain tähän  │ selainmuistutus (sm, muted)
+│ selaimeen tällä laitteella. …  │
+│ [ Pyydä pysyvää tallennusta ]  │ toissijainen painike
+│                                │
+│ Hae nimellä …                  │ (5.4)
+│ [☐ Vain omistetut]             │ UUSI, 44 px
+│ Tyyppi / Väri …                │ (5.4)
+│                                │ --space-6
+│ ┌────────────────────────────┐ │
+│ │ V                [−]  2 [+]│ │ nimi (rivittyy) | kontrolli, keskitetty pystysuunnassa
+│ │ Streetkid                  │ │ subname
+│ │ Legend · ■ Punainen · Hinta 5││ tyyppi + väri, hinta
+│ ├────────────────────────────┤ │
+│ │ Swordwise Huscle       [+] │ │ määrä 0: vain [+]
+│ │ Unit · ■ Sininen · Hinta 3 │ │
+│ ├────────────────────────────┤ │
+│ │ Viktor Vektor    [−]  1 [+]│ │
+│ │ You Might Feel a Little    │ │ pitkä alaotsikko rivittyy
+│ │ Pinch                      │ │
+│ │ Program · ■ Keltainen · Hinta – │ hinta puuttuu: "–" kuten 4.4
+│ └────────────────────────────┘ │
+└────────────────────────────────┘
+```
+
+- Ruudukko `< 40rem`: `grid-template-columns: auto auto 1fr auto; grid-template-areas: "name name name control" "type cost . control"`. Kontrollin leveys on vakio `calc(3 * var(--target-min) + 2 * var(--space-2))` (132 px), jotta nimen leveys ei vaihtele rivien välillä. Kontrolli on pystysuunnassa keskitetty.
+- Hinta-solun eteen tulee **näkyvä** teksti `Hinta ` (CSS `::before`, koska otsikkorivi on piilotettu). Ruudunlukija voi lukea sen sarakeotsikon lisäksi, mikä on hyväksytty.
+- Tyyppi ja väri -solun sisältö ja tekstit ennallaan (5.5). Tyypin, värin ja hinnan välinen erotin `·` on koriste (`aria-hidden`).
+- Rivien erotus 1 px `--color-border`, rivin pystysisäväli `--space-2`.
+- 320 px:ssä nimelle jää noin 144 px. Nimi rivittyy (`overflow-wrap: anywhere`, kuten 4.4). Ei vaakavieritystä 400 % zoomilla eikä pisimmällä nimellä.
+
+#### 6.4.5 Rautalanka, ≥ 640 px (40 rem)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Kortit                                                       │
+│ 151 korttia                                                  │
+│ Kokoelmassa 3 eri korttia, yhteensä 5 kappaletta.            │
+│ Kokoelma tallentuu vain tähän selaimeen tällä laitteella.    │
+│ Se ei siirry toiselle laitteelle eikä toiseen selaimeen.     │
+│ [ Pyydä pysyvää tallennusta ]                                │
+│ …lomake (Hae nimellä, Vain omistetut, Tyyppi, Väri)…         │
+│ ┌────────────────────────────────────────────────────────┐   │
+│ │ Nimi        Tyyppi ja väri   Hinta      Omistan        │   │
+│ ├────────────────────────────────────────────────────────┤   │
+│ │ V           Legend              5     [−]  2  [+]      │   │
+│ │ Streetkid   ■ Punainen                                 │   │
+│ ├────────────────────────────────────────────────────────┤   │
+│ │ Swordwise…  Unit                3            [+]       │   │
+│ │             ■ Sininen                                  │   │
+│ └────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+- Sama taulukko kuin 4.4 ja 5.5 plus sarake `Omistan` (`col-fit`, oikealle tasattu). Solujen sisäväli kuten 4.4. Eksplisiittiset roolit saa jättää päälle myös tällä leveydellä.
+
+### 6.5 Kokoelman yhteenveto
+
+`<p id="collection-summary" class="status-line">` tilarivin alla (`--font-size-sm`, `--color-text-muted`). Se kertoo **koko kokoelman**, ei suodatuksen tulosta, ja päivittyy heti jokaisella tallennetulla muutoksella. Se ei ole live-alueessa: määrän muutos ilmoitetaan 6.9:n mukaan.
+
+| Tilanne | Teksti |
+|---|---|
+| Kokoelma luetaan | `Haetaan kokoelmaa…` |
+| Tyhjä kokoelma | `Kokoelmassa ei ole vielä kortteja.` |
+| 1 eri kortti, 1 kappale | `Kokoelmassa 1 eri kortti, yhteensä 1 kappale.` |
+| 3 eri korttia, 5 kappaletta | `Kokoelmassa 3 eri korttia, yhteensä 5 kappaletta.` |
+| 1 eri kortti, 12 kappaletta | `Kokoelmassa 1 eri kortti, yhteensä 12 kappaletta.` |
+| Kappaleita yli 999 | `Intl.NumberFormat('fi-FI')`, esim. `yhteensä 1 024 kappaletta` |
+| LUKITTU tai EI SAATAVILLA (6.8) | kappale ei renderöidy |
+
+"Eri korttia" = ladatun korttiluettelon korttien määrä, joilla kokoelmassa on määrä ≥ 1. "Kappaletta" = niiden määrien summa. Sanat taipuvat: yksikkö vain luvulle 1.
+
+### 6.6 "Vain omistetut" -suodatin
+
+Uusi valintaruutu T-010:n lomakkeeseen (`form role="search"`), **hakukentän jälkeen ja ennen ryhmäohjetta** `Valitse yksi tai useampi…`. Oma `.field`-kääre, ei `<fieldset>`:ia, koska se ei kuulu Tyyppi- eikä Väri-ryhmään.
+
+```
+Hae nimellä                         (5.4)
+Kortin nimi tai alaotsikko. …
+[ silver                        ✕ ]
+[☐ Vain omistetut]                  UUSI
+Valitse yksi tai useampi. …         (5.4, koskee vain Tyyppi ja Väri)
+Tyyppi …
+Väri …
+```
+
+- Label `Vain omistetut`. Natiivi `<input type="checkbox">`, 3.4:n mukainen (koko label vähintään 44 px korkea).
+- Logiikka: JA-ehto muiden kanssa. Kortti näkyy, kun sen määrä on ≥ 1 **ja** haku, tyyppi ja väri täyttyvät. Suodatin ei tallennu eikä säily sivun uudelleenlatauksessa, mutta säilyy `Yritä uudelleen` -painalluksen yli kuten muut (5.8).
+- Se on aktiivinen suodatin (`isFilterActive`): caption `Hakua vastaavat kortit`, tilarivi `{n} / {kaikki} korttia`, live-alue 5.6:n mukaan (750 ms, toistokielto).
+- Valintaruutu **ei renderöidy**, jos kokoelma ei ole valmis (luetaan, LUKITTU, EI SAATAVILLA). Jos suodatin on päällä ja kokoelma muuttuu LUKITUKSI, suodatin nollataan.
+- **Rivi ei katoa käsistä.** Kun "Vain omistetut" on päällä ja käyttäjä painaa `−` määrään 0, rivi **jää näkyviin** (määrä 0, vain `+`), kunnes hakuehdot (haku, tyyppi, väri tai "Vain omistetut") muuttuvat. Fokus ei katoa, ja painalluksen voi perua `+`:lla (WCAG 3.2.2, 2.4.3). Tilarivin `{n}` = näkyvien rivien määrä. Yhteenveto lasketaan todellisesta kokoelmasta.
+
+**EI TULOKSIA, kun "Vain omistetut" on päällä:**
+
+| Tilanne | Teksti | Painike |
+|---|---|---|
+| Koko kokoelma on tyhjä eikä muita suodattimia tai hakua ole | `Kokoelmassa ei ole vielä kortteja. Poista "Vain omistetut" -valinta ja merkitse omistamasi kortit listasta.` | `Näytä kaikki kortit` |
+| Muuten ei osumia | `Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.` (5.6, ennallaan) | `Tyhjennä haku ja suodattimet` (tyhjentää myös "Vain omistetut") |
+
+- `Näytä kaikki kortit` poistaa vain "Vain omistetut" -valinnan ja siirtää fokuksen sen valintaruutuun. Live-alue ilmoittaa heti `Näytetään kaikki {kaikki} korttia.` (5.6). Tyhjä tila kuten 5.6: ei ilmoituslaatikkoa eikä `h2`:ta.
+- Live-alueen EI TULOKSIA -teksti ennallaan: `Hakua vastaavia kortteja ei löytynyt.`
+
+### 6.7 Selainmuistutus ja pysyvä tallennus
+
+Näytetään, kun kokoelma on valmis (6.5) ja `repositories.persistent` on `true`. Jos `persistent` on `false`, näytetään vain varoitus (6.8): pysyvä tallennus ei auttaisi.
+
+```
+Kokoelma tallentuu vain tähän selaimeen tällä laitteella. Se ei siirry
+toiselle laitteelle eikä toiseen selaimeen.
+[ Pyydä pysyvää tallennusta ]
+Pysyvä tallennus pyytää selainta säilyttämään kokoelman, vaikka laitteen
+tallennustila vähenee. Selaimen tietojen tyhjennys poistaa kokoelman silti.
+```
+
+- Kappale (aina näkyvissä, `--font-size-sm`, `--color-text-muted`, ei suljettavissa): `Kokoelma tallentuu vain tähän selaimeen tällä laitteella. Se ei siirry toiselle laitteelle eikä toiseen selaimeen.`
+- Painike (`.button-secondary`, `<button type="button">`): `Pyydä pysyvää tallennusta`.
+- Ohje painikkeen alla (liitetty `aria-describedby`:llä, sm, muted): `Pysyvä tallennus pyytää selainta säilyttämään kokoelman, vaikka laitteen tallennustila vähenee. Selaimen tietojen tyhjennys poistaa kokoelman silti.`
+- Pyyntö käynnistyy vain painikkeen painalluksesta (SR-13). Pyynnön ajan painike on `aria-disabled="true"` ja `aria-busy="true"` (selain voi näyttää lupakyselyn, eikä kaksoispainallus saa käynnistää toista pyyntöä). Teksti ei muutu.
+- **Tulos** korvaa painikkeen ja ohjeen kappaleella, joka saa fokuksen (`tabindex="-1"`, jotta fokus ei katoa), ja sama teksti ilmoitetaan heti live-alueella:
+
+| Tulos | Kappale ja live-teksti |
+|---|---|
+| `true` | `Selain lupasi säilyttää kokoelmasi. Selaimen tietojen tyhjennys poistaa sen silti.` |
+| `false` (kielto tai ei tuettu) | `Selain ei antanut lupaa pysyvään tallennukseen. Kokoelma tallentuu silti, mutta selain voi poistaa sen, jos laitteen tila loppuu. Älä tyhjennä selaimen tietoja.` |
+
+- Tulos pysyy näkyvissä, kunnes sivu ladataan uudelleen. Vaihtoehto A2: jos vain-luku-tarkistus `navigator.storage.persisted()` palauttaa `true`, painiketta ei näytetä vaan pelkkä kappale `Selain on luvannut säilyttää kokoelmasi. Selaimen tietojen tyhjennys poistaa sen silti.`
+
+### 6.8 Ilmoitukset ja virheet (tilat)
+
+Ilmoituslaatikko = 3.4:n malli: `h2` + kappale + tarvittaessa painike. Tekstit eivät sisällä avaimia, versionumeroita, varmuuskopion nimeä (SEC-007) eikä virheolion viestiä. Tekniset tiedot menevät vain konsoliin.
+
+#### Latauksen tilat
+
+| Tila | Näkyvä | Käyttäytyminen |
+|---|---|---|
+| **LATAUS (kokoelma)** | Yhteenvetorivi `Haetaan kokoelmaa…`. Kontrollialue varataan (132 px), mutta painikkeita ei ole. Kontrollisolussa piilotettu teksti `ladataan`. | "Vain omistetut" ei renderöidy. Ei live-ilmoitusta (lataus on nopea ja paikallinen). |
+| **TYHJÄ kokoelma** | `Kokoelmassa ei ole vielä kortteja.` Kaikilla riveillä vain `[+]`. | Ei ilmoituslaatikkoa, ei virhe. |
+| **OSITTAINEN data** | OSITTAINEN-varoitus (4.5) näkyy normaalisti, ja kokoelmakontrollit toimivat näkyville korteille. Yhteenveto laskee vain näkyvät kortit. | Ei erillistä tekstiä. |
+| **EI SAATAVILLA** (`collection.load()` hylkää) | Danger-laatikko, katso alla. Kontrollisarake ja "Vain omistetut" eivät renderöidy, korttilista toimii ilman niitä. | `Lue kokoelma uudelleen` kutsuu `load()`:ia uudelleen, ja fokus siirretään `h1`:een. |
+
+**EI SAATAVILLA:** `h2` `Kokoelmaa ei voitu lukea` · kappale `Selain ei antanut lukea tallennettuja tietoja. Korttilista toimii, mutta omistettuja kortteja ei voi nyt merkitä. Voit yrittää uudelleen tai tarkistaa selaimen yksityisyysasetukset.` · painike `Lue kokoelma uudelleen` · live `Kokoelmaa ei voitu lukea.`
+
+#### Latauksen ilmoitukset (`load().notices`)
+
+Useampi ilmoitus samaan aikaan: allekkain järjestyksessä newer-version, reset, repaired, persistent:false. `migrated`-ilmoitusta ei näytetä käyttäjälle.
+
+| Lähde | Tyyli | `h2` | Kappale | `Sulje` | Live |
+|---|---|---|---|---|---|
+| `persistent: false` | warning | `Tietoja ei voi tallentaa` | `Selain ei salli tietojen tallentamista tälle sivustolle. Voit merkitä kortteja, mutta merkinnät häviävät, kun suljet tai päivität sivun. Tarkista selaimen yksityisyysasetukset tai avaa sivu tavallisessa selausikkunassa.` | ei | `Tietoja ei voi tallentaa.` |
+| `reset`, `backupKey` on merkkijono | warning | `Vanhat kokoelmatiedot eivät olleet luettavissa` | `Tallennetut kokoelmatiedot olivat vioittuneet, joten kokoelma aloitettiin tyhjänä. Vanhoista tiedoista on otettu kopio selaimeen, mutta sovellus ei vielä osaa palauttaa sitä.` | kyllä | `Vanhat kokoelmatiedot eivät olleet luettavissa.` |
+| `reset`, `backupKey: null` (SEC-007) | danger | `Vanhoja kokoelmatietoja ei voitu käsitellä` | `Tallennetut kokoelmatiedot olivat vioittuneet, eikä niistä saatu kopiota. Vanhoja tietoja ei ole poistettu, joten uusia merkintöjä ei voi tallentaa, ennen kuin selain sallii tallennuksen. Vapauta selaimen tallennustilaa ja päivitä sivu.` | ei | `Vanhoja kokoelmatietoja ei voitu käsitellä.` |
+| `repaired`, `dropped` = 1 | warning | `Osa kokoelman tiedoista oli vioittunut` | `Yhtä merkintää ei voitu lukea, ja se jätettiin pois. Muut merkinnät ovat tallessa. Tarkista kokoelmasi.` | kyllä | `Osa kokoelman tiedoista oli vioittunut.` |
+| `repaired`, `dropped` = n > 1 | warning | sama | `{n} merkintää ei voitu lukea, ja ne jätettiin pois. Muut merkinnät ovat tallessa. Tarkista kokoelmasi.` | kyllä | sama |
+| `newer-version` | warning | `Kokoelma on tallennettu uudemmalla versiolla` | `Selaimeen tallennetut tiedot ovat peräisin sovelluksen uudemmasta versiosta. Kokoelmaa ei näytetä eikä sitä voi muokata, jotta tiedot eivät vioitu. Päivitä sivu. Jos tämä ei auta, tyhjennä selaimen välimuisti ja yritä uudelleen.` | ei | `Kokoelma on tallennettu uudemmalla versiolla.` |
+
+- **LUKITTU (newer-version):** kokoelma näytetään tyhjänä, ja kirjoitus on estetty. Kontrollisarakkeessa **ei ole painikkeita**: solussa `<span aria-hidden="true">–</span><span class="visually-hidden">ei muokattavissa</span>`. Yhteenveto ja "Vain omistetut" eivät renderöidy. Sama tila syntyy, jos `setCount` heittää `StorageError('newer-version')` (toinen välilehti on päivittänyt tiedot uudempaan versioon): rivin määrä palaa viimeksi tallennettuun ja näkymä siirtyy LUKITTU-tilaan.
+- `backupKey: null` -tilassa painikkeet pysyvät käytössä, ja tallennus epäonnistuu tallennusvirheenä (alla). Katso A4.
+- **`Sulje`** (`.button-secondary`): saavutettava nimi `Sulje ilmoitus: {h2-teksti}`. Sulkeminen poistaa laatikon ja siirtää fokuksen `h1`:een (4.6). Suljettu ilmoitus ei palaa ennen seuraavaa sivun latausta.
+- **Live-ilmoitukset latauksessa:** ensin normaali latausviesti (`151 korttia ladattu.`). **1,5 s sen jälkeen** ilmoitetaan kaikkien yhtä aikaa näkyvien warning- ja danger-ilmoitusten live-tekstit yhdessä viestissä välilyönnillä erotettuna, jotta ensimmäinen ei ylikirjoita jälkimmäistä.
+
+#### Tallennusvirheet muutoksen yhteydessä (`StorageError`)
+
+Danger-laatikko (`h2` + kappale + `Sulje`) ennen lomaketta, **ilman toimintopainiketta** (käyttäjä yrittää uudelleen painamalla `+` tai `−`). Laatikko poistuu, kun seuraava tallennus onnistuu tai käyttäjä sulkee sen. Rivin määrä palaa viimeksi tallennettuun (6.4.2). Live-alue ilmoittaa heti `h2`-tekstin ja `Kortin määrä ei muuttunut.`
+
+| `kind` | `h2` | Kappale |
+|---|---|---|
+| `quota` | `Muutosta ei voitu tallentaa` | `Selaimen tallennustila on täynnä, joten kortin määrä ei muuttunut. Vapauta tilaa poistamalla selaimen tietoja muilta sivustoilta ja yritä uudelleen.` |
+| `unavailable` | `Muutosta ei voitu tallentaa` | `Selain esti tallennuksen, joten kortin määrä ei muuttunut. Yritä uudelleen. Jos ongelma jatkuu, tarkista selaimen yksityisyysasetukset.` |
+| `newer-version` | LUKITTU-tila (yllä) | (yllä) |
+| `limit-reached` | `Kokoelma on täynnä` | `Kokoelmaan mahtuu enintään 5 000 eri korttia, joten uutta korttia ei voi lisätä. Voit poistaa kortteja, joita et enää tarvitse.` (käytännössä tavoittamaton, koska korttiluettelossa on alle 200 korttia) |
+| muu (`invalid-input`, `not-found`, tuntematon) | `Muutosta ei voitu tallentaa` | `Jokin meni pieleen, ja kortin määrä ei muuttunut. Yritä uudelleen.` |
+
+- Peräkkäiset virheet eivät kasaa laatikoita: yksi laatikko, teksti päivittyy. Live-ilmoitus annetaan vain, kun virhelaji muuttuu tai laatikko on ollut poissa.
+- `Sulje`-nimi: `Sulje ilmoitus: Muutosta ei voitu tallentaa`. Fokus `h1`:een.
+
+### 6.9 Ruudunlukijailmoitukset
+
+Käytetään olemassa olevaa `role="status"`-aluetta (4.3). **Tallentamattomasta määrästä ei ilmoiteta.**
+
+| Tapahtuma | Viive | Teksti |
+|---|---|---|
+| Määrä `0 → n` | 500 ms viimeisen **tallennetun** muutoksen jälkeen | `{nimi} lisätty kokoelmaan: {n} kappaletta.` (n = 1: `1 kappale`) |
+| Määrä `n → m`, `m ≥ 1` | 500 ms | `{nimi}: {m} kappaletta kokoelmassa.` (m = 1: `1 kappale`) |
+| Määrä `n → 0` | 500 ms | `{nimi} poistettu kokoelmasta.` |
+| `+` painettu, kun määrä on 999 | heti | `Enimmäismäärä 999 on täynnä: {nimi}.` |
+| Tallennus epäonnistui | heti | 6.8:n teksti |
+| Muutos toisessa välilehdessä (`subscribe`) | 750 ms (5.6) | `Kokoelma päivittyi toisessa välilehdessä.` |
+
+- `{nimi}` = `{name}` tai `{name}, {subname}` kuten rivin nimi (esim. `V, Streetkid`).
+- **Hillintä nopeissa painalluksissa.** Yksi ajastin koko näkymälle. Ajastin käynnistyy vasta, kun mikään tallennus ei ole kesken, ja jokainen uusi onnistunut tallennus nollaa sen. Viesti kuvaa **alkutilasta lopputilaan** (jos käyttäjä painaa `+` viisi kertaa nopeasti, ruudunlukija kuulee yhden viestin: `{nimi} lisätty kokoelmaan: 5 kappaletta.`). Jos painallukset kohdistuvat eri riveihin, ilmoitetaan vain viimeksi muutettu kortti.
+- Jos alku- ja lopputila ovat samat (`+` ja `−`), ilmoitusta ei anneta (toistokielto kuten 5.6).
+- Kokoelman ilmoitus ja suodatuksen tulosilmoitus (5.6) jakavat saman viivästetyn tekstin: myöhempi korvaa aiemman.
+- Taulukon, yhteenvedon ja tilarivin visuaalinen päivitys tapahtuu heti. Vain live-teksti viivästyy.
+- Toisen välilehden muutos (`subscribe`) päivittää rivit hiljaa **vasta, kun omat käynnissä olevat tallennukset ovat valmistuneet**. Fokus pysyy paikallaan. Jos fokusoitu `−` katoaa päivityksessä, fokus siirtyy saman rivin `+`:aan.
+
+### 6.10 Fokus ja näppäimistö
+
+DOM-järjestys ONNISTUMINEN-tilassa (laajentaa 5.7:ää):
+
+1. (OSITTAINEN: `Yritä uudelleen`)
+2. Kokoelman ilmoituslaatikoiden painikkeet (`Sulje`, `Lue kokoelma uudelleen`)
+3. `Pyydä pysyvää tallennusta`
+4. Hakukenttä → **`Vain omistetut`** → Tyyppi-ruudut → Väri-ruudut
+5. EI TULOKSIA: `Tyhjennä haku ja suodattimet` tai `Näytä kaikki kortit`
+6. Taulukossa riveittäin: `−` (jos määrä ≥ 1) → `+`
+7. Alatunnisteen linkit
+
+- Kaikki painikkeet toimivat Enterillä ja välilyönnillä (natiivit `<button>`).
+- **Fokus ei siirry itsestään** määrän muutoksen, suodatuksen tai tallennusvirheen vuoksi. Ainoat ohjelmalliset fokussiirrot: (a) `−` katoaa → saman rivin `+`, (b) `Sulje` ja `Lue kokoelma uudelleen` → `h1`, (c) pysyvän tallennuksen tulos → tulos-kappale (`tabindex="-1"`), (d) `Näytä kaikki kortit` → "Vain omistetut" -valintaruutu, (e) `Tyhjennä haku ja suodattimet` → hakukenttä (5.7).
+- Sarkainpysähdyksiä on enintään kaksi per rivi (noin 300 koko listalla). Ohituskeinoa ei tässä tehtävässä (IDEAS.md). "Vain omistetut" lyhentää listan tarvittaessa.
+- Sticky-elementtejä ei ole, joten mikään ei peitä fokusta (2.4.11).
+
+### 6.11 Responsiivisuus ja zoom
+
+| Leveys | Muutokset |
+|---|---|
+| 320–639 px | Korttimainen rivi (6.4.4). Kontrolli rivin oikeassa reunassa, 132 px leveä. Nimi rivittyy. Hinta-solun eteen `Hinta `. |
+| ≥ 640 px | Neljä saraketta (6.4.5). Sisältö enintään 48 rem. |
+
+- Ei vaakavieritystä 320 px:ssä eikä 400 % zoomilla (1280 px:n ikkunassa) pisimmällä nimellä ja värillä `Keltainen`.
+- 200 % tekstin suurennus ja WCAG 1.4.12 -välistys: rivit kasvavat sisällön mukaan (ei kiinteitä korkeuksia), painikkeet pysyvät vähintään 44 × 44 px. WCAG 2.5.8 vaatii vain 24 px.
+- Pysty- ja vaakasuunta toimivat samalla asettelulla.
+
+### 6.12 Tilat yhteenvetona
+
+| Tila | Yhteenvetorivi | Kontrollit | Muuta |
+|---|---|---|---|
+| Lista LATAUS / VIRHE / TYHJÄ | ei | ei | ei kokoelmaa eikä lupapyyntöä |
+| Kokoelma luetaan | `Haetaan kokoelmaa…` | ei (tila varattu) | – |
+| Kokoelma tyhjä | `Kokoelmassa ei ole vielä kortteja.` | `[+]` | selainmuistutus + painike |
+| Kokoelmassa kortteja | `Kokoelmassa 3 eri korttia, yhteensä 5 kappaletta.` | `[−] n [+]` | selainmuistutus + painike |
+| OSITTAINEN lista | vain näkyvät kortit | toimii | OSITTAINEN-varoitus (4.5) |
+| `persistent: false` | normaali (muistissa) | toimii | warning-laatikko, ei pysyvän tallennuksen painiketta |
+| `reset` / `repaired` | normaali | toimii | ilmoituslaatikko + `Sulje` |
+| `reset`, `backupKey: null` | normaali (tyhjä) | toimii, tallennus epäonnistuu | danger-laatikko |
+| `newer-version` (LUKITTU) | ei | ei painikkeita, `–` | warning-laatikko |
+| Lukeminen epäonnistui | ei | ei saraketta | danger-laatikko + `Lue kokoelma uudelleen` |
+| Tallennus epäonnistui | normaali | määrä palautuu | danger-laatikko, ei toimintopainiketta |
+| "Vain omistetut", tyhjä kokoelma | – | – | tyhjä tila + `Näytä kaikki kortit` |
+| "Vain omistetut" ja `−` nollaan | – | – | rivi jää, kunnes hakuehdot muuttuvat |
+
+### 6.13 Saavutettavuusvaatimukset (tarkistuslista Koodarille)
+
+- [ ] Uusi sarake `Omistan` (`th scope="col"`). Rivin otsikko on edelleen kortin nimi (`th scope="row"`).
+- [ ] Alle 40 rem:n korttiasettelu säilyttää taulukkosemantiikan eksplisiittisillä rooleilla (`table`, `rowgroup`, `row`, `columnheader`, `rowheader`, `cell`). `thead` on visuaalisesti piilotettu, ei `display: none`. Tarkista saavutettavuuspuusta.
+- [ ] `+` ja `−` ovat `<button type="button">`, nimi `Lisää yksi kappale: {nimi}` / `Vähennä yksi kappale: {nimi}` (korttinimet `lang="en"`). Symboli `aria-hidden`.
+- [ ] Määrä luetaan tekstinä (`Kokoelmassa 2 kappaletta`). Määrällä 0 piilotettu `Ei kokoelmassa`.
+- [ ] Painikkeet vähintään 44 × 44 px, väli 8 px, fokusrengas `--focus-ring` ei leikkaudu.
+- [ ] `+` pysyy samana DOM-elementtinä, kun `−` ilmestyy ja katoaa. Kun `−` katoaa, fokus siirtyy `+`:aan.
+- [ ] Raja 999: `aria-disabled="true"` (ei `disabled`), ilmoitus `Enimmäismäärä 999 on täynnä: {nimi}.`
+- [ ] Näytetty määrä on aina uusin tavoitemäärä. Tallennukset ovat peräkkäisiä, vanhempi vastaus ei ylikirjoita uudempaa, ja epäonnistuessa määrä palaa viimeksi tallennettuun. Testit (`createMemoryRepositories`): nopeat peräkkäiset painallukset, viiveellä vastaava `setCount`, `quota`, `unavailable`, `newer-version`.
+- [ ] Määrän live-ilmoitus tulee **tallennuksen jälkeen**, 500 ms:n hillinnällä, kuvaa alku- ja lopputilan eikä toista samaa. Sama `role="status"`-alue, ei `assertive`.
+- [ ] `#collection-summary` on tavallinen kappale (ei live-alueessa), taivutus oikein (`1 kortti`, `1 kappale`, `0`).
+- [ ] `Vain omistetut`: natiivi valintaruutu `<label>`:in sisällä, vähintään 44 px korkea, `form role="search"`:n sisällä hakukentän jälkeen, ei `fieldset`:ia. Aktiivisena caption `Hakua vastaavat kortit`.
+- [ ] Tyhjä kokoelma + "Vain omistetut": oma teksti ja `Näytä kaikki kortit` (fokus valintaruutuun). Muuten `Tyhjennä haku ja suodattimet` tyhjentää myös "Vain omistetut".
+- [ ] "Vain omistetut" + `−` nollaan: rivi jää näkyviin, eikä fokus katoa.
+- [ ] `requestPersistentStorage` kutsutaan **vain painikkeesta** (testi: ei kutsuta renderöinnissä eikä latauksessa). Painike `aria-busy` pyynnön ajan, tulos ilmoitetaan live-alueella ja tulos-kappale saa fokuksen.
+- [ ] Jokaiselle `LoadNotice`-lajille (`persistent: false`, `reset` kummallakin `backupKey`-arvolla, `repaired` n = 1 ja n > 1, `newer-version`) on oma ilmoituslaatikko, `h2` ja teksti 6.8:n mukaan. Ei teknisiä tietoja, ei `backupKey`:n arvoa (SEC-007).
+- [ ] `StorageError`-laji `quota`, `unavailable`, `limit-reached`, `newer-version` ja muu: teksti valitaan `kind`-kentästä, `message`- ja `cause`-kenttää ei näytetä.
+- [ ] `Sulje` ja `Lue kokoelma uudelleen` siirtävät fokuksen `h1`:een. `Sulje`-nimi `Sulje ilmoitus: {otsikko}`.
+- [ ] Kaikki värit tokeneista (3.1). Ei uusia tokeneita. Ei animaatioita, tai ne poistetaan `prefers-reduced-motion: reduce` -tilassa.
+- [ ] Ei vaakavieritystä 320 px:ssä eikä 400 % zoomilla pisimmällä nimellä (`Viktor Vektor` / `You Might Feel a Little Pinch`).
+- [ ] axe-core: 0 rikkomusta tiloissa kokoelma tyhjä, kokoelmassa kortteja, jokainen ilmoituslaatikko, EI SAATAVILLA, LUKITTU, "Vain omistetut" EI TULOKSIA, 320 px ja ≥ 640 px. Lisäksi manuaalisesti näppäimistöpolku, saavutettavuuspuu sekä 200 % ja 400 % zoom.
+
+### 6.14 Sisällöntuottajalle
+
+Uudet termit CONTENT.md:n sanastoon (UX:n ehdotukset): **kokoelma** (omat kortit), **omistaa / omistetut** (`Omistan`, `Vain omistetut`), **kappale** (yksi fyysinen kortti, ei "kopio" eikä "kpl" käyttöliittymätekstissä), **eri kortti** (kokoelman yksittäinen kortti määrästä riippumatta), **pysyvä tallennus** (pyyntö selaimelle säilyttää tiedot). Otsikko `Kortit` pysyy ennallaan.
+
+Tarkistettavat tekstit: kaikki 6.5–6.9. Erityisesti ilmoituslaatikoiden ytimekkyys ja se, ettei teksti lupaa liikaa (`backupKey: null`: "Vanhoja tietoja ei ole poistettu").
+
+### 6.15 Avoimet kysymykset (PM ratkaisee, oletus valittu)
+
+- **A1 · Korttimainen rivi alle 40 rem:ssä.** Oletus: kyllä (6.4.4), koska neljä saraketta ja kaksi 44 px:n painiketta eivät mahdu 288 px:iin. Vaihtoehdot: Hinta-sarakkeen piilotus kapeassa näkymässä (poistaa tietoa) tai vaakavieritys (rikkoo reflow-vaatimuksen). T-018 voi myöhemmin korvata ratkaisun.
+- **A2 · `navigator.storage.persisted()`.** Oletus: Koodari saa kutsua sitä vain-luku-tarkistuksena ja piilottaa painikkeen, jos tallennus on jo pysyvä. Jos Arkkitehti haluaa kaiken tallennuksen tallennuskerroksen taakse, oletus on näyttää painike, kunnes käyttäjä on painanut sitä (SR-13 koskee pyyntöä, ei tarkistusta).
+- **A3 · Tuntemattomat avaimet.** Oletus (kortin ehdotus): ei näytetä, ei lasketa yhteenvetoon, ei poisteta. Seuraus: yhteenveto voi olla pienempi kuin tallennettu kokoelma. Kirjataan T-014:n tai T-015:n yhteyteen.
+- **A4 · `reset` ja `backupKey: null` (SEC-007).** Oletus: painikkeet pysyvät käytössä, ja tallennus epäonnistuu tallennusvirheenä, koska tallennuskerros estää kirjoituksen, kunnes varmuuskopio onnistuu. Vaihtoehto: kontrollit lukitaan kuten `newer-version`. Digiturvan tai Koodarin on vahvistettava, mikä `StorageError`-laji tässä tilanteessa heitetään (`unavailable` vai `quota`), koska virheteksti riippuu siitä.
+- **A5 · Rivi jää näkyviin "Vain omistetut" -suodatuksessa, kun määrä nollataan (6.6).** Oletus: kyllä. Vaihtoehto: rivi poistuu heti ja fokus siirretään seuraavaan riviin. Oletus on turvallisempi (ei fokuksen katoamista eikä hyppäävää listaa).
+- **A6 · Ilmoitusviiveet.** Oletus 500 ms tallennuksen jälkeen ja 750 ms suodatuksessa. Koodari voi säätää arvoja käytettävyystestin perusteella, mutta ilmoitus ei saa tulla ennen tallennuksen valmistumista.
+- **A7 · Ilmoitusten sulkeminen.** Oletus: `reset` ja `repaired` ovat suljettavissa, muut eivät (ne kuvaavat jatkuvaa tilaa). Suljettu ei palaa ennen sivun uudelleenlatausta.

@@ -1,6 +1,6 @@
 # T-012 · Kokoelma: omistettujen korttien merkintä
 **Tila:** Ready · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
-**Suunnittelu:** UX ☐ (näkymä, tilat, mikrokopio, saavutettavuus)
+**Suunnittelu:** UX ☑ (docs/UX.md luku 6, 2026-10-01) (näkymä, tilat, mikrokopio, saavutettavuus)
 **Katselmoinnit (D-009):** Koodikatselmointi ☐ · UX ☐ (käytettävyys, saavutettavuus, mikrokopio) · Digiturva ☐ (tallennettu data, syöte, SEC-007) · Testikäyttäjä: MVP-1:n lopussa · Dokumentoija: MVP-1:n lopussa
 **Riippuvuudet:** T-011 (Done), T-010 (Done)
 **Haara:** `t-012-kokoelma`
@@ -34,3 +34,20 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 - Seuraava askel: UX suunnittelee kokoelmanäkymän (UX.md:n uusi luku 6). Sen jälkeen Koodari toteuttaa.
 
 ## Luovutukset
+
+### Luovutus 2026-10-01 · UX Designer → Koodari
+- Mitä tehtiin: kokoelmanäkymän suunnittelu `docs/UX.md` luvussa 6 (versio 0.5): polku (6.2), sivun rakenne (6.3), määräkontrolli ja korttimainen rivi 320 px:ssä (6.4), yhteenveto (6.5), "Vain omistetut" (6.6), selainmuistutus ja pysyvä tallennus (6.7), kaikki tilat ja tarkat tekstit (6.8: lataus, tyhjä, `persistent: false`, `reset` kummallakin `backupKey`-arvolla, `repaired`, `newer-version`, `StorageError` `quota`/`unavailable`/`newer-version`/`limit-reached`), ruudunlukijailmoitukset ja hillintä (6.9), fokus ja näppäimistö (6.10), responsiivisuus (6.11), tarkistuslista (6.13). Ideat: `docs/IDEAS.md`.
+- Mitä pyydän: toteutus UX.md 6:n mukaan. Sisällöntuottaja tarkistaa uudet termit ja tekstit (6.14) ja lisää ne CONTENT.md:hen. Tekstit `src/ui/texts.ts`:iin.
+- Mistä katsoa: `docs/UX.md` luku 6, `src/ui/CatalogView.tsx`, `CardList.tsx`, `CardFilters.tsx`, `texts.ts`, `src/storage/types.ts`, `errors.ts`.
+- Keskeiset päätökset: neljäs sarake `Omistan` (`[+]` / `[−] n [+]`, yksi painallus omistetuksi, +-painike pysyy samana elementtinä). Alle 40 rem:ssä rivi on korttimainen ruudukko eksplisiittisillä ARIA-rooleilla. Näytetty määrä = uusin tavoitemäärä, tallennukset peräkkäin, epäonnistuessa palautus viimeksi tallennettuun. Live-ilmoitus vasta tallennuksen jälkeen, 500 ms hillintä. "Vain omistetut" -rivi jää näkyviin, kun määrä nollataan, kunnes hakuehdot muuttuvat. `newer-version` = LUKITTU-tila ilman painikkeita.
+- Tunnetut rajoitteet ja riskit: tallennettu `Collection` voi sisältää avaimia, joita ei näytetä (A3). Yli 300 sarkainpysähdystä listalla (IDEAS.md). Korttimainen asettelu on uusi rakenne, joten Koodarin on tarkistettava saavutettavuuspuu.
+- Testit: ei koodia eikä testejä tässä vaiheessa (vain määrittely).
+
+**Avoimet kysymykset (PM ratkaisee, oletus voimassa kunnes toisin päätetään):**
+1. A1 Korttimainen rivi alle 40 rem:ssä. Oletus: kyllä.
+2. A2 `navigator.storage.persisted()` vain-luku-tarkistus painikkeen piilottamiseen. Oletus: sallittu (Arkkitehti voi kieltää).
+3. A3 Tuntemattomat avaimet: ei näytetä, ei lasketa, ei poisteta. Oletus: kyllä.
+4. A4 `reset` + `backupKey: null`: painikkeet käytössä, tallennus epäonnistuu virheenä. Digiturva/Koodari vahvistaa heitettävän `StorageError`-lajin.
+5. A5 Rivi jää näkyviin "Vain omistetut" -suodatuksessa nollauksen jälkeen. Oletus: kyllä.
+6. A6 Ilmoitusviiveet 500 ms / 750 ms. Oletus: kyllä.
+7. A7 Vain `reset` ja `repaired` suljettavissa. Oletus: kyllä.
