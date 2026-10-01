@@ -1,7 +1,7 @@
 # T-001 · Kävelevä luuranko: korttilista rajapinnasta näytölle
 **Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 0 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☐ (teknologia ja rakenne, ADR) · Digiturva ☐ (ulkoinen rajapinta, korttikuvien käyttöoikeus) · UX ☐ (korttilistan näkymä ja tilat)
-**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☑ · Sisällöntuottaja ☑ · Testikäyttäjä ☐ · Dokumentoija ☐
+**Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · UX ☑ · Sisällöntuottaja ☑ · Testikäyttäjä ☐ · Dokumentoija ☑
 **Riippuvuudet:** T-000 (Done). Julkaisuputken workflowt ovat jo haarassa `t-001-kaveleva-luuranko`.
 **Haara:** `t-001-kaveleva-luuranko`
 
@@ -181,3 +181,8 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 
 ### Luovutus 2026-10-01 · Sisällöntuottaja → PM (korjausten varmistus)
 - TXT-001, TXT-002 ja TXT-004 varmistettu (commit 6667d77, diff ja esikatselun JS-paketti). Ei uusia löydöksiä. TXT-003 avoinna käyttäjän kysymyksenä (ei blokkaa). Veto: ei.
+
+### Luovutus 2026-10-01 · Dokumentoija → PM
+- Mitä tehtiin: README.md kirjoitettu (mikä, kenelle, URL:t, pikakäynnistys, rakenne, julkaisu, docs-linkit). CHANGELOG.md:n [Julkaisematon]-osioon ensimmäisen version merkinnät käyttäjän kielellä. .env.example ja docs/guides/ eivät ole tarpeen MVP-0:ssa.
+- Testit: puhdas klooni (commit 9101b7a), Node 24.14.0: npm ci ok, npm test 71/71, lint 0, build ok, npm audit 0, npm run dev käynnistyy.
+- Tunnetut rajoitteet ja riskit: Ei DOC-löydöksiä. Dokumentoija pysäytti testatessaan todennäköisesti käyttäjän toisen projektin kehityspalvelimen portista 5173 (`npx kill-port`), katso LESSONS L-001.
