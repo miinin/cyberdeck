@@ -4,13 +4,12 @@
 MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). MVP-1 on pilkottu tehtäviksi T-010–T-015 (D-007).
 
 ## MVP-taso
-Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
+Työn alla: MVP-1 · Valmiina: 1/6 tehtävää (T-010–T-015). MVP-0 valmis.
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
 | T-010 | UX, Sisällöntuottaja, Testikäyttäjä | Review | PR #3. Katselmoinnit ajetaan uudelleen (keskeytyivät käyttörajaan 2026-10-01) |
-| T-011 | Koodari | Review (korjauskierros) | SEC-005, SEC-006, ARCH-007, ARCH-008, katso kortti |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -38,6 +37,7 @@ Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-011 Tietomalli ja paikallinen tallennuskerros (2026-10-01)
 - T-001 Kävelevä luuranko: korttilista rajapinnasta näytölle (2026-10-01)
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 

@@ -1,5 +1,5 @@
 # T-011 · Tietomalli ja paikallinen tallennuskerros
-**Tila:** In Progress · **Omistaja:** Arkkitehti (suunnittelu) → Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Arkkitehti (suunnittelu) → Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Suunnittelu:** Arkkitehti ☑ (D-008) · Digiturva ☑ (paikallinen tallennus, PRIVACY.md)
 **Katselmoinnit:** Koodikatselmointi ☑ · Arkkitehti ☑ · Digiturva ☑ · Dokumentoija: MVP-1:n lopussa (D-009)
 **Riippuvuudet:** T-001 (Done), D-007. Ei käyttöliittymää, joten UX ja Testikäyttäjä eivät katselmoi.
@@ -9,19 +9,19 @@
 Kokoelma (T-012) ja pakat (T-013) tarvitsevat tietomallin ja tallennuksen, joka säilyy selaimen sulkemisen yli. D-007:n mukaan tallennus on nyt paikallinen, mutta Firebase-kirjautuminen ja pilvitallennus sekä korttien painokset pitää voida lisätä myöhemmin ilman, että tietomalli tai sitä käyttävä koodi kirjoitetaan uudelleen.
 
 ## Hyväksymiskriteerit
-- [ ] ADR DECISIONS.md:hen: tallennustekniikka (vähintään kaksi vaihtoehtoa, esim. localStorage ja IndexedDB), tietomalli (kokoelma, pakat), korttien yksilöivä avain (D-007: korttitaso, valmius painoksille) ja skeemaversio migraatioita varten.
-- [ ] ARCHITECTURE.md: tallennuskerroksen rajapinta (repository-tyyppinen), jonka takana paikallinen toteutus voidaan myöhemmin vaihtaa tai täydentää Firebase-toteutuksella. Käyttöliittymä ei käytä selaimen tallennusta suoraan.
-- [ ] Toteutus: kokoelman ja pakkojen luku, tallennus ja poisto paikalliseen tallennukseen. Tallennettu data validoidaan luettaessa, eikä rikkinäinen tai vanhan version data kaada sovellusta.
-- [ ] Yksikkötestit: tallennus ja luku, rikkinäinen data, tyhjä tila, skeemaversio ja tallennustilan puuttuminen tai täyttyminen.
-- [ ] Digiturva on arvioinut paikallisen tallennuksen (mitä tallennetaan, ei henkilötietoja) ja kirjannut sen PRIVACY.md:hen tai SECURITY.md:hen.
+- [x] ADR DECISIONS.md:hen: tallennustekniikka (vähintään kaksi vaihtoehtoa, esim. localStorage ja IndexedDB), tietomalli (kokoelma, pakat), korttien yksilöivä avain (D-007: korttitaso, valmius painoksille) ja skeemaversio migraatioita varten.
+- [x] ARCHITECTURE.md: tallennuskerroksen rajapinta (repository-tyyppinen), jonka takana paikallinen toteutus voidaan myöhemmin vaihtaa tai täydentää Firebase-toteutuksella. Käyttöliittymä ei käytä selaimen tallennusta suoraan.
+- [x] Toteutus: kokoelman ja pakkojen luku, tallennus ja poisto paikalliseen tallennukseen. Tallennettu data validoidaan luettaessa, eikä rikkinäinen tai vanhan version data kaada sovellusta.
+- [x] Yksikkötestit: tallennus ja luku, rikkinäinen data, tyhjä tila, skeemaversio ja tallennustilan puuttuminen tai täyttyminen.
+- [x] Digiturva on arvioinut paikallisen tallennuksen (mitä tallennetaan, ei henkilötietoja) ja kirjannut sen PRIVACY.md:hen tai SECURITY.md:hen.
 
 ### Turvavaatimukset (Digiturva, tarkemmin SECURITY.md luku 11)
-- [ ] **SR-11:** Tallennettu data validoidaan ajonaikaisesti luettaessa, ja mukana on skeemaversio. Hyväksytty data rakennetaan uudeksi olioksi vain sallituista kentistä (ei spreadia eikä Object.assignia jäsennettyyn dataan). Raja-arvot: määrä 0–999 kokoelmassa ja 1–99 pakassa, enintään 200 pakkaa, 500 eri korttia pakassa ja 5 000 kokoelmassa, nimi 1–100 merkkiä. Nimistä poistetaan ohjaus- ja suunnanohjausmerkit, ja ne normalisoidaan NFC-muotoon. Hakutaulut ovat Map-olioita, ja avaimet `__proto__`, `constructor` ja `prototype` hylätään. Arkkitehti saa muuttaa lukuja, kunhan jokaisella listalla ja merkkijonolla on yläraja.
-- [ ] **SR-11:** Tuntematonta tai uudempaa skeemaversiota ei ylikirjoiteta. Lukukelvoton raakadata siirretään varakopioavaimeen ennen tyhjää tilaa, ja osittain rikkinäisestä datasta ehjä osa säilyy. Sama validointifunktio palvelee myöhemmin T-015:n tuontia.
-- [ ] **SR-12:** Vain `src/storage/` käyttää localStoragea tai IndexedDB:tä, ja lint-sääntö estää suoran käytön muualla. Avaimet ovat nimiavaruudessa ja versioituja (`cyberdeck:v1:…`). Ei evästeitä.
-- [ ] **SR-13:** Jokainen tallennustilan kutsu on try/catchissa (SecurityError ja QuotaExceededError). Ilman tallennustilaa sovellus toimii muistinvaraisesti ja näyttää yleisen ilmoituksen. Kirjoitukset ovat atomisia, ja usean välilehden kilpailutilanne hoidetaan (Arkkitehti valitsee tavan). Kiintiövirheessä poistetaan vain välimuisti, ei koskaan käyttäjän dataa.
-- [ ] **SR-16:** Tallennustilaan ei tallenneta henkilö-, laite- tai käyttäjätunnisteita eikä tokeneita. Uudet kentät päivitetään PRIVACY.md:n inventaarioon.
-- [ ] Yksikkötestit: virheellinen JSON, väärät tyypit, negatiiviset, desimaali-, NaN- ja ylisuuret määrät, ylipitkä nimi, ohjausmerkit, `__proto__`- ja `constructor`-avaimet (prototyyppiin ei synny ominaisuutta), tuntematon skeemaversio (data säilyy muuttumattomana), osittain rikkinäinen data, kiintiövirhe ja estetty tallennustila.
+- [x] **SR-11:** Tallennettu data validoidaan ajonaikaisesti luettaessa, ja mukana on skeemaversio. Hyväksytty data rakennetaan uudeksi olioksi vain sallituista kentistä (ei spreadia eikä Object.assignia jäsennettyyn dataan). Raja-arvot: määrä 0–999 kokoelmassa ja 1–99 pakassa, enintään 200 pakkaa, 500 eri korttia pakassa ja 5 000 kokoelmassa, nimi 1–100 merkkiä. Nimistä poistetaan ohjaus- ja suunnanohjausmerkit, ja ne normalisoidaan NFC-muotoon. Hakutaulut ovat Map-olioita, ja avaimet `__proto__`, `constructor` ja `prototype` hylätään. Arkkitehti saa muuttaa lukuja, kunhan jokaisella listalla ja merkkijonolla on yläraja.
+- [x] **SR-11:** Tuntematonta tai uudempaa skeemaversiota ei ylikirjoiteta. Lukukelvoton raakadata siirretään varakopioavaimeen ennen tyhjää tilaa, ja osittain rikkinäisestä datasta ehjä osa säilyy. Sama validointifunktio palvelee myöhemmin T-015:n tuontia.
+- [x] **SR-12:** Vain `src/storage/` käyttää localStoragea tai IndexedDB:tä, ja lint-sääntö estää suoran käytön muualla. Avaimet ovat nimiavaruudessa ja versioituja (`cyberdeck:v1:…`). Ei evästeitä.
+- [x] **SR-13:** Jokainen tallennustilan kutsu on try/catchissa (SecurityError ja QuotaExceededError). Ilman tallennustilaa sovellus toimii muistinvaraisesti ja näyttää yleisen ilmoituksen. Kirjoitukset ovat atomisia, ja usean välilehden kilpailutilanne hoidetaan (Arkkitehti valitsee tavan). Kiintiövirheessä poistetaan vain välimuisti, ei koskaan käyttäjän dataa.
+- [x] **SR-16:** Tallennustilaan ei tallenneta henkilö-, laite- tai käyttäjätunnisteita eikä tokeneita. Uudet kentät päivitetään PRIVACY.md:n inventaarioon.
+- [x] Yksikkötestit: virheellinen JSON, väärät tyypit, negatiiviset, desimaali-, NaN- ja ylisuuret määrät, ylipitkä nimi, ohjausmerkit, `__proto__`- ja `constructor`-avaimet (prototyyppiin ei synny ominaisuutta), tuntematon skeemaversio (data säilyy muuttumattomana), osittain rikkinäinen data, kiintiövirhe ja estetty tallennustila.
 
 ## Rajaukset (ei kuulu tähän)
 - Kokoelman ja pakkojen käyttöliittymä (T-012, T-013)
@@ -107,3 +107,9 @@ Kokoelma (T-012) ja pakat (T-013) tarvitsevat tietomallin ja tallennuksen, joka 
 - Mitä pyydän: Digiturva varmistaa SEC-005/006, Arkkitehti ARCH-007/008.
 - Testit: `npx vitest run --dir src` 288/288, eslint OK, build OK.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
+
+### Checkpoint 2026-10-01 · PM (Definition of Done)
+- Korjaukset SEC-005, SEC-006, ARCH-007 ja ARCH-008 tehty (15812ba–4a22b96). PM ajoi `npx vitest run --dir src` 288/288, lint 0 ja build ok. PR #4:n tarkistukset vihreät. D-009:n mukaan korjauksia ei katselmoitu uudelleen, koska kaikki olivat Low-tasoa.
+- Pääkansiosta poistettiin tyhjä, seurantaan kuulumaton `src/ui/CatalogView.filters.test.tsx` (syntyi 15.38 rinnakkaisen T-010-katselmoinnin aikana, sisältö 0 tavua).
+- Katselmoinnit: Koodikatselmointi, Arkkitehti ja Digiturva tehty, ei vetoja. Dokumentoija MVP-1:n lopussa (D-009). Käyttäjälle näkyvää muutosta ei ole, joten CHANGELOG-merkintää ei tarvita.
+- Päätös: **Done** (PM). Yhdistetään testiin.
