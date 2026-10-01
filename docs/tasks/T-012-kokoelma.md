@@ -86,3 +86,9 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 - Testit: `npm test` 17 tiedostoa, 424 testiä, kaikki läpi (uusia 71: `collectionStore.test.ts` 21, `CatalogView.collection.test.tsx` 46 (sis. nopeat painallukset, viiveellä vastaava `setCount`, `quota`, `unavailable`, `limit-reached`, `invalid-input`, `newer-version`, toinen välilehti), `isStoragePersisted` 4). `npm run lint` 0 virhettä ja 0 varoitusta. `npm run build` onnistui. Näkymättömien merkkien tarkistus (L-002) muutetuille tiedostoille: ei löydöksiä.
 - Koodikatselmointi: tehty · Pakollisia korjattu 1 (kapean asettelun `.col-fit { width: 1% }` voitti solujen `width: auto`:n, commit fd25234) · Suosituksia 2 (ehdotus [velka]-tehtäviksi PM:lle): (1) jokainen määrän muutos renderöi koko taulukon, mittaa ja tarvittaessa `memo`; (2) jos painallussarjan myöhempi tallennus epäonnistuu, sarjan jo tallennettua osaa ei ilmoiteta ruudunlukijalle (vain virhe).
 - Muutokset muiden tiedostoihin: `docs/CONTENT.md` sanastoon UX.md 6.14:n termit (PM:n lupa tässä kortissa), `CHANGELOG.md` `[Julkaisematon]`.
+
+### Checkpoint 2026-10-01 · PM (katselmoinnit)
+- Digiturva: `docs/reports/SEC-003-t012-katselmointi.md`. Veto: ei. Low: SEC-011 (lukitun tilan teksti "tyhjennä välimuisti" voi poistaa kokoelman), SEC-012 ("Vapauta tallennustilaa" monitulkintainen). Info: SEC-013 (R-11 jäännösriski). SEC-007 varmistettu. `index.html`:n `Cache-Control` → T-009.
+- UX: `docs/reports/UX-003-t012-kokoelma.md`. Veto: ei. Medium: UX-005 (320 px:n korttirivin rivitys, orpo erotin). Low: UX-006 (ensimmäinen kortti kaukana 320 px:ssä) → T-018. axe 0 rikkomusta kaikissa tarkistetuissa tiloissa.
+- PM:n päätös: UX-005, SEC-011 ja SEC-012 korjataan tällä kierroksella. Koodari saa päivittää UX.md:n kohdat 6.4.4 (rautalanka) ja 6.8 (tekstit) löydösten korjausehdotusten mukaisesti (PM:n lupa, rules.md 3).
+- Seuraava askel: Koodari korjaa, sitten UX ja Digiturva varmistavat korjaukset.
