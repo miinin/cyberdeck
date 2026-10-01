@@ -74,3 +74,67 @@ Päätösloki. Vain lisäyksiä, ei poistoja (rules.md 5.2).
 4. Pakan voi viedä ja tuoda sekä .json- että .txt-muodossa (viitemuoto). Käyttötarkoitus: varmuuskopio ja jakaminen kaverille.
 **Perustelu:** Käyttäjän päätös. Pienin toteutus, joka ratkaisee pääongelman ja jättää tien auki MVP-2:lle.
 **Seuraukset:** MVP-1:n tehtävät T-010–T-015. Arkkitehti tekee tallennuskerroksesta ja tietomallista ADR:n (T-011). Digiturva arvioi paikallisen tallennuksen, tiedostojen tuonnin ja .json-tiedostot epäluotettavana syötteenä.
+
+## D-008 · Kokoelman ja pakkojen tietomalli ja paikallinen tallennuskerros · 2026-10-01 · Päättäjä: PM (Arkkitehdin ehdotus)
+**Tila:** Voimassa (PM hyväksyi 2026-10-01: ei kustannuksia, uusia riippuvuuksia eikä palvelulukitusta). Kohdan 5 Firebase-osuus on vain suunta: Firestore-päätös tehdään MVP-2:n ADR:ssä käyttäjän hyväksynnällä.
+**Konteksti:** D-007: MVP-1 tallentaa kokoelman (T-012) ja pakat (T-013) vain selaimeen ja seuraa kortteja korttitasolla, mutta malli jättää valmiuden painoksille, ja MVP-2 lisää kirjautumisen ja pilvitallennuksen ilman tietomallin uudelleenkirjoitusta. T-014 tuo pakkalistan tekstinä (`3 Nimi - Alaotsikko`, osiot `// Legends (3)`), ja T-015 vie ja tuo pakan .json- ja .txt-muodossa. Kaikki tallennettu ja tuotu data on epäluotettavaa syötettä (D-007, rules.md 10). Datan koko on pieni: kokoelmassa on enintään noin 150 riviä (noin 5 kt), ja yksi pakka on noin 2 kt.
+
+Päätöksessä on kuusi osaa. Rakenne ja allekirjoitukset ovat ARCHITECTURE.md:n luvussa 12.
+
+### 1. Tallennustekniikka
+**Vaihtoehdot:**
+- **A) `localStorage` (yksinkertaisin mahdollinen)**, yksi JSON-merkkijono per kokonaisuus. **(ehdotus)**
+  + Synkroninen ja yksinkertainen API, ei riippuvuuksia. jsdom toteuttaa sen (tarkistettu `node_modules/jsdom/lib/jsdom/browser/Window.js` 2026-10-01), joten testit toimivat sellaisenaan. `storage`-tapahtuma kertoo muiden välilehtien muutoksista. Kaikki kohdeselaimet tukevat.
+  − Raja on 5 MiB per origin (MDN: Storage quotas and eviction criteria, tarkistettu 2026-10-01), mikä riittää satoihin pakkoihin. Ylitys heittää `QuotaExceededError`in, joka käsitellään. Synkroninen kirjoitus pysäyttää pääsäikeen hetkeksi, mutta muutaman kilotavun datalla viivettä ei huomaa.
+- **B) IndexedDB suoraan selaimen API:lla.**
+  + Asynkroninen, suurempi kiintiö ja transaktiot.
+  − Huomattavasti monimutkaisempi API (tapahtumapohjaiset pyynnöt, versionvaihdot, `onblocked`). jsdom ei toteuta IndexedDB:tä (sama tarkistus), joten testeihin tarvittaisiin uusi riippuvuus (esim. fake-indexeddb). Hyödyt (koko, transaktiot) eivät koske tätä datamäärää.
+- **C) IndexedDB kirjaston kautta** (idb-keyval, Dexie).
+  − Uusi ajonaikainen riippuvuus (rules.md 10) ja lisäksi testien väärennösriippuvuus ilman tarvetta.
+- (Hylätty jo D-007:ssä: Firebase ja anonyymi kirjautuminen heti MVP-1:ssä.)
+**Valinta: A.** Rajapinta on silti asynkroninen (`Promise`), jotta IndexedDB- tai Firestore-toteutus voidaan vaihtaa sen taakse muuttamatta kutsujia.
+**Molempia (A ja B) koskeva riski:** selaimen tallennustila on "best-effort". Selain voi tyhjentää sen tilanpuutteessa, ja Safari poistaa skriptin luoman datan, jos sivustolla ei ole ollut käyttäjän vuorovaikutusta 7 päivän selainkäytön aikana (MDN, sama lähde). Tekniikan valinta ei siis ratkaise datan pysyvyyttä. Torjunta: T-015:n .json-vienti varmuuskopiona nyt ja pilvitallennus MVP-2:ssa. Lisäksi tallennuskerros tarjoaa funktion `requestPersistentStorage()` (`navigator.storage.persist()`, SECURITY.md SR-13), jota T-012 kutsuu käyttäjän toimesta, ei käynnistyksessä.
+
+### 2. Korttien yksilöivä avain (`CardKey`)
+**Vaihtoehdot:**
+- **A) Netdeckin UUID (`id`).** Vakaa, jos Netdeck ei vaihda sitä. Toisaalta läpinäkymätön (vientitiedostot eivät ole luettavia) ja sidottu yhteen lähteeseen: jos rajapinta vaihtuu (PROJECT.md:n riski, todennäköisyys keskisuuri), kaikki tallennettu data jää orvoksi. Tekstituonti ei voi tuottaa UUID:tä ilman korttiluetteloa.
+- **B) Netdeckin `slug`.** Luettava, mutta sekin on lähteen omaa dataa. **ARCHITECTURE.md:n luvun 6 oletus, että slug on "rakennettavissa uudelleen nimestä", ei pidä:** 16 kortilla 151:stä slug poikkeaa nimen normalisoinnista (esim. `judy-a-lvarez-braindance-maestro` nimestä Judy Álvarez ja `royce-don-t-call-me-simon`). Todennettu rajapinnasta 2026-10-01.
+- **C) Oma avain, joka johdetaan nimestä ja alaotsikosta**, `cardKey(name, subname)`: Unicode NFKD, diakriittiset merkit pois, pienet kirjaimet, heittomerkit (`'`, `’`, `‘`) pois, muiden kuin `a–z0–9`-merkkien jaksot yhdeksi väliviivaksi ja reunojen väliviivat pois. Esim. `V — Streetkid` → `v-streetkid` ja `Judy Álvarez — Braindance Maestro` → `judy-alvarez-braindance-maestro`. **(ehdotus)**
+  + Riippumaton lähteestä: avain syntyy uudelleen mistä tahansa korttidatasta, jossa on nimi ja alaotsikko. Luettava vientitiedostoissa.
+  + **Sama funktio ratkaisee T-014:n tuonnin:** `normalizeCardName("Dum Dum - Maelstrom Triggerman")` on sama kuin `cardKey("Dum Dum", "Maelstrom Triggerman")`, koska erotin (` - `, ` — ` tai välilyönti) katoaa normalisoinnissa. Todennettu 2026-10-01: 151 korttia tuottaa 151 eri avainta, ja esimerkkipakan kaikki 19 riviä löytyvät suoraan avaimella. Pisin avain on 43 merkkiä.
+  − Jos kortin nimeä korjataan lähteessä (errata, aksentti), avain muuttuu. Torjunta: tallennettuja rivejä, joiden avainta ei löydy luettelosta, ei poisteta, vaan ne näytetään avaimella. Tarvittaessa lisätään aliaslista migraationa (kohta 4).
+  − Teoreettinen törmäys (kaksi korttia samalla avaimella). Torjunta: luettelon indeksi varoittaa törmäyksestä (T-012), ja testi varmistaa fixtuurin avainten yksilöllisyyden.
+**Valinta: C.** Avain lisätään `Card`-malliin kentäksi `key` (lasketaan `mapCard`issa). `id` ja `slug` säilyvät mallissa, mutta tallennettu data ei viittaa niihin.
+**Painosvalmius:** kokoelman ja pakan rivi on `{ card: CardKey, count }`. Painokset lisätään myöhemmin **valinnaisena erittelynä** saman rivin sisään (esim. `printings?: { printing: PrintingKey; count: number }[]`, summa ≤ `count`), ja korttitason `count` säilyy kokonaismääränä. Vanha data on silloin sellaisenaan kelvollista. `PrintingKey`n muoto (todennäköisesti setti ja keräilynumero, esim. `welcometonightcityretail:005a`) päätetään painostehtävässä, ei nyt.
+
+### 3. Tietomalli
+**Vaihtoehdot:** A) Yksi tallennusavain kaikelle datalle. B) **Oma tallennusavain ja skeemaversio per kokonaisuus: kokoelma ja pakat. (ehdotus)** C) Oma avain jokaiselle pakalle.
+**Valinta: B.** Rikkinäinen pakkadata ei vie kokoelmaa mukanaan, ja jako vastaa MVP-2:n Firestore-dokumentteja. C:n hyöty (pienemmät kirjoitukset) on merkityksetön tällä datamäärällä, ja pakkojen listaus vaatisi avainten luettelointia.
+- **Kokoelma:** `{ entries: { card: CardKey; count: number }[] }`. `count` on kokonaisluku 1–999, ja määrä 0 poistaa rivin. Kortti esiintyy enintään kerran.
+- **Pakka:** `{ id, name, sections: { name, cards: { card, count }[] }[], createdAt, updatedAt }`. Osiot ovat vapaasti nimettyjä ja järjestettyjä (T-014:n `// Legends (3)` → osio `Legends`, `Sideboard` → osio `Sideboard`). Osion korttimäärää ei tallenneta, vaan se lasketaan. `id` = `crypto.randomUUID()`.
+- Kortin tiedot (nimi, tyyppi, kustannus) eivät tallennu, vaan ne haetaan luettelosta avaimella. "Missä pakoissa kortti on" ja "montako kopiota on vapaana" ovat johdettuja tietoja, eikä niitä tallenneta.
+- Tallennusmuoto on taulukko eikä avaimin indeksoitu objekti (`Record<CardKey, …>`). Näin `__proto__`-tyyppiset avaimet eivät aiheuta ongelmia, ja järjestys on deterministinen.
+
+### 4. Skeemaversio, validointi ja migraatiot
+- Jokainen tallennettu arvo on kääre `{ schemaVersion, savedAt, data }`. Aloitusversio on 1 molemmille kokonaisuuksille.
+- **Luettaessa:** JSON jäsennetään, versio tarkistetaan, migraatiot ajetaan järjestyksessä (n → n+1) ja tulos validoidaan valkolistalla. Virheellinen rivi pudotetaan ja lasketaan (`dropped`). Tuntemattomat kentät pudotetaan.
+- **Juuri rikki** (JSON ei jäsenny tai kääre tai `data` on väärän muotoinen): raaka merkkijono kopioidaan varmuuskopioavaimeen **ennen** kuin mitään kirjoitetaan päälle. Sitten jatketaan tyhjästä ja kerrotaan kutsujalle (`notice: reset`). Jos varmuuskopiointi epäonnistuu, päälle ei kirjoiteta.
+- **Uudempi versio kuin sovellus tuntee** (esim. sivuston palautus vanhaan versioon): data luetaan tyhjänä, ja kirjoitukset hylätään virheellä `newer-version`. Uudemman version dataa ei koskaan ylikirjoiteta.
+- **Vanhempi versio:** migraatiot ajetaan muistissa. Ennen ensimmäistä päällekirjoittavaa tallennusta alkuperäinen kopioidaan varmuuskopioavaimeen.
+- Kirjoitettaessa syöte validoidaan samalla validaattorilla. Virheellistä dataa ei tallenneta (`invalid-input`).
+
+### 5. Firebase myöhemmin (MVP-2, suunta)
+- Kaikki käyttöliittymäkoodi käyttää vain rajapintoja `CollectionRepository` ja `DeckRepository`. Firestore-toteutus tehdään samojen rajapintojen taakse omaan moduuliinsa, eivätkä kutsujat muutu. Kaikki metodit ovat jo asynkronisia, ja `subscribe` vastaa sekä `storage`-tapahtumaa että Firestoren `onSnapshot`ia.
+- Alustava Firestore-rakenne: `users/{uid}/collection/main` (kokoelma yhtenä dokumenttina) ja `users/{uid}/decks/{deckId}` (dokumentti per pakka), sama kääre ja versio. Säännöt: `request.auth.uid == uid`. Firestoren rajat: 1 MiB per dokumentti, ja Spark-tasolla 50 000 lukua, 20 000 kirjoitusta ja 20 000 poistoa päivässä sekä 1 GiB tallennustilaa (firebase.google.com/docs/firestore/quotas, tarkistettu 2026-10-01). Kokoelma mahtuu yhteen dokumenttiin moninkertaisesti. Firestore-toteutus niputtaa nopeat määrämuutokset (debounce), jotta kirjoitusraja ei täyty.
+- Paikallisen datan siirto pilveen ensimmäisellä kirjautumisella, erillinen testiprojekti (D-003, vaihtoehto C) ja Firestoren säännöt kuuluvat MVP-2:n omaan ADR:ään. Firestore on Spark-tasolla ilmainen, mutta **se lukitsee Googlen palveluun**, joten sen hyväksyy käyttäjä MVP-2:ssa, ei tämän päätöksen yhteydessä.
+
+### 6. Vienti ja tuonti (T-015, T-014)
+- **.json-vienti ei ole tallennusskeema** vaan oma, versioitu vaihtomuoto: `{ format: "cyberdeck.deck", version: 1, deck: { name, sections: [{ name, cards: [{ card, name, count }] }] } }`. Siinä ei ole `id`- eikä aikaleimakenttiä (tuonti luo uuden pakan). Näyttönimi `name` on mukana luettavuuden vuoksi ja varapolkuna: jos avainta ei löydy, tuonti yrittää nimen normalisointia. Perustelu: tallennusskeema saa muuttua (esim. MVP-2:n synkronointikentät) rikkomatta kaverille jaettuja tiedostoja. Validointi käyttää samoja domain-funktioita (`parseDeckContent`) ja kokorajoja. T-015 tarkentaa muodon ja tiedostokokorajan (Digiturva).
+- **T-014:n tekstituonti:** rivin nimiosa → `normalizeCardName` → haku avaimella. Jos osumaa ei ole, haetaan pelkällä nimellä (`normalizeCardName(card.name)`): yksi osuma = löytyi, monta = monitulkintainen (esim. pelkkä `V`), nolla = tunnistamaton rivi, joka näytetään käyttäjälle. Hakufunktio kuuluu T-014:lle, normalisointi tähän tehtävään.
+
+**Kustannukset ja lukittautuminen:** Ei kustannuksia, uusia riippuvuuksia eikä palvelulukitusta MVP-1:ssä.
+**Seuraukset:**
+- T-011 toteuttaa `src/domain/`-tiedostot (cardKey, collection, deck, validate) ja `src/storage/`-kerroksen ARCHITECTURE.md:n luvun 12 mukaan. `Card` saa kentän `key` (`mapCard` ja testien Card-fixtuurit päivittyvät).
+- ESLint estää selaimen tallennus-API:t (`localStorage`, `sessionStorage`, `indexedDB`) kaikkialla paitsi `src/storage/keyValueStore.ts`:ssä sekä `storage`-kerroksen sisäiset tuonnit sen ulkopuolelta.
+- T-012–T-015 käyttävät vain `src/storage/index.ts`:n julkista rajapintaa.
+- Avoin PM:lle: tallennetaanko T-014:ssä tuotu pakkalista aina pakaksi, ja tarvitaanko pakalle tila "koottu / suunnitelma" (PROJECT.md: "missä omassa pakassasi kortti on"). Malli sallii molemmat myöhemmin valinnaisena kenttänä ilman migraatiota.

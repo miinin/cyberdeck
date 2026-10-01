@@ -9,8 +9,8 @@ Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-010 | UX → Koodari | Ready (suunnittelu) | Hakunäkymän suunnittelu, katso kortti |
-| T-011 | Arkkitehti, Digiturva → Koodari | Ready (suunnittelu) | Tallennus-ADR ja tietomalli, katso kortti |
+| T-010 | Koodari (worktree .claude/worktrees/t-010) | In Progress | Toteutus UX.md luvun 5 mukaan, sitten PR |
+| T-011 | Koodari (pääkansio) | In Progress | Toteutus ARCHITECTURE.md 12.9:n mukaan, D-008 |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -20,6 +20,7 @@ Työn alla: MVP-1 · Valmiina: 0/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi: UX ja Sisällöntuottaja suosittelevat molemmat näitä, joten ne on toteutettu näin.
 - TXT-003: tarvitaanko alatunnisteeseen myös englanninkielinen fanisisältömerkintä (CD PROJEKT RED:n ohje)? Oletus: ei MVP-0:ssa.
 - ~~K5~~ → ratkaistu, D-007 (korttitaso, valmius painoksille).
+- T-014 (vastaus tarvitaan ennen T-014:ää): kun liität pakkalistan, tallennetaanko se aina omaksi pakakseen, vai riittääkö pelkkä raportti puuttuvista korteista ja niiden sijainnista? Tarvitaanko pakoille tila "koottu / suunnitelma"?
 - K-P1–K-P4 (tietosuoja, ei blokkaa MVP-1:tä): rekisterinpitäjä ja käsittelyperuste IP-osoitteille (ehdotus: sinä, oikeutettu etu), riittääkö ilmoitus ilman suostumusbanneria (ehdotus: kyllä), voivatko MVP-2:n käyttäjät olla alaikäisiä (selvitettävä ennen MVP-2:ta) ja Hosting-lokien säilytysaika (Firebase-konsoli). Katso PRIVACY.md.
 
 ## Toimintatapa, kun käyttäjä on poissa (sovittu 2026-09-30)

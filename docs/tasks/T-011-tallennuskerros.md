@@ -1,6 +1,6 @@
 # T-011 · Tietomalli ja paikallinen tallennuskerros
-**Tila:** Ready · **Omistaja:** Arkkitehti (suunnittelu) → Koodari · **MVP:** 1 · **Prioriteetti:** Must
-**Suunnittelu:** Arkkitehti ☐ (ADR) · Digiturva ☐ (paikallinen tallennus, PRIVACY.md)
+**Tila:** In Progress · **Omistaja:** Arkkitehti (suunnittelu) → Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Suunnittelu:** Arkkitehti ☑ (D-008) · Digiturva ☑ (paikallinen tallennus, PRIVACY.md)
 **Katselmoinnit:** Koodikatselmointi ☐ · Arkkitehti ☐ · Digiturva ☐ · Dokumentoija ☐ (ARCHITECTURE)
 **Riippuvuudet:** T-001 (Done), D-007. Ei käyttöliittymää, joten UX ja Testikäyttäjä eivät katselmoi.
 **Haara:** `t-011-tallennuskerros`
@@ -45,3 +45,16 @@ Kokoelma (T-012) ja pakat (T-013) tarvitsevat tietomallin ja tallennuksen, joka 
 - Tietosuojailmoitus ("tiedot vain tässä selaimessa", R-10:n torjunta) liitetään T-012:een (UX ja Sisällöntuottaja).
 - "Poista kaikki tiedot tästä selaimesta" → IDEAS.md.
 - K-P1–K-P4 kirjattu STATUS.md:hen käyttäjälle (eivät blokkaa).
+
+### Luovutus 2026-10-01 · Arkkitehti → Koodari
+- Mitä tehtiin: ADR D-008 ja ARCHITECTURE.md:n luku 12 (rakenne, allekirjoitukset, luku- ja kirjoituspolku, testilista). Lisäksi päivitetty luvut 1, 3, 4 ja 6 (`Card.key`, ESLint-säännöt). localStorage kahden versioidun kääreen `{schemaVersion,savedAt,data}` sisällä, Promise-pohjainen repository-rajapinta, kortin avain `cardKey(name, subname)`. Netdeckin slug ei ole johdettavissa nimestä 16 kortilla, joten se ei käy avaimeksi. Rajat sovitettu SR-11–SR-13:een.
+- Mitä pyydän: Toteutus viidessä askeleessa ARCHITECTURE.md:n luvun 12.9 mukaan: (1) cardKey, Card.key, mapCard ja fixtuurit; (2) domain: collection, deck ja validate; (3) storage: keys, errors ja envelope; (4) keyValueStore, repositories, types ja index sekä localStorage.clear() test-setupiin; (5) ESLint-rajat tallennustilalle ja storage-kerroksen sisäisille tuonneille.
+- Mistä katsoa: docs/ARCHITECTURE.md luku 12, docs/DECISIONS.md D-008, docs/SECURITY.md SR-11–SR-13 ja SR-16.
+- Tunnetut rajoitteet ja riskit: Avain muuttuu, jos lähde muuttaa kortin nimeä (alias-migraatio tarvittaessa). Välilehtien kilpailutilanne on minimoitu mutta ei poistettu. Avaimen versio on kääreessä eikä avaimen nimessä (poikkeama SR-12:n esimerkistä, Digiturva arvioi katselmoinnissa).
+- Testit: suunnittelu. Avainanalyysi oikeaa rajapintaa vasten: 151 korttia ja 151 yksilöllistä avainta, esimerkkipakasta 19/19 riviä täsmäsi.
+
+### Checkpoint 2026-10-01 · PM
+- D-008 hyväksytty (PM).
+- Huom. rinnakkaisuus: T-010 muokkaa myös `src/ui/CatalogView.test.tsx`:ää (sarake "Tyyppi ja väri"). Ensin valmistuva yhdistetään testiin, ja toinen yhdistää testin haaraansa ja ratkaisee konfliktin ennen katselmointia.
+- Arkkitehdin kysymykset: (2) tallennetaanko tuotu pakkalista pakaksi → käyttäjälle ennen T-014:ää; (3) uuden pakan oletusosiot → T-013 UX; (4) varmuuskopioiden palautuksen käyttöliittymä → IDEAS.md; (5) T-015:n muodon tunniste → T-015 (Arkkitehti ja Digiturva).
+- Seuraava askel: Koodari toteuttaa.
