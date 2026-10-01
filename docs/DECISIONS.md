@@ -63,3 +63,14 @@ Päätösloki. Vain lisäyksiä, ei poistoja (rules.md 5.2).
 **Päätös:** A. Käyttäjä hyväksyi riskin R-2. Korttikuvia ei näytetä T-001:ssä, vaan käyttäjä tuo ne käyttöön myöhemmin (R-1).
 **Perustelu:** Käyttäjän päätös. Sovellus on ei-kaupallinen, siinä on epävirallisuusmerkintä, ja rajapintaa kutsutaan maltillisesti.
 **Seuraukset:** Digiturva kirjaa riskin hyväksytyksi SECURITY.md:hen seuraavassa katselmoinnissa. Korttikuvat tulevat omana tehtävänään, kun käyttäjä toimittaa ne.
+
+## D-007 · MVP-1:n rajaukset: korttitaso, paikallinen tallennus ja pakkojen tiedostomuodot · 2026-10-01 · Päättäjä: käyttäjä
+**Tila:** Voimassa
+**Konteksti:** MVP-1 tuo kokoelman, pakat ja pakkalistan tuonnin. Avoimia olivat K5 (kortit vai painokset), tallennuspaikka (kirjautuminen on MVP-2:ssa) ja tuontimuoto.
+**Päätös:**
+1. Kokoelma seuraa kortteja korttitasolla. Tietomalli jättää valmiuden painoksille (alt-artit, beta, kieliversiot), mutta niitä ei toteuteta nyt.
+2. MVP-1 tallentaa kokoelman ja pakat vain paikallisesti selaimeen. Tallennuskerros suunnitellaan niin, että Firebase-kirjautuminen ja pilvitallennus voidaan lisätä myöhemmin (MVP-2) ilman tietomallin uudelleenkirjoitusta.
+3. Pakkalistat tuodaan tekstinä tai .txt-tiedostona. Viitemuoto on `docs/examples/esimerkkipakka.txt`: `# Pakan nimi`, osio-otsikot `// Legends (3)`, rivit `3 Nimi - Alaotsikko`. Kaikki 19 esimerkin korttia vastaavat rajapinnan kortteja (PM tarkisti 2026-10-01).
+4. Pakan voi viedä ja tuoda sekä .json- että .txt-muodossa (viitemuoto). Käyttötarkoitus: varmuuskopio ja jakaminen kaverille.
+**Perustelu:** Käyttäjän päätös. Pienin toteutus, joka ratkaisee pääongelman ja jättää tien auki MVP-2:lle.
+**Seuraukset:** MVP-1:n tehtävät T-010–T-015. Arkkitehti tekee tallennuskerroksesta ja tietomallista ADR:n (T-011). Digiturva arvioi paikallisen tallennuksen, tiedostojen tuonnin ja .json-tiedostot epäluotettavana syötteenä.
