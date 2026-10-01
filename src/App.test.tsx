@@ -15,6 +15,7 @@ const catalog: CardCatalog = {
       type: 'Legend',
       color: 'Red',
       cost: null,
+      key: 'v-streetkid',
     },
   ],
   reportedTotal: 1,

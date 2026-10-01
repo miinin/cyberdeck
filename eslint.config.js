@@ -34,6 +34,17 @@ const apiInternals = {
   message: "Import the API layer only through its public index ('../api').",
 };
 
+// ARCHITECTURE.md luku 4 (T-011): only storage/index.ts is the public API of the storage layer.
+const storageInternals = {
+  group: ['**/storage/*'],
+  message: "Import the storage layer only through its public index ('../storage').",
+};
+
+// SR-12, D-008: only storage/keyValueStore.ts may use browser storage, so nothing bypasses validation,
+// backups and the in-memory fallback (ARCH-008).
+const browserStorageApis = ['localStorage', 'sessionStorage', 'indexedDB'];
+const browserStorageMessage = 'SR-12: use the storage layer (src/storage) instead of browser storage.';
+
 export default defineConfig(
   globalIgnores(['dist', 'coverage', 'node_modules']),
   js.configs.recommended,
@@ -56,7 +67,8 @@ export default defineConfig(
   {
     files: ['src/ui/**', 'src/App.tsx', 'src/main.tsx'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: [apiInternals] }],
+      // One block for both layers: a later no-restricted-imports block would replace this one, not merge.
+      'no-restricted-imports': ['error', { patterns: [apiInternals, storageInternals] }],
     },
   },
   {
@@ -68,9 +80,45 @@ export default defineConfig(
           paths: [{ name: 'react', message: 'The domain layer has no dependencies.' }],
           patterns: [
             apiInternals,
-            { group: ['**/api', '**/api/**', '**/ui', '**/ui/**'], message: 'The domain layer has no dependencies.' },
+            {
+              group: ['**/api', '**/api/**', '**/ui', '**/ui/**', '**/storage', '**/storage/**'],
+              message: 'The domain layer has no dependencies.',
+            },
           ],
         },
+      ],
+    },
+  },
+  {
+    files: ['src/storage/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [{ name: 'react', message: 'The storage layer does not depend on the UI.' }],
+          patterns: [
+            {
+              group: ['**/ui', '**/ui/**', '**/api', '**/api/**'],
+              message: 'The storage layer depends only on the domain layer.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['**/*.{ts,tsx}'],
+    ignores: ['src/storage/keyValueStore.ts', 'src/storage/keyValueStore.test.ts', 'src/test/**'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        ...browserStorageApis.map((name) => ({ name, message: browserStorageMessage })),
+      ],
+      'no-restricted-properties': [
+        'error',
+        ...['window', 'globalThis', 'self'].flatMap((object) =>
+          browserStorageApis.map((property) => ({ object, property, message: browserStorageMessage })),
+        ),
       ],
     },
   },
