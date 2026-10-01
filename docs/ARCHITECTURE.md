@@ -297,3 +297,14 @@ Toteutus noudattaa lukuja 3–9. Poikkeamat ja tarkennukset perusteluineen:
 - **Lint (SR-1):** `no-restricted-syntax` estää `dangerouslySetInnerHTML`:n, `innerHTML`/`outerHTML`-sijoitukset, `insertAdjacentHTML`:n, `document.write`:n ja merkkijonoajastimet. `no-eval`, `no-implied-eval` ja `no-new-func` ovat päällä. Kerrosraja valvotaan luvun 4 mukaan (myös `src/main.tsx`).
 - **Workflowt (SR-8):** `deploy-prod.yml` ja `deploy-test.yml` saivat `permissions: contents: read`. `repoToken` poistettiin live-julkaisuista, koska `action-hosting-deploy` käyttää tokenia vain PR-ajoissa (tarkistettu lähdekoodista `src/index.ts`).
 - **Todennettu oikeaa rajapintaa vasten** kerran käsin 2026-09-30 (ei testisarjassa): 151 / 151 korttia, 0 ohitettua, noin 6 s.
+
+### T-010 · Koodari 2026-10-01
+
+Haku ja suodatus (UX.md luku 5). Ei uusia riippuvuuksia, ei muutoksia rajapintakerrokseen eikä tietomalliin.
+
+- **`src/domain/cardSearch.ts`** (uusi, puhdas, ei riippuvuuksia): `normalizeForSearch` (NFD, yhdistävien merkkien poisto, pienet kirjaimet, välilyöntien tiivistys), `filterCards` (haku `"{name} {subname}"`-merkkijonosta `includes`-vertailulla, ryhmän sisällä TAI, ryhmät ja haku JA), `filterOptions` (tunnetut arvot kiinteässä järjestyksessä + tuntemattomat datasta ja valinnoista), `toggleValue`, `isFilterActive`. Ei säännöllisiä lausekkeita käyttäjän syötteestä, joten erikoismerkit ovat tavallista tekstiä (SR-1, ei ReDoS-riskiä).
+- **`src/ui/CardFilters.tsx`** (uusi): esittävä lomake (`form role="search"`, hakukenttä `maxLength=100`, kaksi fieldsetiä). Esc ja Enter käsitellään `keydown`issa. IME-koostaminen tunnistetaan `isComposing`-lipusta.
+- **`src/ui/CardColor.tsx`** (uusi): väri tekstinä + koristeellinen näyte. Käytössä taulukossa ja suodattimissa. Värien suomenkieliset nimet `texts.ts`:n `colorNames`-Mapissa (Map eikä objekti, jotta `"constructor"` tms. rajapinnan arvo ei osu prototyyppiin).
+- **`src/ui/useDelayedAnnouncement.ts`** (uusi): live-alueen 750 ms:n hillintä. Ilmoitukset sidotaan `owner`-arvoon (`CatalogState`-olio). Kun tila vaihtuu (uudelleenyritys), odottava ajastin perutaan efektin purussa ja aiempi ilmoitus hylätään, joten latausviesti ei jää vanhentuneen tuloksen alle. Sama tulos (avain: tila + määrä) ei toistu. `Tyhjennä haku ja suodattimet` ilmoittaa aina heti (`force`).
+- **`CatalogView`**: hakutila (`criteria`) on `CatalogView`issa, joka pysyy asennettuna kaikissa tiloissa, joten haku ja valinnat säilyvät uudelleenyrityksen yli. Lomake renderöidään vain, kun ladattuja kortteja on vähintään yksi (myös OSITTAINEN ilman yhtään saatua korttia jää ilman lomaketta, koska suodatettavaa ei ole). `CardList` saa captionin propsina.
+- **Testit:** `cardSearch.test.ts` (logiikka) ja `CatalogView.filters.test.tsx` (näkymä). Live-alueen testit käyttävät `fireEvent`iä ja Vitestin valeajastimia, koska user-event jumittuu valeajastimien kanssa (LESSONS L-002).
