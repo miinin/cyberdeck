@@ -44,7 +44,7 @@ Tarkistettu, ei löydöksiä: `lang="fi"`, `<title>`, otsikko "Kortit", lataus (
 | `partialStatus` | {r} / {t} korttia | ei muutosta |
 
 Perustelu: teksti on totta kummassakin OSITTAINEN-tilan syyssä, kertoo mitä tapahtui ja mitä voi tehdä, eikä lupaa varmaa korjausta. Testit (`CatalogView.test.tsx`), jotka hakevat tekstiä, päivitetään samalla. UX.md 4.5:n OSITTAINEN-tekstit on syytä päivittää vastaamaan (UX Designer).
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 6667d77)
 
 ### TXT-002 · Epävirallisuusmerkintä: genetiivi "WeirdCon", lausefragmentti, peliä ei mainita · Low
 **Sijainti:** `src/ui/texts.ts` `footerUnofficial` · **Tehtävä:** T-001
@@ -59,7 +59,7 @@ Perustelu: teksti on totta kummassakin OSITTAINEN-tilan syyssä, kertoo mitä ta
 Yhdysmerkki "Cyberpunk TCG -fanityökalu" on oikein (monisanainen nimi + yleissana, välilyönti ennen yhdysmerkkiä). Vaihtoehto ilman pelin nimeä, jos Digiturva tai PM haluaa välttää tavaramerkin mainitsemisen: "Cyberdeck on epävirallinen fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä."
 `footerSource` "Korttitiedot: Netdeck.gg" on hyvä sellaisenaan.
 Lähteet: SECURITY.md luku 7 (WeirdCo julkaisijana, cyberpunktcg.com:n ehdot; suositeltu merkintä). Lisäksi texts.ts:n kommentti "the Content Producer reviews it later" päivitetään muotoon, joka viittaa tähän raporttiin.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 6667d77, ensisijainen vaihtoehto pelin nimen kanssa)
 
 ### TXT-003 · Tarkistettava: CD PROJEKT RED:n fanisisältöohjeen englanninkielinen merkintä · Low
 **Sijainti:** alatunniste · **Tehtävä:** T-001
@@ -74,7 +74,7 @@ Lähteet: SECURITY.md luku 7 (WeirdCo julkaisijana, cyberpunktcg.com:n ehdot; su
 **Havainto:** Teksti käskee yrittämään myöhemmin, mutta heti alla on painike "Yritä uudelleen". "Korttitietokanta" viittaa järjestelmään, jota käyttäjä ei tunne (sovelluksella ei ole omaa tietokantaa).
 **Ehdotettu:** "Kortteja ei löytynyt. Korttitietojen lähde ei juuri nyt palauttanut yhtään korttia. Yritä hetken päästä uudelleen."
 Perustelu: kertoo, mistä kortit tulevat, ja "hetken päästä" sopii yhteen painikkeen kanssa. `emptyStatus` ja `emptyLive` pysyvät ennallaan.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 6667d77)
 
 ### TXT-005 · K1: sarakeotsikko "Hinta" · Info (suositus)
 **Sijainti:** `texts.columnCost`, `texts.noCost`

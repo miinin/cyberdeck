@@ -170,3 +170,11 @@ Kaikki versiot on lukittu tarkasti (`.npmrc` `save-exact=true`, ei `^` eikä `~`
 - Kaikki neljä katselmointia valmiit, ei vetoja. Avoimet korjattavat: TXT-001 (Medium), TXT-002 ja TXT-004 (Low). TXT-002:n ehdotus korjaa myös UX:n huomaaman taivutuksen.
 - UX-003 (vaakavieritys yli WCAG-vaatimusten, 320 px ja 200 % fontti) kirjattu IDEAS.md:hen.
 - Seuraava askel: Koodari korjaa TXT-001, TXT-002 ja TXT-004. Sen jälkeen Testikäyttäjä ja Sisällöntuottajan varmistus rinnakkain.
+
+### Luovutus 2026-10-01 · Koodari → Sisällöntuottaja, Testikäyttäjä (PM ohjaa)
+- Mitä tehtiin: TXT-001, TXT-002 (ensisijainen vaihtoehto pelin nimen kanssa) ja TXT-004 korjattu `src/ui/texts.ts`:ään raportin ehdotusten mukaan (commit 6667d77). Testit todentavat uudet tekstit kirjaimellisesti: OSITTAINEN-tilan otsikko, leipäteksti ja live-alue, TYHJÄ-tilan leipäteksti ja alatunniste (`CatalogView.test.tsx`, `App.test.tsx`). TXT-003:een ei koskettu.
+- Mitä pyydän: Sisällöntuottaja varmistaa korjaukset ja sulkee löydökset. Testikäyttäjä aloittaa rikkomistestauksen.
+- Mistä katsoa: commit 6667d77, esikatselu https://cyberdeck-tcg-test--pr1-t-001-kaveleva-luura-wj9wvfxt.web.app (URL ennallaan, paketti index-D8UMX4QW.js sisältää uudet tekstit).
+- Tunnetut rajoitteet ja riskit: UX.md 4.5:n OSITTAINEN- ja TYHJÄ-tekstit ovat vielä vanhat (UX Designerin tiedosto, ei muokattu).
+- Testit: `npm test` 71/71, `npm run lint` 0 virhettä ja 0 varoitusta, `npm run build` ok. Preview-workflow (run 36820974748) onnistui.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
