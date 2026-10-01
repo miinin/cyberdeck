@@ -1,5 +1,5 @@
 # T-010 · Haku ja suodatus korttilistaan
-**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Suunnittelu:** UX ☑ · Sisällöntuottaja ☐ (tekstit)
 **Katselmoinnit:** Koodikatselmointi ☐ · UX ☐ · Sisällöntuottaja ☐ · Testikäyttäjä ☐ · Dokumentoija ☐ (CHANGELOG)
 **Riippuvuudet:** T-001 (Done). Ei riippuvuutta T-011:een (voidaan tehdä rinnakkain).
@@ -9,12 +9,12 @@
 Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. Tämä on pohja kokoelman merkinnälle (T-012) ja pakkojen kokoamiselle (T-013) sekä PROJECT.md:n mittarille "kortin sijainnin näkee yhdellä haulla".
 
 ## Hyväksymiskriteerit
-- [ ] Hakukenttä suodattaa listaa kirjoitettaessa nimen ja alaotsikon perusteella. Kirjainkoolla ei ole väliä, ja haku löytää myös osan sanasta (esim. "silver" → Johnny Silverhand).
-- [ ] Listaa voi suodattaa korttityypin (Legend, Unit, Gear, Program) ja värin perusteella. Suodattimet ja haku toimivat yhdessä.
-- [ ] Näkyvien korttien määrä päivittyy ("12 / 151 korttia"), ja muutos ilmoitetaan ruudunlukijalle hillitysti (ei jokaisesta näppäilystä erikseen).
-- [ ] Jos mikään kortti ei vastaa hakua, näkyy tyhjä tila ja tapa tyhjentää haku ja suodattimet.
-- [ ] Haku ja suodattimet toimivat näppäimistöllä ja 320 px:n leveydellä. axe ei löydä virheitä.
-- [ ] Hakulogiikalla on yksikkötestit (myös erikoismerkit ja XSS-merkkijono hakusanana, SR-1).
+- [x] Hakukenttä suodattaa listaa kirjoitettaessa nimen ja alaotsikon perusteella. Kirjainkoolla ei ole väliä, ja haku löytää myös osan sanasta (esim. "silver" → Johnny Silverhand).
+- [x] Listaa voi suodattaa korttityypin (Legend, Unit, Gear, Program) ja värin perusteella. Suodattimet ja haku toimivat yhdessä.
+- [x] Näkyvien korttien määrä päivittyy ("12 / 151 korttia"), ja muutos ilmoitetaan ruudunlukijalle hillitysti (ei jokaisesta näppäilystä erikseen).
+- [x] Jos mikään kortti ei vastaa hakua, näkyy tyhjä tila ja tapa tyhjentää haku ja suodattimet.
+- [x] Haku ja suodattimet toimivat näppäimistöllä ja 320 px:n leveydellä. axe ei löydä virheitä.
+- [x] Hakulogiikalla on yksikkötestit (myös erikoismerkit ja XSS-merkkijono hakusanana, SR-1).
 
 ## Rajaukset (ei kuulu tähän)
 - Hakutilan tallennus URL:iin tai selaimeen
@@ -111,3 +111,8 @@ Pelaaja löytää haluamansa kortin 151 kortin listasta muutamassa sekunnissa. T
 ### Checkpoint 2026-10-01 · PM (konflikti)
 - PM yhdisti testin t-010-haku-haaraan ja ratkaisi konfliktit (ARCHITECTURE.md, IDEAS.md, LESSONS.md: molempien lisäykset säilytetty). T-010:n user-event-oppi numeroitu L-003:ksi.
 - UX.md 5.3:n suodatussäännöt kuvaavat vielä vanhaa hakusääntöä (ennen B-013:a ja B-014:ää). Päivitetään MVP-1:n lopun UX-auditoinnissa.
+
+### Checkpoint 2026-10-01 · PM (Definition of Done)
+- Korjaukset UX-002, TXT-008–TXT-010 ja B-013–B-015 tehty (a6890e9, 74404fe). PM yhdisti testin (T-011) ja lisäsi T-010:n testiaineistoon T-011:n vaatiman `Card.key`-kentän (f33fc8e). PM ajoi build ok, `npx vitest run --dir src` 353/353 ja lint 0. PR #3:n Preview vihreä.
+- Katselmoinnit: Koodikatselmointi, UX, Sisällöntuottaja ja Testikäyttäjä tehty, ei vetoja. Korjauksia ei katselmoitu uudelleen (D-009). Dokumentoija MVP-1:n lopussa (D-009). CHANGELOG päivitetty.
+- Päätös: **Done** (PM). Yhdistetään testiin.
