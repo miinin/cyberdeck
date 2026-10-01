@@ -22,6 +22,12 @@ function blockLocalStorage() {
   });
 }
 
+function fillQuota() {
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new DOMException('full', 'QuotaExceededError');
+  });
+}
+
 describe('openBrowserStore', () => {
   it('returns a working store backed by localStorage and leaves no probe key', () => {
     const store = openBrowserStore();
@@ -39,11 +45,27 @@ describe('openBrowserStore', () => {
     expect(openBrowserStore()).toBeNull();
   });
 
-  it('returns null when writing fails', () => {
+  it('returns null when the probe write fails for a reason other than quota', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new DOMException('full', 'QuotaExceededError');
+      throw new DOMException('The operation is insecure.', 'SecurityError');
     });
     expect(openBrowserStore()).toBeNull();
+  });
+
+  it('returns null when reading fails even though the write would hit the quota', () => {
+    fillQuota();
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('The operation is insecure.', 'SecurityError');
+    });
+    expect(openBrowserStore()).toBeNull();
+  });
+
+  it('returns the real store when only the probe write hits the quota (SEC-006)', () => {
+    window.localStorage.setItem('cyberdeck:test', 'saved');
+    fillQuota();
+    const store = openBrowserStore();
+    expect(store).not.toBeNull();
+    expect(store?.getItem('cyberdeck:test')).toBe('saved');
   });
 });
 
@@ -53,6 +75,15 @@ describe('openBrowserRepositories', () => {
     expect(repositories.persistent).toBe(true);
     await repositories.collection.setCount('detonate', 2);
     expect(window.localStorage.getItem(COLLECTION_KEY)).toContain('"detonate"');
+  });
+
+  it('keeps showing saved data when storage is full, and writes fail with quota (SEC-006)', async () => {
+    await openBrowserRepositories().collection.setCount('detonate', 2);
+    fillQuota();
+    const repositories = openBrowserRepositories();
+    expect(repositories.persistent).toBe(true);
+    expect((await repositories.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 2 }]);
+    await expect(repositories.collection.setCount('detonate', 3)).rejects.toMatchObject({ kind: 'quota' });
   });
 
   it('falls back to memory with persistent false when storage is blocked', async () => {

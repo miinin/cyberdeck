@@ -3,6 +3,8 @@
  * the KeyValueStore interface, so tests and the in-memory fallback share the same code path.
  */
 
+import { isQuotaError } from './errors';
+
 export interface KeyValueStore {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
@@ -31,12 +33,19 @@ function wrapStorage(storage: Storage): KeyValueStore {
 /**
  * Returns localStorage as a KeyValueStore, or null when it is blocked or does not work.
  * Even reading `window.localStorage` can throw a SecurityError (SR-13), so it is inside the try.
+ * A full storage is still returned: saved data stays visible and writes fail with `quota` (SEC-006).
  */
 export function openBrowserStore(): KeyValueStore | null {
   try {
     const storage = window.localStorage;
-    storage.setItem(PROBE_KEY, '1');
-    storage.removeItem(PROBE_KEY);
+    // Reading must work; a SecurityError here falls through to the outer catch.
+    storage.getItem(PROBE_KEY);
+    try {
+      storage.setItem(PROBE_KEY, '1');
+      storage.removeItem(PROBE_KEY);
+    } catch (error) {
+      if (!isQuotaError(error)) return null;
+    }
     return wrapStorage(storage);
   } catch {
     return null;

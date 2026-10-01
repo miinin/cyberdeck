@@ -33,7 +33,7 @@ export function toStorageError(error: unknown, action: string): StorageError {
   return new StorageError(kind, `Storage ${action} failed`, { cause: error });
 }
 
-function isQuotaError(error: unknown): boolean {
+export function isQuotaError(error: unknown): boolean {
   if (typeof error !== 'object' || error === null || !('name' in error)) return false;
   return error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED';
 }
