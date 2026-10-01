@@ -1,7 +1,7 @@
 # T-012 · Kokoelma: omistettujen korttien merkintä
-**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Review · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Suunnittelu:** UX ☑ (docs/UX.md luku 6, 2026-10-01) (näkymä, tilat, mikrokopio, saavutettavuus)
-**Katselmoinnit (D-009):** Koodikatselmointi ☐ · UX ☐ (käytettävyys, saavutettavuus, mikrokopio) · Digiturva ☐ (tallennettu data, syöte, SEC-007) · Testikäyttäjä: MVP-1:n lopussa · Dokumentoija: MVP-1:n lopussa
+**Katselmoinnit (D-009):** Koodikatselmointi ☑ · UX ☐ (käytettävyys, saavutettavuus, mikrokopio) · Digiturva ☐ (tallennettu data, syöte, SEC-007) · Testikäyttäjä: MVP-1:n lopussa · Dokumentoija: MVP-1:n lopussa
 **Riippuvuudet:** T-011 (Done), T-010 (Done)
 **Haara:** `t-012-kokoelma`
 
@@ -48,6 +48,13 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 5. Ilmoituslaatikot (load notices, `persistent: false`, EI SAATAVILLA, LUKITTU, tallennusvirheet), selainmuistutus ja pysyvä tallennus, live-ilmoitukset (500 ms hillintä, 1,5 s ilmoitukset, toinen välilehti).
 6. CONTENT.md-sanasto, CHANGELOG, ARCHITECTURE.md:n toteutusosa, koodikatselmointi, luovutus.
 
+### Checkpoint 2026-10-01 · Koodari
+- Tehty: suunnitelman askeleet 1–6. Commitit c50a02d (A2 `isStoragePersisted`), 968cca2 (kokoelman ohjain), 9ee1247 (määräkontrolli, yhteenveto, kapea asettelu), 21082c1 ("Vain omistetut"), 611af55 (ilmoitukset, tallennusvirheet, selainmuistutus, live-ilmoitukset), fd25234 (koodikatselmoinnin korjaus), d706bb0 (CONTENT.md, CHANGELOG, ARCHITECTURE.md).
+- Kesken: ei mitään. Tila Review.
+- Seuraava askel: UX katselmoi (selaimessa: 320 px, 400 % zoom, axe, saavutettavuuspuu, näppäimistöpolku) ja Digiturva katselmoi (tallennettu data, SEC-007).
+- Avoimet kysymykset: ei blokkaavia. Velkaehdotukset PM:lle luovutuksessa.
+- Muutetut tiedostot: `src/storage/keyValueStore.ts`, `index.ts`, `keyValueStore.test.ts`; `src/App.tsx`; `src/ui/` `CatalogView.tsx`, `CardList.tsx`, `CardFilters.tsx`, `texts.ts`, `useDelayedAnnouncement.ts`, uudet `collectionStore.ts` (+ testi), `useCollection.ts`, `useCollectionAnnouncements.ts`, `CountControl.tsx`, `CardName.tsx`, `CollectionNotices.tsx`, `StorageReminder.tsx`, `CatalogView.collection.test.tsx`; testien apufunktiot `CatalogView.test.tsx`, `CatalogView.filters.test.tsx`; `src/styles.css`; `docs/CONTENT.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`.
+
 ## Luovutukset
 
 ### Luovutus 2026-10-01 · UX Designer → Koodari
@@ -66,3 +73,16 @@ Pelaaja merkitsee omistamansa kortit ja niiden määrät korttilistaan muutamall
 5. A5 Rivi jää näkyviin "Vain omistetut" -suodatuksessa nollauksen jälkeen. Oletus: kyllä.
 6. A6 Ilmoitusviiveet 500 ms / 750 ms. Oletus: kyllä.
 7. A7 Vain `reset` ja `repaired` suljettavissa. Oletus: kyllä.
+
+### Luovutus 2026-10-01 · Koodari → UX Designer ja Digiturva
+- Mitä tehtiin: kokoelmanäkymä UX.md:n luvun 6 mukaan. Sarake `Omistan` (`+` / `− n +`, 0–999, 999:ssä `aria-disabled` + ilmoitus), yhteenveto, "Vain omistetut" (rivi jää näkyviin nollauksen jälkeen, oma tyhjä tila ja `Näytä kaikki kortit`), selainmuistutus ja `Pyydä pysyvää tallennusta` (vain painikkeesta; A2: `isStoragePersisted` piilottaa painikkeen, jos lupa on jo), kaikki 6.8:n ilmoituslaatikot ja tallennusvirheet, LUKITTU- ja EI SAATAVILLA -tilat, live-ilmoitukset (500 ms hillintä tallennuksen jälkeen, alku → loppu, 1,5 s latausilmoitukset, 750 ms toinen välilehti). Alle 40 rem:n korttimainen asettelu eksplisiittisillä ARIA-rooleilla. Peräkkäiset tallennukset: näytöllä uusin tavoitemäärä, vanhempi vastaus ei ylikirjoita, virheessä palautus viimeksi tallennettuun.
+- Mitä pyydän: **UX:** käytettävyys-, saavutettavuus- ja mikrokopiokatselmointi esikatselussa (axe 6.13:n tiloissa, 320 px ja ≥ 640 px, 200 %/400 % zoom, saavutettavuuspuu korttiasettelussa, näppäimistöpolku, fokusrengas ei leikkaudu). **Digiturva:** tallennettu data ja syöte (määrät vain painikkeista, avaimet `Card.key`:stä), virheteksteissä ei teknisiä tietoja eikä `backupKey`:tä (SEC-007), `persist()` vain käyttäjän toimesta (SR-13), `persisted()`-lisäys tallennuskerrokseen.
+- Mistä katsoa: `git diff origin/test...t-012-kokoelma`, erityisesti `src/ui/collectionStore.ts`, `CatalogView.tsx`, `CountControl.tsx`, `CollectionNotices.tsx`, `StorageReminder.tsx`, `useCollectionAnnouncements.ts`, `src/storage/keyValueStore.ts`, `src/styles.css`. Ajo: `npm run dev`. Toteutuksen yksityiskohdat: ARCHITECTURE.md "T-012 · Koodari".
+- Tunnetut rajoitteet ja riskit:
+  - Kapeaa korttiasettelua, zoomia, kosketusalueita ja axea **ei ole tarkistettu selaimessa** (vain jsdom, joka ei laske CSS-asettelua). Selainta tai axea ei ollut käytettävissä ilman uutta riippuvuutta.
+  - jsdom laskee rivin otsikon nimeksi "V,Streetkid" (piilotetun ", ":n välilyönti katoaa). Oikeissa selaimissa nimi on "V, Streetkid". Testit hakevat rivit tekstisisällöllä. UX voi varmistaa saavutettavuuspuusta.
+  - Uusia `+`/`−`-pysähdyksiä on noin 300 (IDEAS.md, UX:n tiedossa).
+  - Tallennettuja tuntemattomia avaimia ei näytetä eikä poisteta (A3), joten yhteenveto voi olla pienempi kuin tallennettu kokoelma.
+- Testit: `npm test` 17 tiedostoa, 424 testiä, kaikki läpi (uusia 67: `collectionStore.test.ts` 21, `CatalogView.collection.test.tsx` 46 (sis. nopeat painallukset, viiveellä vastaava `setCount`, `quota`, `unavailable`, `limit-reached`, `invalid-input`, `newer-version`, toinen välilehti), `isStoragePersisted` 4). `npm run lint` 0 virhettä ja 0 varoitusta. `npm run build` onnistui. Näkymättömien merkkien tarkistus (L-002) muutetuille tiedostoille: ei löydöksiä.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (kapean asettelun `.col-fit { width: 1% }` voitti solujen `width: auto`:n, commit fd25234) · Suosituksia 2 (ehdotus [velka]-tehtäviksi PM:lle): (1) jokainen määrän muutos renderöi koko taulukon, mittaa ja tarvittaessa `memo`; (2) jos painallussarjan myöhempi tallennus epäonnistuu, sarjan jo tallennettua osaa ei ilmoiteta ruudunlukijalle (vain virhe).
+- Muutokset muiden tiedostoihin: `docs/CONTENT.md` sanastoon UX.md 6.14:n termit (PM:n lupa tässä kortissa), `CHANGELOG.md` `[Julkaisematon]`.

@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: 2/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-012 | Koodari | In Progress | Toteutus UX.md:n luvun 6 mukaan. Haara `t-012-kokoelma`. |
+| T-012 | Koodari → UX, Digiturva | Review | Toteutus valmis (haara `t-012-kokoelma`, 424 testiä läpi). PM avaa PR:n; UX ja Digiturva katselmoivat, katso kortin luovutus. |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
