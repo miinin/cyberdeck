@@ -156,13 +156,19 @@ describe('validateDeck', () => {
   });
 });
 
+function at(key: string): Card {
+  const found = byKey.get(key);
+  if (found === undefined) throw new Error(`No test card ${key}`);
+  return found;
+}
+
 describe('addBlocker', () => {
   const start = deck(legendRows);
   it('explains RAM and copy limits and a full Legend slot', () => {
-    expect(addBlocker(byKey.get('big')!, start, byKey)).toBe('RAM 5 ylittää Red-värin rajan 4.');
-    expect(addBlocker(byKey.get('u0')!, deck([...legendRows, ['u0', 3]]), byKey)).toBe('Pakassa on jo 3 kopiota.');
-    expect(addBlocker(byKey.get('u0')!, start, byKey)).toBeNull();
-    expect(addBlocker(legends[0]!, start, byKey)).toBe('Pakassa on jo 3 Legendiä.');
+    expect(addBlocker(at('big'), start, byKey)).toBe('RAM 5 ylittää Red-värin rajan 4.');
+    expect(addBlocker(at('u0'), deck([...legendRows, ['u0', 3]]), byKey)).toBe('Pakassa on jo 3 kopiota.');
+    expect(addBlocker(at('u0'), start, byKey)).toBeNull();
+    expect(addBlocker(at('l1'), start, byKey)).toBe('Pakassa on jo 3 Legendiä.');
   });
   it('blocks a second Legend with the same name', () => {
     const dupe = card('l1b', { name: 'L1', type: 'Legend' });

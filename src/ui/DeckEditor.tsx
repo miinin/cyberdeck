@@ -190,19 +190,22 @@ export function DeckEditor({
   }, [phase]);
 
   // Leaving the editor or closing the tab must not lose the last edit. The update runs its write
-  // synchronously, so it also works inside pagehide.
+  // synchronously when called directly, so that also works inside pagehide.
   useEffect(() => {
-    const saveNow = () => {
+    const saveNow = (afterRunningSave: boolean) => {
       const next = pending.current;
       if (next === null) return;
       pending.current = null;
-      repository.update(deckId, next).catch(() => undefined);
+      // On unmount, wait for a save already in flight so the older content cannot land last.
+      const write = () => repository.update(deckId, next);
+      void (afterRunningSave ? chain.current.then(write) : write()).catch(() => undefined);
     };
-    window.addEventListener('pagehide', saveNow);
+    const onPageHide = () => saveNow(false);
+    window.addEventListener('pagehide', onPageHide);
     return () => {
-      window.removeEventListener('pagehide', saveNow);
+      window.removeEventListener('pagehide', onPageHide);
       clearTimeout(timer.current);
-      saveNow();
+      saveNow(true);
     };
   }, [repository, deckId]);
 

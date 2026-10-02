@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pakanrakennus: yläpalkin Pakat-valinnasta voi luoda, nimetä, kopioida ja poistaa pakkoja (poisto kysyy varmistuksen). Pakkaeditorissa kortteja haetaan samoilla suodattimilla kuin Kortit-näkymässä ja lisätään −/+-painikkeilla. Yhteenveto näyttää Legend- ja pääpakkamäärät, värikohtaiset RAM-rajat, rikkeet selkokielellä ja kokoelmasta puuttuvat kortit. Muutokset tallentuvat itsestään. Kortit-näkymässä kortin alla lukee, monessako pakassa se on.
+
 - Selaus ja muokkaus ovat nyt erillään. Listan yläpuolella oleva Muokkaa kokoelmaa -kytkin näyttää tai piilottaa −- ja +-painikkeet: kun se on pois päältä, kortissa näkyy vain määrä ja tila (harmaa, keltainen tai vihreä ✓). Tyhjällä kokoelmalla kytkin on aluksi päällä.
 
 - Uusi kompakti Taulukko-näkymä (nimi, tyyppi, Rarity, Cost, Power, RAM ja kokoelma). Näkymän voi vaihtaa Ruudukko- ja Taulukko-valinnalla, ja valinta sekä kytkin säilyvät tässä selaimessa.

@@ -1741,3 +1741,8 @@ body:has(dialog[open]) {
   text-align: center;
   font-weight: var(--font-weight-bold);
 }
+
+.card-decks {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}

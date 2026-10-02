@@ -135,22 +135,24 @@ export function DecksView({
   const [failure, setFailure] = useState<StorageErrorKind | 'unknown' | null>(null);
   const [live, setLive] = useState('');
   /** Element to focus after the next render (a data attribute of a row button, or the heading). */
-  const [focusTarget, setFocusTarget] = useState<string | null>(null);
+  const focusTarget = useRef<string | null>(null);
   const deleteOpenerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     headingRef.current?.focus();
   }, []);
 
+  // No dependencies: runs after every render and moves focus once when a target was set.
   useEffect(() => {
-    if (focusTarget === null) return;
+    const target = focusTarget.current;
+    if (target === null) return;
+    focusTarget.current = null;
     const element =
-      focusTarget === 'heading'
+      target === 'heading'
         ? headingRef.current
-        : document.querySelector<HTMLElement>(`[data-focus-id="${CSS.escape(focusTarget)}"]`);
-    setFocusTarget(null);
+        : document.querySelector<HTMLElement>(`[data-focus-id="${CSS.escape(target)}"]`);
     element?.focus();
-  }, [focusTarget]);
+  });
 
   const names = decks.map((deck) => deck.name);
 
@@ -165,7 +167,7 @@ export function DecksView({
     }
     await reload();
     setLive(message);
-    setFocusTarget(focus);
+    focusTarget.current = focus;
     return true;
   };
 
@@ -266,7 +268,7 @@ export function DecksView({
                       onSave={(name) => void handleRename(deck, name)}
                       onCancel={() => {
                         setRenamingId(null);
-                        setFocusTarget(`rename-${deck.id}`);
+                        focusTarget.current = `rename-${deck.id}`;
                       }}
                     />
                   ) : (

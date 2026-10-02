@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
 import { CardColor, typeBadgeClass } from './CardColor';
 import { CardImage } from './CardImage';
+import { CardDecks } from './CardDecks';
 import { collectionState } from './CardList';
 import type { OwnedColumn } from './CardList';
 import { CountControl } from './CountControl';
@@ -26,11 +27,13 @@ export function CardTable({
   cards,
   caption = texts.tableCaption,
   owned,
+  decksOf,
   onOpenImage,
 }: {
   cards: readonly Card[];
   caption?: string;
   owned?: OwnedColumn;
+  decksOf?: (card: Card) => readonly string[];
   onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
 }) {
   return (
@@ -74,6 +77,7 @@ export function CardTable({
                     </>
                   )}
                 </button>
+                {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
               </th>
               <td>
                 <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
