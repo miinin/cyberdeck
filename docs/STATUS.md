@@ -39,6 +39,7 @@ Työn alla: MVP-1 · Valmiina: T-010, T-011, T-012, T-013, T-021, T-025–T-027,
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-004 Lint ja testit CI:hin, T-024, T-029, T-032 (2026-10-02, PR #14)
 - T-013 Pakanrakennus ja laillisuussäännöt (2026-10-02, PR #13)
 - T-040 Selaus- ja muokkaustila, taulukkonäkymä (2026-10-02, PR #12)
 - T-039 Teemavalitsin ikonina (2026-10-02)

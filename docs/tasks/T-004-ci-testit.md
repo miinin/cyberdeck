@@ -1,5 +1,5 @@
 # T-004 · Testit ja lint CI:hin (sisältää T-024, T-029, T-032)
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must
 **Malli:** D-014. Digiturva tekee kevyen katselmoinnin, koska workflowt muuttuvat (SR-9, SEC-003).
 **Haara:** `t-004-ci-testit`
 
@@ -34,3 +34,6 @@ Rikkinäinen koodi ei pääse testisivustolle eikä tuotantoon. Testit ja lint a
 
 ### Luovutus 2026-10-02 · Digiturva → PM
 - Kevyt katselmointi (.github, firebase.json, .gitignore, eslint.config.js, vite.config.ts): `persist-credentials: false` kaikissa kolmessa checkoutissa, ei uusia salaisuuksia, permissions ja triggerit ennallaan (ei `pull_request_target`ia), lint ja test ennen buildia ja deployta. firebase.json ei muuttunut. SEC-003 Varmistettu ja suljettu (`reports/SEC-001-t001-katselmointi.md`). Uusia löydöksiä 0, veto: ei.
+
+### PM 2026-10-02 · Done (D-014)
+- PR #14: build_and_preview (lint + test + build) vihreä 1 min 49 s. Digiturva: SEC-003 Varmistettu, ei löydöksiä. Avoin: SECURITY.md R-9 suljetaan Digiturvan seuraavassa katselmoinnissa.
