@@ -236,3 +236,16 @@ export function groupDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckGroups
     .map((type) => ({ type, rows: [...(byType.get(type) ?? [])].sort(byCostThenName) }));
   return { legends: legends.sort(byCostThenName), groups, unknown };
 }
+
+/**
+ * True when `card` is a Legend and the deck already has a Legend with the same name (the subname
+ * does not matter, T-013). The editor refuses to add such a Legend (T-045).
+ */
+export function hasSameNameLegend(card: Card, deck: DeckContent, cardsByKey: CardsByKey): boolean {
+  if (card.type !== 'Legend') return false;
+  for (const [key, count] of deckCounts(deck)) {
+    const other = cardsByKey.get(key);
+    if (count > 0 && other?.type === 'Legend' && other.name === card.name) return true;
+  }
+  return false;
+}

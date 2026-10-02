@@ -1,7 +1,7 @@
 import type { Card } from './card';
 import type { DeckContent } from './deck';
 import { checkDeckName, copyDeckName, uniqueDeckName, withDeckCount } from './deckEdit';
-import { addBlocker, groupDeck, ramLimits, toCardsByKey, validateDeck } from './deckRules';
+import { addBlocker, groupDeck, hasSameNameLegend, ramLimits, toCardsByKey, validateDeck } from './deckRules';
 
 function card(key: string, overrides: Partial<Card> = {}): Card {
   return {
@@ -176,6 +176,18 @@ describe('addBlocker', () => {
   });
 });
 
+
+describe('hasSameNameLegend', () => {
+  it('matches by name only, and only for Legends already in the deck', () => {
+    const dupe = card('l1b', { name: 'L1', subname: 'Other', type: 'Legend' });
+    const map = toCardsByKey([...all, dupe]);
+    expect(hasSameNameLegend(dupe, deck([['l1', 1]]), map)).toBe(true);
+    expect(hasSameNameLegend(at('l1'), deck([['l1', 1]]), map)).toBe(true);
+    expect(hasSameNameLegend(dupe, deck([['l2', 1]]), map)).toBe(false);
+    expect(hasSameNameLegend(dupe, deck([]), map)).toBe(false);
+    expect(hasSameNameLegend(at('u0'), deck([['u0', 1]]), map)).toBe(false);
+  });
+});
 describe('deck editing helpers', () => {
   it('names: trims, requires 1–100 characters', () => {
     expect(checkDeckName('  Oma pakka ')).toEqual({ ok: true, name: 'Oma pakka' });

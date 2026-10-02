@@ -1274,6 +1274,25 @@ body:has(dialog[open]) {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   clip-path: polygon(0 0, calc(100% - 0.5em) 0, 100% 0.5em, 100% 100%, 0 100%);
+  position: relative;
+}
+
+/* The clip-path cuts the border too, so the bevel is drawn as a diagonal line. */
+.type-badge::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: calc(0.5em + 1px);
+  height: calc(0.5em + 1px);
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    var(--badge-color) calc(50% - 0.5px),
+    var(--badge-color) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  pointer-events: none;
 }
 
 .type-badge-red { --badge-color: var(--color-card-red); }
@@ -1727,11 +1746,12 @@ body:has(dialog[open]) {
 }
 
 .card-row {
-  display: flex;
-  flex-wrap: wrap;
+  /* Info on the left, the control always in the right column (T-045). */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-2) var(--space-3);
+  min-height: 3.5rem;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -1787,4 +1807,75 @@ body:has(dialog[open]) {
 .card-decks {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+/* Colour filter chips show only the ball (T-045). */
+.option-color .color-swatch {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+
+/* Deck editor: toast, result view selector and image grid (T-045). */
+.pick-view {
+  margin-block: var(--space-3) 0;
+}
+
+.toast-slot:empty {
+  display: none;
+}
+
+.toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-warning);
+  background: var(--color-surface-raised);
+}
+
+.pick-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: var(--space-3);
+}
+
+.pick-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.pick-image.is-dimmed {
+  border-style: dashed;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.pick-image-button {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.pick-image-button .card-image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.pick-image-name {
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
 }

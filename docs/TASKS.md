@@ -45,7 +45,8 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-038 | Tiivis yläosa: pysyvä tallennus ikonina yläpalkissa, tiiviit suodatinchipit | 1 | Must | Koodari (D-014) | Done | UX MVP-1:n lopussa |
 | T-039 | Teemavalitsin pelkkänä aurinko- ja kuu-ikonina | 1 | Must | PM (pieni, D-014) | Done | – |
 | T-040 | Selaus ja muokkaus erilleen (Muokkaa kokoelmaa -kytkin), kompakti taulukkonäkymä | 1 | Must | Koodari (D-014) | Done | UX ja Sisällöntuottaja MVP-1:n lopussa (uudet tekstit) |
-| T-041 | [velka] Pakkaeditorin rivit tiiviimmiksi (nyt noin 130 px per kortti) ja DeckEditor.tsx:n pilkkominen | 1 | Should | Koodari | Backlog | UX |
+| T-041 | [velka] Pakkaeditorin rivit tiiviimmiksi (nyt noin 130 px per kortti) ja DeckEditor.tsx:n pilkkominen | 1 | Should | Koodari | Done (rivit T-045:ssä; DeckEditorin pilkkominen jäljellä) | UX |
 | T-042 | [velka] Pakkaeditori kahdessa välilehdessä: viimeinen tallennus voittaa (storage-tapahtuma tai versiotarkistus) | 2 | Could | Koodari | Backlog | – |
 | T-043 | [velka] Pakan nimikenttiin maxLength=100 (SEC-007 Low) | 2 | Could | Koodari | Backlog | – |
 | T-044 | Tuontiraportin ulkoasu: tiivis taulukko tai kuvat pelkän listan sijaan, toimintojen korostus | 2 | Should | Koodari | Backlog | UX |
+| T-045 | Hiominen: tyyppimerkin kulma, värisuodatin palloina, Legend-nimen esto, yhtenäiset rivit, Power, kuvanäkymä pakkaeditoriin (sisältää T-041:n rivien tiivistyksen) | 1 | Must | Koodari | Done | PM esikatselu |

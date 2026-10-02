@@ -9,6 +9,7 @@ export const THEME_KEY = 'cyberdeck:theme';
 /** Browser-list preferences (T-040): raw strings like the theme, no envelope. */
 export const VIEW_KEY = 'cyberdeck:view';
 export const EDIT_MODE_KEY = 'cyberdeck:edit-mode';
+export const DECK_PICK_VIEW_KEY = 'cyberdeck:deck-pick-view';
 /** Followed by `<aggregate>:<ISO timestamp>`. Only keys with this prefix are ever pruned (SR-13). */
 export const BACKUP_PREFIX = 'cyberdeck:backup:';
 

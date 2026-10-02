@@ -282,3 +282,11 @@ Päätöksessä on viisi osaa.
 - CLAUDE.md:n luku "Kevyt malli".
 - Aliagenttien määrittelyihin (`~/.claude/agents/`) on lisätty D-014-ohitus ja malli (Sonnet, paitsi Arkkitehti ja Digiturva Opus).
 - Kun rules.md ja agents.md ovat ristiriidassa D-014:n kanssa, D-014 voittaa (käyttäjän nimenomainen ohje). agents.md:n versiomerkintä on vielä päivittämättä.
+
+## D-015 · Pakan haku Netdeck-linkistä: selain kutsuu api.netdeck.gg:tä käyttäjän pyynnöstä · 2026-10-02 · Päättäjä: käyttäjä (pyyntö), PM
+**Tila:** Voimassa. Tarkentaa D-013:a: `connect-src` laajenee osoitteeseen `https://api.netdeck.gg`.
+**Konteksti:** Käyttäjä haluaa nähdä, mitä hänen kokoelmastaan puuttuu esimerkiksi turnauspakasta, linkin perusteella. Netdeckin julkinen pakkarajapinta sallii CORS:n (PM:n selvitys T-046-kortissa).
+**Vaihtoehdot:** A) Vain tekstituonti (T-014), jolloin käyttäjä kopioi listan itse. B) Linkkihaku Netdeckistä selaimesta käyttäjän pyynnöstä. C) Oma välipalvelin (kustannus, ylläpito).
+**Päätös:** B
+**Perustelu:** Ei kustannuksia eikä uusia riippuvuuksia. Pyyntö lähtee vain käyttäjän painalluksesta, ja siitä on huomautus. Vastaus käsitellään epäluotettavana syötteenä (T-046 kriteerit 2–3). Korttidata pysyy buildissa (D-013 ennallaan).
+**Seuraukset:** CSP `connect-src 'self' https://api.netdeck.gg`. PRIVACY.md: IP-osoite näkyy Netdeckille vain linkkihaussa (Digiturva päivittää). Muut pakkasivustot tuodaan tekstinä.
