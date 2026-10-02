@@ -1,7 +1,7 @@
 # T-027 · Korttikuvat näkyviin (151 kuvan paketti käyttäjältä)
 **Tila:** Ready (rakennetaan T-026:n päälle) · **Omistaja:** Arkkitehti (osa T-026:n ADR:ää) → UX → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** Arkkitehti ☐ (tiedostomuoto, nimeäminen, sijainti, koot, tuontikomento) · UX ☐ (missä ja miten kuva näkyy)
-**Katselmoinnit:** Koodikatselmointi ☐ · UX ☐ · Digiturva ☐ (tiedostot, `img-src`, R-1)
+**Katselmoinnit:** Koodikatselmointi ☐ · UX ☐ · Digiturva ☑ (SEC-006-t027: ei Critical-, High- eikä Medium-löydöksiä; sharp hyväksyttävissä; SEC-019 Low, SEC-020 Info)
 **Riippuvuudet:** T-026. Toteutus voidaan tehdä valmiiksi paikkamerkkikuvilla ennen kuin paketti saapuu.
 **Haara:** `t-027-korttikuvat`
 
@@ -108,3 +108,11 @@ Pelaaja tunnistaa kortin kuvasta (D-012). Kun käyttäjän kuvapaketti saapuu, k
 - **Tulos:** axe 0 rikkomusta listassa ja dialogissa (320 ja 1280 px). Näppäimistö, fokus (Sulje, Esc → takaisin nappiin), taustan inertti, tausta-klikkaus, paikkamerkki, 320 px sekä 200 ja 400 % zoom OK, ei vaakavieritystä. Critical 0, High 0, Medium 0, Low 3 (UX-040 scrollbar-gutter, UX-041 ison kuvan uudelleenyritys, UX-042 Info). **Veto: ei, ei blokkaavia.**
 - **Suositukset:** UX-040 (`html { scrollbar-gutter: stable }`, yksi rivi) korjattavaksi, jos Koodari koskee CSS:ää muutenkin, muuten velka. UX-041 velka (kiertotie: sivun päivitys, harvinainen).
 - **Rajoitteet:** ruudunlukijaa ei ajettu. Vierityspalkin hyppyä ei voitu mitata headless-selaimessa.
+
+### Luovutus 2026-10-02 · Digiturva → PM
+- **Mitä tehtiin:** tietoturva- ja tietosuojakatselmointi `git diff a844792..HEAD` ja esikatselu PR #9. Raportti `docs/reports/SEC-006-t027-korttikuvat.md`. SECURITY.md luku 15 (kuvien uhkamalli, R-1:n tekniset ehdot todennettu) ja muutosloki, PRIVACY.md muutosloki. SEC-016 (T-026) merkitty Varmistetuksi SEC-005-raporttiin (PR #9:n esikatselun `curl -sI`: CSP `connect-src 'self'`, `/assets/**` vuoden välimuisti).
+- **sharp@0.35.5:** hyväksyttävissä. Apache-2.0 (libvips LGPL-3.0-or-later, devDependency, ei `dist/`issä), ei install-skriptejä (lockfilessa `hasInstallScript` 0), 31 uutta pakettia kaikki npm-rekisteristä tiivisteineen, `npm audit` 0.
+- **Hyväksymiskriteeri "omalla originilla, ei `image_url`ia":** todennettu esikatselussa (`/assets/<key>-<hash>.webp`, `image/webp`, `nosniff`, CSP ennallaan; `image_url` ei bundlessa).
+- **Löydökset:** Critical 0 · High 0 · Medium 0 · Low 1 (SEC-019: worktreen `public/*.webp`-alkuperäiset eivät ole `.gitignore`ssa; poista ne ja harkitse `/public/*.webp` ignoreen) · Info 1 (SEC-020: alkuperäiset `test`-historiassa c31f42c, ei toimenpidettä).
+- **Veto:** ei. Done-tilaa ei estetä tietoturvan perusteella.
+- **Testit:** `npx vitest run` 26 tiedostoa, 484 testiä läpi. Metatiedot tarkistettu kaikista 302 kuvasta.
