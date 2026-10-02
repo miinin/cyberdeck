@@ -1,5 +1,5 @@
 # T-027 · Korttikuvat näkyviin (151 kuvan paketti käyttäjältä)
-**Tila:** Backlog (T-026, kuvapaketti) · **Omistaja:** Arkkitehti (osa T-026:n ADR:ää) → UX → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
+**Tila:** Ready (rakennetaan T-026:n päälle) · **Omistaja:** Arkkitehti (osa T-026:n ADR:ää) → UX → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** Arkkitehti ☐ (tiedostomuoto, nimeäminen, sijainti, koot, tuontikomento) · UX ☐ (missä ja miten kuva näkyy)
 **Katselmoinnit:** Koodikatselmointi ☐ · UX ☐ · Digiturva ☐ (tiedostot, `img-src`, R-1)
 **Riippuvuudet:** T-026. Toteutus voidaan tehdä valmiiksi paikkamerkkikuvilla ennen kuin paketti saapuu.
@@ -55,3 +55,17 @@ Pelaaja tunnistaa kortin kuvasta (D-012). Kun käyttäjän kuvapaketti saapuu, k
 - K-I3: vain perusversiot. Erikoisversiot (alt-art) lisätään myöhemmin, matala prioriteetti (D-007, painokset).
 - K-I4 (alkuperäiset pois gitistä): käyttäjä ei vastannut erikseen. Oletus: kyllä, kuten D-013.
 - Seuraava askel: T-026 valmiiksi, sitten UX suunnittelee kuvan paikan ja Koodari toteuttaa T-027:n.
+
+### Luovutus 2026-10-02 · UX → PM → Koodari (suunnitelma)
+- **Ratkaisu:** listan jokaisella rivillä pikkukuva (`sm`), jonka painallus avaa natiivin `<dialog>`in isolla kuvalla (`lg`). Yksityiskohtanäkymää ei tehdä.
+- **Lista (`CardList.tsx`):** uusi ensimmäinen sarake `Kuva` (`th scope="col" class="col-fit col-image"`). Solussa `<CardImage card size="sm" onOpen>`. Nimisolu pysyy `<th scope="row">`. Pikkukuvan kuvasuhde on 63/88, leveys desktopilla 3.5rem ja mobiilissa 3rem. Reuna 1 px `--color-border`, tausta `--color-surface`. `<img width=160 height=224 alt="" loading="lazy" decoding="async">` napin sisällä: `<button type="button" class="card-image-button" aria-haspopup="dialog">`. Napin nimi on visually-hidden "Suurenna kuva: <CardName lang=en>". Fokus `--focus-ring`/`--focus-offset`, hover reuna `--color-info`.
+- **Mobiili (< 40 rem):** kuvasolu riville 2 (`order: 3; flex: none`), ja rivi 1 (nimi ja määrä) pysyy ennallaan. Tarkista 320 px:ssä, 360 px:ssä ja 400 % zoomilla. Jos asettelu ei toimi, palauta PM:lle.
+- **Puuttuva kuva:** `getCardImage(key) === null` tai `onError` → `<span class="card-image card-image--missing" aria-hidden="true">` (katkoviivareuna `--color-border-strong`), ei nappia, ei tekstiä.
+- **Dialogi:** yksi `<dialog class="card-dialog" aria-labelledby="card-dialog-title">` `CatalogView`issa, tila `openCard: Card | null`, `showModal()`. Ylärivillä `h2#card-dialog-title lang=en` (CardName) ja `Sulje`-nappi (ensimmäinen fokusoitava). Alla `<img width=720 height=1006 alt="{nimi}" lang=en loading="eager">`. Sulkeminen: Esc, Sulje ja klikkaus taustaan. Fokus palaa avanneeseen nappiin, tai hakukenttään, jos rivi on poistunut. Leveys `min(30rem, 100vw - 2*space-3)`, `max-height: calc(100dvh - 2*space-3)`, `overflow: auto`, img `max-width: 100%; height: auto`. Tausta `--color-bg`, reuna `--color-border-strong`, sisäväli `--space-4`. `::backdrop` tokenista. `body:has(dialog[open]) { overflow: hidden }`. Ei animaatioita. Latausvirhe: `<p role="alert">Kuvaa ei voitu ladata.</p>`.
+- **Koot:** `CARD_IMAGE_WIDTH = { sm: 160, lg: 720 }` (ARCHITECTURE.md 13.8: 240 → 160). Lähdekuvat ovat 733×1024, joten kuvasuhde täsmää. `sm` vaatii pienennyksen → sharp.
+- **Tekstit (`texts.ts`):** `columnImage = 'Kuva'`, `enlargeImage = 'Suurenna kuva: '`, `closeDialog = 'Sulje'`, `imageLoadError = 'Kuvaa ei voitu ladata.'`.
+- **Testit:** jsdomin `showModal`/`close` stubataan. Testaa nappi vs. paikkamerkki, `onError`, napin nimi ja puuttuvan kuvan polku. axe 0 sekä listassa että dialogissa.
+- **Ideat → IDEAS.md:** nuolinäppäinselaus dialogissa, ruudukkonäkymä, `srcset`.
+
+### Checkpoint 2026-10-02 · PM
+- UX:n dialogiratkaisu hyväksytty (`CardImageDialog`). sharp hyväksytty sm-kuviin (D-013 osa 4), ja Digiturva tarkistaa sen katselmoinnissa. Käyttäjä nosti T-027:n kaiken muun edelle (2026-10-02). Tila Ready, kun T-026 on Done.
