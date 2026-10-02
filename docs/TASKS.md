@@ -43,3 +43,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-036 | Englanninkieliset pelitermit, värillinen tyyppimerkki, keskitetty kokoelmakontrolli, hillitympi reuna | 1 | Must | PM (pieni, D-014) | Done | – |
 | T-037 | Keltainen omistusreuna, want-lista (Puuttuvat), rarity korttiin ja suodattimiin | 1 | Must | Koodari (D-014) | Done | Sisällöntuottaja: tyhjän kokoelman ohjeteksti MVP-1:n lopussa |
 | T-038 | Tiivis yläosa: pysyvä tallennus ikonina yläpalkissa, tiiviit suodatinchipit | 1 | Must | Koodari (D-014) | Done | UX MVP-1:n lopussa |
+| T-039 | Teemavalitsin pelkkänä aurinko- ja kuu-ikonina | 1 | Must | PM (pieni, D-014) | Done | – |
