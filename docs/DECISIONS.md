@@ -271,3 +271,14 @@ Päätöksessä on viisi osaa.
 - T-027 toteuttaa osan 4. Sharp lisätään vasta hyväksynnän jälkeen. Käyttöliittymä ja yhdistämislogiikka voidaan tehdä ja testata ilman kuvapakettia.
 - Avoin velka: testit eivät ole CI:ssä (T-004), joten `parseCardFile`-testi ei estä julkaisua. Tyyppitarkistus estää. T-004:n prioriteetti nousee.
 - Havainto PM:lle (ei kuulu tähän päätökseen): `index.html` tulee välimuistista (`max-age=3600`). Julkaisun jälkeen vanha `index.html` voi tunnin ajan viitata poistettuihin asset-tiedostoihin. Ehdotus: `Cache-Control: no-cache` `index.html`:lle omana velkatehtävänään, kun otsakkeiden yhdistäminen on todennettu.
+
+## D-014 · Kevyt toimintamalli tokenien säästämiseksi · 2026-10-02 · Päättäjä: käyttäjä (pyyntö), PM (toteutus)
+**Tila:** Voimassa. Täydentää D-009:ää ja ohittaa sen ristiriitaisilta osin.
+**Konteksti:** 75 % viiden tunnin käyttökiintiöstä kului alle tunnissa (T-026 ja T-027: 6 aliagenttia, noin 1 M tokenia). Kulutuksen syyt: CLAUDE.md latasi rules.md:n ja agents.md:n (noin 66 kt) jokaiseen istuntoon ja aliagenttiin, agentit lukivat kokonaan ARCHITECTURE.md:n (85 kt) ja UX.md:n (170 kt), ja jokaiseen tehtävään käytettiin 3–5 agenttia.
+**Vaihtoehdot:** A) Nykyinen malli. B) Kevyt malli: säännöt tiivistettynä CLAUDE.md:ssä ilman automaattista latausta, yksi Sonnet-Koodari pieniin tehtäviin, katselmoinnit vain riskin mukaan, ei väli-checkpointeja ja grepillä haettava luku.
+**Päätös:** B
+**Perustelu:** Käyttäjä pyysi. Laadun takaavat testit, lint, build, esikatselu ja riskiperusteiset katselmoinnit.
+**Seuraukset:**
+- CLAUDE.md:n luku "Kevyt malli".
+- Aliagenttien määrittelyihin (`~/.claude/agents/`) on lisätty D-014-ohitus ja malli (Sonnet, paitsi Arkkitehti ja Digiturva Opus).
+- Kun rules.md ja agents.md ovat ristiriidassa D-014:n kanssa, D-014 voittaa (käyttäjän nimenomainen ohje). agents.md:n versiomerkintä on vielä päivittämättä.
