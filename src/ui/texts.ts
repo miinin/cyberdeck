@@ -97,9 +97,12 @@ export const texts = {
   externalChangeLive: 'Kokoelma päivittyi toisessa välilehdessä.',
   countNotChanged: 'Kortin määrä ei muuttunut.',
 
-  ownedOnly: 'Vain omistetut',
+  collectionLegend: 'Kokoelma',
+  collectionAll: 'Kaikki',
+  collectionOwned: 'Omistetut',
+  collectionMissing: 'Puuttuvat',
   ownedOnlyEmptyBody:
-    'Kokoelmassa ei ole vielä kortteja. Poista "Vain omistetut" -valinta ja merkitse omistamasi kortit listasta.',
+    'Kokoelmassa ei ole vielä kortteja. Valitse Kokoelma-ryhmästä "Kaikki" ja merkitse omistamasi kortit listasta.',
   showAllCards: 'Näytä kaikki kortit',
 
   browserOnly:

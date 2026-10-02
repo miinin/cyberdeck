@@ -224,24 +224,41 @@ describe('CatalogView collection: loading states', () => {
 });
 
 
-const ownedOnlyBox = () => screen.getByRole('checkbox', { name: 'Vain omistetut' });
+const ownedOnlyBox = () => screen.getByRole('radio', { name: 'Omistetut' });
+const missingBox = () => screen.getByRole('radio', { name: 'Puuttuvat' });
+const allBox = () => screen.getByRole('radio', { name: 'Kaikki' });
 const rowNames = () =>
   within(screen.getByRole('list'))
     .getAllByRole('heading', { level: 3 })
     .map((cell) => cell.textContent);
 const statusText = (container: HTMLElement) => container.querySelector('#card-status')?.textContent;
 
-describe('CatalogView collection: "Vain omistetut"', () => {
+describe('CatalogView collection: "Puuttuvat"', () => {
+  it('lists cards below a full playset, including 0 copies, but not complete ones', async () => {
+    const user = userEvent.setup();
+    await renderView(
+      withCollection([
+        { card: 'v-streetkid', count: 3 },
+        { card: 'viktor-vektor-pinch', count: 1 },
+      ]),
+    );
+    await user.click(missingBox());
+    expect(rowNames()).toEqual(['Swordwise Huscle', 'Viktor Vektor, You Might Feel a Little Pinch']);
+    expect(rowNames()).not.toContain('V, Streetkid');
+  });
+});
+
+describe('CatalogView collection: "Omistetut"', () => {
   it('sits in the search form right after the search field, unchecked', async () => {
     await renderView();
     const form = screen.getByRole('search');
-    const box = within(form).getByRole('checkbox', { name: 'Vain omistetut' });
+    const box = within(form).getByRole('radio', { name: 'Omistetut' });
     expect(box).not.toBeChecked();
-    expect(box.closest('fieldset')).toBeNull();
+    expect(allBox()).toBeChecked();
+    expect(within(form).getByRole('group', { name: 'Kokoelma' })).toBeInTheDocument();
     const inputs = Array.from(form.querySelectorAll('input'));
     expect(inputs[0]).toHaveAttribute('type', 'search');
-    expect(inputs[1]).toBe(box);
-    expect(box.closest('label')).toHaveTextContent('Vain omistetut');
+    expect(inputs[1]).toBe(allBox());
   });
 
   it('shows only owned cards together with the search and updates caption and status', async () => {
@@ -293,7 +310,7 @@ describe('CatalogView collection: "Vain omistetut"', () => {
       expect(screen.queryByRole('list')).toBeNull();
       expect(
         screen.getByText(
-          'Kokoelmassa ei ole vielä kortteja. Poista "Vain omistetut" -valinta ja merkitse omistamasi kortit listasta.',
+          'Kokoelmassa ei ole vielä kortteja. Valitse Kokoelma-ryhmästä "Kaikki" ja merkitse omistamasi kortit listasta.',
         ),
       ).toBeInTheDocument();
       act(() => vi.advanceTimersByTime(ANNOUNCE_DELAY_MS));
@@ -301,7 +318,8 @@ describe('CatalogView collection: "Vain omistetut"', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Näytä kaikki kortit' }));
       expect(ownedOnlyBox()).not.toBeChecked();
-      expect(ownedOnlyBox()).toHaveFocus();
+      expect(allBox()).toBeChecked();
+      expect(allBox()).toHaveFocus();
       expect(rowNames()).toHaveLength(3);
       expect(screen.getByRole('status')).toHaveTextContent('Näytetään kaikki 3 korttia.');
     } finally {
@@ -326,13 +344,13 @@ describe('CatalogView collection: "Vain omistetut"', () => {
     const loading = createMemoryRepositories();
     vi.spyOn(loading.collection, 'load').mockReturnValue(new Promise(() => {}));
     const { unmount } = await renderView(loading);
-    expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Omistetut' })).toBeNull();
     unmount();
 
     await renderView(
       createMemoryRepositories({ initial: { [COLLECTION_KEY]: stored([{ card: 'v-streetkid', count: 1 }], 99) } }),
     );
-    expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Omistetut' })).toBeNull();
   });
 });
 
@@ -482,7 +500,7 @@ describe('CatalogView collection: notices', () => {
     expect(within(controlCell('V, Streetkid') as HTMLElement).queryByRole('button')).toBeNull();
     expect(controlCell('V, Streetkid')).toHaveTextContent('–ei muokattavissa');
     expect(summary(container)).toBeNull();
-    expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Omistetut' })).toBeNull();
     expect(screen.queryByRole('button', { name: /Sulje/ })).toBeNull();
   });
 
@@ -495,7 +513,7 @@ describe('CatalogView collection: notices', () => {
     expect(heading2()).toEqual(['Kokoelmaa ei voitu lukea']);
     expect(container.textContent).not.toMatch(/SecurityError/);
     expect(row('V, Streetkid').querySelector('.card-collection')).toBeNull();
-    expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Omistetut' })).toBeNull();
     expect(summary(container)).toBeNull();
 
     await user.click(screen.getByRole('button', { name: 'Lue kokoelma uudelleen' }));
