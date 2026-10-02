@@ -4,7 +4,7 @@
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
 
 ## MVP-taso
-Työn alla: MVP-1 · Valmiina: T-010, T-011, T-012, T-013, T-021, T-025–T-027, T-033–T-040. Jäljellä Must: T-014 (pakkalistan tuonti, vaatii vastauksen alla), T-015 (vienti ja tuonti), T-004 (testit CI:hin). MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
+Työn alla: MVP-1 · Valmiina: T-010, T-011, T-012, T-013, T-021, T-025–T-027, T-033–T-040. Jäljellä Must: T-015 (vienti ja tuonti). MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
@@ -21,7 +21,7 @@ Työn alla: MVP-1 · Valmiina: T-010, T-011, T-012, T-013, T-021, T-025–T-027,
 - K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi: UX ja Sisällöntuottaja suosittelevat molemmat näitä, joten ne on toteutettu näin.
 - TXT-003: tarvitaanko alatunnisteeseen myös englanninkielinen fanisisältömerkintä (CD PROJEKT RED:n ohje)? Oletus: ei MVP-0:ssa.
 - ~~K5~~ → ratkaistu, D-007 (korttitaso, valmius painoksille).
-- T-014 (vastaus tarvitaan ennen T-014:ää): kun liität pakkalistan, tallennetaanko se aina omaksi pakakseen, vai riittääkö pelkkä raportti puuttuvista korteista ja niiden sijainnista? Tarvitaanko pakoille tila "koottu / suunnitelma"?
+- ~~T-014-kysymys~~ → ratkaistu 2026-10-02: raportti ensin ja "Tallenna pakaksi" -painike, ei Koottu/Suunnitelma-tilaa (T-014-kortti).
 - K-P1–K-P4 (tietosuoja, ei blokkaa MVP-1:tä): rekisterinpitäjä ja käsittelyperuste IP-osoitteille (ehdotus: sinä, oikeutettu etu), riittääkö ilmoitus ilman suostumusbanneria (ehdotus: kyllä), voivatko MVP-2:n käyttäjät olla alaikäisiä (selvitettävä ennen MVP-2:ta) ja Hosting-lokien säilytysaika (Firebase-konsoli). Katso PRIVACY.md.
 
 ## Kulutus (D-014, 2026-10-02: kevyt malli, katso CLAUDE.md. D-009 alla vain niiltä osin kuin ei ristiriitaa)
@@ -39,6 +39,7 @@ Työn alla: MVP-1 · Valmiina: T-010, T-011, T-012, T-013, T-021, T-025–T-027,
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-014 Pakkalistan tuonti ja raportti (2026-10-02, PR #15)
 - T-004 Lint ja testit CI:hin, T-024, T-029, T-032 (2026-10-02, PR #14)
 - T-013 Pakanrakennus ja laillisuussäännöt (2026-10-02, PR #13)
 - T-040 Selaus- ja muokkaustila, taulukkonäkymä (2026-10-02, PR #12)
@@ -60,7 +61,7 @@ Työn alla: MVP-1 · Valmiina: T-010, T-011, T-012, T-013, T-021, T-025–T-027,
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-014 (tarvitsee vastauksen: tallennetaanko tuotu lista aina pakaksi?) → T-015. T-004 (testit CI:hin) ja pienet velat T-029, T-032, T-041.
+1. T-015 (pakan vienti ja tuonti .json/.txt, huomioi SEC-021). Sitten T-041 ja T-044 (pakkojen ulkoasu).
 2. MVP-1:n loppukatselmoinnit (UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija) ja sen jälkeen /julkaise.
 2. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
 

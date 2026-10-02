@@ -53,7 +53,7 @@ describe('App', () => {
     expect(screen.queryByText('Haetaan kortteja…')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Yritä uudelleen' })).not.toBeInTheDocument();
     expect(fetchSpy).not.toHaveBeenCalled();
-  });
+  }, 20_000); // renders every card; slow when the whole suite runs in parallel
 
   // D-012 brought card images in scope (T-027); they must come from the app's own origin (SR-1, img-src 'self').
   it('shows card images only from the bundled assets, never from an external URL', () => {

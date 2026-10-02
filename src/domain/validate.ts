@@ -31,7 +31,7 @@ const ISO_TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})
 // (ALM, LRM, RLM), line and paragraph separators and BOM. ZWJ and ZWNJ stay: emoji sequences and
 // some scripts need them. Matching control characters is the purpose of this pattern (SR-11, SEC-005).
 // eslint-disable-next-line no-control-regex
-const UNSAFE_CHARACTERS = /[\u0000-\u001F\u007F-\u009F\u061C\u200E\u200F\u2028\u2029\u202A-\u202E\u2066-\u2069\uFEFF]/g;
+export const UNSAFE_CHARACTERS = /[\u0000-\u001F\u007F-\u009F\u061C\u200E\u200F\u2028\u2029\u202A-\u202E\u2066-\u2069\uFEFF]/g;
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

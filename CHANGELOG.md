@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pakkalistan tuonti: Pakat-sivun Tuo pakkalista -painikkeella voi liittää netistä löytyneen pakkalistan tai valita .txt-tiedoston. Tarkistus näyttää, mitä kortteja kokoelmasta puuttuu, missä muissa pakoissasi kortit ovat, mitkä rivit jäivät tunnistamatta ja onko pakka laillinen. Listan voi sen jälkeen tallentaa uudeksi pakaksi nimeä muokaten. Mitään ei tallenneta ennen kuin painat Tallenna pakaksi.
+
 - Pakanrakennus: yläpalkin Pakat-valinnasta voi luoda, nimetä, kopioida ja poistaa pakkoja (poisto kysyy varmistuksen). Pakkaeditorissa kortteja haetaan samoilla suodattimilla kuin Kortit-näkymässä ja lisätään −/+-painikkeilla. Yhteenveto näyttää Legend- ja pääpakkamäärät, värikohtaiset RAM-rajat, rikkeet selkokielellä ja kokoelmasta puuttuvat kortit. Muutokset tallentuvat itsestään. Kortit-näkymässä kortin alla lukee, monessako pakassa se on.
 
 - Selaus ja muokkaus ovat nyt erillään. Listan yläpuolella oleva Muokkaa kokoelmaa -kytkin näyttää tai piilottaa −- ja +-painikkeet: kun se on pois päältä, kortissa näkyy vain määrä ja tila (harmaa, keltainen tai vihreä ✓). Tyhjällä kokoelmalla kytkin on aluksi päällä.
