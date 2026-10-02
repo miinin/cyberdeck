@@ -6,6 +6,9 @@ export const DECKS_KEY = 'cyberdeck:decks';
  * before the first paint without parsing anything (UX.md 8.7, T-025 A2). That script repeats this key.
  */
 export const THEME_KEY = 'cyberdeck:theme';
+/** Browser-list preferences (T-040): raw strings like the theme, no envelope. */
+export const VIEW_KEY = 'cyberdeck:view';
+export const EDIT_MODE_KEY = 'cyberdeck:edit-mode';
 /** Followed by `<aggregate>:<ISO timestamp>`. Only keys with this prefix are ever pruned (SR-13). */
 export const BACKUP_PREFIX = 'cyberdeck:backup:';
 

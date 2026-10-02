@@ -13,6 +13,7 @@ export type {
   PreferencesRepository,
   Repositories,
   Theme,
+  CatalogViewMode,
 } from './types';
 export { StorageError } from './errors';
 export type { StorageErrorKind } from './errors';

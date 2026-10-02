@@ -2,7 +2,7 @@ import type { DeckContent } from '../domain/deck';
 import { MAX_DECKS } from '../domain/deck';
 import { encodeEnvelope } from './envelope';
 import { StorageError } from './errors';
-import { BACKUP_PREFIX, COLLECTION_KEY, DECKS_KEY, THEME_KEY } from './keys';
+import { BACKUP_PREFIX, COLLECTION_KEY, DECKS_KEY, EDIT_MODE_KEY, THEME_KEY, VIEW_KEY } from './keys';
 import { createMemoryStore } from './keyValueStore';
 import type { KeyValueStore } from './keyValueStore';
 import { createRepositories } from './repositories';
@@ -461,5 +461,38 @@ describe('preferences: theme (T-025, UX.md 8.7)', () => {
     const { preferences, store } = setup();
     await preferences.saveTheme('light');
     expect(store.keys()).toEqual([THEME_KEY]);
+  });
+});
+
+describe('preferences: list view and edit switch (T-040)', () => {
+  it('loads grid and "not chosen" when nothing is saved', async () => {
+    const { preferences } = setup();
+    expect(await preferences.loadView()).toBe('grid');
+    expect(await preferences.loadEditMode()).toBeNull();
+  });
+
+  it('saves the view and the switch so that a new instance reads them back', async () => {
+    const { preferences, store } = setup();
+    await preferences.saveView('table');
+    await preferences.saveEditMode(true);
+    const again = createRepositories({ store, persistent: true }).preferences;
+    expect(await again.loadView()).toBe('table');
+    expect(await again.loadEditMode()).toBe(true);
+    await preferences.saveEditMode(false);
+    expect(await again.loadEditMode()).toBe(false);
+  });
+
+  it('reads unknown stored values as the defaults', async () => {
+    const { preferences } = setup({ [VIEW_KEY]: 'cards', [EDIT_MODE_KEY]: 'yes' });
+    expect(await preferences.loadView()).toBe('grid');
+    expect(await preferences.loadEditMode()).toBeNull();
+  });
+
+  it('rejects an unknown view and reports a failed save', async () => {
+    const { preferences, store } = setup();
+    await expectStorageError(preferences.saveView('list' as 'grid'), 'invalid-input');
+    expect(store.getItem(VIEW_KEY)).toBeNull();
+    const quota = setup({}, { store: failingStore(createMemoryStore(), quotaError()) });
+    await expectStorageError(quota.preferences.saveEditMode(true), 'quota');
   });
 });
