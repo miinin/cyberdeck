@@ -37,6 +37,13 @@ function renderView(state: CatalogState) {
   return { onRetry, container };
 }
 
+function renderViewWithRerender(state: CatalogState) {
+  const repositories = browserLikeRepositories();
+  const view = (next: CatalogState) => <CatalogView state={next} onRetry={vi.fn()} repositories={repositories} />;
+  const { container, rerender } = render(view(state));
+  return { container, rerender: (next: CatalogState) => rerender(view(next)) };
+}
+
 function statusLine(container: HTMLElement): HTMLElement {
   const element = container.querySelector<HTMLElement>('#card-status');
   if (element === null) throw new Error('#card-status is missing');
@@ -64,6 +71,16 @@ describe('CatalogView', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Haetaan kortteja…');
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('shows a decorative loading bar only while loading (UX.md 7.5)', () => {
+    const { container, rerender } = renderViewWithRerender({ status: 'loading' });
+    const bar = container.querySelector('.loading-bar');
+    expect(bar).toHaveAttribute('aria-hidden', 'true');
+    expect(bar).toBeEmptyDOMElement();
+
+    rerender(ready([card(1)]));
+    expect(container.querySelector('.loading-bar')).toBeNull();
   });
 
   it('shows every card with name, type and cost on success', () => {

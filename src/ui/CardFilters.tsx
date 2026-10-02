@@ -61,7 +61,7 @@ export function CardFilters({
     <form
       role="search"
       aria-label={texts.filterFormLabel}
-      className="card-filters"
+      className="card-filters panel"
       onSubmit={(event) => {
         event.preventDefault();
         onSearchSubmit();
@@ -108,43 +108,45 @@ export function CardFilters({
         {texts.filterHint}
       </p>
 
-      <fieldset aria-describedby="filter-hint">
-        <legend>{texts.typeLegend}</legend>
-        <div className="options">
-          {typeOptions.map((type) => (
-            <label key={type} className="option">
-              <input
-                type="checkbox"
-                name="type"
-                value={type}
-                checked={criteria.types.includes(type)}
-                onChange={() => onToggleType(type)}
-              />{' '}
-              <span lang="en">{type}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <div className="fieldsets">
+        <fieldset aria-describedby="filter-hint">
+          <legend>{texts.typeLegend}</legend>
+          <div className="options">
+            {typeOptions.map((type) => (
+              <label key={type} className="option">
+                <input
+                  type="checkbox"
+                  name="type"
+                  value={type}
+                  checked={criteria.types.includes(type)}
+                  onChange={() => onToggleType(type)}
+                />{' '}
+                <span lang="en">{type}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
-      <fieldset aria-describedby="filter-hint">
-        <legend>{texts.colorLegend}</legend>
-        <div className="options">
-          {colorOptions.map((color) => (
-            <label key={color} className="option">
-              <input
-                type="checkbox"
-                name="color"
-                value={color}
-                checked={criteria.colors.includes(color)}
-                onChange={() => onToggleColor(color)}
-              />{' '}
-              <span>
-                <CardColor color={color} />
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+        <fieldset aria-describedby="filter-hint">
+          <legend>{texts.colorLegend}</legend>
+          <div className="options">
+            {colorOptions.map((color) => (
+              <label key={color} className="option">
+                <input
+                  type="checkbox"
+                  name="color"
+                  value={color}
+                  checked={criteria.colors.includes(color)}
+                  onChange={() => onToggleColor(color)}
+                />{' '}
+                <span>
+                  <CardColor color={color} />
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </div>
     </form>
   );
 }

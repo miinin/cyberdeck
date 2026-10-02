@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-01 (PM)
+# STATUS · päivitetty 2026-10-02 (PM)
 
 ## Yhdellä lauseella
 MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). MVP-1 on pilkottu tehtäviksi T-010–T-015 (D-007).
@@ -37,6 +37,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-021 Ulkoasu: Cyberpunk 2077 -henkinen ilme (2026-10-02)
 - T-012 Kokoelma (2026-10-01)
 - T-010 Haku ja suodatus (2026-10-01)
 - T-011 Tietomalli ja paikallinen tallennuskerros (2026-10-01)

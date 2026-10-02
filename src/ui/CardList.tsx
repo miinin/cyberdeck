@@ -12,6 +12,11 @@ export interface OwnedColumn {
   onLimit: (card: Card) => void;
 }
 
+/** Owned-row highlight (UX.md 7.5): only when the collection is ready and the count is above zero. */
+function isOwned(card: Card, owned: OwnedColumn | undefined): boolean {
+  return owned?.mode === 'ready' && owned.countOf(card) > 0;
+}
+
 /**
  * Card table (UX.md 4.4, 5.5, 6.4). All values are rendered as React text nodes, never as HTML (SR-1).
  * `caption` names the table for screen readers ("Kaikki kortit" / "Hakua vastaavat kortit").
@@ -50,7 +55,7 @@ export function CardList({
       </thead>
       <tbody role="rowgroup">
         {cards.map((card) => (
-          <tr key={card.id} role="row">
+          <tr key={card.id} role="row" className={isOwned(card, owned) ? 'is-owned' : undefined}>
             <th scope="row" role="rowheader" className="card-name">
               <span lang="en">{card.name}</span>
               {card.subname !== null && (

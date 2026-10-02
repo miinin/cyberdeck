@@ -16,3 +16,5 @@ Parkkipaikka uusille ideoille. Kaikki lisäävät, PM priorisoi (rules.md 0.7).
 | 2026-10-01 | Kortin määrän syöttö suoraan numerolla ja pitkä painallus toistona (kokoelma, T-012) | UX Designer | Parkissa |
 | 2026-10-01 | Ohituslinkki tai pikanäppäin korttilistan rivien ohi (yli 300 sarkainpysähdystä 151 rivillä, T-012) | UX Designer | Parkissa, MVP-2:n saavutettavuusauditoinnin yhteydessä |
 | 2026-10-01 | Kumoa-toiminto kortin poistolle kokoelmasta (T-012) | UX Designer | Parkissa |
+| 2026-10-02 | Vaalea teema Cyberpunk-ilmeen rinnalle ja teemavalitsin (T-021, 7.3) | UX Designer | Vaalea teema toteutetaan T-021:ssä (D-011). Teemavalitsin (käsin vaihdettava) jää parkkiin. |
+| 2026-10-02 | `prefers-contrast: more` -tyyli (vahvemmat reunat) ja tulostustyyli (T-021, 7.8) | UX Designer | Parkissa, MVP-2:n saavutettavuusauditoinnin yhteydessä |

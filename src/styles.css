@@ -1,37 +1,103 @@
-/* Design tokens: docs/UX.md luku 3. All colours, spacing and font sizes come from here. */
+/*
+ * Visual style: Cyberpunk 2077 inspired (T-021, D-010, D-011). Spec: docs/UX.md luku 3 ja 7,
+ * reference mockup docs/design/t021-mallisivu.html.
+ * All colours, spacing and font sizes come from the tokens below. The light theme is the default
+ * and the dark theme follows prefers-color-scheme. All motion is inside prefers-reduced-motion: no-preference.
+ */
+
+/* Self-hosted fonts (SIL OFL 1.1, licences next to the files). CSP allows only font-src 'self'. */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./assets/fonts/rajdhani-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./assets/fonts/rajdhani-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/share-tech-mono-400.woff2') format('woff2');
+}
+
+/* Design tokens: docs/UX.md luku 3. Light theme (default). */
 :root {
   color-scheme: light dark;
 
-  --color-bg: #ffffff;
-  --color-surface: #f3f4f6;
-  --color-text: #16181d;
-  --color-text-muted: #4b5262;
-  --color-border: #d5d9e0;
-  --color-border-strong: #767d8c;
-  --color-accent: #a3004f;
-  --color-on-accent: #ffffff;
-  --color-danger: #b3261e;
-  --color-danger-surface: #fdecec;
-  --color-warning: #8a5a00;
-  --color-warning-surface: #fff6db;
-  --color-focus: var(--color-accent);
+  --color-bg: #f3f0e6;
+  --color-surface: #ebe7d9;
+  --color-surface-raised: #fbf9f1;
+  --color-surface-hover: #ddd8c6;
+  --color-text: #0e0f14;
+  --color-text-muted: #4a4f5c;
+  --color-border: #cfc9b5;
+  --color-border-strong: #5f6676;
+  /* Yellow is a fill colour only: never text or a thin line on the light background (UX.md 3.1). */
+  --color-accent: #fcee09;
+  --color-on-accent: #0e0f14;
+  --color-accent-edge: #0e0f14;
+  --color-accent-2: #1fe0ff;
+  --color-info: #005f73;
+  --color-focus: var(--color-info);
+  --color-selected-surface: #d4f3f8;
+  --color-danger: #b00030;
+  --color-danger-surface: #ffe3e8;
+  --color-warning: #8a4b00;
+  --color-warning-surface: #fff0d0;
+  --color-header-bg: #0e0f14;
+  --color-header-text: #f1f1ec;
+  --color-bracket: #0e0f14;
+  --color-count: #0e0f14;
+  --color-owned: rgba(252, 238, 9, 0.3);
+  --color-owned-hover: rgba(252, 238, 9, 0.45);
+  --color-swatch-edge: #0e0f14;
+  /* Decorative only, same in both themes: header lines and the brand mark, the heading glitch (UX.md 7.5, 7.7). */
+  --color-brand-yellow: #fcee09;
+  --color-glitch-a: #ff2a6d;
+  --color-glitch-b: #1fe0ff;
+  --heading-bar: linear-gradient(90deg, var(--color-text) 0 65%, var(--color-brand-yellow) 65%);
+  --glow-accent: none;
+  --page-glow-a: rgba(31, 224, 255, 0.16);
+  --page-glow-b: rgba(252, 238, 9, 0.22);
+  --scanline: rgba(0, 0, 0, 0.03);
 
   /* Card colors (UX.md 3.1.1): only for the decorative swatch, never for text. */
-  --color-card-red: #c62828;
-  --color-card-yellow: #e0b000;
-  --color-card-green: #2e7d32;
-  --color-card-blue: #1565c0;
+  --color-card-red: #d32f45;
+  --color-card-yellow: #f2c200;
+  --color-card-green: #1b9e5a;
+  --color-card-blue: #1f6fd1;
   --color-card-unknown: transparent;
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-size-base: 1rem;
-  --font-size-sm: 0.875rem;
-  --font-size-lg: 1.25rem;
-  --font-size-xl: 1.75rem;
+  --font-sans: 'Rajdhani', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --font-size-base: 1.125rem;
+  --font-size-sm: 1rem;
+  --font-size-lg: 1.375rem;
+  --font-size-xl: 2.25rem;
+  --font-size-card-name: 1.25rem;
   --line-height-body: 1.5;
-  --line-height-heading: 1.2;
-  --font-weight-normal: 400;
+  --line-height-heading: 1.15;
+  --line-height-tight: 1.2;
+  --letter-spacing-body: 0.01em;
+  --letter-spacing-caps: 0.08em;
+  --letter-spacing-button: 0.06em;
+  --letter-spacing-table-head: 0.1em;
+  --letter-spacing-h2: 0.05em;
+  --letter-spacing-brand: 0.2em;
+  --font-weight-normal: 500;
   --font-weight-bold: 700;
+  /* Share Tech Mono has a single weight. */
+  --font-weight-mono: 400;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -39,34 +105,74 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  --content-max-width: 48rem;
-  --radius: 0.375rem;
-  --focus-ring: 3px solid var(--color-focus);
+  --content-max-width: 56rem;
   --target-min: 2.75rem;
+  --cut: 0.625rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --cut-inner-2: calc(var(--cut) - 2px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner)),
+    calc(100% - var(--cut-inner)) 100%,
+    0 100%
+  );
+  --shape-chamfer-inner-2: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner-2)),
+    calc(100% - var(--cut-inner-2)) 100%,
+    0 100%
+  );
+  --shape-swatch: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%);
+  --shape-brand: polygon(0 0, 100% 0, 100% 55%, 55% 100%, 0 100%);
+  --focus-ring: 3px solid var(--color-focus);
+  --focus-offset: 3px;
+  --ease: 0.12s ease-out;
 
   --gutter: var(--space-4);
   --cell-padding-x: var(--space-2);
 }
 
+/* Dark theme (UX.md 3.1). Components use only tokens, so no per-component theme rules. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #0f1115;
-    --color-surface: #1a1d24;
-    --color-text: #e9ebf0;
-    --color-text-muted: #a9b0bd;
-    --color-border: #2c313b;
-    --color-border-strong: #7d8494;
-    --color-accent: #ff6bb0;
-    --color-on-accent: #0f1115;
-    --color-danger: #ff8a80;
-    --color-danger-surface: #3a1414;
-    --color-warning: #f2c14e;
-    --color-warning-surface: #33290f;
+    --color-bg: #0b0c10;
+    --color-surface: #13151b;
+    --color-surface-raised: #1b1e27;
+    --color-surface-hover: #262a36;
+    --color-text: #f1f1ec;
+    --color-text-muted: #a9afbd;
+    --color-border: #2b303b;
+    --color-border-strong: #7b8396;
+    --color-accent: #fcee09;
+    --color-on-accent: #0b0c10;
+    --color-accent-edge: #fcee09;
+    --color-accent-2: #1fe0ff;
+    --color-info: #1fe0ff;
+    --color-selected-surface: #0c2a31;
+    --color-danger: #ff5a73;
+    --color-danger-surface: #2a0d15;
+    --color-warning: #ffa726;
+    --color-warning-surface: #2b1a05;
+    --color-header-bg: #000000;
+    --color-header-text: #f1f1ec;
+    --color-bracket: #fcee09;
+    --color-count: #fcee09;
+    --color-owned: rgba(252, 238, 9, 0.05);
+    --color-owned-hover: rgba(252, 238, 9, 0.09);
+    --color-swatch-edge: transparent;
+    --heading-bar: var(--color-brand-yellow);
+    --glow-accent: 0 0 0.75rem rgba(252, 238, 9, 0.35);
+    --page-glow-a: rgba(31, 224, 255, 0.1);
+    --page-glow-b: rgba(252, 238, 9, 0.06);
+    --scanline: rgba(255, 255, 255, 0.022);
 
-    --color-card-red: #ff6b6b;
-    --color-card-yellow: #f2c94c;
-    --color-card-green: #5ccf6a;
-    --color-card-blue: #64a8ff;
+    --color-card-red: #ff4d5e;
+    --color-card-yellow: #ffd400;
+    --color-card-green: #39e08a;
+    --color-card-blue: #4d9dff;
   }
 }
 
@@ -84,14 +190,27 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-body);
+  overflow-wrap: break-word;
+  /* Glows and scanlines are background images only: nothing is drawn over the text (UX.md 7.3). */
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(48rem 20rem at 85% -8%, var(--page-glow-a), transparent 70%),
+    radial-gradient(36rem 16rem at 0% 0%, var(--page-glow-b), transparent 70%),
+    repeating-linear-gradient(0deg, var(--scanline) 0 1px, transparent 1px 4px);
+  background-attachment: fixed;
 }
 
 h1,
@@ -102,11 +221,29 @@ h2 {
 }
 
 h1 {
+  position: relative;
+  padding-block-end: var(--space-3);
   font-size: var(--font-size-xl);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+/* Decorative bar under the heading. */
+h1::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 3.5rem;
+  height: 4px;
+  background: var(--heading-bar);
+  box-shadow: var(--glow-accent);
 }
 
 h2 {
   font-size: var(--font-size-lg);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-h2);
 }
 
 p {
@@ -115,7 +252,7 @@ p {
 
 :focus-visible {
   outline: var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: var(--focus-offset);
 }
 
 /* The heading is focused programmatically after "Yritä uudelleen" (UX.md 4.6). */
@@ -143,11 +280,48 @@ h1:focus:not(:focus-visible) {
   padding-inline: var(--gutter);
 }
 
+/* Header: black in both themes (UX.md 7.5, V11). Not sticky. */
 .site-header {
-  background: var(--color-surface);
+  position: relative;
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 7rem;
+  height: 3px;
+  background: var(--color-brand-yellow);
+}
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   padding-block: var(--space-3);
+}
+
+/* Decorative chamfered mark before the name: not a logo, no text. */
+.site-header .container::before {
+  content: '';
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  background: var(--color-brand-yellow);
+  clip-path: var(--shape-brand);
+}
+
+.brand {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-brand);
 }
 
 main {
@@ -157,54 +331,238 @@ main {
   padding-block: var(--space-6);
 }
 
+/* Machine-like status lines: monospace HUD readout (UX.md 7.4). */
 .status-line {
   color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-mono);
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
 
+.status-line.is-summary {
+  color: var(--color-info);
+}
+
 .site-footer {
+  position: relative;
+  margin-block-start: var(--space-6);
   padding-block: var(--space-6);
+  border-top: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-/* Primary button */
-.button-primary {
+.site-footer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 3rem;
+  height: 2px;
+  background: var(--color-accent-edge);
+}
+
+.site-footer .container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Source credit ("Korttitiedot: Netdeck.gg") in monospace. */
+.site-footer p:last-child {
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-mono);
+  letter-spacing: 0;
+}
+
+/* Panel with HUD corner brackets (UX.md 3.4). Gradients instead of clip-path, so focus rings are not clipped. */
+.panel {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  background:
+    linear-gradient(var(--color-bracket), var(--color-bracket)) 0 0 / 16px 2px no-repeat,
+    linear-gradient(var(--color-bracket), var(--color-bracket)) 0 0 / 2px 16px no-repeat,
+    linear-gradient(var(--color-bracket), var(--color-bracket)) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(var(--color-bracket), var(--color-bracket)) 100% 100% / 2px 16px no-repeat,
+    var(--color-surface);
+}
+
+/*
+ * Buttons (UX.md 3.4). The element background is the edge and ::before is the fill.
+ * Dark theme: edge = fill (yellow). Light theme: black edge around the yellow fill.
+ */
+.button-primary,
+.button-secondary,
+.step {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: var(--target-min);
   min-height: var(--target-min);
   padding: var(--space-2) var(--space-4);
   border: 0;
-  border-radius: var(--radius);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+  border-radius: 0;
   font: inherit;
   font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-button);
+  text-transform: uppercase;
+  text-align: center;
+  /* Long labels wrap instead of widening the page when text is enlarged (UX-008). */
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
   cursor: pointer;
+  clip-path: var(--shape-chamfer);
 }
 
+.button-primary,
+.step-plus {
+  background: var(--color-accent-edge);
+  color: var(--color-on-accent);
+}
+
+.button-primary::before,
+.step-plus::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: var(--color-accent);
+  clip-path: var(--shape-chamfer-inner-2);
+}
+
+.button-primary:hover::before,
+.step-plus:hover::before {
+  background: var(--color-accent-2);
+}
+
+/* Hover is never colour alone (UX.md 3.4). */
 .button-primary:hover {
   text-decoration: underline;
 }
 
-/* Notice box (error / warning) */
+.button-secondary,
+.step-minus {
+  background: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.button-secondary::before,
+.step-minus::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--color-surface-raised);
+  clip-path: var(--shape-chamfer-inner);
+}
+
+.button-secondary:hover,
+.step-minus:hover {
+  background: var(--color-info);
+  text-decoration: underline;
+}
+
+.button-secondary:hover::before,
+.step-minus:hover::before {
+  background: var(--color-surface-hover);
+}
+
+.button-secondary[aria-disabled='true'] {
+  cursor: progress;
+}
+
+/* Count buttons (UX.md 7.5): smaller chamfer, the symbol is not uppercase text. */
+.step {
+  /* Custom properties resolve where they are declared, so the shapes are redeclared for the smaller cut. */
+  --cut: 0.5rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --cut-inner-2: calc(var(--cut) - 2px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner)),
+    calc(100% - var(--cut-inner)) 100%,
+    0 100%
+  );
+  --shape-chamfer-inner-2: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner-2)),
+    calc(100% - var(--cut-inner-2)) 100%,
+    0 100%
+  );
+  padding: 0;
+  font-size: var(--font-size-lg);
+  letter-spacing: 0;
+}
+
+/* "+" at the maximum count: striped and muted, but still focusable (UX.md 6.4, 7.5). */
+.step-plus[aria-disabled='true'] {
+  background: var(--color-border-strong);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.step-plus[aria-disabled='true']::before {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-surface-hover) 0 4px,
+    var(--color-surface-raised) 4px 8px
+  );
+}
+
+/* After the base rules: the chamfer would clip the focus ring (UX.md 7.9 kohta 7). */
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.step:focus-visible {
+  clip-path: none;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Notice box (error / warning). The heading carries the information, the stripes are decoration. */
 .notice {
+  --tone: var(--color-danger);
+  --tone-surface: var(--color-danger-surface);
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-4);
-  border-radius: var(--radius);
-  border-left: 4px solid;
+  padding: calc(var(--space-4) + 6px) var(--space-4) var(--space-4) calc(var(--space-4) + 4px);
+  border: 1px solid var(--tone);
+  border-left: 4px solid var(--tone);
+  background: var(--tone-surface);
+}
+
+.notice::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 6px;
+  background: repeating-linear-gradient(135deg, var(--tone) 0 8px, transparent 8px 16px);
+}
+
+.notice h2 {
+  color: var(--tone);
 }
 
 .notice-danger {
-  background: var(--color-danger-surface);
-  border-left-color: var(--color-danger);
+  --tone: var(--color-danger);
+  --tone-surface: var(--color-danger-surface);
 }
 
 .notice-warning {
-  background: var(--color-warning-surface);
-  border-left-color: var(--color-warning);
+  --tone: var(--color-warning);
+  --tone-surface: var(--color-warning-surface);
 }
 
 .empty {
@@ -212,6 +570,26 @@ main {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+/* Loading bar: decorative, aria-hidden, not a progress meter (UX.md 7.5, V3). Static without motion. */
+.loading-bar {
+  position: relative;
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  background: var(--color-border);
+}
+
+.loading-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: var(--color-info);
 }
 
 /* Search and filter form (UX.md 3.4, 5.4, 5.9) */
@@ -230,7 +608,10 @@ main {
 
 .field label,
 .card-filters legend {
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
 }
 
 .hint {
@@ -238,17 +619,29 @@ main {
   font-size: var(--font-size-sm);
 }
 
-.field input {
+.field input[type='search'] {
   width: 100%;
   min-height: var(--target-min);
   margin-block-start: var(--space-1);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius);
-  background: var(--color-bg);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
   color: var(--color-text);
   font: inherit;
   font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+}
+
+.field input[type='search']:hover {
+  border-color: var(--color-info);
+}
+
+.field input[type='search']:focus-visible {
+  border-color: var(--color-info);
+  outline: var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .filter-hint {
@@ -256,10 +649,10 @@ main {
 }
 
 .card-filters fieldset {
+  min-width: 0;
   margin: var(--space-2) 0 0;
   padding: 0;
   border: 0;
-  min-width: 0;
 }
 
 .card-filters fieldset + fieldset {
@@ -273,38 +666,125 @@ main {
 .options {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  margin-block-start: var(--space-1);
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
 }
 
+/* Checkbox label as a "chip": the whole label is the click target (UX.md 3.4). */
 .option {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-width: var(--target-min);
+  max-width: 100%;
   min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
 .option:hover {
+  border-color: var(--color-info);
+  background: var(--color-surface-hover);
   text-decoration: underline;
 }
 
+.option:has(input:checked) {
+  border-color: var(--color-info);
+  background: var(--color-selected-surface);
+}
+
+/* Native checkbox restyled; the tick is drawn with clip-path (no images: CSP img-src 'self'). */
 .option input {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  inline-size: 1.375rem;
+  block-size: 1.375rem;
   margin: 0;
-  accent-color: var(--color-accent);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 0;
+  background: var(--color-surface-raised);
   cursor: pointer;
 }
 
+.option input::after {
+  content: '';
+  width: 0.8rem;
+  height: 0.8rem;
+  background: var(--color-on-accent);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+  transform: scale(0);
+}
+
+.option input:checked {
+  border-color: var(--color-accent-edge);
+  background-color: var(--color-accent);
+}
+
+.option input:checked::after {
+  transform: scale(1);
+}
+
+.option input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* "Vain omistetut" (UX.md 6.6) */
+.owned-only {
+  margin-block-start: var(--space-3);
+}
+
+.owned-only .option {
+  align-self: flex-start;
+  font-weight: var(--font-weight-bold);
+}
+
 @media (min-width: 40rem) {
-  .field input {
+  .field input[type='search'] {
     max-width: 24rem;
+  }
+
+  /* "Tyyppi" and "Väri" side by side when there is room. */
+  .card-filters .fieldsets {
+    display: flex;
+    flex-wrap: wrap;
+    /* Row gap + the fieldset margin = --space-3, as when stacked. */
+    gap: var(--space-1) var(--space-8);
+  }
+
+  .card-filters fieldset + fieldset {
+    margin-block-start: var(--space-2);
   }
 }
 
-/* Card table (UX.md 4.4) */
+/* Browser-only reminder and persistent storage (UX.md 6.7) */
+.storage-reminder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-info);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* The result takes focus programmatically after the request (UX.md 6.7), like the heading. */
+.storage-result:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.storage-reminder .button-secondary {
+  font-size: var(--font-size-base);
+}
+
+/* Card table (UX.md 4.4, 7.5) */
 .card-table {
   width: 100%;
   border-collapse: collapse;
@@ -312,19 +792,47 @@ main {
 
 .card-table th,
 .card-table td {
-  padding: var(--space-2) var(--cell-padding-x);
+  padding: var(--space-3) var(--cell-padding-x);
   border-bottom: 1px solid var(--color-border);
   text-align: left;
   vertical-align: top;
 }
 
 .card-table thead th {
+  border-top: 3px solid var(--color-accent-edge);
+  border-bottom: 1px solid var(--color-border-strong);
   background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-table-head);
+}
+
+/* Rows are not interactive: the highlight helps to follow a wide row to its count control. */
+.card-table tbody tr:hover,
+.card-table tbody tr:focus-within {
+  background: var(--color-surface-raised);
+}
+
+/* Owned card (count > 0). The count itself carries the information, not the colour (UX.md 7.5). */
+.card-table tbody tr.is-owned {
+  background: var(--color-owned);
+}
+
+.card-table tbody tr.is-owned:hover,
+.card-table tbody tr.is-owned:focus-within {
+  background: var(--color-owned-hover);
+}
+
+.card-table tbody tr.is-owned .card-name {
+  box-shadow: inset 4px 0 0 var(--color-accent-edge);
 }
 
 .card-table .card-name {
+  font-size: var(--font-size-card-name);
   font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   overflow-wrap: anywhere;
 }
 
@@ -353,7 +861,18 @@ main {
 
 .card-table .col-number {
   text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-mono);
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
+}
+
+.card-table thead .col-number {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-table-head);
 }
 
 /* Decorative color swatch, always next to the color name (UX.md 3.1.1, 5.4). */
@@ -361,9 +880,9 @@ main {
   display: inline-block;
   inline-size: 0.875rem;
   block-size: 0.875rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 2px;
-  vertical-align: middle;
+  border: 1px solid var(--color-swatch-edge);
+  vertical-align: -1px;
+  clip-path: var(--shape-swatch);
 }
 
 .color-swatch-red {
@@ -386,54 +905,6 @@ main {
   background: var(--color-card-unknown);
 }
 
-/* Secondary button (UX.md 6.4.3): "Sulje", "Lue kokoelma uudelleen", "Pyydä pysyvää tallennusta". */
-.button-secondary {
-  min-width: var(--target-min);
-  min-height: var(--target-min);
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font: inherit;
-  font-weight: var(--font-weight-bold);
-  cursor: pointer;
-}
-
-.button-secondary:hover {
-  text-decoration: underline;
-}
-
-.button-secondary[aria-disabled='true'] {
-  cursor: progress;
-}
-
-/* Browser-only reminder and persistent storage (UX.md 6.7) */
-.storage-reminder {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-/* The result takes focus programmatically after the request (UX.md 6.7), like the heading. */
-.storage-result:focus:not(:focus-visible) {
-  outline: none;
-}
-
-.storage-reminder .button-secondary {
-  font-size: var(--font-size-base);
-  color: var(--color-text);
-}
-
-/* "Vain omistetut" (UX.md 6.6) */
-.owned-only {
-  margin-block-start: var(--space-2);
-  font-weight: var(--font-weight-bold);
-}
-
 /* Count control (UX.md 6.4) */
 .card-table .col-control {
   text-align: right;
@@ -449,56 +920,14 @@ main {
   min-width: calc(3 * var(--target-min) + 2 * var(--space-2));
 }
 
-.step {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--target-min);
-  min-height: var(--target-min);
-  padding: 0;
-  border-radius: var(--radius);
-  font: inherit;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-  cursor: pointer;
-}
-
-.step-plus {
-  border: 0;
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-}
-
-.step-plus:hover {
-  box-shadow: inset 0 0 0 2px var(--color-on-accent);
-}
-
-.step-plus[aria-disabled='true'] {
-  opacity: 0.5;
-  outline: 2px dashed var(--color-border-strong);
-  outline-offset: -2px;
-  cursor: not-allowed;
-}
-
-.step-plus[aria-disabled='true']:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.step-minus {
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-bg);
-  color: var(--color-text);
-}
-
-.step-minus:hover {
-  background: var(--color-surface);
-}
-
 .count {
-  min-width: 2.5ch;
-  font-weight: var(--font-weight-bold);
+  min-width: 2.75ch;
+  color: var(--color-count);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-mono);
+  line-height: 1;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
@@ -528,20 +957,30 @@ main {
     border: 0;
   }
 
+  /*
+   * Card-like row (UX.md 6.4.4, UX-007): line 1 is the name and the count control, line 2 is
+   * type, color and cost, which wrap as needed. Visual order only: the DOM and reading order
+   * stay name, type, cost, control, and the control is the only focusable part of the row.
+   */
   .card-table tbody tr {
-    display: grid;
-    /* Three lines: name, type and color, cost (UX-005). */
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      'name control'
-      'type control'
-      'cost control';
-    column-gap: var(--space-2);
-    padding-block: var(--space-2);
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    column-gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid var(--color-border);
   }
 
-  /* .col-fit sets width: 1% for the wide table; grid cells size by their content instead. */
+  /* Forces type and cost onto their own line under the name and the control. */
+  .card-table tbody tr::after {
+    content: '';
+    order: 2;
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  /* .col-fit sets width: 1% for the wide table; flex items size by their content instead. */
   .card-table tbody th,
   .card-table tbody td,
   .card-table tbody .col-fit {
@@ -550,12 +989,38 @@ main {
     width: auto;
   }
 
+  /* The owned rail moves from the name cell to the row edge (UX.md 7.5). */
+  .card-table tbody tr.is-owned .card-name {
+    box-shadow: none;
+  }
+
+  .card-table tbody tr.is-owned::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background: var(--color-accent-edge);
+  }
+
+  /* The basis lets very large text move the control to its own line instead of widening the page (UX-008). */
   .card-table tbody .card-name {
-    grid-area: name;
+    order: 0;
+    flex: 1 1 6rem;
+    min-width: 0;
+  }
+
+  .card-table tbody .col-control {
+    order: 1;
+    flex: none;
+    max-width: 100%;
+    align-self: center;
+    margin-inline-start: auto;
   }
 
   .card-table tbody .col-type {
-    grid-area: type;
+    order: 3;
     white-space: normal;
   }
 
@@ -569,11 +1034,14 @@ main {
   .card-table tbody .col-type,
   .card-table tbody .col-cost {
     color: var(--color-text-muted);
+    font-family: var(--font-sans);
     font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-normal);
+    letter-spacing: var(--letter-spacing-body);
   }
 
   .card-table tbody .col-cost {
-    grid-area: cost;
+    order: 4;
     text-align: left;
   }
 
@@ -581,9 +1049,13 @@ main {
     content: attr(data-label) ' ';
   }
 
-  .card-table tbody .col-control {
-    grid-area: control;
-    align-self: center;
+  /*
+   * No reserved width on narrow screens (UX-007, UX-008): the name gets the room, and "+" stays at the
+   * right edge when "−" appears. Large text may wrap the control instead of widening the page.
+   */
+  .count-control {
+    flex-wrap: wrap;
+    min-width: 0;
   }
 
   .card-table .separator {
@@ -591,6 +1063,103 @@ main {
   }
 }
 
+/* Windows high contrast: shapes and decorations may disappear, borders keep components visible (UX.md 7.8). */
+@media (forced-colors: active) {
+  .button-primary,
+  .button-secondary,
+  .step {
+    border: 2px solid ButtonText;
+    clip-path: none;
+  }
+
+  .panel,
+  .notice,
+  .empty {
+    border: 1px solid CanvasText;
+  }
+
+  .option input:checked {
+    forced-color-adjust: none;
+    background-color: Highlight;
+  }
+}
+
+/* All motion (UX.md 3.5, 7.7): only when the user has not asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .button-primary,
+  .button-secondary,
+  .step,
+  .button-primary::before,
+  .step-plus::before,
+  .button-secondary::before,
+  .step-minus::before {
+    transition: background-color var(--ease), color var(--ease);
+  }
+
+  .field input[type='search'] {
+    transition: border-color var(--ease);
+  }
+
+  .option {
+    transition: background-color var(--ease), border-color var(--ease);
+  }
+
+  .card-table tbody tr {
+    transition: background-color var(--ease);
+  }
+
+  .button-primary:active,
+  .button-secondary:active,
+  .step:active {
+    transform: translateY(1px);
+  }
+
+  .loading-bar::after {
+    animation: sweep 1.4s linear infinite;
+  }
+
+  /* Once when the page opens; the heading stays mounted across states (UX.md 7.7). */
+  main > h1 {
+    animation: glitch 0.4s steps(1, end) 1;
+  }
+
+  @keyframes sweep {
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(290%);
+    }
+  }
+
+  @keyframes glitch {
+    0% {
+      text-shadow: none;
+    }
+
+    30% {
+      text-shadow:
+        -2px 0 var(--color-glitch-a),
+        2px 0 var(--color-glitch-b);
+      transform: translateX(1px);
+    }
+
+    60% {
+      text-shadow:
+        2px 0 var(--color-glitch-a),
+        -2px 0 var(--color-glitch-b);
+      transform: translateX(-1px);
+    }
+
+    100% {
+      text-shadow: none;
+      transform: none;
+    }
+  }
+}
+
+/* Safety net (UX.md 3.5). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

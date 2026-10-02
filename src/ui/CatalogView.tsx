@@ -294,8 +294,10 @@ export function CatalogView({
       <p id="card-status" className="status-line" hidden={status === ''}>
         {status}
       </p>
+      {/* Decorative only: the state is told by the status line and the live region (UX.md 7.5). */}
+      {state.status === 'loading' && <span className="loading-bar" aria-hidden="true" />}
       {showFilters && summary !== null && (
-        <p id="collection-summary" className="status-line">
+        <p id="collection-summary" className="status-line is-summary">
           {summary}
         </p>
       )}
