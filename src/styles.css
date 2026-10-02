@@ -1274,6 +1274,25 @@ body:has(dialog[open]) {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   clip-path: polygon(0 0, calc(100% - 0.5em) 0, 100% 0.5em, 100% 100%, 0 100%);
+  position: relative;
+}
+
+/* The clip-path cuts the border too, so the bevel is drawn as a diagonal line. */
+.type-badge::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: calc(0.5em + 1px);
+  height: calc(0.5em + 1px);
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    var(--badge-color) calc(50% - 0.5px),
+    var(--badge-color) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  pointer-events: none;
 }
 
 .type-badge-red { --badge-color: var(--color-card-red); }
@@ -1787,4 +1806,10 @@ body:has(dialog[open]) {
 .card-decks {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+/* Colour filter chips show only the ball (T-045). */
+.option-color .color-swatch {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
 }
