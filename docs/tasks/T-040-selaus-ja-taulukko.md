@@ -24,3 +24,10 @@ Kun kokoelma on kerran syötetty, pääkäyttö on selailu. Lisäys ja poisto ov
 - Sarakkeiden lajittelu ei kuulu tähän (IDEAS.md).
 
 ## Luovutukset
+### Luovutus 2026-10-02 · Koodari → PM
+- Mitä tehtiin: preferences-varastoon `loadView/saveView` ja `loadEditMode/saveEditMode` (avaimet `cyberdeck:view`, `cyberdeck:edit-mode`, raakamerkkijonot kuten teema). `ListToolbar` (Ruudukko/Taulukko-radioryhmä + `role="switch"` "Muokkaa kokoelmaa") listan yläpuolella. `CountControl` sai `editable`-propin (pois päältä vain määrä ja tila, ✓ säilyy). Uusi `CardTable` (kuva md 40 px, nimi-painike avaa dialogin, tyyppi-badge, Rarity, Cost, Power, RAM, kokoelma; rivin vasen reuna keltainen/vihreä; `overflow-x: auto`, nimetty region, `tabindex=0`).
+- Muokkaustilan oletus: tallennettu valinta, muuten päällä vain jos kokoelma on tyhjä. Oletus ratkaistaan kerran (lukitaan), joten ensimmäisen kortin lisäys ei piilota painikkeita; oletusta ei tallenneta. Kytkin näkyy vain kun kokoelma on `ready`.
+- Uudet tekstit (Näkymä, Ruudukko, Taulukko, Muokkaa kokoelmaa, Tyyppi, Kokoelma, taulukon region-nimi) lisätty texts.ts:ään itse: Sisällöntuottaja/UX tarkistavat MVP-1:n lopussa.
+- Testit: uusi CatalogView.browse.test.tsx (9), storage-testit (4), collection-testit asettavat kytkimen päälle. `vitest run src/ui src/storage src/App.test.tsx src/App.theme.test.tsx`: 452/452. Lint ja build läpi. CHANGELOG päivitetty.
+- Rajoitteet: ei selainnäkymän silmämääräistä tarkistusta (vain jsdom); taulukon CSS (sarakeleveydet, mobiili) kannattaa katsoa esikatselussa.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0

@@ -13,10 +13,12 @@ export interface OwnedColumn {
   countOf: (card: Card) => number;
   onChange: (card: Card, count: number) => void;
   onLimit: (card: Card) => void;
+  /** The "Muokkaa kokoelmaa" switch (T-040): false hides the − and + buttons. */
+  editable: boolean;
 }
 
 /** Box state (UX.md 7.5): only when the collection is ready; a 1 px edge colour, never a size change. */
-function collectionState(card: Card, owned: OwnedColumn | undefined): string {
+export function collectionState(card: Card, owned: OwnedColumn | undefined): string {
   if (owned?.mode !== 'ready') return '';
   const count = owned.countOf(card);
   if (count >= playsetSize(card)) return 'is-owned is-playset';
@@ -97,6 +99,7 @@ export function CardList({
                 mode={owned.mode}
                 onChange={owned.onChange}
                 onLimit={owned.onLimit}
+                editable={owned.editable}
               />
             </div>
           )}

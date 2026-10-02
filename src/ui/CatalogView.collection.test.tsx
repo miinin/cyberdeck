@@ -36,6 +36,8 @@ async function settle() {
 }
 
 async function renderView(repositories: Repositories = createMemoryRepositories(), list: Card[] = cards) {
+  // These tests change counts, so the edit switch is saved as on (T-040 has its own tests for the switch).
+  await repositories.preferences.saveEditMode(true);
   const slot = document.createElement('div');
   document.body.appendChild(slot);
   const result = render(<CatalogView cards={list} repositories={repositories} headerSlot={slot} />);

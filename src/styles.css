@@ -1285,3 +1285,177 @@ body:has(dialog[open]) {
 :root[data-theme='light'] .type-badge {
   color: var(--color-text);
 }
+
+/* List toolbar (T-040): view selector and the edit switch above the list. */
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-block: var(--space-3);
+}
+
+.view-select {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.view-select legend {
+  padding: 0;
+  float: left;
+}
+
+.edit-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.edit-switch:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.edit-switch-track {
+  display: inline-flex;
+  align-items: center;
+  inline-size: 2.5rem;
+  block-size: 1.25rem;
+  padding: 2px;
+  border: 2px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+}
+
+.edit-switch-thumb {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  background: var(--color-border-strong);
+}
+
+.edit-switch[aria-checked='true'] .edit-switch-track {
+  border-color: var(--color-accent-edge);
+  justify-content: flex-end;
+}
+
+.edit-switch[aria-checked='true'] .edit-switch-thumb {
+  background: var(--color-accent-edge);
+}
+
+/* Table view (T-040): scrolls sideways inside its own region on narrow screens, not the whole page. */
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+}
+
+.table-scroll:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.card-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  /* Not owned: neutral grey count, as in the grid. */
+  --color-count: var(--color-text-muted);
+}
+
+.card-table th,
+.card-table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.card-table thead th {
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-bold);
+}
+
+.card-table .cell-name {
+  min-inline-size: 10rem;
+  font-weight: var(--font-weight-bold);
+  white-space: normal;
+}
+
+.card-table .cell-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.card-table .cell-image {
+  inline-size: 2.5rem;
+  min-inline-size: 2.5rem;
+}
+
+.card-table .cell-image .card-image-button,
+.card-table .cell-image .card-image {
+  inline-size: 2.5rem;
+}
+
+.card-table .cell-collection .count-control {
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.card-table .count-control--readonly {
+  min-inline-size: 3.5rem;
+}
+
+.card-table tbody tr:hover {
+  background: var(--color-surface-raised);
+}
+
+/* Row state: a 1 px-wide edge like the grid box, plus the coloured count and the check mark. */
+.card-table tr.is-owned {
+  --color-count: var(--color-accent-edge);
+}
+
+.card-table tr.is-owned > :first-child {
+  box-shadow: inset 3px 0 0 var(--color-accent-edge);
+}
+
+.card-table tr.is-playset {
+  --color-count: var(--color-success);
+}
+
+.card-table tr.is-playset > :first-child {
+  box-shadow: inset 3px 0 0 var(--color-success);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+.link-button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
