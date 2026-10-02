@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
+import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import { MAX_COLLECTION_COUNT } from '../domain/collection';
 import { CardName } from './CardName';
@@ -22,15 +23,16 @@ export interface CountControlProps {
  */
 export function CountControl({ card, count, mode, onChange, onLimit }: CountControlProps) {
   const plusRef = useRef<HTMLButtonElement>(null);
+  const minusRef = useRef<HTMLButtonElement>(null);
   /** Which button of this row had focus last. */
   const lastFocused = useRef<'minus' | 'plus' | null>(null);
 
-  // "−" disappeared while focused (another tab, or a rollback): keep focus in the row (UX.md 6.9).
+  // "−" became disabled while focused (another tab, or a rollback): keep focus in the row (UX.md 6.9).
   useLayoutEffect(() => {
     if (count !== 0 || lastFocused.current !== 'minus') return;
     lastFocused.current = null;
     const active = document.activeElement;
-    if (active === null || active === document.body) plusRef.current?.focus();
+    if (active === null || active === document.body || active === minusRef.current) plusRef.current?.focus();
   }, [count]);
 
   if (mode === 'loading') {
@@ -67,28 +69,42 @@ export function CountControl({ card, count, mode, onChange, onLimit }: CountCont
 
   return (
     <div className="count-control">
-      {count > 0 && (
-        <button
-          type="button"
-          className="step step-minus"
-          onFocus={() => (lastFocused.current = 'minus')}
-          onClick={decrease}
-        >
-          <span className="visually-hidden">
-            {texts.decreaseOne}
-            <CardName card={card} />
-          </span>
-          <span aria-hidden="true">{texts.minusSymbol}</span>
-        </button>
-      )}
-      {count > 0 && (
-        <span className="count">
-          <span className="visually-hidden">{texts.countPrefix}</span>
-          {count}
-          <span className="visually-hidden">{copiesSuffix(count)}</span>
+      <button
+        type="button"
+        ref={minusRef}
+        className="step step-minus"
+        disabled={count === 0}
+        onFocus={() => (lastFocused.current = 'minus')}
+        onClick={decrease}
+      >
+        <span className="visually-hidden">
+          {texts.decreaseOne}
+          <CardName card={card} />
         </span>
-      )}
-      {count === 0 && <span className="visually-hidden">{texts.notOwned}</span>}
+        <span aria-hidden="true">{texts.minusSymbol}</span>
+      </button>
+      <span className="count">
+        {count > 0 ? (
+          <>
+            <span className="visually-hidden">{texts.countPrefix}</span>
+            {count}
+            <span className="visually-hidden">{copiesSuffix(count)}</span>
+          </>
+        ) : (
+          <>
+            <span aria-hidden="true">0</span>
+            <span className="visually-hidden">{texts.notOwned}</span>
+          </>
+        )}
+        {count >= playsetSize(card) && (
+          <>
+            <span aria-hidden="true" className="playset-mark">
+              {' ✓'}
+            </span>
+            <span className="visually-hidden">. {texts.playsetFull}</span>
+          </>
+        )}
+      </span>
       <button
         ref={plusRef}
         type="button"

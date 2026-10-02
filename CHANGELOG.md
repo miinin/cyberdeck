@@ -4,6 +4,10 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+### Muutettu
+- Kokoelman −- ja +-painikkeet pysyvät aina samoilla paikoilla: määrä näkyy myös nollana, ja − on himmeä, kun kortteja ei ole. Keltainen palkki laatikon reunassa on poistettu: kokoelmassa olevan kortin reuna ja määrä värjäytyvät siniseksi, ja täysi pelisarja (Legend 1, muut 3) näkyy vihreänä ja ✓-merkkinä.
+- Kortin suurennetun kuvan sulkupainike on nyt ruksi (×).
+
 ### Lisätty
 - Korttilista on nyt ruudukko: jokaisessa laatikossa on iso kuva, nimi, tyyppi ja väri, kortin hinta, Power ja RAM sekä kokoelman +- ja −-painikkeet. Kuvaa painamalla se suurenee kuten ennenkin.
 - Haku ja suodatus korttilistaan: voit hakea korttia nimen tai alaotsikon osalla, eikä kirjainkoolla tai aksenteilla ole väliä ("alvarez" löytää Judy Álvarezin). Listaa voi rajata korttityypin (Legend, Unit, Gear, Program) ja värin mukaan, ja haku ja valinnat toimivat yhdessä.

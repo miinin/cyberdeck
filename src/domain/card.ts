@@ -25,3 +25,8 @@ export interface Card {
   /** The app's own key, cardKey(name, subname). Collections and decks refer to cards only by this (D-008). */
   key: CardKey;
 }
+
+/** Copies that make a full playset: 1 for Legend cards, 3 for every other type. */
+export function playsetSize(card: Pick<Card, 'type'>): number {
+  return card.type === 'Legend' ? 1 : 3;
+}

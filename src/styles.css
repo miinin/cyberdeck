@@ -58,8 +58,9 @@
   --color-header-text: #f1f1ec;
   --color-bracket: #fcee09;
   --color-count: #fcee09;
-  --color-owned: rgba(252, 238, 9, 0.05);
-  --color-owned-hover: rgba(252, 238, 9, 0.09);
+  --color-owned: transparent;
+  --color-success: #39e08a;
+  --color-owned-hover: var(--color-surface-raised);
   --color-swatch-edge: transparent;
   /* Decorative only, same in both themes: header lines and the brand mark, the heading glitch (UX.md 7.5, 7.7). */
   --color-brand-yellow: #fcee09;
@@ -162,8 +163,9 @@
   --color-header-text: #f1f1ec;
   --color-bracket: #0e0f14;
   --color-count: #0e0f14;
-  --color-owned: rgba(252, 238, 9, 0.3);
-  --color-owned-hover: rgba(252, 238, 9, 0.45);
+  --color-owned: transparent;
+  --color-success: #17713f;
+  --color-owned-hover: var(--color-surface-raised);
   --color-swatch-edge: #0e0f14;
   --heading-bar: linear-gradient(90deg, var(--color-text) 0 65%, var(--color-brand-yellow) 65%);
   --glow-accent: none;
@@ -1086,8 +1088,13 @@ body:has(dialog[open]) {
 
 /* Owned card (count > 0). The count itself carries the information, not the colour (UX.md 7.5). */
 .card-box.is-owned {
-  border-inline-start: 4px solid var(--color-accent-edge);
-  background: var(--color-owned);
+  border-color: var(--color-info);
+  --color-count: var(--color-info);
+}
+
+.card-box.is-playset {
+  border-color: var(--color-success);
+  --color-count: var(--color-success);
 }
 
 .card-box.is-owned:hover,
@@ -1175,4 +1182,18 @@ body:has(dialog[open]) {
 
 .card-image-button:hover .card-image {
   border-color: var(--color-info);
+}
+
+/* "−" at count 0: visible and in place, but muted (T-035). */
+.step-minus:disabled {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.dialog-close {
+  flex: none;
+  font-size: var(--font-size-lg);
+  letter-spacing: 0;
+  text-transform: none;
 }

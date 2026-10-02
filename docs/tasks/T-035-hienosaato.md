@@ -18,3 +18,9 @@
 - Ei suodatinta "playset puuttuu" (IDEAS.md, jos haluat).
 
 ## Luovutukset
+### Luovutus 2026-10-02 · Koodari → PM
+- Tehty: aina paikallaan oleva −/määrä/+ (− `disabled` kun 0, määrä 0 näkyy), palkki pois, reunaväri 0 = harmaa / 1–2 = info (syaani) / playset = vihreä + ✓ ja visually-hidden "Pelisarja täynnä" (texts.ts), `playsetSize()` domain/card.ts, dialogin sulku × (aria-label "Sulje", 44 px).
+- Uusi token `--color-success`: tumma #39e08a, vaalea #17713f (laskettu noin >=4,5:1 pintaa vasten, ei mitattu työkalulla). `--color-owned` nyt transparent (ei taustasävyä).
+- Fokus: kun − muuttuu disabled-tilaan fokusoituna, fokus siirretään +:aan (myös Chromen disabled-fokus-oikku).
+- Testit: 1442/1442 läpi, lint ja build läpi. Uudet: playsetSize, playset-merkintä, − disabled 0:ssa. Ei tarkistettu silmin selaimessa.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (käyttämättömät --color-owned-hover-tokenit ja is-owned:hover-sääntö voi siivota). Prettier --check valittaa 65 tiedostoa jo ennestään (ei osa lintiä).
