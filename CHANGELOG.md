@@ -14,6 +14,11 @@ Käyttäjälle näkyvät muutokset versioittain.
 - Kokoelma tallentuu tähän selaimeen ja säilyy, kun avaat sivun uudelleen. Se ei siirry toiselle laitteelle. Voit pyytää selainta säilyttämään kokoelman pysyvästi. Jos tallennus ei onnistu, sivu kertoo sen, eikä näytä määrää, jota ei tallennettu.
 - Puhelimen kapealla näytöllä jokainen kortti näkyy omana korttinaan, jotta painikkeet mahtuvat.
 
+### Muutettu
+- Uusi Cyberpunk 2077 -henkinen ulkoasu: keltainen ja syaani korostus, viistetyt painikkeet ja uudet fontit (Rajdhani ja numeroille Share Tech Mono). Sivu on tumma tai vaalea sen mukaan, kumman teeman laitteesi käyttää. Toiminnot ja tekstit ovat ennallaan.
+- Teksti on aiempaa suurempaa, ja omistamasi kortit erottuvat listassa korostettuna rivinä.
+- Jos olet pyytänyt laitteelta vähemmän liikettä, sivulla ei ole animaatioita.
+
 ## [0.1.0] · 2026-10-01
 
 Ensimmäinen versio.

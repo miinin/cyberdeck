@@ -744,7 +744,8 @@ main {
   .card-filters .fieldsets {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-8);
+    /* Row gap + the fieldset margin = --space-3, as when stacked. */
+    gap: var(--space-1) var(--space-8);
   }
 
   .card-filters fieldset + fieldset {
