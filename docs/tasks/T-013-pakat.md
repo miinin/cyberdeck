@@ -54,3 +54,6 @@ Pelaaja rakentaa omista korteistaan laillisen pakan, nimeää sen ja näkee heti
 - Digiturva: käyttäjän syöte on pakan nimi (cleanText + repositorion validointi, renderöinti React-tekstinä, ei innerHTML), ei uusia riippuvuuksia. Hash-reitin id validoidaan `isDeckId`llä.
 - Testit: `npx vitest run src/domain src/ui src/storage src/App.test.tsx` 40 tiedostoa / 860 testiä läpi; lint 0 varoitusta; build ok. Uudet: deckRules.test.ts (säännöt rajoineen), DecksView.test.tsx, DeckEditor.test.tsx, CatalogView.decks.test.tsx. Testisetup nollaa `location.hash`in.
 - Koodikatselmointi: tehty · Pakollisia korjattu 1 (poistuessa tehtävä tallennus ohitti käynnissä olevan tallennuksen -> nyt jonotetaan) · Suosituksia 2 (editorin ylikirjoitus toisesta välilehdestä; DeckEditor.tsx on pitkä, voisi pilkkoa DeckSummary/CardSearch-komponentteihin) -> ei vielä [velka]-tehtäviä, PM päättää.
+
+### Luovutus 2026-10-02 · Digiturva → PM
+- Kevyt tietoturvakatselmointi tehty: 0 Critical, 0 High, 0 Medium, 1 Low (SEC-007, nimikentän maxLength puuttuu, ei turvavaikutusta). Ei estä Done-tilaa. Raportti: docs/reports/SEC-007-t013-pakat.md.
