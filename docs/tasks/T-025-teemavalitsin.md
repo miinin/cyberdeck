@@ -1,7 +1,7 @@
 # T-025 · Teemavalitsin: tumma oletuksena, käyttäjä voi vaihtaa
 **Tila:** Review · **Omistaja:** Koodari → UX, Digiturva · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** UX ☑ (UX.md luku 8, v0.9)
-**Katselmoinnit:** Koodikatselmointi ☑ · UX ☐ · Digiturva ☐ (kevyt: uusi tallennettava asetus, SR-12, SR-16)
+**Katselmoinnit:** Koodikatselmointi ☑ · UX ☐ · Digiturva ☑ (SEC-004)
 **Riippuvuudet:** T-021 (Done)
 **Haara:** `t-025-teemavalitsin`
 
@@ -82,3 +82,10 @@ Käyttäjä valitsee väriteeman helposti. Tumma teema on oletus (D-012), koska 
 - Tunnetut rajoitteet ja riskit: (1) CONTENT.md:n sanastorivi ja CHANGELOG-merkintä puuttuvat, koska tiedostojen luku estettiin. Ehdotukset PM:lle: sanasto "**teema**: sovelluksen väriteema, tumma (oletus) tai vaalea. Valitaan otsikkopalkin painikkeella Vaalea teema. Ei: tila, moodi, skin." CHANGELOG `[Julkaisematon]` → Lisätty: "Sovellus on nyt oletuksena tumma. Otsikkopalkin Vaalea teema -painikkeella voit vaihtaa vaaleaan teemaan, ja valinta säilyy tässä selaimessa." (2) Toisen välilehden muutos näkyy vasta päivityksessä (A4). (3) Tallennuksen epäonnistuminen kirjataan vain `console.warn`iin (A3).
 - Testit: `npx vitest run --exclude ".claude/**"` 19 tiedostoa, 456 testiä läpi (uusia 25: repositories 11, themeInit 8, App.theme 10, joista osa parametrisoituja). Mutaatiotarkistus: ilman `userChose`-vahtia kilpailutilannetesti kaatuu, ja kun teema vaihdetaan vasta tallennuksen jälkeen, tallennusvirhetesti kaatuu. `npx eslint . --max-warnings 0 --ignore-pattern ".claude/**"` läpi. `npm run build` läpi, ja `dist/index.html` viittaa `/theme-init.js`:ään ennen JS-pakettia ja tyylitiedostoa. Pelkkä `npm run lint` ja `npm test` pääkansiossa poimivat T-026-worktreen tiedostot (ks. checkpoint).
 - Koodikatselmointi: tehty · Pakollisia korjattu 1 (themeInit-testi riippui siitä, että edellinen testi jätti `data-theme`-attribuutin paikalleen; nyt `beforeEach`) · Suosituksia 2 (`vi.unstubAllGlobals` siirretty `afterEach`iin, korjattu heti; `.claude` lint- ja testirajauksista, ehdotettu PM:lle [velka]).
+
+### Luovutus 2026-10-02 · Digiturva → PM (PM kirjasi)
+- Mitä tehtiin: kevyt tietoturva- ja tietosuojakatselmointi `docs/reports/SEC-004-t025-teemavalitsin.md` (commit 6e4dfb5). A1-poikkeus (`public/theme-init.js`) hyväksytty ja kirjattu SECURITY.md:n SR-12:een. SR-12, SR-13 ja SR-16 täyttyvät. PRIVACY.md:n inventaarioon lisätty rivi 10 `cyberdeck:theme` (ei henkilötieto).
+- Mitä pyydän: Digiturva ☑. Ei estä Done-tilaa.
+- Mistä katsoa: SEC-004-raportti, PRIVACY.md (rivi 10, luvut 5 ja 6), SECURITY.md (SR-12).
+- Tunnetut rajoitteet ja riskit: SEC-014 (Info, `theme-init.js` välimuistissa enintään tunnin) ja SEC-015 (Info, tulevan "Poista kaikki tiedot" -toiminnon on poistettava myös teema-avain). Firefoxia ja Safaria ei testattu. Havainto UX:lle: body-tausta jäi hetkeksi tummaksi vaihdon jälkeen (todennäköisesti CSS-siirtymä), välitetty UX-katselmointiin.
+- Testit: Vitest 456/456 ja ESLint läpi (ilman `.claude/**`). PR #7:n esikatselussa Chrome headless: CSP-rikkomuksia 0, oletus tumma, vaihto ja tallennus toimivat, vihamielinen arvo jättää tumman teeman.
