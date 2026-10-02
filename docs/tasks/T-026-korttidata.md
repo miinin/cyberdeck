@@ -1,7 +1,7 @@
 # T-026 · Korttidata sovelluksen mukana (ei hakua joka käynnillä)
 **Tila:** In Progress · **Omistaja:** Arkkitehti → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** Arkkitehti ☐ (ADR, kattaa myös T-027:n kuvat)
-**Katselmoinnit:** Koodikatselmointi ☐ · Digiturva ☐ (data, CSP ja firebase.json, R-2) · UX ☐ (vain jos käyttäjälle näkyvät tilat muuttuvat)
+**Katselmoinnit:** Koodikatselmointi ☐ · Digiturva ☑ (SEC-005-t026: ei Critical- eikä High-löydöksiä; SEC-016 Medium: otsakkeet todennettava esikatselussa) · UX ☐ (vain jos käyttäjälle näkyvät tilat muuttuvat)
 **Riippuvuudet:** –. Korvaa T-003:n (välimuisti).
 **Haara:** `t-026-korttidata`
 
@@ -87,3 +87,12 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
 - **Tunnetut rajoitteet ja riskit:** firebase.jsonin otsakkeiden yhdistymistä ei ole todennettu Hostingissa. `runnerImport` on Viten kokeellinen API. Testit eivät ole CI:ssä (T-004).
 - **Testit:** `npm test` 19 tiedostoa, 437 testiä läpi · `npm run lint` 0 varoitusta · `npm run build` läpi (JS 286 kt, 90 kt gzip).
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (kuollut `.loading-bar`-CSS, korjattu heti dfcca96). Huomio UX:lle: UX.md:n poistuneiden tilojen kuvaukset.
+
+### Luovutus 2026-10-02 · Digiturva → PM, Koodari
+- **Mitä tehtiin:** tietoturva- ja tietosuojakatselmointi `docs/reports/SEC-005-t026-korttidata.md`. Critical 0, High 0, Medium 1 (SEC-016), Low 1 (SEC-017), Info 1 (SEC-018). **Veto: ei.** SECURITY.md (SR-2, SR-4, SR-5, SR-7, luku 8, R-1 ja R-2 hyväksytty D-012:lla, R-6 → Low, R-7 ja R-12 poistuneet, uusi luku 14) ja PRIVACY.md (Netdeck ei enää näe käyttäjien IP-osoitteita) päivitetty `origin/test`:n versioiden pohjalta.
+- **Mitä pyydän:**
+  - Koodari: yhdistä `origin/test` haaraan (PR #8 on `CONFLICTING`, joten esikatselua ei synny). `eslint.config.js`:ssä säilytetään sekä T-025:n `public/**/*.js`-lohkot että T-026:n `scripts/**`-lohkot. Ei rebasea eikä force pushia.
+  - PM tai Koodari: esikatselu-URL:lle `curl -sI <URL>/` (CSP:ssä `connect-src 'self'`) ja `curl -sI <URL>/assets/<index-*.js>` (`Cache-Control: public, max-age=31536000, immutable`), selaimen konsoli ilman CSP-virheitä ja Network ilman `api.netdeck.gg`-pyyntöjä. Kirjaa tulos tähän korttiin, niin Digiturva sulkee SEC-016:n.
+- **Mistä katsoa:** raportti yllä, `git diff origin/test -- docs/SECURITY.md docs/PRIVACY.md`.
+- **Tunnetut rajoitteet ja riskit:** Hostingin sääntöjen yhdistymistä ei voitu todentaa (paikallinen Hosting-emulaattori ei palauta `firebase.json`:n otsakkeita). Epäonnistuminen ei heikennä tietoturvaa, koska `index.html`:n CSP tulee `**`-säännöstä. SEC-017 kuuluu T-004:ään.
+- **Testit:** `npm test` 437/437, `npm run lint` 0 varoitusta, `npm run build` läpi, `npm audit` 0, salaisuushaku diffistä ja historiasta 0 osumaa, `grep -ri netdeck dist/` vain alatunnisteen tekstit.
