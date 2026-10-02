@@ -1,6 +1,6 @@
 # T-021 · Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme
 **Tila:** Review (UX-004:n korjaukset tehty, UX varmistaa) · **Omistaja:** Koodari → UX Designer (katselmointi) · **MVP:** 1 · **Prioriteetti:** Must (D-010)
-**Suunnittelu:** UX ☐ (tutkimus, visuaalinen suunta, tokenit, komponentit, mallisivu)
+**Suunnittelu:** UX ☑ (tutkimus, visuaalinen suunta, tokenit, komponentit, mallisivu)
 **Katselmoinnit (D-010):** Koodikatselmointi ☑ · UX ☐ · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
 **Riippuvuudet:** T-010, T-012 (Done)
 **Haara:** `t-021-ulkoasu`
@@ -9,11 +9,11 @@
 Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiseltä alusta loppuun (D-010). Käytettävyys on ensisijainen, tyyli toissijainen.
 
 ## Hyväksymiskriteerit
-- [ ] UX on selvittänyt Cyberpunk 2077:n visuaalisen kielen (värit, typografia, muodot, käyttöliittymäelementit, liike) ja kirjannut tiivistelmän lähteineen UX.md:hen sekä sen, mitä siitä otetaan ja mitä jätetään pois käytettävyyden tai saavutettavuuden vuoksi.
-- [ ] UX.md:n tokenit (värit, typografia, välit, reunat, varjot ja hehkut, liike) ja komponentit (painikkeet, kentät, valintaruudut, taulukko ja korttirivi, ilmoituslaatikot, otsake ja alatunniste) on päivitetty uuteen ilmeeseen. Käyttäjä on hyväksynyt suunnan mallisivusta ennen toteutusta.
-- [ ] Koko nykyinen sovellus (otsake, haku ja suodattimet, korttilista, kokoelman kontrollit, kaikki tilat ja ilmoitukset, alatunniste) käyttää uutta ilmettä. Kovakoodattuja värejä tai välejä ei ole tokenien ulkopuolella.
-- [ ] Käytettävyys ei heikkene: kaikki nykyiset toiminnot ja tekstit säilyvät, toiminnot löytyvät yhtä helposti tai helpommin, ja nykyiset testit menevät läpi.
-- [ ] WCAG 2.2 AA: kontrastit (teksti 4.5:1, UI ja fokus 3:1, myös hover- ja fokustilat), fokus näkyy, 320 px ja 400 % zoom ilman vaakavieritystä, axe 0 rikkomusta. Animaatiot ja glitch-efektit kunnioittavat `prefers-reduced-motion`-asetusta, eikä mikään vilku yli 3 kertaa sekunnissa.
+- [x] UX on selvittänyt Cyberpunk 2077:n visuaalisen kielen (värit, typografia, muodot, käyttöliittymäelementit, liike) ja kirjannut tiivistelmän lähteineen UX.md:hen sekä sen, mitä siitä otetaan ja mitä jätetään pois käytettävyyden tai saavutettavuuden vuoksi.
+- [x] UX.md:n tokenit (värit, typografia, välit, reunat, varjot ja hehkut, liike) ja komponentit (painikkeet, kentät, valintaruudut, taulukko ja korttirivi, ilmoituslaatikot, otsake ja alatunniste) on päivitetty uuteen ilmeeseen. Käyttäjä on hyväksynyt suunnan mallisivusta ennen toteutusta.
+- [x] Koko nykyinen sovellus (otsake, haku ja suodattimet, korttilista, kokoelman kontrollit, kaikki tilat ja ilmoitukset, alatunniste) käyttää uutta ilmettä. Kovakoodattuja värejä tai välejä ei ole tokenien ulkopuolella.
+- [x] Käytettävyys ei heikkene: kaikki nykyiset toiminnot ja tekstit säilyvät, toiminnot löytyvät yhtä helposti tai helpommin, ja nykyiset testit menevät läpi.
+- [x] WCAG 2.2 AA: kontrastit (teksti 4.5:1, UI ja fokus 3:1, myös hover- ja fokustilat), fokus näkyy, 320 px ja 400 % zoom ilman vaakavieritystä, axe 0 rikkomusta. Animaatiot ja glitch-efektit kunnioittavat `prefers-reduced-motion`-asetusta, eikä mikään vilku yli 3 kertaa sekunnissa.
 
 ## Rajaukset (ei kuulu tähän)
 - Uudet toiminnot tai näkymät (pakat ovat T-013)
@@ -147,3 +147,8 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 - Mitä tehtiin: UX-007, UX-008 ja UX-009 varmistettu selaimessa (PR #6:n esikatselu, molemmat teemat, 320 px ja teksti 200 % 320 px:ssä, axe 0 rikkomusta). Rivi 140 → 85 px, sivu 23 901 → 14 410 px, vaakavieritys 0 px myös 200 %:n tekstillä, kisko 4 px. Uusi kaksirivinen korttirivi on käytettävä (+ pysyy paikallaan, järjestys visuaalisesti eri kuin DOM:ssa mutta fokus vain kontrollissa). Uusi UX-011 (Low, nimi rivittyy uudelleen − ilmestyessä) hyväksytty. Raportti `docs/reports/UX-004-t021-ulkoasu.md`.
 - Veto: ei. UX hyväksyy T-021:n Done-tilaan. UX-010 → T-022 ja 640 px + teksti 200 % → T-023 (PM).
 - Selain ajettu omalla väliaikaisella profiililla ja suljettu `browser.close()`-kutsulla (L-004).
+
+### Checkpoint 2026-10-02 · PM (Done)
+- Definition of Done tarkistettu: käyttäjä hyväksyi suunnan (D-011), hyväksymiskriteerit todennettu (UX-004: axe 0 rikkomusta molemmissa teemoissa, kontrastit mitattu renderöidyltä sivulta, 320 px, 400 % ja teksti 200 % 320 px:ssä ilman vaakavieritystä, liikkeen vähentäminen), testit 427/427, lint ja build läpi, koodikatselmointi tehty, UX-007–UX-009 korjattu ja varmistettu, CHANGELOG, CONTENT.md (fonttilisenssit) ja UX.md v0.8 päivitetty. Digiturvaa ei tarvittu (ei firebase.json- eikä riippuvuusmuutoksia).
+- Jatkoon: UX-006 ja UX-011 → T-018, UX-010 → T-022, 640 px + teksti 200 % → T-023, epävakaa testi → T-024. Oppi L-004.
+- Tila Done, yhdistetty test-haaraan.
