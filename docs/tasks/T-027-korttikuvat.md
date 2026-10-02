@@ -102,3 +102,9 @@ Pelaaja tunnistaa kortin kuvasta (D-012). Kun käyttäjän kuvapaketti saapuu, k
 - **Testit:** `npm test` 24 tiedostoa, 455 testiä läpi. `npm run lint` 0 virhettä ja varoitusta. `npm run build` (sis. `tsc --noEmit`) läpi.
 - **Uusi riippuvuus:** `sharp@0.35.5` (devDependency, tarkka versio). Apache-2.0, libvips-binäärit LGPL-3.0-or-later, ei install-skriptejä (Arkkitehdin tarkistus 2026-10-02).
 - Koodikatselmointi: tehty · Pakollisia korjattu 2 (raportin järjestys riippui `localeCompare`n lokaalista → koodiyksikköjärjestys; muuntamatta jääneen kuvan kortti puuttui kuvattomien listasta väärässä järjestyksessä → lasketaan korttien järjestyksessä) · Suosituksia 2 (vierityspalkin hyppy dialogissa UX:lle; ison kuvan uudelleenyritys, ei velkatehtävää ennen UX:n kantaa)
+
+### Luovutus 2026-10-02 · UX → PM (katselmointi, UX-006)
+- **Mitä tehtiin:** T-027:n UX-katselmointi ja T-026:n kevyt katselmointi esikatselussa (PR #9). Raportti `docs/reports/UX-006-t027-korttikuvat.md`. UX.md päivitetty (v0.10): poistuneet tilat ja latauspalkki merkitty vanhentuneiksi (4, 4.5, 7.5, 7.7, 7.9, 7.10), uusi luku 9 (korttikuvat).
+- **Tulos:** axe 0 rikkomusta listassa ja dialogissa (320 ja 1280 px). Näppäimistö, fokus (Sulje, Esc → takaisin nappiin), taustan inertti, tausta-klikkaus, paikkamerkki, 320 px sekä 200 ja 400 % zoom OK, ei vaakavieritystä. Critical 0, High 0, Medium 0, Low 3 (UX-040 scrollbar-gutter, UX-041 ison kuvan uudelleenyritys, UX-042 Info). **Veto: ei, ei blokkaavia.**
+- **Suositukset:** UX-040 (`html { scrollbar-gutter: stable }`, yksi rivi) korjattavaksi, jos Koodari koskee CSS:ää muutenkin, muuten velka. UX-041 velka (kiertotie: sivun päivitys, harvinainen).
+- **Rajoitteet:** ruudunlukijaa ei ajettu. Vierityspalkin hyppyä ei voitu mitata headless-selaimessa.
