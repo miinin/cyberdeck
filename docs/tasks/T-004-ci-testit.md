@@ -31,3 +31,6 @@ Rikkinäinen koodi ei pääse testisivustolle eikä tuotantoon. Testit ja lint a
 - Mitä pyydän: Digiturvan kevyt katselmointi (.github/workflows), PM todentaa PR:n workflow-ajon.
 - Testit: `npm test` 3 kertaa, 34 tiedostoa / 559 testiä läpi joka kerta, ajat 22 s, 22 s, 21 s. Lint ja build läpi.
 - Koodikatselmointi: tehty · Pakollisia korjattu 1 (theme-testi) · Suosituksia 0
+
+### Luovutus 2026-10-02 · Digiturva → PM
+- Kevyt katselmointi (.github, firebase.json, .gitignore, eslint.config.js, vite.config.ts): `persist-credentials: false` kaikissa kolmessa checkoutissa, ei uusia salaisuuksia, permissions ja triggerit ennallaan (ei `pull_request_target`ia), lint ja test ennen buildia ja deployta. firebase.json ei muuttunut. SEC-003 Varmistettu ja suljettu (`reports/SEC-001-t001-katselmointi.md`). Uusia löydöksiä 0, veto: ei.

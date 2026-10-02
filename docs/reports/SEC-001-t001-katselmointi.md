@@ -85,7 +85,7 @@ Ei uutta riippuvuutta. Voidaan tehdä T-006:n yhteydessä tai omana `[velka]`-te
           persist-credentials: false
 ```
 `action-hosting-deploy` saa tokenin `repoToken`-syötteenä, eikä se tarvitse gitin tunnuksia. Korjauksen voi tehdä T-004:n yhteydessä (sama tiedosto `preview.yml`). Muutos on SR-9:n mukaisesti Digiturvan katselmoitava.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (T-004, commit 380d25d: `persist-credentials: false` kaikissa kolmessa checkoutissa) → Varmistettu (Digiturva 2026-10-02: triggerit ja permissions ennallaan, ei `pull_request_target`ia eikä uusia salaisuuksia, lint ja test ajetaan ennen deployta)
 
 ### SEC-004 · Sivukatto ja vastauksen koko · Info
 **Sijainti:** `src/api/netdeckClient.ts:8-11`, `remainingOffsets` · **Tehtävä:** T-001
@@ -119,4 +119,4 @@ Ei uutta riippuvuutta. Voidaan tehdä T-006:n yhteydessä tai omana `[velka]`-te
 | Löydös | Korjattu (commit) | Varmistettu |
 |---|---|---|
 | SEC-002 | – | – |
-| SEC-003 | – | – |
+| SEC-003 | 380d25d (T-004) | Digiturva 2026-10-02 |
