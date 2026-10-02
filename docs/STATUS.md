@@ -67,8 +67,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 1. T-044 (tuontiraportin ja Netdeck-linkkikentän ulkoasu) ja taulukon lajittelu sarakkeittain (uusi tehtävä, PM pilkkoo). Sen jälkeen /julkaise.
 2. Käyttäjä 2026-10-02: MVP-1:n loppukatselmoinnit (UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija) eivät ole vielä ajankohtaisia, joten ne siirretään myöhemmäksi.
 3. Velat: T-047, T-041 (DeckEditorin pilkkominen), T-042, T-043, T-030, T-031.
-2. MVP-1:n loppukatselmoinnit (UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija) ja sen jälkeen /julkaise.
-2. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
+4. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
 
 **Tokenien säästö (käyttäjä 2026-10-02):** tokenit kuluvat nopeasti, ja käyttöraja katkaisi kaksi rinnakkaista Koodaria. Aja yksi agentti kerrallaan, pidä tehtävänannot lyhyinä ja tyhjennä istunto (`/clear`) tehtävien välissä.
 
