@@ -1,5 +1,5 @@
 # T-013 · Pakanrakennus: luonti, nimeäminen, muokkaus, poisto ja laillisuustarkistus
-**Tila:** Ready · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02)
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02)
 **Malli:** D-014. Tietomalli ja tallennus ovat valmiina (T-011: `src/domain/deck.ts`, decks-repositorio), joten Arkkitehtia ei tarvita. Digiturva tekee kevyen katselmoinnin, koska tehtävässä on käyttäjän syöte (pakan nimi) ja tallennus. UX katselmoi MVP-1:n lopussa.
 **Haara:** `t-013-pakat` (test-haarasta T-040:n jälkeen)
 
@@ -57,3 +57,7 @@ Pelaaja rakentaa omista korteistaan laillisen pakan, nimeää sen ja näkee heti
 
 ### Luovutus 2026-10-02 · Digiturva → PM
 - Kevyt tietoturvakatselmointi tehty: 0 Critical, 0 High, 0 Medium, 1 Low (SEC-007, nimikentän maxLength puuttuu, ei turvavaikutusta). Ei estä Done-tilaa. Raportti: docs/reports/SEC-007-t013-pakat.md.
+
+### PM 2026-10-02 · Done (D-014)
+- Esikatselu PR #13 (1280 px): pakkalista, uusi pakka, lisäys, rikeviestit (39/40-raja ja 4 kopiota), RAM-rajat ja kokoelmavertailu toimivat. Digiturva SEC-007: ei Critical/High.
+- Velaksi: T-041 (pakan rivien tiivistys ja DeckEditorin pilkkominen), T-042 (kahden välilehden ylikirjoitus), T-043 (maxLength pakan nimeen, SEC-007 Low). Tekstit (deckTexts.ts, rikeviestit) Sisällöntuottajalle MVP-1:n lopussa.

@@ -1,18 +1,20 @@
-# STATUS · päivitetty 2026-10-02 (PM, D-014 kevyt malli, T-034 aloitettu)
+# STATUS · päivitetty 2026-10-02 (PM, T-013 Done, valmis /clear-komentoon)
 
 ## Yhdellä lauseella
-MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). MVP-1 on pilkottu tehtäviksi T-010–T-015 (D-007).
+MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
 
 ## MVP-taso
-Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015) sekä D-012:n lisätehtävistä T-021 ja T-025. MVP-0 valmis.
+Työn alla: MVP-1 · Valmiina: T-010, T-011, T-012, T-013, T-021, T-025–T-027, T-033–T-040. Jäljellä Must: T-014 (pakkalistan tuonti, vaatii vastauksen alla), T-015 (vienti ja tuonti), T-004 (testit CI:hin). MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | – | Odotetaan käyttäjän seuraavaa tehtävää. |
+| – | – | – | Ei keskeneräisiä tehtäviä. Seuraava: käyttäjän valinta (katso Seuraavaksi). |
 
 ## Blokkerit
-- Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
+- Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
+- Paikallinen: vanhat `vite preview` -prosessit lukitsevat node_modulesin ja `.claude/worktrees/t-026`-kansion (poisto epäonnistui). Käyttäjä sulkee prosessit, minkä jälkeen kansion voi poistaa. Worktree t-027 on vielä rekisteröity (valmis, voi poistaa: `git worktree remove .claude/worktrees/t-027`).
+- PM:n kuvakaappausskripti (CDP, 320 px, localStorage) oli istunnon scratchpadissa. Jos sitä tarvitaan, kirjoita uudelleen `scripts/`-kansion ulkopuolelle.
 
 ## Kysymykset käyttäjälle (ei blokkaa, edetään oletuksella)
 - R-4 Tuotantojulkaisun suojaus: katso PM:n ehdotus T-001-kortissa. Oletus: ei muutoksia ennen erillistä testiprojektia.
@@ -24,8 +26,8 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 
 ## Kulutus (D-014, 2026-10-02: kevyt malli, katso CLAUDE.md. D-009 alla vain niiltä osin kuin ei ristiriitaa)
 - Katselmoinnit riskin mukaan (agents.md v1.3). Testikäyttäjä ja Dokumentoija MVP-tason lopussa.
-- Opus: Koodari, Arkkitehti, Digiturva. Sonnet: UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija (Agent-kutsussa `model: "sonnet"`).
-- Enintään kaksi agenttia kerrallaan. PM tyhjentää istunnon (`/clear`) tehtävien välissä ja jatkaa komennolla `/jatka`.
+- Sonnet: Koodari, UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija. Opus: Arkkitehti ja Digiturva (D-014, malli on agenttimäärittelyssä).
+- Yksi agentti kerrallaan (D-014). PM tyhjentää istunnon (`/clear`) tehtävien välissä ja jatkaa komennolla `/jatka`.
 
 ## Toimintatapa, kun käyttäjä on poissa (sovittu 2026-09-30)
 - PM vie tehtävää eteenpäin agenttien työnkulun mukaan (suunnittelu → Koodari → katselmoinnit → testikäyttäjä → dokumentointi → PR testiin).
@@ -37,6 +39,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-013 Pakanrakennus ja laillisuussäännöt (2026-10-02, PR #13)
 - T-040 Selaus- ja muokkaustila, taulukkonäkymä (2026-10-02, PR #12)
 - T-039 Teemavalitsin ikonina (2026-10-02)
 - T-038 Tiivis yläosa (2026-10-02)
@@ -56,7 +59,8 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-013 → T-014 → T-015 (riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta. T-029 ja T-032 (velka, pieniä) ennen seuraavaa rinnakkaista työtä.
+1. T-014 (tarvitsee vastauksen: tallennetaanko tuotu lista aina pakaksi?) → T-015. T-004 (testit CI:hin) ja pienet velat T-029, T-032, T-041.
+2. MVP-1:n loppukatselmoinnit (UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija) ja sen jälkeen /julkaise.
 2. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
 
 **Tokenien säästö (käyttäjä 2026-10-02):** tokenit kuluvat nopeasti, ja käyttöraja katkaisi kaksi rinnakkaista Koodaria. Aja yksi agentti kerrallaan, pidä tehtävänannot lyhyinä ja tyhjennä istunto (`/clear`) tehtävien välissä.
