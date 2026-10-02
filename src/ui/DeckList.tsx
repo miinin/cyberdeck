@@ -16,7 +16,7 @@ import { texts } from './texts';
 export type DeckView = 'list' | 'stacks';
 
 /** The card image, or the dashed placeholder when there is none or it fails to load. */
-function DeckCardImage({ card, className }: { card: Card; className: string }) {
+export function DeckCardImage({ card, className }: { card: Card; className: string }) {
   const image = getCardImage(card.key);
   const [failed, setFailed] = useState(false);
   if (image === null || failed) return <span className={`${className} card-image--missing`} aria-hidden="true" />;

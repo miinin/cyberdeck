@@ -38,6 +38,17 @@ describe('Deck list import', () => {
     expect(within(report).getByText(/Pääpakassa on 5 korttia, vähintään 40/)).toBeInTheDocument();
   });
 
+  it('shows the report like the deck column: progress, Legends, rows by type and stats (T-051)', async () => {
+    const { user } = await openImport(storedCollection([['u0', 1]]));
+    await check(user, LIST);
+    const report = await screen.findByRole('region', { name: 'Tarkistuksen tulos' });
+    expect(within(report).getByText('Pääpakka 5/40–50')).toBeInTheDocument();
+    expect(within(report).getByRole('heading', { name: 'Legendit (3/3)' })).toBeInTheDocument();
+    expect(within(report).getByRole('heading', { name: 'Unit (5)' })).toBeInTheDocument();
+    expect(within(report).getByText('3 × Unit 0').closest('li')).toHaveTextContent('omistat 1/3 · puuttuu 2');
+    expect(within(report).getByRole('heading', { name: 'Tilastot' })).toBeInTheDocument();
+  });
+
   it('renders imported text as text, not markup (SR-14)', async () => {
     const { user } = await openImport();
     await check(user, '1 L1\n3 <img src=x onerror=alert(1)>');

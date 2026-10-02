@@ -21,6 +21,11 @@ export const deckTexts = {
   listLoading: 'Ladataan pakkoja…',
   listUnavailable: 'Pakkoja ei voitu ladata. Lataa sivu uudelleen. Jos ongelma jatkuu, tarkista selaimen yksityisyysasetukset.',
   newDeck: 'Uusi pakka',
+  // Deck cards and empty state (T-051)
+  listEmptyTitle: 'Ei vielä pakkoja',
+  listEmptyHint: 'Rakenna pakka kortti kerrallaan, liitä valmis pakkalista tai hae julkinen pakka Netdeck.gg:stä.',
+  fetchNetdeck: 'Hae Netdeckistä',
+  deckColors: 'Värit',
   decksLabel: 'Omat pakat',
   open: 'Avaa',
   rename: 'Nimeä uudelleen',
@@ -179,6 +184,7 @@ export const deckTexts = {
   },
   // Netdeck link (T-046)
   linkHeading: 'Hae pakka Netdeck-linkistä',
+  textHeading: 'Liitä pakkalista tai tiedosto',
   linkLabel: 'Netdeck-linkki',
   linkHint: 'Esimerkiksi https://netdeck.gg/decks/cyberpunk/… Haku lähettää pyynnön Netdeck.gg-palveluun.',
   linkButton: 'Hae pakka',

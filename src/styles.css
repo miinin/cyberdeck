@@ -3406,3 +3406,379 @@ button.legality:focus-visible {
     border: 1px solid ButtonText;
   }
 }
+
+/*
+ * Decks page (T-051): each deck as a card with the Legends' art as a banner, colours, the main deck
+ * progress, legality and what is missing from the collection. The actions stay at the bottom.
+ */
+.deck-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.deck-list {
+  grid-template-columns: repeat(auto-fill, minmax(min(21rem, 100%), 1fr));
+}
+
+.deck-row {
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border-block-start: 3px solid var(--color-accent-edge);
+}
+
+.deck-row:hover {
+  border-color: var(--color-border-strong);
+  border-block-start-color: var(--color-accent-edge);
+}
+
+.deck-card-banner {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: 100%;
+  gap: 2px;
+  block-size: 7.5rem;
+  overflow: hidden;
+  border-block-end: 1px solid var(--color-border);
+  background: var(--color-border);
+}
+
+.deck-card-art {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-width: 0;
+  object-fit: cover;
+  object-position: center 16%;
+}
+
+.deck-card-banner .card-image--missing {
+  border: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-surface) 0 0.5rem,
+    var(--color-surface-hover) 0.5rem 1rem
+  );
+}
+
+.deck-card-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.deck-card-body > * {
+  margin: 0;
+}
+
+.deck-row .deck-name {
+  font-size: var(--font-size-lg);
+  line-height: 1.2;
+}
+
+.deck-card-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.deck-card-color {
+  white-space: nowrap;
+}
+
+.deck-card-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.deck-card-facts > p {
+  margin: 0;
+}
+
+.deck-card-missing {
+  color: var(--color-warning);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.deck-card-owned {
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+}
+
+.deck-row > .row-actions,
+.deck-row > .deck-rename {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.deck-row > .row-actions {
+  gap: var(--space-1);
+  margin-block-start: 0;
+}
+
+/* Six actions on a card: compact, but still at least 2.75rem high. */
+.deck-row > .row-actions > button {
+  padding-inline: var(--space-2);
+  font-size: 0.875rem;
+}
+
+.deck-empty {
+  max-width: 44rem;
+}
+
+.deck-empty .deck-empty-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.deck-empty p {
+  margin: 0;
+}
+
+/* Import (T-051): the two sources side by side, the report in the deck column's style. */
+.import-sources {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr));
+  align-items: start;
+  gap: var(--space-4);
+  max-width: 90rem;
+  margin-block: var(--space-4);
+}
+
+.deck-import-form.import-source-panel {
+  max-width: none;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-accent-edge);
+  background: var(--color-surface);
+}
+
+.import-source-panel h2 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.import-source-panel .hint,
+.import-source-panel .field-error {
+  margin: 0;
+}
+
+.deck-import-form input[type='url'] {
+  width: 100%;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.deck-import-form input[type='url']:hover,
+.deck-import-form textarea:hover {
+  border-color: var(--color-info);
+}
+
+.deck-import-form input[type='url']:focus-visible {
+  border-color: var(--color-info);
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.deck-import-form input[type='url'][aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.deck-import-form textarea {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.import-source {
+  color: var(--color-text-muted);
+}
+
+.import-layout {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.import-layout h3 {
+  margin-block: 0 var(--space-2);
+}
+
+.import-head,
+.import-save,
+.import-rules {
+  min-width: 0;
+}
+
+/* Not sticky like the editor's head: nothing below it may be covered (WCAG 2.4.11). */
+.deck-head.import-head {
+  position: static;
+}
+
+.import-head > p {
+  margin: 0;
+}
+
+.import-missing-total {
+  color: var(--color-warning);
+  font-weight: var(--font-weight-bold);
+}
+
+.import-owned-total {
+  color: var(--color-success);
+}
+
+.deck-name-field.import-save {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+.import-save h3 {
+  margin: 0;
+}
+
+.import-save .row-actions {
+  margin-block-start: var(--space-1);
+}
+
+.import-save-button {
+  flex: 1 1 auto;
+}
+
+.import-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.import-cards .deck-section > :is(h3, h4) {
+  margin-block: 0 var(--space-2);
+}
+
+.import-cards .legend-slots {
+  max-width: 40rem;
+}
+
+.import-legend-image {
+  cursor: default;
+}
+
+.import-legend-image:hover {
+  border-color: var(--color-border);
+}
+
+.legend-slot .import-row-name {
+  white-space: normal;
+}
+
+.legend-slot .import-row-meta {
+  font-size: 0.875rem;
+}
+
+/* Main deck rows: wide screens show them in columns. */
+.import-cards .deck-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
+  gap: 2px;
+}
+
+.deck-tile.import-tile,
+.deck-tile.import-tile.is-missing {
+  grid-template-columns: 2rem minmax(0, 1fr);
+  grid-template-areas:
+    'gem name'
+    'gem meta';
+  padding-block: var(--space-1);
+}
+
+.import-tile .deck-tile-art {
+  inset-inline-end: 0;
+}
+
+.import-row-name {
+  grid-area: name;
+  min-width: 0;
+  font-weight: var(--font-weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.import-row-meta {
+  grid-area: meta;
+  min-width: 0;
+  font-size: 0.875rem;
+}
+
+.import-row-meta:empty {
+  display: none;
+}
+
+.import-tile .import-missing,
+.import-tile .hint {
+  font-size: inherit;
+  text-shadow:
+    0 0 2px var(--color-surface),
+    0 0 4px var(--color-surface);
+}
+
+.import-lines {
+  margin: 0;
+  padding-inline-start: var(--space-6);
+}
+
+.import-unrecognized .import-lines {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.import-unrecognized h3,
+.import-unrecognized p {
+  margin: 0;
+}
+
+@media (min-width: 64rem) {
+  .import-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas:
+      'cards head'
+      'cards save'
+      'cards rules'
+      'cards stats';
+  }
+
+  .import-head {
+    grid-area: head;
+  }
+
+  .import-save {
+    grid-area: save;
+  }
+
+  .import-rules {
+    grid-area: rules;
+  }
+
+  .import-cards {
+    grid-area: cards;
+  }
+
+  .import-stats {
+    grid-area: stats;
+  }
+}

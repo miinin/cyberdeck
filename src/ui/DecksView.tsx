@@ -3,14 +3,29 @@ import type { FormEvent } from 'react';
 import type { Card } from '../domain/card';
 import type { Deck, DeckContent } from '../domain/deck';
 import { checkDeckName, copyContent, copyDeckName, emptyDeckContent, uniqueDeckName } from '../domain/deckEdit';
-import { deckTotals, errorsOf, toCardsByKey, validateDeck } from '../domain/deckRules';
-import type { CardsByKey } from '../domain/deckRules';
+import {
+  colorDistribution,
+  deckCounts,
+  deckTotals,
+  errorsOf,
+  groupDeck,
+  LEGEND_COUNT,
+  MAX_MAIN_DECK,
+  MIN_MAIN_DECK,
+  toCardsByKey,
+  validateDeck,
+} from '../domain/deckRules';
+import type { CardsByKey, ColorShare, DeckGroups } from '../domain/deckRules';
 import { StorageError } from '../storage';
 import type { LoadNotice, Repositories, StorageErrorKind } from '../storage';
+import { CardColor } from './CardColor';
+import { countIn } from './collectionStore';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
+import { DeckCardImage } from './DeckList';
 import { DeckImport } from './DeckImport';
 import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
+import { useCollection } from './useCollection';
 import { useDecks } from './useDecks';
 
 const dateFormat = new Intl.DateTimeFormat('fi-FI', { dateStyle: 'short', timeStyle: 'short' });
@@ -32,40 +47,96 @@ function noticeText(notice: LoadNotice): string | null {
   }
 }
 
-/** Counts and legality of one deck, shown on its row. */
-function DeckRowSummary({ deck, cardsByKey }: { deck: Deck; cardsByKey: CardsByKey }) {
+/** Colours of a deck: the Legends' colours first, then the main deck's, each once. */
+function deckColors(grouped: DeckGroups, main: readonly ColorShare[]): string[] {
+  const colors = [...grouped.legends.map((row) => row.card.color), ...main.map((share) => share.color)];
+  return [...new Set(colors.filter((color): color is string => color !== null))];
+}
+
+/**
+ * One deck as a card (T-051): the Legends' art as a banner, colours, the main deck progress, legality,
+ * what is missing from the collection and when it was changed.
+ */
+function DeckCardSummary({
+  deck,
+  cardsByKey,
+  ownedOf,
+}: {
+  deck: Deck;
+  cardsByKey: CardsByKey;
+  /** Copies in the collection, or null when the collection cannot be compared. */
+  ownedOf: (key: string) => number | null;
+}) {
   const totals = deckTotals(deck, cardsByKey);
   const errors = errorsOf(validateDeck(deck, cardsByKey)).length;
+  const grouped = groupDeck(deck, cardsByKey);
+  const colors = deckColors(grouped, colorDistribution(deck, cardsByKey));
+  const mainState = totals.main < MIN_MAIN_DECK ? 'under' : totals.main > MAX_MAIN_DECK ? 'over' : 'ok';
+  let missing: number | null = 0;
+  let copies = 0;
+  for (const [key, count] of deckCounts(deck)) {
+    if (!cardsByKey.has(key)) continue;
+    copies += count;
+    const have = ownedOf(key);
+    if (have === null) missing = null;
+    else if (missing !== null) missing += Math.max(0, count - have);
+  }
+  const emptySlots = Math.max(0, LEGEND_COUNT - grouped.legends.length);
   return (
     <>
-      <p className="deck-counts">{deckTexts.counts(totals.legends, totals.main)}</p>
-      <p className={errors === 0 ? 'deck-status is-legal' : 'deck-status'}>
-        {errors === 0 ? (
-          <>
-            <span aria-hidden="true">{deckTexts.legal}</span>
-            <span className="visually-hidden">{deckTexts.legalSpoken}</span>
-          </>
-        ) : (
-          deckTexts.unfinished(errors)
+      <div className="deck-card-banner" aria-hidden="true">
+        {grouped.legends.slice(0, LEGEND_COUNT).map((row) => (
+          <DeckCardImage key={row.card.key} card={row.card} className="deck-card-art" />
+        ))}
+        {Array.from({ length: emptySlots }, (_, i) => (
+          <span key={`empty-${i}`} className="deck-card-art card-image--missing" />
+        ))}
+      </div>
+      <div className="deck-card-body">
+        <h2 className="deck-name">{deck.name}</h2>
+        {colors.length > 0 && (
+          <p className="deck-card-colors">
+            <span className="visually-hidden">{deckTexts.deckColors}: </span>
+            {colors.map((color) => (
+              <span key={color} className="deck-card-color">
+                <CardColor color={color} />
+              </span>
+            ))}
+          </p>
         )}
-      </p>
-      <p className="deck-updated">
-        {deckTexts.updated} <time dateTime={deck.updatedAt}>{dateFormat.format(new Date(deck.updatedAt))}</time>
-      </p>
+        <p className="deck-counts">{deckTexts.counts(totals.legends, totals.main)}</p>
+        <progress
+          className={`deck-progress is-${mainState}`}
+          max={MAX_MAIN_DECK}
+          value={Math.min(totals.main, MAX_MAIN_DECK)}
+          aria-hidden="true"
+        />
+        <div className="deck-card-facts">
+          {errors === 0 ? (
+            <p className="legality is-legal">
+              <span aria-hidden="true">✓</span> {deckTexts.legalSpoken}
+            </p>
+          ) : (
+            <p className="legality is-issues">
+              <span aria-hidden="true">⚠</span> {deckTexts.unfinished(errors)}
+            </p>
+          )}
+          {missing !== null && copies > 0 && (
+            <p className={missing > 0 ? 'deck-card-missing' : 'deck-card-owned'}>
+              {deckTexts.missingFromCollection(missing)}
+            </p>
+          )}
+        </div>
+        <p className="deck-updated">
+          {deckTexts.updated} <time dateTime={deck.updatedAt}>{dateFormat.format(new Date(deck.updatedAt))}</time>
+        </p>
+      </div>
     </>
   );
 }
 
 /** Inline rename form on a deck row. Validates like the repository: 1–100 characters after trimming. */
-function RenameForm({
-  deck,
-  onSave,
-  onCancel,
-}: {
-  deck: Deck;
-  onSave: (name: string) => void;
-  onCancel: () => void;
-}) {
+function RenameForm({ deck, onSave, onCancel }: { deck: Deck; onSave: (name: string) => void; onCancel: () => void }) {
   const [text, setText] = useState(deck.name);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -135,7 +206,10 @@ export function DecksView({
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Deck | null>(null);
   const [failure, setFailure] = useState<StorageErrorKind | 'unknown' | null>(null);
-  const [importing, setImporting] = useState(false);
+  /** Open import page, and which field it starts in. */
+  const [importing, setImporting] = useState<'text' | 'link' | null>(null);
+  const { snapshot: collection } = useCollection(repositories.collection);
+  const ownedOf = (key: string) => (collection.phase === 'ready' ? countIn(collection, key) : null);
   const [live, setLive] = useState('');
   /** Element to focus after the next render (a data attribute of a row button, or the heading). */
   const focusTarget = useRef<string | null>(null);
@@ -214,20 +288,35 @@ export function DecksView({
     if (opener?.isConnected) opener.focus();
   };
 
-  if (importing) {
+  if (importing !== null) {
     return (
       <DeckImport
         cards={cards}
         repositories={repositories}
         decks={decks}
         onOpen={onOpen}
+        startAtLink={importing === 'link'}
         onClose={() => {
-          setImporting(false);
-          focusTarget.current = 'import';
+          focusTarget.current = importing === 'link' ? 'netdeck' : 'import';
+          setImporting(null);
         }}
       />
     );
   }
+
+  const actions = (
+    <div className="deck-toolbar">
+      <button type="button" className="button-primary" onClick={() => void handleCreate()}>
+        {deckTexts.newDeck}
+      </button>
+      <button type="button" className="button-secondary" data-focus-id="import" onClick={() => setImporting('text')}>
+        {deckTexts.importButton}
+      </button>
+      <button type="button" className="button-secondary" data-focus-id="netdeck" onClick={() => setImporting('link')}>
+        {deckTexts.fetchNetdeck}
+      </button>
+    </div>
+  );
 
   return (
     <>
@@ -264,83 +353,74 @@ export function DecksView({
 
       {phase === 'ready' && (
         <>
-          <div className="deck-toolbar">
-            <button type="button" className="button-primary" onClick={() => void handleCreate()}>
-              {deckTexts.newDeck}
-            </button>{' '}
-            <button
-              type="button"
-              className="button-secondary"
-              data-focus-id="import"
-              onClick={() => setImporting(true)}
-            >
-              {deckTexts.importButton}
-            </button>
-          </div>
-
           {decks.length === 0 ? (
-            <div className="empty">
+            <div className="empty deck-empty">
+              <h2 className="deck-empty-title">{deckTexts.listEmptyTitle}</h2>
               <p>{deckTexts.listEmpty}</p>
+              <p className="hint">{deckTexts.listEmptyHint}</p>
+              {actions}
             </div>
           ) : (
-            <ul className="deck-list" aria-label={deckTexts.decksLabel}>
-              {decks.map((deck) => (
-                <li key={deck.id} className="deck-row">
-                  <h2 className="deck-name">{deck.name}</h2>
-                  <DeckRowSummary deck={deck} cardsByKey={cardsByKey} />
-                  {renamingId === deck.id ? (
-                    <RenameForm
-                      deck={deck}
-                      onSave={(name) => void handleRename(deck, name)}
-                      onCancel={() => {
-                        setRenamingId(null);
-                        focusTarget.current = `rename-${deck.id}`;
-                      }}
-                    />
-                  ) : (
-                    <div className="row-actions">
-                      <button
-                        type="button"
-                        className="button-primary"
-                        aria-label={deckTexts.forDeck(deckTexts.open, deck.name)}
-                        onClick={() => onOpen(deck.id)}
-                      >
-                        {deckTexts.open}
-                      </button>
-                      <button
-                        type="button"
-                        className="button-secondary"
-                        data-focus-id={`rename-${deck.id}`}
-                        aria-label={deckTexts.forDeck(deckTexts.rename, deck.name)}
-                        onClick={() => setRenamingId(deck.id)}
-                      >
-                        {deckTexts.rename}
-                      </button>
-                      <button
-                        type="button"
-                        className="button-secondary"
-                        aria-label={deckTexts.forDeck(deckTexts.copy, deck.name)}
-                        onClick={() => handleCopy(deck)}
-                      >
-                        {deckTexts.copy}
-                      </button>
-                      <button
-                        type="button"
-                        className="button-secondary"
-                        aria-label={deckTexts.forDeck(deckTexts.remove, deck.name)}
-                        onClick={(event) => {
-                          deleteOpenerRef.current = event.currentTarget;
-                          setDeleting(deck);
+            <>
+              {actions}
+              <ul className="deck-list" aria-label={deckTexts.decksLabel}>
+                {decks.map((deck) => (
+                  <li key={deck.id} className="deck-row">
+                    <DeckCardSummary deck={deck} cardsByKey={cardsByKey} ownedOf={ownedOf} />
+                    {renamingId === deck.id ? (
+                      <RenameForm
+                        deck={deck}
+                        onSave={(name) => void handleRename(deck, name)}
+                        onCancel={() => {
+                          setRenamingId(null);
+                          focusTarget.current = `rename-${deck.id}`;
                         }}
-                      >
-                        {deckTexts.remove}
-                      </button>
-                      <ExportButtons deck={deck} cardsByKey={cardsByKey} />
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
+                      />
+                    ) : (
+                      <div className="row-actions">
+                        <button
+                          type="button"
+                          className="button-primary"
+                          aria-label={deckTexts.forDeck(deckTexts.open, deck.name)}
+                          onClick={() => onOpen(deck.id)}
+                        >
+                          {deckTexts.open}
+                        </button>
+                        <button
+                          type="button"
+                          className="button-secondary"
+                          data-focus-id={`rename-${deck.id}`}
+                          aria-label={deckTexts.forDeck(deckTexts.rename, deck.name)}
+                          onClick={() => setRenamingId(deck.id)}
+                        >
+                          {deckTexts.rename}
+                        </button>
+                        <button
+                          type="button"
+                          className="button-secondary"
+                          aria-label={deckTexts.forDeck(deckTexts.copy, deck.name)}
+                          onClick={() => handleCopy(deck)}
+                        >
+                          {deckTexts.copy}
+                        </button>
+                        <button
+                          type="button"
+                          className="button-secondary"
+                          aria-label={deckTexts.forDeck(deckTexts.remove, deck.name)}
+                          onClick={(event) => {
+                            deleteOpenerRef.current = event.currentTarget;
+                            setDeleting(deck);
+                          }}
+                        >
+                          {deckTexts.remove}
+                        </button>
+                        <ExportButtons deck={deck} cardsByKey={cardsByKey} />
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </>
       )}
