@@ -27,9 +27,9 @@ export function CardImage({ card, onOpen }: { card: Card; onOpen: (card: Card, o
     >
       <img
         className="card-image"
-        src={image.small}
-        width={CARD_IMAGE_WIDTH.sm}
-        height={cardImageHeight('sm')}
+        src={image.medium}
+        width={CARD_IMAGE_WIDTH.md}
+        height={cardImageHeight('md')}
         alt=""
         loading="lazy"
         decoding="async"

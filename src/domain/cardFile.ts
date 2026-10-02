@@ -18,7 +18,7 @@ export interface CardFile {
 }
 
 /** Card fields in model order. The file is written in this order, so the output is deterministic. */
-const CARD_FIELDS = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'key'] as const;
+const CARD_FIELDS = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'key'] as const;
 const FILE_FIELDS = ['format', 'version', 'cards'] as const;
 
 /** Builds the file object with a fixed key order (format, version, cards; Card fields in model order). */
@@ -35,6 +35,8 @@ export function toCardFile(cards: readonly Card[]): CardFile {
       type: card.type,
       color: card.color,
       cost: card.cost,
+      power: card.power,
+      ram: card.ram,
       key: card.key,
     })),
   };
@@ -67,6 +69,13 @@ function requireTextOrNull(value: unknown, field: string, where: string): string
   return value === null ? null : requireText(value, field, where);
 }
 
+function requireNumberOrNull(value: unknown, field: string, where: string): number | null {
+  if (value !== null && (typeof value !== 'number' || !Number.isFinite(value))) {
+    throw new Error(`${where}: "${field}" must be a finite number or null`);
+  }
+  return value;
+}
+
 function parseCard(value: unknown, index: number): Card {
   const where = `cards[${index}]`;
   if (!isPlainObject(value)) throw new Error(`${where}: not an object`);
@@ -74,10 +83,9 @@ function parseCard(value: unknown, index: number): Card {
 
   const name = requireText(value.name, 'name', where);
   const subname = requireTextOrNull(value.subname, 'subname', where);
-  const cost = value.cost;
-  if (cost !== null && (typeof cost !== 'number' || !Number.isFinite(cost))) {
-    throw new Error(`${where}: "cost" must be a finite number or null`);
-  }
+  const cost = requireNumberOrNull(value.cost, 'cost', where);
+  const power = requireNumberOrNull(value.power, 'power', where);
+  const ram = requireNumberOrNull(value.ram, 'ram', where);
   const key = requireText(value.key, 'key', where);
   if (!isCardKey(key) || key !== cardKey(name, subname)) {
     throw new Error(`${where}: "key" ${JSON.stringify(key)} does not match cardKey(name, subname)`);
@@ -92,6 +100,8 @@ function parseCard(value: unknown, index: number): Card {
     type: requireText(value.type, 'type', where),
     color: requireTextOrNull(value.color, 'color', where),
     cost,
+    power,
+    ram,
     key,
   };
 }

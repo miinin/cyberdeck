@@ -16,4 +16,6 @@ export interface NetdeckCardFields {
   card_type: unknown;
   color: unknown;
   cost: unknown;
+  power: unknown;
+  ram: unknown;
 }

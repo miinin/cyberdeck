@@ -11,7 +11,7 @@ function browserLikeRepositories() {
 import { ANNOUNCE_DELAY_MS } from './useDelayedAnnouncement';
 
 function card(slug: string, name: string, subname: string | null, type: string, color: string | null): Card {
-  return { id: `id-${slug}`, key: `key-${slug}`, slug, name, subname, displayName: name, type, color, cost: 1 };
+  return { id: `id-${slug}`, key: `key-${slug}`, slug, name, subname, displayName: name, type, color, cost: 1, power: null, ram: null };
 }
 
 const cards: Card[] = [
@@ -31,8 +31,8 @@ const searchBox = () => screen.getByRole('searchbox', { name: 'Hae nimellä' });
 const liveRegion = () => screen.getByRole('status');
 const statusText = (container: HTMLElement) => container.querySelector('#card-status')?.textContent;
 const rowNames = () =>
-  within(screen.getByRole('table'))
-    .getAllByRole('rowheader')
+  within(screen.getByRole('list'))
+    .getAllByRole('heading', { level: 3 })
     .map((cell) => cell.textContent);
 
 describe('CatalogView search and filters: structure', () => {
@@ -83,7 +83,7 @@ describe('CatalogView search and filters: filtering', () => {
     await userEvent.type(searchBox(), 'SILVER');
     expect(rowNames()).toEqual(['Johnny Silverhand, Rocking Renegade', 'Johnny Silverhand, Never Stop Fighting']);
     expect(statusText(container)).toBe('2 / 6 korttia');
-    expect(screen.getByRole('table', { name: 'Hakua vastaavat kortit' })).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Hakua vastaavat kortit' })).toBeInTheDocument();
 
     await userEvent.clear(searchBox());
     await userEvent.type(searchBox(), 'alvarez');
@@ -97,7 +97,7 @@ describe('CatalogView search and filters: filtering', () => {
     await userEvent.clear(searchBox());
 
     expect(statusText(container)).toBe('6 korttia');
-    expect(screen.getByRole('table', { name: 'Kaikki kortit' })).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Kaikki kortit' })).toBeInTheDocument();
     expect(rowNames()).toHaveLength(6);
   });
 
@@ -118,7 +118,7 @@ describe('CatalogView search and filters: filtering', () => {
     expect(statusText(container)).toBe('1 / 6 korttia');
 
     await userEvent.type(searchBox(), 'johnny');
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
     expect(statusText(container)).toBe('0 / 6 korttia');
   });
 
@@ -140,7 +140,7 @@ describe('CatalogView search and filters: filtering', () => {
     fireEvent.change(searchBox(), { target: { value: payload } });
 
     expect(searchBox()).toHaveValue(payload);
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
     expect(container.querySelector('script')).toBeNull();
     expect(container.querySelector('img')).toBeNull();
   });
@@ -158,7 +158,7 @@ describe('CatalogView search and filters: no results', () => {
         'Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.',
       ),
     ).toBeInTheDocument();
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { level: 2 })).not.toBeInTheDocument();
     // The search text stays so the user can see and fix it.
     expect(searchBox()).toHaveValue('silverhandd');

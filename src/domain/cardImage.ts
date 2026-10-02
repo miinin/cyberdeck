@@ -1,9 +1,9 @@
 /**
  * Card image sizes (D-013 osa 4, ARCHITECTURE.md 13.8). The import script and the UI read the same
- * constants, so UX changes a size in one place. `sm` is the list thumbnail (UX: 160 px, 2× of about
- * 3.5rem) and `lg` the enlarged image in the dialog.
+ * constants, so UX changes a size in one place. `md` is the grid image (T-034: about 360 px, 2× of a
+ * 14–16rem box) and `lg` the enlarged image in the dialog.
  */
-export const CARD_IMAGE_WIDTH = { sm: 160, lg: 720 } as const;
+export const CARD_IMAGE_WIDTH = { md: 360, lg: 720 } as const;
 
 export type CardImageSize = keyof typeof CARD_IMAGE_WIDTH;
 

@@ -10,7 +10,7 @@ export interface CardFileDiff {
   changed: { key: CardKey; fields: (keyof Card)[] }[];
 }
 
-const COMPARED_FIELDS: readonly (keyof Card)[] = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost'];
+const COMPARED_FIELDS: readonly (keyof Card)[] = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram'];
 
 /** Compares two validated card lists by key (D-008: the key is the card's identity). */
 export function diffCardFiles(previous: readonly Card[], next: readonly Card[]): CardFileDiff {

@@ -51,6 +51,10 @@ export const texts = {
   columnCost: 'Hinta',
   missingValue: '–',
   noCost: 'ei hintaa',
+  columnPower: 'Power',
+  noPower: 'ei poweria',
+  columnRam: 'RAM',
+  noRam: 'ei RAMia',
   noColor: 'ei väriä',
 
   // Search and filters: UX.md luku 5 (PM accepted K6–K8 on 2026-10-01).

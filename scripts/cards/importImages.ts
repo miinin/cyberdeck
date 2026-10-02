@@ -129,7 +129,7 @@ export async function importImages(
   }
 
   const keys = new Set(cards.map((card) => card.key));
-  const existing = (await deps.listFiles(`${CARD_IMAGES_DIR}/sm`)) ?? [];
+  const existing = (await deps.listFiles(`${CARD_IMAGES_DIR}/md`)) ?? [];
   const report: ImportImagesReport = {
     ...match,
     // A matched image that could not be converted leaves its card without an image, too.
