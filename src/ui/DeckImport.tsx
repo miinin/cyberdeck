@@ -8,11 +8,15 @@ import { buildImportReport } from '../domain/deckReport';
 import type { ImportReport } from '../domain/deckReport';
 import { toCardsByKey } from '../domain/deckRules';
 import { MAX_IMPORT_BYTES, parseDeckText } from '../domain/deckText';
+import type { ParsedDeckText } from '../domain/deckText';
+import { netdeckToParsedDeck, parseNetdeckUrl } from '../domain/netdeckDeck';
+import { fetchNetdeckDeck, NetdeckFetchError } from '../netdeck/fetchNetdeckDeck';
 import { StorageError } from '../storage';
 import type { Repositories, StorageErrorKind } from '../storage';
 import { deckTexts } from './deckTexts';
 
 type InputError = keyof typeof deckTexts.importErrors;
+type LinkError = keyof typeof deckTexts.linkErrors;
 
 /**
  * Import of a deck list pasted as text or read from a .txt file (T-014, SR-17). The report is shown
@@ -35,6 +39,10 @@ export function DeckImport({
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const [text, setText] = useState('');
   const [inputError, setInputError] = useState<InputError | null>(null);
+  const [linkText, setLinkText] = useState('');
+  const [linkError, setLinkError] = useState<LinkError | null>(null);
+  const [linkLoading, setLinkLoading] = useState(false);
+  const linkAbort = useRef<AbortController | null>(null);
   const [report, setReport] = useState<ImportReport | null>(null);
   const [collectionKnown, setCollectionKnown] = useState(true);
   const [nameText, setNameText] = useState('');
@@ -46,6 +54,7 @@ export function DeckImport({
 
   useEffect(() => {
     headingRef.current?.focus();
+    return () => linkAbort.current?.abort();
   }, []);
 
   const edit = (next: string) => {
@@ -77,6 +86,7 @@ export function DeckImport({
   const handleCheck = async (event: FormEvent) => {
     event.preventDefault();
     setSaveFailure(null);
+    setLinkError(null);
     const result = parseDeckText(text, cards);
     if (!result.ok) {
       setReport(null);
@@ -84,6 +94,10 @@ export function DeckImport({
       textRef.current?.focus();
       return;
     }
+    await showReport(result.deck);
+  };
+
+  const showReport = async (parsed: ParsedDeckText) => {
     let owned = new Map<string, number>();
     let known = true;
     try {
@@ -91,7 +105,7 @@ export function DeckImport({
     } catch {
       known = false;
     }
-    const next = buildImportReport(result.deck, owned, decks, cardsByKey);
+    const next = buildImportReport(parsed, owned, decks, cardsByKey);
     setInputError(null);
     setCollectionKnown(known);
     setReport(next);
@@ -99,6 +113,33 @@ export function DeckImport({
     setNameError(null);
     // Move focus to the result so a screen reader starts reading it.
     setTimeout(() => reportRef.current?.focus());
+  };
+
+  const handleFetch = async (event: FormEvent) => {
+    event.preventDefault();
+    setSaveFailure(null);
+    setInputError(null);
+    const uuid = parseNetdeckUrl(linkText);
+    if (uuid === null) {
+      setReport(null);
+      setLinkError('bad-url');
+      return;
+    }
+    linkAbort.current?.abort();
+    const controller = new AbortController();
+    linkAbort.current = controller;
+    setLinkError(null);
+    setReport(null);
+    setLinkLoading(true);
+    try {
+      const deck = await fetchNetdeckDeck(uuid, { signal: controller.signal });
+      await showReport(netdeckToParsedDeck(deck, cards));
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      setLinkError(error instanceof NetdeckFetchError ? error.kind : 'network');
+    } finally {
+      if (linkAbort.current === controller) setLinkLoading(false);
+    }
   };
 
   const handleSave = async (event: FormEvent) => {
@@ -129,6 +170,36 @@ export function DeckImport({
         {deckTexts.importHeading}
       </h1>
       <p>{deckTexts.importIntro}</p>
+
+      <form className="deck-import-form" onSubmit={(event) => void handleFetch(event)} noValidate>
+        <h2>{deckTexts.linkHeading}</h2>
+        <label htmlFor="import-link">{deckTexts.linkLabel}</label>
+        <input
+          id="import-link"
+          type="url"
+          autoComplete="off"
+          value={linkText}
+          aria-invalid={linkError !== null ? 'true' : undefined}
+          aria-describedby={linkError !== null ? 'import-link-hint import-link-error' : 'import-link-hint'}
+          onChange={(event) => {
+            setLinkText(event.target.value);
+            setLinkError(null);
+          }}
+        />
+        <p id="import-link-hint" className="hint">
+          {deckTexts.linkHint}
+        </p>
+        {linkError !== null && (
+          <p id="import-link-error" className="field-error" role="alert">
+            {deckTexts.linkErrors[linkError]}
+          </p>
+        )}
+        <div className="row-actions">
+          <button type="submit" className="button-primary" disabled={linkLoading}>
+            {linkLoading ? deckTexts.linkLoading : deckTexts.linkButton}
+          </button>
+        </div>
+      </form>
 
       <form className="deck-import-form" onSubmit={(event) => void handleCheck(event)} noValidate>
         <label htmlFor="import-text">{deckTexts.importTextLabel}</label>
@@ -161,6 +232,7 @@ export function DeckImport({
           <h2 id="report-heading" ref={reportRef} tabIndex={-1}>
             {deckTexts.reportHeading}
           </h2>
+          {report.source !== null && <p>{deckTexts.reportSource(report.source.name, report.source.author)}</p>}
           {!collectionKnown && <p className="notice notice-warning">{deckTexts.collectionNotReady}</p>}
           {collectionKnown && <p>{deckTexts.missingFromCollection(report.missingTotal)}</p>}
 
@@ -190,6 +262,21 @@ export function DeckImport({
               <ul>
                 {report.missingRows.map((row) => (
                   <li key={row.card.key}>{deckTexts.reportMissingRow(row.card.displayName, row.missing)}</li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {report.sideboardRows.length > 0 && (
+            <>
+              <h3>{deckTexts.reportSideboardHeading}</h3>
+              <p className="hint">{deckTexts.reportSideboardHint}</p>
+              <ul>
+                {report.sideboardRows.map((row) => (
+                  <li key={row.card.key}>
+                    {deckTexts.reportRow(row.needed, row.card.displayName)}
+                    {collectionKnown && ` · ${deckTexts.owned(row.owned, row.needed)}`}
+                  </li>
                 ))}
               </ul>
             </>

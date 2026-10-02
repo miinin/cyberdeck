@@ -31,6 +31,10 @@ export interface ParsedDeckText {
   readonly rows: readonly ImportedRow[];
   /** Lines that were not understood, cut to 100 characters (shown as text only, SR-14). */
   readonly unrecognized: readonly string[];
+  /** Cards outside the deck (Netdeck sideboard, T-046). Reported but never saved. */
+  readonly sideboard?: readonly ImportedRow[];
+  /** Where the list came from, when it was fetched from a link (T-046). */
+  readonly source?: { readonly name: string; readonly author: string | null };
 }
 
 export type ParseDeckTextResult = { ok: true; deck: ParsedDeckText } | { ok: false; error: ImportError };

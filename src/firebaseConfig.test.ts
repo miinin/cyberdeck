@@ -16,3 +16,14 @@ describe('firebase.json hosting headers', () => {
     expect(test?.headers).toEqual(prod?.headers);
   });
 });
+
+// T-046 (D-015): the only external origin the browser may call is the Netdeck deck API.
+describe('firebase.json Content-Security-Policy connect-src', () => {
+  it('allows connections only to self and api.netdeck.gg on both sites', () => {
+    for (const site of firebaseConfig.hosting) {
+      const csp = JSON.stringify(site.headers);
+      expect(csp).toContain("connect-src 'self' https://api.netdeck.gg;");
+      expect(csp.match(/https:\/\/[a-z.]+/g)).toEqual(['https://api.netdeck.gg']);
+    }
+  });
+});

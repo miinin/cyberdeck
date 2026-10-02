@@ -189,6 +189,7 @@ Huomiot:
 | R-14 | Firebase-projektin web-konfiguraatio on luettavissa osoitteesta `/__/firebase/init.json` (B-010). API-avainta ei ole rajattu. | Low nyt, High jos Auth tai Firestore otetaan käyttöön ilman rajauksia | Käyttäjä / Koodari (T-009) | Avoin. Ei hyödynnettävissä MVP-1:ssä, koska sovellus ei käytä Firebase-palveluita Hostingin lisäksi. Ehto ennen MVP-2:ta: luvun 12 vaatimukset MVP2-1–MVP2-3. Polkua ei voi poistaa Hostingista, joten tieto hyväksytään julkiseksi; suojaus perustuu rajauksiin ja sääntöihin. |
 | R-15 | Nimistä jää poistamatta LRM, RLM, ALM, U+2028, U+2029 ja U+FEFF (SEC-005, raportti SEC-002-t011) | Low | Koodari | ~~Avoin~~ → **Korjattu** (commit 15812ba, todennettu SEC-003-t012:ssa: `UNSAFE_CHARACTERS` kattaa merkit). |
 | R-16 | Kiintiövirhe koetallennuksessa vaihtaa sovelluksen muistinvaraiseen tilaan ja piilottaa tallennetun datan (SEC-006, raportti SEC-002-t011) | Low (kasvaa T-003:n myötä, R-12) | Koodari | ~~Avoin~~ → **Korjattu** (commit 7dc05c5, todennettu SEC-003-t012:ssa: kiintiövirhe koetallennuksessa palauttaa oikean tallennustilan, testi). |
+| R-17 | Linkkihaku (T-046, D-015): selain hakee käyttäjän pyynnöstä epäluotettavan JSON-vastauksen osoitteesta `api.netdeck.gg`. Haitallinen tai rikkinäinen vastaus, rajapinnan muutos tai katoaminen, Netdeck näkee käyttäjän IP-osoitteen ja Originin. | Low | Koodari / PM | Avoin, torjuttu SR-20:llä (SEC-009-t046). Jäännös: vastauksen runko luetaan kokonaan ennen kokorajaa, jos Content-Length puuttuu (SEC-023), Netdeckin tietosuojaehtoja ei löydy (PRIVACY.md rivi 9). Linkkihaun katoaminen ei estä tekstituontia (T-014). |
 
 ## 10. Hyväksytyt riskit
 
@@ -349,6 +350,7 @@ Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-
 | 2026-10-02 | Katselmointi `reports/SEC-005-t026-korttidata.md`: SR-2 (`connect-src 'self'`), SR-4, SR-5 ja SR-7 täyttyvät. R-1 ja R-2 hyväksytty (D-012) ja luku 10 päivitetty, R-6 pienennetty, R-7 ja R-12 poistuneet. Uusi luku 14. Löydökset SEC-016 (Medium, otsakkeiden todennus esikatselussa tekemättä), SEC-017 (Low) ja SEC-018 (Info). | T-026 |
 | 2026-10-02 | Katselmointi `reports/SEC-006-t027-korttikuvat.md`: sharp hyväksyttävissä, R-1:n tekniset ehdot ja SR-1/SR-2 täyttyvät kuvissa. Uusi luku 15. SEC-016 varmistettu. Löydökset SEC-019 (Low) ja SEC-020 (Info). | T-027 |
 | 2026-10-02 | Katselmointi `reports/SEC-008-t014-tuonti.md`: SR-17, SR-14 ja SR-15 täyttyvät T-014:ssä. R-9 suljettu (T-004), R-13 päivitetty tuonnin osalta. Löydökset SEC-021 (Low, nimen katkaisu surrogaattiparin kohdalta) ja SEC-022 (Info). | T-014 |
+| 2026-10-02 | Katselmointi `reports/SEC-009-t046-netdeck-linkki.md`: linkkihaku Netdeckistä (D-015). Uusi SR-20 ja riski R-17, luku 16. CSP `connect-src 'self' https://api.netdeck.gg` todennettu esikatselussa. Löydökset SEC-023 ja SEC-024 (Low) ja SEC-025 (Info). | T-046 |
 
 ## 14. T-026: korttidata buildissa (D-013)
 
@@ -363,3 +365,16 @@ Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-
 - **Luottamusraja:** käyttäjän kuvapaketti (epäluotettava tiedosto) → kehittäjän kone (`cards:images`) → git → build. Torjunta: lähdetiedostot luetaan vain annetusta kansiosta (`readdir` + `isFile`), tulospolku muodostetaan vain validoidusta kortin avaimesta (`isCardKey`, ei tiedostonimestä), map-tiedoston avaimet ovat pelkkiä tiedostonimiä ja arvot olemassa olevia avaimia, kokoraja 25 Mt, formaatti tarkistetaan sisällöstä (PNG, JPEG, WebP), sharpin pikselikatto päällä, metatiedot (EXIF, GPS, XMP, ICC) poistetaan. Alkuperäiset eivät mene gittiin (`.gitignore`: `card-images-src/`, `public/cards/`).
 - **STRIDE-muutokset:** T (haitallinen kuvatiedosto) → libvips-jäsennys vain kehittäjän koneella, ei käyttäjän syötettä selaimessa. I (metatiedot kuvissa) → poistettu, tarkistettu. D (Sparkin 10 Gt/kk siirtokiintiö) → laiska lataus, sm noin 11 kt, lg vasta dialogissa, vuoden välimuisti. Riippuvuus sharp@0.35.5: Apache-2.0, libvips LGPL-3.0-or-later, ei install-skriptejä, `npm audit` 0, ei päädy `dist/`iin.
 - **R-1:n tekniset ehdot (luku 10) todennettu SEC-006-t027:ssä:** kuvat omalta palvelimelta, ei `image_url`ia, epävirallisuusmerkintä alatunnisteessa, ei mainoksia, analytiikkaa tai virallisia logoja.
+
+## 16. T-046: pakan haku Netdeck-linkistä (D-015)
+
+- **Järjestelmä:** tuontinäkymän lomake "Hae pakka Netdeck-linkistä". `parseNetdeckUrl` (src/domain/netdeckDeck.ts) poimii linkistä UUID:n, ja `fetchNetdeckDeck` (src/netdeck/) hakee `https://api.netdeck.gg/api/cyberpunk/decks/<uuid>`. Kiinteä host: linkin hostia ei koskaan käytetä pyynnön osoitteena. CSP `connect-src 'self' https://api.netdeck.gg` (molemmat sivustot, firebaseConfig-testi).
+- **Luottamusraja:** Netdeck.gg (kolmas osapuoli) → käyttäjän selain, vain käyttäjän painalluksesta. Vastaus on epäluotettava syöte (SR-11).
+- **STRIDE:** S (väärä host linkissä) → ankkuroitu regex, vain https, (www.)netdeck.gg, tasan yksi UUID. T (haitallinen JSON) → SR-20. I (IP ja Origin Netdeckille, tunnisteiden vuoto) → vain pyynnöstä, huomautus näkymässä, `credentials: 'omit'`, `no-referrer` (R-7 ei koske). D (jättivastaus, jumittuva yhteys) → 10 s aikakatkaisu, 512 kt raja, 300 riviä, ei uudelleenyrityksiä. E → ei uusia oikeuksia; sideboardia ei tallenneta, pakka tallennetaan aina uutena (SR-17).
+
+#### SR-20 · Linkkihaku Netdeckistä (T-046)
+1. Linkki hyväksytään vain muodossa `https://(www.)netdeck.gg/(decks/cyberpunk|cyberpunk/decks)/<UUID>`, enintään 300 merkkiä. Muuten ei pyyntöä.
+2. Pyynnön osoite on kiinteä `https://api.netdeck.gg/api/cyberpunk/decks/` + UUID. `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`, aikakatkaisu 10 s, ei uudelleenyrityksiä.
+3. Vastauksen koko enintään 512 kt (Content-Length ja luettu teksti) ennen `JSON.parse`a.
+4. Vain `name`, `owner.display_name`, `zones[].zone_code` (legends/deck/sideboard), `cards[].quantity` (1–99), `card.id` (≤64), `card.name`/`subname`. Tekstit `cleanText`illä, enintään 3 vyöhykettä ja 300 riviä, mikä tahansa rakennevirhe hylkää koko vastauksen. `image_url`ia ja muita kenttiä ei käytetä (SR-1).
+5. Kaikki vastauksesta peräisin oleva renderöidään tekstinä. Virheviestit ovat kiinteitä, eivätkä ne sisällä vastauksen tai virheen sisältöä.

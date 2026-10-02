@@ -4,6 +4,7 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pakan haku Netdeck-linkistä: Tuo pakkalista -näkymässä voi liittää netdeck.gg-pakan osoitteen ja painaa Hae pakka. Raportti näyttää, mitä kortteja kokoelmasta puuttuu. Sideboard näytetään erikseen, eikä sitä tallenneta pakkaan. Haku lähettää pyynnön Netdeck.gg-palveluun vain, kun painat Hae pakka.
 - Pakkaeditorin hiominen: hakulistan rivit ovat tasaisia (−/määrä/+ aina oikealla) ja näyttävät myös Powerin ja Rarityn. Väri-suodatin on pelkkiä värejä (nimi näkyy kursorin alla). Samannimisen Legendin lisäys estetään ilmoituksella. Hakulistan voi vaihtaa Kuvat-näkymään, jossa kortin kuvaa painamalla kortti lisätään pakkaan, ja valinta säilyy. Tyyppimerkin viistetty kulma piirtyy reunan väreillä.
 
 - Pakkalistan tuonti: Pakat-sivun Tuo pakkalista -painikkeella voi liittää netistä löytyneen pakkalistan tai valita .txt-tiedoston. Tarkistus näyttää, mitä kortteja kokoelmasta puuttuu, missä muissa pakoissasi kortit ovat, mitkä rivit jäivät tunnistamatta ja onko pakka laillinen. Listan voi sen jälkeen tallentaa uudeksi pakaksi nimeä muokaten. Mitään ei tallenneta ennen kuin painat Tallenna pakaksi.
