@@ -18,7 +18,7 @@ Löydöstunnisteet B-017...B-021. Tietoturvaepäilyjä ei löytynyt: HTML ja skr
 **Havaittu:** Tallennus onnistuu (localStorage: 2 korttia), mutta lista näyttää "Pääpakka 1/40–50" myös odotuksen jälkeen, ja kopio saa 1 kortin. Sama nimelle: "Eka" -> "Toka" ja heti Takaisin, lista näyttää "Eka", tallennettu on "Toka". Lista päivittyy vasta sivun latauksella. Syy: unmountin tallennus on asynkroninen ja ketjutettu, mutta Pakat-näkymän `useDecks` lataa heti ennen sitä eikä saman välilehden kirjoitus laukaise `subscribe`-kutsua.
 **Vaikutus:** Käyttäjä näkee väärän tilan ja kopio menettää viimeisen muutoksen. Alkuperäinen data ei katoa.
 **Korjausehdotus:** `reload()` kun tallennus valmistuu, tai notify saman välilehden `update`-kirjoituksesta.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050, testi lisätty)
 
 ### B-018 · Pitkä välilyönniton pakan nimi aiheuttaa vaakavierityksen editorissa · Medium
 **Sijainti:** `src/ui/DeckEditor.tsx:355` (`.editor-title`, h1), `src/styles.css`
@@ -26,7 +26,7 @@ Löydöstunnisteet B-017...B-021. Tietoturvaepäilyjä ei löytynyt: HTML ja skr
 **Toistaminen:** Anna nimeksi 100 kertaa "W" (sallittu raja) tai tuo pakka, jonka nimi on yhtä pitkä sana. Avaa editori.
 **Havaittu:** `scrollWidth` 3209 px (375 px:n ikkuna): h1, `.editor-back` ja sen sisältö levenevät 3193 px:iin, koko sivu vaakavierii ja "Näytä pakka" / "Siirry pakkaan" -fokus (h2 pakkapalstalla) päätyy ruudun ulkopuolelle. Pakat-listassa sama nimi rivittyy oikein (sw 375).
 **Korjausehdotus:** `overflow-wrap: anywhere; min-width: 0` otsikolle ja sen flex/grid-vanhemmalle.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050, testi lisätty)
 
 ### B-019 · Tyhjän tai roskalistan tuonti sanoo "Kaikki pakan kortit ovat kokoelmassasi." ja Tallenna pakaksi on käytössä · Low
 **Sijainti:** `src/ui/deckTexts.ts:97`, `src/ui/DeckImport.tsx`
@@ -34,7 +34,7 @@ Löydöstunnisteet B-017...B-021. Tietoturvaepäilyjä ei löytynyt: HTML ja skr
 **Toistaminen:** Tuo pakkalista -> liitä "asdf qwerty / ??? / 999 999 999" -> Tarkista lista.
 **Havaittu:** Raportti kertoo 0 tunnistettua korttia, tunnistamattomat rivit oikein, mutta kokoelmarivi sanoo positiivisesti, että kaikki kortit ovat kokoelmassa, ja "Tallenna pakaksi" luo tyhjän pakan.
 **Korjausehdotus:** kun tunnistettuja kortteja on 0, piilota kokoelmarivi ja kysy vahvistus tai estä tallennus.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050, testi lisätty)
 
 ### B-020 · Ristiriitainen sääntöviesti, kun pakassa ei ole Legendiä · Low
 **Sijainti:** `src/domain/deckRules.ts:155` (RAM-väriviesti), tuontiraportin Säännöt-lista
@@ -42,7 +42,7 @@ Löydöstunnisteet B-017...B-021. Tietoturvaepäilyjä ei löytynyt: HTML ja skr
 **Toistaminen:** Tuo "99999999999999999999 Detonate / 3x Detonate" (vain ei-Legend-kortteja).
 **Havaittu:** Säännöt-listassa "Legendeillä ei ole väriä Red, mutta ylittää: Detonate." samalla kun tilastoissa lukee "Ei RAM-rajoja ennen kuin pakassa on Legend." Viesti on harhaanjohtava ja tuplaa "Legendejä on 0" -virheen.
 **Korjausehdotus:** ohita värirajatarkistus, kun Legendejä on 0.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050, testi lisätty)
 
 ### B-021 · Tuonti hyväksyy `3x Nimi` tuntemattomalta riviltä hiljaa ja luku 3 jää silti pois riviraportista · Info
 **Sijainti:** `src/domain/deckText.ts`

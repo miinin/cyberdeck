@@ -1825,6 +1825,20 @@ body:has(dialog[open]) {
   gap: var(--space-2) var(--space-6);
 }
 
+.editor-title,
+.editor-meta,
+.editor-meta .deck-name-field {
+  min-width: 0;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+.deck-head-main {
+  overflow-wrap: anywhere;
+}
+
 .editor-head .editor-back {
   margin-block: var(--space-3) var(--space-2);
 }

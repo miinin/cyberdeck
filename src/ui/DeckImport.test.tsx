@@ -49,6 +49,15 @@ describe('Deck list import', () => {
     expect(within(report).getByRole('heading', { name: 'Tilastot' })).toBeInTheDocument();
   });
 
+  it('says nothing was recognized instead of "all cards owned" and cannot save an empty deck (B-019)', async () => {
+    const { user } = await openImport(storedCollection([['u0', 1]]));
+    await check(user, 'asdf qwerty\n999 999 999');
+    const report = await screen.findByRole('region', { name: 'Tarkistuksen tulos' });
+    expect(within(report).getByText(/Yhtään korttia ei tunnistettu/)).toBeInTheDocument();
+    expect(within(report).queryByText('Kaikki pakan kortit ovat kokoelmassasi.')).toBeNull();
+    expect(within(report).getByRole('button', { name: 'Tallenna pakaksi' })).toBeDisabled();
+  });
+
   it('renders imported text as text, not markup (SR-14)', async () => {
     const { user } = await openImport();
     await check(user, '1 L1\n3 <img src=x onerror=alert(1)>');

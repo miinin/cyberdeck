@@ -118,6 +118,11 @@ describe('validateDeck', () => {
     expect(validateDeck(d, byKey).map((i) => i.type)).toContain('copies');
   });
 
+  it('has no RAM issue while the deck has no Legend (B-020)', () => {
+    const issues = validateDeck(deck([['big', 1], ...mainRows(40)]), byKey);
+    expect(issues.map((i) => i.type)).toEqual(['legend-count']);
+  });
+
   it('RAM limit is per color: the sum of the RAM of that color Legends', () => {
     expect(Object.fromEntries(ramLimits(deck(legendRows), byKey))).toEqual({ Red: 4, Blue: 2 });
     const ram = validateDeck(deck([...legendRows, ['big', 1], ['blue2', 1], ...mainRows(40)]), byKey).filter(

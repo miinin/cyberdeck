@@ -47,6 +47,7 @@ import type { ImageSize } from './ListToolbar';
 import { Stepper } from './Stepper';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
+import { trackDeckSave } from './useDecks';
 import { EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
 
 /** A change is saved this long after the last edit (T-013). */
@@ -191,11 +192,17 @@ export function DeckEditor({
   useEffect(() => {
     const saveNow = (afterRunningSave: boolean) => {
       const next = pending.current;
-      if (next === null) return;
+      // The deck list reads after leaving: it waits for the saves still running (B-017).
+      if (next === null) {
+        if (afterRunningSave) trackDeckSave(chain.current);
+        return;
+      }
       pending.current = null;
       // On unmount, wait for a save already in flight so the older content cannot land last.
       const write = () => repository.update(deckId, next);
-      void (afterRunningSave ? chain.current.then(write) : write()).catch(() => undefined);
+      const save = afterRunningSave ? chain.current.then(write) : write();
+      if (afterRunningSave) trackDeckSave(save);
+      void save.catch(() => undefined);
     };
     const onPageHide = () => saveNow(false);
     window.addEventListener('pagehide', onPageHide);
@@ -358,7 +365,7 @@ export function DeckEditor({
               {deckTexts.backToList}
             </button>
           </p>
-          <h1 ref={headingRef} tabIndex={-1}>
+          <h1 ref={headingRef} tabIndex={-1} className="editor-name">
             {content.name}
           </h1>
         </div>

@@ -147,6 +147,25 @@ describe('Deck editor', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Pakat' })).toBeInTheDocument();
   });
 
+  it('the deck list shows the latest edit right after leaving, and copying keeps it (B-017)', async () => {
+    const user = userEvent.setup();
+    const repositories = openEditor([['u3', 1]]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await user.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: Unit 3' }));
+    await user.click(screen.getByRole('button', { name: 'Takaisin pakkoihin' }));
+    await screen.findByRole('heading', { level: 1, name: 'Pakat' });
+    expect(await screen.findByText(/Oma pakka/)).toBeInTheDocument();
+    await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'u3', count: 2 }]));
+    expect(screen.getByText(/Pääpakka 2\/40–50/)).toBeInTheDocument();
+  });
+
+  it('gives a long unbroken deck name the wrapping heading class (B-018)', async () => {
+    const long = 'W'.repeat(100);
+    renderRoute('#/pakat/a', createMemoryRepositories({ initial: storedDecks([{ id: 'a', name: long, cards: [] }]) }));
+    const heading = await screen.findByRole('heading', { level: 1, name: long });
+    expect(heading).toHaveClass('editor-name');
+  });
+
   it('filters the search list with the catalog filters', async () => {
     const user = userEvent.setup();
     openEditor([]);

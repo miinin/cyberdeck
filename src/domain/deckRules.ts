@@ -138,8 +138,9 @@ export function validateDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckIss
     });
   }
 
+  // Without a Legend there are no RAM limits to break; the Legend count issue already says so (B-020).
   const overRam = new Map<string, Card[]>();
-  for (const key of counts.keys()) {
+  for (const key of totals.legends === 0 ? [] : counts.keys()) {
     const card = cardsByKey.get(key);
     if (card === undefined || card.type === 'Legend' || card.color === null || card.ram === null) continue;
     if (card.ram > (limits.get(card.color) ?? 0)) {

@@ -213,6 +213,7 @@ export const deckTexts = {
   reportLegalityHeading: 'Säännöt',
   reportSaveHeading: 'Tallenna pakaksi',
   reportSaveButton: 'Tallenna pakaksi',
+  reportNothingRecognized: 'Yhtään korttia ei tunnistettu, joten pakkaa ei voi tallentaa. Tarkista rivit.',
 
   // Catalog
   inDecks: (count: number) => `Pakoissa: ${count}`,

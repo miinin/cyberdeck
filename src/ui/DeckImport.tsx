@@ -168,7 +168,7 @@ export function DeckImport({
 
   const handleSave = async (event: FormEvent) => {
     event.preventDefault();
-    if (report === null) return;
+    if (report === null || report.rows.length === 0) return;
     const name = checkDeckName(nameText);
     if (!name.ok) {
       setNameError(name.error === 'empty' ? deckTexts.nameEmpty : deckTexts.nameTooLong);
@@ -326,7 +326,9 @@ export function DeckImport({
                 aria-hidden="true"
               />
               <p className="deck-head-sub">{deckTexts.legendsProgress(view.legends)}</p>
-              {collectionKnown ? (
+              {report.rows.length === 0 ? (
+                <p className="notice notice-warning">{deckTexts.reportNothingRecognized}</p>
+              ) : collectionKnown ? (
                 <p className={report.missingTotal > 0 ? 'import-missing-total' : 'import-owned-total'}>
                   {deckTexts.missingFromCollection(report.missingTotal)}
                 </p>
