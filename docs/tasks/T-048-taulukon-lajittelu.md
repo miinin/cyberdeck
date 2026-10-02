@@ -1,5 +1,5 @@
 # T-048 · Taulukkonäkymän lajittelu sarakkeittain
-**Tila:** Review · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Should (STATUS, Seuraavaksi 1)
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Should (STATUS, Seuraavaksi 1)
 **Malli:** D-014, ei erillistä katselmointia (ei syötettä, tallennusta eikä riippuvuuksia). PM tarkistaa esikatselusta.
 **Haara:** `t-048-taulukon-lajittelu`
 

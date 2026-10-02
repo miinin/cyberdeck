@@ -1,10 +1,17 @@
 import type { Card } from './card';
+import { KNOWN_CARD_RARITIES } from './cardSearch';
 
 export type SortKey = 'name' | 'type' | 'rarity' | 'cost' | 'power' | 'ram';
 export type SortDirection = 'asc' | 'desc';
 
 function valueOf(card: Card, key: SortKey): string | number | null {
-  return key === 'name' ? card.displayName : card[key];
+  if (key === 'name') return card.displayName;
+  if (key === 'rarity' && card.rarity !== null) {
+    // Game order (Common → Nova Rare); an unknown rarity sorts after the known ones.
+    const index = KNOWN_CARD_RARITIES.indexOf(card.rarity);
+    return index === -1 ? KNOWN_CARD_RARITIES.length : index;
+  }
+  return card[key];
 }
 
 function compareValues(a: string | number, b: string | number): number {

@@ -27,8 +27,8 @@ describe('sortCards', () => {
     expect(names(sortCards([c('b'), c('A'), c('C')], 'name', 'desc'))).toEqual(['C', 'b', 'A']);
   });
   it('sorts by rarity with null last and does not mutate the input', () => {
-    const input = [c('X', { rarity: 'Rare' }), c('Y'), c('W', { rarity: 'Common' })];
-    expect(names(sortCards(input, 'rarity', 'asc'))).toEqual(['W', 'X', 'Y']);
-    expect(names(input)).toEqual(['X', 'Y', 'W']);
+    const input = [c('X', { rarity: 'Rare' }), c('Y'), c('W', { rarity: 'Common' }), c('V', { rarity: 'Epic' })];
+    expect(names(sortCards(input, 'rarity', 'asc'))).toEqual(['W', 'X', 'V', 'Y']);
+    expect(names(input)).toEqual(['X', 'Y', 'W', 'V']);
   });
 });
