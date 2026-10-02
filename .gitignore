@@ -10,3 +10,6 @@ coverage/
 Thumbs.db
 .claude/settings.local.json
 .claude/worktrees/
+
+# Original card images for `npm run cards:images` (T-027, D-013): never committed
+card-images-src/
