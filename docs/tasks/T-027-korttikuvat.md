@@ -47,3 +47,11 @@ Pelaaja tunnistaa kortin kuvasta (D-012). Kun käyttäjän kuvapaketti saapuu, k
   - Lisäksi suositus käyttäjälle (ei blokkaa): aseta Firebase-konsolissa säilytettävien julkaisujen määräksi esim. 10 per sivusto (D-013 osa 5).
 - **Avoin PM:lle:** A4: T-027:n tila voi olla Ready heti, kun sharp on hyväksytty ja UX-suunnittelu on tehty. Kuvapaketti tarvitaan vasta viimeiseen askeleeseen.
 - **Testit:** Ei koodia. `npm view` -tarkistukset (sharp-versio, lisenssit ja skriptit) 2026-10-02.
+
+### Checkpoint 2026-10-02 · PM (käyttäjän vastaukset K-I1–K-I4)
+- Kuvat ovat pääkansion `public/cards/`-hakemistossa: 151 tiedostoa, valmiiksi .webp-muodossa, yhteensä 14 Mt. Kansio on `.gitignore`ssa (T-025-haarassa, commit "Untrack card images"). Huom: T-025:n Koodari commitoi kuvat vahingossa (c31f42c), ja PM poisti ne seurannasta. Kuvat ovat T-025-haaran historiassa, mutta niitä ei ole enää työpuussa (L-005).
+- K-I1 nimeäminen: kortin nimi alaviivoin, esim. `Corpo_Security.webp`, `6th_Street_Recruits.webp`, `(Don't_Fear)_The_Reaper.webp`, `Adam_Smasher_Ender_of_Legends.webp`. Alaotsikko voi olla mukana ilman erotinta, joten yhdistämiseen sopii `normalizeCardName` (alaviiva = välilyönti) → `Card.key`, ja varapolkuna pelkkä nimi.
+- K-I2 muoto: .webp. Tarkistettava: sharpia ei ehkä tarvita, jos koot ovat jo sopivat. Arkkitehti tai Koodari mittaa kuvien mitat ja päättää, riittääkö kopiointi ja uudelleennimeäminen (`src/assets/cards/<key>.webp`) ilman muuntoa. Jos riittää, D-013:n osan 4 sharp-riippuvuus jätetään pois (kirjataan D-013:een).
+- K-I3: vain perusversiot. Erikoisversiot (alt-art) lisätään myöhemmin, matala prioriteetti (D-007, painokset).
+- K-I4 (alkuperäiset pois gitistä): käyttäjä ei vastannut erikseen. Oletus: kyllä, kuten D-013.
+- Seuraava askel: T-026 valmiiksi, sitten UX suunnittelee kuvan paikan ja Koodari toteuttaa T-027:n.

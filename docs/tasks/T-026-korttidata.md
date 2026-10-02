@@ -65,3 +65,9 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
 - A2: poistuvien tilojen (lataus, virhe, osittainen, tyhjä) testit saa poistaa, koska tilat poistuvat sovelluksesta (rules.md 6:n poikkeus, PM hyväksyy). Muut testit eivät saa heikentyä.
 - A3: `index.html`:n välimuistiotsake kuuluu jo T-009:ään (SEC-011). T-004:n prioriteetti nostettu (Should → Must), koska `parseCardFile`-testi ei vielä estä julkaisua.
 - Tila In Progress. Seuraava askel: Koodari toteuttaa luovutuksen askeleet 1–6 tässä worktreessä.
+
+### Checkpoint 2026-10-02 · PM (Koodari keskeytetty, istunto tyhjennetään)
+- Tehty (Koodari): korttitiedoston muoto ja validointi (a6ed3ac), `cards:update`-komento testeineen (1741578), 151 kortin data (56709e9), lataus-, virhe-, osittaisen ja tyhjän tilan poisto (4a57aa1). PM commitoi keskeneräisen `firebase.json`-muutoksen (CSP `connect-src` ja `/assets/**`-otsakkeet), jota EI ole testattu: 8e35488.
+- Kesken: luovutuksen askel 5 (firebase.json) tarkistamatta, askel 6 (esikatselu, `curl -sI`) tekemättä, avainvertailun tulos kirjaamatta, STATUS.md:n ajo-ohje, CHANGELOG, ARCHITECTURE.md:n toteutusosa, koodikatselmointi ja luovutus.
+- Seuraava askel: uusi Koodari jatkaa tästä worktreestä (`.claude/worktrees/t-026`): `git log origin/test..HEAD`, tarkista firebase.json D-013:n osaa 3 ja ARCHITECTURE.md 13.7:ää vasten, aja `npm test`, `npm run lint` ja `npm run build` ja tee loput askeleet.
+- Muutetut tiedostot: scripts/, src/data/, src/domain/cardFile.ts, src/ui/*, src/App.tsx, firebase.json, package.json.
