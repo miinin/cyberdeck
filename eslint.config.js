@@ -34,6 +34,12 @@ const apiInternals = {
   message: "Import the API layer only through its public index ('../api').",
 };
 
+// D-013, ARCHITECTURE.md 13.6: the app uses bundled card data; Netdeck code must not reach the bundle.
+const noApiInApp = {
+  group: ['**/api', '**/api/**'],
+  message: 'The app uses bundled card data (src/data); src/api is only for scripts/ (D-013).',
+};
+
 // ARCHITECTURE.md luku 4 (T-011): only storage/index.ts is the public API of the storage layer.
 const storageInternals = {
   group: ['**/storage/*'],
@@ -68,7 +74,7 @@ export default defineConfig(
     files: ['src/ui/**', 'src/App.tsx', 'src/main.tsx'],
     rules: {
       // One block for both layers: a later no-restricted-imports block would replace this one, not merge.
-      'no-restricted-imports': ['error', { patterns: [apiInternals, storageInternals] }],
+      'no-restricted-imports': ['error', { patterns: [noApiInApp, storageInternals] }],
     },
   },
   {
@@ -79,10 +85,27 @@ export default defineConfig(
         {
           paths: [{ name: 'react', message: 'The domain layer has no dependencies.' }],
           patterns: [
-            apiInternals,
             {
               group: ['**/api', '**/api/**', '**/ui', '**/ui/**', '**/storage', '**/storage/**'],
               message: 'The domain layer has no dependencies.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/data/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [{ name: 'react', message: 'The data layer depends only on the domain layer.' }],
+          patterns: [
+            noApiInApp,
+            {
+              group: ['**/ui', '**/ui/**', '**/storage', '**/storage/**'],
+              message: 'The data layer depends only on the domain layer.',
             },
           ],
         },
