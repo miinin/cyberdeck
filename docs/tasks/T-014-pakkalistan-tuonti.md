@@ -1,5 +1,5 @@
 # T-014 · Pakkalistan tuonti tekstinä ja .txt-tiedostona, raportti ja "Tallenna pakaksi"
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must
 **Malli:** D-014. Digiturva katselmoi, koska tehtävässä on epäluotettava syöte (SR-17, R-13).
 **Haara:** `t-014-pakkalistan-tuonti`
 **Käyttäjän päätökset 2026-10-02:** raportti näytetään ensin, ja sen alla on "Tallenna pakaksi" -painike (käyttäjä valitsee). Pakoille ei tehdä Koottu/Suunnitelma-tilaa (IDEAS.md).
@@ -48,3 +48,7 @@ Pelaaja liittää netistä löytämänsä pakkalistan ja näkee heti, mitä kort
 
 ### Luovutus 2026-10-02 · Digiturva → PM
 - Katselmointi `docs/reports/SEC-008-t014-tuonti.md`: SR-17, SR-14 ja SR-15 täyttyvät, ei Critical/High/Medium; SEC-021 (Low, nimen katkaisu surrogaattiparin kohdalta) ja SEC-022 (Info, 10 000 merkin rivi testiin); App.test.tsx:n 20 s aikaraja hyväksyttävä. Ei estä Done-tilaa. SECURITY.md: R-9 suljettu, R-13 päivitetty.
+
+### PM 2026-10-02 · Done (D-014)
+- PR #15: CI vihreä (lint, test, build). Esikatselussa esimerkkipakka: 19/19 tunnistui, puuttuvat listattu, keksitty rivi tunnistamattomana. Digiturva SEC-008: ei Critical/High.
+- Jatkoon: SEC-021 (nimen katkaisu emojin kohdalta) T-015:een, T-044 (raportin ulkoasu: taulukko tai kuvat, nyt pelkkä lista).
