@@ -1,5 +1,5 @@
 # T-049 · Pakkaeditorin asettelu ja pakkalistan ulkoasu
-**Tila:** Review · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02: "ei optimaalista tilankäyttöä, pakkalista ei tyylikäs, katso mallia muista ja tee parempi")
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02: "ei optimaalista tilankäyttöä, pakkalista ei tyylikäs, katso mallia muista ja tee parempi")
 **Malli:** D-014. Ei uutta riippuvuutta eikä tietomallia. PM tarkistaa kuvakaappauksista.
 **Haara:** `t-049-pakkaeditorin-asettelu`
 

@@ -2137,7 +2137,7 @@ button.deck-line-name:focus-visible {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: var(--space-1);
-  block-size: 5.5rem;
+  block-size: 7rem;
 }
 
 .cost-curve-col {

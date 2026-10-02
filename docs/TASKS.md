@@ -53,4 +53,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-046 | Pakan haku Netdeck-linkistä ja vertailu kokoelmaan (D-015) | 1 | Must | Koodari | Done | Digiturva SEC-009 |
 | T-047 | [velka] Netdeck-vastauksen runko luetaan paloittain 512 kt:n rajaan asti (SEC-023), tunnistamattoman card.id:n siivous (SEC-024) | 2 | Should | Koodari | Backlog | Digiturva |
 | T-048 | Taulukkonäkymän lajittelu sarakkeittain | 1 | Should | Koodari | Done | PM esikatselu |
-| T-049 | Pakkaeditorin asettelu ja pakkalistan ulkoasu (leveä asettelu, tiivis lista, kustannuskäyrä) | 1 | Must | Koodari | Ready | PM kuvakaappaukset |
+| T-049 | Pakkaeditorin asettelu ja pakkalistan ulkoasu (leveä asettelu, tiivis lista, kustannuskäyrä) | 1 | Must | Koodari | Done | PM kuvakaappaukset |
