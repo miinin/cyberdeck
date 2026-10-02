@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-02 (PM, MVP-1:n Must-tehtävät valmiit)
+# STATUS · päivitetty 2026-10-03 (PM, julkaisu tuotantoon)
 
 ## Yhdellä lauseella
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
@@ -39,6 +39,8 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-049 Pakkaeditorin leveä asettelu, tiivis pakkalista ja kustannuskäyrä (2026-10-03, PR #20)
+- T-048 Taulukon lajittelu sarakkeittain (2026-10-02, PR #19)
 - T-015 Pakan vienti ja tuonti tiedostona (2026-10-02, PR #18)
 - T-046 Pakan haku Netdeck-linkistä (2026-10-02, PR #17)
 - T-045 Pakkaeditorin hiominen ja kuvanäkymä (2026-10-02, PR #16)
@@ -64,7 +66,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-044 (tuontiraportin ja Netdeck-linkkikentän ulkoasu) ja taulukon lajittelu sarakkeittain (uusi tehtävä, PM pilkkoo). Sen jälkeen /julkaise.
+1. T-048 ja T-049 tehty ja julkaistu 2026-10-03. Seuraavaksi T-044 (tuontiraportin ulkoasu) ja suodatinpaneelin tiivistys pakkaeditorissa (T-049:n avoin asia).
 2. Käyttäjä 2026-10-02: MVP-1:n loppukatselmoinnit (UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija) eivät ole vielä ajankohtaisia, joten ne siirretään myöhemmäksi.
 3. Velat: T-047, T-041 (DeckEditorin pilkkominen), T-042, T-043, T-030, T-031.
 4. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
