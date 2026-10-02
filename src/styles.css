@@ -316,6 +316,8 @@ h1:focus:not(:focus-visible) {
 }
 
 .brand {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
@@ -408,6 +410,11 @@ main {
   line-height: var(--line-height-tight);
   letter-spacing: var(--letter-spacing-button);
   text-transform: uppercase;
+  text-align: center;
+  /* Long labels wrap instead of widening the page when text is enlarged (UX-008). */
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
   cursor: pointer;
   clip-path: var(--shape-chamfer);
 }
@@ -669,10 +676,12 @@ main {
   align-items: center;
   gap: var(--space-2);
   min-width: var(--target-min);
+  max-width: 100%;
   min-height: var(--target-min);
   padding: 0 var(--space-3);
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface-raised);
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
@@ -948,21 +957,30 @@ main {
     border: 0;
   }
 
+  /*
+   * Card-like row (UX.md 6.4.4, UX-007): line 1 is the name and the count control, line 2 is
+   * type, color and cost, which wrap as needed. Visual order only: the DOM and reading order
+   * stay name, type, cost, control, and the control is the only focusable part of the row.
+   */
   .card-table tbody tr {
     position: relative;
-    display: grid;
-    /* Three lines: name, type and color, cost (UX-005). */
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      'name control'
-      'type control'
-      'cost control';
-    column-gap: var(--space-2);
-    padding: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    column-gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid var(--color-border);
   }
 
-  /* .col-fit sets width: 1% for the wide table; grid cells size by their content instead. */
+  /* Forces type and cost onto their own line under the name and the control. */
+  .card-table tbody tr::after {
+    content: '';
+    order: 2;
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  /* .col-fit sets width: 1% for the wide table; flex items size by their content instead. */
   .card-table tbody th,
   .card-table tbody td,
   .card-table tbody .col-fit {
@@ -982,16 +1000,27 @@ main {
     top: 0;
     bottom: 0;
     left: 0;
-    width: 3px;
+    width: 4px;
     background: var(--color-accent-edge);
   }
 
+  /* The basis lets very large text move the control to its own line instead of widening the page (UX-008). */
   .card-table tbody .card-name {
-    grid-area: name;
+    order: 0;
+    flex: 1 1 6rem;
+    min-width: 0;
+  }
+
+  .card-table tbody .col-control {
+    order: 1;
+    flex: none;
+    max-width: 100%;
+    align-self: center;
+    margin-inline-start: auto;
   }
 
   .card-table tbody .col-type {
-    grid-area: type;
+    order: 3;
     white-space: normal;
   }
 
@@ -1012,7 +1041,7 @@ main {
   }
 
   .card-table tbody .col-cost {
-    grid-area: cost;
+    order: 4;
     text-align: left;
   }
 
@@ -1020,9 +1049,13 @@ main {
     content: attr(data-label) ' ';
   }
 
-  .card-table tbody .col-control {
-    grid-area: control;
-    align-self: center;
+  /*
+   * No reserved width on narrow screens (UX-007, UX-008): the name gets the room, and "+" stays at the
+   * right edge when "−" appears. Large text may wrap the control instead of widening the page.
+   */
+  .count-control {
+    flex-wrap: wrap;
+    min-width: 0;
   }
 
   .card-table .separator {
