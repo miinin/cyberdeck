@@ -14,7 +14,7 @@ Ei Critical-, High- eikä Medium-löydöksiä. Yksi Low ja yksi Info. Ei estä D
 **Odotettu:** katkaisu merkin (koodipisteen) rajalla. · **Havaittu:** `String.slice` katkaisee UTF-16-yksikön kohdalta.
 **Vaikutus:** ei tietoturvavaikutusta. Nimeen jää rikkinäinen merkki, joka näkyy �-merkkinä ja muuttuu UTF-8-viennissä (T-015) U+FFFD:ksi, jolloin SR-19:n round trip -testi voi erota tällä nimellä.
 **Korjausehdotus:** katkaise koodipisteittäin samoin kuin `shortened` (`Array.from(cleaned).slice(…)`), mutta niin, että tulos mahtuu `MAX_DECK_NAME_LENGTH`:iin UTF-16-pituutena, tai poista lopusta yksinäinen korkea surrogaatti (`/[\uD800-\uDBFF]$/`). Testi emojinimellä rajan kohdalla.
-**Tila:** Avoin (backlog, PM päättää; voidaan korjata T-015:n yhteydessä)
+**Tila:** ~~Avoin (backlog, PM päättää; voidaan korjata T-015:n yhteydessä)~~ → Korjattu (T-015, commit ba5eab8) → Varmistettu (Digiturva 2026-10-02, SEC-010)
 
 ### SEC-022 · SR-17:n suorituskykytestistä puuttuu kirjaimellinen 10 000 merkin rivi · Info
 **Sijainti:** src/domain/deckText.test.ts, "parses worst-case lines quickly (ReDoS guard)" · **Tehtävä:** T-014

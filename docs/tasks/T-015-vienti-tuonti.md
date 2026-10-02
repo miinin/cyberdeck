@@ -32,3 +32,6 @@ Pelaaja varmuuskopioi pakkansa tai jakaa sen kaverille tiedostona, ja kaveri tuo
 - Rajoitteet: .json- ja .txt-tuonti litistävät osiot yhteen nimettömään osioon (editori käyttää yhtä osiota); json:n kortin `name`-kenttää ei käytetä lainkaan (tuntematon kortti näytetään avaimella). `deckEdit.ts` kopion nimen `slice` on samaa katkaisuluokkaa kuin SEC-021, ei korjattu (ei tehtävän rajauksessa).
 - Testit: `npm test` 42 tiedostoa / 680 testiä läpi, lint 0 varoitusta, build OK. Uudet: deckExport.test, deckJson.test (round trip, `__proto__`, rajat), DeckExportImport.test (UI, lataus, uusi id), deckText.test (SEC-021). Selaimessa ei ajettu käsin.
 - Koodikatselmointi: tehty · Pakollisia korjattu 1 (tiedostonimen `\`-suodatus puuttui regexistä, korjattu testillä) · Suosituksia 2 (yllä: copy-nimen katkaisu, osioiden säilytys)
+
+### Luovutus 2026-10-02 · Digiturva → PM
+- Katselmointi `docs/reports/SEC-010-t015-vienti-tuonti.md`: SR-18 ja SR-19 täyttyvät, ei Critical/High/Medium. SEC-026 (Low, kopion nimen `slice` deckEdit.ts:35, backlog), SEC-027 (Info). SEC-021 varmistettu, R-13 suljettu. Ei estä Done-tilaa.
