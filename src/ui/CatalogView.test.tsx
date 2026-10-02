@@ -57,17 +57,17 @@ describe('CatalogView', () => {
     const headers = within(table)
       .getAllByRole('columnheader')
       .map((cell) => cell.textContent);
-    expect(headers).toEqual(['Nimi', 'Tyyppi ja väri', 'Hinta', 'Omistan']);
+    expect(headers).toEqual(['Kuva', 'Nimi', 'Tyyppi ja väri', 'Hinta', 'Omistan']);
 
     const rows = within(table).getAllByRole('row').slice(1) as HTMLElement[];
     expect(rows).toHaveLength(3);
     const [first, second, third] = rows as [HTMLElement, HTMLElement, HTMLElement];
     expect(within(first).getByRole('rowheader')).toHaveTextContent('V, Streetkid');
-    expect(within(first).getAllByRole('cell')[0]).toHaveTextContent('Legend');
-    expect(within(first).getAllByRole('cell')[1]).toHaveTextContent('ei hintaa');
+    expect(within(first).getAllByRole('cell')[1]).toHaveTextContent('Legend');
+    expect(within(first).getAllByRole('cell')[2]).toHaveTextContent('ei hintaa');
     expect(within(second).getByRole('rowheader')).toHaveTextContent('Swordwise Huscle');
-    expect(within(second).getAllByRole('cell')[1]).toHaveTextContent(/^3$/);
-    expect(within(third).getAllByRole('cell')[1]).toHaveTextContent(/^0$/);
+    expect(within(second).getAllByRole('cell')[2]).toHaveTextContent(/^3$/);
+    expect(within(third).getAllByRole('cell')[2]).toHaveTextContent(/^0$/);
 
     expect(statusLine(container)).toHaveTextContent(/^3 korttia$/);
     expect(screen.getByRole('status')).toHaveTextContent('3 korttia ladattu.');
@@ -103,7 +103,7 @@ describe('CatalogView', () => {
     const typeCells = within(screen.getByRole('table'))
       .getAllByRole('row')
       .slice(1)
-      .map((row) => textWithoutSeparators(within(row).getAllByRole('cell')[0]));
+      .map((row) => textWithoutSeparators(within(row).getAllByRole('cell')[1]));
     expect(typeCells).toEqual([
       'Unit, Punainen',
       'Gear, Keltainen',

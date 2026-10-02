@@ -1,5 +1,6 @@
 import type { Card } from '../domain/card';
 import { CardColor } from './CardColor';
+import { CardImage } from './CardImage';
 import { CountControl } from './CountControl';
 import type { CountControlMode } from './CountControl';
 import { texts } from './texts';
@@ -27,16 +28,22 @@ export function CardList({
   cards,
   caption = texts.tableCaption,
   owned,
+  onOpenImage,
 }: {
   cards: readonly Card[];
   caption?: string;
   owned?: OwnedColumn;
+  /** Opens the enlarged image (T-027 UX); the button is where focus returns. */
+  onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
 }) {
   return (
     <table className="card-table" role="table">
       <caption className="visually-hidden">{caption}</caption>
       <thead role="rowgroup">
         <tr role="row">
+          <th scope="col" role="columnheader" className="col-fit col-image">
+            {texts.columnImage}
+          </th>
           <th scope="col" role="columnheader">
             {texts.columnName}
           </th>
@@ -56,6 +63,9 @@ export function CardList({
       <tbody role="rowgroup">
         {cards.map((card) => (
           <tr key={card.id} role="row" className={isOwned(card, owned) ? 'is-owned' : undefined}>
+            <td role="cell" className="col-fit col-image">
+              <CardImage card={card} onOpen={onOpenImage} />
+            </td>
             <th scope="row" role="rowheader" className="card-name">
               <span lang="en">{card.name}</span>
               {card.subname !== null && (
