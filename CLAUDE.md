@@ -1,32 +1,30 @@
 # cyberdeck
 
-@rules.md
-@agents.md
+Säännöt: `rules.md`, roolit: `agents.md`. **Niitä ei ladata automaattisesti (D-014, tokenien säästö).** Lue niistä vain se luku, jota tarvitset (`grep -n "^## " rules.md`).
 
-## Roolit tässä projektissa (D-002)
+## Tärkeimmät säännöt (tiivistelmä rules.md:stä)
+- Jos asia ei ole tiedostossa, sitä ei ole. Päätökset `docs/DECISIONS.md`:hen, ideat `docs/IDEAS.md`:hen, opit `docs/LESSONS.md`:hen.
+- Yksi tehtävä kerrallaan, pienet commitit `T-XXX: …` (englanniksi). Dokumentit suomeksi, koodi englanniksi.
+- Ei regressioita: `npm test`, `npm run lint` ja `npm run build` läpi ennen luovutusta. Testejä ei heikennetä.
+- Ei salaisuuksia repoon. Ulkoinen syöte on epäluotettavaa. Uusi riippuvuus vain perustellusti.
+- Kysy käyttäjältä: tuotepäätökset, maksulliset palvelut, peruuttamattomat toimet, riskien hyväksyntä. Kun jokin käyttäytyy odottamattomasti, kysy äläkä arvaa.
+- Kielletty ilman lupaa: force push, `reset --hard`, `clean -f`, historian uudelleenkirjoitus, massapoistot.
 
-- **Pääistunto on Projektipäällikkö (PM)**, ellei käyttäjä pyydä toista roolia ("Toimi agenttina Koodari"). PM keskustelee käyttäjän kanssa, pitää STATUS.md:n ajan tasalla ja delegoi työn.
-- Muut roolit ovat aliagentteja: `arkkitehti`, `ux-designer`, `sisallontuottaja`, `koodari`, `digiturva`, `testikayttaja`, `dokumentoija`. PM käynnistää ne Agent-työkalulla ja antaa aina tehtävätunnisteen (T-XXX) ja sen, mitä pyydetään (suunnittelu vai katselmointi). Aliagentti lukee kortin itse.
-- Aliagentit eivät voi kysyä käyttäjältä. Jos ne palaavat avoimen kysymyksen kanssa, PM ratkaisee sen tai kysyy käyttäjältä.
-- Suunnittelut (arkkitehti, ux-designer, sisallontuottaja, digiturva) ja katselmoinnit voi ajaa rinnakkain. Kaksi agenttia ei muokkaa samaa tiedostoa samaan aikaan.
-- Roolit ja komennot lyhyesti: `MUISTILAPPU.md`.
+## Kevyt malli (D-014, voimassa 2026-10-02 alkaen)
+- **Pääistunto on PM.** Pienen ja selkeän tehtävän (alle noin 150 riviä, ei uutta riippuvuutta, ei tietomallia) PM määrittelee lyhyesti korttiin ja antaa **yhdelle Koodarille**. Erillistä suunnitteluvaihetta ei ole.
+- **Yksi agentti kerrallaan.** Koodari, UX, Sisällöntuottaja, Testikäyttäjä ja Dokumentoija ajetaan Sonnetilla. Arkkitehti ja Digiturva ajetaan Opuksella, ja vain kun niitä tarvitaan.
+- **Katselmoinnit vain riskin mukaan:** Digiturva, kun muuttuvat riippuvuudet, firebase.json, workflowt, tiedostojen tai syötteen käsittely tai tallennus. Arkkitehti tietomallin tai uuden teknologian kohdalla. UX ja Testikäyttäjä MVP-tason lopussa yhdellä kertaa, tai uuden ison näkymän jälkeen. PM tarkistaa muut esikatselusta itse.
+- **Kevyt kirjaus:** kortissa on määrittely ja yksi luovutus. Väli-checkpoint kirjataan vain, jos työ keskeytyy. STATUS.md ja TASKS.md päivitetään tehtävän lopussa.
+- **Lue vähän:** älä lue kokonaan `docs/UX.md`:tä (170 kt), `docs/ARCHITECTURE.md`:tä (85 kt), `rules.md`:tä tai `agents.md`:tä. Hae tarvittava kohta grepillä ja lue vain se.
+- **Lyhyet tehtävänannot ja vastaukset.** Aliagentti palauttaa enintään noin 15 riviä.
 
 ## Git ja julkaisu (D-001, D-003)
-
 ```
-t-XXX-haara → PR (esikatselu testisivustolla) → test → testisivusto
-                                                 /julkaise → main → tuotanto
+t-XXX-haara → PR testiin (esikatselu) → PM yhdistää testiin → /julkaise → main
 ```
+- Haarat `t-XXX-nimi` tehdään `test`-haarasta. PR: `gh pr create --base test` (gh: `"C:\Program Files\GitHub CLI\gh.exe"`).
+- `main` = tuotanto, vain käyttäjän `/julkaise`-komennolla. Hook kysyy luvan main-pushiin, `gh pr merge`:en ja `firebase deploy`:hin.
+- GitHub: https://github.com/miinin/cyberdeck · Testi: https://cyberdeck-tcg-test.web.app · Tuotanto: https://cyberdeck-tcg.web.app
 
-- **Tehtävähaarat** `t-XXX-lyhyt-nimi` tehdään `test`-haarasta. Niihin saa pushata vapaasti.
-- **PR** avataan aina testiin (`gh pr create --base test`). GitHub Actions luo esikatselu-URL:n testisivustolle.
-- **`test`** = pysyvä testisivusto. PM yhdistää Done-tehtävän testiin (`git merge --no-ff`, `git push origin test`), jolloin testisivusto päivittyy.
-- **`main`** = tuotanto. Mainiin mennään vain käyttäjän `/julkaise`-komennolla (julkaisu-PR test → main). Suojaushook kysyy luvan jokaiseen main-pushiin, `gh pr merge`:en ja `firebase deploy`:hin ja estää force pushin sekä main- ja test-haarojen poiston.
-- **Rinnakkaiset tehtävät** (`/rinnakkain`) tehdään omissa git worktreeissään (`.claude/worktrees/`). Katselmoijat lukevat diffit ilman checkoutia, jotta pääkansion haara ei vaihdu kesken työn.
-- GitHub: https://github.com/miinin/cyberdeck · Firebase: `cyberdeck-tcg`
-- Testi: https://cyberdeck-tcg-test.web.app · Tuotanto: https://cyberdeck-tcg.web.app
-- Kun sovellus alkaa tallentaa dataa, testille tarvitaan oma Firebase-projekti, jotta testidata ja oikea data eivät sekoitu (Arkkitehti tekee ADR:n).
-
-## Pikakomennot käyttäjälle
-
-`/tilanne` · `/jatka` · `/tehtava T-XXX` · `/rinnakkain T-XXX T-YYY` · `/julkaise`
+## Pikakomennot
+`/tilanne` · `/jatka` · `/tehtava T-XXX` · `/julkaise` (`/rinnakkain` vain erikseen pyydettäessä, koska se kuluttaa paljon)

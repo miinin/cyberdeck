@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-02 (PM, T-026 ja T-027 Done)
+# STATUS · päivitetty 2026-10-02 (PM, D-014 kevyt malli, T-034 aloitettu)
 
 ## Yhdellä lauseella
 MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). MVP-1 on pilkottu tehtäviksi T-010–T-015 (D-007).
@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | – | Kuvat ovat testisivustolla. Odotetaan käyttäjän lupaa jatkaa (käyttäjä 2026-10-02: "kun kuvat ovat toiminnassa, pyydä lupaa jatkaa"). |
+| T-034 | Koodari | In Progress | Korttiruudukko, katso kortti. Kevyt malli D-014: yksi Koodari, PM tarkistaa esikatselun. |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -22,7 +22,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 - T-014 (vastaus tarvitaan ennen T-014:ää): kun liität pakkalistan, tallennetaanko se aina omaksi pakakseen, vai riittääkö pelkkä raportti puuttuvista korteista ja niiden sijainnista? Tarvitaanko pakoille tila "koottu / suunnitelma"?
 - K-P1–K-P4 (tietosuoja, ei blokkaa MVP-1:tä): rekisterinpitäjä ja käsittelyperuste IP-osoitteille (ehdotus: sinä, oikeutettu etu), riittääkö ilmoitus ilman suostumusbanneria (ehdotus: kyllä), voivatko MVP-2:n käyttäjät olla alaikäisiä (selvitettävä ennen MVP-2:ta) ja Hosting-lokien säilytysaika (Firebase-konsoli). Katso PRIVACY.md.
 
-## Kulutus (D-009, 2026-10-01)
+## Kulutus (D-014, 2026-10-02: kevyt malli, katso CLAUDE.md. D-009 alla vain niiltä osin kuin ei ristiriitaa)
 - Katselmoinnit riskin mukaan (agents.md v1.3). Testikäyttäjä ja Dokumentoija MVP-tason lopussa.
 - Opus: Koodari, Arkkitehti, Digiturva. Sonnet: UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija (Agent-kutsussa `model: "sonnet"`).
 - Enintään kaksi agenttia kerrallaan. PM tyhjentää istunnon (`/clear`) tehtävien välissä ja jatkaa komennolla `/jatka`.
