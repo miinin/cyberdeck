@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-021 | UX Designer | Ready (suunnittelu) | UX tutkii Cyberpunk 2077:n ilmeen ja tekee mallisivun käyttäjän hyväksyttäväksi (D-010). Haara `t-021-ulkoasu`. |
+| T-021 | Koodari | In Progress | Toteutus UX.md:n luvun 7 mukaan (D-010, D-011). Haara `t-021-ulkoasu`. |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)

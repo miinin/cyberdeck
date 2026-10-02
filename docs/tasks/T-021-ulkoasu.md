@@ -67,3 +67,7 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 - Mitä pyydän: Koodari toteuttaa UX.md 7.9:n mukaan. Vaalea teema on `:root`-oletus ja tumma `@media (prefers-color-scheme: dark)` -lohkossa. Mallisivun `[data-theme]`-säännöt ja skripti eivät kuulu sovellukseen.
 - Mistä katsoa: `docs/design/t021-mallisivu.html` (avaa selaimessa, "Rinnakkain" näyttää molemmat teemat), UX.md luvut 3 ja 7.
 - Tunnetut rajoitteet: Rajdhanin tasaleveitä numeroita ei varmistettu, siksi numerot jäävät monolle. Axe, ruudunlukija ja zoom ajetaan toteutuksen katselmoinnissa. Veto: ei.
+
+### Checkpoint 2026-10-02 · PM
+- UX.md v0.7 ja mallisivu (molemmat teemat) valmiit, commit 52a9c78. V9–V11: UX:n oletukset hyväksytty (käytettävyysvalintoja, käyttäjä voi muuttaa).
+- Tila In Progress. Seuraava askel: Koodari toteuttaa UX.md:n luvun 7.9 mukaan.
