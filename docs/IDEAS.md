@@ -18,3 +18,5 @@ Parkkipaikka uusille ideoille. Kaikki lisäävät, PM priorisoi (rules.md 0.7).
 | 2026-10-01 | Kumoa-toiminto kortin poistolle kokoelmasta (T-012) | UX Designer | Parkissa |
 | 2026-10-02 | Vaalea teema Cyberpunk-ilmeen rinnalle ja teemavalitsin (T-021, 7.3) | UX Designer | Vaalea teema toteutetaan T-021:ssä (D-011). Teemavalitsin (käsin vaihdettava) jää parkkiin. |
 | 2026-10-02 | `prefers-contrast: more` -tyyli (vahvemmat reunat) ja tulostustyyli (T-021, 7.8) | UX Designer | Parkissa, MVP-2:n saavutettavuusauditoinnin yhteydessä |
+| 2026-10-02 | Teeman kolmas vaihtoehto "laitteen mukaan" ja teeman synkronointi välilehtien välillä (`storage`-tapahtuma) (T-025, UX.md 8.1 ja 8.6) | UX Designer | Parkissa, vain jos käyttäjät pyytävät |
+| 2026-10-02 | `<meta name="theme-color" content="#000000">` selaimen osoitepalkin väriksi (otsikkopalkki on musta kummassakin teemassa) (T-025, UX.md 8.10 A5) | UX Designer | Parkissa |

@@ -7,7 +7,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-000 | Projektin alustus ja julkaisuputki | 0 | Must | PM | Done | – |
 | T-001 | Kävelevä luuranko: korttilista rajapinnasta näytölle | 0 | Must | Koodari | Done | Arkkitehti, Digiturva, UX, Testikäyttäjä, Dokumentoija |
 | T-002 | [velka] GitHub Actionit lukittu commit-tunnisteeseen ja Dependabot käyttöön (R-3) | 1 | Could | Koodari | Backlog | Digiturva |
-| T-003 | Korttidatan välimuisti (vaatii ADR:n) | 1 | Should | Arkkitehti → Koodari | Backlog | Arkkitehti, Digiturva |
+| T-003 | ~~Korttidatan välimuisti (vaatii ADR:n)~~ → korvattu, katso T-026 (D-012) | 1 | Should | Arkkitehti → Koodari | Peruttu | – |
 | T-004 | [velka] `npm test` ja `npm run lint` PR-workflowhun, firebase.json-otsakkeiden ja CSP:n yhdenmukaisuustesti (ARCH-003) ja `persist-credentials: false` (SEC-003) | 1 | Should | Koodari | Backlog | Digiturva (SR-9) |
 | T-005 | [velka] ESLintin saavutettavuusliitännäinen, kun ESLint 10 -yhteensopiva versio on saatavilla | 2 | Could | Koodari | Backlog | UX |
 | T-006 | [velka] Keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen ja testityyppien erottaminen sovelluksen tsconfigista | 1 | Could | Koodari | Backlog | – |
@@ -29,3 +29,8 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-022 | [velka] Hakukentän tyhjennyspainikkeen (selaimen oma ×) koko ja teemoitus (UX-010) | 2 | Could | Koodari | Backlog | UX |
 | T-023 | Leveä asettelu suurella tekstillä: 640 px + teksti 200 % vierittyy vaakasuunnassa 224 px (UX-008:n jatko, esim. container query) | 2 | Should | Koodari | Backlog | UX |
 | T-024 | [velka] Satunnaisesti aikakatkaistuva testi "formats large counts the Finnish way" (1 024 riviä) koko sarjan kuormassa | 1 | Should | Koodari | Backlog | – |
+| T-025 | Teemavalitsin: tumma oletuksena, käyttäjä voi vaihtaa (D-012) | 1 | Must | UX → Koodari | Done | UX, Digiturva (kevyt) |
+| T-026 | Korttidata sovelluksen mukana, ei hakua joka käynnillä (D-012, korvaa T-003:n) | 1 | Must | Arkkitehti → Koodari | In Progress | Digiturva, UX tarvittaessa |
+| T-027 | Korttikuvat näkyviin käyttäjän 151 kuvan paketista (D-012) | 1 | Must | Arkkitehti → UX → Koodari | Backlog (T-026) | UX, Digiturva |
+| T-028 | [velka] Teeman vaihdon siirtymät ja reduced-motion-sääntö: `transition: none` reduce-tilassa ja ei 0,12 s:n siirtymiä teeman vaihdossa (UX-005-2, UX-005-3) | 2 | Could | Koodari | Backlog | UX |
+| T-029 | [velka] `.claude/` pois ESLintin ja Vitestin piiristä, jotta worktreet eivät riko `npm run lint`/`npm test`:iä pääkansiossa (T-025:n koodikatselmointi). Tehdään T-026:n jälkeen (sama konfiguraatio). | 1 | Should | Koodari | Backlog (T-026) | – |

@@ -66,6 +66,7 @@ Yksi käsite = yksi termi. Uusi termi lisätään tähän heti, kun sitä käyte
 | **kappale** | Yksi fyysinen kortti | `count` | T-012. Taivutus: "1 kappale", "2 kappaletta". Ei "kopio" eikä "kpl" käyttöliittymätekstissä. |
 | **eri kortti** | Kokoelman yksittäinen kortti määrästä riippumatta | – | T-012. "1 eri kortti", "3 eri korttia". |
 | **pysyvä tallennus** | Pyyntö selaimelle säilyttää tiedot, vaikka laitteen tallennustila vähenee | `navigator.storage.persist` | T-012. Painike "Pyydä pysyvää tallennusta". Ei lupaa, että tiedot säilyvät selaimen tietojen tyhjennyksessä. |
+| **teema** | Sovelluksen väriteema: tumma (oletus) tai vaalea | – | T-025 (UX.md 8). Vaihdetaan otsikkopalkin painikkeella "Vaalea teema". Ei "tila", "moodi" eikä "skin". |
 
 Suomenkieliset vastineet (legenda, yksikkö, varuste, ohjelma) ovat tässä vain selitykseksi. Käyttöliittymässä käytetään englanninkielisiä tyyppejä, kunnes käyttäjä päättää toisin (K2). Värit sen sijaan ovat suomeksi (K6). K6–K8 ovat tekstivalintoja, jotka käyttäjä voi muuttaa myöhemmin (T-010:n kortti, PM:n checkpoint 2026-10-01).
 

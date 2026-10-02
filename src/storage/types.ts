@@ -37,9 +37,20 @@ export interface DeckRepository {
   subscribe(listener: () => void): () => void;
 }
 
+export type Theme = 'dark' | 'light';
+
+/** User preferences that are not data (UX.md 8.7). Stored as raw strings, not in an envelope. */
+export interface PreferencesRepository {
+  /** Saved theme, or 'dark' when nothing valid is saved. Never rejects because of storage problems. */
+  loadTheme(): Promise<Theme>;
+  /** Resolves with the saved theme. Rejects with StorageError when saving fails (the UI keeps the theme for the session). */
+  saveTheme(theme: Theme): Promise<Theme>;
+}
+
 export interface Repositories {
   collection: CollectionRepository;
   decks: DeckRepository;
+  preferences: PreferencesRepository;
   /** false = browser storage is not in use and data lives only in memory (the UI shows a notice, SR-13). */
   persistent: boolean;
 }

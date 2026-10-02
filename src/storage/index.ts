@@ -5,7 +5,15 @@ import { createMemoryStore, openBrowserStore, subscribeToBrowserStorage } from '
 import { createRepositories } from './repositories';
 import type { Repositories } from './types';
 
-export type { CollectionRepository, DeckRepository, Repositories, Loaded, LoadNotice } from './types';
+export type {
+  CollectionRepository,
+  DeckRepository,
+  Loaded,
+  LoadNotice,
+  PreferencesRepository,
+  Repositories,
+  Theme,
+} from './types';
 export { StorageError } from './errors';
 export type { StorageErrorKind } from './errors';
 export { isStoragePersisted, requestPersistentStorage } from './keyValueStore';

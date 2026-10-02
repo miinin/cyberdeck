@@ -22,10 +22,19 @@ import {
   DECKS_KEY,
   DECKS_SCHEMA_VERSION,
   MAX_BACKUPS_PER_AGGREGATE,
+  THEME_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
 import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS } from './migrations';
-import type { CollectionRepository, DeckRepository, Loaded, LoadNotice, Repositories } from './types';
+import type {
+  CollectionRepository,
+  DeckRepository,
+  Loaded,
+  LoadNotice,
+  PreferencesRepository,
+  Repositories,
+  Theme,
+} from './types';
 
 export interface RepositoryOptions {
   store: KeyValueStore;
@@ -275,5 +284,27 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     subscribe: (listener) => subscribe(DECKS_KEY, listener),
   };
 
-  return { collection, decks, persistent: options.persistent };
+  const preferences: PreferencesRepository = {
+    loadTheme: async () => {
+      try {
+        // Anything other than 'light' (nothing, 'dark', unknown) is the dark default and is not rewritten.
+        return store.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+      } catch {
+        return 'dark';
+      }
+    },
+    saveTheme: async (theme: Theme) => {
+      if (theme !== 'light' && theme !== 'dark') {
+        throw new StorageError('invalid-input', 'Unknown theme');
+      }
+      try {
+        store.setItem(THEME_KEY, theme);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return theme;
+    },
+  };
+
+  return { collection, decks, preferences, persistent: options.persistent };
 }
