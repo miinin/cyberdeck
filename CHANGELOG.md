@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pelin termit englanniksi (Cost, Red, Yellow, Green, Blue). Kortin tyyppi näkyy merkkinä, jonka reunan väri kertoo kortin värin. Kokoelman painikkeet ovat kortin keskellä, ja omistuksen reunaväri on hillitympi.
+
 ### Muutettu
 - Kokoelman −- ja +-painikkeet pysyvät aina samoilla paikoilla: määrä näkyy myös nollana, ja − on himmeä, kun kortteja ei ole. Keltainen palkki laatikon reunassa on poistettu: kokoelmassa olevan kortin reuna ja määrä värjäytyvät siniseksi, ja täysi pelisarja (Legend 1, muut 3) näkyy vihreänä ja ✓-merkkinä.
 - Kortin suurennetun kuvan sulkupainike on nyt ruksi (×).

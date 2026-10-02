@@ -61,7 +61,7 @@ describe('CatalogView', () => {
   it('shows the power and RAM of a card next to its cost', () => {
     renderView([card(1, { cost: 2, power: 3000, ram: 0 })]);
 
-    expect(stats(screen.getByRole('listitem'))).toEqual({ Hinta: '2', Power: '3000', RAM: '0' });
+    expect(stats(screen.getByRole('listitem'))).toEqual({ Cost: '2', Power: '3000', RAM: '0' });
   });
 
   it('shows every card with name, type and cost at once', () => {
@@ -77,10 +77,10 @@ describe('CatalogView', () => {
     const [first, second, third] = rows as [HTMLElement, HTMLElement, HTMLElement];
     expect(within(first).getByRole('heading', { level: 3 })).toHaveTextContent('V, Streetkid');
     expect(first.querySelector('.card-type')).toHaveTextContent('Legend');
-    expect(stats(first)).toEqual({ Hinta: '–ei hintaa', Power: '–ei poweria', RAM: '–ei RAMia' });
+    expect(stats(first)).toEqual({ Cost: '–ei hintaa', Power: '–ei poweria', RAM: '–ei RAMia' });
     expect(within(second).getByRole('heading', { level: 3 })).toHaveTextContent('Swordwise Huscle');
-    expect(stats(second).Hinta).toBe('3');
-    expect(stats(third).Hinta).toBe('0');
+    expect(stats(second).Cost).toBe('3');
+    expect(stats(third).Cost).toBe('0');
 
     expect(statusLine(container)).toHaveTextContent(/^3 korttia$/);
     expect(screen.getByRole('status')).toHaveTextContent('3 korttia ladattu.');
@@ -103,7 +103,7 @@ describe('CatalogView', () => {
     expect(within(table).getByText('Legend')).toHaveAttribute('lang', 'en');
   });
 
-  it('shows the color in Finnish under the type, with a decorative swatch (UX.md 5.5)', () => {
+  it('shows the type as a badge coloured by the card colour, colour name in English for screen readers (T-036)', () => {
     const { container } = renderView([
       card(1, { type: 'Unit', color: 'Red' }),
       card(2, { type: 'Gear', color: 'Yellow' }),
@@ -117,10 +117,10 @@ describe('CatalogView', () => {
       .getAllByRole('listitem')
       .map((row) => textWithoutSeparators(row.querySelector('.card-type')));
     expect(typeCells).toEqual([
-      'Unit, Punainen',
-      'Gear, Keltainen',
-      'Legend, Vihreä',
-      'Program, Sininen',
+      'Unit, Red',
+      'Gear, Yellow',
+      'Legend, Green',
+      'Program, Blue',
       'Unit, Purple',
       'Unit, –ei väriä',
     ]);
@@ -136,7 +136,15 @@ describe('CatalogView', () => {
     swatches.forEach((swatch) => expect(swatch).toHaveAttribute('aria-hidden', 'true'));
     const table = screen.getByRole('list');
     expect(within(table).getByText('Purple')).toHaveAttribute('lang', 'en');
-    expect(within(table).getByText('Punainen')).not.toHaveAttribute('lang');
+    expect(within(table).getByText('Red')).toHaveAttribute('lang', 'en');
+    expect(Array.from(container.querySelectorAll('.type-badge')).map((b) => b.className)).toEqual([
+      'type-badge type-badge-red',
+      'type-badge type-badge-yellow',
+      'type-badge type-badge-green',
+      'type-badge type-badge-blue',
+      'type-badge',
+      'type-badge',
+    ]);
   });
 
   it('renders HTML in card data as literal text (SR-1)', () => {

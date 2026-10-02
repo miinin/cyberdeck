@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
-import { CardColor } from './CardColor';
+import { CardColor, typeBadgeClass } from './CardColor';
 import { CardImage } from './CardImage';
 import { CountControl } from './CountControl';
 import type { CountControlMode } from './CountControl';
@@ -76,13 +76,11 @@ export function CardList({
             )}
           </h3>
           <p className="card-type">
-            <span lang="en">{card.type}</span>
-            <span className="visually-hidden">, </span>
-            <span className="separator" aria-hidden="true">
-              {' · '}
+            <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
+              {card.type}
             </span>
-            <span className="card-color">
-              <CardColor color={card.color} />
+            <span className="visually-hidden">
+              , <CardColor color={card.color} />
             </span>
           </p>
           <dl className="card-stats">

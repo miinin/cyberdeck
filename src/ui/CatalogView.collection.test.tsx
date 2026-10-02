@@ -76,15 +76,11 @@ describe('CatalogView collection: count control', () => {
     expect(within(plus('V, Streetkid')).getByText('+')).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('has one decorative separator, between type and color, and none before the cost (UX-005)', async () => {
+  it('shows the type as one badge and no decorative separators (T-036)', async () => {
     await renderView();
     const typeCell = row('V, Streetkid').querySelector('.card-type');
-    const costCell = row('V, Streetkid').querySelector('.card-stats');
-    const separators = typeCell?.querySelectorAll('.separator') ?? [];
-    expect(separators).toHaveLength(1);
-    expect(separators[0]).toHaveAttribute('aria-hidden', 'true');
-    expect(separators[0]?.nextElementSibling).toHaveClass('card-color');
-    expect(costCell?.querySelector('.separator')).toBeNull();
+    expect(typeCell?.querySelectorAll('.type-badge')).toHaveLength(1);
+    expect(row('V, Streetkid').querySelector('.separator')).toBeNull();
   });
 
   it('marks a card owned with one press and keeps it in storage', async () => {

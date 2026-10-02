@@ -50,7 +50,7 @@ export const texts = {
   imageLoadError: 'Kuvaa ei voitu ladata.',
   columnName: 'Nimi',
   columnTypeAndColor: 'Tyyppi ja väri',
-  columnCost: 'Hinta',
+  columnCost: 'Cost',
   missingValue: '–',
   noCost: 'ei hintaa',
   columnPower: 'Power',
@@ -165,8 +165,8 @@ export const texts = {
 
 /** Card colors in Finnish (UX.md 5.2, K6). Other API values are shown as such, in English. */
 export const colorNames: ReadonlyMap<string, string> = new Map([
-  ['Red', 'Punainen'],
-  ['Yellow', 'Keltainen'],
-  ['Green', 'Vihreä'],
-  ['Blue', 'Sininen'],
+  ['Red', 'Red'],
+  ['Yellow', 'Yellow'],
+  ['Green', 'Green'],
+  ['Blue', 'Blue'],
 ]);
