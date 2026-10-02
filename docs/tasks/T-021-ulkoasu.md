@@ -46,3 +46,7 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 - Tunnetut rajoitteet ja riskit: tutkimuslähteet ovat kolmannen osapuolen analyyseja (ei CDPR:n tyyliohjetta), joten värit ovat likiarvoja. Mallisivun korttitiedot ovat esimerkkejä. Mallisivun CSS käyttää `clip-path`-muotoja ja `:has()`-valitsinta (toimii nykyselaimissa, ilman `:has()`:ia valitun chipin tausta puuttuu mutta ruksi näkyy). Glitch-animaatio ja hover/fokus on tarkistettu vain ulkoasun osalta. Axe, näppäimistöpolku ja ruudunlukija ajetaan vasta toteutuksen katselmoinnissa. Vite ei saa inline-liittää fontteja `data:`-muotoon (CSP), tarkista build.
 - Testit: ei koodimuutoksia, ei testejä ajettu. Mallisivu renderöity Edge headlessilla ja tarkistettu kuvakaappauksista (320 px iframe, 1200 px).
 - Veto: ei.
+
+### Checkpoint 2026-10-02 · PM (käyttäjän päätökset, D-011)
+- Käyttäjä hyväksyi mallisivun suunnan. V1: myös vaalea teema (seuraa laitteen asetusta). V2: Rajdhani. V3–V8: UX:n oletukset hyväksytty.
+- Seuraava askel: UX lisää vaalean teeman ja vaihtaa fontin (UX.md ja mallisivu). Sitten Koodari toteuttaa.

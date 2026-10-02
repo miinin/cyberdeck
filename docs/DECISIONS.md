@@ -156,3 +156,14 @@ Päätöksessä on kuusi osaa. Rakenne ja allekirjoitukset ovat ARCHITECTURE.md:
 3. Tehtävään osallistuvat vain UX Designer ja Koodari. Muita katselmointeja ei tilata. Poikkeus: jos `firebase.json` (CSP) tai riippuvuudet muuttuvat, Digiturva tekee kevyen tarkistuksen (D-009).
 **Perustelu:** Käyttäjän päätös.
 **Seuraukset:** UX.md:n periaate 7 päivitetään. Pelin tavaramerkit, logot, kuvat ja pelin omat fontit eivät tule sovellukseen (tekijänoikeus, SECURITY.md luku 7): ilme rakennetaan omilla väreillä, muodoilla ja avoimen lisenssin fonteilla.
+
+## D-011 · T-021:n suunta hyväksytty: vaalea ja tumma teema, fonttina Rajdhani · 2026-10-02 · Päättäjä: käyttäjä
+**Tila:** Voimassa
+**Konteksti:** UX:n mallisivu `docs/design/t021-mallisivu.html` (UX.md v0.6, luku 7). Avoimet kysymykset V1 (vain tumma teema?) ja V2 (fontit).
+**Päätös:**
+1. Mallisivun visuaalinen suunta hyväksytään.
+2. V1: sovelluksessa on **sekä tumma että vaalea** Cyberpunk-teema, ja se seuraa laitteen asetusta (`prefers-color-scheme`), kuten nyt. UX suunnittelee vaalean teeman tokenit ja kontrastit ennen toteutusta.
+3. V2: fonttina on **Rajdhani** (SIL OFL 1.1, itse isännöity). Tämä tarkentaa D-010:tä: avoimen lisenssin fontti on sallittu, vaikka peli käyttää sitä. Pelin logot, kuvat ja tavaramerkit ovat yhä kiellettyjä. UX päättää numeroiden ja tilarivien fontin ja varmistaa Rajdhanin luettavuuden pienissä koissa.
+4. V3–V8: UX:n oletukset hyväksytty (PM).
+**Perustelu:** Käyttäjän päätös.
+**Seuraukset:** UX päivittää UX.md:n luvut 3 ja 7 sekä mallisivun, ja sen jälkeen Koodari toteuttaa.
