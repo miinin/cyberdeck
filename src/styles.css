@@ -1579,6 +1579,48 @@ body:has(dialog[open]) {
   border-color: var(--color-danger);
 }
 
+.deck-import-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 40rem;
+}
+
+.deck-import-form textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.deck-import-form textarea:focus-visible {
+  border-color: var(--color-info);
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.deck-import-form textarea[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.import-report {
+  margin-block-start: var(--space-6);
+}
+
+.import-rows {
+  padding-inline-start: var(--space-4);
+}
+
+.import-missing {
+  color: var(--color-warning);
+  font-weight: var(--font-weight-bold);
+}
+
 .field-error {
   color: var(--color-danger);
   font-weight: var(--font-weight-bold);

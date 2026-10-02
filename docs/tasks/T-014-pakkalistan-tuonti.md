@@ -37,3 +37,11 @@ Pelaaja liittää netistä löytämänsä pakkalistan ja näkee heti, mitä kort
 - Ei raahaa ja pudota -tuontia (voi lisätä myöhemmin samoilla rajoilla).
 
 ## Luovutukset
+
+### Luovutus 2026-10-02 · Koodari → Digiturva (SR-17, R-13) ja PM
+- Mitä tehtiin: jäsennin `src/domain/deckText.ts` (kaikki SR-17:n rajat, ankkuroidut lineaariset regexit, ei regexiä syötteestä, BOM/rivinvaihdot/NFC/ohjausmerkit, `UNSAFE_CHARACTERS` exportattu validate.ts:stä jaettavaksi), raportti `src/domain/deckReport.ts`, näkymä `src/ui/DeckImport.tsx` (Pakat-sivun "Tuo pakkalista", tekstikenttä + tiedostovalitsin, tiedoston koko tarkistetaan ennen `file.text()`:iä), "Tallenna pakaksi" (nimi muokattavissa, `checkDeckName`, `decks.create`, siirtyy editoriin, virheet `deckTexts.actionFailed`). Tekstit `deckTexts.ts`:ssä (Sisällöntuottaja/UX katselmoivat), CHANGELOG päivitetty.
+- Mistä katsoa: `git diff origin/test...HEAD`; testit `deckText.test.ts` (esimerkkipaka 19/19 tunnistuu, rajat, ReDoS-aika), `deckReport.test.ts`, `DeckImport.test.tsx` (raportti, SR-14 `<img>` tekstinä, 301 riviä, 64 kt tiedosto ei lueta, tallennus/nimen validointi/virhe).
+- Tunnetut rajoitteet: saman kortin yhdistetty määrä katkaistaan 99:ään; vain ensimmäinen `# `-rivi on nimi; tunnistamaton rivi (esim. ilman määrää) ei ole osa pakkaa; ei raahaa ja pudota -tuontia.
+- Sivuhuomio: `App.test.tsx` D-013 -testi aikakatkesi 5 s:n rajalla koko sarjassa myös ilman T-014:ää (päällä: aikaraja 20 s, vain tämä testi).
+- Testit: `npx vitest run` 582/582, `eslint .` ja `tsc --noEmit` ja `npm run build` läpi.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (DeckImport voisi käyttää useCollection-hookia; nykyinen suora `collection.load()` riittää kertakäyttöön)

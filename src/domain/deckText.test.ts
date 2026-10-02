@@ -1,10 +1,9 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { CARDS } from '../data/cards';
 import type { Card } from './card';
 import { MAX_IMPORT_BYTES, parseDeckText } from './deckText';
 
-const example = readFileSync('docs/examples/esimerkkipakka.txt', 'utf8');
+import example from '../../docs/examples/esimerkkipakka.txt?raw';
 
 function card(name: string, subname: string | null, type = 'Unit'): Card {
   const display = subname ? `${name} - ${subname}` : name;

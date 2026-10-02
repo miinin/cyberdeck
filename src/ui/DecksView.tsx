@@ -8,6 +8,7 @@ import type { CardsByKey } from '../domain/deckRules';
 import { StorageError } from '../storage';
 import type { LoadNotice, Repositories, StorageErrorKind } from '../storage';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
+import { DeckImport } from './DeckImport';
 import { deckTexts } from './deckTexts';
 import { useDecks } from './useDecks';
 
@@ -133,6 +134,7 @@ export function DecksView({
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Deck | null>(null);
   const [failure, setFailure] = useState<StorageErrorKind | 'unknown' | null>(null);
+  const [importing, setImporting] = useState(false);
   const [live, setLive] = useState('');
   /** Element to focus after the next render (a data attribute of a row button, or the heading). */
   const focusTarget = useRef<string | null>(null);
@@ -211,6 +213,21 @@ export function DecksView({
     if (opener?.isConnected) opener.focus();
   };
 
+  if (importing) {
+    return (
+      <DeckImport
+        cards={cards}
+        repositories={repositories}
+        decks={decks}
+        onOpen={onOpen}
+        onClose={() => {
+          setImporting(false);
+          focusTarget.current = 'import';
+        }}
+      />
+    );
+  }
+
   return (
     <>
       <h1 ref={headingRef} tabIndex={-1}>
@@ -249,6 +266,14 @@ export function DecksView({
           <div className="deck-toolbar">
             <button type="button" className="button-primary" onClick={() => void handleCreate()}>
               {deckTexts.newDeck}
+            </button>{' '}
+            <button
+              type="button"
+              className="button-secondary"
+              data-focus-id="import"
+              onClick={() => setImporting(true)}
+            >
+              {deckTexts.importButton}
             </button>
           </div>
 
