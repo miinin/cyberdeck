@@ -13,6 +13,7 @@ Käyttäjälle näkyvät muutokset versioittain.
 - "Vain omistetut" -valinta näyttää vain kortit, joita sinulla on. Se toimii yhdessä haun ja muiden valintojen kanssa.
 - Kokoelma tallentuu tähän selaimeen ja säilyy, kun avaat sivun uudelleen. Se ei siirry toiselle laitteelle. Voit pyytää selainta säilyttämään kokoelman pysyvästi. Jos tallennus ei onnistu, sivu kertoo sen, eikä näytä määrää, jota ei tallennettu.
 - Puhelimen kapealla näytöllä jokainen kortti näkyy omana korttinaan, jotta painikkeet mahtuvat.
+- Korttikuvat: jokaisella listan rivillä on kortin pikkukuva. Kuvaa painamalla kortti aukeaa isona, ja ikkunan saa kiinni Sulje-painikkeella, Esc-näppäimellä tai painamalla taustaa. Jos kuvaa ei ole, rivillä näkyy tyhjä kehys.
 
 ### Muutettu
 - Kortit näkyvät heti ilman latausta. Korttitiedot tulevat sovelluksen mukana, joten sivu ei enää hae niitä Netdeck.gg:stä joka käynnillä eikä näytä haku- tai virheilmoituksia.

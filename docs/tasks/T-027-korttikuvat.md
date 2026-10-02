@@ -69,3 +69,36 @@ Pelaaja tunnistaa kortin kuvasta (D-012). Kun käyttäjän kuvapaketti saapuu, k
 
 ### Checkpoint 2026-10-02 · PM
 - UX:n dialogiratkaisu hyväksytty (`CardImageDialog`). sharp hyväksytty sm-kuviin (D-013 osa 4), ja Digiturva tarkistaa sen katselmoinnissa. Käyttäjä nosti T-027:n kaiken muun edelle (2026-10-02). Tila Ready, kun T-026 on Done.
+
+### Checkpoint 2026-10-02 · Koodari
+- Suunnitelma (toteutettu): (1) `matchImages` + testit, (2) `importImages` + sharp-muunnin + `cards:images` + map-tiedosto, (3) tuonti ja optimoidut kuvat, (4) `cardImages`, `CardImage`, `CardImageDialog`, lista ja CSS, (5) dokumentit.
+- Tehty: commitit 071b4a0 (tuonti), a42ed2d (kuvat), 49f69b6 (käyttöliittymä) ja dokumentticommit.
+- Kesken: –
+- Seuraava askel: katselmoinnit (UX ja Digiturva).
+- Avoimet kysymykset: ei blokkaavia (katso luovutus).
+- Muutetut tiedostot: package.json, package-lock.json, .gitignore, scripts/cards-images.mjs, scripts/cards/{matchImages,importImages}.ts (+ testit), scripts/cards/convertImage.mjs (+ testi), scripts/cards/card-images.map.json, src/domain/cardImage.ts, src/data/cardImages.ts (+ testi), src/assets/cards/{sm,lg}/*.webp (302), src/ui/{CardImage,CardImageDialog}.tsx (+ testi), src/ui/{CardList,CatalogView,texts}.ts(x), src/styles.css, src/test/setup.ts, src/App.test.tsx, src/ui/CatalogView*.test.tsx, docs/ARCHITECTURE.md, CHANGELOG.md.
+
+**Tuontiraportti** (`npm run cards:images -- <pääkansio>/public/cards`, 2026-10-02, noin 17 s):
+- Lähde: 151 WebP-tiedostoa, 733 × 1024 px, yhteensä 14 Mt. Alkuperäisiä ei commitoitu.
+- Muunnettu 151 / yhdistetty 151. Säännöt: `key` 130, `slug` 9, `map` 12. Kortittomia tiedostoja 0, hylättyjä 0, ohitettuja 0, kuvattomia kortteja 0, orpoja 0.
+- Tulosteet: `sm` 160 × 224 px, yhteensä 1,7 Mt (noin 11 kt/kuva). `lg` 720 × 1006 px, yhteensä 11 Mt (noin 73 kt/kuva). Metatiedot poistettu (tarkistettu sharpilla).
+- **Kaksi paketin tiedostoa oli nimetty väärin** (tarkistettu katsomalla kuvat): `Modded_Muramasa.webp` on oikeasti *Bootleg Black Sapphire Show* ja `Panam_Palmer_Nomad_Cavalry_ri17.webp` on *Panam Palmer — Strength Through Family*. Oikea Modded Muramasa on `Modded_Muramasa_lwjp.webp`. Korjattu map-tiedostolla. Kaikkien 151 kuvan nimialue käytiin läpi kontaktiarkeilla, ja muut nimet täsmäsivät. Osalla Legend-korteista nimi on kuvan yläosassa rajauksen ulkopuolella, joten ne tarkistettiin vain tiedostonimen perusteella.
+- Map-tiedoston 12 riviä: 6 tiedostoa, joista aksenttikirjain puuttuu (`Gilded_Mat_n`, `Judy_lvarez` ×2, `Les_l_mens`, `El_Sombrer_n`, `Muamar_Reyes_El_Capit_n`), 3 satunnaisella päätteellä (`_v7sd`, `_vleh`, `_bxcf`) ja edellä mainitut 3.
+
+## Luovutukset (Koodari)
+
+### Luovutus 2026-10-02 · Koodari → PM → UX ja Digiturva
+- **Mitä tehtiin:** `npm run cards:images -- <kansio>` (sharp, yhdistäminen map → avain → slug → nimi, raportti). 151 kortin kuvat `src/assets/cards/{sm,lg}/<key>.webp` (12,7 Mt). Listan ensimmäinen sarake "Kuva": pikkukuva napissa, joka avaa natiivin modaalidialogin isolla kuvalla. Puuttuva kuva tai latausvirhe → katkoviivakehys. Toteutuksen poikkeamat suunnitelmasta: ARCHITECTURE.md "T-027 · Koodari".
+- **Mitä pyydän:**
+  - UX: katselmointi (lista, mobiilin rivi 2, dialogi, fokus, axe). Tarkista erityisesti: dialogin avaus piilottaa sivun vierityspalkin (`body:has(dialog[open]) { overflow: hidden }`), jolloin sisältö hyppää desktopilla noin 15 px sivulle. Korjaus olisi esim. `scrollbar-gutter: stable`, jos UX haluaa.
+  - Digiturva: sharp-riippuvuus (`npm audit`: 0 haavoittuvuutta asennuksen jälkeen), tuontiskriptin polut ja map-tiedoston validointi, `img-src 'self' data:` riittää (kuvat ovat `/assets/`-polussa).
+- **Mistä katsoa:** commitit 071b4a0, a42ed2d, 49f69b6 ja dokumentticommit haarassa `t-027-korttikuvat`. Ajo: `npm ci`, `npm run dev`. Tuonti uudelleen: `npm run cards:images -- <kansio>`.
+- **Tunnetut rajoitteet ja riskit:**
+  - Haara on tehty `t-026-korttidata`-haarasta, joten diff `origin/test...HEAD` sisältää myös T-026:n. T-027:n oma diff: `git diff a844792..HEAD`.
+  - Repo kasvaa 12,7 Mt (302 binääriä), kuten D-013 arvioi.
+  - Isoon kuvaan ei ole uudelleenyritystä: jos `lg` epäonnistuu kerran, saman kortin dialogi näyttää virheen, kunnes sivu ladataan uudelleen.
+  - Selaintarkistus tehtiin paikallisesti headless-Chromella (`vite preview`): 320 px (tumma teema) ja 1280 px (vaalea). Ei vaakavieritystä 320 px:ssä, laiska lataus toimii (17 / 151 kuvaa ladattu 320 px:ssä, 38 / 151 desktopilla), dialogi aukeaa, fokus menee Sulje-nappiin, Esc sulkee ja fokus palaa pikkukuvaan. 400 % zoomia, ruudunlukijaa ja axea ei ajettu (UX).
+  - Pääkansion `public/cards` ja tämän worktreen seuraamaton `public/` (151 alkuperäistä kuvaa, ei minun tekemäni) eivät ole gitissä. Worktreen `public/` päätyy paikalliseen `dist/`iin, jos buildaa tässä kansiossa, mutta CI:n puhtaaseen buildiin se ei vaikuta. Sen voi poistaa.
+- **Testit:** `npm test` 24 tiedostoa, 455 testiä läpi. `npm run lint` 0 virhettä ja varoitusta. `npm run build` (sis. `tsc --noEmit`) läpi.
+- **Uusi riippuvuus:** `sharp@0.35.5` (devDependency, tarkka versio). Apache-2.0, libvips-binäärit LGPL-3.0-or-later, ei install-skriptejä (Arkkitehdin tarkistus 2026-10-02).
+- Koodikatselmointi: tehty · Pakollisia korjattu 2 (raportin järjestys riippui `localeCompare`n lokaalista → koodiyksikköjärjestys; muuntamatta jääneen kuvan kortti puuttui kuvattomien listasta väärässä järjestyksessä → lasketaan korttien järjestyksessä) · Suosituksia 2 (vierityspalkin hyppy dialogissa UX:lle; ison kuvan uudelleenyritys, ei velkatehtävää ennen UX:n kantaa)
