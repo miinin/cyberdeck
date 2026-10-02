@@ -18,7 +18,7 @@ export interface CardFile {
 }
 
 /** Card fields in model order. The file is written in this order, so the output is deterministic. */
-const CARD_FIELDS = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'key'] as const;
+const CARD_FIELDS = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'rarity', 'key'] as const;
 const FILE_FIELDS = ['format', 'version', 'cards'] as const;
 
 /** Builds the file object with a fixed key order (format, version, cards; Card fields in model order). */
@@ -37,6 +37,7 @@ export function toCardFile(cards: readonly Card[]): CardFile {
       cost: card.cost,
       power: card.power,
       ram: card.ram,
+      rarity: card.rarity,
       key: card.key,
     })),
   };
@@ -102,6 +103,7 @@ function parseCard(value: unknown, index: number): Card {
     cost,
     power,
     ram,
+    rarity: requireTextOrNull(value.rarity, 'rarity', where),
     key,
   };
 }

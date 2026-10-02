@@ -22,6 +22,8 @@ export interface Card {
   power: number | null;
   /** RAM, or null when the card has none. */
   ram: number | null;
+  /** "Common", "Rare" and so on (first printing), or null when unknown. A plain string so a new rarity does not break the app. */
+  rarity: string | null;
   /** The app's own key, cardKey(name, subname). Collections and decks refer to cards only by this (D-008). */
   key: CardKey;
 }

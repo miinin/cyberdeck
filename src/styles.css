@@ -1093,8 +1093,8 @@ body:has(dialog[open]) {
 
 /* Owned card (count > 0). The count itself carries the information, not the colour (UX.md 7.5). */
 .card-box.is-owned {
-  border-color: color-mix(in srgb, var(--color-info) 40%, var(--color-border));
-  --color-count: var(--color-info);
+  border-color: color-mix(in srgb, var(--color-accent) 38%, var(--color-border));
+  --color-count: var(--color-accent-edge);
 }
 
 .card-box.is-playset {

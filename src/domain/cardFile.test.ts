@@ -12,7 +12,7 @@ const streetkid: Card = {
   color: 'Red',
   cost: null,
   power: null,
-  ram: null,
+  ram: null, rarity: null,
   key: 'v-streetkid',
 };
 
@@ -26,7 +26,7 @@ const solo: Card = {
   color: null,
   cost: 0,
   power: null,
-  ram: null,
+  ram: null, rarity: null,
   key: 'solo',
 };
 
@@ -43,7 +43,7 @@ describe('toCardFile', () => {
       key: solo.key,
       cost: solo.cost,
       power: null,
-      ram: null,
+      ram: null, rarity: null,
       color: solo.color,
       type: solo.type,
       displayName: solo.displayName,
@@ -65,6 +65,7 @@ describe('toCardFile', () => {
       'cost',
       'power',
       'ram',
+      'rarity',
       'key',
     ]);
   });
@@ -89,7 +90,7 @@ describe('parseCardFile', () => {
       color: null,
       cost: 0,
       power: null,
-      ram: null,
+      ram: null, rarity: null,
     });
   });
 

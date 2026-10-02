@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf } from '../domain/collection';
@@ -7,6 +8,7 @@ import type { Repositories } from '../storage';
 import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
+  KNOWN_CARD_RARITIES,
   KNOWN_CARD_TYPES,
   filterCards,
   filterOptions,
@@ -15,6 +17,7 @@ import {
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardFilters } from './CardFilters';
+import type { CollectionFilter } from './CardFilters';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
 import type { OwnedColumn } from './CardList';
@@ -64,8 +67,8 @@ export function CatalogView({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
-  const ownedOnlyRef = useRef<HTMLInputElement>(null);
-  const [ownedOnlyChecked, setOwnedOnly] = useState(false);
+  const collectionAllRef = useRef<HTMLInputElement>(null);
+  const [collectionChoice, setCollectionFilter] = useState<CollectionFilter>('all');
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
@@ -78,19 +81,25 @@ export function CatalogView({
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
-  if (ownedOnlyChecked && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
-    setOwnedOnly(false);
+  if (collectionChoice !== 'all' && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
+    setCollectionFilter('all');
   }
-  const ownedOnly = ownedOnlyChecked && collection.phase === 'ready';
-  const visibleCards = (next: CardFilterCriteria, nextOwnedOnly: boolean, nextKept: ReadonlySet<CardKey>) => {
+  const collectionFilter: CollectionFilter = collection.phase === 'ready' ? collectionChoice : 'all';
+  const ownedOnly = collectionFilter === 'owned';
+  const visibleCards = (next: CardFilterCriteria, nextFilter: CollectionFilter, nextKept: ReadonlySet<CardKey>) => {
     const matching = filterCards(allCards, next);
-    if (!nextOwnedOnly) return matching;
-    return matching.filter((card) => countIn(collection, card.key) > 0 || nextKept.has(card.key));
+    if (nextFilter === 'all') return matching;
+    return matching.filter((card) => {
+      if (nextKept.has(card.key)) return true;
+      const count = countIn(collection, card.key);
+      return nextFilter === 'owned' ? count > 0 : count < playsetSize(card);
+    });
   };
-  const isActive = (next: CardFilterCriteria, nextOwnedOnly: boolean) => isFilterActive(next) || nextOwnedOnly;
+  const isActive = (next: CardFilterCriteria, nextFilter: CollectionFilter) =>
+    isFilterActive(next) || nextFilter !== 'all';
 
-  const filtered = visibleCards(criteria, ownedOnly, kept);
-  const filterActive = isActive(criteria, ownedOnly);
+  const filtered = visibleCards(criteria, collectionFilter, kept);
+  const filterActive = isActive(criteria, collectionFilter);
 
   // The cards are there from the first render, so the live region starts with the loaded message.
   // It already tells the unfiltered result, so that result is not announced again right away.
@@ -140,17 +149,17 @@ export function CatalogView({
   /** Any change of the search, a selection or "Vain omistetut" (UX.md 5.6, 6.6). */
   const updateFilters = (
     next: CardFilterCriteria,
-    nextOwnedOnly: boolean,
+    nextFilter: CollectionFilter,
     when: 'later' | 'now' | 'never',
     force = false,
   ) => {
     setCriteria(next);
-    setOwnedOnly(nextOwnedOnly);
+    setCollectionFilter(nextFilter);
     // New conditions: rows whose count went to 0 are no longer kept.
     setKept(NO_KEYS);
     const announcement = describeResult(
-      isActive(next, nextOwnedOnly),
-      visibleCards(next, nextOwnedOnly, NO_KEYS).length,
+      isActive(next, nextFilter),
+      visibleCards(next, nextFilter, NO_KEYS).length,
       allCards.length,
     );
     if (when === 'later') announcer.announceLater(announcement);
@@ -158,10 +167,10 @@ export function CatalogView({
     else announcer.cancel();
   };
   const updateCriteria = (next: CardFilterCriteria, when: 'later' | 'now' | 'never') =>
-    updateFilters(next, ownedOnly, when);
+    updateFilters(next, collectionFilter, when);
 
   const handleClearFilters = () => {
-    updateFilters(EMPTY_CRITERIA, false, 'now', true);
+    updateFilters(EMPTY_CRITERIA, 'all', 'now', true);
     // The button disappears with the empty result; the search field is the natural next step (UX.md 5.7).
     searchInputRef.current?.focus();
   };
@@ -173,7 +182,7 @@ export function CatalogView({
           mode: collection.phase,
           countOf: (card) => countIn(collection, card.key),
           onChange: (card, count) => {
-            if (ownedOnly) setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
+            if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
             collectionStore.setCount(card.key, count);
           },
           onLimit: collectionAnnouncer.announceLimit,
@@ -205,8 +214,8 @@ export function CatalogView({
   };
 
   const handleShowAll = () => {
-    updateFilters(criteria, false, 'now', true);
-    ownedOnlyRef.current?.focus();
+    updateFilters(criteria, 'all', 'now', true);
+    collectionAllRef.current?.focus();
   };
 
   return (
@@ -264,16 +273,24 @@ export function CatalogView({
           allCards.map((card) => card.color),
           criteria.colors,
         )}
+        rarityOptions={filterOptions(
+          KNOWN_CARD_RARITIES,
+          allCards.map((card) => card.rarity),
+          criteria.rarities,
+        )}
         searchInputRef={searchInputRef}
-        ownedOnly={collection.phase === 'ready' ? ownedOnly : undefined}
-        ownedOnlyRef={ownedOnlyRef}
-        onToggleOwnedOnly={() => updateFilters(criteria, !ownedOnly, 'later')}
+        collectionFilter={collection.phase === 'ready' ? collectionFilter : undefined}
+        collectionAllRef={collectionAllRef}
+        onCollectionFilterChange={(next) => updateFilters(criteria, next, 'later')}
         onQueryChange={(query, composing) =>
           updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
         }
         onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
         onToggleColor={(color) =>
           updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
+        }
+        onToggleRarity={(rarity) =>
+          updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later')
         }
         onSearchSubmit={() =>
           announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))

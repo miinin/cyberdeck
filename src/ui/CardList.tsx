@@ -24,7 +24,7 @@ function collectionState(card: Card, owned: OwnedColumn | undefined): string {
 }
 
 /** One game value (cost, power, RAM). A missing value shows a dash and a hidden spoken equivalent. */
-function Stat({ label, value, missing }: { label: string; value: number | null; missing: string }) {
+function Stat({ label, value, missing }: { label: string; value: number | string | null; missing: string }) {
   let shown: ReactNode = value;
   if (value === null) {
     shown = (
@@ -87,6 +87,7 @@ export function CardList({
             <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} />
             <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} />
             <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} />
+            <Stat label={texts.columnRarity} value={card.rarity} missing={texts.noRarity} />
           </dl>
           {owned !== undefined && (
             <div className="card-collection">

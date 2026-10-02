@@ -41,3 +41,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-034 | Korttiruudukko: iso kuva, nimi, tyyppi, hinta, power, RAM ja kokoelma samassa laatikossa | 1 | Must | Koodari | Done | PM tarkistaa esikatselun (D-014) |
 | T-035 | Hienosäätö: +/−-kontrolli, hillitty kokoelmatila (playset), dialogin × | 1 | Must | Koodari | Done | PM esikatselu (D-014) |
 | T-036 | Englanninkieliset pelitermit, värillinen tyyppimerkki, keskitetty kokoelmakontrolli, hillitympi reuna | 1 | Must | PM (pieni, D-014) | Done | – |
+| T-037 | Keltainen omistusreuna, want-lista (Puuttuvat), rarity korttiin ja suodattimiin | 1 | Must | Koodari (D-014) | Done | Sisällöntuottaja: tyhjän kokoelman ohjeteksti MVP-1:n lopussa |

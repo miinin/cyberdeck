@@ -5,6 +5,9 @@ import type { Card } from './card';
 /** Known card types in display order. Unknown types from the data are appended after these. */
 export const KNOWN_CARD_TYPES: readonly string[] = ['Legend', 'Unit', 'Gear', 'Program'];
 
+/** Known rarities in display order. Unknown rarities from the data are appended after these. */
+export const KNOWN_CARD_RARITIES: readonly string[] = ['Common', 'Uncommon', 'Rare', 'Epic', 'Secret', 'Nova Rare'];
+
 /** Known card colors in display order. Unknown colors from the data are appended after these. */
 export const KNOWN_CARD_COLORS: readonly string[] = ['Red', 'Yellow', 'Green', 'Blue'];
 
@@ -15,9 +18,11 @@ export interface CardFilterCriteria {
   types: readonly string[];
   /** Selected colors. Empty = all colors (also cards without a color). */
   colors: readonly string[];
+  /** Selected rarities. Empty = all rarities (also cards without one). */
+  rarities: readonly string[];
 }
 
-export const EMPTY_CRITERIA: CardFilterCriteria = { query: '', types: [], colors: [] };
+export const EMPTY_CRITERIA: CardFilterCriteria = { query: '', types: [], colors: [], rarities: [] };
 
 const COMBINING_MARKS = /\p{M}/gu;
 /** Invisible format characters such as zero-width spaces and direction marks (B-014). */
@@ -43,7 +48,10 @@ export function normalizeForSearch(text: string): string {
 
 /** True when the search text, a type or a color narrows the list. */
 export function isFilterActive(criteria: CardFilterCriteria): boolean {
-  return normalizeForSearch(criteria.query) !== '' || criteria.types.length > 0 || criteria.colors.length > 0;
+  return (
+    normalizeForSearch(criteria.query) !== '' || criteria.types.length > 0 || criteria.colors.length > 0 ||
+    criteria.rarities.length > 0
+  );
 }
 
 /**
@@ -56,10 +64,12 @@ export function filterCards(cards: readonly Card[], criteria: CardFilterCriteria
   const words = normalizedQuery === '' ? [] : normalizedQuery.split(' ');
   const types = new Set(criteria.types);
   const colors = new Set(criteria.colors);
+  const rarities = new Set(criteria.rarities);
 
   return cards.filter((card) => {
     if (types.size > 0 && !types.has(card.type)) return false;
     if (colors.size > 0 && (card.color === null || !colors.has(card.color))) return false;
+    if (rarities.size > 0 && (card.rarity === null || !rarities.has(card.rarity))) return false;
     if (words.length === 0) return true;
     const searchable = normalizeForSearch(card.subname === null ? card.name : `${card.name} ${card.subname}`);
     return words.every((word) => searchable.includes(word));
