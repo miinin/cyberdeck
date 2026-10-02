@@ -1,5 +1,5 @@
 # T-021 · Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme
-**Tila:** Ready · **Omistaja:** UX Designer → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-010)
+**Tila:** Odottaa käyttäjän hyväksyntää mallisivulle (UX-suunnittelu valmis) · **Omistaja:** UX Designer → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-010)
 **Suunnittelu:** UX ☐ (tutkimus, visuaalinen suunta, tokenit, komponentit, mallisivu)
 **Katselmoinnit (D-010):** Koodikatselmointi ☐ · UX ☐ · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
 **Riippuvuudet:** T-010, T-012 (Done)
@@ -27,4 +27,22 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 - Kortti määritelty käyttäjän pyynnöstä (D-010), tila Ready, haara `t-021-ulkoasu` test-haarasta.
 - Kulku: 1) UX tutkii ja suunnittelee ja tekee staattisen mallisivun `docs/design/t021-mallisivu.html`, 2) PM näyttää mallisivun käyttäjälle hyväksyttäväksi, 3) Koodari toteuttaa, 4) UX katselmoi.
 
+### Checkpoint 2026-10-02 · UX Designer
+- Tehty: tutkimus (lähteet UX.md 7.2), UX.md päivitetty versioon 0.6 (periaate 7, luku 3 tokenit ja komponentit, uusi luku 7), mallisivu `docs/design/t021-mallisivu.html` (itsenäinen, fontit upotettu vain mallia varten; tarkistettu Edge headlessilla 320 px (iframe) ja 1200 px). Lähdekoodia ei muutettu.
+- Seuraava askel: PM näyttää mallisivun käyttäjälle hyväksyttäväksi. Hyväksynnän jälkeen Koodari toteuttaa UX.md 7.9:n mukaan, sitten UX katselmoi.
+- Avoimet kysymykset: V1–V8 (UX.md 7.10), oletukset valittu.
+- Muutetut tiedostot: `docs/UX.md`, `docs/design/t021-mallisivu.html`, `docs/IDEAS.md`, tämä kortti.
+
 ## Luovutukset
+### Luovutus 2026-10-02 · UX Designer → PM (sitten Koodari)
+- Mitä tehtiin: Cyberpunk 2077 -tutkimus ja visuaalinen suunta. Värit: lähes musta tausta (`#0b0c10`), keltainen pääkorostus (`#fcee09`), syaani toissijainen ja fokus (`#1fe0ff`), punainen virhe (`#ff5a73`), oranssi varoitus (`#ffa726`). Fontit: Chakra Petch (teksti) ja Share Tech Mono (luvut). Muodot: viistetty oikea alakulma painikkeissa, HUD-kulmasulut hakupaneelissa, vinoraidat ilmoituksissa. Vain tumma teema. Kaikki kontrastit laskettu (UX.md 7.6): teksti ≥ 5.97 : 1, UI ≥ 3.77 : 1, fokus 12.25 : 1. Liike vain `prefers-reduced-motion: no-preference` (yksi 0,4 s glitch otsikossa, latauspalkki).
+- Mitä pyydän: 1) PM näyttää mallisivun käyttäjälle ja pyytää hyväksynnän suunnalle (avaa tiedosto selaimessa, kokeile 320 px ja työpöytä). 2) PM ratkaisee V1–V8 (UX.md 7.10), erityisesti V1: vaalean teeman poisto kirjataan päätökseksi (rules.md 5.3). 3) Hyväksynnän jälkeen Koodari toteuttaa UX.md 7.9:n mukaan.
+- Mistä katsoa: `docs/design/t021-mallisivu.html` (avaa suoraan selaimessa, ei palvelinta), `docs/UX.md` luvut 1 (periaate 7), 3 ja 7.
+- Fontit Koodarille (SIL OFL 1.1, Googlen woff2, latin-alijoukko, ladataan kerran repoon `src/assets/fonts/` ja isännöidään itse, CSP `font-src 'self'`):
+  - Chakra Petch 400: https://fonts.gstatic.com/s/chakrapetch/v13/cIf6MapbsEk7TDLdtEz1BwkWn6pg.woff2
+  - Chakra Petch 700: https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkeJI91R5_F.woff2
+  - Share Tech Mono 400: https://fonts.gstatic.com/s/sharetechmono/v16/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2
+  - OFL.txt: https://raw.githubusercontent.com/google/fonts/main/ofl/chakrapetch/OFL.txt ja https://raw.githubusercontent.com/google/fonts/main/ofl/sharetechmono/OFL.txt. Lisenssit kirjataan CONTENT.md:n sisältöjen oikeuksiin. Share Tech Mono: varattu fonttinimi "Share", älä muokkaa tiedostoa.
+- Tunnetut rajoitteet ja riskit: tutkimuslähteet ovat kolmannen osapuolen analyyseja (ei CDPR:n tyyliohjetta), joten värit ovat likiarvoja. Mallisivun korttitiedot ovat esimerkkejä. Mallisivun CSS käyttää `clip-path`-muotoja ja `:has()`-valitsinta (toimii nykyselaimissa, ilman `:has()`:ia valitun chipin tausta puuttuu mutta ruksi näkyy). Glitch-animaatio ja hover/fokus on tarkistettu vain ulkoasun osalta. Axe, näppäimistöpolku ja ruudunlukija ajetaan vasta toteutuksen katselmoinnissa. Vite ei saa inline-liittää fontteja `data:`-muotoon (CSP), tarkista build.
+- Testit: ei koodimuutoksia, ei testejä ajettu. Mallisivu renderöity Edge headlessilla ja tarkistettu kuvakaappauksista (320 px iframe, 1200 px).
+- Veto: ei.

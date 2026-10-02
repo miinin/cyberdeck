@@ -1,10 +1,11 @@
 # UX · cyberdeck
 
-> Omistaja: UX Designer. Versio 0.5 · 2026-10-01 (T-012). Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
+> Omistaja: UX Designer. Versio 0.6 · 2026-10-02 (T-021). Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
 > Muutos 0.3 · 2026-10-01 (T-010, MVP-1): uusi luku 5 (haku ja suodatus), korttien väritokenit (3.1.1) sekä tekstikenttä ja valintaruutu (3.4). Luvun 4 kohtiin, joita luku 5 muuttaa, on lisätty viittaus.
 > Muutos 0.4 · 2026-10-01 (T-010, katselmointi UX-002): K9 ratkaistu (latausviesti suodatettuna, 5.6), tyhjennyspainikkeen ilmoitus ja toistokielto (5.6), OSITTAINEN ilman kortteja (5.8). Raportti `docs/reports/UX-002-t010-katselmointi.md`.
 > Muutos 0.5 · 2026-10-01 (T-012, MVP-1): uusi luku 6 (kokoelma): määräkontrolli korttirivillä, korttimainen rivi alle 40 rem:ssä, "Vain omistetut" -suodatin, kokoelman yhteenveto, selainmuistutus ja pysyvän tallennuksen pyyntö, tallennuskerroksen ilmoitukset ja virheet, ruudunlukijailmoitukset ja tarkistuslista. Uudet komponentit: määräpainike ja toissijainen painike (6.4.3).
-> Tämä on minimitason design-järjestelmä, joka riittää MVP-0:aan. MVP-1 laajentaa sitä (lomakkeet, navigaatio, haku, kokoelman merkintä). Määrittely ei sido kehykseen: tokenit ovat CSS-muuttujia, ja rakenne kuvataan semanttisena HTML:nä.
+> Muutos 0.6 · 2026-10-02 (T-021, D-010): periaate 7 päivitetty, luku 3 (tokenit ja komponentit) uusittu Cyberpunk 2077 -henkiseen ilmeeseen (vain tumma teema, Chakra Petch ja Share Tech Mono, viistetyt kulmat, keltainen ja syaani korostus) ja uusi luku 7 (tutkimus, päätökset, kontrastilaskelmat, liike, ohje Koodarille). Referenssi: `docs/design/t021-mallisivu.html`. Toiminta, rakenne ja tekstit lukuissa 4–6 eivät muutu.
+> Tämä oli alun perin minimitason design-järjestelmä, joka riittää MVP-0:aan. MVP-1 laajentaa sitä (lomakkeet, navigaatio, haku, kokoelman merkintä). Määrittely ei sido kehykseen: tokenit ovat CSS-muuttujia, ja rakenne kuvataan semanttisena HTML:nä.
 
 ---
 
@@ -16,7 +17,7 @@
 4. **Saavutettava oletuksena.** WCAG 2.2 AA koskee jokaista näkymää. Semanttinen HTML ensin, ARIA vain kun HTML ei riitä.
 5. **Mobiili ensin.** Suunnitellaan 320 px:n leveydelle ja laajennetaan ylöspäin. Kaverit käyttävät sovellusta puhelimella pelipöydän ääressä.
 6. **Johdonmukaisuus.** Sama asia näyttää ja toimii samalla tavalla kaikkialla. Kaikki värit, välit ja fonttikoot tulevat tokeneista, ei kovakoodattuna.
-7. **Ei kultausta.** Cyberpunk-henki näkyy korostusvärissä, ei animaatioissa tai efekteissä, jotka heikentävät luettavuutta.
+7. ~~**Ei kultausta.** Cyberpunk-henki näkyy korostusvärissä, ei animaatioissa tai efekteissä, jotka heikentävät luettavuutta.~~ → 2026-10-02 (D-010): **Käytettävyys ensin, Cyberpunk 2077 -henki toiseksi alusta loppuun.** Henki näkyy väreissä, muodoissa, typografiassa ja hillityssä liikkeessä koko palvelussa, mutta se ei saa heikentää luettavuutta, käytettävyyttä eikä saavutettavuutta. Ristiriidassa WCAG 2.2 AA ja käytettävyys voittavat aina. Ei pientä tai vaikealukuista tekstiä, ei versaaleja leipätekstissä, ei tekstin päälle piirrettäviä efektejä, ei vilkkumista. Katso luku 7.
 
 ## 2. Äänensävy ja mikrokopio
 
@@ -29,121 +30,143 @@
 
 ## 3. Design-tokenit
 
-Tokenit määritellään CSS-muuttujina `:root`-tasolla. Tumma tila otetaan käyttöön `@media (prefers-color-scheme: dark)` -kyselyllä. Erillistä teemavalitsinta ei MVP-0:ssa ole. `color-scheme: light dark` asetetaan `:root`iin, jotta selaimen omat osat (vierityspalkit, lomakekentät) seuraavat teemaa.
+> **Päivitetty 2026-10-02 (T-021, D-010).** Luvun 3 tokenit ja komponentit on uusittu Cyberpunk 2077 -henkiseen ilmeeseen. Perustelut, tutkimus, kontrastilaskelmat ja komponenttien visuaaliset yksityiskohdat ovat luvussa 7. Kun lukujen 4–6 tekstit mainitsevat värin, reunan tai painikkeen ulkoasun, voimassa ovat tämän luvun ja luvun 7 arvot. Lukujen 4–6 toiminta, rakenne, tekstit ja saavutettavuusvaatimukset eivät muutu.
+> ~~Vaalea ja tumma teema (`prefers-color-scheme`).~~ → Teema on vain tumma (7.2). `color-scheme: dark` asetetaan `:root`iin, jotta selaimen omat osat (vierityspalkit, lomakekentät) ovat tummia.
+
+Tokenit määritellään CSS-muuttujina `:root`-tasolla. Erillistä teemavalitsinta ei ole.
 
 ### 3.1 Värit
 
-Kontrastit on laskettu WCAG 2.x -kaavalla 2026-09-30. Kaikki tekstiparit ylittävät 4.5:1 ja UI-reunat 3:1.
+Kontrastit on laskettu WCAG 2.x -kaavalla 2026-10-02. Täydellinen parikohtainen taulukko (myös hover, fokus ja valittu): 7.6.
 
-| Token | Vaalea | Tumma | Käyttö | Kontrasti (vaalea / tumma) |
-|---|---|---|---|---|
-| `--color-bg` | `#ffffff` | `#0f1115` | Sivun tausta | – |
-| `--color-surface` | `#f3f4f6` | `#1a1d24` | Otsikkopalkki, taulukon otsikkorivi, parilliset rivit | – |
-| `--color-text` | `#16181d` | `#e9ebf0` | Leipäteksti, otsikot | 17.8 / 15.8 (bg), 16.1 / 14.1 (surface) |
-| `--color-text-muted` | `#4b5262` | `#a9b0bd` | Toissijainen teksti (alaotsikko, alatunniste) | 7.8 / 8.7 (bg), 7.1 / 7.7 (surface) |
-| `--color-border` | `#d5d9e0` | `#2c313b` | Koristeelliset erottimet (taulukon rivit). Ei informatiivinen. | – |
-| `--color-border-strong` | `#767d8c` | `#7d8494` | Reunat, jotka rajaavat käyttöliittymäkomponentin | 4.1 / 5.0 |
-| `--color-accent` | `#a3004f` | `#ff6bb0` | Ensisijaisen painikkeen tausta, linkit, fokusrengas | 7.9 / 7.2 (bg) |
-| `--color-on-accent` | `#ffffff` | `#0f1115` | Teksti korostusvärin päällä | 7.9 / 7.2 |
-| `--color-danger` | `#b3261e` | `#ff8a80` | Virheilmoituksen reuna ja ikoni | 6.5 / 8.3 (bg), 5.7 / 7.1 (danger-surface) |
-| `--color-danger-surface` | `#fdecec` | `#3a1414` | Virheilmoituksen tausta | teksti 15.6 / 13.7 |
-| `--color-warning` | `#8a5a00` | `#f2c14e` | Varoituksen reuna | 5.5 / 8.5 (warning-surface) |
-| `--color-warning-surface` | `#fff6db` | `#33290f` | Varoituksen tausta | teksti 16.5 / 12.0 |
-| `--color-focus` | `= --color-accent` | `= --color-accent` | Fokusrengas | ks. yllä |
+| Token | Arvo | Käyttö |
+|---|---|---|
+| `--color-bg` | `#0b0c10` | Sivun tausta |
+| `--color-surface` | `#13151b` | Paneelit (hakulomake, selainmuistutus, tyhjä tila), taulukon otsikkorivi |
+| `--color-surface-raised` | `#1b1e27` | Valintakentät (chip), toissijaisen painikkeen täyttö, rivin hover |
+| `--color-surface-hover` | `#262a36` | Hover-tausta toissijaisille painikkeille ja valinnoille, käytöstä poistetun + -painikkeen raidoitus |
+| `--color-text` | `#f1f1ec` | Leipäteksti, otsikot |
+| `--color-text-muted` | `#a9afbd` | Toissijainen teksti (alaotsikko, ohje, alatunniste, taulukon otsikot) |
+| `--color-border` | `#2b303b` | Koristeelliset erottimet (rivien viivat, paneelin reuna). Ei informatiivinen. |
+| `--color-border-strong` | `#7b8396` | Reunat, jotka rajaavat käyttöliittymäkomponentin (kentät, valintaruudut, toissijainen painike) |
+| `--color-accent` | `#fcee09` | Ensisijainen korostus: ensisijainen painike, + -painike, valittu valintaruutu, otsikon viiva, omistetun rivin kisko, määrälukema |
+| `--color-on-accent` | `#0b0c10` | Teksti ja ruksi korostusvärin päällä |
+| `--color-accent-2` | `#1fe0ff` | Toissijainen korostus: hover-tausta painikkeilla, kokoelman yhteenveto, valitun valinnan reuna, selainmuistutuksen kisko |
+| `--color-focus` | `= --color-accent-2` | Fokusrengas |
+| `--color-selected-surface` | `#0c2a31` | Valitun suodatinvalinnan tausta |
+| `--color-danger` | `#ff5a73` | Virheilmoituksen reuna, raidoitus ja otsikko |
+| `--color-danger-surface` | `#2a0d15` | Virheilmoituksen tausta |
+| `--color-warning` | `#ffa726` | Varoituksen reuna, raidoitus ja otsikko |
+| `--color-warning-surface` | `#2b1a05` | Varoituksen tausta |
 
 Säännöt:
-- Tieto ei välity pelkällä värillä. Virhe- ja varoituslaatikoissa on aina otsikko tekstinä ("Korttien haku epäonnistui"), ei pelkkä punainen reuna.
+- Tieto ei välity pelkällä värillä. Virhe- ja varoituslaatikoissa on aina otsikko tekstinä, omistettu kortti näkyy määränä ("2") ja valittu valinta ruksina. Raidoitus, kisko ja hehku ovat koristeita.
+- Keltainen (`--color-accent`) tarkoittaa "toiminto tai valittu", syaani (`--color-accent-2`) "tieto tai fokus ja hover", punainen "virhe". Väreille ei anneta muita merkityksiä.
 - Uusi väri lisätään tänne tokeniksi kontrastilaskelman kanssa ennen käyttöä.
+- ~~Tokenit `--color-accent: #a3004f / #ff6bb0`, vaalea teema ja muut vanhat arvot~~ → korvattu 2026-10-02 (D-010).
 
-#### 3.1.1 Korttien värit (T-010)
+#### 3.1.1 Korttien värit (T-010, päivitetty T-021)
 
-Pelin neljä väriä (rajapinnan `color`, katso 5.2). Niitä käytetään **vain** koristeellisessa värinäytteessä (`.color-swatch`), joka on aina värin nimen vieressä ja `aria-hidden="true"`. Tieto välittyy tekstinä, joten näyte ei ole informatiivinen grafiikka. Näytteellä on silti 1 px:n reuna `--color-border-strong` (4.1 / 5.0 taustaa vasten), jotta vaalea keltainen erottuu valkoisesta taustasta.
+Pelin neljä väriä (rajapinnan `color`, katso 5.2). Niitä käytetään **vain** koristeellisessa värinäytteessä (`.color-swatch`), joka on aina värin nimen vieressä ja `aria-hidden="true"`. Tieto välittyy tekstinä. Näytteen muoto on viistetty neliö (`clip-path`, 7.3). Reunaa ei tarvita, koska kaikki neljä väriä erottuvat tummasta taustasta.
 
-| Token | Vaalea | Tumma | Kontrasti taustaa vasten (vaalea / tumma), tiedoksi |
-|---|---|---|---|
-| `--color-card-red` | `#c62828` | `#ff6b6b` | 5.6 / 6.8 |
-| `--color-card-yellow` | `#e0b000` | `#f2c94c` | 2.0 / 11.9 (reuna erottaa näytteen) |
-| `--color-card-green` | `#2e7d32` | `#5ccf6a` | 5.1 / 9.5 |
-| `--color-card-blue` | `#1565c0` | `#64a8ff` | 5.7 / 7.7 |
-| `--color-card-unknown` | `transparent` | `transparent` | Tuntematon väri: pelkkä reuna |
+| Token | Arvo | Kontrasti `--color-bg` / `--color-surface-raised`, tiedoksi |
+|---|---|---|
+| `--color-card-red` | `#ff4d5e` | 6.03 / 5.13 |
+| `--color-card-yellow` | `#ffd400` | 13.65 / 11.63 |
+| `--color-card-green` | `#39e08a` | 11.36 / 9.67 |
+| `--color-card-blue` | `#4d9dff` | 7.06 / 6.01 |
+| `--color-card-unknown` | `transparent` | Tuntematon väri: ei näytettä, vain teksti |
 
-Näitä tokeneita ei käytetä tekstin värinä eikä tekstin taustana.
+Näitä tokeneita ei käytetä tekstin värinä eikä tekstin taustana. ~~Näytteen 1 px:n reuna `--color-border-strong`~~ → poistettu, ei tarpeen tummalla taustalla.
 
 ### 3.2 Typografia
 
 | Token | Arvo | Käyttö |
 |---|---|---|
-| `--font-sans` | `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif` | Kaikki teksti. Ei ulkoisia verkkofontteja (ei kolmannen osapuolen pyyntöjä, katso Digiturva). |
+| `--font-sans` | `'Chakra Petch', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif` | Kaikki teksti: otsikot, leipäteksti, painikkeet, taulukko. Chakra Petch isännöidään itse (7.4). |
+| `--font-mono` | `'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace` | Luvut ja koneluonteinen tieto: tilarivit ("151 korttia"), hinta, määrälukema, alatunnisteen lähdemaininta. Ei pitkiä lauseita. |
 | `--font-size-base` | `1rem` (16 px) | Leipäteksti, taulukko |
-| `--font-size-sm` | `0.875rem` (14 px) | Alaotsikko (subname), alatunniste. Ei pienempää tekstiä. |
-| `--font-size-lg` | `1.25rem` | Otsikkopalkin sovelluksen nimi, h2 |
-| `--font-size-xl` | `1.75rem` | h1 |
+| `--font-size-sm` | `0.875rem` (14 px) | Alaotsikko (subname), ohjetekstit, alatunniste, taulukon otsikot. Ei pienempää tekstiä. |
+| `--font-size-lg` | `1.25rem` | Sovelluksen nimi, h2, + ja − -merkit |
+| `--font-size-xl` | `2rem` | h1 (~~1.75rem~~ → 2rem) |
 | `--line-height-body` | `1.5` | Leipäteksti |
 | `--line-height-heading` | `1.2` | Otsikot |
+| `--letter-spacing-caps` | `0.08em` | Versaalit otsikot (h1). Painikkeissa ja labeleissa `0.06em`, taulukon otsikoissa `0.1em`. |
 | `--font-weight-normal` | `400` | |
-| `--font-weight-bold` | `700` | Otsikot, kortin nimi, taulukon otsikot |
+| `--font-weight-bold` | `700` | Otsikot, kortin nimi, painikkeet, labelit |
 
 - Kaikki koot `rem`-yksiköissä, jotta selaimen tekstikokoasetus toimii. `html`-elementin fonttikokoa ei lukita pikseleihin.
+- **Versaalit (`text-transform: uppercase`) vain lyhyissä teksteissä:** h1, h2, painikkeet, kenttien labelit ja legendit, taulukon otsikot, sovelluksen nimi. Leipäteksti, ohjeet, ilmoitusten tekstit, kortin nimet ja alaotsikot pysyvät sekakirjaimisina. Versaalit tehdään CSS:llä, jolloin ruudunlukija lukee tekstin normaalisti.
 - Numerot (hinta, lukumäärät): `font-variant-numeric: tabular-nums`, jotta sarake tasautuu.
 - Tekstin välistyksen muutokset (WCAG 1.4.12) eivät saa katkaista tekstiä: ei kiinteitä korkeuksia tekstiä sisältäville elementeille, ei `overflow: hidden` tekstissä.
+- `font-display: swap`. Varafontit ovat järjestelmäfontteja, joten sisältö on luettavissa ennen fonttien latautumista.
 
-### 3.3 Välistys ja asettelu
+### 3.3 Välistys, muodot ja asettelu
 
 | Token | Arvo |
 |---|---|
-| `--space-1` | `0.25rem` (4 px) |
-| `--space-2` | `0.5rem` (8 px) |
-| `--space-3` | `0.75rem` (12 px) |
-| `--space-4` | `1rem` (16 px) |
-| `--space-6` | `1.5rem` (24 px) |
-| `--space-8` | `2rem` (32 px) |
-| `--content-max-width` | `48rem` |
-| `--radius` | `0.375rem` |
-| `--focus-ring` | `3px solid var(--color-focus)`, `outline-offset: 2px` |
+| `--space-1` … `--space-8` | ennallaan: `0.25rem`, `0.5rem`, `0.75rem`, `1rem`, `1.5rem`, `2rem` (4, 8, 12, 16, 24, 32 px) |
+| `--content-max-width` | ~~`48rem`~~ → `56rem` (nelisarakkeinen taulukko ja hakupaneeli ovat väljemmät) |
+| `--radius` | ~~`0.375rem`~~ → ei käytössä. Kulmat ovat suorat tai viistetyt (`--cut`). |
+| `--cut` | `0.625rem` (10 px). Viistetyn kulman koko. Määräpainikkeilla `0.5rem`. |
+| `--shape-chamfer` | `polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%)` |
+| `--shape-chamfer-inner` | sama kuin yllä, mutta `--cut`-arvosta vähennetty `1px` (sisäkerros, joka luo 1 px:n reunan) |
+| `--focus-ring` | `3px solid var(--color-focus)` |
+| `--focus-offset` | `3px` |
 | `--target-min` | `2.75rem` (44 px) |
+| `--glow-accent` | `0 0 0.75rem rgba(252, 238, 9, 0.35)`. Vain koristeviivoissa (otsikon alaviiva, otsikkopalkin viiva). Ei tekstin tai painikkeen ympärillä. |
+| `--ease` | `0.12s ease-out`. Siirtymä värimuutoksille, vain `prefers-reduced-motion: no-preference` -tilassa. |
 
 - Sivun reunaväli (gutter): `--space-4` alle 40 rem:n leveydellä, `--space-6` siitä ylöspäin.
 - Sisältö keskitetään ja rajataan leveyteen `--content-max-width`.
-- Breakpoint MVP-0:ssa: yksi, `40rem` (640 px). Mediakyselyt `em`/`rem`-yksiköissä, jotta ne reagoivat zoomiin.
+- Breakpoint: yksi, `40rem` (640 px), kuten ennenkin. Mediakyselyt `rem`-yksiköissä.
 
-### 3.4 Komponentit (MVP-0)
+### 3.4 Komponentit
+
+Komponenttien toiminta ja rakenne ovat ennallaan. Tässä on ulkoasun muutos. Visuaaliset yksityiskohdat ja kuvaus: 7.5. Referenssitoteutus: `docs/design/t021-mallisivu.html`.
 
 **Painike (ensisijainen)**
-- Tausta `--color-accent`, teksti `--color-on-accent`, lihavoitu, `--radius`.
+- Tausta `--color-accent`, teksti `--color-on-accent`, lihavoitu, versaalit, viistetty oikea alakulma (`clip-path: var(--shape-chamfer)`).
 - Vähimmäiskorkeus ja -leveys `--target-min`, sisäväli `--space-2` `--space-4`.
-- Hover: `text-decoration: underline` (ei pelkkää värimuutosta).
-- Fokus: `:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }`.
+- Hover: tausta `--color-accent-2` **ja** `text-decoration: underline` (ei pelkkää värimuutosta). Aktiivinen (painettu): siirtyy 1 px alas.
+- Fokus: `:focus-visible` poistaa viistoleikkauksen (`clip-path: none`) ja piirtää fokusrenkaan (`outline: var(--focus-ring); outline-offset: var(--focus-offset)`). Syy: `clip-path` leikkaisi renkaan.
 - Aina `<button type="button">`, ei `div` tai linkki.
+- ~~`border-radius`~~ → ei pyöristystä.
 
 **Ilmoituslaatikko (virhe / varoitus)**
-- Tausta `--color-danger-surface` tai `--color-warning-surface`, vasen reuna 4 px `--color-danger` tai `--color-warning`, sisäväli `--space-4`, `--radius`.
+- Tausta `--color-danger-surface` tai `--color-warning-surface`. 1 px:n reuna ja 4 px:n vasen reuna `--color-danger` tai `--color-warning`. Yläreunassa 6 px:n vinoraidoitus (`repeating-linear-gradient(135deg, …)`), koristeena.
+- Otsikko (h2) saa saman värin kuin reuna (kontrasti ≥ 5.9, katso 7.6). Selitys (p) on `--color-text`.
 - Sisältö: otsikko (h2), selitys (p), tarvittaessa painike.
-- Ikonia ei MVP-0:ssa tarvita. Jos ikoni lisätään, se on `aria-hidden="true"`, koska otsikko kertoo saman.
+- Ikonia ei tarvita. Raidoitus ei ole ikoni eikä kanna tietoa.
 
 **Fokus yleisesti**
 - Selaimen oletusfokusta ei poisteta ilman korvaavaa `--focus-ring`-tyyliä.
-- Mikään kiinnitetty (sticky) elementti ei saa peittää fokusoitua elementtiä (2.4.11). MVP-0:ssa ei käytetä sticky-elementtejä.
+- Fokusrengas on syaani (`--color-focus`), joka erottuu sekä tummasta taustasta (12.25 : 1) että keltaisesta painikkeesta (rengas piirretään painikkeen ulkopuolelle `--focus-offset`-välillä, joten sitä vasten ei tarvita kontrastia).
+- Mikään kiinnitetty (sticky) elementti ei saa peittää fokusoitua elementtiä (2.4.11). Sticky-elementtejä ei käytetä.
 
 **Tekstikenttä** (T-010)
-- Näkyvä `<label>` kentän yläpuolella (`--font-weight-bold`). Placeholderia ei käytetä labelin tai ohjeen korvikkeena.
+- Näkyvä `<label>` kentän yläpuolella (`--font-weight-bold`, versaalit, `--font-size-sm`). Placeholderia ei käytetä labelin tai ohjeen korvikkeena.
 - Ohjeteksti labelin ja kentän välissä (`--font-size-sm`, `--color-text-muted`), liitetty kenttään `aria-describedby`-attribuutilla.
-- Kenttä: korkeus vähintään `--target-min`, leveys 100 % (enintään `24rem`, kun leveys on ≥ 640 px), tausta `--color-bg`, teksti `--color-text`, reuna 1 px `--color-border-strong`, `--radius`, sisäväli `--space-2` `--space-3`, fonttikoko `--font-size-base` (16 px estää iOS:n automaattisen zoomauksen).
-- Fokus: `--focus-ring`.
+- Kenttä: korkeus vähintään `--target-min`, leveys 100 % (enintään `24rem`, kun leveys on ≥ 640 px), tausta `--color-bg`, teksti `--color-text`, reuna 1 px `--color-border-strong` ja alareuna 2 px, suorat kulmat, sisäväli `--space-2` `--space-3`, fonttikoko `--font-size-base` (16 px estää iOS:n automaattisen zoomauksen).
+- Hover: reuna `--color-accent-2`. Fokus: reuna `--color-accent-2` ja `--focus-ring` (`outline-offset: 2px`).
 
 **Valintaruutu ja valintaryhmä** (T-010)
-- Natiivi `<input type="checkbox">` labelin sisällä yhdessä tekstin kanssa. Koko label on klikattava alue: vähintään `--target-min` korkea ja vähintään 44 px leveä. Ruudun koko `1.25rem`, `accent-color: var(--color-accent)`.
-- Valittu tila näkyy natiivina ruksina, ei pelkkänä värinä. Hover: labelin teksti alleviivataan.
-- Fokus: `--focus-ring` ruudussa (`input:focus-visible`). Fokusrengas ei saa leikkautua (ei `overflow: hidden` vanhemmissa).
-- Ryhmä on `<fieldset>`, jonka nimi on `<legend>` (`--font-weight-bold`). Fieldsetin oletusreuna poistetaan, ja sisäväli on 0.
-- Vaihtoehdot rivitetään: `display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4)`.
+- Natiivi `<input type="checkbox">` labelin sisällä yhdessä tekstin kanssa, ulkoasu `appearance: none` -tyylillä (7.5). Koko label on klikattava alue: vähintään `--target-min` korkea. Ruudun koko `1.375rem`, 2 px:n reuna `--color-border-strong`, suorat kulmat.
+- Valittu tila: tausta ja reuna `--color-accent`, ruksi (`--color-on-accent`) piirretään `input::after`-pseudoelementillä (`clip-path`-monikulmio). Ei kuvia eikä data-URI-resursseja, koska CSP (`default-src 'self'`) estäisi ne. Ruksi on aina näkyvissä, joten tila ei välity pelkällä värillä. Koko label saa samalla `--color-selected-surface`-taustan ja `--color-accent-2`-reunan (`:has(input:checked)`).
+- Label on "chip": 1 px reuna `--color-border-strong`, tausta `--color-surface-raised`, sisäväli `0 --space-3`. Hover: reuna `--color-accent-2`, tausta `--color-surface-hover`, teksti alleviivataan.
+- Fokus: `--focus-ring` ruudussa (`input:focus-visible`, `outline-offset: 2px`). Fokusrengas ei saa leikkautua (ei `overflow: hidden` eikä `clip-path` vanhemmissa).
+- Ryhmä on `<fieldset>`, jonka nimi on `<legend>` (`--font-weight-bold`, versaalit). Fieldsetin oletusreuna poistetaan, ja sisäväli on 0.
+- Vaihtoehdot rivitetään: `display: flex; flex-wrap: wrap; gap: var(--space-2)`.
+
+**Paneeli** (uusi, T-021): hakulomake (`.card-filters`). Tausta `--color-surface`, 1 px `--color-border` ja kaksi kulmasulkua (vasen yläkulma ja oikea alakulma, 16 px × 2 px `--color-accent`, toteutus `background`-gradienteilla, ei `clip-path`). Selainmuistutuksella (`.storage-reminder`) on sen sijaan 2 px:n vasen kisko `--color-accent-2` ja tausta `--color-surface`. Tyhjä tila (`.empty`): 1 px katkoviivareuna `--color-border-strong`, tausta `--color-surface`.
 
 **Visuaalisesti piilotettu teksti** (`.visually-hidden`)
 - Ruudunlukijalle tarkoitettu teksti, joka ei näy. Käytetään vakiintunutta clip-toteutusta (ei `display: none` eikä `visibility: hidden`, jotka piilottavat myös ruudunlukijalta).
 
 ### 3.5 Liike
 
-- MVP-0:ssa ei animaatioita eikä pyörivää latausikonia. Lataustila on tekstiä.
-- Yleissääntö kaikille myöhemmille animaatioille: `@media (prefers-reduced-motion: reduce)` poistaa siirtymät ja animaatiot (tai lyhentää ne alle 0.01 s:iin). Mikään ei vilku yli 3 kertaa sekunnissa.
+- Kaikki liike (animaatiot, siirtymät) on kirjoitettu ehdon `@media (prefers-reduced-motion: no-preference)` sisään. Ilman ehtoa tai `reduce`-tilassa ei ole liikettä. ~~Erillinen `reduce`-ylikirjoitus~~ → säilytetään varmuuden vuoksi nykyisenä turvaverkkona (`animation-duration: 0.01ms`, `transition-duration: 0.01ms`).
+- Sallittu liike on lueteltu 7.7:ssä: otsikon yksi lyhyt glitch sivun avautuessa, latauspalkin pyyhkäisy ja värisiirtymät (0.12 s). Mikään ei vilku yli 3 kertaa sekunnissa.
 
 ---
 
@@ -1218,3 +1241,248 @@ Tarkistettavat tekstit: kaikki 6.5–6.9. Erityisesti ilmoituslaatikoiden ytimek
 - **A5 · Rivi jää näkyviin "Vain omistetut" -suodatuksessa, kun määrä nollataan (6.6).** Oletus: kyllä. Vaihtoehto: rivi poistuu heti ja fokus siirretään seuraavaan riviin. Oletus on turvallisempi (ei fokuksen katoamista eikä hyppäävää listaa).
 - **A6 · Ilmoitusviiveet.** Oletus 500 ms tallennuksen jälkeen ja 750 ms suodatuksessa. Koodari voi säätää arvoja käytettävyystestin perusteella, mutta ilmoitus ei saa tulla ennen tallennuksen valmistumista.
 - **A7 · Ilmoitusten sulkeminen.** Oletus: `reset` ja `repaired` ovat suljettavissa, muut eivät (ne kuvaavat jatkuvaa tilaa). Suljettu ei palaa ennen sivun uudelleenlatausta.
+
+
+---
+
+## 7. Visuaalinen ilme: Cyberpunk 2077 -henki (T-021, D-010)
+
+### 7.1 Tavoite ja prioriteetit
+
+Käyttäjän ohje (D-010): sovelluksen ulkoasu on "ei minkään näköinen", ja sen pitää näyttää ja tuntua Cyberpunk 2077 -henkiseltä alusta loppuun. **1. prioriteetti on käytettävyys** (kaikki intuitiivista ja helppokäyttöistä), **2. prioriteetti tyyli.** Ristiriidassa käytettävyys ja WCAG 2.2 AA voittavat aina.
+
+Periaate: tyyli tulee **väreistä, muodoista ja typografiasta**, ei efekteistä. Pelin henkeä ei kopioida, vaan tulkitaan omilla väreillä, muodoilla ja avoimen lisenssin fonteilla (D-010, SECURITY.md luku 7). Rakenne, tekstit ja toiminta eivät muutu.
+
+### 7.2 Tutkimustiivistelmä
+
+Lähteet haettu 2026-10-02. Lähteet ovat kolmannen osapuolen analyyseja ja yhteisön poimintoja, ei CD PROJEKT REDin julkaisemaa tyyliohjetta. Värit ovat siksi likiarvoja.
+
+| Aihe | Löydös | Lähde |
+|---|---|---|
+| Värit | Pelin visuaalinen kieli rakentuu kirkkaan keltaisen, sähkösyaanin ja punaisen/magentan varaan lähes mustaa taustaa vasten. Yhteisön poimima keltainen on noin `#fcec0c`. Kansitaiteen neljä päävärin kuvaus: neonkeltainen, kirsikanpunainen, vaalea neonsininen, tumma ruskea. | [ColorsWall: Cyberpunk 2077 UI palette](https://colorswall.com/palette/66354), [Pageflows: Cyberpunk color palette](https://pageflows.com/resources/cyberpunk-color-palette/), [ChromaXP](https://chromaxp.com/games/cyberpunk-2077/) |
+| Pelin käyttöliittymän fontti | Pelin käyttöliittymä on suurelta osin Rajdhani-fonttia (Regular–Bold). Toissijaisena Orbitron. Pelin verkkosivuilla käytetään Refinery- ja Blender-fontteja. | [Fonts In Use: Cyberpunk 2077 video game](https://fontsinuse.com/uses/60926/cyberpunk-2077-video-game) |
+| Muodot | Paksut, neliömäiset kirjaimet ja 80-luvun piirilevymäiset muodot. HUD on pääosin tekstipohjainen, "off red, low-fi" -ilmeinen. Käyttöliittymä on utilitaristinen: toiminnallinen ja vailla koristeita ("ohjelmisto näyttää betavaiheelta"). | [HUDS+GUIS: Cyberpunk 2077](https://www.hudsandguis.com/home/2019/cyberpunk-2077) |
+| Efektit | Skannausviivat, glitch-siirtymät, kromaattinen aberraatio ja haamukuva (kuin informaatio heijastettaisiin silmäimplantin linssiin). Yhteisön ohje: efekti on mauste, ei ateria, yksi glitch-efekti per näkymä. | [HUDS+GUIS](https://www.hudsandguis.com/home/2019/cyberpunk-2077), [DEV: CYBERCORE CSS](https://dev.to/sebyx07/introducing-cybercore-css-a-cyberpunk-design-framework-for-futuristic-uis-2e6c), [DESIGN.md: Cyberpunk UI](https://designmd.app/library/cyberpunk-ui/) |
+| Fonttien lisenssi | Rajdhani, Chakra Petch ja Share Tech Mono ovat SIL OFL 1.1 -lisenssillä Google Fontsin repositoriossa (`OFL.txt` mukana). Tarkistettu 2026-10-02. | [google/fonts: ofl/rajdhani](https://github.com/google/fonts/tree/main/ofl/rajdhani), [OFL chakrapetch](https://raw.githubusercontent.com/google/fonts/main/ofl/chakrapetch/OFL.txt), [OFL sharetechmono](https://raw.githubusercontent.com/google/fonts/main/ofl/sharetechmono/OFL.txt) |
+
+**Tutkimuksen tärkein johtopäätös käytettävyyden kannalta:** pelin oma käyttöliittymä on tarkoituksella pienikokoinen, hehkuva ja efektien peittämä, koska se on pelin sisäinen "näyttö". Verkkopalvelussa sama tekisi tekstistä vaikealukuista. Siksi otetaan väripaletti, muotokieli ja äänensävy, mutta ei pelin tekstiefektejä eikä pientä tekstiä.
+
+### 7.3 Mitä otetaan ja mitä jätetään pois
+
+**Otetaan:**
+
+| Elementti | Toteutus | Miksi se toimii |
+|---|---|---|
+| Lähes musta tausta, keltainen pääkorostus, syaani toissijaisena, punainen virheille | Tokenit 3.1 | Tunnistettavin osa pelin ilmettä. Kontrastit ovat korkeat (keltainen mustalla 16.2 : 1). |
+| Viistetyt kulmat | Painikkeiden oikea alakulma (`clip-path`), korttien värinäytteet | Edustaa HUD-kehysten kulmaleikkauksia. Pieni, ei vaikuta luettavuuteen. |
+| HUD-kulmasulut | Hakupaneelin kaksi kulmaa (gradientit) | Jäsentää hakulomakkeen yhdeksi alueeksi. |
+| Vinoraidat | Ilmoituslaatikoiden yläreuna | Varoitusmerkintöjen kieli. Koriste, otsikko kantaa tiedon. |
+| Neliömäinen tekninen fontti, lyhyet versaalit | Chakra Petch, versaalit vain otsikoissa, painikkeissa ja labeleissa | Pelin typografian henki. Leipäteksti sekakirjaimin. |
+| Konetekstin tuntu | Share Tech Mono tilariveillä, hinnoilla ja määrillä | Luvut näyttävät HUD-lukemilta, ja `tabular-nums` pitää sarakkeet suorina. |
+| Ohuet hehkuviivat | Otsikon ja otsikkopalkin keltainen viiva (`--glow-accent`) | Neon-vaikutelma ilman tekstin hehkua. |
+| Hienovarainen skannausviivapinta | Vain sivun taustakuviossa (`background-image`, 2,2 % valkoista) | Tekstin päälle ei piirretä mitään. |
+| Yksi lyhyt glitch | Otsikon "Kortit" siirtymä kerran sivun avautuessa | "Yksi efekti per näkymä" -periaate. Katso 7.7. |
+| Terminaalimainen luku | Kokoelman yhteenveto ja tilarivi monospace-fontilla | Pelin tekstipohjainen HUD. |
+
+**Jätetään pois ja miksi:**
+
+| Pois | Syy |
+|---|---|
+| Pelin logot, kuvat, ääni, tavaramerkit, Blender- ja Refinery-fontit | Tekijänoikeus (D-010, SECURITY.md luku 7). |
+| Rajdhani ja Orbitron (pelin käyttämät avoimet fontit) | Lisenssi sallii käytön, mutta D-010 kieltää "pelin omat fontit". Chakra Petch välittää saman tunnelman ja on selvästi luettavampi leipätekstinä. Katso kysymys V2. |
+| Koko ruudun skannausviivat tai kohinakerros tekstin päällä | Heikentää tekstin luettavuutta ja kontrastia (1.4.3). Pinta on vain taustakuvana. |
+| Kromaattinen aberraatio ja haamukuva tekstissä | Heikentää luettavuutta, erityisesti lukivaikeuksisilla ja heikkonäköisillä. Sallittu vain otsikossa kerran 0,4 s. |
+| Toistuva tai jatkuva glitch, vilkkuminen, kohina | WCAG 2.3.1 ja 2.2.2, häiritsee lukemista ja voi laukaista vestibulaarioireita. |
+| Hehkuva teksti (`text-shadow`) leipätekstissä | Pehmentää reunat ja laskee tehollista kontrastia. |
+| Läpikuultavat, sumennetut (`backdrop-filter`) hologrammipinnat | Kontrasti riippuu taustasta, ei ole laskettavissa. |
+| Pieni, tiivis tai haalea teksti | Pelissä tavallista, mutta tässä vähimmäiskoko on 14 px ja leipäteksti 16 px. Haaleinta tekstiä (`--color-text-muted`) kontrasti on 7.6–8.9 : 1. |
+| Pelkkä punertava yksivärinen "off red" -paletti | Vähäkontrastinen ja värisokeille vaikea. Käytetään kirkasta keltaista ja syaania. |
+| Versaalit leipätekstissä ja pitkissä riveissä | Versaalit lukevat huonommin. Vain lyhyet otsikot ja labelit. |
+| Vain väriin perustuva tila tai hover | Aina myös muoto, teksti tai alleviivaus (1.4.1). |
+| Viistetyt (`clip-path`) kohteet, jotka saavat fokuksen, ilman varaa | `clip-path` leikkaisi fokusrenkaan. Fokuksessa leikkaus poistetaan (3.4). |
+| Vaalea teema | Katso 7.8. |
+| Parallax, liikkuva tausta, äänet | Ei lisää käytettävyyttä, riski vestibulaarioireille. |
+
+**Teemapäätös: vain tumma.** Aiempi toteutus seurasi selaimen `prefers-color-scheme`-asetusta (vaalea ja tumma). Tämä ilme on tumma: keltainen ja syaani ovat kirkkaita värejä, jotka toimivat tummalla taustalla (16.2 : 1 ja 12.3 : 1), mutta vaalealla taustalla ne olisi tummennettava (kuten aiemmassa tokenissa `#a3004f`), jolloin pelin henki katoaa. Kahden teeman ylläpito kaksinkertaistaisi kontrastilaskennan ja katselmoinnin. Tumma teema on WCAG:n kannalta sallittu. Muutos poistaa vaalean teeman, mikä on rules.md 5.3:n mukaan ominaisuuden muutos. D-010 kattaa uudistuksen, mutta **PM kirjaa tämän erikseen** (kysymys V1). Vaalea teema kirjataan IDEAS.md:hen.
+
+### 7.4 Fontit
+
+Fontit isännöidään itse, koska CSP on `font-src 'self'` (firebase.json). Ei kolmannen osapuolen pyyntöjä, ei Google Fonts -linkkiä.
+
+| Fontti | Käyttö | Painot | Lisenssi | Tekijänoikeusrivi (OFL.txt) | Latauslähde (latin-alijoukko, woff2) |
+|---|---|---|---|---|---|
+| **Chakra Petch** | Kaikki teksti ja otsikot | 400, 700 | SIL OFL 1.1 | Copyright 2018 The Chakra Petch Project Authors (https://github.com/m4rc1e/Chakra-Petch.git) | 400: `https://fonts.gstatic.com/s/chakrapetch/v13/cIf6MapbsEk7TDLdtEz1BwkWn6pg.woff2` (9,8 kB)<br>700: `https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkeJI91R5_F.woff2` (9,9 kB) |
+| **Share Tech Mono** | Luvut, tilarivit, alatunnisteen lähde | 400 | SIL OFL 1.1 | Copyright (c) 2012, Carrois Type Design, Ralph du Carrois (post@carrois.com www.carrois.com), with Reserved Font Name 'Share' | `https://fonts.gstatic.com/s/sharetechmono/v16/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2` (13,5 kB) |
+
+- OFL.txt-tiedostot: `https://raw.githubusercontent.com/google/fonts/main/ofl/chakrapetch/OFL.txt` ja `https://raw.githubusercontent.com/google/fonts/main/ofl/sharetechmono/OFL.txt`. Ne tallennetaan fonttien viereen (`src/assets/fonts/`), ja lisenssi kirjataan `docs/CONTENT.md`:n sisältöjen oikeuksiin (Sisällöntuottajan omistama tiedosto, Koodari lisää rivin T-021-kortin luvalla tai PM delegoi).
+- **Latin-alijoukko riittää:** se kattaa U+0000–00FF eli ä, ö, å, é, á ja muut Latin-1-merkit (esim. "Judy Álvarez", "El Sombrerón", "Les Élémens"). Latin-ext-alijoukkoa ei tarvita nykyisillä korttinimillä. Jos rajapinta palauttaa nimen, jossa on merkki latin-alueen ulkopuolelta, selain käyttää varafonttia. Se on hyväksyttävä.
+- **Share Tech Mono:n Reserved Font Name "Share":** fonttia ei saa muokata (esim. osajoukkoistaa itse tai nimetä uudelleen). Käytä Googlen toimittamia woff2-tiedostoja sellaisenaan. Chakra Petchillä ei ole varattua nimeä.
+- Painoja 300, 500, 600 ja kursiivia ei ladata. Yhteiskoko noin 33 kB.
+- Latausjärjestys: `@font-face` `font-display: swap`, ja kriittiset fontit (Chakra Petch 400 ja 700) ladataan `<link rel="preload" as="font" type="font/woff2" crossorigin>` -vihjeellä `index.html`:ssä. Preload on valinnainen (Koodarin harkinta).
+- **Vite-huomio (CSP):** varmista `npm run build` -jälkeen, että fontit ovat omina tiedostoinaan `dist/assets/` eikä data-URI:na (Viten `assetsInlineLimit` on oletuksena 4 kB, joten nämä tiedostot eivät inline-liity, mutta tarkista). `font-src 'self'` estäisi `data:`-fontit. Samasta syystä CSS:ssä ei käytetä data-URI-kuvia (`img-src` on `'self'`).
+- Jos CSP:tä tai `firebase.json`ia muutetaan, Digiturva tekee kevyen tarkistuksen (D-010). Pelkkä fonttien lisäys omalle origin-osoitteelle ei vaadi CSP-muutosta.
+- **Vaihtoehdot, jotka harkittiin:** Rajdhani (pelin oma fontti, ks. 7.3), Orbitron (leveä, huono luettavuus pienellä koolla), Exo 2 ja Oxanium (hyvä tunnelma, mutta Chakra Petch on tiiviimpi ja sen numerot ovat selkeämmät taulukossa).
+
+### 7.5 Komponenttien visuaalinen määrittely
+
+Referenssi: `docs/design/t021-mallisivu.html` (CSS on kopioitavissa lähes sellaisenaan `src/styles.css`:ään, kun mallisivun `.spec*`-luokat jätetään pois). Alla on yhteenveto, joka selittää tarkoituksen.
+
+**Otsikkopalkki (`.site-header`)**: tausta `#000000` (`--color-bg`:tä tummempi, jotta palkki erottuu), alareuna 1 px `--color-border`, vasemmassa alareunassa 7 rem leveä 3 px:n `--color-accent`-viiva (`--glow-accent`). Sovelluksen nimi `Cyberdeck` (teksti, ei otsikkoelementti) versaaleilla (`text-transform`), `letter-spacing: 0.2em`, lihavoitu. Nimen edessä koristeellinen viistetty keltainen merkki (`::before`, 1.125 rem, ei tekstiä, ei logoa). Ei sticky.
+
+**Sivun otsikko (h1 "Kortit")**: `--font-size-xl`, versaalit, `--letter-spacing-caps`. Alla 3.5 rem leveä 3 px keltainen viiva (`::after`, `--glow-accent`). Glitch kerran, katso 7.7.
+
+**Tilarivi ja yhteenveto (`.status-line`)**: Share Tech Mono, `--color-text-muted`. Kokoelman yhteenveto (`.is-summary`) `--color-accent-2` (10.4 : 1 taustaglow'n kanssa). Tekstit ennallaan.
+
+**Selainmuistutus (`.storage-reminder`)**: paneeli: `--color-surface`, 2 px vasen kisko `--color-accent-2`, `--font-size-sm`, `--color-text-muted`. Sisällä toissijainen painike.
+
+**Hakupaneeli (`form.card-filters.panel`)**: katso 3.4 "Paneeli". Labelit versaaleilla (`--font-size-sm`, lihavoitu). Hakukenttä ja "Vain omistetut" -chip pinottuna, suodatinryhmät (Tyyppi, Väri) allaan. Chipit rivittyvät (`flex-wrap`). Alle 40 rem:n leveydellä chipit voivat olla rivillä 2 kpl, ja ne rivittyvät automaattisesti.
+
+**Taulukko (`.card-table`)**, ≥ 40 rem:
+- Otsikkorivi: tausta `--color-surface`, ylä 2 px `--color-accent`, ala 1 px `--color-border-strong`, teksti `--color-text-muted`, versaalit, `--font-size-sm`, `letter-spacing: 0.1em`.
+- Rivi: alareuna 1 px `--color-border`, sisäväli `--space-3` pysty. Hover ja `:focus-within`: tausta `--color-surface-raised`. (Rivit eivät ole interaktiivisia. Korostus auttaa seuraamaan riviä leveällä näytöllä määräkontrolliin asti ja näyttää, missä fokus on.)
+- **Omistettu rivi** (`.is-owned`, määrä > 0): tausta keltainen 5 % (`rgba(252, 238, 9, 0.05)`, hover 9 %), nimisolun vasemmassa reunassa 3 px keltainen kisko (`box-shadow: inset`). Tieto välittyy myös määrälukemasta ("2"), ei vain värillä.
+- Kortin nimi: lihavoitu `1.0625rem`. Alaotsikko `--font-size-sm`, `--color-text-muted`.
+- Hinta: Share Tech Mono `1.125rem`, oikealle tasattu. Puuttuva hinta "–" ennallaan.
+- Värinäyte: 0.875 rem viistetty neliö (`clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%)`) värin nimen vieressä.
+
+**Taulukko alle 40 rem** (kortti-ruudukko, rakenne ennallaan luvun 6.4.4 mukaan): rivi on ruudukko (nimi / tyyppi ja väri / hinta vasemmalla, määräkontrolli oikealla), alareuna 1 px `--color-border`. Omistetun rivin kisko on rivin vasemmassa reunassa (`tr.is-owned::before`, 3 px).
+
+**Määräkontrolli (`.count-control`)**: ennallaan `[−] n [+]`, varattu leveys ennallaan. `+`: keltainen täyttö, `--color-on-accent`, viistetty kulma (`--cut: 0.5rem`). `−`: toissijainen tyyli (1 px `--color-border-strong` -reuna sisäkerroksella, tausta `--color-surface-raised`). Määrälukema: Share Tech Mono `1.375rem`, `--color-accent`. Hover: `+` ja `−` reunat/täyttö `--color-accent-2`. Fokus: leikkaus pois ja `--focus-ring`. Enimmäismäärä (`aria-disabled`): `+` raidoitettu tausta (`--color-surface-hover`/`--color-surface-raised` vinoraidat) ja `--color-text-muted`-merkki. Aria-disabled-nappi pysyy fokusoitavana, ja fokusrengas näkyy kuten muillakin.
+
+**Painikkeet**: ensisijainen (keltainen), toissijainen (reunallinen), katso 3.4. Kokonaisuuden säännöt: yksi ensisijainen painike per ilmoitus tai tila. Toissijaista käytetään "Sulje", "Lue kokoelma uudelleen" ja "Pyydä pysyvää tallennusta" -toiminnoissa (kuten luvussa 6.4.3). Painikkeiden tekstit ennallaan, ja versaalit ovat vain CSS:ää.
+
+**Ilmoituslaatikot**: katso 3.4. Kokoelman ilmoitukset (luku 6.8) käyttävät samaa komponenttia. "Sulje" on toissijainen painike.
+
+**Tyhjä tila (`.empty`)**: katkoviivareuna, `--color-surface`, kappale ja ensisijainen painike. Ei uusia tekstejä.
+
+**Lataustila**: tilarivi `Haetaan kortteja…`. Valinnainen koriste (V3): sen alle `span.loading-bar` (`aria-hidden="true"`, 3 px korkea `--color-border`-viiva, jossa 35 % leveä `--color-accent-2`-pyyhkäisy). Pyyhkäisy liikkuu vain `no-preference`-tilassa, muuten palkki on paikallaan ja täyttää 35 % vasemmalta. Palkki ei ole edistymismittari eikä kanna tietoa (tila kerrotaan tekstinä ja live-alueella). Palkki näkyy vain LATAUS-tilassa.
+
+**Alatunniste (`.site-footer`)**: yläreuna 1 px `--color-border` ja vasemmalla 3 rem leveä 1 px keltainen viiva, `--font-size-sm`, `--color-text-muted` (7.6 : 1 tai parempi). Epävirallisuusmerkintä sekakirjaimin Chakra Petch, lähdemaininta ("Korttitiedot: Netdeck.gg") Share Tech Mono. Tekstit ennallaan (TXT-002).
+
+**Sivun tausta (`body`)**: `--color-bg` yhdistettynä kolmeen taustakuvaan: syaani hehku oikeassa yläkulmassa (10 %), keltainen hehku vasemmassa yläkulmassa (6 %), hienovarainen vaakaviivapinta (`repeating-linear-gradient`, 2,2 % valkoista 4 px:n välein). `background-attachment: fixed`. Pinta on vain `background-image`, ei päällyskerros, eikä se saa vaikuttaa pointer-tapahtumiin. Kontrasti on laskettu pahimmalla taustavärillä (7.6).
+
+### 7.6 Kontrastilaskelmat
+
+Laskettu WCAG 2.x -suhteella (suhteellinen luminanssi, sRGB) 2026-10-02. Tavoite: teksti ≥ 4.5 : 1, UI-komponentit, fokus ja tilaa kantavat reunat ≥ 3 : 1.
+
+**Teksti**
+
+| Väripari | Käyttö | Suhde |
+|---|---|---|
+| `--color-text` / `--color-bg` | Leipäteksti | 17.25 |
+| `--color-text` / `--color-surface` | Paneelit | 16.11 |
+| `--color-text` / `--color-surface-raised` | Rivin hover, chip | 14.69 |
+| `--color-text` / `--color-surface-hover` | Hover-tilat (toissijainen painike, chip, − -painike) | 12.63 |
+| `--color-text` / omistetun rivin tausta `#171710` | Omistettu rivi | 15.89 |
+| `--color-text` / omistetun rivin hover `#2f3124` | Omistettu rivi, hover | 11.69 |
+| `--color-text-muted` / `--color-bg` | Alaotsikko, ohje, alatunniste | 8.89 |
+| `--color-text-muted` / `--color-surface` | Ohje paneelissa | 8.30 |
+| `--color-text-muted` / `--color-surface-raised` | Rivin hover | 7.57 |
+| `--color-text-muted` / `--color-surface-hover` | Käytöstä poistettu +, hover | 6.51 |
+| `--color-text-muted` / omistetun rivin tausta | Alaotsikko omistetulla rivillä | 8.19 |
+| `--color-text-muted` / omistetun rivin hover | Alaotsikko, omistettu hover | 6.03 |
+| `--color-text-muted` / `--color-selected-surface` | Valittu chip (muted-teksti) | 6.87 |
+| `--color-text` / `--color-selected-surface` | Valittu chip | 13.32 |
+| `--color-on-accent` / `--color-accent` | Ensisijainen painike, + | 16.17 |
+| `--color-on-accent` / `--color-accent-2` | Ensisijainen painike, hover | 12.25 |
+| `--color-accent` / `--color-bg` | Määrälukema (omistamaton rivi), `--color-accent`-teksti | 16.17 |
+| `--color-accent` / omistetun rivin tausta | Määrälukema | 14.89 |
+| `--color-accent` / `--color-surface-raised` | Määrälukema rivin hoverissa | 13.77 |
+| `--color-accent-2` / `--color-bg` | Kokoelman yhteenveto (10.40 taustaglow mukaan lukien) | 12.25 |
+| `--color-accent-2` / `--color-surface-hover` | Toissijaisen painikkeen hover-teksti | 8.97 |
+| `--color-danger` / `--color-danger-surface` | Virheilmoituksen otsikko | 5.97 |
+| `--color-text` / `--color-danger-surface` | Virheilmoituksen teksti | 15.88 |
+| `--color-warning` / `--color-warning-surface` | Varoituksen otsikko | 8.63 |
+| `--color-text` / `--color-warning-surface` | Varoituksen teksti | 14.80 |
+
+Taustakuvion pahin tapaus (keltainen hehku `--color-bg`:n päällä, 6 % → sävy `#17160f`-tasoa): `--color-text-muted` 7.98 : 1. Syaanihehku (10 %) laskee yhteenvedon 10.40 : 1:een. Molemmat ovat selvästi yli 4.5 : 1.
+
+**UI-komponentit, reunat ja fokus (≥ 3 : 1)**
+
+| Väripari | Käyttö | Suhde |
+|---|---|---|
+| `--color-border-strong` / `--color-bg` | Kentän reuna, valintaruudun reuna | 5.15 |
+| `--color-border-strong` / `--color-surface` | Reuna paneelissa | 4.80 |
+| `--color-border-strong` / `--color-surface-raised` | Chipin reuna | 4.38 |
+| `--color-border-strong` / `--color-surface-hover` | Reuna hoverissa | 3.77 |
+| `--color-border-strong` / `--color-danger-surface` | Reuna virheilmoituksen sisällä | 4.74 |
+| `--color-accent` / `--color-bg` | Valittu valintaruutu, ensisijainen painike taustaa vasten | 16.17 |
+| `--color-accent` / `--color-surface`, `--color-surface-raised` | Painike paneelin ja rivin päällä | 15.10, 13.77 |
+| `--color-accent-2` / `--color-bg` | Hover-reuna, valitun chipin reuna | 12.25 |
+| `--color-accent-2` / `--color-surface`, `--color-surface-raised`, `--color-surface-hover` | Samat paneelien päällä | 11.44, 10.43, 8.97 |
+| `--color-focus` / `--color-bg` | **Fokusrengas** | **12.25** |
+| `--color-focus` / `--color-surface` | Fokusrengas paneelissa | 11.44 |
+| `--color-focus` / `--color-danger-surface` | Fokusrengas virheilmoituksessa | 11.28 |
+| `--color-focus` / `--color-warning-surface` | Fokusrengas varoituksessa | 10.51 |
+| `--color-danger` / `--color-danger-surface` | Virheilmoituksen reuna | 5.97 |
+| `--color-warning` / `--color-warning-surface` | Varoituksen reuna | 8.63 |
+| `--color-on-accent` / `--color-accent` | Ruksi valitussa valintaruudussa | 16.17 |
+
+**Muut huomiot**
+- Fokusrengas piirretään 3 px:n välin (`--focus-offset`) päähän elementistä, joten sitä vasten ei tarvita kontrastia painikkeen (keltainen) väriin. Rengas on vasten taustaa 11–12 : 1, ja leveys on 3 px (WCAG 2.4.13).
+- Keltaisen (`--color-accent`) ja syaanin (`--color-accent-2`) keskinäinen kontrasti on vain 1.32 : 1, eikä erottelu perustu siihen. Hover erottuu tausta- **ja** tekstimuutoksesta (alleviivaus), fokus renkaasta.
+- Koristeelliset viivat ja raidoitus (`--color-border` 1.48 : 1, hehkut) eivät kanna tietoa, eikä niille ole kontrastivaatimusta. Rivien erottelu perustuu myös sisäväleihin.
+- Kortin värinäytteet 5.1–13.7 : 1 taustaa vasten (3.1.1), tiedoksi. Tieto on aina tekstinä.
+- Käytöstä poistettu (`aria-disabled`) + -painike: raidoitettu tausta ja himmeä merkki, jonka kontrasti on 6.5 : 1. Painike on silti tunnistettavissa, ja sen selittävä ilmoitus tulee live-alueelle (luku 6.4).
+
+### 7.7 Liike ja efektit
+
+Kaikki liike on `@media (prefers-reduced-motion: no-preference)` -ehdon sisällä. Kun käyttäjä pyytää vähemmän liikettä (`reduce`), mitään animaatiota ei ole ja kaikki tila näkyy staattisesti.
+
+| Liike | Määrittely | Rajoitteet |
+|---|---|---|
+| Värisiirtymät (hover, valinta) | `transition: background-color, color, border-color 0.12s ease-out` | Vain värit. Ei liikettä tai koon muutosta. Ehto: `no-preference`. |
+| Painikkeen painallus | `:active { transform: translateY(1px) }` | 1 px, ei animoitu. Pois `reduce`-tilassa kuten kaikki `transform`-siirtymät, käytännössä vaikutus on olematon. |
+| Otsikon glitch | `main > h1 { animation: glitch 0.4s steps(1, end) 1; }`. Kehykset: 0 % ei varjoa, 30 % `text-shadow: -2px 0 #ff2a6d, 2px 0 var(--color-accent-2)` ja `translateX(1px)`, 60 % käänteinen ja `translateX(-1px)`, 100 % lepo. | **Kerran** sivun avautuessa (`1`-toisto). Kaksi siirtymää 0,4 s:ssa, ei vilkkumista (WCAG 2.3.1). Ei toistu uudelleenyrityksen tai tilanmuutoksen yhteydessä (animaatio ajetaan vain, kun elementti syntyy. Koodari varmistaa, ettei `h1` mountata uudestaan joka tilanvaihdolla; jos mountataan, glitch rajataan luokalla, joka lisätään vain ensimmäisellä renderöinnillä). Teksti on luettavissa koko ajan (offsetit 2 px). Glitchin varjoväri `#ff2a6d` on tilapäinen koriste. |
+| Latauspalkin pyyhkäisy | `transform: translateX(-100% → 290%)`, 1.4 s lineaarinen, ääretön | Vain LATAUS-tilassa ja vain `no-preference`. Pienikokoinen (3 px korkea), ei vilku. Latausindikaattorina se täyttää WCAG 2.2.2:n poikkeuksen (olennainen), eikä kyse ole tiedosta. |
+
+Ei muita animaatioita (ei parallaxia, ei jatkuvaa hehkun sykettä, ei kohinaa, ei siirtymiä sisällön näkyviin tuloon).
+
+### 7.8 Saavutettavuus ja erityistilat
+
+- **Rakenne ennallaan:** otsikkorakenne, maamerkit, fokusjärjestys, live-alueet ja saavutettavat nimet ovat samat kuin luvuissa 4–6. Ulkoasun muutokset eivät lisää tekstiä DOM:iin (koristeet ovat `::before`/`::after`-pseudoelementeissä ilman `content`-tekstiä) eivätkä muuta lukujärjestystä.
+- **Versaalit CSS:llä:** `text-transform: uppercase` ei muuta ruudunlukijan lukemaa. Ruudunlukija ei lue versaalitekstiä kirjain kerrallaan.
+- **Fokus:** syaani rengas 3 px, 3 px välillä, kaikissa interaktiivisissa elementeissä. Viistetyt painikkeet poistavat leikkauksen fokuksessa. Kenttien ja valintaruutujen fokus ei saa leikkautua (ei `clip-path`/`overflow: hidden` vanhemmissa).
+- **Kosketuskohteet:** kaikki painikkeet, chipit ja määräpainikkeet vähintään 44 × 44 px.
+- **Zoom ja reflow:** sisältö rivittyy kuten ennenkin. Ei kiinteitä leveyksiä tekstille. 320 px:ssä ei vaakavieritystä (varmistettu mallisivulla 320 px:n iframessa), 400 % zoomilla sama asettelu kuin 320 px:ssä. Uusi tekijä: Chakra Petch on hieman leveämpi kuin järjestelmäfontti, joten pitkät nimet rivittyvät aiempaa useammin. `overflow-wrap: anywhere` säilyy nimisolussa.
+- **Tekstin välistys (1.4.12):** ei kiinteitä korkeuksia tekstiä sisältäville elementeille. Painikkeiden korkeus on `min-height`.
+- **Windowsin suuri kontrasti / `forced-colors: active`:** painikkeille 2 px `ButtonText`-reuna ja `clip-path: none`, paneeleille ja ilmoituksille 1 px `CanvasText`-reuna, valitun valintaruudun tausta `Highlight`. Taustakuviot, kulmasulut ja raidoitus voivat kadota, mikä on hyväksyttävää, koska ne ovat koristeita.
+- **`prefers-contrast: more`:** ei erillistä tyyliä. Pienin tekstikontrasti on jo 5.97 : 1 ja UI-kontrasti 3.77 : 1. Jos halutaan, `--color-border-strong` nostetaan, esim. `#9aa1b3`. Kirjataan IDEAS.md:hen.
+- **Vaalea teema:** poistettu (7.3). Selaimen `color-scheme: dark` pitää vierityspalkit ja lomakkeiden oletusosat tummina.
+- **Kieli:** `lang="en"` korttinimissä ja tyypeissä säilyy. Chakra Petchissä ei ole vaikeuksia Latin-1-merkeillä (ä, ö, å, á, é, ó).
+- **Tulostus:** ei erillistä tulostustyyliä (tummalla pohjalla tulostus on selaimen asetusten varassa). Ei kuulu tähän tehtävään.
+
+### 7.9 Ohje Koodarille
+
+Pidä toiminta, DOM-rakenne ja tekstit ennallaan (`src/ui/texts.ts` ei muutu). Muutokset ovat pääosin `src/styles.css`:ssä ja fonttitiedostoissa. Tarvittavat pienet luokkalisäykset (ei toimintalogiikkaa):
+
+1. **Tokenit ja perustyylit:** korvaa `:root`-lohko luvun 3 tokeneilla, poista `@media (prefers-color-scheme: dark)` -lohko ja aseta `color-scheme: dark`. Kopioi komponenttityylit mallisivulta (`.spec*`, `.frame`, `.chips`, `.chip`, `.row`, `.state-demo`, `.spec-bar` jäävät pois). Säilytä `@media (prefers-reduced-motion: reduce)` -turvaverkko.
+2. **Fontit:** lataa kolme woff2-tiedostoa (7.4) hakemistoon `src/assets/fonts/`, lisää `@font-face`-säännöt `styles.css`:n alkuun (suhteelliset `url(./assets/fonts/…)`), lisää OFL.txt-tiedostot samaan hakemistoon ja lisenssirivit CONTENT.md:hen. Tarkista, ettei buildissa synny `data:`-fontteja.
+3. **Otsikkopalkki (`App.tsx`):** kääri sovelluksen nimi `<span className="brand">`-elementtiin. Keltainen merkki on `.site-header .container::before`. Maamerkit ja teksti ennallaan.
+4. **Hakulomake (`CardFilters.tsx`):** lisää `<form>`-elementille luokka `panel` (`className="card-filters panel"`). Mallisivulla Tyyppi- ja Väri-ryhmät ovat `div.fieldsets`-käärössä, joka asettaa ne rinnakkain, kun tilaa on (≥ 40 rem). Kääre on valinnainen: ilman sitä ryhmät pinoutuvat. Valintaruutu-labelit ovat jo `.option`-luokassa. "Vain omistetut" -labelin (`.owned-only .option`) tyyli on mallisivulla.
+5. **Omistettu rivi (`CardList.tsx`):** lisää `<tr>`-elementille luokka `is-owned`, kun rivillä on määrä > 0 ja kokoelma on `ready`-tilassa (tieto on jo saatavilla `owned.countOf(card)`-kutsulla). Pelkkä luokka, ei uutta logiikkaa.
+6. **Latauspalkki (V3, valinnainen):** `<span className="loading-bar" aria-hidden="true" />` LATAUS-tilassa tilarivin jälkeen.
+7. **Fokus ja viisto:** `.button-primary`, `.button-secondary` ja `.step` saavat `clip-path`-muodon. Varmista, että `:focus-visible`-tyyli (clip-path: none) on luettu **myöhemmin** kuin perustyyli. Tarkista fokus näppäimistöllä kaikissa painikkeissa (myös `aria-disabled` + -painike).
+8. **Glitch:** älä anna `h1`:n mountautua uudelleen tilanvaihdoissa glitchin vuoksi (7.7). Nykyinen `CatalogView` pitää `h1`:n paikallaan, joten pelkkä `main > h1 { animation }` riittää. Ellei, rajaa luokkaan.
+9. **Ei kovakoodattuja arvoja:** kaikki värit, välit ja koot tokeneista. Poikkeukset: glitchin varjoväri `#ff2a6d` ja taustakuvion `rgba`-arvot (kirjattu tässä luvussa), tulevat omiksi tokeneikseen `--color-glitch` ja `--bg-glow-*`, jos haluat välttää literaalit.
+10. **Testit:** olemassa olevien testien pitää mennä läpi. Uusia toimintatestejä ei tarvita. Aja axe-core ja tarkista käsin 320 px, 400 % zoom, näppäimistöpolku ja `prefers-reduced-motion: reduce`.
+
+### 7.10 Avoimet kysymykset (PM ratkaisee, oletus valittu)
+
+| # | Kysymys | Oletus (jos PM ei vastaa) |
+|---|---|---|
+| V1 | Vaalea teema poistuu, ja sovellus on vain tumma (7.3). PM kirjaa päätöksen (muutos rules.md 5.3:n mukaan). | **Kyllä, vain tumma.** Vaalea teema IDEAS.md:hen. |
+| V2 | Fontit: Chakra Petch (teksti) ja Share Tech Mono (luvut). Rajdhani (pelin oma, avoin fontti) jätetty pois, koska D-010 kieltää pelin omat fontit. Tarkoittaako D-010 vain suljettuja fontteja, jolloin Rajdhani kävisi? | **Chakra Petch ja Share Tech Mono.** |
+| V3 | Latauspalkki on uusi koriste-elementti (ei uusi toiminto, ei uutta tekstiä). | **Kyllä**, mutta voi jättää pois ilman muita muutoksia. |
+| V4 | Sisältöleveys 48 rem → 56 rem. | **Kyllä, 56 rem.** |
+| V5 | Otsikon glitch kerran sivun avautuessa. | **Kyllä**, `reduce`-tilassa ei animaatiota. |
+| V6 | Kortin väri näytetään viistettynä neliönä pyöreän tai suoran sijaan. | **Kyllä.** |
+| V7 | Omistettujen rivien korostus (keltainen kisko ja 5 % tausta) on uusi visuaalinen vihje. Se ei lisää toimintoa, ja tieto näkyy myös määränä. | **Kyllä.** |
+| V8 | UX-006 (mobiilin suodattimien tila) ei ratkea tässä tehtävässä. Hakupaneeli on mobiilissa 1.5 näyttöä korkea, kuten ennenkin (T-018). | **Ei muuteta**, T-018 hoitaa. |
+
+### 7.11 Rajaukset
+
+- Ei uusia toimintoja, näkymiä tai tekstejä.
+- Ei pelin logoja, kuvia, ääntä, tavaramerkkejä eikä pelin omia fontteja.
+- Ei uusia npm-riippuvuuksia. Fontit ovat staattisia tiedostoja.
+- Jatkoideat (vaalea teema, `prefers-contrast`-tuki, tulostustyyli, siirtymäanimaatiot) on kirjattu `docs/IDEAS.md`:hen.
