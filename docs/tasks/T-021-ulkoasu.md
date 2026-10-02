@@ -50,3 +50,20 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 ### Checkpoint 2026-10-02 · PM (käyttäjän päätökset, D-011)
 - Käyttäjä hyväksyi mallisivun suunnan. V1: myös vaalea teema (seuraa laitteen asetusta). V2: Rajdhani. V3–V8: UX:n oletukset hyväksytty.
 - Seuraava askel: UX lisää vaalean teeman ja vaihtaa fontin (UX.md ja mallisivu). Sitten Koodari toteuttaa.
+
+### Checkpoint 2026-10-02 · UX Designer (D-011)
+- Tehty: UX.md versioon 0.7 (luku 3: tokenit vaalealle ja tummalle teemalle, Rajdhani, nostetut fonttikoot; luvut 7.3, 7.4, 7.6, 7.9, 7.10 päivitetty). Mallisivu `docs/design/t021-mallisivu.html` näyttää molemmat teemat: teemapainikkeet (automaattinen, vaalea, tumma) ja "Rinnakkain"-näkymä (kaksi iframea). Skripti vain mallisivulla. Tarkistettu Edge headlessilla: 1100 px ja 320 px (iframe), molemmat teemat. IDEAS.md: vaalea teema merkitty toteutetuksi.
+- Seuraava askel: Koodari toteuttaa UX.md 7.9:n mukaan. Sen jälkeen UX katselmoi (axe kummassakin teemassa).
+- Avoimet kysymykset: V9–V11 (UX.md 7.10), oletukset valittu.
+
+### Luovutus 2026-10-02 · UX Designer → PM → Koodari (päivitys D-011:n jälkeen)
+- Mitä tehtiin: vaalea teema (kermanvalkoinen `#f3f0e6`, teksti `#0e0f14`, keltainen täyttö mustalla reunalla, tummansyaani `#005f73` fokukselle ja tiedolle, otsikkopalkki musta) ja fontti Rajdhani. Kontrastit laskettu molemmille teemoille (UX.md 7.6): vaalea teksti ≥ 5.10 : 1, UI ≥ 4.03 : 1, fokus 6.39 : 1. Tumma ennallaan (teksti ≥ 5.97, UI ≥ 3.77, fokus 12.25).
+- **Päivitetyt fonttitiedot Koodarille** (SIL OFL 1.1, Googlen woff2, latin-alijoukko; ladataan kerran repoon `src/assets/fonts/`, itse isännöity, CSP `font-src 'self'`; Chakra Petch on poistunut):
+  - Rajdhani 500: https://fonts.gstatic.com/s/rajdhani/v17/LDI2apCSOBg7S-QT7pb0EPOreec.woff2
+  - Rajdhani 700: https://fonts.gstatic.com/s/rajdhani/v17/LDI2apCSOBg7S-QT7pa8FvOreec.woff2
+  - Share Tech Mono 400 (luvut, tilarivit; säilyy): https://fonts.gstatic.com/s/sharetechmono/v16/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2
+  - OFL.txt: https://raw.githubusercontent.com/google/fonts/main/ofl/rajdhani/OFL.txt ja https://raw.githubusercontent.com/google/fonts/main/ofl/sharetechmono/OFL.txt. Tekijänoikeusrivit: Rajdhani "Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com)", Share Tech Mono "Copyright (c) 2012, Carrois Type Design, Ralph du Carrois, Reserved Font Name 'Share'" (älä muokkaa tiedostoa). Lisenssit CONTENT.md:n sisältöjen oikeuksiin. Yhteiskoko noin 44 kB.
+  - Rajdhanin luettavuus: leipäteksti 18 px paino 500, pienin teksti 16 px (ennen 14 px), lihavat 700. Share Tech Mono säilyy luvuille ja tilariveille (kiinteä leveys, selkeämmät numerot, HUD-lukema).
+- Mitä pyydän: Koodari toteuttaa UX.md 7.9:n mukaan. Vaalea teema on `:root`-oletus ja tumma `@media (prefers-color-scheme: dark)` -lohkossa. Mallisivun `[data-theme]`-säännöt ja skripti eivät kuulu sovellukseen.
+- Mistä katsoa: `docs/design/t021-mallisivu.html` (avaa selaimessa, "Rinnakkain" näyttää molemmat teemat), UX.md luvut 3 ja 7.
+- Tunnetut rajoitteet: Rajdhanin tasaleveitä numeroita ei varmistettu, siksi numerot jäävät monolle. Axe, ruudunlukija ja zoom ajetaan toteutuksen katselmoinnissa. Veto: ei.
