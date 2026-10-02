@@ -35,6 +35,8 @@ export const texts = {
   // Theme toggle (UX.md 8.4): the accessible name is always 'Vaalea teema'; the space comes from the markup.
   themeToggleLabel: 'Vaalea',
   themeToggleSuffix: 'teema',
+  themeToggleTitleLight: 'Vaihda vaaleaan teemaan',
+  themeToggleTitleDark: 'Vaihda tummaan teemaan',
   heading: 'Kortit',
   /** Live region text when the list is shown (UX.md 4.5). */
   loaded: (count: number) => `${cardCount(count)} ladattu.`,

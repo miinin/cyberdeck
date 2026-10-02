@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Teemavalitsin on nyt pelkkä aurinko- tai kuu-ikoni. Vihje kertoo, mihin teemaan painike vaihtaa.
+
 - Pysyvän tallennuksen pyyntö on nyt pieni tallennuskuvake yläpalkissa, ja hakukriteerien valinnat ovat tiiviimpiä.
 
 - Korttilistassa näkyy harvinaisuus (Rarity), ja sen voi valita suodattimeksi. Kokoelma-valinnalla voi näyttää kaikki, omistetut tai puuttuvat kortit. Omistetun kortin reunus ja määrä ovat nyt keltaiset.

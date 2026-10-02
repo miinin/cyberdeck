@@ -544,7 +544,7 @@ main {
   flex: none;
   gap: var(--space-2);
   margin-inline-start: auto;
-  padding-inline: var(--space-3);
+  padding-inline: var(--space-2);
   background: var(--toggle-edge);
   color: var(--toggle-text);
   font-size: var(--font-size-sm);
