@@ -16,9 +16,9 @@ Löydöksiä on neljä: kaksi Medium ja kaksi Low. Medium-löydökset ovat Rajdh
 
 | Tunniste | Vakavuus | Aihe | Tila |
 |---|---|---|---|
-| UX-007 | Medium | Kapean näkymän rivit ovat korkeampia, ja lista on 43 % pidempi kuin ennen | Avoin |
-| UX-008 | Medium | Vaakavieritys 320 px:ssä, kun tekstiä suurennetaan 200 % (vain teksti) | Avoin |
-| UX-009 | Low | Omistetun rivin kisko 3 px kapealla ja 4 px leveällä asettelulla | Avoin (UX.md päivitetty 4 px:ksi) |
+| UX-007 | Medium | Kapean näkymän rivit ovat korkeampia, ja lista on 43 % pidempi kuin ennen | Avoin → Korjattu (commit 0b6395c) |
+| UX-008 | Medium | Vaakavieritys 320 px:ssä, kun tekstiä suurennetaan 200 % (vain teksti) | Avoin → Korjattu (commit 0b6395c) |
+| UX-009 | Low | Omistetun rivin kisko 3 px kapealla ja 4 px leveällä asettelulla | Avoin (UX.md päivitetty 4 px:ksi) → Korjattu (commit 0b6395c) |
 | UX-010 | Low | Selaimen oma haun tyhjennyspainike (×) on pieni eikä teemoitettu | Avoin, backlogiin |
 
 ## Menetelmä
@@ -142,7 +142,7 @@ Painikkeet, paneelit, chipit ja taulukon viivat näkyvät järjestelmän väreil
 **Havaittu:** taulukon yläreuna on 1284 px:ssä (ennen 934 px), rivin korkeus 140 px (ennen 104 px) ja koko sivun korkeus 23 901 px (ennen 16 683 px, +43 %). Rivissä on neljä tekstiriviä: nimi, alaotsikko, tyyppi ja väri sekä hinta. Useammin kuin ennen myös nimi rivittyy ("Johnny Silverhand" kahdelle riville), koska nimisarakkeen leveys on 320 px:ssä vain noin 130 px.
 **Vaikutus:** pelaajan on vieritettävä enemmän löytääkseen kortin (noin 30 näytön lista). Tämä on V9:n tiedossa oleva seuraus, mutta sitä voi pienentää ilman luettavuuden menetystä. Liittyy avoimeen UX-006:een (suodattimien korkeus mobiilissa, T-018).
 **Korjausehdotus:** 1) Kapean rivin tyyppi, väri ja hinta samalle (rivittyvälle) riville: `.col-type, .col-cost { display: inline }` tai flex `flex-wrap: wrap; column-gap: var(--space-2)` → rivi 3 tekstiriviä (noin 112 px). 2) Rivin pystysisäväli `--space-3` → `--space-2` (säästää 8 px × 151 = noin 1200 px). Lopputuloksena lista on noin 25 % lyhyempi kuin nyt.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 0b6395c). Kapea rivi on flex-rivi: 1. rivi nimi ja kontrolli, 2. rivi tyyppi · väri ja hinta (rivittyy). Sisäväli `--space-2` pysty. Kontrollille ei varata leveyttä kapealla (UX.md 7.5 päivitetty). Mitattu 320 px, molemmat teemat: rivin keskikorkeus 85 px (aiemmin 140 px), omistettu rivi 85–103 px, sivun korkeus 14 386 px (aiemmin 23 901 px, −40 %), vaakavieritys 0 px. Taulukon yläreuna on ennallaan 1284 px:ssä (suodattimet, UX-006/T-018).
 
 ### UX-008 · Vaakavieritys 320 px:ssä, kun tekstiä suurennetaan 200 % · Medium
 **Sijainti:** `.brand`, `.button-secondary` (selainmuistutus), `.option`, `.count-control` ja kapea rivi · **Tehtävä:** T-021 (pohjana T-012:n `min-width`)
@@ -151,14 +151,14 @@ Painikkeet, paneelit, chipit ja taulukon viivat näkyvät järjestelmän väreil
 **Havaittu:** `scrollWidth` 531 px, kun `clientWidth` on 320 px (ennen T-021:tä 495 px). Ylittävät elementit: `.brand` (kirjainväli 0.2em), `.button-secondary` (pitkä versaaliteksti ei rivity), `.option`, `.col-control` / `.count-control` (`min-width: calc(3 * var(--target-min) + 2 * var(--space-2))` kasvaa rem-yksiköissä) ja rivi. Selaimen oikea zoom (400 %, 320 px) ja 200 % zoom (640 px) eivät aiheuta vieritystä.
 **Vaikutus:** suurella järjestelmäfontilla puhelimessa on vieritettävä sivusuunnassa. Sisältö on kuitenkin saavutettavissa. Ennen T-021:tä ongelma oli jo olemassa (IDEAS.md 2026-10-01, UX-003), ja T-021 lisäsi siihen `.brand`- ja painikeylitykset.
 **Korjausehdotus:** `.button-secondary, .button-primary { max-width: 100%; white-space: normal }`, `.brand { overflow-wrap: anywhere }` tai kirjainväli pienemmäksi kapealla, `.option { flex-wrap: wrap; max-width: 100% }`, ja `.count-control`in `min-width` kapealla asettelulla `auto` (tai `flex-wrap: wrap`), jolloin nimisarake ja kontrolli saavat jakaa leveyden. Tarkista uudelleen skriptillä: `html { font-size: 200% }` 320 px:ssä.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 0b6395c). Painikkeet `max-width: 100%`, `white-space: normal`, `overflow-wrap: anywhere`; `.option` `max-width: 100%` ja `overflow-wrap: anywhere`; `.brand` `min-width: 0` ja `overflow-wrap: anywhere`; `.count-control` kapealla `min-width: 0` ja `flex-wrap: wrap`; nimen `flex-basis: 6rem` siirtää kontrollin omalle rivilleen suurella tekstillä. Mitattu (`html { font-size: 200% }`): 320 px vaakavieritys 0 px (aiemmin 531 px) molemmissa teemoissa, 1280 px 0 px. Huom. 640 px + teksti 200 %: leveä taulukko vierittää yhä 224 px (aiemmin 864 px), koska 40 rem:n mediakysely ei reagoi tekstikokoon. Ei kuulunut löydöksen 320 px:n rajaukseen.
 
 ### UX-009 · Omistetun rivin kisko 3 px kapealla ja 4 px leveällä asettelulla · Low
 **Sijainti:** `src/styles.css` `tr.is-owned::before` (3 px) ja `tr.is-owned .card-name` (`inset 4px`) · **Tehtävä:** T-021
 **Havaittu:** UX.md 7.5 sanoi kapealle asettelulle 3 px ja leveälle 4 px (mallisivu: 4 px kummassakin). Koodari noudatti UX.md:tä, joten tämä on määrittelyn epäjohdonmukaisuus.
 **Vaikutus:** kosmeettinen. Johdonmukaisuus (Nielsen) edellyttäisi yhtä leveyttä.
 **Korjausehdotus:** UX.md päivitetty (versio 0.8): kisko on 4 px kummassakin. Koodari muuttaa kapean asettelun `width: 3px` → `4px` (yksi rivi, voi tehdä UX-007:n yhteydessä).
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 0b6395c). Kapean asettelun kisko 4 px (mitattu `::before` 4px).
 
 ### UX-010 · Selaimen oma haun tyhjennyspainike (×) on pieni eikä teemoitettu · Low
 **Sijainti:** `#card-search` (`type="search"`) · **Tehtävä:** T-010 (ennallaan), näkyy T-021:n teemassa

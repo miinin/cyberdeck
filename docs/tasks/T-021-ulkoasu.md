@@ -1,5 +1,5 @@
 # T-021 · Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme
-**Tila:** UX-katselmointi tehty (UX-004), odottaa PM:n päätöstä · **Omistaja:** Koodari → UX Designer (katselmointi) · **MVP:** 1 · **Prioriteetti:** Must (D-010)
+**Tila:** Review (UX-004:n korjaukset tehty, UX varmistaa) · **Omistaja:** Koodari → UX Designer (katselmointi) · **MVP:** 1 · **Prioriteetti:** Must (D-010)
 **Suunnittelu:** UX ☐ (tutkimus, visuaalinen suunta, tokenit, komponentit, mallisivu)
 **Katselmoinnit (D-010):** Koodikatselmointi ☑ · UX ☐ · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
 **Riippuvuudet:** T-010, T-012 (Done)
@@ -113,3 +113,32 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 - Mitä pyydän: PM päättää korjauksista. Jos korjataan, Koodari tekee UX-007–UX-009 ja UX varmistaa uudelleen (skripti: `html { font-size: 200% }` 320 px:ssä, taulukon yläreunan sijainti 320 px:ssä).
 - Veto: ei. UX hyväksyy T-021:n Done-tilaan omalta osaltaan. Medium-löydökset suositellaan korjattavaksi, mutta eivät ole blokkaavia.
 - Rajoitteet: ruudunlukija, Firefox, Safari ja oikeat mobiililaitteet testaamatta. Enimmäismäärän (999) tilaa ei testattu käsin.
+
+### Checkpoint 2026-10-02 · Koodari (korjauskierros UX-004)
+- Tehty: 0b6395c (UX-007, UX-008 ja UX-009: `src/styles.css`, UX.md 6.4.4 ja 7.5 päivitetty PM:n luvalla). Raportti `docs/reports/UX-004-t021-ulkoasu.md`: UX-007–UX-009 merkitty Korjattu.
+- Kesken: ei. UX-010 jää backlogiin (PM).
+- Seuraava askel: UX varmistaa korjaukset.
+- Muutetut tiedostot: `src/styles.css`, `docs/UX.md`, `docs/reports/UX-004-t021-ulkoasu.md`, tämä kortti.
+
+### Luovutus 2026-10-02 · Koodari → UX Designer (korjausten varmistus)
+- Mitä tehtiin:
+  - UX-007: kapea rivi on nyt `display: flex; flex-wrap: wrap`. 1. rivi: nimi (`flex: 1 1 6rem`) ja kontrolli oikeassa reunassa. 2. rivi: tyyppi · väri ja hinta, rivittyy (näkymätön `tr::after`, `flex-basis: 100%`, pakottaa rivinvaihdon). Pystysisäväli `--space-2`. Järjestys on vain visuaalinen (`order`). DOM, lukujärjestys ja ARIA-roolit ovat ennallaan, ja kontrolli on rivin ainoa fokusoitava osa.
+  - UX-008: painikkeet `max-width: 100%`, `white-space: normal`, `overflow-wrap: anywhere`, `text-align: center`; `.option` `max-width: 100%`, `overflow-wrap: anywhere`; `.brand` `min-width: 0`, `overflow-wrap: anywhere`; kapealla `.count-control` `min-width: 0` ja `flex-wrap: wrap`.
+  - UX-009: kapean asettelun kisko 4 px.
+  - Ensin kokeiltu kolmesarakkeinen grid hylättiin: hintasarake sai leveyden 0 ja rivittyi merkki kerrallaan (mitattu 219 px:n keskikorkeus).
+- Mitä pyydän: korjausten varmistus (UX-007–UX-009), erityisesti visuaalinen arvio uudesta kapeasta rivistä ja se, että `+` ei siirry `−`:n ilmestyessä.
+- Mistä katsoa: commit 0b6395c, `src/styles.css` kohta `@media (max-width: 39.99rem)`. UX.md 7.5 "Taulukko alle 40 rem" ja "Määräkontrolli".
+- Mittaukset (Chrome headless, oma väliaikainen profiili scratchpadissa, suljettu vain `browser.close()`-kutsulla (L-004); kaksi riviä merkitty omistetuksi):
+
+| Kokoonpano | Rivin korkeus (ka / min–max) | Sivun korkeus | Vaakavieritys |
+|---|---|---|---|
+| 320 px, vaalea ja tumma | 85 / 85–103 px (UX-004: 140 px) | 14 386 px (UX-004: 23 901 px) | 0 px |
+| 1200 px, molemmat | 76 px (ennallaan) | 12 570 px | 0 px |
+| 320 px, teksti 200 % | 377 / 265–494 px | 62 322 px | 0 px (UX-004: 531 px) |
+| 1280 px, teksti 200 % | 151 px | 25 131 px | 0 px |
+| 640 px, teksti 200 % | 344 px | 55 159 px | 224 px (UX-004: 864 px) |
+
+- Muut: taulukon yläreuna 320 px:ssä on ennallaan 1284 px (suodatinpaneeli, UX-006/T-018). Solun sisäinen ylivuoto tai päällekkäisyys kontrollin kanssa: 0 kaikissa ajoissa. axe 0 rikkomusta (320 px ja 1200 px, molemmat teemat). Kuvakaappaukset tarkistettu.
+- Tunnetut rajoitteet ja riskit: 640 px + teksti 200 % vierittää yhä 224 px. Syy on se, että leveä taulukko on käytössä, koska 40 rem:n mediakysely ei reagoi tekstikokoon. Tämä ei kuulunut UX-008:n 320 px:n rajaukseen. Ehdotus jatkoon: kapea asettelu kontekstin leveyden mukaan (esim. container query), PM päättää. Ilman omistettua määrää kapea rivi on matalampi, joten kontrollin puuttuva varaus muuttaa nimen rivitystä, kun `−` ilmestyy (`+` pysyy paikallaan). Testi "formats large counts the Finnish way" (1 024 riviä) epäonnistui kerran koko sarjan ajossa ja meni läpi yksinään ja kahdessa seuraavassa koko ajossa. Todennäköisesti aikakatkaisu kuormassa. Testiä ei muutettu tässä tehtävässä.
+- Testit: `npm test` 427/427 läpi (kahdesti), `npm run lint` 0 varoitusta, `npm run build` onnistui.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (gridin hintasarake rivittyi merkki kerrallaan, korvattu flex-rivillä ennen committia) · Suosituksia 1 (640 px + teksti 200 %, ks. rajoitteet)

@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-021 | UX Designer | Review | Toteutus valmis (haara `t-021-ulkoasu`, 2026-10-02). UX katselmoi, katso kortin luovutus Koodari → UX. |
+| T-021 | UX Designer | Review | UX-004:n korjaukset UX-007–UX-009 tehty (0b6395c). UX varmistaa korjaukset, katso kortin luovutus Koodari → UX (korjausten varmistus). |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
