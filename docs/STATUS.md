@@ -4,7 +4,7 @@
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
 
 ## MVP-taso
-Työn alla: MVP-1 · Valmiina: T-010, T-011, T-012, T-013, T-021, T-025–T-027, T-033–T-040. Jäljellä Must: T-015 (vienti ja tuonti). MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
+Työn alla: MVP-1 · Valmiina: T-004, T-010–T-014, T-021, T-025–T-027, T-033–T-040. Jäljellä Must: T-015 (vienti ja tuonti). MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
