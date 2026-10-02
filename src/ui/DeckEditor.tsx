@@ -481,7 +481,7 @@ export function DeckEditor({
             <ul className="search-results pick-images" aria-label={deckTexts.searchHeading}>
               {filtered.map((card) => {
                 const blocker = addBlocker(card, content, cardsByKey);
-                const hintId = `blocker-`;
+                const hintId = `blocker-image-${card.key}`;
                 const count = counts.get(card.key) ?? 0;
                 return (
                   <DeckPickImage
@@ -491,7 +491,7 @@ export function DeckEditor({
                     hint={
                       blocker !== null && (
                         <span id={hintId} className="card-row-meta">
-                          {deckTexts.dimmedHint(blocker)}
+                          {hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker)}
                         </span>
                       )
                     }
@@ -521,7 +521,7 @@ export function DeckEditor({
                       <span className="card-row-meta">{cardMeta(card)}</span>
                       {blocker !== null && (
                         <span id={hintId} className="card-row-meta">
-                          {deckTexts.dimmedHint(blocker)}
+                          {hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker)}
                         </span>
                       )}
                     </span>

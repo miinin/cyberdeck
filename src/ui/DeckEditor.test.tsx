@@ -141,6 +141,8 @@ describe('Deck editor', () => {
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     const row = within(searchList()).getByText('L1').closest('li') as HTMLElement;
     expect(row).toHaveClass('is-dimmed');
+    // The hint must not invite adding a card that is refused (T-045 PM fix).
+    expect(row).not.toHaveTextContent('Voit silti lisätä kortin.');
     await user.click(within(row).getByRole('button', { name: 'Lisää pakkaan: L1' }));
     const message = screen.getByText('Pakassa on jo Legend nimeltä L1.');
     expect(message.closest('[role="status"]')).not.toBeNull();

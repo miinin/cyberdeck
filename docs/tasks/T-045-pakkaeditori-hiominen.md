@@ -1,5 +1,5 @@
 # T-045 · Hiominen: tyyppimerkin kulma, värisuodatin palloina, Legend-nimen esto, yhtenäiset rivit, Power ja kuvanäkymä pakkaeditoriin
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02)
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02)
 **Malli:** D-014. PM tarkistaa esikatselun.
 **Haara:** `t-045-pakkaeditori-hiominen`
 
@@ -28,3 +28,6 @@
 - Huomio: kuvanäkymässä kuvapainike ja + -painike ovat molemmat nimeltä "Lisää pakkaan: <nimi>" (kriteerin mukaan). Ei uusia riippuvuuksia.
 - Testit: `npm test` 589 läpi (uudet: hasSameNameLegend, preferences, toast, 4 s katoaminen, Power/Rarity, kuvanäkymä ja muisti), lint ja build läpi. CHANGELOG päivitetty.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
+
+### PM 2026-10-02 · Done (D-014)
+- Esikatselu PR #16: tyyppimerkin viisto kulma (vaalea teema), värisuodatin palloina, kuvanäkymä ja samannimisen Legendin esto tarkistettu kuvakaappauksin. PM korjasi kaksi virhettä: samannimisen Legendin vihje sanoi "Voit silti lisätä kortin" (regressiotesti lisätty), ja kuvanäkymän hintId oli kaikille sama `blocker-` (päällekkäiset id:t).
