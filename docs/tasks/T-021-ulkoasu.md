@@ -1,7 +1,7 @@
 # T-021 · Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme
-**Tila:** Review (UX-004:n korjaukset tehty, UX varmistaa) · **Omistaja:** Koodari → UX Designer (katselmointi) · **MVP:** 1 · **Prioriteetti:** Must (D-010)
+**Tila:** Done · **Omistaja:** UX Designer → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-010)
 **Suunnittelu:** UX ☑ (tutkimus, visuaalinen suunta, tokenit, komponentit, mallisivu)
-**Katselmoinnit (D-010):** Koodikatselmointi ☑ · UX ☐ · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
+**Katselmoinnit (D-010):** Koodikatselmointi ☑ · UX ☑ (UX-004) · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
 **Riippuvuudet:** T-010, T-012 (Done)
 **Haara:** `t-021-ulkoasu`
 
