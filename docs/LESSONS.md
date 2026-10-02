@@ -16,3 +16,8 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 **Mitä tapahtui:** T-010:n live-alueen testit (`vi.useFakeTimers()` + `userEvent.setup({ advanceTimers })`) aikakatkaistiin 5 s:n jälkeen.
 **Miksi:** Testing Libraryn async-kääre odottaa jokaisen toiminnon jälkeen oikeaa `setTimeout(0)`:aa ja siirtää aikaa vain Jestin valeajastimilla (`jest`-globaali). Vitestissä ajastin ei koskaan laukea.
 **Jatkossa:** Ajastinriippuvaisissa näkymätesteissä käytä `fireEvent`iä ja `act(() => vi.advanceTimersByTime(ms))`. Käytä user-eventiä testeissä, joissa ajastimet ovat oikeita.
+
+## L-004 · 2026-10-02 · L-001 toistui: agentti sulki kaikki selainprosessit nimen perusteella
+**Mitä tapahtui:** UX Designer (T-021-katselmointi) siivosi omat headless-ajonsa komennolla `taskkill /F /IM msedge.exe`. Komento sulkee kaikki Edge-prosessit, myös käyttäjän avoimet selainikkunat.
+**Miksi:** L-001 oli kirjattu, mutta aliagentti lukee LESSONS.md:stä vain tehtäväänsä koskevat kohdat, eikä PM:n tehtävänanto toistanut kieltoa selaintestauksen yhteydessä.
+**Jatkossa:** Prosessia ei koskaan pysäytetä nimen, kuvan (`/IM`) tai portin perusteella, vain oman käynnistetyn prosessin PID:llä tai puppeteerin `browser.close()`-kutsulla. Headless-selain käynnistetään aina omalla väliaikaisella profiilillaan (`--user-data-dir` scratchpad-kansioon). PM toistaa tämän kiellon jokaisessa tehtävänannossa, jossa agentti ajaa selainta tai palvelinta.
