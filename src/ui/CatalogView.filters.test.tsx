@@ -63,7 +63,7 @@ describe('CatalogView search and filters: structure', () => {
         .getAllByRole('checkbox')
         .map((box) => box.closest('label')?.textContent?.trim());
     expect(names(typeGroup)).toEqual(['Legend', 'Unit', 'Gear', 'Program', 'Token']);
-    expect(names(colorGroup)).toEqual(['Punainen', 'Keltainen', 'Vihreä', 'Sininen', 'Purple']);
+    expect(names(colorGroup)).toEqual(['Red', 'Yellow', 'Green', 'Blue', 'Purple']);
     within(typeGroup)
       .getAllByRole('checkbox')
       .forEach((box) => expect(box).not.toBeChecked());
@@ -113,7 +113,7 @@ describe('CatalogView search and filters: filtering', () => {
     await userEvent.click(screen.getByRole('checkbox', { name: 'Gear' }));
     expect(rowNames()).toEqual(['Johnny Silverhand, Rocking Renegade', 'V, Streetkid', 'El Sombrerón']);
 
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Sininen' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Blue' }));
     expect(rowNames()).toEqual(['V, Streetkid']);
     expect(statusText(container)).toBe('1 / 6 korttia');
 
@@ -304,7 +304,7 @@ describe('CatalogView search and filters: live region', () => {
 
     typeText('johnny silver');
     wait(ANNOUNCE_DELAY_MS);
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Punainen' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Red' }));
     wait(ANNOUNCE_DELAY_MS);
     // Let the MutationObserver deliver its records.
     await Promise.resolve();

@@ -37,6 +37,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-036 Tyyppimerkki ja englanninkieliset pelitermit (2026-10-02)
 - T-035 Hienosäätö: määräkontrolli, playset-tila, dialogin × (2026-10-02, PR #11)
 - T-034 Korttiruudukko: iso kuva, Power ja RAM (2026-10-02, PR #10)
 - T-033 Kevyt toimintamalli D-014 (2026-10-02)

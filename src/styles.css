@@ -1093,12 +1093,12 @@ body:has(dialog[open]) {
 
 /* Owned card (count > 0). The count itself carries the information, not the colour (UX.md 7.5). */
 .card-box.is-owned {
-  border-color: var(--color-info);
+  border-color: color-mix(in srgb, var(--color-info) 40%, var(--color-border));
   --color-count: var(--color-info);
 }
 
 .card-box.is-playset {
-  border-color: var(--color-success);
+  border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border));
   --color-count: var(--color-success);
 }
 
@@ -1157,7 +1157,7 @@ body:has(dialog[open]) {
 }
 
 .card-collection .count-control {
-  justify-content: flex-start;
+  justify-content: center;
   flex-wrap: wrap;
   min-width: 0;
 }
@@ -1201,4 +1201,27 @@ body:has(dialog[open]) {
   font-size: var(--font-size-lg);
   letter-spacing: 0;
   text-transform: none;
+}
+
+/* Card type as a badge; the border shows the card colour, the text names the type (T-036). */
+.type-badge {
+  --badge-color: var(--color-border-strong);
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border: 1px solid var(--badge-color);
+  color: var(--badge-color);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  clip-path: polygon(0 0, calc(100% - 0.5em) 0, 100% 0.5em, 100% 100%, 0 100%);
+}
+
+.type-badge-red { --badge-color: var(--color-card-red); }
+.type-badge-yellow { --badge-color: var(--color-card-yellow); }
+.type-badge-green { --badge-color: var(--color-card-green); }
+.type-badge-blue { --badge-color: var(--color-card-blue); }
+
+/* Light theme: coloured border only, text keeps full contrast. */
+:root[data-theme='light'] .type-badge {
+  color: var(--color-text);
 }

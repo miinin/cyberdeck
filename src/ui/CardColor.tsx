@@ -10,6 +10,11 @@ function swatchClass(color: string): string {
  * conveyed by the swatch alone. Unknown API values are shown as such and marked English.
  * `null` is shown as a dash with "ei väriä" for screen readers.
  */
+/** Badge class for a card type label coloured by the card colour (T-036). */
+export function typeBadgeClass(color: string | null): string {
+  return color !== null && colorNames.has(color) ? `type-badge type-badge-${color.toLowerCase()}` : 'type-badge';
+}
+
 export function CardColor({ color }: { color: string | null }) {
   if (color === null) {
     return (
@@ -20,11 +25,12 @@ export function CardColor({ color }: { color: string | null }) {
     );
   }
 
-  const finnishName = colorNames.get(color);
+  // Game terms are English (T-036).
+  const name = colorNames.get(color) ?? color;
   return (
     <>
       <span className={`color-swatch ${swatchClass(color)}`} aria-hidden="true" />{' '}
-      {finnishName === undefined ? <span lang="en">{color}</span> : finnishName}
+      <span lang="en">{name}</span>
     </>
   );
 }
