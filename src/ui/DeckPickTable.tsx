@@ -29,7 +29,7 @@ export function cardMeta(card: Card): string {
 }
 
 /** Cost as a round gem with the card colour on its edge (T-050b). */
-function CostGem({ card }: { card: Card }) {
+export function CostGem({ card }: { card: Card }) {
   if (card.cost === null) return <Value value={null} missing={texts.noCost} />;
   return <span className={`cost-gem ${typeColorClass(card.color)}`}>{card.cost}</span>;
 }

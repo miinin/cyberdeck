@@ -1,7 +1,7 @@
 import type { Card } from './card';
 import type { DeckContent } from './deck';
 import { checkDeckName, copyDeckName, uniqueDeckName, withDeckCount } from './deckEdit';
-import { addBlocker, costCurve, groupDeck, hasSameNameLegend, ramLimits, toCardsByKey, validateDeck } from './deckRules';
+import { addBlocker, colorDistribution, costCurve, groupDeck, hasSameNameLegend, ramLimits, toCardsByKey, validateDeck } from './deckRules';
 
 function card(key: string, overrides: Partial<Card> = {}): Card {
   return {
@@ -259,5 +259,31 @@ describe('costCurve', () => {
 
   it('is all zeros for an empty deck', () => {
     expect(costCurve(deck([]), toCardsByKey([]))).toEqual([0, 0, 0, 0, 0, 0, 0]);
+  });
+});
+
+describe('colorDistribution', () => {
+  it('counts main deck copies per color, most first, without Legends, unknown or colorless cards', () => {
+    const cards = [
+      card('l1', { type: 'Legend', color: 'Blue' }),
+      card('r1', { color: 'Red' }),
+      card('r2', { color: 'Red' }),
+      card('b1', { color: 'Blue' }),
+      card('g1', { color: 'Green' }),
+      card('n1', { color: null }),
+    ];
+    const shares = colorDistribution(
+      deck([['l1', 1], ['r1', 3], ['r2', 2], ['b1', 2], ['g1', 2], ['n1', 3], ['ghost', 2]]),
+      toCardsByKey(cards),
+    );
+    expect(shares).toEqual([
+      { color: 'Red', count: 5 },
+      { color: 'Blue', count: 2 },
+      { color: 'Green', count: 2 },
+    ]);
+  });
+
+  it('is empty for an empty deck', () => {
+    expect(colorDistribution(deck([]), toCardsByKey([]))).toEqual([]);
   });
 });

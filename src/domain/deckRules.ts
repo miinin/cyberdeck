@@ -267,3 +267,24 @@ export function costCurve(deck: DeckContent, cardsByKey: CardsByKey): number[] {
   }
   return bars;
 }
+
+export interface ColorShare {
+  readonly color: string;
+  readonly count: number;
+}
+
+/**
+ * Main deck copies per card color (T-050c), most first, then by name. Legends, unknown cards and cards
+ * without a color are not counted.
+ */
+export function colorDistribution(deck: DeckContent, cardsByKey: CardsByKey): ColorShare[] {
+  const byColor = new Map<string, number>();
+  for (const [key, count] of deckCounts(deck)) {
+    const card = cardsByKey.get(key);
+    if (card === undefined || card.type === 'Legend' || card.color === null || count <= 0) continue;
+    byColor.set(card.color, (byColor.get(card.color) ?? 0) + count);
+  }
+  return [...byColor]
+    .map(([color, count]) => ({ color, count }))
+    .sort((a, b) => b.count - a.count || a.color.localeCompare(b.color, 'en'));
+}

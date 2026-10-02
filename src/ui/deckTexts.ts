@@ -73,7 +73,6 @@ export const deckTexts = {
   backToList: 'Takaisin pakkoihin',
   editorLoading: 'Ladataan pakkaa…',
   editorNotFound: 'Pakkaa ei löytynyt. Se on voitu poistaa.',
-  summaryHeading: 'Yhteenveto',
   legendsHeading: 'Legendit',
   mainHeading: 'Pääpakka',
   sectionLabel: (title: string) => `${title}: pakan kortit`,
@@ -84,7 +83,7 @@ export const deckTexts = {
   ramLimitsLabel: 'RAM-rajat',
   ramLimit: (color: string, limit: number) => `${color} ${limit}`,
   ramLimitsNone: 'Ei RAM-rajoja ennen kuin pakassa on Legend.',
-  issuesHeading: 'Puutteet',
+  issuesHeading: 'Ongelmat',
   allGood: 'Pakka on laillinen.',
   issuesLive: (count: number) => (count === 0 ? 'Pakka on nyt laillinen.' : `Pakassa on ${issueCount(count)}.`),
   warningPrefix: 'Huomio: ',
@@ -97,8 +96,6 @@ export const deckTexts = {
   missingCount: (count: number) => `puuttuu ${count}`,
   /** Small badge on a search result: copies already in the deck. */
   inDeckBadge: (count: number) => `${count} pakassa`,
-  costChip: (cost: number) => `Cost ${cost}`,
-  ramChip: (ram: number) => `RAM ${ram}`,
   curveHeading: 'Kustannuskäyrä',
   curveCaption: 'Pääpakan kortit Costin mukaan',
   curveCost: 'Cost',
@@ -126,6 +123,27 @@ export const deckTexts = {
   changeAnnounce: (name: string, count: number, main: number) => `${name}: ${count} pakassa. Pääpakka ${main} korttia.`,
   changeAnnounceLegend: (name: string, count: number, legends: number) =>
     `${name}: ${count} pakassa. Legendejä ${legends}/${LEGEND_COUNT}.`,
+  // Deck column (T-050c)
+  mainProgress: (main: number) => `Pääpakka ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
+  legendsProgress: (legends: number) => `Legendit ${legends}/${LEGEND_COUNT}`,
+  legalShort: 'Laillinen',
+  issuesCount: (count: number) => (count === 1 ? '1 ongelma' : `${count} ongelmaa`),
+  legendSlotEmpty: 'Legend-paikka vapaana',
+  deckViewLegend: 'Pakkanäkymä',
+  deckViewList: 'Lista',
+  deckViewStacks: 'Pinot',
+  /** Copies on a deck tile or a stack card, e.g. "×3". */
+  copies: (count: number) => `×${count}`,
+  stackCard: (name: string, count: number) => `Suurenna kuva: ${name}, ${count} pakassa`,
+  statsHeading: 'Tilastot',
+  colorsLabel: 'Värit',
+  typesLabel: 'Tyypit',
+  colorShare: (color: string, count: number, pct: number) => `${color} ${count} (${pct} %)`,
+  typeShare: (type: string, count: number) => `${type} ${count}`,
+  mobileBar: (main: number, legends: number) =>
+    `Pakka ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK} · Legendit ${legends}/${LEGEND_COUNT}`,
+  showDeck: 'Näytä pakka',
+  backToSearch: 'Takaisin hakuun',
   distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',
 
   saveSaved: 'Tallennettu',
