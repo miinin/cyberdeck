@@ -36,6 +36,13 @@ Käyttäjä valitsee väriteeman helposti. Tumma teema on oletus (D-012), koska 
 - Koodari lisää termin "teema" CONTENT.md:n sanastoon (D-009, ei erillistä Sisällöntuottajaa).
 - Tila In Progress. Seuraava askel: Koodari toteuttaa UX.md:n luvun 8 mukaan.
 
+### Suunnitelma 2026-10-02 · Koodari
+1. Tallennuskerros: `Theme`, `PreferencesRepository` (`loadTheme`, `saveTheme`), avain `THEME_KEY` keys.ts:ään, testit.
+2. Välähdyksen esto: tokenien uudelleenjärjestely (tumma `:root`issa, vaalea `:root[data-theme='light']`), `data-theme="dark"` index.html:ään, `public/theme-init.js` (A1-ehdot), ESLint-lohko, avaintesti.
+3. Käyttöliittymä: `ThemeToggle`-painike otsikkopalkkiin, tekstit, tyylit (UX.md 8.3–8.6), App-testit (8.9).
+4. Dokumentit: CONTENT.md-sanasto, CHANGELOG, ARCHITECTURE.md 12.2.
+5. Selaintarkistus (build + preview): 320 px:n otsikkopalkki, axe kummassakin teemassa, ei välähdystä. Koodikatselmointi ja luovutus.
+
 ## Luovutukset
 ### Luovutus 2026-10-02 · UX Designer → Koodari
 - Mitä tehtiin: teemavalitsimen määrittely UX.md:n luvussa 8: kontrolli (8.1, 8.3, 8.4), ulkoasu ja kontrastit (8.5), toiminta (8.6), välähdyksen esto ja tallennus (8.7), CSS-rakenne (8.8), tarkistuslista ja testit (8.9).
