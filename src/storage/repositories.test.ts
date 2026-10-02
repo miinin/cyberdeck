@@ -496,3 +496,16 @@ describe('preferences: list view and edit switch (T-040)', () => {
     await expectStorageError(quota.preferences.saveEditMode(true), 'quota');
   });
 });
+
+describe('preferences: deck editor result view (T-045)', () => {
+  it('defaults to the list, remembers images and ignores unknown values', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadDeckPickView()).toBe('list');
+    await preferences.saveDeckPickView('images');
+    const again = createRepositories({ store, persistent: true }).preferences;
+    expect(await again.loadDeckPickView()).toBe('images');
+    await expectStorageError(preferences.saveDeckPickView('grid' as 'list'), 'invalid-input');
+    const odd = setup({ 'cyberdeck:deck-pick-view': 'cards' });
+    expect(await odd.preferences.loadDeckPickView()).toBe('list');
+  });
+});

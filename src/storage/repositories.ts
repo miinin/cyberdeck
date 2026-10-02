@@ -25,6 +25,7 @@ import {
   THEME_KEY,
   VIEW_KEY,
   EDIT_MODE_KEY,
+  DECK_PICK_VIEW_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
 import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS } from './migrations';
@@ -37,6 +38,7 @@ import type {
   Repositories,
   Theme,
   CatalogViewMode,
+  DeckPickView,
 } from './types';
 
 export interface RepositoryOptions {
@@ -338,6 +340,22 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         throw toStorageError(error, 'write');
       }
       return on;
+    },
+    loadDeckPickView: async () => {
+      try {
+        return store.getItem(DECK_PICK_VIEW_KEY) === 'images' ? 'images' : 'list';
+      } catch {
+        return 'list';
+      }
+    },
+    saveDeckPickView: async (view: DeckPickView) => {
+      if (view !== 'list' && view !== 'images') throw new StorageError('invalid-input', 'Unknown view');
+      try {
+        store.setItem(DECK_PICK_VIEW_KEY, view);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return view;
     },
   };
 
