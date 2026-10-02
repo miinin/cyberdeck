@@ -301,8 +301,10 @@ h1:focus:not(:focus-visible) {
 
 .site-header .container {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
+  row-gap: var(--space-2);
   padding-block: var(--space-3);
 }
 
@@ -395,7 +397,8 @@ main {
  */
 .button-primary,
 .button-secondary,
-.step {
+.step,
+.theme-toggle {
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -521,10 +524,96 @@ main {
 /* After the base rules: the chamfer would clip the focus ring (UX.md 7.9 kohta 7). */
 .button-primary:focus-visible,
 .button-secondary:focus-visible,
-.step:focus-visible {
+.step:focus-visible,
+.theme-toggle:focus-visible {
   clip-path: none;
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);
+}
+
+/*
+ * Theme toggle in the header (UX.md 8.3–8.5). The header is black in both themes, so the toggle uses the
+ * header and accent tokens, not the page surfaces. Same edge and fill structure as the other buttons.
+ */
+.theme-toggle {
+  --toggle-edge: var(--color-header-text);
+  --toggle-fill: var(--color-header-bg);
+  --toggle-text: var(--color-header-text);
+  flex: none;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+  padding-inline: var(--space-3);
+  background: var(--toggle-edge);
+  color: var(--toggle-text);
+  font-size: var(--font-size-sm);
+}
+
+.theme-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: var(--toggle-fill);
+  clip-path: var(--shape-chamfer-inner-2);
+}
+
+/* Hover is never colour alone (UX.md 3.4). */
+.theme-toggle:hover {
+  --toggle-edge: var(--color-accent-2);
+  --toggle-text: var(--color-accent-2);
+  text-decoration: underline;
+}
+
+.theme-toggle[aria-pressed='true'] {
+  --toggle-edge: var(--color-accent);
+  --toggle-fill: var(--color-accent);
+  --toggle-text: var(--color-on-accent);
+}
+
+.theme-toggle[aria-pressed='true']:hover {
+  --toggle-edge: var(--color-accent-2);
+  --toggle-fill: var(--color-accent-2);
+}
+
+/* The ring is drawn on the black header: --color-focus of the light theme would be under 3:1 there (UX.md 8.5). */
+.theme-toggle:focus-visible {
+  outline-color: var(--color-accent-2);
+}
+
+.theme-toggle-icon {
+  flex: none;
+}
+
+/* The state is also shown without colour: filled sun = light theme in use (UX.md 8.4). */
+.theme-toggle[aria-pressed='true'] .theme-toggle-icon circle {
+  fill: currentColor;
+}
+
+/* " teema" only from 40 rem up; below that it stays for screen readers (same as .visually-hidden). */
+.theme-toggle-suffix {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (min-width: 40rem) {
+  .theme-toggle-suffix {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+  }
 }
 
 /* Notice box (error / warning). The heading carries the information, the stripes are decoration. */
@@ -1068,7 +1157,8 @@ main {
 @media (forced-colors: active) {
   .button-primary,
   .button-secondary,
-  .step {
+  .step,
+  .theme-toggle {
     border: 2px solid ButtonText;
     clip-path: none;
   }
@@ -1090,10 +1180,12 @@ main {
   .button-primary,
   .button-secondary,
   .step,
+  .theme-toggle,
   .button-primary::before,
   .step-plus::before,
   .button-secondary::before,
-  .step-minus::before {
+  .step-minus::before,
+  .theme-toggle::before {
     transition: background-color var(--ease), color var(--ease);
   }
 
@@ -1111,7 +1203,8 @@ main {
 
   .button-primary:active,
   .button-secondary:active,
-  .step:active {
+  .step:active,
+  .theme-toggle:active {
     transform: translateY(1px);
   }
 

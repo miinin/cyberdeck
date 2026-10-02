@@ -3,6 +3,7 @@ import { openBrowserRepositories } from './storage';
 import type { Repositories } from './storage';
 import { CatalogView } from './ui/CatalogView';
 import { texts } from './ui/texts';
+import { ThemeToggle } from './ui/ThemeToggle';
 import { useCardCatalog } from './ui/useCardCatalog';
 import type { LoadCatalog } from './ui/useCardCatalog';
 
@@ -16,6 +17,7 @@ export function App({ loadCatalog, repositories }: { loadCatalog?: LoadCatalog; 
       <header className="site-header">
         <div className="container">
           <span className="brand">{texts.appName}</span>
+          <ThemeToggle preferences={openRepositories.preferences} />
         </div>
       </header>
       <main className="container">
