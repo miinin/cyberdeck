@@ -25,3 +25,10 @@ Pelaaja varmuuskopioi pakkansa tai jakaa sen kaverille tiedostona, ja kaveri tuo
 - Koko kokoelman vienti ei kuulu tähän (IDEAS.md, jos tarpeen).
 
 ## Luovutukset
+### Luovutus 2026-10-02 · Koodari → PM (sitten Digiturva ja UX)
+- Mitä tehtiin (3 committia + viimeistely): `deckExport.ts` (json/txt-vienti, tiedostonimi SR-19), `deckJson.ts` (SR-18-tuonti: 256 kt, try/catch ilman revieveriä, format/version, `parseDeckContent`, kortin nimi omasta datasta, id ja ylimääräiset kentät ohitetaan), `ExportButtons` + `downloadFile.ts` (Blob, a[download], revokeObjectURL), Vie-painikkeet pakkalistassa ja editorissa, tuontinäkymän valitsin hyväksyy .json (tunnistus `{`-alusta; tiedostokoko-raja 256 kt json / 64 kt txt ennen lukemista), SEC-021 (`Array.from`-katkaisu), CHANGELOG.
+- Mitä pyydän: Digiturva (SR-18/19, tiedostot) ja UX (uudet painikkeet ja virheviestit).
+- Tekstit (UX/Sisältö tarkistettava): "Vie .json", "Vie .txt", virheet "Tiedosto ei ole cyberdeckin pakka." / "Tiedostoa ei voitu lukea. Tarkista…" / "Enintään 256 kt"; tuontiohje ja valitsimen label muutettu ("Tai valitse .txt- tai .json-tiedosto").
+- Rajoitteet: .json- ja .txt-tuonti litistävät osiot yhteen nimettömään osioon (editori käyttää yhtä osiota); json:n kortin `name`-kenttää ei käytetä lainkaan (tuntematon kortti näytetään avaimella). `deckEdit.ts` kopion nimen `slice` on samaa katkaisuluokkaa kuin SEC-021, ei korjattu (ei tehtävän rajauksessa).
+- Testit: `npm test` 42 tiedostoa / 680 testiä läpi, lint 0 varoitusta, build OK. Uudet: deckExport.test, deckJson.test (round trip, `__proto__`, rajat), DeckExportImport.test (UI, lataus, uusi id), deckText.test (SEC-021). Selaimessa ei ajettu käsin.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (tiedostonimen `\`-suodatus puuttui regexistä, korjattu testillä) · Suosituksia 2 (yllä: copy-nimen katkaisu, osioiden säilytys)

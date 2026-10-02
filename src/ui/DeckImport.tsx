@@ -7,6 +7,7 @@ import { checkDeckName } from '../domain/deckEdit';
 import { buildImportReport } from '../domain/deckReport';
 import type { ImportReport } from '../domain/deckReport';
 import { toCardsByKey } from '../domain/deckRules';
+import { parseDeckJson, MAX_JSON_IMPORT_BYTES } from '../domain/deckJson';
 import { MAX_IMPORT_BYTES, parseDeckText } from '../domain/deckText';
 import type { ParsedDeckText } from '../domain/deckText';
 import { netdeckToParsedDeck, parseNetdeckUrl } from '../domain/netdeckDeck';
@@ -69,10 +70,11 @@ export function DeckImport({
     const file = input.files?.[0];
     input.value = '';
     if (file === undefined) return;
-    // The size is checked before the file is read (SR-17).
-    if (file.size > MAX_IMPORT_BYTES) {
+    // The size is checked before the file is read (SR-17, SR-18).
+    const isJson = file.name.toLowerCase().endsWith('.json') || file.type === 'application/json';
+    if (file.size > (isJson ? MAX_JSON_IMPORT_BYTES : MAX_IMPORT_BYTES)) {
       edit('');
-      setInputError('file-too-big');
+      setInputError(isJson ? 'json-too-long' : 'file-too-big');
       return;
     }
     try {
@@ -87,7 +89,8 @@ export function DeckImport({
     event.preventDefault();
     setSaveFailure(null);
     setLinkError(null);
-    const result = parseDeckText(text, cards);
+    // An exported .json deck starts with a brace; a deck list never does.
+    const result = text.trimStart().startsWith('{') ? parseDeckJson(text, cards) : parseDeckText(text, cards);
     if (!result.ok) {
       setReport(null);
       setInputError(result.error);
@@ -214,7 +217,7 @@ export function DeckImport({
           onChange={(event) => edit(event.target.value)}
         />
         <label htmlFor="import-file">{deckTexts.importFileLabel}</label>
-        <input id="import-file" type="file" accept=".txt,text/plain" onChange={(event) => void handleFile(event)} />
+        <input id="import-file" type="file" accept=".txt,.json,text/plain,application/json" onChange={(event) => void handleFile(event)} />
         {inputError !== null && (
           <p id="import-error" className="field-error" role="alert">
             {deckTexts.importErrors[inputError]}

@@ -15,7 +15,7 @@ export const MAX_FILE_NAME_LENGTH = 60;
 export type ExportFormat = 'json' | 'txt';
 
 // Characters not allowed in file names (SR-19). Control and direction characters come from UNSAFE_CHARACTERS.
-const FILE_NAME_FORBIDDEN = /[/\:*?"<>|]/g;
+const FILE_NAME_FORBIDDEN = /[/\\:*?"<>|]/g;
 
 /** Removes line breaks and control characters, so a name cannot add lines or section headings. */
 function singleLine(text: string): string {

@@ -23,7 +23,7 @@ function deck(name: string): DeckContent {
   };
 }
 
-const NAMES = ['Oma pakka', '// Legends (3)', '# Hash # tag', 'Tulta 🔥👨‍👩‍👧 ja <b>"x"</b> & \ / : *'];
+const NAMES = ['Oma pakka', '// Legends (3)', '# Hash # tag', 'Tulta 🔥👨‍👩‍👧 ja <b>"x"</b> & \\ / : *'];
 
 describe('deckToText', () => {
   it('writes the reference format with Legends first', () => {
@@ -85,7 +85,7 @@ describe('deckToJson', () => {
 
 describe('exportFileName', () => {
   it('removes forbidden characters, control and direction characters', () => {
-    expect(exportFileName('a/b\c:d*e?f"g<h>i|j\u0000k‮l', 'json')).toBe('abcdefghijkl.json');
+    expect(exportFileName('a/b\\c:d*e?f"g<h>i|j\u0000k\u202El', 'json')).toBe('abcdefghijkl.json');
   });
   it('uses the default name for an empty or dots-only name', () => {
     expect(exportFileName('///', 'txt')).toBe('pakka.txt');
