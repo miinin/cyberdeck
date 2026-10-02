@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-034 | Koodari | In Progress | Korttiruudukko, katso kortti. Kevyt malli D-014: yksi Koodari, PM tarkistaa esikatselun. |
+| – | – | – | Odotetaan käyttäjän seuraavaa tehtävää. |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -37,6 +37,8 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-034 Korttiruudukko: iso kuva, Power ja RAM (2026-10-02, PR #10)
+- T-033 Kevyt toimintamalli D-014 (2026-10-02)
 - T-027 Korttikuvat: pikkukuva listassa ja iso kuva dialogissa, 151/151 (2026-10-02, PR #9)
 - T-026 Korttidata sovelluksen mukana (2026-10-02, PR #8)
 - T-025 Teemavalitsin, tumma oletuksena (2026-10-02, PR #7)

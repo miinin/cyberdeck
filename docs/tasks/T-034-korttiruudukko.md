@@ -31,3 +31,7 @@ Pelaaja tunnistaa kortin isosta kuvasta ja näkee pelin arvot ja oman kokoelmans
 - Tunnetut rajoitteet: ei visuaalista tarkistusta selaimessa; 3–4 saraketta riippuu sisältöalueen leveydestä. Vanha UX.md 6.4 (taulukko) on vanhentunut, UX päivittää. ARCHITECTURE.md kuvaa vielä `sm`-koon.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2 (ARCHITECTURE.md ja UX.md päivitettävä: sm→md, taulukko→ruudukko)
 - Testit: vitest 73 tiedostoa / 1440 testiä läpi, lint ja build (tsc + vite) läpi. `npm ci` kaatui EPERM-lukkoon (vanhat `vite preview` -prosessit pääkansion node_modulesissa, PIDit 30764, 32436, 34448); `npm install` korjasi, package-lock ei muuttunut.
+
+### PM 2026-10-02 · Done (D-014)
+- Esikatselu PR #10 tarkistettu kuvakaappauksella (1280 px): ruudukossa 3 saraketta, laatikossa kuva, nimi, tyyppi ja väri, Hinta/Power/RAM ja +-kontrolli. 320 px:ää ei voitu luotettavasti kuvata headless-Chromella (ikkunan vähimmäisleveys). UX tarkistaa sen MVP-1:n lopussa.
+- Jatkoon: ARCHITECTURE.md (sm→md) ja UX.md 6.4 (taulukko→ruudukko) päivitetään MVP-1:n lopun katselmoinneissa. Uudet termit Power ja RAM CONTENT.md:hen samalla.
