@@ -6,6 +6,7 @@ import { checkDeckName, distinctRows, withDeckCount } from '../domain/deckEdit';
 import {
   LEGEND_COUNT,
   addBlocker,
+  costCurve,
   deckCounts,
   deckTotals,
   groupDeck,
@@ -28,8 +29,11 @@ import type { CardFilterCriteria } from '../domain/cardSearch';
 import { StorageError } from '../storage';
 import type { DeckPickView, Repositories, StorageErrorKind } from '../storage';
 import { CardFilters } from './CardFilters';
+import { CardImageDialog } from './CardImageDialog';
 import { CardName } from './CardName';
+import { CostCurve } from './CostCurve';
 import { DeckPickImage } from './DeckPickImage';
+import { typeColorClass } from './CardColor';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
@@ -68,6 +72,7 @@ function Stepper({
   onChange,
   addLabel,
   describedBy,
+  showCount = true,
 }: {
   name: string;
   count: number;
@@ -75,6 +80,8 @@ function Stepper({
   addLabel?: string;
   /** Id of a visible text that explains why adding breaks a rule. */
   describedBy?: string;
+  /** False when the count is shown elsewhere (deck rows): only the spoken count stays. */
+  showCount?: boolean;
 }) {
   return (
     <div className="card-row-controls">
@@ -87,8 +94,8 @@ function Stepper({
       >
         <span aria-hidden="true">{texts.minusSymbol}</span>
       </button>
-      <span className="deck-card-count">
-        <span aria-hidden="true">{count}</span>
+      <span className={showCount ? 'deck-card-count' : 'deck-card-count-spoken'}>
+        {showCount && <span aria-hidden="true">{count}</span>}
         <span className="visually-hidden">{deckTexts.inDeck(count)}</span>
       </span>
       <button
@@ -128,6 +135,7 @@ export function DeckEditor({
   const [pickView, setPickView] = useState<DeckPickView>('list');
   const pickViewChosen = useRef(false);
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
+  const [zoomCard, setZoomCard] = useState<Card | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -238,6 +246,7 @@ export function DeckEditor({
   const totals = useMemo(() => deckTotals(content, cardsByKey), [content, cardsByKey]);
   const limits = useMemo(() => ramLimits(content, cardsByKey), [content, cardsByKey]);
   const counts = useMemo(() => deckCounts(content), [content]);
+  const curve = useMemo(() => costCurve(content, cardsByKey), [content, cardsByKey]);
   const grouped = useMemo(() => groupDeck(content, cardsByKey), [content, cardsByKey]);
 
   const collectionReady = collection.phase === 'ready';
@@ -309,29 +318,47 @@ export function DeckEditor({
     );
   }
 
+  const renderChip = (card: Card) => {
+    if (card.cost !== null) {
+      return (
+        <span className="deck-line-chip" title={deckTexts.costChip(card.cost)}>
+          <span aria-hidden="true">{card.cost}</span>
+          <span className="visually-hidden">{deckTexts.costChip(card.cost)}</span>
+        </span>
+      );
+    }
+    if (card.ram !== null) return <span className="deck-line-chip is-ram">{deckTexts.ramChip(card.ram)}</span>;
+    return null;
+  };
+
   const renderDeckRow = (row: DeckRow) => {
     const have = collectionReady ? countIn(collection, row.card.key) : null;
-    const missing = have !== null && have < row.count;
+    const missingCount = have !== null ? Math.max(0, row.count - have) : 0;
     return (
-      <li key={row.card.key} className={'card-row' + (missing ? ' is-missing' : '')}>
-        <span className="card-row-name">
-          <span>
-            <CardName card={row.card} />
-          </span>
-          <span className="card-row-meta">
-            {cardMeta(row.card)}
-            {have !== null && (
-              <>
-                {' · '}
-                {deckTexts.owned(have, row.count)}
-                {missing && ` · ${deckTexts.missingBadge}`}
-              </>
-            )}
-          </span>
+      <li
+        key={row.card.key}
+        className={`deck-line ${typeColorClass(row.card.color)}` + (missingCount > 0 ? ' is-missing' : '')}
+      >
+        <span className="deck-line-count" aria-hidden="true">
+          {row.count}×
         </span>
+        <button
+          type="button"
+          className="deck-line-name"
+          aria-haspopup="dialog"
+          aria-label={`${texts.enlargeImage}${row.card.displayName}`}
+          title={cardMeta(row.card)}
+          onClick={() => setZoomCard(row.card)}
+        >
+          <CardName card={row.card} muteSubname />
+        </button>
+        {have !== null && <span className="visually-hidden">{deckTexts.owned(have, row.count)}</span>}
+        {missingCount > 0 && <span className="deck-line-missing">{deckTexts.missingCount(missingCount)}</span>}
+        {renderChip(row.card)}
         <Stepper
           name={row.card.displayName}
           count={row.count}
+          showCount={false}
           onChange={(count) => setCount(row.card, count)}
         />
       </li>
@@ -340,36 +367,41 @@ export function DeckEditor({
 
   return (
     <>
-      <p className="editor-back">
-        <button type="button" className="button-secondary" onClick={onBack}>
-          {deckTexts.backToList}
-        </button>
-      </p>
-      <h1 ref={headingRef} tabIndex={-1}>
-        {content.name}
-      </h1>
-      <div className="row-actions">
-        <ExportButtons deck={content} cardsByKey={cardsByKey} />
-      </div>
-
-      <div className="deck-name-field">
-        <label htmlFor="deck-name">{deckTexts.nameLabel}</label>
-        <input
-          id="deck-name"
-          type="text"
-          value={nameText}
-          aria-invalid={nameError !== null ? 'true' : undefined}
-          aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
-          onChange={(event) => handleName(event.target.value)}
-        />
-        <p id="deck-name-hint" className="hint">
-          {deckTexts.nameHint}
-        </p>
-        {nameError !== null && (
-          <p id="deck-name-error" className="field-error">
-            {nameError}
+      <div className="editor-head">
+        <div className="editor-title">
+          <p className="editor-back">
+            <button type="button" className="button-secondary" onClick={onBack}>
+              {deckTexts.backToList}
+            </button>
           </p>
-        )}
+          <h1 ref={headingRef} tabIndex={-1}>
+            {content.name}
+          </h1>
+        </div>
+        <div className="editor-meta">
+          <div className="deck-name-field">
+            <label htmlFor="deck-name">{deckTexts.nameLabel}</label>
+            <input
+              id="deck-name"
+              type="text"
+              value={nameText}
+              aria-invalid={nameError !== null ? 'true' : undefined}
+              aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
+              onChange={(event) => handleName(event.target.value)}
+            />
+            <p id="deck-name-hint" className="hint">
+              {deckTexts.nameHint}
+            </p>
+            {nameError !== null && (
+              <p id="deck-name-error" className="field-error">
+                {nameError}
+              </p>
+            )}
+          </div>
+          <div className="row-actions">
+            <ExportButtons deck={content} cardsByKey={cardsByKey} />
+          </div>
+        </div>
       </div>
 
       {saveState === 'error' ? (
@@ -384,46 +416,6 @@ export function DeckEditor({
           {saveState === 'saved' ? deckTexts.saveSaved : saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}
         </p>
       )}
-
-      <section className="deck-summary" aria-labelledby="summary-heading">
-        <h2 id="summary-heading">{deckTexts.summaryHeading}</h2>
-        <p>{deckTexts.counts(totals.legends, totals.main)}</p>
-        <p>
-          {limits.size === 0
-            ? deckTexts.ramLimitsNone
-            : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`}
-        </p>
-        <p>
-          {collectionReady
-            ? deckTexts.missingFromCollection(missingCopies)
-            : collection.phase === 'loading'
-              ? ''
-              : deckTexts.collectionNotReady}
-        </p>
-        <div aria-live="polite" aria-atomic="true">
-          {issues.length === 0 ? (
-            <p>{deckTexts.allGood}</p>
-          ) : (
-            <>
-              <h3 className="visually-hidden">{deckTexts.issuesHeading}</h3>
-              <ul className="issue-list">
-                {issues.map((issue) => (
-                  <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
-                    {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
-                    {issue.message}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-        <p className="hint">{deckTexts.rulesNote}</p>
-        {notice !== null && (
-          <p className="field-error" role="alert">
-            {notice}
-          </p>
-        )}
-      </section>
 
       <div className="editor-layout">
         <section className="editor-search" aria-labelledby="search-heading">
@@ -444,31 +436,33 @@ export function DeckEditor({
             }
             onSearchSubmit={() => undefined}
           />
-          <fieldset className="view-select pick-view">
-            <legend>{deckTexts.pickViewLegend}</legend>
-            <div className="options">
-              {(
-                [
-                  ['list', deckTexts.pickViewList],
-                  ['images', deckTexts.pickViewImages],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className="option">
-                  <input
-                    type="radio"
-                    name="deck-pick-view"
-                    value={value}
-                    checked={pickView === value}
-                    onChange={() => handlePickView(value)}
-                  />{' '}
-                  {label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <p className="status-line" role="status">
-            {deckTexts.searchResults(filtered.length, cards.length)}
-          </p>
+          <div className="pick-bar">
+            <fieldset className="view-select pick-view">
+              <legend>{deckTexts.pickViewLegend}</legend>
+              <div className="options">
+                {(
+                  [
+                    ['list', deckTexts.pickViewList],
+                    ['images', deckTexts.pickViewImages],
+                  ] as const
+                ).map(([value, label]) => (
+                  <label key={value} className="option">
+                    <input
+                      type="radio"
+                      name="deck-pick-view"
+                      value={value}
+                      checked={pickView === value}
+                      onChange={() => handlePickView(value)}
+                    />{' '}
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <p className="status-line" role="status">
+              {deckTexts.searchResults(filtered.length, cards.length)}
+            </p>
+          </div>
           <div role="status" className="toast-slot">
             {toast !== null && (
               <p className="toast">
@@ -487,15 +481,19 @@ export function DeckEditor({
                 const blocker = addBlocker(card, content, cardsByKey);
                 const hintId = `blocker-image-${card.key}`;
                 const count = counts.get(card.key) ?? 0;
+                const reason =
+                  blocker === null ? null : hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker);
                 return (
                   <DeckPickImage
                     key={card.key}
                     card={card}
                     dimmed={blocker !== null}
+                    title={reason ?? undefined}
+                    badge={count > 0 ? deckTexts.inDeckBadge(count) : null}
                     hint={
-                      blocker !== null && (
-                        <span id={hintId} className="card-row-meta">
-                          {hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker)}
+                      reason !== null && (
+                        <span id={hintId} className="visually-hidden">
+                          {reason}
                         </span>
                       )
                     }
@@ -542,57 +540,105 @@ export function DeckEditor({
           )}
         </section>
 
-        <section className="editor-deck" aria-labelledby="deck-heading">
-          <h2 id="deck-heading" className="visually-hidden">
-            {deckTexts.sectionLabel(content.name)}
-          </h2>
-          <div className="deck-section">
-            <h2>
-              {deckTexts.legendsHeading} ({legendsCount}/{LEGEND_COUNT})
+        <div className="editor-side">
+          <section className="deck-summary" aria-labelledby="summary-heading">
+            <h2 id="summary-heading" className="visually-hidden">
+              {deckTexts.summaryHeading}
             </h2>
-            {grouped.legends.length === 0 ? (
-              <p className="hint">{deckTexts.legendsEmpty}</p>
-            ) : (
-              <ul className="deck-cards">{grouped.legends.map(renderDeckRow)}</ul>
+            <div className="summary-counts">
+              <p className="summary-main">{deckTexts.counts(totals.legends, totals.main)}</p>
+              <p>
+                {collectionReady
+                  ? deckTexts.missingFromCollection(missingCopies)
+                  : collection.phase === 'loading'
+                    ? ''
+                    : deckTexts.collectionNotReady}
+              </p>
+              <p>
+                {limits.size === 0
+                  ? deckTexts.ramLimitsNone
+                  : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`}
+              </p>
+            </div>
+            <div aria-live="polite" aria-atomic="true">
+              {issues.length === 0 ? (
+                <p className="summary-ok">{deckTexts.allGood}</p>
+              ) : (
+                <>
+                  <h3 className="visually-hidden">{deckTexts.issuesHeading}</h3>
+                  <ul className="issue-list">
+                    {issues.map((issue) => (
+                      <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
+                        {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
+                        {issue.message}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+            <CostCurve curve={curve} />
+            <p className="hint">{deckTexts.rulesNote}</p>
+            {notice !== null && (
+              <p className="field-error" role="alert">
+                {notice}
+              </p>
             )}
-          </div>
-          <div className="deck-section">
-            <h2>
-              {deckTexts.mainHeading} ({totals.main})
+          </section>
+
+          <section className="editor-deck" aria-labelledby="deck-heading">
+            <h2 id="deck-heading" className="visually-hidden">
+              {deckTexts.sectionLabel(content.name)}
             </h2>
-            {grouped.groups.length === 0 && grouped.unknown.length === 0 && (
-              <p className="hint">{deckTexts.deckEmpty}</p>
-            )}
-            {grouped.groups.map((group) => (
-              <div key={group.type}>
-                <h3 className="deck-group-title" lang="en">
-                  {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
-                </h3>
-                <ul className="deck-cards">{group.rows.map(renderDeckRow)}</ul>
-              </div>
-            ))}
-            {grouped.unknown.length > 0 && (
-              <div>
-                <h3 className="deck-group-title">{deckTexts.unknownHeading}</h3>
-                <ul className="deck-cards">
-                  {grouped.unknown.map(({ key, count }) => (
-                    <li key={key} className="card-row">
-                      <span className="card-row-name">{key}</span>
-                      <button
-                        type="button"
-                        className="button-secondary"
-                        onClick={() => schedule(withDeckCount(contentRef.current, key, 0))}
-                      >
-                        {deckTexts.removeUnknown(key, count)}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </section>
+            <div className="deck-section">
+              <h2>
+                {deckTexts.legendsHeading} ({legendsCount}/{LEGEND_COUNT})
+              </h2>
+              {grouped.legends.length === 0 ? (
+                <p className="hint">{deckTexts.legendsEmpty}</p>
+              ) : (
+                <ul className="deck-cards">{grouped.legends.map(renderDeckRow)}</ul>
+              )}
+            </div>
+            <div className="deck-section">
+              <h2>
+                {deckTexts.mainHeading} ({totals.main})
+              </h2>
+              {grouped.groups.length === 0 && grouped.unknown.length === 0 && (
+                <p className="hint">{deckTexts.deckEmpty}</p>
+              )}
+              {grouped.groups.map((group) => (
+                <div key={group.type}>
+                  <h3 className="deck-group-title" lang="en">
+                    {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
+                  </h3>
+                  <ul className="deck-cards">{group.rows.map(renderDeckRow)}</ul>
+                </div>
+              ))}
+              {grouped.unknown.length > 0 && (
+                <div>
+                  <h3 className="deck-group-title">{deckTexts.unknownHeading}</h3>
+                  <ul className="deck-cards">
+                    {grouped.unknown.map(({ key, count }) => (
+                      <li key={key} className="deck-line">
+                        <span className="deck-line-name">{key}</span>
+                        <button
+                          type="button"
+                          className="button-secondary"
+                          onClick={() => schedule(withDeckCount(contentRef.current, key, 0))}
+                        >
+                          {deckTexts.removeUnknown(key, count)}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
       </div>
+      <CardImageDialog card={zoomCard} onClose={() => setZoomCard(null)} />
     </>
   );
 }

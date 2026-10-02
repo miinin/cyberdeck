@@ -80,10 +80,26 @@ describe('Deck editor', () => {
     expect(await screen.findByText('Kokoelmasta puuttuu 2 korttia.')).toBeInTheDocument();
     const deckSection = screen.getByRole('region', { name: /pakan kortit/ });
     const missingRow = within(deckSection).getByText('Unit 0').closest('li') as HTMLElement;
-    expect(missingRow).toHaveTextContent('omistat 1/3 · puuttuu');
+    expect(missingRow).toHaveTextContent('omistat 1/3');
+    expect(missingRow).toHaveTextContent('puuttuu 2');
     const ownedRow = within(deckSection).getByText('Unit 1').closest('li') as HTMLElement;
     expect(ownedRow).toHaveTextContent('omistat 5/1');
     expect(ownedRow).not.toHaveTextContent('puuttuu');
+  });
+
+  it('shows the cost curve to screen readers as a table', async () => {
+    openEditor([['l1', 1], ['u0', 3], ['u1', 2]]);
+    const table = await screen.findByRole('table', { name: 'Pääpakan kortit Costin mukaan' });
+    const costOne = within(table).getByRole('row', { name: /^1 / });
+    expect(costOne).toHaveTextContent('5');
+  });
+
+  it('opens the card image from the name in the deck list', async () => {
+    const user = userEvent.setup();
+    openEditor([['u0', 1]]);
+    const deckSection = await screen.findByRole('region', { name: /pakan kortit/ });
+    await user.click(within(deckSection).getByRole('button', { name: 'Suurenna kuva: Unit 0' }));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
   it('says so when nothing is missing from the collection', async () => {
