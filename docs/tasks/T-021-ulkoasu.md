@@ -71,3 +71,10 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 ### Checkpoint 2026-10-02 · PM
 - UX.md v0.7 ja mallisivu (molemmat teemat) valmiit, commit 52a9c78. V9–V11: UX:n oletukset hyväksytty (käytettävyysvalintoja, käyttäjä voi muuttaa).
 - Tila In Progress. Seuraava askel: Koodari toteuttaa UX.md:n luvun 7.9 mukaan.
+
+### Suunnitelma 2026-10-02 · Koodari
+1. Fontit ja OFL-lisenssit `src/assets/fonts/`, `@font-face` ja lisenssit CONTENT.md:hen. Build: fontit erillisinä tiedostoina.
+2. `styles.css`: tokenit (vaalea `:root`, tumma `prefers-color-scheme: dark`) ja komponenttityylit mallisivulta UX.md 3 ja 7 mukaan. Kaikki siirtymät ja animaatiot `prefers-reduced-motion: no-preference` -ehtoon.
+3. Luokkalisäykset (UX.md 7.9): `.brand` (App), `panel` ja `.fieldsets` (CardFilters), `is-owned` (CardList), `is-summary` ja `loading-bar` (CatalogView). Ei logiikkamuutoksia.
+4. Selaintarkistus (axe, 320 px ja työpöytä, molemmat teemat, reduce) Edge headlessilla scratchpadista.
+5. CHANGELOG, koodikatselmointi, checkpoint ja luovutus UX:lle.
