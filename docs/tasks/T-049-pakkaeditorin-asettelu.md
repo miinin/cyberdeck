@@ -1,5 +1,5 @@
 # T-049 · Pakkaeditorin asettelu ja pakkalistan ulkoasu
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02: "ei optimaalista tilankäyttöä, pakkalista ei tyylikäs, katso mallia muista ja tee parempi")
+**Tila:** Review · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02: "ei optimaalista tilankäyttöä, pakkalista ei tyylikäs, katso mallia muista ja tee parempi")
 **Malli:** D-014. Ei uutta riippuvuutta eikä tietomallia. PM tarkistaa kuvakaappauksista.
 **Haara:** `t-049-pakkaeditorin-asettelu`
 
@@ -28,3 +28,8 @@ Moxfield, Archidekt ja Netdeck: tiivis pakkalista (määrä, nimi, hinta oikeall
 - DeckEditor.tsx:n pilkkominen (T-041): saa siirtää osia omiin komponentteihin (esim. `DeckList.tsx`, `CostCurve.tsx`), mutta laajaa refaktorointia ei tehdä.
 
 ## Luovutukset
+
+### Luovutus (Koodari)
+Toteutettu hyväksymiskriteerit 1–7: `--editor-max-width: 100rem` (vain pakkanäkymä), kaksi saraketta ≥75rem (sticky pakkasarake, oma vieritys), yhteenveto pakkasarakkeen yläosaan, kustannuskäyrä (`costCurve` + testi, `CostCurve.tsx`, visually-hidden-taulukko), tiivis pakkarivi (`deck-line`: väriraita, `3×`, nimi joka avaa kuvadialogin, `puuttuu N`, Cost-merkki, 24 px −/+), hakutuloksen "N pakassa" -merkki Kuvat-näkymässä (koko vihje visually-hidden + aria-describedby + title). Tekstit `deckTexts.ts`:ssä. Testejä päivitetty vain rakenteen osalta (puuttuu-merkki), lisätty 3 testiä. CHANGELOG päivitetty.
+Kuvakaappaukset (scratchpad, ei repoon): 1600×1000 dark/light/images, 2800×1400, 375×800; ei vaakavieritystä 375 px:ssä.
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2 (mobiilissa yhteenveto on hakulistan jälkeen; suodatinpaneeli on edelleen iso).

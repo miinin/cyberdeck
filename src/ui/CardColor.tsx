@@ -45,3 +45,8 @@ export function CardColor({ color, swatchOnly = false }: { color: string | null;
     </>
   );
 }
+
+/** Class that only sets the colour variable of a card colour (`--badge-color`), for stripes and the like (T-049). */
+export function typeColorClass(color: string | null): string {
+  return color !== null && colorNames.has(color) ? `type-badge-${color.toLowerCase()}` : '';
+}

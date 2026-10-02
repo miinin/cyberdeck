@@ -13,7 +13,9 @@ import { deckTexts } from './deckTexts';
 export function DeckPickImage({
   card,
   dimmed,
+  title,
   hint,
+  badge,
   onAdd,
   children,
 }: {
@@ -21,6 +23,10 @@ export function DeckPickImage({
   dimmed: boolean;
   /** Visible reason shown when adding would break a rule. */
   hint: ReactNode;
+  /** Short visible mark, e.g. "3 pakassa". */
+  badge?: string | null;
+  /** Full text of the reason, for the hover title. */
+  title?: string;
   onAdd: () => void;
   children: ReactNode;
 }) {
@@ -28,7 +34,7 @@ export function DeckPickImage({
   const [failed, setFailed] = useState(false);
   const showImage = image !== null && !failed;
   return (
-    <li className={'pick-image' + (dimmed ? ' is-dimmed' : '')}>
+    <li className={'pick-image' + (dimmed ? ' is-dimmed' : '')} title={title}>
       <button type="button" className="pick-image-button" aria-label={deckTexts.addCard(card.displayName)} onClick={onAdd}>
         {showImage ? (
           <img
@@ -44,6 +50,11 @@ export function DeckPickImage({
         ) : (
           <span className="card-image card-image--missing" aria-hidden="true" />
         )}
+        {badge ? (
+          <span className="pick-badge" aria-hidden="true">
+            {badge}
+          </span>
+        ) : null}
       </button>
       <span className="pick-image-name" aria-hidden="true">
         <CardName card={card} />

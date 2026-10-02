@@ -249,3 +249,21 @@ export function hasSameNameLegend(card: Card, deck: DeckContent, cardsByKey: Car
   }
   return false;
 }
+
+/** Cost values 0 … this value are their own bar of the cost curve; higher costs share the last bar. */
+export const COST_CURVE_LAST = 6;
+
+/**
+ * Cost curve of the main deck (T-049): copies per Cost, index 0 … COST_CURVE_LAST (the last bar holds
+ * "6 or more"). Legends, unknown cards and cards without a Cost are not counted.
+ */
+export function costCurve(deck: DeckContent, cardsByKey: CardsByKey): number[] {
+  const bars = new Array<number>(COST_CURVE_LAST + 1).fill(0);
+  for (const [key, count] of deckCounts(deck)) {
+    const card = cardsByKey.get(key);
+    if (card === undefined || card.type === 'Legend' || card.cost === null) continue;
+    const index = Math.min(Math.max(Math.trunc(card.cost), 0), COST_CURVE_LAST);
+    bars[index] = (bars[index] ?? 0) + count;
+  }
+  return bars;
+}

@@ -1,7 +1,7 @@
 import type { Card } from './card';
 import type { DeckContent } from './deck';
 import { checkDeckName, copyDeckName, uniqueDeckName, withDeckCount } from './deckEdit';
-import { addBlocker, groupDeck, hasSameNameLegend, ramLimits, toCardsByKey, validateDeck } from './deckRules';
+import { addBlocker, costCurve, groupDeck, hasSameNameLegend, ramLimits, toCardsByKey, validateDeck } from './deckRules';
 
 function card(key: string, overrides: Partial<Card> = {}): Card {
   return {
@@ -237,5 +237,27 @@ describe('groupDeck', () => {
     expect(grouped.groups.map((group) => group.type)).toEqual(['Unit', 'Gear', 'Program', 'Weird']);
     expect(grouped.groups[0]?.rows.map((row) => row.card.key)).toEqual(['unit-a', 'unit-b']);
     expect(grouped.unknown).toEqual([{ key: 'ghost', count: 3 }]);
+  });
+});
+
+describe('costCurve', () => {
+  it('counts main deck copies per Cost and folds high costs into the last bar', () => {
+    const cards = [
+      card('l1', { type: 'Legend', cost: 0 }),
+      card('a', { cost: 0 }),
+      card('b', { cost: 2 }),
+      card('c', { cost: 6 }),
+      card('d', { cost: 9 }),
+      card('e', { cost: null }),
+    ];
+    const curve = costCurve(
+      deck([['l1', 1], ['a', 1], ['b', 3], ['c', 2], ['d', 1], ['e', 4], ['ghost', 2]]),
+      toCardsByKey(cards),
+    );
+    expect(curve).toEqual([1, 0, 3, 0, 0, 0, 3]);
+  });
+
+  it('is all zeros for an empty deck', () => {
+    expect(costCurve(deck([]), toCardsByKey([]))).toEqual([0, 0, 0, 0, 0, 0, 0]);
   });
 });

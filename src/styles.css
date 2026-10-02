@@ -107,6 +107,7 @@
   --space-6: 1.5rem;
   --space-8: 2rem;
   --content-max-width: 56rem;
+  --editor-max-width: 100rem;
   --target-min: 2.75rem;
   --cut: 0.625rem;
   --cut-inner: calc(var(--cut) - 1px);
@@ -281,6 +282,11 @@ h1:focus:not(:focus-visible) {
   max-width: var(--content-max-width);
   margin-inline: auto;
   padding-inline: var(--gutter);
+}
+
+/* The deck editor is wider so search and deck fit side by side (T-049). */
+.container-wide {
+  max-width: var(--editor-max-width);
 }
 
 /* Header: black in both themes (UX.md 7.5, V11). Not sticky. */
@@ -1687,11 +1693,34 @@ body:has(dialog[open]) {
 .deck-summary {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  margin-block-end: var(--space-4);
-  padding: var(--space-4);
+  gap: var(--space-3);
+  padding: var(--space-3);
   border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-accent-edge);
   background: var(--color-surface);
+  font-size: var(--font-size-sm);
+}
+
+.summary-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.summary-counts p:empty {
+  display: none;
+}
+
+.summary-main {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+}
+
+.summary-ok {
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
 }
 
 .deck-summary h2,
@@ -1702,7 +1731,7 @@ body:has(dialog[open]) {
 
 .issue-list {
   margin: 0;
-  padding-inline-start: var(--space-6);
+  padding-inline-start: var(--space-4);
 }
 
 .issue-list li {
@@ -1715,19 +1744,73 @@ body:has(dialog[open]) {
 
 .editor-layout {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
   align-items: start;
 }
 
-@media (min-width: 60rem) {
+/* From 75rem: search and results on the left, the deck in a sticky column on the right (T-049). */
+@media (min-width: 75rem) {
   .editor-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) clamp(22rem, 27vw, 28rem);
+    gap: var(--space-6);
+  }
+
+  .editor-side {
+    position: sticky;
+    top: var(--space-3);
+    max-height: calc(100vh - 2 * var(--space-3));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .search-results {
+    max-height: none;
+    overflow: visible;
   }
 }
 
 .editor-search,
+.editor-side,
 .editor-deck {
   min-width: 0;
+}
+
+.editor-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+}
+
+.editor-head .editor-back {
+  margin-block: var(--space-3) var(--space-2);
+}
+
+.editor-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-4);
+}
+
+.editor-meta .deck-name-field {
+  margin-block: 0;
+}
+
+.editor-meta .row-actions {
+  margin-block-start: 0;
+}
+
+.editor-head + .save-status,
+.editor-head + .notice {
+  margin-block: var(--space-2) var(--space-3);
 }
 
 .search-results,
@@ -1743,6 +1826,15 @@ body:has(dialog[open]) {
 .search-results {
   max-height: 70vh;
   overflow-y: auto;
+}
+
+/* Wide list results: several rows next to each other (T-049). */
+@media (min-width: 75rem) {
+  .search-results:not(.pick-images) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+    gap: var(--space-2);
+  }
 }
 
 .card-row {
@@ -1787,11 +1879,16 @@ body:has(dialog[open]) {
 }
 
 .deck-section {
-  margin-block-end: var(--space-6);
+  margin-block-end: var(--space-4);
+}
+
+.deck-section > h2 {
+  padding-block-end: var(--space-1);
+  border-block-end: 1px solid var(--color-border);
 }
 
 .deck-group-title {
-  margin-block: var(--space-3) 0;
+  margin-block: var(--space-3) var(--space-1);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
@@ -1817,7 +1914,20 @@ body:has(dialog[open]) {
 
 /* Deck editor: toast, result view selector and image grid (T-045). */
 .pick-view {
-  margin-block: var(--space-3) 0;
+  margin: 0;
+}
+
+.pick-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-block-start: var(--space-3);
+}
+
+.pick-bar .status-line {
+  margin: 0;
 }
 
 .toast-slot:empty {
@@ -1838,11 +1948,12 @@ body:has(dialog[open]) {
 
 .pick-images {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
   gap: var(--space-3);
 }
 
 .pick-image {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1861,6 +1972,7 @@ body:has(dialog[open]) {
 }
 
 .pick-image-button {
+  position: relative;
   display: block;
   inline-size: 100%;
   padding: 0;
@@ -1896,4 +2008,196 @@ body:has(dialog[open]) {
 .card-table .sort-button:focus-visible {
   outline: 2px solid var(--color-focus, currentColor);
   outline-offset: 2px;
+}
+
+/* Deck list rows (T-049): colour stripe, "3×", name, missing badge, Cost chip and small −/+. */
+.deck-cards {
+  gap: 2px;
+  margin-block-start: var(--space-1);
+}
+
+.deck-line {
+  /* count | name | missing | Cost | −/+ : fixed columns keep the chips in line from row to row. */
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 4.75rem 2rem auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2rem;
+  padding: 2px var(--space-1) 2px var(--space-2);
+  border-inline-start: 3px solid var(--badge-color, var(--color-border-strong));
+  background: var(--color-surface);
+}
+
+.deck-line:hover {
+  background: var(--color-surface-hover);
+}
+
+.deck-line.is-missing {
+  background: var(--color-warning-surface);
+}
+
+.deck-line-count {
+  grid-column: 1;
+  color: var(--color-count);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.deck-line-name {
+  grid-column: 2;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button.deck-line-name {
+  cursor: zoom-in;
+}
+
+button.deck-line-name:hover {
+  text-decoration: underline;
+}
+
+button.deck-line-name:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.name-sub {
+  color: var(--color-text-muted);
+}
+
+.deck-line-missing {
+  grid-column: 3;
+  justify-self: end;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-warning);
+  color: var(--color-warning);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.deck-line-chip {
+  grid-column: 4;
+  justify-self: end;
+  min-inline-size: 1.5rem;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.deck-line .card-row-controls {
+  grid-column: 5;
+  gap: 2px;
+}
+
+.deck-line .step {
+  --cut: 0.3rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --cut-inner-2: calc(var(--cut) - 2px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner)), calc(100% - var(--cut-inner)) 100%, 0 100%);
+  --shape-chamfer-inner-2: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner-2)), calc(100% - var(--cut-inner-2)) 100%, 0 100%);
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  font-size: var(--font-size-base);
+}
+
+.deck-card-count-spoken {
+  display: contents;
+}
+
+/* Cost curve (T-049): decorative bars, the same data is in a hidden table. */
+.cost-curve-title {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+.cost-curve-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1);
+  block-size: 5.5rem;
+}
+
+.cost-curve-col {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  align-items: end;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.cost-curve-count {
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.cost-curve-col.is-empty .cost-curve-count,
+.cost-curve-col.is-empty .cost-curve-label {
+  color: var(--color-text-muted);
+}
+
+.cost-curve-bar {
+  inline-size: 100%;
+  max-inline-size: 1.75rem;
+  min-block-size: 2px;
+  background: var(--color-accent-edge);
+  clip-path: polygon(0 0, calc(100% - 0.3rem) 0, 100% 0.3rem, 100% 100%, 0 100%);
+}
+
+.cost-curve-col.is-empty .cost-curve-bar {
+  background: var(--color-border-strong);
+}
+
+.cost-curve-label {
+  color: var(--color-text-muted);
+}
+
+/* Image grid badge, e.g. "3 pakassa" (T-049). */
+.pick-badge {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-1);
+  padding: 0 var(--space-2);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  clip-path: var(--shape-chamfer);
+}
+
+.pick-image-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.deck-line > .button-secondary {
+  grid-column: 3 / -1;
 }
