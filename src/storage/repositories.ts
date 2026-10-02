@@ -23,6 +23,8 @@ import {
   DECKS_SCHEMA_VERSION,
   MAX_BACKUPS_PER_AGGREGATE,
   THEME_KEY,
+  VIEW_KEY,
+  EDIT_MODE_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
 import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS } from './migrations';
@@ -34,6 +36,7 @@ import type {
   PreferencesRepository,
   Repositories,
   Theme,
+  CatalogViewMode,
 } from './types';
 
 export interface RepositoryOptions {
@@ -303,6 +306,38 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         throw toStorageError(error, 'write');
       }
       return theme;
+    },
+    loadView: async () => {
+      try {
+        return store.getItem(VIEW_KEY) === 'table' ? 'table' : 'grid';
+      } catch {
+        return 'grid';
+      }
+    },
+    saveView: async (view: CatalogViewMode) => {
+      if (view !== 'grid' && view !== 'table') throw new StorageError('invalid-input', 'Unknown view');
+      try {
+        store.setItem(VIEW_KEY, view);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return view;
+    },
+    loadEditMode: async () => {
+      try {
+        const raw = store.getItem(EDIT_MODE_KEY);
+        return raw === 'on' ? true : raw === 'off' ? false : null;
+      } catch {
+        return null;
+      }
+    },
+    saveEditMode: async (on: boolean) => {
+      try {
+        store.setItem(EDIT_MODE_KEY, on ? 'on' : 'off');
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return on;
     },
   };
 

@@ -17,7 +17,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-010 | Haku ja suodatus korttilistaan (nimi, tyyppi, väri) | 1 | Must | Koodari | Done | UX, Sisällöntuottaja, Testikäyttäjä |
 | T-011 | Tietomalli ja paikallinen tallennuskerros (kokoelma, pakat), valmius Firebaseen ja painoksiin (D-007) | 1 | Must | Arkkitehti → Koodari | Done | Arkkitehti, Digiturva |
 | T-012 | Kokoelma: omistettujen korttien ja määrien merkintä helposti, ilmoitus "tiedot vain tässä selaimessa" (R-10) sekä newer-version-, reset- ja kirjoitus estetty -ilmoitukset (SEC-007) | 1 | Must | Koodari | Done | UX, Digiturva (Testikäyttäjä ja Dokumentoija MVP-1:n lopussa, D-009) |
-| T-013 | Pakat: luonti, muokkaus, poisto ja kortin kohdalla näkyvät pakat | 1 | Must | Koodari | Backlog | UX, Sisällöntuottaja, Testikäyttäjä |
+| T-013 | Pakanrakennus: luonti, nimeäminen, muokkaus, poisto, laillisuussäännöt ja kortin pakat | 1 | Must | Koodari | In Progress | UX, Sisällöntuottaja, Testikäyttäjä |
 | T-014 | Pakkalistan tuonti (teksti ja .txt) ja raportti: puuttuvat kortit ja missä pakoissa tarvittavat kortit ovat (SR-17) | 1 | Must | Koodari | Backlog (T-013) | UX, Digiturva, Sisällöntuottaja, Testikäyttäjä |
 | T-015 | Pakan vienti ja tuonti .json- ja .txt-muodossa (varmuuskopio ja jakaminen, SR-18–SR-19) | 1 | Must | Koodari | Backlog (T-013, T-014) | Arkkitehti, Digiturva, UX, Testikäyttäjä |
 | T-016 | [velka] `.claude/**` pois Vitestin ja ESLintin piiristä, valinnaisesti SEC-009 ja SEC-010 (document.cookie lintiin) | 1 | Should | Koodari | Backlog | – |
@@ -44,3 +44,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-037 | Keltainen omistusreuna, want-lista (Puuttuvat), rarity korttiin ja suodattimiin | 1 | Must | Koodari (D-014) | Done | Sisällöntuottaja: tyhjän kokoelman ohjeteksti MVP-1:n lopussa |
 | T-038 | Tiivis yläosa: pysyvä tallennus ikonina yläpalkissa, tiiviit suodatinchipit | 1 | Must | Koodari (D-014) | Done | UX MVP-1:n lopussa |
 | T-039 | Teemavalitsin pelkkänä aurinko- ja kuu-ikonina | 1 | Must | PM (pieni, D-014) | Done | – |
+| T-040 | Selaus ja muokkaus erilleen (Muokkaa kokoelmaa -kytkin), kompakti taulukkonäkymä | 1 | Must | Koodari (D-014) | Done | UX ja Sisällöntuottaja MVP-1:n lopussa (uudet tekstit) |

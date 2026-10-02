@@ -4,6 +4,10 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Selaus ja muokkaus ovat nyt erillään. Listan yläpuolella oleva Muokkaa kokoelmaa -kytkin näyttää tai piilottaa −- ja +-painikkeet: kun se on pois päältä, kortissa näkyy vain määrä ja tila (harmaa, keltainen tai vihreä ✓). Tyhjällä kokoelmalla kytkin on aluksi päällä.
+
+- Uusi kompakti Taulukko-näkymä (nimi, tyyppi, Rarity, Cost, Power, RAM ja kokoelma). Näkymän voi vaihtaa Ruudukko- ja Taulukko-valinnalla, ja valinta sekä kytkin säilyvät tässä selaimessa.
+
 - Teemavalitsin on nyt pelkkä aurinko- tai kuu-ikoni. Vihje kertoo, mihin teemaan painike vaihtaa.
 
 - Pysyvän tallennuksen pyyntö on nyt pieni tallennuskuvake yläpalkissa, ja hakukriteerien valinnat ovat tiiviimpiä.

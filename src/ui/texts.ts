@@ -102,6 +102,15 @@ export const texts = {
   externalChangeLive: 'Kokoelma päivittyi toisessa välilehdessä.',
   countNotChanged: 'Kortin määrä ei muuttunut.',
 
+  // T-040: browsing and editing apart, list views.
+  editSwitchLabel: 'Muokkaa kokoelmaa',
+  viewLegend: 'Näkymä',
+  viewGrid: 'Ruudukko',
+  viewTable: 'Taulukko',
+  columnCollection: 'Kokoelma',
+  columnType: 'Tyyppi',
+  tableRegionLabel: (caption: string) => `${caption}, taulukko`,
+
   collectionLegend: 'Kokoelma',
   collectionAll: 'Kaikki',
   collectionOwned: 'Omistetut',

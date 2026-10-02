@@ -3,8 +3,8 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf } from '../domain/collection';
-import { isStoragePersisted, requestPersistentStorage } from '../storage';
-import type { Repositories } from '../storage';
+import { StorageError, isStoragePersisted, requestPersistentStorage } from '../storage';
+import type { CatalogViewMode, Repositories } from '../storage';
 import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
@@ -20,6 +20,8 @@ import { CardFilters } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
+import { CardTable } from './CardTable';
+import { ListToolbar } from './ListToolbar';
 import type { OwnedColumn } from './CardList';
 import { CollectionNotices, loadNotices } from './CollectionNotices';
 import { countIn } from './collectionStore';
@@ -82,6 +84,47 @@ export function CatalogView({
   /** The card in the enlarged image dialog, and the thumbnail button that opened it (T-027 UX). */
   const [openCard, setOpenCard] = useState<Card | null>(null);
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
+
+  // List view and the edit switch are remembered like the theme (T-040). The edit switch has no saved
+  // value until the user chooses; then it starts on for an empty collection and off otherwise, decided once.
+  const [view, setView] = useState<CatalogViewMode>('grid');
+  const [editMode, setEditMode] = useState<boolean | null>(null);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+  const userChose = useRef({ view: false, edit: false });
+  useEffect(() => {
+    let active = true;
+    void Promise.all([repositories.preferences.loadView(), repositories.preferences.loadEditMode()]).then(
+      ([savedView, savedEdit]) => {
+        if (!active) return;
+        if (!userChose.current.view) setView(savedView);
+        if (!userChose.current.edit) setEditMode(savedEdit);
+        setPreferencesLoaded(true);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [repositories]);
+  if (editMode === null && preferencesLoaded && collection.phase === 'ready') {
+    setEditMode(allCards.every((card) => countOf(collection.saved, card.key) === 0));
+  }
+  const editable = editMode === true;
+  const savePreference = (save: Promise<unknown>) => {
+    // No message to the user, as with the theme (T-025 A3); only the error kind.
+    save.catch((error: unknown) => {
+      console.warn(`Preference could not be saved (${error instanceof StorageError ? error.kind : 'unknown'})`);
+    });
+  };
+  const handleViewChange = (next: CatalogViewMode) => {
+    userChose.current.view = true;
+    setView(next);
+    savePreference(repositories.preferences.saveView(next));
+  };
+  const handleEditChange = (next: boolean) => {
+    userChose.current.edit = true;
+    setEditMode(next);
+    savePreference(repositories.preferences.saveEditMode(next));
+  };
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
   if (collectionChoice !== 'all' && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
@@ -189,6 +232,7 @@ export function CatalogView({
             collectionStore.setCount(card.key, count);
           },
           onLimit: collectionAnnouncer.announceLimit,
+          editable,
         };
   const summary =
     collection.phase === 'loading'
@@ -198,6 +242,7 @@ export function CatalogView({
         : null;
 
   const status = filterActive ? texts.filteredStatus(filtered.length, allCards.length) : cardCount(allCards.length);
+  const listCaption = filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
   const noResults = filtered.length === 0;
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
   const noOwnedCards = noResults && ownedOnly && !isFilterActive(criteria);
@@ -314,14 +359,19 @@ export function CatalogView({
         </div>
       )}
 
-      {filtered.length > 0 && (
-        <CardList
-          cards={filtered}
-          caption={filterActive ? texts.tableCaptionFiltered : texts.tableCaption}
-          owned={owned}
-          onOpenImage={handleOpenImage}
-        />
-      )}
+      <ListToolbar
+        view={view}
+        onViewChange={handleViewChange}
+        editable={collection.phase === 'ready' ? editable : undefined}
+        onEditChange={handleEditChange}
+      />
+
+      {filtered.length > 0 &&
+        (view === 'table' ? (
+          <CardTable cards={filtered} caption={listCaption} owned={owned} onOpenImage={handleOpenImage} />
+        ) : (
+          <CardList cards={filtered} caption={listCaption} owned={owned} onOpenImage={handleOpenImage} />
+        ))}
 
       <CardImageDialog card={openCard} onClose={handleCloseImage} />
     </>

@@ -15,13 +15,43 @@ export interface CountControlProps {
   onChange: (card: Card, count: number) => void;
   /** "+" pressed at the maximum count. */
   onLimit: (card: Card) => void;
+  /** false = browsing: only the count and its state are shown, no buttons (T-040). */
+  editable?: boolean;
+}
+
+/** The count with its spoken equivalents and the playset mark (✓). */
+function CountValue({ card, count }: { card: Card; count: number }) {
+  return (
+    <span className="count">
+      {count > 0 ? (
+        <>
+          <span className="visually-hidden">{texts.countPrefix}</span>
+          {count}
+          <span className="visually-hidden">{copiesSuffix(count)}</span>
+        </>
+      ) : (
+        <>
+          <span aria-hidden="true">0</span>
+          <span className="visually-hidden">{texts.notOwned}</span>
+        </>
+      )}
+      {count >= playsetSize(card) && (
+        <>
+          <span aria-hidden="true" className="playset-mark">
+            {' ✓'}
+          </span>
+          <span className="visually-hidden">. {texts.playsetFull}</span>
+        </>
+      )}
+    </span>
+  );
 }
 
 /**
  * "[−] n [+]" for one card row (UX.md 6.4). "+" is always the last child and keeps its position
  * in the children list, so React keeps the same element (and focus) when "−" appears or goes.
  */
-export function CountControl({ card, count, mode, onChange, onLimit }: CountControlProps) {
+export function CountControl({ card, count, mode, onChange, onLimit, editable = true }: CountControlProps) {
   const plusRef = useRef<HTMLButtonElement>(null);
   const minusRef = useRef<HTMLButtonElement>(null);
   /** Which button of this row had focus last. */
@@ -47,6 +77,14 @@ export function CountControl({ card, count, mode, onChange, onLimit }: CountCont
       <div className="count-control">
         <span aria-hidden="true">{texts.missingValue}</span>
         <span className="visually-hidden">{texts.notEditable}</span>
+      </div>
+    );
+  }
+
+  if (!editable) {
+    return (
+      <div className="count-control count-control--readonly">
+        <CountValue card={card} count={count} />
       </div>
     );
   }
@@ -83,28 +121,7 @@ export function CountControl({ card, count, mode, onChange, onLimit }: CountCont
         </span>
         <span aria-hidden="true">{texts.minusSymbol}</span>
       </button>
-      <span className="count">
-        {count > 0 ? (
-          <>
-            <span className="visually-hidden">{texts.countPrefix}</span>
-            {count}
-            <span className="visually-hidden">{copiesSuffix(count)}</span>
-          </>
-        ) : (
-          <>
-            <span aria-hidden="true">0</span>
-            <span className="visually-hidden">{texts.notOwned}</span>
-          </>
-        )}
-        {count >= playsetSize(card) && (
-          <>
-            <span aria-hidden="true" className="playset-mark">
-              {' ✓'}
-            </span>
-            <span className="visually-hidden">. {texts.playsetFull}</span>
-          </>
-        )}
-      </span>
+      <CountValue card={card} count={count} />
       <button
         ref={plusRef}
         type="button"

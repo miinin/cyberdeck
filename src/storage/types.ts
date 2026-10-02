@@ -39,12 +39,20 @@ export interface DeckRepository {
 
 export type Theme = 'dark' | 'light';
 
+export type CatalogViewMode = 'grid' | 'table';
+
 /** User preferences that are not data (UX.md 8.7). Stored as raw strings, not in an envelope. */
 export interface PreferencesRepository {
   /** Saved theme, or 'dark' when nothing valid is saved. Never rejects because of storage problems. */
   loadTheme(): Promise<Theme>;
   /** Resolves with the saved theme. Rejects with StorageError when saving fails (the UI keeps the theme for the session). */
   saveTheme(theme: Theme): Promise<Theme>;
+  /** Saved list view, or 'grid' when nothing valid is saved. Never rejects because of storage problems. */
+  loadView(): Promise<CatalogViewMode>;
+  saveView(view: CatalogViewMode): Promise<CatalogViewMode>;
+  /** Saved "edit collection" switch, or null when the user has not chosen (the UI then picks a default). */
+  loadEditMode(): Promise<boolean | null>;
+  saveEditMode(on: boolean): Promise<boolean>;
 }
 
 export interface Repositories {
