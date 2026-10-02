@@ -107,8 +107,16 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.{ts,tsx}'],
-    ignores: ['src/storage/keyValueStore.ts', 'src/storage/keyValueStore.test.ts', 'src/test/**'],
+    files: ['**/*.{ts,tsx}', 'public/**/*.js'],
+    ignores: [
+      'src/storage/keyValueStore.ts',
+      'src/storage/keyValueStore.test.ts',
+      'src/test/**',
+      // T-025 A1 (UX.md 8.7): reads only the theme key before the first paint and writes nothing.
+      // It runs before the app bundle, so it cannot use the storage layer. Digiturva reviews it.
+      'public/theme-init.js',
+      'src/storage/themeInit.test.ts',
+    ],
     rules: {
       'no-restricted-globals': [
         'error',
@@ -125,6 +133,11 @@ export default defineConfig(
   {
     files: ['**/*.test.{ts,tsx}', 'src/test/**'],
     languageOptions: { globals: { ...globals.browser, ...globals.vitest } },
+  },
+  {
+    // Plain scripts copied to dist/ as they are (not bundled): classic scripts in the browser.
+    files: ['public/**/*.js'],
+    languageOptions: { sourceType: 'script', globals: globals.browser },
   },
   {
     files: ['eslint.config.js'],

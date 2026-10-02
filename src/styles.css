@@ -1,8 +1,9 @@
 /*
  * Visual style: Cyberpunk 2077 inspired (T-021, D-010, D-011). Spec: docs/UX.md luku 3 ja 7,
  * reference mockup docs/design/t021-mallisivu.html.
- * All colours, spacing and font sizes come from the tokens below. The light theme is the default
- * and the dark theme follows prefers-color-scheme. All motion is inside prefers-reduced-motion: no-preference.
+ * All colours, spacing and font sizes come from the tokens below. The dark theme is the default (D-012);
+ * the light theme is used only with data-theme="light" on <html> (theme toggle, UX.md 8). The device's
+ * prefers-color-scheme is ignored. All motion is inside prefers-reduced-motion: no-preference.
  */
 
 /* Self-hosted fonts (SIL OFL 1.1, licences next to the files). CSP allows only font-src 'self'. */
@@ -30,52 +31,51 @@
   src: url('./assets/fonts/share-tech-mono-400.woff2') format('woff2');
 }
 
-/* Design tokens: docs/UX.md luku 3. Light theme (default). */
+/* Design tokens: docs/UX.md luku 3. Dark theme (default, D-012). Components use only tokens, so no per-component theme rules. */
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 
-  --color-bg: #f3f0e6;
-  --color-surface: #ebe7d9;
-  --color-surface-raised: #fbf9f1;
-  --color-surface-hover: #ddd8c6;
-  --color-text: #0e0f14;
-  --color-text-muted: #4a4f5c;
-  --color-border: #cfc9b5;
-  --color-border-strong: #5f6676;
-  /* Yellow is a fill colour only: never text or a thin line on the light background (UX.md 3.1). */
+  --color-bg: #0b0c10;
+  --color-surface: #13151b;
+  --color-surface-raised: #1b1e27;
+  --color-surface-hover: #262a36;
+  --color-text: #f1f1ec;
+  --color-text-muted: #a9afbd;
+  --color-border: #2b303b;
+  --color-border-strong: #7b8396;
   --color-accent: #fcee09;
-  --color-on-accent: #0e0f14;
-  --color-accent-edge: #0e0f14;
+  --color-on-accent: #0b0c10;
+  --color-accent-edge: #fcee09;
   --color-accent-2: #1fe0ff;
-  --color-info: #005f73;
+  --color-info: #1fe0ff;
   --color-focus: var(--color-info);
-  --color-selected-surface: #d4f3f8;
-  --color-danger: #b00030;
-  --color-danger-surface: #ffe3e8;
-  --color-warning: #8a4b00;
-  --color-warning-surface: #fff0d0;
-  --color-header-bg: #0e0f14;
+  --color-selected-surface: #0c2a31;
+  --color-danger: #ff5a73;
+  --color-danger-surface: #2a0d15;
+  --color-warning: #ffa726;
+  --color-warning-surface: #2b1a05;
+  --color-header-bg: #000000;
   --color-header-text: #f1f1ec;
-  --color-bracket: #0e0f14;
-  --color-count: #0e0f14;
-  --color-owned: rgba(252, 238, 9, 0.3);
-  --color-owned-hover: rgba(252, 238, 9, 0.45);
-  --color-swatch-edge: #0e0f14;
+  --color-bracket: #fcee09;
+  --color-count: #fcee09;
+  --color-owned: rgba(252, 238, 9, 0.05);
+  --color-owned-hover: rgba(252, 238, 9, 0.09);
+  --color-swatch-edge: transparent;
   /* Decorative only, same in both themes: header lines and the brand mark, the heading glitch (UX.md 7.5, 7.7). */
   --color-brand-yellow: #fcee09;
   --color-glitch-a: #ff2a6d;
   --color-glitch-b: #1fe0ff;
-  --heading-bar: linear-gradient(90deg, var(--color-text) 0 65%, var(--color-brand-yellow) 65%);
-  --glow-accent: none;
-  --page-glow-a: rgba(31, 224, 255, 0.16);
-  --page-glow-b: rgba(252, 238, 9, 0.22);
-  --scanline: rgba(0, 0, 0, 0.03);
+  --heading-bar: var(--color-brand-yellow);
+  --glow-accent: 0 0 0.75rem rgba(252, 238, 9, 0.35);
+  --page-glow-a: rgba(31, 224, 255, 0.1);
+  --page-glow-b: rgba(252, 238, 9, 0.06);
+  --scanline: rgba(255, 255, 255, 0.022);
 
   /* Card colors (UX.md 3.1.1): only for the decorative swatch, never for text. */
-  --color-card-red: #d32f45;
-  --color-card-yellow: #f2c200;
-  --color-card-green: #1b9e5a;
-  --color-card-blue: #1f6fd1;
+  --color-card-red: #ff4d5e;
+  --color-card-yellow: #ffd400;
+  --color-card-green: #39e08a;
+  --color-card-blue: #4d9dff;
   --color-card-unknown: transparent;
 
   --font-sans: 'Rajdhani', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -135,45 +135,46 @@
   --cell-padding-x: var(--space-2);
 }
 
-/* Dark theme (UX.md 3.1). Components use only tokens, so no per-component theme rules. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0b0c10;
-    --color-surface: #13151b;
-    --color-surface-raised: #1b1e27;
-    --color-surface-hover: #262a36;
-    --color-text: #f1f1ec;
-    --color-text-muted: #a9afbd;
-    --color-border: #2b303b;
-    --color-border-strong: #7b8396;
-    --color-accent: #fcee09;
-    --color-on-accent: #0b0c10;
-    --color-accent-edge: #fcee09;
-    --color-accent-2: #1fe0ff;
-    --color-info: #1fe0ff;
-    --color-selected-surface: #0c2a31;
-    --color-danger: #ff5a73;
-    --color-danger-surface: #2a0d15;
-    --color-warning: #ffa726;
-    --color-warning-surface: #2b1a05;
-    --color-header-bg: #000000;
-    --color-header-text: #f1f1ec;
-    --color-bracket: #fcee09;
-    --color-count: #fcee09;
-    --color-owned: rgba(252, 238, 9, 0.05);
-    --color-owned-hover: rgba(252, 238, 9, 0.09);
-    --color-swatch-edge: transparent;
-    --heading-bar: var(--color-brand-yellow);
-    --glow-accent: 0 0 0.75rem rgba(252, 238, 9, 0.35);
-    --page-glow-a: rgba(31, 224, 255, 0.1);
-    --page-glow-b: rgba(252, 238, 9, 0.06);
-    --scanline: rgba(255, 255, 255, 0.022);
+/* Light theme: chosen with the theme toggle (UX.md 8.8). (0,2,0) beats :root. */
+:root[data-theme='light'] {
+  color-scheme: light;
 
-    --color-card-red: #ff4d5e;
-    --color-card-yellow: #ffd400;
-    --color-card-green: #39e08a;
-    --color-card-blue: #4d9dff;
-  }
+  --color-bg: #f3f0e6;
+  --color-surface: #ebe7d9;
+  --color-surface-raised: #fbf9f1;
+  --color-surface-hover: #ddd8c6;
+  --color-text: #0e0f14;
+  --color-text-muted: #4a4f5c;
+  --color-border: #cfc9b5;
+  --color-border-strong: #5f6676;
+  /* Yellow is a fill colour only: never text or a thin line on the light background (UX.md 3.1). */
+  --color-accent: #fcee09;
+  --color-on-accent: #0e0f14;
+  --color-accent-edge: #0e0f14;
+  --color-accent-2: #1fe0ff;
+  --color-info: #005f73;
+  --color-selected-surface: #d4f3f8;
+  --color-danger: #b00030;
+  --color-danger-surface: #ffe3e8;
+  --color-warning: #8a4b00;
+  --color-warning-surface: #fff0d0;
+  --color-header-bg: #0e0f14;
+  --color-header-text: #f1f1ec;
+  --color-bracket: #0e0f14;
+  --color-count: #0e0f14;
+  --color-owned: rgba(252, 238, 9, 0.3);
+  --color-owned-hover: rgba(252, 238, 9, 0.45);
+  --color-swatch-edge: #0e0f14;
+  --heading-bar: linear-gradient(90deg, var(--color-text) 0 65%, var(--color-brand-yellow) 65%);
+  --glow-accent: none;
+  --page-glow-a: rgba(31, 224, 255, 0.16);
+  --page-glow-b: rgba(252, 238, 9, 0.22);
+  --scanline: rgba(0, 0, 0, 0.03);
+
+  --color-card-red: #d32f45;
+  --color-card-yellow: #f2c200;
+  --color-card-green: #1b9e5a;
+  --color-card-blue: #1f6fd1;
 }
 
 @media (min-width: 40rem) {
