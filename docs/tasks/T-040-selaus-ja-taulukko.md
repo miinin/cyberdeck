@@ -1,5 +1,5 @@
 # T-040 · Selaus ja muokkaus erilleen, kompakti taulukkonäkymä
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02)
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02)
 **Malli:** D-014. PM tarkistaa esikatselun, ja UX katselmoi MVP-1:n lopussa.
 **Haara:** `t-040-selaus-taulukko`
 
@@ -31,3 +31,6 @@ Kun kokoelma on kerran syötetty, pääkäyttö on selailu. Lisäys ja poisto ov
 - Testit: uusi CatalogView.browse.test.tsx (9), storage-testit (4), collection-testit asettavat kytkimen päälle. `vitest run src/ui src/storage src/App.test.tsx src/App.theme.test.tsx`: 452/452. Lint ja build läpi. CHANGELOG päivitetty.
 - Rajoitteet: ei selainnäkymän silmämääräistä tarkistusta (vain jsdom); taulukon CSS (sarakeleveydet, mobiili) kannattaa katsoa esikatselussa.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
+
+### PM 2026-10-02 · Done (D-014)
+- Esikatselu PR #12: taulukko (1280 px, muokkaustila päällä) ja ruudukko 320 px:ssä (scrollWidth 320, ei vaakavieritystä) tarkistettu kuvakaappauksin.
