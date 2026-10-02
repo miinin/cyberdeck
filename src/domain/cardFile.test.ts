@@ -11,6 +11,8 @@ const streetkid: Card = {
   type: 'Legend',
   color: 'Red',
   cost: null,
+  power: null,
+  ram: null,
   key: 'v-streetkid',
 };
 
@@ -23,6 +25,8 @@ const solo: Card = {
   type: 'Unit',
   color: null,
   cost: 0,
+  power: null,
+  ram: null,
   key: 'solo',
 };
 
@@ -38,6 +42,8 @@ describe('toCardFile', () => {
     const shuffled = {
       key: solo.key,
       cost: solo.cost,
+      power: null,
+      ram: null,
       color: solo.color,
       type: solo.type,
       displayName: solo.displayName,
@@ -57,6 +63,8 @@ describe('toCardFile', () => {
       'type',
       'color',
       'cost',
+      'power',
+      'ram',
       'key',
     ]);
   });
@@ -80,6 +88,8 @@ describe('parseCardFile', () => {
       displayName: 'V',
       color: null,
       cost: 0,
+      power: null,
+      ram: null,
     });
   });
 
@@ -141,10 +151,12 @@ describe('parseCardFile', () => {
     ['a string', '3'],
     ['NaN', Number.NaN],
     ['Infinity', Number.POSITIVE_INFINITY],
-  ])('rejects a cost that is %s', (_label, cost) => {
+  ])('rejects a cost, power or RAM that is %s', (_label, bad) => {
     // JSON cannot hold NaN or Infinity, so these are given as an object, not via JSON.parse.
-    const json = { ...toCardFile([streetkid]), cards: [{ ...streetkid, cost }] };
-    expect(() => parseCardFile(json)).toThrow(/"cost" must be a finite number or null/);
+    for (const field of ['cost', 'power', 'ram']) {
+      const json = { ...toCardFile([streetkid]), cards: [{ ...streetkid, [field]: bad }] };
+      expect(() => parseCardFile(json)).toThrow(new RegExp(`"${field}" must be a finite number or null`));
+    }
   });
 
   it('rejects text longer than the limit and accepts text at the limit', () => {

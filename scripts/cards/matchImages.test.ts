@@ -13,6 +13,8 @@ function card(name: string, subname: string | null = null, slug?: string): Card 
     type: 'Unit',
     color: 'Red',
     cost: 1,
+    power: null,
+    ram: null,
     key,
   };
 }

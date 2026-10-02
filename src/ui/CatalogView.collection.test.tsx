@@ -11,7 +11,7 @@ import { ANNOUNCE_DELAY_MS } from './useDelayedAnnouncement';
 const COLLECTION_KEY = 'cyberdeck:collection';
 
 function card(slug: string, name: string, subname: string | null, type = 'Unit', color: string | null = 'Red'): Card {
-  return { id: `id-${slug}`, key: slug, slug, name, subname, displayName: name, type, color, cost: 2 };
+  return { id: `id-${slug}`, key: slug, slug, name, subname, displayName: name, type, color, cost: 2, power: null, ram: null };
 }
 
 const cards: Card[] = [
@@ -43,16 +43,16 @@ async function renderView(repositories: Repositories = createMemoryRepositories(
 
 const row = (name: string) => {
   // By text: jsdom's name computation drops the space of the hidden ", " ("V,Streetkid").
-  const header = within(screen.getByRole('table'))
-    .getAllByRole('rowheader')
+  const header = within(screen.getByRole('list'))
+    .getAllByRole('heading', { level: 3 })
     .find((cell) => cell.textContent === name);
-  const element = header?.closest('tr');
+  const element = header?.closest('li');
   if (element === null || element === undefined) throw new Error(`No row for ${name}`);
   return element;
 };
 const plus = (name: string) => within(row(name)).getByRole('button', { name: `Lisää yksi kappale: ${name}` });
 const minus = (name: string) => within(row(name)).queryByRole('button', { name: `Vähennä yksi kappale: ${name}` });
-const controlCell = (name: string) => within(row(name)).getAllByRole('cell')[3];
+const controlCell = (name: string) => row(name).querySelector('.card-collection');
 const summary = (container: HTMLElement) => container.querySelector('#collection-summary');
 
 beforeEach(() => {
@@ -64,12 +64,9 @@ afterEach(() => {
 });
 
 describe('CatalogView collection: count control', () => {
-  it('adds an "Omistan" column with only "+" for cards not in the collection', async () => {
+  it('adds a collection control with only "+" for cards not in the collection', async () => {
     await renderView();
-    const headers = within(screen.getByRole('table'))
-      .getAllByRole('columnheader')
-      .map((header) => header.textContent);
-    expect(headers).toEqual(['Kuva', 'Nimi', 'Tyyppi ja väri', 'Hinta', 'Omistan']);
+    expect(row('V, Streetkid').querySelector('.card-collection')).not.toBeNull();
     expect(plus('V, Streetkid')).toBeInTheDocument();
     expect(minus('V, Streetkid')).toBeNull();
     expect(controlCell('V, Streetkid')).toHaveTextContent('Ei kokoelmassa');
@@ -81,7 +78,8 @@ describe('CatalogView collection: count control', () => {
 
   it('has one decorative separator, between type and color, and none before the cost (UX-005)', async () => {
     await renderView();
-    const [, typeCell, costCell] = within(row('V, Streetkid')).getAllByRole('cell');
+    const typeCell = row('V, Streetkid').querySelector('.card-type');
+    const costCell = row('V, Streetkid').querySelector('.card-stats');
     const separators = typeCell?.querySelectorAll('.separator') ?? [];
     expect(separators).toHaveLength(1);
     expect(separators[0]).toHaveAttribute('aria-hidden', 'true');
@@ -218,8 +216,8 @@ describe('CatalogView collection: loading states', () => {
 
 const ownedOnlyBox = () => screen.getByRole('checkbox', { name: 'Vain omistetut' });
 const rowNames = () =>
-  within(screen.getByRole('table'))
-    .getAllByRole('rowheader')
+  within(screen.getByRole('list'))
+    .getAllByRole('heading', { level: 3 })
     .map((cell) => cell.textContent);
 const statusText = (container: HTMLElement) => container.querySelector('#card-status')?.textContent;
 
@@ -246,7 +244,7 @@ describe('CatalogView collection: "Vain omistetut"', () => {
     );
     await user.click(ownedOnlyBox());
     expect(rowNames()).toEqual(['V, Streetkid', 'Viktor Vektor, You Might Feel a Little Pinch']);
-    expect(screen.getByRole('table', { name: 'Hakua vastaavat kortit' })).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Hakua vastaavat kortit' })).toBeInTheDocument();
     expect(statusText(container)).toBe('2 / 3 korttia');
 
     await user.type(screen.getByRole('searchbox', { name: 'Hae nimellä' }), 'viktor');
@@ -274,7 +272,7 @@ describe('CatalogView collection: "Vain omistetut"', () => {
     await settle();
     await user.click(screen.getByRole('checkbox', { name: 'Legend' }));
     await user.click(screen.getByRole('checkbox', { name: 'Legend' }));
-    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('list')).toBeNull();
   });
 
   it('with an empty collection shows its own text and "Näytä kaikki kortit" moves focus to the checkbox', async () => {
@@ -282,7 +280,7 @@ describe('CatalogView collection: "Vain omistetut"', () => {
     try {
       await renderView();
       fireEvent.click(ownedOnlyBox());
-      expect(screen.queryByRole('table')).toBeNull();
+      expect(screen.queryByRole('list')).toBeNull();
       expect(
         screen.getByText(
           'Kokoelmassa ei ole vielä kortteja. Poista "Vain omistetut" -valinta ja merkitse omistamasi kortit listasta.',
@@ -478,7 +476,7 @@ describe('CatalogView collection: notices', () => {
     expect(screen.queryByRole('button', { name: /Sulje/ })).toBeNull();
   });
 
-  it('a failed read: danger box, no "Omistan" column, and "Lue kokoelma uudelleen" recovers', async () => {
+  it('a failed read: danger box, no collection control, and "Lue kokoelma uudelleen" recovers', async () => {
     const user = userEvent.setup();
     const repositories = persistentMemory([{ card: 'v-streetkid', count: 2 }]);
     const load = vi.spyOn(repositories.collection, 'load').mockRejectedValueOnce(new Error('SecurityError'));
@@ -486,10 +484,7 @@ describe('CatalogView collection: notices', () => {
 
     expect(heading2()).toEqual(['Kokoelmaa ei voitu lukea']);
     expect(container.textContent).not.toMatch(/SecurityError/);
-    const headers = within(screen.getByRole('table'))
-      .getAllByRole('columnheader')
-      .map((header) => header.textContent);
-    expect(headers).toEqual(['Kuva', 'Nimi', 'Tyyppi ja väri', 'Hinta']);
+    expect(row('V, Streetkid').querySelector('.card-collection')).toBeNull();
     expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
     expect(summary(container)).toBeNull();
 

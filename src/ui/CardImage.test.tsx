@@ -14,6 +14,8 @@ function card(name: string, subname: string | null, key: string): Card {
     type: 'Legend',
     color: 'Red',
     cost: null,
+    power: null,
+    ram: null,
     key,
   };
 }
@@ -26,7 +28,7 @@ function renderView() {
   return render(<CatalogView cards={[withImage, withoutImage]} repositories={createMemoryRepositories()} />);
 }
 
-const rowOf = (name: string) => screen.getByRole('rowheader', { name: new RegExp(`^${name}`) }).closest('tr') as HTMLElement;
+const rowOf = (name: string) => screen.getByRole('heading', { level: 3, name: new RegExp(`^${name}`) }).closest('li') as HTMLElement;
 const thumbnailButton = () => screen.getByRole('button', { name: /^Suurenna kuva: V/ });
 const dialog = () => document.querySelector('dialog.card-dialog') as HTMLDialogElement;
 
@@ -39,8 +41,8 @@ describe('Card images (T-027)', () => {
     const image = within(button).getByRole('presentation', { hidden: true }) as HTMLImageElement;
     expect(image).toHaveAttribute('alt', '');
     expect(image).toHaveAttribute('loading', 'lazy');
-    expect(image).toHaveAttribute('width', '160');
-    expect(image).toHaveAttribute('height', '224');
+    expect(image).toHaveAttribute('width', '360');
+    expect(image).toHaveAttribute('height', '503');
     expect(image.getAttribute('src')).toMatch(/v-streetkid.*\.webp$/);
   });
 

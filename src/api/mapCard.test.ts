@@ -12,6 +12,8 @@ describe('mapCard', () => {
       type: 'Legend',
       color: 'Red',
       cost: null,
+      power: null,
+      ram: null,
       key: 'v-streetkid',
     });
   });
@@ -72,5 +74,15 @@ describe('mapCard', () => {
     expect(keys).not.toContain('rules_text');
     expect(keys).not.toContain('extra');
     expect(JSON.stringify(card)).not.toContain('Signature');
+  });
+});
+
+describe('mapCard power and RAM', () => {
+  it('keeps numeric power and RAM, including 0', () => {
+    expect(mapCard(rawCard(1, { power: 3000, ram: 0 }))).toMatchObject({ power: 3000, ram: 0 });
+  });
+
+  it.each([null, undefined, '3', Number.NaN])('maps power and RAM %s to null', (value) => {
+    expect(mapCard(rawCard(1, { power: value, ram: value }))).toMatchObject({ power: null, ram: null });
   });
 });

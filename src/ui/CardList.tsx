@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
 import { CardColor } from './CardColor';
 import { CardImage } from './CardImage';
@@ -5,7 +6,7 @@ import { CountControl } from './CountControl';
 import type { CountControlMode } from './CountControl';
 import { texts } from './texts';
 
-/** The "Omistan" column (UX.md 6.4). Left out when the collection could not be read. */
+/** The collection part of each box. Left out when the collection could not be read. */
 export interface OwnedColumn {
   mode: CountControlMode;
   countOf: (card: Card) => number;
@@ -13,16 +14,34 @@ export interface OwnedColumn {
   onLimit: (card: Card) => void;
 }
 
-/** Owned-row highlight (UX.md 7.5): only when the collection is ready and the count is above zero. */
+/** Owned-box highlight (UX.md 7.5): only when the collection is ready and the count is above zero. */
 function isOwned(card: Card, owned: OwnedColumn | undefined): boolean {
   return owned?.mode === 'ready' && owned.countOf(card) > 0;
 }
 
+/** One game value (cost, power, RAM). A missing value shows a dash and a hidden spoken equivalent. */
+function Stat({ label, value, missing }: { label: string; value: number | null; missing: string }) {
+  let shown: ReactNode = value;
+  if (value === null) {
+    shown = (
+      <>
+        <span aria-hidden="true">{texts.missingValue}</span>
+        <span className="visually-hidden">{missing}</span>
+      </>
+    );
+  }
+  return (
+    <div className="card-stat">
+      <dt>{label}</dt>
+      <dd>{shown}</dd>
+    </div>
+  );
+}
+
 /**
- * Card table (UX.md 4.4, 5.5, 6.4). All values are rendered as React text nodes, never as HTML (SR-1).
- * `caption` names the table for screen readers ("Kaikki kortit" / "Hakua vastaavat kortit").
- * The explicit ARIA roles keep the table semantics when narrow screens lay rows out as a grid
- * (UX.md 6.4.4: `display: grid` removes them in Chrome and Safari).
+ * Card grid (T-034): one box per card with the image, name, type and color, the game values and the
+ * collection control. All values are rendered as React text nodes, never as HTML (SR-1).
+ * `caption` names the list for screen readers ("Kaikki kortit" / "Hakua vastaavat kortit").
  */
 export function CardList({
   cards,
@@ -37,80 +56,49 @@ export function CardList({
   onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
 }) {
   return (
-    <table className="card-table" role="table">
-      <caption className="visually-hidden">{caption}</caption>
-      <thead role="rowgroup">
-        <tr role="row">
-          <th scope="col" role="columnheader" className="col-fit col-image">
-            {texts.columnImage}
-          </th>
-          <th scope="col" role="columnheader">
-            {texts.columnName}
-          </th>
-          <th scope="col" role="columnheader" className="col-fit col-wrap-header">
-            {texts.columnTypeAndColor}
-          </th>
-          <th scope="col" role="columnheader" className="col-fit col-number">
-            {texts.columnCost}
-          </th>
-          {owned !== undefined && (
-            <th scope="col" role="columnheader" className="col-fit col-control">
-              {texts.columnOwned}
-            </th>
-          )}
-        </tr>
-      </thead>
-      <tbody role="rowgroup">
-        {cards.map((card) => (
-          <tr key={card.id} role="row" className={isOwned(card, owned) ? 'is-owned' : undefined}>
-            <td role="cell" className="col-fit col-image">
-              <CardImage card={card} onOpen={onOpenImage} />
-            </td>
-            <th scope="row" role="rowheader" className="card-name">
-              <span lang="en">{card.name}</span>
-              {card.subname !== null && (
-                <>
-                  <span className="visually-hidden">, </span>
-                  <span className="card-subname" lang="en">
-                    {card.subname}
-                  </span>
-                </>
-              )}
-            </th>
-            <td role="cell" className="col-fit col-type">
-              <span lang="en">{card.type}</span>
-              <span className="visually-hidden">, </span>
-              <span className="separator" aria-hidden="true">
-                {' · '}
-              </span>
-              <span className="card-color">
-                <CardColor color={card.color} />
-              </span>
-            </td>
-            <td role="cell" className="col-fit col-number col-cost" data-label={texts.columnCost}>
-              {card.cost === null ? (
-                <>
-                  <span aria-hidden="true">{texts.missingValue}</span>
-                  <span className="visually-hidden">{texts.noCost}</span>
-                </>
-              ) : (
-                card.cost
-              )}
-            </td>
-            {owned !== undefined && (
-              <td role="cell" className="col-fit col-control">
-                <CountControl
-                  card={card}
-                  count={owned.countOf(card)}
-                  mode={owned.mode}
-                  onChange={owned.onChange}
-                  onLimit={owned.onLimit}
-                />
-              </td>
+    <ul className="card-grid" aria-label={caption}>
+      {cards.map((card) => (
+        <li key={card.id} className={isOwned(card, owned) ? 'card-box is-owned' : 'card-box'}>
+          <CardImage card={card} onOpen={onOpenImage} />
+          <h3 className="card-name">
+            <span lang="en">{card.name}</span>
+            {card.subname !== null && (
+              <>
+                <span className="visually-hidden">, </span>
+                <span className="card-subname" lang="en">
+                  {card.subname}
+                </span>
+              </>
             )}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+          </h3>
+          <p className="card-type">
+            <span lang="en">{card.type}</span>
+            <span className="visually-hidden">, </span>
+            <span className="separator" aria-hidden="true">
+              {' · '}
+            </span>
+            <span className="card-color">
+              <CardColor color={card.color} />
+            </span>
+          </p>
+          <dl className="card-stats">
+            <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} />
+            <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} />
+            <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} />
+          </dl>
+          {owned !== undefined && (
+            <div className="card-collection">
+              <CountControl
+                card={card}
+                count={owned.countOf(card)}
+                mode={owned.mode}
+                onChange={owned.onChange}
+                onLimit={owned.onLimit}
+              />
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }

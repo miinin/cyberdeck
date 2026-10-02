@@ -3,7 +3,7 @@ import { CARD_IMAGES_DIR, CARD_IMAGES_MAP_PATH, MAX_SOURCE_BYTES, importImages, 
 import type { ImportImagesDeps } from './importImages';
 
 function card(key: string, name: string): Card {
-  return { id: `id-${key}`, slug: key, name, subname: null, displayName: name, type: 'Unit', color: null, cost: 1, key };
+  return { id: `id-${key}`, slug: key, name, subname: null, displayName: name, type: 'Unit', color: null, cost: 1, power: null, ram: null, key };
 }
 
 const cards = [card('corpo-security', 'Corpo Security'), card('gilded-maton', 'Gilded Matón'), card('octant', 'Octant')];
@@ -29,7 +29,7 @@ describe('importImages', () => {
     const { deps, convert, lines } = fakeDeps(
       {
         src: ['Corpo_Security.webp', 'Gilded_Mat_n.webp', 'Unknown.webp', 'Thumbs.db'],
-        [`${CARD_IMAGES_DIR}/sm`]: ['corpo-security.webp', 'old-card.webp'],
+        [`${CARD_IMAGES_DIR}/md`]: ['corpo-security.webp', 'old-card.webp'],
       },
       { map: JSON.stringify({ 'Gilded_Mat_n.webp': 'gilded-maton' }) },
     );
@@ -37,11 +37,11 @@ describe('importImages', () => {
 
     expect(result.exitCode).toBe(0);
     expect(convert).toHaveBeenCalledWith('src/Corpo_Security.webp', [
-      { path: 'src/assets/cards/sm/corpo-security.webp', width: 160 },
+      { path: 'src/assets/cards/md/corpo-security.webp', width: 360 },
       { path: 'src/assets/cards/lg/corpo-security.webp', width: 720 },
     ]);
     expect(convert).toHaveBeenCalledWith('src/Gilded_Mat_n.webp', [
-      { path: 'src/assets/cards/sm/gilded-maton.webp', width: 160 },
+      { path: 'src/assets/cards/md/gilded-maton.webp', width: 360 },
       { path: 'src/assets/cards/lg/gilded-maton.webp', width: 720 },
     ]);
     expect(result.report?.converted).toBe(2);
@@ -85,6 +85,6 @@ describe('importImages', () => {
 
   it('builds output paths only from valid card keys', () => {
     expect(outputPath('lg', 'octant')).toBe('src/assets/cards/lg/octant.webp');
-    expect(() => outputPath('sm', '../../evil')).toThrow();
+    expect(() => outputPath('md', '../../evil')).toThrow();
   });
 });

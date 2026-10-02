@@ -5,6 +5,7 @@ Käyttäjälle näkyvät muutokset versioittain.
 ## [Julkaisematon]
 
 ### Lisätty
+- Korttilista on nyt ruudukko: jokaisessa laatikossa on iso kuva, nimi, tyyppi ja väri, kortin hinta, Power ja RAM sekä kokoelman +- ja −-painikkeet. Kuvaa painamalla se suurenee kuten ennenkin.
 - Haku ja suodatus korttilistaan: voit hakea korttia nimen tai alaotsikon osalla, eikä kirjainkoolla tai aksenteilla ole väliä ("alvarez" löytää Judy Álvarezin). Listaa voi rajata korttityypin (Legend, Unit, Gear, Program) ja värin mukaan, ja haku ja valinnat toimivat yhdessä.
 - Listan yläpuolella näkyy, montako korttia haku ja valinnat löysivät (esim. "2 / 151 korttia"). Jos mikään kortti ei vastaa, näet ohjeen ja painikkeen, joka tyhjentää haun ja valinnat.
 - Taulukossa näkyy nyt myös kortin väri tekstinä ja pienenä värinäytteenä. Sarakkeen nimi on "Tyyppi ja väri".

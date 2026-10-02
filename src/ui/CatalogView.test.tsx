@@ -18,6 +18,8 @@ function card(index: number, overrides: Partial<Card> = {}): Card {
     type: 'Unit',
     color: null,
     cost: index,
+    power: null,
+    ram: null,
     key: `card-${index}`,
     ...overrides,
   };
@@ -35,8 +37,8 @@ function statusLine(container: HTMLElement): HTMLElement {
 }
 
 /** Cell text without the decorative "·" separators of the narrow layout (aria-hidden, UX.md 6.4.4). */
-function textWithoutSeparators(cell: HTMLElement | undefined): string | undefined {
-  if (cell === undefined) return undefined;
+function textWithoutSeparators(cell: HTMLElement | null | undefined): string | undefined {
+  if (cell === undefined || cell === null) return undefined;
   const copy = cell.cloneNode(true) as HTMLElement;
   copy.querySelectorAll('.separator').forEach((separator) => {
     expect(separator).toHaveAttribute('aria-hidden', 'true');
@@ -45,7 +47,23 @@ function textWithoutSeparators(cell: HTMLElement | undefined): string | undefine
   return copy.textContent?.replace(/\s+/g, ' ');
 }
 
+/** Label and text of each game value in a box (dt and dd pairs). */
+function stats(box: HTMLElement): Record<string, string | null> {
+  return Object.fromEntries(
+    Array.from(box.querySelectorAll('.card-stat')).map((stat) => [
+      stat.querySelector('dt')?.textContent,
+      stat.querySelector('dd')?.textContent ?? null,
+    ]),
+  );
+}
+
 describe('CatalogView', () => {
+  it('shows the power and RAM of a card next to its cost', () => {
+    renderView([card(1, { cost: 2, power: 3000, ram: 0 })]);
+
+    expect(stats(screen.getByRole('listitem'))).toEqual({ Hinta: '2', Power: '3000', RAM: '0' });
+  });
+
   it('shows every card with name, type and cost at once', () => {
     const { container } = renderView([
       card(1, { name: 'V', subname: 'Streetkid', type: 'Legend', cost: null }),
@@ -53,21 +71,16 @@ describe('CatalogView', () => {
       card(3, { cost: 0 }),
     ]);
 
-    const table = screen.getByRole('table', { name: 'Kaikki kortit' });
-    const headers = within(table)
-      .getAllByRole('columnheader')
-      .map((cell) => cell.textContent);
-    expect(headers).toEqual(['Kuva', 'Nimi', 'Tyyppi ja väri', 'Hinta', 'Omistan']);
-
-    const rows = within(table).getAllByRole('row').slice(1) as HTMLElement[];
+    const table = screen.getByRole('list', { name: 'Kaikki kortit' });
+    const rows = within(table).getAllByRole('listitem') as HTMLElement[];
     expect(rows).toHaveLength(3);
     const [first, second, third] = rows as [HTMLElement, HTMLElement, HTMLElement];
-    expect(within(first).getByRole('rowheader')).toHaveTextContent('V, Streetkid');
-    expect(within(first).getAllByRole('cell')[1]).toHaveTextContent('Legend');
-    expect(within(first).getAllByRole('cell')[2]).toHaveTextContent('ei hintaa');
-    expect(within(second).getByRole('rowheader')).toHaveTextContent('Swordwise Huscle');
-    expect(within(second).getAllByRole('cell')[2]).toHaveTextContent(/^3$/);
-    expect(within(third).getAllByRole('cell')[2]).toHaveTextContent(/^0$/);
+    expect(within(first).getByRole('heading', { level: 3 })).toHaveTextContent('V, Streetkid');
+    expect(first.querySelector('.card-type')).toHaveTextContent('Legend');
+    expect(stats(first)).toEqual({ Hinta: '–ei hintaa', Power: '–ei poweria', RAM: '–ei RAMia' });
+    expect(within(second).getByRole('heading', { level: 3 })).toHaveTextContent('Swordwise Huscle');
+    expect(stats(second).Hinta).toBe('3');
+    expect(stats(third).Hinta).toBe('0');
 
     expect(statusLine(container)).toHaveTextContent(/^3 korttia$/);
     expect(screen.getByRole('status')).toHaveTextContent('3 korttia ladattu.');
@@ -84,7 +97,7 @@ describe('CatalogView', () => {
   it('marks English card names and types with lang="en"', () => {
     renderView([card(1, { name: 'V', subname: 'Streetkid', type: 'Legend' })]);
 
-    const table = screen.getByRole('table');
+    const table = screen.getByRole('list');
     expect(within(table).getByText('V')).toHaveAttribute('lang', 'en');
     expect(within(table).getByText('Streetkid')).toHaveAttribute('lang', 'en');
     expect(within(table).getByText('Legend')).toHaveAttribute('lang', 'en');
@@ -100,10 +113,9 @@ describe('CatalogView', () => {
       card(6, { type: 'Unit', color: null }),
     ]);
 
-    const typeCells = within(screen.getByRole('table'))
-      .getAllByRole('row')
-      .slice(1)
-      .map((row) => textWithoutSeparators(within(row).getAllByRole('cell')[1]));
+    const typeCells = within(screen.getByRole('list'))
+      .getAllByRole('listitem')
+      .map((row) => textWithoutSeparators(row.querySelector('.card-type')));
     expect(typeCells).toEqual([
       'Unit, Punainen',
       'Gear, Keltainen',
@@ -113,7 +125,7 @@ describe('CatalogView', () => {
       'Unit, –ei väriä',
     ]);
 
-    const swatches = Array.from(container.querySelectorAll('.card-table .color-swatch'));
+    const swatches = Array.from(container.querySelectorAll('.card-grid .color-swatch'));
     expect(swatches.map((swatch) => swatch.className)).toEqual([
       'color-swatch color-swatch-red',
       'color-swatch color-swatch-yellow',
@@ -122,7 +134,7 @@ describe('CatalogView', () => {
       'color-swatch color-swatch-unknown',
     ]);
     swatches.forEach((swatch) => expect(swatch).toHaveAttribute('aria-hidden', 'true'));
-    const table = screen.getByRole('table');
+    const table = screen.getByRole('list');
     expect(within(table).getByText('Purple')).toHaveAttribute('lang', 'en');
     expect(within(table).getByText('Punainen')).not.toHaveAttribute('lang');
   });
@@ -133,7 +145,7 @@ describe('CatalogView', () => {
       card(1, { name: payload, subname: '<b>x</b>', type: '<script>1</script>', color: '<i>y</i>' }),
     ]);
 
-    const table = screen.getByRole('table');
+    const table = screen.getByRole('list');
     expect(within(table).getByText(payload)).toBeInTheDocument();
     expect(within(table).getByText('<b>x</b>')).toBeInTheDocument();
     expect(within(table).getByText('<script>1</script>')).toBeInTheDocument();

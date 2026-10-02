@@ -1,5 +1,5 @@
 # T-034 · Korttiruudukko: iso kuva, pelin arvot (power, RAM) ja kokoelma samassa laatikossa
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02, aikaraja 45 min)
+**Tila:** Review · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02, aikaraja 45 min)
 **Malli:** D-014 (kevyt). Ei erillistä suunnittelua. PM tarkistaa esikatselun, ja UX katselmoi MVP-1:n lopussa.
 **Haara:** `t-034-korttiruudukko` (test-haarasta)
 
@@ -24,3 +24,10 @@ Pelaaja tunnistaa kortin isosta kuvasta ja näkee pelin arvot ja oman kokoelmans
 - Ei korttitekstiä (kykyjä) laatikkoon.
 
 ## Luovutukset
+### Luovutus 2026-10-02 · Koodari → PM
+- Mitä tehtiin: taulukko korvattu ruudukolla (`ul.card-grid` > `li.card-box`: kuva, h3-nimi, tyyppi ja väri, `dl` hinta/Power/RAM, kokoelmakontrolli). `power` ja `ram` lisätty malliin, `mapCard`, `cardFile` (validointi) ja `cards.json` (haettu `cards:update`, 1 pyyntöjakso; API-kentät `power`, `ram`; ram 150/151 ja power 98/151 kortilla). Kuvakoko `sm` (160) korvattu `md`:llä (360), `src/assets/cards/md` luotu `cards:images`-komennolla (151/151, 4,8 Mt), `sm` poistettu. Vanhat taulukon CSS-säännöt poistettu, uusi ruudukko-CSS (auto-fill, minmax(min(14rem,100%),1fr)), vain olemassa olevia tokeneita.
+- Tekstit: uudet `Power`, `RAM` (pelitermit sellaisenaan) ja ruudunlukijan "ei poweria", "ei RAMia" (texts.ts). CONTENT.md:n sanastoon ei lisätty, Sisällöntuottajan tarkistettava.
+- Mitä pyydän: PM tarkistaa esikatselun (ei ajettu selaimessa, vain jsdom-testit). UX katselmoi MVP-1:n lopussa.
+- Tunnetut rajoitteet: ei visuaalista tarkistusta selaimessa; 3–4 saraketta riippuu sisältöalueen leveydestä. Vanha UX.md 6.4 (taulukko) on vanhentunut, UX päivittää. ARCHITECTURE.md kuvaa vielä `sm`-koon.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2 (ARCHITECTURE.md ja UX.md päivitettävä: sm→md, taulukko→ruudukko)
+- Testit: vitest 73 tiedostoa / 1440 testiä läpi, lint ja build (tsc + vite) läpi. `npm ci` kaatui EPERM-lukkoon (vanhat `vite preview` -prosessit pääkansion node_modulesissa, PIDit 30764, 32436, 34448); `npm install` korjasi, package-lock ei muuttunut.

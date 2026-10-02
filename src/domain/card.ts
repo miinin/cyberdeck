@@ -18,6 +18,10 @@ export interface Card {
   color: string | null;
   /** In-game cost, or null when the card has none. */
   cost: number | null;
+  /** Power, or null when the card has none. */
+  power: number | null;
+  /** RAM, or null when the card has none. */
+  ram: number | null;
   /** The app's own key, cardKey(name, subname). Collections and decks refer to cards only by this (D-008). */
   key: CardKey;
 }

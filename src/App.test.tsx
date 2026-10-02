@@ -15,6 +15,8 @@ const cards: Card[] = [
     type: 'Legend',
     color: 'Red',
     cost: null,
+    power: null,
+    ram: null,
     key: 'v-streetkid',
   },
 ];
@@ -30,13 +32,13 @@ describe('App', () => {
       'Cyberdeck on epävirallinen Cyberpunk TCG -fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä.',
     );
     expect(footer).toHaveTextContent('Korttitiedot: Netdeck.gg');
-    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByRole('list')).toBeInTheDocument();
   });
 
   it('shows the given cards on the first render', () => {
     render(<App cards={cards} repositories={createMemoryRepositories()} />);
 
-    expect(screen.getByRole('rowheader')).toHaveTextContent('V, Streetkid');
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('V, Streetkid');
     expect(screen.getByRole('status')).toHaveTextContent('1 kortti ladattu.');
   });
 
@@ -46,7 +48,7 @@ describe('App', () => {
 
     // Synchronous queries: no loading state, the list is there at once.
     expect(container.querySelector('#card-status')).toHaveTextContent(cardCount(CARDS.length));
-    const rows = within(screen.getByRole('table', { name: 'Kaikki kortit' })).getAllByRole('rowheader');
+    const rows = within(screen.getByRole('list', { name: 'Kaikki kortit' })).getAllByRole('heading', { level: 3 });
     expect(rows).toHaveLength(CARDS.length);
     expect(screen.queryByText('Haetaan kortteja…')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Yritä uudelleen' })).not.toBeInTheDocument();

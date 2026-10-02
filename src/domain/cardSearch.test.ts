@@ -22,6 +22,8 @@ function card(slug: string, name: string, subname: string | null, type: string, 
     type,
     color,
     cost: null,
+    power: null,
+    ram: null,
   };
 }
 
