@@ -22,3 +22,9 @@
 7. Testit, koko `npm test`, lint ja build menevät läpi. CHANGELOG `[Julkaisematon]`.
 
 ## Luovutukset
+### Luovutus 2026-10-02 · Koodari → PM
+- Mitä tehtiin: (1) `.type-badge::after` piirtää viistoreunan `--badge-color`illa gradientilla (molemmat teemat samalla tokenilla). (2) Väriryhmän chipit pelkkinä palloina (`CardColor swatchOnly`, visually-hidden nimi, `title`, valittu = chipin reuna + rasti, korkeus 28 px). (3) `hasSameNameLegend` (deckRules) + estävä toast pakkaeditorissa (`role="status"`, 4 s, Sulje ilmoitus); himmennys ja selite ennallaan, neljäs Legend sallittu. (4) `.card-row` on grid `minmax(0,1fr) auto`, min-korkeus 3.5 rem, koskee haku- ja pakkarivejä. (5) cardMeta: + Power ja Rarity. (6) Lista/Kuvat-valinta (`DeckPickImage.tsx`, md-kuva, laiska lataus, kuva = "Lisää pakkaan: <nimi>", −/+ kuvan alla); valinta `cyberdeck:deck-pick-view` (preferences.loadDeckPickView/saveDeckPickView).
+- Mitä pyydän: PM tarkistaa esikatselusta ulkoasun (viistokulma, kuvaruudukon leveys 8 rem+, rivien korkeus), sillä visuaalista tarkistusta selaimessa en tehnyt.
+- Huomio: kuvanäkymässä kuvapainike ja + -painike ovat molemmat nimeltä "Lisää pakkaan: <nimi>" (kriteerin mukaan). Ei uusia riippuvuuksia.
+- Testit: `npm test` 589 läpi (uudet: hasSameNameLegend, preferences, toast, 4 s katoaminen, Power/Rarity, kuvanäkymä ja muisti), lint ja build läpi. CHANGELOG päivitetty.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
