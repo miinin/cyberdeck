@@ -1086,6 +1086,11 @@ body:has(dialog[open]) {
   background: var(--color-surface-raised);
 }
 
+/* Not owned: neutral grey count (T-035). */
+.card-box {
+  --color-count: var(--color-text-muted);
+}
+
 /* Owned card (count > 0). The count itself carries the information, not the colour (UX.md 7.5). */
 .card-box.is-owned {
   border-color: var(--color-info);

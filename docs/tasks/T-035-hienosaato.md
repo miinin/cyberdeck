@@ -1,5 +1,5 @@
 # T-035 · Hienosäätö: +/−-kontrolli, hillitty kokoelmatila (playset) ja dialogin sulkuruksi
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02, aikaraja 20 min)
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02, aikaraja 20 min)
 **Malli:** D-014. PM tarkistaa esikatselun.
 **Haara:** `t-035-hienosaato`
 
@@ -24,3 +24,6 @@
 - Fokus: kun − muuttuu disabled-tilaan fokusoituna, fokus siirretään +:aan (myös Chromen disabled-fokus-oikku).
 - Testit: 1442/1442 läpi, lint ja build läpi. Uudet: playsetSize, playset-merkintä, − disabled 0:ssa. Ei tarkistettu silmin selaimessa.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (käyttämättömät --color-owned-hover-tokenit ja is-owned:hover-sääntö voi siivota). Prettier --check valittaa 65 tiedostoa jo ennestään (ei osa lintiä).
+
+### PM 2026-10-02 · Done (D-014)
+- Esikatselu PR #11 (1280 px): − 0 + pysyy paikallaan. PM korjasi määrän 0 värin harmaaksi (`--color-text-muted`), koska se oli keltainen. Täysi kokoelmatila ja dialogin × todennettu testeillä, ei kuvakaappauksella. Velka: `--color-owned-hover` voi siivota.
