@@ -1,7 +1,7 @@
 import type { Card } from './card';
 import type { DeckContent } from './deck';
 import { checkDeckName, copyDeckName, uniqueDeckName, withDeckCount } from './deckEdit';
-import { addBlocker, ramLimits, toCardsByKey, validateDeck } from './deckRules';
+import { addBlocker, groupDeck, ramLimits, toCardsByKey, validateDeck } from './deckRules';
 
 function card(key: string, overrides: Partial<Card> = {}): Card {
   return {
@@ -194,5 +194,26 @@ describe('deck editing helpers', () => {
     expect(withDeckCount(d, 'a', 500).sections[0]?.cards[0]?.count).toBe(99);
     d = withDeckCount(d, 'a', 0);
     expect(d.sections[0]?.cards).toEqual([]);
+  });
+});
+
+describe('groupDeck', () => {
+  it('groups the main deck by type in Cost order and keeps Legends and unknown cards apart', () => {
+    const cards = [
+      card('l1', { type: 'Legend', name: 'L1', ram: 2 }),
+      card('unit-b', { cost: 3 }),
+      card('unit-a', { cost: 1 }),
+      card('prog', { type: 'Program', cost: 2 }),
+      card('gear', { type: 'Gear', cost: 2 }),
+      card('odd', { type: 'Weird', cost: 0 }),
+    ];
+    const grouped = groupDeck(
+      deck([['unit-b', 1], ['l1', 1], ['prog', 1], ['unit-a', 2], ['gear', 1], ['odd', 1], ['ghost', 3]]),
+      toCardsByKey(cards),
+    );
+    expect(grouped.legends.map((row) => row.card.key)).toEqual(['l1']);
+    expect(grouped.groups.map((group) => group.type)).toEqual(['Unit', 'Gear', 'Program', 'Weird']);
+    expect(grouped.groups[0]?.rows.map((row) => row.card.key)).toEqual(['unit-a', 'unit-b']);
+    expect(grouped.unknown).toEqual([{ key: 'ghost', count: 3 }]);
   });
 });

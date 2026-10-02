@@ -77,6 +77,8 @@ export const deckTexts = {
   legendsHeading: 'Legendit',
   mainHeading: 'Pääpakka',
   sectionLabel: (title: string) => `${title}: pakan kortit`,
+  unknownHeading: 'Tuntemattomat kortit',
+  removeUnknown: (key: string, count: number) => `Poista pakasta: ${key} (${count})`,
   deckEmpty: 'Pakka on tyhjä. Lisää kortteja hakulistasta.',
   legendsEmpty: 'Ei Legendejä. Lisää kolme eri Legendiä.',
   ramLimitsLabel: 'RAM-rajat',

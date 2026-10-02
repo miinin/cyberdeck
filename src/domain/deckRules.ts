@@ -198,3 +198,41 @@ export function addBlocker(card: Card, deck: DeckContent, cardsByKey: CardsByKey
   }
   return null;
 }
+
+export interface DeckRow {
+  readonly card: Card;
+  readonly count: number;
+}
+
+export interface DeckGroups {
+  readonly legends: readonly DeckRow[];
+  /** Main deck by type (Unit, Gear, Program, then other types), each ordered by Cost, then name. */
+  readonly groups: readonly { readonly type: string; readonly rows: readonly DeckRow[] }[];
+  /** Keys not found in the card data, with their copies. */
+  readonly unknown: readonly { readonly key: CardKey; readonly count: number }[];
+}
+
+const MAIN_TYPE_ORDER = ['Unit', 'Gear', 'Program'];
+
+function byCostThenName(a: DeckRow, b: DeckRow): number {
+  const cost = (a.card.cost ?? Number.MAX_SAFE_INTEGER) - (b.card.cost ?? Number.MAX_SAFE_INTEGER);
+  return cost !== 0 ? cost : a.card.displayName.localeCompare(b.card.displayName, 'en');
+}
+
+/** The deck as the editor shows it: Legends, then the main deck grouped by type in Cost order. */
+export function groupDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckGroups {
+  const legends: DeckRow[] = [];
+  const byType = new Map<string, DeckRow[]>();
+  const unknown: { key: CardKey; count: number }[] = [];
+  for (const [key, count] of deckCounts(deck)) {
+    const card = cardsByKey.get(key);
+    if (card === undefined) unknown.push({ key, count });
+    else if (card.type === 'Legend') legends.push({ card, count });
+    else byType.set(card.type, [...(byType.get(card.type) ?? []), { card, count }]);
+  }
+  const otherTypes = [...byType.keys()].filter((type) => !MAIN_TYPE_ORDER.includes(type));
+  const groups = [...MAIN_TYPE_ORDER, ...otherTypes]
+    .filter((type) => byType.has(type))
+    .map((type) => ({ type, rows: [...(byType.get(type) ?? [])].sort(byCostThenName) }));
+  return { legends: legends.sort(byCostThenName), groups, unknown };
+}
