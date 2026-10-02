@@ -127,7 +127,14 @@ export default defineConfig(
     languageOptions: { globals: { ...globals.browser, ...globals.vitest } },
   },
   {
-    files: ['eslint.config.js'],
+    // ARCHITECTURE.md 13.6: developer scripts may use src/api, but only through its public index.
+    files: ['scripts/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [apiInternals] }],
+    },
+  },
+  {
+    files: ['eslint.config.js', 'scripts/**/*.mjs'],
     languageOptions: { globals: globals.node },
   },
 );
