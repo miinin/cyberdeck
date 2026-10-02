@@ -69,8 +69,7 @@ function shortened(line: string): string {
 
 export function parseDeckText(text: string, cards: readonly Card[]): ParseDeckTextResult {
   if (text.length > MAX_IMPORT_BYTES) return { ok: false, error: 'too-long' };
-  const lines = text
-    .replace(/^FEFF/, '')
+  const lines = (text.charCodeAt(0) === 0xfeff ? text.slice(1) : text)
     .replace(/\r\n?/g, '\n')
     .normalize('NFC')
     .split('\n');
