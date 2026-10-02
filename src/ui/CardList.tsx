@@ -5,6 +5,7 @@ import { CardColor, typeBadgeClass } from './CardColor';
 import { CardImage } from './CardImage';
 import { CountControl } from './CountControl';
 import type { CountControlMode } from './CountControl';
+import { CardDecks } from './CardDecks';
 import { texts } from './texts';
 
 /** The collection part of each box. Left out when the collection could not be read. */
@@ -53,11 +54,14 @@ export function CardList({
   cards,
   caption = texts.tableCaption,
   owned,
+  decksOf,
   onOpenImage,
 }: {
   cards: readonly Card[];
   caption?: string;
   owned?: OwnedColumn;
+  /** Names of the decks a card is in (T-013); left out when decks could not be read. */
+  decksOf?: (card: Card) => readonly string[];
   /** Opens the enlarged image (T-027 UX); the button is where focus returns. */
   onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
 }) {
@@ -91,6 +95,7 @@ export function CardList({
             <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} />
             <Stat label={texts.columnRarity} value={card.rarity} missing={texts.noRarity} />
           </dl>
+          {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
           {owned !== undefined && (
             <div className="card-collection">
               <CountControl

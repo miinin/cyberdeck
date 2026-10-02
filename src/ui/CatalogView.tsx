@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
@@ -30,6 +30,7 @@ import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
 import { useCollection } from './useCollection';
+import { useDecks } from './useDecks';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
 import type { Announcement } from './useDelayedAnnouncement';
@@ -42,6 +43,7 @@ function describeResult(active: boolean, shown: number, all: number): Announceme
 }
 
 const NO_KEYS: ReadonlySet<CardKey> = new Set();
+const NO_NAMES: readonly string[] = [];
 
 /** Summary of the whole collection, counted only from cards in the loaded list (UX.md 6.5, A3). */
 function collectionSummary(snapshot: CollectionSnapshot, cards: readonly Card[]): string {
@@ -77,6 +79,18 @@ export function CatalogView({
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
+  // Which decks each card is in (T-013). Decks that cannot be read just leave the mention out.
+  const { phase: decksPhase, decks } = useDecks(repositories.decks);
+  const decksByCard = useMemo(() => {
+    const byCard = new Map<CardKey, string[]>();
+    for (const deck of decks) {
+      for (const key of new Set(deck.sections.flatMap((section) => section.cards.map((row) => row.card)))) {
+        byCard.set(key, [...(byCard.get(key) ?? []), deck.name]);
+      }
+    }
+    return byCard;
+  }, [decks]);
+  const decksOf = decksPhase === 'ready' ? (card: Card) => decksByCard.get(card.key) ?? NO_NAMES : undefined;
   const [persistence, setPersistence] = useState<PersistenceState>('idle');
   const persistenceResultRef = useRef<HTMLParagraphElement>(null);
   /** Set by the button: the result paragraph takes focus once it is rendered. */
@@ -368,9 +382,9 @@ export function CatalogView({
 
       {filtered.length > 0 &&
         (view === 'table' ? (
-          <CardTable cards={filtered} caption={listCaption} owned={owned} onOpenImage={handleOpenImage} />
+          <CardTable cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
         ) : (
-          <CardList cards={filtered} caption={listCaption} owned={owned} onOpenImage={handleOpenImage} />
+          <CardList cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
         ))}
 
       <CardImageDialog card={openCard} onClose={handleCloseImage} />

@@ -1459,3 +1459,290 @@ body:has(dialog[open]) {
   outline: var(--focus-ring);
   outline-offset: 2px;
 }
+
+/* Main navigation in the header and deck building (T-013). Header colours are fixed in both themes. */
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.main-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  color: var(--color-header-text);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-button);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+
+.main-nav a:hover {
+  border-bottom-color: var(--color-header-text);
+}
+
+.main-nav a[aria-current='page'] {
+  border-bottom-color: var(--color-brand-yellow);
+}
+
+.main-nav a:focus-visible {
+  outline: 2px solid var(--color-brand-yellow);
+  outline-offset: 2px;
+}
+
+.deck-toolbar {
+  margin-block: var(--space-4);
+}
+
+.deck-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deck-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.deck-name {
+  overflow-wrap: anywhere;
+}
+
+.deck-counts,
+.deck-updated {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.deck-status {
+  font-weight: var(--font-weight-bold);
+}
+
+.deck-status.is-legal {
+  color: var(--color-success);
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+
+.deck-rename,
+.deck-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.deck-rename input,
+.deck-name-field input {
+  width: 100%;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.deck-rename input:hover,
+.deck-name-field input:hover {
+  border-color: var(--color-info);
+}
+
+.deck-rename input:focus-visible,
+.deck-name-field input:focus-visible {
+  border-color: var(--color-info);
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.deck-rename input[aria-invalid='true'],
+.deck-name-field input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.field-error {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+.confirm-dialog {
+  max-width: min(30rem, calc(100vw - 2 * var(--gutter)));
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.confirm-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+/* Deck editor: search left, deck right from 60rem up; stacked below that. */
+.editor-back {
+  margin-block: var(--space-3);
+}
+
+.deck-name-field {
+  max-width: 32rem;
+  margin-block: var(--space-4);
+}
+
+.save-status {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.save-status.is-error {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+.deck-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block-end: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.deck-summary h2,
+.deck-section h2,
+.editor-search h2 {
+  font-size: var(--font-size-base);
+}
+
+.issue-list {
+  margin: 0;
+  padding-inline-start: var(--space-6);
+}
+
+.issue-list li {
+  color: var(--color-danger);
+}
+
+.issue-list li.is-warning {
+  color: var(--color-warning);
+}
+
+.editor-layout {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .editor-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.editor-search,
+.editor-deck {
+  min-width: 0;
+}
+
+.search-results,
+.deck-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.search-results {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.card-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+/* Dimmed = adding would break a rule. Text stays above 4.5:1 (opacity is not used); the reason is shown as text. */
+.card-row.is-dimmed {
+  border-style: dashed;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.card-row.is-missing {
+  border-color: var(--color-warning);
+}
+
+.card-row-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.card-row-meta {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.card-row-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.deck-section {
+  margin-block-end: var(--space-6);
+}
+
+.deck-group-title {
+  margin-block: var(--space-3) 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+.deck-card-count {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: var(--font-weight-bold);
+}
+
+.card-decks {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}

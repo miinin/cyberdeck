@@ -1,0 +1,116 @@
+import { LEGEND_COUNT, MAX_MAIN_DECK, MIN_MAIN_DECK } from '../domain/deckRules';
+import { MAX_DECK_NAME_LENGTH } from '../domain/deck';
+import type { StorageErrorKind } from '../storage';
+import { cardCount } from './texts';
+
+// User-facing texts of deck building (T-013). Terms follow docs/CONTENT.md: card type and game
+// terms (Legend, RAM, Cost) stay in English, the rest is plain Finnish.
+
+/** "1 rike", "2 rikettä" */
+function issueCount(count: number): string {
+  return `${count} ${count === 1 ? 'rike' : 'rikettä'}`;
+}
+
+export const deckTexts = {
+  navLabel: 'Päävalikko',
+  navCards: 'Kortit',
+  navDecks: 'Pakat',
+
+  listHeading: 'Pakat',
+  listEmpty: 'Sinulla ei ole vielä pakkoja. Aloita luomalla ensimmäinen pakka.',
+  listLoading: 'Ladataan pakkoja…',
+  listUnavailable: 'Pakkoja ei voitu ladata. Lataa sivu uudelleen. Jos ongelma jatkuu, tarkista selaimen yksityisyysasetukset.',
+  newDeck: 'Uusi pakka',
+  decksLabel: 'Omat pakat',
+  open: 'Avaa',
+  rename: 'Nimeä uudelleen',
+  copy: 'Kopioi',
+  remove: 'Poista',
+  /** Accessible names: the button text plus the deck name. */
+  forDeck: (action: string, name: string) => `${action}: ${name}`,
+  counts: (legends: number, main: number) =>
+    `Legendit ${legends}/${LEGEND_COUNT} · Pääpakka ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
+  legal: 'Laillinen ✓',
+  legalSpoken: 'Laillinen',
+  unfinished: (issues: number) => `Keskeneräinen · ${issueCount(issues)}`,
+  updated: 'Muokattu',
+
+  nameLabel: 'Pakan nimi',
+  nameHint: `Enintään ${MAX_DECK_NAME_LENGTH} merkkiä.`,
+  nameEmpty: 'Anna pakalle nimi.',
+  nameTooLong: `Nimi on liian pitkä. Enintään ${MAX_DECK_NAME_LENGTH} merkkiä.`,
+  saveName: 'Tallenna nimi',
+  cancel: 'Peruuta',
+
+  deleteTitle: 'Poistetaanko pakka?',
+  deleteBody: (name: string) => `Pakka "${name}" poistetaan. Kortit säilyvät kokoelmassasi, mutta pakkaa ei voi palauttaa.`,
+  deleteConfirm: 'Poista pakka',
+  deletedLive: (name: string) => `Pakka "${name}" poistettu.`,
+  createdLive: (name: string) => `Pakka "${name}" luotu.`,
+  copiedLive: (name: string) => `Kopio "${name}" luotu.`,
+  renamedLive: (name: string) => `Pakan nimi on nyt "${name}".`,
+
+  errorDismiss: 'Sulje ilmoitus',
+  /** What went wrong when a list action failed, by error kind. */
+  actionFailed: (kind: StorageErrorKind | 'unknown') => {
+    switch (kind) {
+      case 'quota':
+        return 'Selaimen tallennustila on täynnä, joten muutos ei tallentunut. Vapauta tilaa poistamalla selaimen tietoja muilta sivustoilta ja yritä uudelleen.';
+      case 'unavailable':
+        return 'Selain esti tallennuksen, joten muutos ei tallentunut. Yritä uudelleen. Jos ongelma jatkuu, tarkista selaimen yksityisyysasetukset.';
+      case 'limit-reached':
+        return 'Pakkoja on jo niin paljon, ettei uutta mahdu. Poista pakka, jota et enää tarvitse.';
+      case 'newer-version':
+        return 'Pakat on tallennettu uudemmalla sovellusversiolla, joten niitä ei voi muuttaa tällä versiolla. Lataa sivu uudelleen.';
+      case 'not-found':
+        return 'Pakkaa ei löytynyt. Se on voitu poistaa toisessa välilehdessä.';
+      default:
+        return 'Jokin meni pieleen, ja muutos ei tallentunut. Yritä uudelleen.';
+    }
+  },
+
+  // Editor
+  backToList: 'Takaisin pakkoihin',
+  editorLoading: 'Ladataan pakkaa…',
+  editorNotFound: 'Pakkaa ei löytynyt. Se on voitu poistaa.',
+  summaryHeading: 'Yhteenveto',
+  legendsHeading: 'Legendit',
+  mainHeading: 'Pääpakka',
+  sectionLabel: (title: string) => `${title}: pakan kortit`,
+  unknownHeading: 'Tuntemattomat kortit',
+  removeUnknown: (key: string, count: number) => `Poista pakasta: ${key} (${count})`,
+  deckEmpty: 'Pakka on tyhjä. Lisää kortteja hakulistasta.',
+  legendsEmpty: 'Ei Legendejä. Lisää kolme eri Legendiä.',
+  ramLimitsLabel: 'RAM-rajat',
+  ramLimit: (color: string, limit: number) => `${color} ${limit}`,
+  ramLimitsNone: 'Ei RAM-rajoja ennen kuin pakassa on Legend.',
+  issuesHeading: 'Puutteet',
+  allGood: 'Pakka on laillinen.',
+  issuesLive: (count: number) => (count === 0 ? 'Pakka on nyt laillinen.' : `Pakassa on ${issueCount(count)}.`),
+  warningPrefix: 'Huomio: ',
+  rulesNote: 'Tarkistettava: sääntö käyttää kortin yhtä väriä ja RAM-arvoa sellaisenaan.',
+  missingFromCollection: (count: number) =>
+    count === 0 ? 'Kaikki pakan kortit ovat kokoelmassasi.' : `Kokoelmasta puuttuu ${cardCount(count)}.`,
+  collectionNotReady: 'Kokoelmaa ei voi verrata, koska sitä ei voitu ladata.',
+  owned: (have: number, need: number) => `omistat ${have}/${need}`,
+  missingBadge: 'puuttuu',
+  addToDeck: 'Lisää pakkaan',
+  addCard: (name: string) => `Lisää pakkaan: ${name}`,
+  removeCard: (name: string) => `Poista pakasta: ${name}`,
+  inDeck: (count: number) => `Pakassa ${count}`,
+  searchHeading: 'Lisää kortteja',
+  searchResults: (shown: number, all: number) => `${shown} / ${all} korttia`,
+  noSearchResults: 'Hakua vastaavia kortteja ei löytynyt.',
+  dimmedHint: (reason: string) => `${reason} Voit silti lisätä kortin.`,
+  distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',
+
+  saveSaved: 'Tallennettu',
+  saveSaving: 'Tallennetaan…',
+  saveDirty: 'Muutokset tallennetaan hetken kuluttua…',
+  saveFailed: (kind: StorageErrorKind | 'unknown') => `Ei tallennettu. ${deckTexts.actionFailed(kind)}`,
+  saveRetry: 'Yritä tallentaa uudelleen',
+
+  // Catalog
+  inDecks: (count: number) => `Pakoissa: ${count}`,
+  inDecksNames: (names: readonly string[]) => `Pakoissa: ${names.join(', ')}`,
+} as const;
