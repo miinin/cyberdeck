@@ -123,7 +123,7 @@ export function CardFilters({
         </fieldset>
       )}
 
-      <p id="filter-hint" className="hint filter-hint">
+      <p id="filter-hint" className="visually-hidden">
         {texts.filterHint}
       </p>
 

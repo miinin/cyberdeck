@@ -11,17 +11,20 @@ import { ThemeToggle } from './ui/ThemeToggle';
 export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; repositories?: Repositories }) {
   // Opened once per page load; tests pass in-memory repositories.
   const [openRepositories] = useState(() => repositories ?? openBrowserRepositories());
+  // The persistent storage button lives in the header but its state in the catalog view.
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
 
   return (
     <>
       <header className="site-header">
         <div className="container">
           <span className="brand">{texts.appName}</span>
+          <span className="header-actions" ref={setHeaderSlot} />
           <ThemeToggle preferences={openRepositories.preferences} />
         </div>
       </header>
       <main className="container">
-        <CatalogView cards={cards} repositories={openRepositories} />
+        <CatalogView cards={cards} repositories={openRepositories} headerSlot={headerSlot} />
       </main>
       <footer className="site-footer">
         <div className="container">
