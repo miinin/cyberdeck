@@ -25,6 +25,10 @@ beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('theme toggle', () => {
   it('starts dark on the first visit even when the device prefers light', async () => {
     const matchMedia = vi.fn((query: string) => ({
@@ -44,7 +48,6 @@ describe('theme toggle', () => {
 
     expect(screen.getByRole('button', { name: 'Vaalea teema', pressed: false })).toBeInTheDocument();
     expect(themeAttribute()).toBe('dark');
-    vi.unstubAllGlobals();
   });
 
   it('is in the header, is the first tab stop and toggles with the mouse, Enter and Space', async () => {

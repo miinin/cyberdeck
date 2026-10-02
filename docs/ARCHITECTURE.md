@@ -339,8 +339,10 @@ MVP-2:ssa `storage/firestore/` toteuttaa samat `CollectionRepository`- ja `DeckR
 | `cyberdeck:collection` | `{"schemaVersion":1,"savedAt":"2026-10-01T12:00:00.000Z","data":{"entries":[{"card":"v-streetkid","count":2}]}}` |
 | `cyberdeck:decks` | `{"schemaVersion":1,"savedAt":"…","data":{"decks":[{"id":"<uuid>","name":"Esimerkkipakka","sections":[{"name":"Legends","cards":[{"card":"v-streetkid","count":1}]}],"createdAt":"…","updatedAt":"…"}]}}` |
 | `cyberdeck:backup:<collection\|decks>:<ISO-aikaleima>[:<n>]` | alkuperäinen raaka merkkijono sellaisenaan (luku 12.7). Pääte `:<n>` (1, 2, …) lisätään vain, jos samalla millisekunnilla on jo varmuuskopio. |
+| `cyberdeck:theme` | raakamerkkijono `light` tai `dark`, ei käärettä (T-025, UX.md 8.7). Kirjoitus vain `PreferencesRepository.saveTheme`:lla. Muu arvo luetaan tummaksi eikä sitä korjata. `public/theme-init.js` lukee avaimen ennen ensimmäistä piirtoa (T-025 A1, ainoa lukupoikkeus SR-12:een, ei kirjoita). |
 
-- `keys.ts`: `COLLECTION_KEY`, `DECKS_KEY`, `BACKUP_PREFIX = 'cyberdeck:backup:'`, `COLLECTION_SCHEMA_VERSION = 1`, `DECKS_SCHEMA_VERSION = 1`, `MAX_BACKUPS_PER_AGGREGATE = 3`.
+- `keys.ts`: `COLLECTION_KEY`, `DECKS_KEY`, `THEME_KEY`, `BACKUP_PREFIX = 'cyberdeck:backup:'`, `COLLECTION_SCHEMA_VERSION = 1`, `DECKS_SCHEMA_VERSION = 1`, `MAX_BACKUPS_PER_AGGREGATE = 3`.
+- `Repositories.preferences` (T-025): `loadTheme(): Promise<Theme>` (ei koskaan hylkää, oletus `dark`) ja `saveTheme(theme): Promise<Theme>` (hylkää `StorageError`illa). Testi `src/storage/themeInit.test.ts` varmistaa, että `public/theme-init.js` käyttää samaa avainta eikä kirjoita.
 - Versio on kääreessä, ei avaimen nimessä (SR-12:n `cyberdeck:v1:…` oli esimerkki): migraatio ei vaadi avaimen vaihtoa, ja vanha data löytyy aina samasta paikasta. Nimiavaruus `cyberdeck:` erottaa käyttäjän datan T-003:n välimuistista (jonka avain on eri, esim. `cyberdeck:cache:…`).
 - Tuotanto, testi ja esikatselukanavat ovat eri origineja, joten niiden tallennustilat ovat erillään (SECURITY.md luku 11).
 
