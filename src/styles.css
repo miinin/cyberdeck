@@ -1152,6 +1152,8 @@ body:has(dialog[open]) {
 }
 
 .card-collection {
+  display: flex;
+  justify-content: center;
   margin-top: auto;
   padding-top: var(--space-2);
 }
