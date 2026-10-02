@@ -866,3 +866,16 @@ Kokoelmanäkymä (UX.md luku 6). Ei uusia riippuvuuksia, ei muutoksia tietomalli
 - **`CardList`**: eksplisiittiset ARIA-roolit (`table`, `rowgroup`, `row`, `columnheader`, `rowheader`, `cell`), koska alle 40 rem:n korttiasettelu käyttää `display: grid`. Tyypin, värin ja hinnan välinen `·` on oikea `aria-hidden`-elementti (näkyy vain kapeassa asettelussa). "Hinta"-etuliite tulee CSS:stä `attr(data-label)`, jotta teksti pysyy `texts.ts`:ssä.
 - **"Vain omistetut"** on `CatalogView`n tila (ei `CardFilterCriteria`n osa, koska se tarvitsee kokoelman määrät). Rivit, joiden määrä painettiin nollaan suodatuksen aikana, pidetään näkyvissä (`kept`-joukko), kunnes hakuehdot muuttuvat (A5).
 - **Tunnetut rajoitteet:** jsdom ei tue CSS-asettelua, joten korttimaisen asettelun, 320 px:n ja zoomin tarkistus sekä axe-ajo jäävät UX-katselmointiin. Jokainen määrän muutos renderöi koko taulukon (noin 150 riviä); mittaus ja tarvittaessa `memo` vasta, jos se näkyy hitautena.
+
+### T-026 · Koodari 2026-10-02
+
+Korttidata sovelluksen mukana luvun 13 mukaan (D-013 osat 1–3). Ei uusia riippuvuuksia.
+
+- **`src/domain/cardFile.ts`**: `toCardFile` (kiinteä kenttäjärjestys) ja `parseCardFile` (tarkat kentät, tyypit, tekstit 1–200 merkkiä, `key === cardKey(name, subname)`, uniikit avaimet ja id:t, ei tyhjää listaa, `format`/`version`). Heittää kehittäjälle tarkoitetun virheen.
+- **`scripts/cards/updateCards.ts`** (+ `cardFileDiff.ts`): tiedostopääsy injektoidaan (`readText`/`writeText`/`log`, valinnainen `fetchFn`), joten testit eivät tarvitse levyä eikä verkkoa. Tulos `unchanged` / `written` / `failed`. `skipped > 0`, määrä ≠ `reportedTotal` tai toistuva avain → `failed`, eikä tiedostoa kirjoiteta. Kirjoitettava teksti validoidaan uudelleen ennen kirjoitusta. `scripts/cards-update.mjs` lataa TS-koodin Viten `runnerImport`illa.
+- **`src/data/cards.ts`** vie `CARDS`-taulukon (`cards.json` importattuna, `resolveJsonModule`). Ajonaikaista validointia ei ole; `cards.test.ts` ajaa `parseCardFile`n bundlattavaan tiedostoon.
+- **Käyttöliittymä:** `App` antaa `CatalogView`lle `cards`-propsin (oletus `CARDS`, testit antavat pienen listan). `useCardCatalog`, lataus-, virhe-, osittaisen ja tyhjän tilan näkymät, tekstit, latauspalkin CSS ja niiden testit poistettu (PM A2). Live-alue alkaa latausviestillä ensimmäisestä renderöinnistä.
+- **ESLint:** sovelluskoodi (`src/ui`, `App`, `main`, `src/data`) ei saa importata `src/api`:a. `scripts/**/*.ts` käyttää vain sen julkista indeksiä. `scripts/**/*.mjs` saa Node-globaalit.
+- **firebase.json:** `connect-src 'self'` ja `/assets/**` → `Cache-Control: public, max-age=31536000, immutable` molemmille sivustoille (13.7). Otsakkeiden yhdistyminen (CSP myös asset-vastauksessa) todennetaan esikatselussa `curl -sI`:llä.
+- **Determinismi:** toinen `npm run cards:update` -ajo 2026-10-02 → `Cards: 151`, `No changes` (tiedosto tavu tavulta sama, myös järjestys).
+- **Avainvertailu (D-008):** 151 korttia, 151 uniikkia avainta ja id:tä. `mapCard` ja `cardKey` eivät muuttuneet, ja `parseCardFile` tarkistaa jokaisen avaimen `cardKey(name, subname)`:ta vasten, joten avaimet ovat samat kuin rajapintakerroksen tuottamat.

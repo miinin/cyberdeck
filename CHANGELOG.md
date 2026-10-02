@@ -15,6 +15,7 @@ Käyttäjälle näkyvät muutokset versioittain.
 - Puhelimen kapealla näytöllä jokainen kortti näkyy omana korttinaan, jotta painikkeet mahtuvat.
 
 ### Muutettu
+- Kortit näkyvät heti ilman latausta. Korttitiedot tulevat sovelluksen mukana, joten sivu ei enää hae niitä Netdeck.gg:stä joka käynnillä eikä näytä haku- tai virheilmoituksia.
 - Uusi Cyberpunk 2077 -henkinen ulkoasu: keltainen ja syaani korostus, viistetyt painikkeet ja uudet fontit (Rajdhani ja numeroille Share Tech Mono). Sivu on tumma tai vaalea sen mukaan, kumman teeman laitteesi käyttää. Toiminnot ja tekstit ovat ennallaan.
 - Teksti on aiempaa suurempaa, ja omistamasi kortit erottuvat listassa korostettuna rivinä.
 - Jos olet pyytänyt laitteelta vähemmän liikettä, sivulla ei ole animaatioita.

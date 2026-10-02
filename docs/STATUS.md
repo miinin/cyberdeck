@@ -68,7 +68,9 @@ npm run lint        # ESLint, 0 varoitusta sallittu
 npm run build       # tyyppitarkistus + tuotantobuild → dist/
 npm run preview     # dist/ paikallisesti (ilman firebase.jsonin otsakkeita)
 npm audit --audit-level=high
+npm run cards:update # korttidatan päivitys Netdeck.gg:stä → src/data/cards.json (kehittäjä ajaa käsin)
 ```
 
-- Sovellus hakee kortit selaimesta suoraan `https://api.netdeck.gg`:stä. Avaimia tai ympäristömuuttujia ei tarvita.
+- Korttidata on sovelluksen mukana (`src/data/cards.json`, D-013). Sovellus ei kutsu Netdeckiä selaimessa. Avaimia tai ympäristömuuttujia ei tarvita.
+- `npm run cards:update` tekee 3 pyyntöä `https://api.netdeck.gg`:hen, validoi datan ja kirjoittaa tiedoston vain, jos sisältö muuttui (muuten `No changes`). Jos yksikin kortti hylätään tai määrä poikkeaa, tiedostoa ei muuteta, ja komento päättyy virheeseen. Poistuneet avaimet näkyvät varoituksena, koska tallennetut kokoelmat voivat viitata niihin. Tarkista muutos (`git diff src/data/cards.json`), aja `npm test` ja commitoi.
 - CSP ja muut turvallisuusotsakkeet tulevat `firebase.json`ista, joten ne näkyvät vain Firebase Hostingissa (esikatselu ja testisivusto), ei `npm run dev`:ssä.
