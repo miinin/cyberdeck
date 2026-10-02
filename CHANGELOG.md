@@ -16,6 +16,7 @@ Käyttäjälle näkyvät muutokset versioittain.
 - Teeman valinta: sovellus on oletuksena tumma. Otsikkopalkin Vaalea teema -painikkeella voit vaihtaa vaaleaan teemaan, ja valinta säilyy tässä selaimessa.
 
 ### Muutettu
+- Kortit näkyvät heti ilman latausta. Korttitiedot tulevat sovelluksen mukana, joten sivu ei enää hae niitä Netdeck.gg:stä joka käynnillä eikä näytä haku- tai virheilmoituksia.
 - Uusi Cyberpunk 2077 -henkinen ulkoasu: keltainen ja syaani korostus, viistetyt painikkeet ja uudet fontit (Rajdhani ja numeroille Share Tech Mono). Toiminnot ja tekstit ovat ennallaan.
 - Teksti on aiempaa suurempaa, ja omistamasi kortit erottuvat listassa korostettuna rivinä.
 - Jos olet pyytänyt laitteelta vähemmän liikettä, sivulla ei ole animaatioita.

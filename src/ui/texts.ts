@@ -30,35 +30,14 @@ function distinctCards(count: number): string {
   return `${numberFormat.format(count)} eri ${count === 1 ? 'kortti' : 'korttia'}`;
 }
 
-const loaded = (count: number) => `${cardCount(count)} ladattu.`;
-const partialMissing = 'Osa korteista puuttuu listasta.';
-
 export const texts = {
   appName: 'Cyberdeck',
   // Theme toggle (UX.md 8.4): the accessible name is always 'Vaalea teema'; the space comes from the markup.
   themeToggleLabel: 'Vaalea',
   themeToggleSuffix: 'teema',
   heading: 'Kortit',
-  retry: 'Yritä uudelleen',
-
-  loading: 'Haetaan kortteja…',
-
-  loaded,
-
-  emptyStatus: cardCount(0),
-  emptyBody:
-    'Kortteja ei löytynyt. Korttitietojen lähde ei juuri nyt palauttanut yhtään korttia. Yritä hetken päästä uudelleen.',
-  emptyLive: 'Kortteja ei löytynyt.',
-
-  errorTitle: 'Korttien haku epäonnistui',
-  errorBody: 'Korttitietoja ei saatu juuri nyt haettua. Tarkista verkkoyhteys ja yritä uudelleen.',
-  errorLive: 'Korttien haku epäonnistui.',
-
-  partialStatus: (received: number, total: number) => cardShare(received, total),
-  partialTitle: 'Kaikkia kortteja ei saatu näkyviin',
-  partialBody:
-    'Osa korteista puuttuu listasta, koska niiden tietoja ei saatu tai ne olivat puutteellisia. Voit yrittää hakea kortit uudelleen.',
-  partialLive: (received: number, total: number) => `Näytetään ${cardShare(received, total)}. ${partialMissing}`,
+  /** Live region text when the list is shown (UX.md 4.5). */
+  loaded: (count: number) => `${cardCount(count)} ladattu.`,
 
   tableCaption: 'Kaikki kortit',
   tableCaptionFiltered: 'Hakua vastaavat kortit',
@@ -83,9 +62,6 @@ export const texts = {
     all === 1 ? `Näytetään ${cardCount(1)}.` : `Näytetään kaikki ${numberFormat.format(all)} korttia.`,
   noResultsLive: 'Hakua vastaavia kortteja ei löytynyt.',
   noResultsBody: 'Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.',
-  /** Loaded message when a search or selection was kept over a retry (UX.md 5.6, K9, UX-002). */
-  loadedFilteredLive: (all: number, filterResult: string) => `${loaded(all)} ${filterResult}`,
-  partialFilteredLive: (filterResult: string) => `${filterResult} ${partialMissing}`,
   clearFilters: 'Tyhjennä haku ja suodattimet',
 
   // Collection: UX.md luku 6 (T-012; PM accepted A1–A7 on 2026-10-01).

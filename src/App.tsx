@@ -1,14 +1,14 @@
 import { useState } from 'react';
+import { CARDS } from './data/cards';
+import type { Card } from './domain/card';
 import { openBrowserRepositories } from './storage';
 import type { Repositories } from './storage';
 import { CatalogView } from './ui/CatalogView';
 import { texts } from './ui/texts';
 import { ThemeToggle } from './ui/ThemeToggle';
-import { useCardCatalog } from './ui/useCardCatalog';
-import type { LoadCatalog } from './ui/useCardCatalog';
 
-export function App({ loadCatalog, repositories }: { loadCatalog?: LoadCatalog; repositories?: Repositories }) {
-  const { state, retry } = useCardCatalog(loadCatalog);
+/** `cards` defaults to the bundled data (D-013); tests pass a small list and in-memory repositories. */
+export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; repositories?: Repositories }) {
   // Opened once per page load; tests pass in-memory repositories.
   const [openRepositories] = useState(() => repositories ?? openBrowserRepositories());
 
@@ -21,7 +21,7 @@ export function App({ loadCatalog, repositories }: { loadCatalog?: LoadCatalog; 
         </div>
       </header>
       <main className="container">
-        <CatalogView state={state} onRetry={retry} repositories={openRepositories} />
+        <CatalogView cards={cards} repositories={openRepositories} />
       </main>
       <footer className="site-footer">
         <div className="container">

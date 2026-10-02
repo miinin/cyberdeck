@@ -1,6 +1,7 @@
 # SECURITY · cyberdeck
 
-> Omistaja: Digiturva. Päivitetty 2026-10-01 (T-011, MVP-1:n suunnittelu: paikallinen tallennus, tiedostojen tuonti ja vienti).
+> Omistaja: Digiturva. Päivitetty 2026-10-02 (T-026: korttidata buildissa, D-012 ja D-013).
+> **T-026 (D-013) muuttaa luvun 1 mallia:** selain ei enää kutsu Netdeck.gg:tä. Korttidata (`src/data/cards.json`) on buildin mukana, ja kehittäjä päivittää sen käsin komennolla `npm run cards:update`, joka kutsuu rajapintaa Nodessa (luottamusraja 1 siirtyy kehittäjän koneelle, katso luku 14). Lukujen 1–8 Netdeck-kohdat koskevat siitä lähtien vain päivityskomentoa.
 > Luvut 1–10 kattavat **MVP-0:n**: staattinen sivusto Firebase Hostingissa, selain hakee korttidatan suoraan Netdeck.gg:n julkisesta rajapinnasta, julkaisu GitHub Actionsilla. **Luku 11** laajentaa mallin MVP-1:een (kokoelma ja pakat selaimen tallennustilassa, .txt- ja .json-tuonti ja -vienti, SR-11–SR-19). **Luku 12** ennakoi MVP-2:n Firebase-kirjautumisen (avoimet vaatimukset). Tietosuoja: `docs/PRIVACY.md`.
 
 ## 1. Järjestelmä MVP-0:ssa
@@ -87,7 +88,7 @@ script-src 'self';
 style-src 'self';
 img-src 'self' data:;
 font-src 'self';
-connect-src 'self' https://api.netdeck.gg;
+connect-src 'self';
 object-src 'none';
 base-uri 'self';
 form-action 'self';
@@ -98,6 +99,7 @@ upgrade-insecure-requests
 - Ei ulkoisia fontteja, CDN-skriptejä eikä analytiikkaa (myös tietosuojasyy). Kaikki paketoidaan buildiin.
 - Jos korttikuvat hyväksytään myöhemmin, `img-src`-listaan lisätään vain `https://dstcynss47vun.cloudfront.net` erillisellä päätöksellä.
 - Todennus: esikatselu-URL:ssa selaimen konsolissa ei ole CSP-virheitä ja `curl -sI <esikatselu-URL>` näyttää otsakkeen.
+- ~~`connect-src 'self' https://api.netdeck.gg`~~ → `connect-src 'self'` (T-026, D-013 osa 3, 2026-10-02). `'self'` valittu `'none'`n sijaan, koska Viten modulepreload-polyfill tekee saman originin `fetch`-kutsuja, ja se jättää tien auki MVP-2:lle. Uusi ulkoinen osoite `connect-src`iin vain SR-9:n katselmoinnilla.
 
 **SR-3 · Muut turvallisuusotsakkeet firebase.jsonissa** (sama `headers`-lohko):
 - `X-Content-Type-Options: nosniff`
@@ -107,13 +109,13 @@ upgrade-insecure-requests
 - `Cross-Origin-Opener-Policy: same-origin`
 - HSTS:ää ei tarvitse lisätä: Firebase Hosting asettaa sen jo *.web.app-osoitteissa (todennettu). Jos myöhemmin otetaan käyttöön oma verkkotunnus, HSTS tarkistetaan uudelleen.
 
-**SR-4 · Rajapintakutsut vain yhdestä kerroksesta ja ilman tunnisteita.**
+**SR-4 · Rajapintakutsut vain yhdestä kerroksesta ja ilman tunnisteita.** (T-026: koskee vain `npm run cards:update` -komentoa. ESLint estää `src/api`:n importin sovelluskoodissa, eikä `dist/` sisällä Netdeck-osoitetta.)
 - Perus-URL `https://api.netdeck.gg/api/cards/cyberpunk` on vakiona yhdessä paikassa rajapintakerroksessa. Ei käyttäjän syötteestä tai URL-parametreista koottua osoitetta.
 - `fetch`-kutsuissa `credentials: 'omit'` (rajapinta sallii evästeet mille tahansa originille, joten niitä ei saa lähettää) ja `referrerPolicy: 'no-referrer'`.
 - Ei API-avaimia tai muita salaisuuksia selainkoodissa. Jos rajapinta joskus vaatii avaimen, se ei kuulu staattiseen sivustoon (uusi arkkitehtuuripäätös).
 - Vastauksen muoto tarkistetaan: `items` on taulukko, `total` on ei-negatiivinen kokonaisluku, ja jokainen käytetty kenttä on odotettua tyyppiä. Odottamaton kenttä tai tyyppi ei kaada sovellusta: kortti ohitetaan tai kenttä näytetään tyhjänä, ja virhe kirjataan konsoliin.
 
-**SR-5 · Kestävyys ja virheet.**
+**SR-5 · Kestävyys ja virheet.** (T-026: koskee päivityskomentoa. Sama `fetchAllCards` aikakatkaisuineen, sivukattoineen ja rinnakkaisuusrajoineen; yksi ajo = 3 pyyntöä. Komento ei kirjoita tiedostoa, jos yksikin kortti hylätään tai määrä poikkeaa.)
 - Jokaisella pyynnöllä on aikakatkaisu (esim. `AbortController`, 10–15 s).
 - Sivutussilmukalla on kova yläraja (esim. enintään 20 sivua tai `ceil(total/limit)+1`, kumpi pienempi) ja se pysähtyy, jos sivu on tyhjä tai `offset` ei kasva. Pyynnöt tehdään peräkkäin tai pienellä rinnakkaisuudella (enintään 2–3 kerrallaan), ei rajattomasti.
 - Automaattisia uusintayrityksiä enintään yksi per pyyntö. Ei loputonta uudelleenyrittämistä.
@@ -126,7 +128,7 @@ upgrade-insecure-requests
 - `npm audit --audit-level=high` ei saa löytää High- tai Critical-haavoittuvuuksia tuotantoriippuvuuksista luovutushetkellä. Tulos kirjataan luovutukseen. Kehitysriippuvuuksien löydökset kirjataan ja arvioidaan erikseen.
 - Ei riippuvuuksia, joilla on `postinstall`-skripti, ilman perustelua (tarkistus: `npm ci` -tuloste tai `npm query ':attr(scripts, [postinstall])'`).
 
-**SR-7 · Ei tekstiä tai dataa ulkoisista palveluista buildissa.** Build ei hae mitään verkosta (ei rajapintakutsuja build-vaiheessa, ei etäfontteja). Näin buildi on toistettava eikä kolmas osapuoli pääse vaikuttamaan julkaistuun pakettiin.
+**SR-7 · Ei tekstiä tai dataa ulkoisista palveluista buildissa.** Build ei hae mitään verkosta (ei rajapintakutsuja build-vaiheessa, ei etäfontteja). Näin buildi on toistettava eikä kolmas osapuoli pääse vaikuttamaan julkaistuun pakettiin. **T-026:** `npm run cards:update` on kehittäjän käsin ajama komento, ei osa `build`-skriptiä tai workflowta. Sen tulos (`src/data/cards.json`) validoidaan ennen kirjoitusta ja katselmoidaan PR:ssä diffinä, joten SR-7 säilyy.
 
 **SR-8 · GitHub Actions: vähimmät oikeudet.**
 - Jokaiseen workflowhun `permissions`-lohko. `deploy-prod.yml` ja `deploy-test.yml`: `contents: read` (lisäksi `checks: write` vain, jos `action-hosting-deploy` sitä live-kanavalle tarvitsee; muuten `repoToken` voi jäädä pois live-julkaisuista). `preview.yml`: nykyinen (`checks: write`, `contents: read`, `pull-requests: write`) on sopiva.
@@ -163,7 +165,7 @@ Digiturva ei anna oikeudellista neuvontaa. Alla on se, mitä julkisista lähteis
 MVP-0 **ei käsittele henkilötietoja**: ei kirjautumista, lomakkeita, evästeitä, analytiikkaa eikä selaimen tallennustilaa. ~~Siksi `docs/PRIVACY.md`:tä ei vielä luoda.~~ → `docs/PRIVACY.md` luotu 2026-10-01 (T-011), ja se kattaa myös alla olevat huomiot.
 
 Huomiot:
-- Käyttäjän selain ottaa suoraan yhteyttä `api.netdeck.gg`:hen, jolloin Netdeck näkee käyttäjän IP-osoitteen ja selaimen tiedot. Tämä on kolmannen osapuolen tiedonsaanti, joka kirjataan PRIVACY.md:hen, kun se luodaan. `Referrer-Policy: no-referrer` ja `credentials: 'omit'` minimoivat vuotavaa tietoa.
+- **T-026:sta alkaen (D-013) käyttäjän selain ei ota yhteyttä Netdeckiin**, vaan Netdeck näkee vain kehittäjän IP-osoitteen, kun `cards:update` ajetaan. Alkuperäinen huomio: ~~käyttäjän selain ottaa suoraan yhteyttä `api.netdeck.gg`:hen, jolloin Netdeck näkee käyttäjän IP-osoitteen ja selaimen tiedot.~~ Tämä on kolmannen osapuolen tiedonsaanti, joka kirjataan PRIVACY.md:hen, kun se luodaan. `Referrer-Policy: no-referrer` ja `credentials: 'omit'` minimoivat vuotavaa tietoa.
 - Firebase Hosting kirjaa pyyntölokeja (IP-osoitteet) Googlen infrastruktuuriin. Kirjataan PRIVACY.md:hen.
 - **PRIVACY.md luodaan viimeistään MVP-1:ssä**, kun kokoelma ja pakat tallennetaan (selaimen tallennustila tai tietokanta), ja ennen MVP-2:ta, jossa kirjautuminen ja kavereiden vaihtolistat tuovat henkilötiedot ja mahdollisesti alaikäiset käyttäjät (eskaloidaan silloin käyttäjälle).
 
@@ -171,18 +173,18 @@ Huomiot:
 
 | ID | Riski | Vakavuus | Omistaja | Tila / torjunta |
 |---|---|---|---|---|
-| R-1 | Korttikuvien käyttöoikeus tuntematon | Medium (oikeudellinen/maine) | Käyttäjä päättää | Avoin. Käyttäjän päätös (D-006): kuvia ei näytetä T-001:ssä, vaan käyttäjä tuo kuvat käyttöön myöhemmin omana tehtävänään. Siihen asti kuvat pois (T-001 todennettu: `image_url` ei pääse malliin, CSP `img-src 'self' data:`). Kuvatehtävä vaatii Digiturvan suunnittelun: kuvien lähde ja käyttöoikeus, `img-src`-muutos (SR-2) ja ettei rajapinnan URL-kenttää käytetä tarkistamatta (SR-1). |
-| R-2 | Korttidatan käyttöehdot epäselvät (cyberpunktcg.com kieltää scrapingin, Netdeckin ehtoja ei löydy) | Medium | Käyttäjä | ~~Avoin~~ → **Hyväksytty** (käyttäjä, D-006, 2026-09-30). Katso luku 10. |
+| R-1 | Korttikuvien käyttöoikeus tuntematon | Medium (oikeudellinen/maine) | Käyttäjä päättää | ~~Avoin~~ → **Hyväksytty** (käyttäjä, D-012, 2026-10-02): kuvat omalla julkisella palvelimella. Katso luku 10. Tekninen toteutus T-027 (D-013 osa 4: kuvat Viten assetteina, `img-src 'self'` riittää, `image_url`ia ei käytetä). Aiempi tila: Käyttäjän päätös (D-006): kuvia ei näytetä T-001:ssä, vaan käyttäjä tuo kuvat käyttöön myöhemmin omana tehtävänään. Siihen asti kuvat pois (T-001 todennettu: `image_url` ei pääse malliin, CSP `img-src 'self' data:`). Kuvatehtävä vaatii Digiturvan suunnittelun: kuvien lähde ja käyttöoikeus, `img-src`-muutos (SR-2) ja ettei rajapinnan URL-kenttää käytetä tarkistamatta (SR-1). |
+| R-2 | Korttidatan käyttöehdot epäselvät (cyberpunktcg.com kieltää scrapingin, Netdeckin ehtoja ei löydy) | Medium | Käyttäjä | ~~Avoin~~ → **Hyväksytty** (käyttäjä, D-006, 2026-09-30) → laajennettu (käyttäjä, D-012, 2026-10-02): data jaetaan omalta palvelimelta. Katso luku 10. |
 | R-3 | Actionit tagilla (`@v4`, `@v0`), ei SHA-lukitusta | Low | Koodari (velka) | Avoin. Ehdotus: `[velka]`-tehtävä, Dependabot. |
 | R-4 | Palvelutilin avain on kaikkien workflowjen käytössä. Tehtävähaaran PR voi muuttaa `preview.yml`:ää ja julkaista `channelId: live` tuotantoon. | Medium | PM / käyttäjä | Avoin. Torjunta nyt: SR-9 (workflow-muutokset aina katselmointiin) ja suojaushook. Ehdotus: GitHub Environment `production` (vain main-haara, käyttäjän hyväksyntä) ja erillinen salaisuus prod-julkaisulle. Vaatii käyttäjän toimenpiteen GitHubin asetuksissa. |
 | R-5 | Build-jobissa ajetaan npm-pakettien install-skriptejä samassa jobissa kuin julkaisusalaisuus | Low–Medium | Koodari / Arkkitehti | Avoin. Riippuvuuksien minimointi, `npm audit`, lukitus (SR-6). Myöhemmin mahdollisesti build ja julkaisu eri jobeihin (artefaktin välitys). |
-| R-6 | Netdeck.gg-rajapinta muuttuu tai katoaa (PROJECT.md) | Medium (saatavuus) | Arkkitehti | Avoin. Eristetty rajapintakerros ja skeemantarkistus (SR-4). |
-| R-7 | Rajapinta sallii evästeet mille tahansa originille (`ACAO` heijastettu + `Allow-Credentials: true`). Koskee Netdeckin omia käyttäjiä, ei meitä, kunhan emme lähetä tunnisteita. | Info | – | Havainto. Ei testattu eikä hyödynnetty. SR-4 estää meidän osuutemme (T-001: `credentials: 'omit'` todennettu testillä). |
+| R-6 | Netdeck.gg-rajapinta muuttuu tai katoaa (PROJECT.md) | ~~Medium~~ → Low (saatavuus) | Arkkitehti | **Pienennetty (T-026, SEC-005-t026):** sovellus toimii ilman rajapintaa, koska data on buildissa. Rajapinnan muutos tai katoaminen estää vain datan päivityksen: `cards:update` epäonnistuu (exit 1) eikä koske tiedostoon. Jäännös: uusia kortteja ei saada ilman uutta lähdettä. Eristetty rajapintakerros ja skeemantarkistus (SR-4) säilyvät komennossa. |
+| R-7 | Rajapinta sallii evästeet mille tahansa originille (`ACAO` heijastettu + `Allow-Credentials: true`). Koskee Netdeckin omia käyttäjiä, ei meitä, kunhan emme lähetä tunnisteita. | Info | – | T-026:sta alkaen ei koske sovellusta (ei selainkutsuja). Havainto. Ei testattu eikä hyödynnetty. SR-4 estää meidän osuutemme (T-001: `credentials: 'omit'` todennettu testillä). |
 | R-8 | SR-1:n lint-säännöt eivät tunnista kaikkia HTML-nieluja (SEC-002). Ei hyödynnettävissä nykyisellä koodilla. | Low | Koodari (velka) | Avoin. Korjattava ennen tehtävää, joka muotoilee `rules_text`iä. |
 | R-9 | `actions/checkout` jättää GITHUB_TOKENin `.git/config`iin npm-skriptien ajaksi (SEC-003) | Low | Koodari (velka) | Avoin. `persist-credentials: false` kaikkiin workflowihin, esim. T-004:n yhteydessä. |
 | R-10 | Paikallinen data katoaa ilman käyttäjän toimea: selaimen tietojen tyhjennys, yksityinen ikkuna, toinen laite tai selain sekä Safarin (WebKit ITP) käytäntö poistaa skriptin kirjoittaman tallennustilan, jos sivustolla ei ole käyty noin 7 vuorokauteen | Medium (tietojen menetys) | PM / UX | Avoin. Torjunta MVP-1:ssä: vienti varmuuskopioksi (T-015), käyttäjälle kerrotaan, että tiedot ovat vain tässä selaimessa (UX-mikrokopio), SR-13 (`navigator.storage.persist()` pyydetään, jos tuettu). Pysyvä ratkaisu: pilvitallennus MVP-2:ssa. **T-012 (SEC-003-t012):** muistutus "vain tähän selaimeen" ja pysyvän tallennuksen pyyntö painikkeesta toteutettu. Ilmoitustekstit eivät saa ohjata käyttäjää tyhjentämään selaimen tietoja (SEC-011, SEC-012). Jäljellä: vienti (T-015). |
 | R-11 | Usean välilehden kilpailutilanne: kaksi välilehteä kirjoittaa saman avaimen, ja myöhempi kirjoitus hävittää ensimmäisen muutokset | Low–Medium (tietojen menetys) | Arkkitehti / Koodari | Avoin, minimoitu (T-011, SEC-002-katselmointi): tuore luku ennen jokaista kirjoitusta ilman awaitia välissä, muutokset kohdistuvat riviin tai yhteen pakkaan, `storage`-tapahtuman tilaus. Jäljelle jää: vanhentuneessa näkymässä oleva välilehti voi tallentaa pakan vanhan sisällön. T-012 ja T-013 lataavat näkymän uudelleen `subscribe`-kutsun kautta. **T-012 toteutettu (SEC-003-t012):** kokoelma luetaan uudelleen toisen välilehden muutoksesta, omat tallennukset ovat peräkkäisiä, ja vanhat vastaukset hylätään. Jäännös: absoluuttinen määrä vanhentuneesta näkymästä millisekuntien ikkunassa (SEC-013, Info). |
-| R-12 | Korttidatan välimuisti (T-003) ja käyttäjän data jakavat saman origin-kohtaisen kiintiön (localStorage noin 5 Mt). Välimuisti voi täyttää tilan, jolloin kokoelman tallennus epäonnistuu. | Low–Medium | Arkkitehti | Avoin. Torjunta SR-13: käyttäjän data ensin, välimuisti poistetaan ensimmäisenä kiintiövirheessä, eri avaimet. |
+| R-12 | Korttidatan välimuisti (T-003) ja käyttäjän data jakavat saman origin-kohtaisen kiintiön (localStorage noin 5 Mt). Välimuisti voi täyttää tilan, jolloin kokoelman tallennus epäonnistuu. | Low–Medium | Arkkitehti | ~~Avoin~~ → **Poistunut** (T-026, D-013: T-003 korvattu, korttidataa ei tallenneta selaimeen). Aiempi torjunta: Torjunta SR-13: käyttäjän data ensin, välimuisti poistetaan ensimmäisenä kiintiövirheessä, eri avaimet. |
 | R-13 | Kaverilta saatu .json- tai .txt-tiedosto on epäluotettava syöte (XSS, jättitiedosto, prototyypin saastutus, olemassa olevan pakan ylikirjoitus) | Medium (ennen torjuntaa) | Koodari | Avoin. Torjunta SR-17–SR-19 (T-014, T-015). |
 | R-14 | Firebase-projektin web-konfiguraatio on luettavissa osoitteesta `/__/firebase/init.json` (B-010). API-avainta ei ole rajattu. | Low nyt, High jos Auth tai Firestore otetaan käyttöön ilman rajauksia | Käyttäjä / Koodari (T-009) | Avoin. Ei hyödynnettävissä MVP-1:ssä, koska sovellus ei käytä Firebase-palveluita Hostingin lisäksi. Ehto ennen MVP-2:ta: luvun 12 vaatimukset MVP2-1–MVP2-3. Polkua ei voi poistaa Hostingista, joten tieto hyväksytään julkiseksi; suojaus perustuu rajauksiin ja sääntöihin. |
 | R-15 | Nimistä jää poistamatta LRM, RLM, ALM, U+2028, U+2029 ja U+FEFF (SEC-005, raportti SEC-002-t011) | Low | Koodari | ~~Avoin~~ → **Korjattu** (commit 15812ba, todennettu SEC-003-t012:ssa: `UNSAFE_CHARACTERS` kattaa merkit). |
@@ -194,7 +196,8 @@ Vain käyttäjä voi hyväksyä riskin (rules.md 8).
 
 | ID | Riski | Hyväksyjä ja päivä | Peruste | Ehdot, joiden on pysyttävä voimassa |
 |---|---|---|---|---|
-| R-2 | Korttidata haetaan Netdeck.gg:n julkisesta rajapinnasta käyttäjän selaimessa, vaikka käyttöehdot ovat epäselvät | Käyttäjä, 2026-09-30 (D-006) | Sovellus on ei-kaupallinen, siinä on epävirallisuusmerkintä, ja rajapintaa kutsutaan maltillisesti | Ei kaupallisuutta eikä mainoksia. Epävirallisuusmerkintä ja lähdemaininta näkyvissä. Kutsumäärä maltillinen (SR-5: sivukatto, rinnakkaisuus enintään 3, ei automaattisia uusintayrityksiä). Dataa ei kopioida omaan Hostingiin. Hyväksyntä arvioidaan uudelleen, jos WeirdCo tai Netdeck.gg julkaisee ehdot tai pyytää lopettamaan, tai kun välimuisti (T-003) muuttaa datan tallennusta. |
+| R-1 | Korttikuvat näytetään omalta julkiselta palvelimelta (Firebase Hosting), vaikka käyttöoikeutta ei löytynyt (luku 7) | Käyttäjä, 2026-10-02 (D-012) | Käyttäjän päätös, ei-kaupallinen fanityökalu | Ei kaupallisuutta eikä mainoksia. Epävirallisuusmerkintä näkyvissä. Ei virallisia logoja. Hyväksyntä arvioidaan uudelleen, jos oikeudenhaltija pyytää poistamaan kuvat. Tekniset ehdot tarkistetaan T-027:n katselmoinnissa. |
+| R-2 | ~~Korttidata haetaan Netdeck.gg:n julkisesta rajapinnasta käyttäjän selaimessa~~ → korttidata (151 korttia, pelimekaaninen tieto) jaetaan omalta palvelimelta osana sovelluspakettia, ja kehittäjä hakee sen Netdeck.gg:stä käsin ajettavalla komennolla, vaikka käyttöehdot ovat epäselvät | Käyttäjä, 2026-09-30 (D-006); laajennettu 2026-10-02 (D-012) | Sovellus on ei-kaupallinen, siinä on epävirallisuusmerkintä, ja rajapintaa kutsutaan maltillisesti | Ei kaupallisuutta eikä mainoksia. Epävirallisuusmerkintä ja lähdemaininta näkyvissä. Kutsumäärä maltillinen (SR-5: sivukatto, rinnakkaisuus enintään 3, ei automaattisia uusintayrityksiä; T-026:sta alkaen 3 pyyntöä per kehittäjän ajo, ei käyttäjien pyyntöjä). ~~Dataa ei kopioida omaan Hostingiin.~~ → kumottu D-012:lla: data on buildissa, mutta vain `Card`-mallin kentät (ei sääntötekstejä, kuvia eikä `image_url`ia). Hyväksyntä arvioidaan uudelleen, jos WeirdCo tai Netdeck.gg julkaisee ehdot tai pyytää lopettamaan, tai kun välimuisti (T-003) muuttaa datan tallennusta. |
 
 ## 11. MVP-1: paikallinen tallennus ja tiedostot (T-011, T-014, T-015)
 
@@ -343,3 +346,11 @@ Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-
 | 2026-10-01 | Katselmointi `reports/SEC-002-t011-katselmointi.md`: SR-11, SR-12, SR-13 ja SR-16 täyttyvät. SR-12:n avainmuodon poikkeama (versio kääreessä) hyväksytty. Löydökset SEC-005 ja SEC-006 (Low, riskit R-15 ja R-16) sekä SEC-007–SEC-010 (Info). R-11:n tila päivitetty. | T-011 |
 | 2026-10-01 | Katselmointi `reports/SEC-003-t012-katselmointi.md`: SR-12–SR-16 täyttyvät T-012:ssa. SR-13:n `persist()`-suositus toteutettu, ja SR-13:een lisätty ilmoitustekstien vaatimus. Löydökset SEC-011 ja SEC-012 (Low, ohjetekstit voivat johtaa tietojen poistoon) ja SEC-013 (Info, R-11:n jäännös). R-10:n ja R-11:n tila päivitetty, R-15 ja R-16 korjattu. SEC-007 varmistettu. | T-012 |
 | 2026-10-02 | Katselmointi `reports/SEC-004-t025-teemavalitsin.md`: A1-poikkeus (`public/theme-init.js`) hyväksytty ja kirjattu SR-12:een. SR-12, SR-13 ja SR-16 täyttyvät, CSP esikatselussa ilman rikkomuksia. Löydökset SEC-014 ja SEC-015 (Info). | T-025 |
+| 2026-10-02 | Katselmointi `reports/SEC-005-t026-korttidata.md`: SR-2 (`connect-src 'self'`), SR-4, SR-5 ja SR-7 täyttyvät. R-1 ja R-2 hyväksytty (D-012) ja luku 10 päivitetty, R-6 pienennetty, R-7 ja R-12 poistuneet. Uusi luku 14. Löydökset SEC-016 (Medium, otsakkeiden todennus esikatselussa tekemättä), SEC-017 (Low) ja SEC-018 (Info). | T-026 |
+
+## 14. T-026: korttidata buildissa (D-013)
+
+- **Järjestelmä:** `src/data/cards.json` importataan buildiin. Selain ei tee yhtään ulkoista pyyntöä (CSP `connect-src 'self'`). `src/api/` on vain `scripts/cards/updateCards.ts`:n käytössä (ESLint estää sovelluskoodissa).
+- **Luottamusraja 1 siirtyy:** Netdeck.gg → kehittäjän kone (`npm run cards:update`) → git (PR-katselmointi) → build. Rajapinnan data on yhä epäluotettavaa: `mapCard` (SR-4) ja `parseCardFile` (täsmälleen `Card`-mallin kentät, teksti enintään 200 merkkiä, `key === cardKey(name, subname)`, ei toistuvia avaimia tai id:itä) ennen kirjoitusta, ja `cards.test.ts` samalla validoinnilla. Renderöinti tekstinä (SR-1).
+- **STRIDE-muutokset:** T (haitallinen data lähteestä) → validointi ja PR-diff ennen buildia; jäännös: validointi ei ole CI:ssä (T-004), mutta `tsc` on (SEC-017). D (rajapinta kaatuu) → ei vaikuta käyttäjiin (R-6 pienenee). I (käyttäjän IP Netdeckille) → poistunut.
+- **firebase.json:** `/assets/**` → `Cache-Control: public, max-age=31536000, immutable`. Turvallinen, koska Viten assetit nimetään sisältötiivisteellä. `index.html` ja `public/`-tiedostot (esim. `theme-init.js`) eivät osu sääntöön.

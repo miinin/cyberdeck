@@ -1,13 +1,10 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
-import type { CardCatalog } from './api';
 import { createMemoryRepositories, StorageError } from './storage';
 import type { Repositories } from './storage';
 
 // Theme toggle (T-025, UX.md 8.9).
-const catalog: CardCatalog = { cards: [], reportedTotal: 0, skipped: 0 };
-const loadCatalog = async () => catalog;
 const THEME_KEY = 'cyberdeck:theme';
 
 function themeAttribute() {
@@ -16,7 +13,7 @@ function themeAttribute() {
 
 /** Renders the app and waits until the saved theme has been loaded. */
 async function renderApp(repositories: Repositories) {
-  render(<App loadCatalog={loadCatalog} repositories={repositories} />);
+  render(<App cards={[]} repositories={repositories} />);
   await act(async () => {});
   return screen.getByRole('button', { name: 'Vaalea teema' });
 }
@@ -99,7 +96,7 @@ describe('theme toggle', () => {
 
   it('shows the theme already painted by the init script on the first render', () => {
     document.documentElement.setAttribute('data-theme', 'light');
-    render(<App loadCatalog={loadCatalog} repositories={createMemoryRepositories()} />);
+    render(<App cards={[]} repositories={createMemoryRepositories()} />);
 
     // Synchronously, before the saved value is loaded: no flash of the wrong button state.
     expect(screen.getByRole('button', { name: 'Vaalea teema', pressed: true })).toBeInTheDocument();
@@ -135,7 +132,7 @@ describe('theme toggle', () => {
         finishLoad = resolve;
       }),
     );
-    render(<App loadCatalog={loadCatalog} repositories={repositories} />);
+    render(<App cards={[]} repositories={repositories} />);
     const button = screen.getByRole('button', { name: 'Vaalea teema' });
 
     await userEvent.click(button); // dark → light

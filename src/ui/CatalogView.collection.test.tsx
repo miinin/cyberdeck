@@ -1,12 +1,10 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { CardCatalog } from '../api';
 import type { Card } from '../domain/card';
 import type { Collection } from '../domain/collection';
 import { StorageError, createMemoryRepositories } from '../storage';
 import type { CollectionRepository, LoadNotice, Repositories } from '../storage';
 import { CatalogView } from './CatalogView';
-import type { CatalogState } from './useCardCatalog';
 import { COUNT_ANNOUNCE_DELAY_MS, NOTICE_ANNOUNCE_DELAY_MS } from './useCollectionAnnouncements';
 import { ANNOUNCE_DELAY_MS } from './useDelayedAnnouncement';
 
@@ -21,11 +19,6 @@ const cards: Card[] = [
   card('swordwise-huscle', 'Swordwise Huscle', null),
   card('viktor-vektor-pinch', 'Viktor Vektor', 'You Might Feel a Little Pinch', 'Program', 'Yellow'),
 ];
-
-function ready(list: Card[] = cards, reportedTotal = list.length): CatalogState {
-  const catalog: CardCatalog = { cards: list, reportedTotal, skipped: reportedTotal - list.length };
-  return { status: 'ready', catalog };
-}
 
 function stored(entries: { card: string; count: number }[], schemaVersion = 1): string {
   return JSON.stringify({ schemaVersion, savedAt: '2026-10-01T10:00:00.000Z', data: { entries } });
@@ -42,11 +35,10 @@ async function settle() {
   });
 }
 
-async function renderView(repositories: Repositories = createMemoryRepositories(), state: CatalogState = ready()) {
-  const onRetry = vi.fn();
-  const result = render(<CatalogView state={state} onRetry={onRetry} repositories={repositories} />);
+async function renderView(repositories: Repositories = createMemoryRepositories(), list: Card[] = cards) {
+  const result = render(<CatalogView cards={list} repositories={repositories} />);
   await settle();
-  return { ...result, onRetry, repositories };
+  return { ...result, repositories };
 }
 
 const row = (name: string) => {
@@ -204,21 +196,12 @@ describe('CatalogView collection: loading states', () => {
     expect(controlCell('V, Streetkid')).toHaveTextContent('ladataan');
   });
 
-  it.each([{ status: 'loading' } as const, { status: 'error', kind: 'network' } as const])(
-    'shows nothing of the collection without a card list ($status)',
-    async (state) => {
-      const { container } = await renderView(createMemoryRepositories(), state);
-      expect(summary(container)).toBeNull();
-      expect(screen.queryByText(/Kokoelma/)).toBeNull();
-    },
-  );
-
-  it('counts only the visible cards in the PARTIAL state', async () => {
+  it('counts only cards in the list, not stored keys without a card (UX.md 6.5, A3)', async () => {
     const repositories = withCollection([
       { card: 'v-streetkid', count: 2 },
       { card: 'swordwise-huscle', count: 1 },
     ]);
-    const { container } = await renderView(repositories, ready([cards[0] as Card], 3));
+    const { container } = await renderView(repositories, [cards[0] as Card]);
     expect(summary(container)).toHaveTextContent('Kokoelmassa 1 eri kortti, yhteensä 2 kappaletta.');
   });
 

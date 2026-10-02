@@ -9,8 +9,8 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-026 | Koodari | In Progress (keskeytetty) | Worktree `.claude/worktrees/t-026` (haara `t-026-korttidata`). Data ja komento valmiit, firebase.json commitoitu testaamatta (8e35488). Katso kortin PM-checkpoint 2026-10-02: uusi Koodari jatkaa askeleista 5–6, sitten koodikatselmointi ja luovutus. |
-| T-027 | – | Backlog (T-026) | Kuvat ovat `public/cards/`-kansiossa (151 × .webp, 14 Mt, gitignoroitu). Käyttäjän vastaukset kirjattu T-027-korttiin (t-026-haara). Mahdollisesti sharpia ei tarvita. |
+| T-026 | PM | Review (PR #8) | Koodari ja Digiturva valmiit (SEC-005: ei Critical/High). Esikatselun curl-tarkistus (SEC-016), sitten Done ja test. |
+| T-027 | Koodari | In Progress | Worktree `.claude/worktrees/t-027` (haara `t-027-korttikuvat`, T-026:n päältä). Käyttäjä nosti kuvat kaiken muun edelle 2026-10-02. UX-suunnitelma ja sharp hyväksytty. |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -71,7 +71,9 @@ npm run lint        # ESLint, 0 varoitusta sallittu
 npm run build       # tyyppitarkistus + tuotantobuild → dist/
 npm run preview     # dist/ paikallisesti (ilman firebase.jsonin otsakkeita)
 npm audit --audit-level=high
+npm run cards:update # korttidatan päivitys Netdeck.gg:stä → src/data/cards.json (kehittäjä ajaa käsin)
 ```
 
-- Sovellus hakee kortit selaimesta suoraan `https://api.netdeck.gg`:stä. Avaimia tai ympäristömuuttujia ei tarvita.
+- Korttidata on sovelluksen mukana (`src/data/cards.json`, D-013). Sovellus ei kutsu Netdeckiä selaimessa. Avaimia tai ympäristömuuttujia ei tarvita.
+- `npm run cards:update` tekee 3 pyyntöä `https://api.netdeck.gg`:hen, validoi datan ja kirjoittaa tiedoston vain, jos sisältö muuttui (muuten `No changes`). Jos yksikin kortti hylätään tai määrä poikkeaa, tiedostoa ei muuteta, ja komento päättyy virheeseen. Poistuneet avaimet näkyvät varoituksena, koska tallennetut kokoelmat voivat viitata niihin. Tarkista muutos (`git diff src/data/cards.json`), aja `npm test` ja commitoi.
 - CSP ja muut turvallisuusotsakkeet tulevat `firebase.json`ista, joten ne näkyvät vain Firebase Hostingissa (esikatselu ja testisivusto), ei `npm run dev`:ssä.

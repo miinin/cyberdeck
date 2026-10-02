@@ -1,10 +1,8 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { CardCatalog } from '../api';
 import type { Card } from '../domain/card';
 import { createMemoryRepositories } from '../storage';
 import { CatalogView } from './CatalogView';
-import type { CatalogState } from './useCardCatalog';
 
 /** In-memory storage that behaves like working browser storage (no "Tietoja ei voi tallentaa" box). */
 function browserLikeRepositories() {
@@ -25,15 +23,8 @@ const cards: Card[] = [
   card('pinch', 'Viktor Vektor', 'You Might Feel a Little Pinch', 'Program', 'Blue'),
 ];
 
-function ready(list: Card[] = cards, reportedTotal = list.length): CatalogState {
-  const catalog: CardCatalog = { cards: list, reportedTotal, skipped: reportedTotal - list.length };
-  return { status: 'ready', catalog };
-}
-
-function renderView(state: CatalogState = ready()) {
-  const onRetry = vi.fn();
-  const result = render(<CatalogView state={state} onRetry={onRetry} repositories={browserLikeRepositories()} />);
-  return { ...result, onRetry };
+function renderView(list: Card[] = cards) {
+  return render(<CatalogView cards={list} repositories={browserLikeRepositories()} />);
 }
 
 const searchBox = () => screen.getByRole('searchbox', { name: 'Hae nimellä' });
@@ -59,7 +50,7 @@ describe('CatalogView search and filters: structure', () => {
   });
 
   it('groups types and colors in named fieldsets, known values first in a fixed order', () => {
-    renderView(ready([...cards, card('odd', 'Odd', null, 'Token', 'Purple')]));
+    renderView([...cards, card('odd', 'Odd', null, 'Token', 'Purple')]);
 
     const typeGroup = screen.getByRole('group', { name: 'Tyyppi' });
     const colorGroup = screen.getByRole('group', { name: 'Väri' });
@@ -82,26 +73,6 @@ describe('CatalogView search and filters: structure', () => {
     within(colorGroup)
       .getAllByText('', { selector: '.color-swatch' })
       .forEach((swatch) => expect(swatch).toHaveAttribute('aria-hidden', 'true'));
-  });
-
-  it.each<[string, CatalogState]>([
-    ['loading', { status: 'loading' }],
-    ['error', { status: 'error', kind: 'network' }],
-    ['empty', ready([], 0)],
-    ['partial without usable cards', ready([], 151)],
-  ])('does not render the search in the %s state', (_name, state) => {
-    renderView(state);
-
-    expect(screen.queryByRole('search')).not.toBeInTheDocument();
-    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
-    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
-  });
-
-  it('places the form after the partial warning and before the table', () => {
-    const { container } = renderView(ready(cards.slice(0, 3), 151));
-
-    const order = Array.from(container.querySelectorAll('.notice-warning, form, table'), (el) => el.tagName);
-    expect(order).toEqual(['DIV', 'FORM', 'TABLE']);
   });
 });
 
@@ -160,15 +131,6 @@ describe('CatalogView search and filters: filtering', () => {
     expect(unit).toBeChecked();
     await userEvent.keyboard(' ');
     expect(unit).not.toBeChecked();
-  });
-
-  it('filters the received cards and keeps the warning in the partial state', async () => {
-    const { container } = renderView(ready(cards.slice(0, 3), 151));
-
-    await userEvent.type(searchBox(), 'silver');
-
-    expect(statusText(container)).toBe('2 / 3 korttia');
-    expect(screen.getByRole('heading', { level: 2, name: 'Kaikkia kortteja ei saatu näkyviin' })).toBeInTheDocument();
   });
 
   it('treats an XSS string as literal search text (SR-1)', async () => {
@@ -392,95 +354,8 @@ describe('CatalogView search and filters: live region', () => {
     expect(liveRegion()).toHaveTextContent(/^Näytetään kaikki 6 korttia\.$/);
   });
 
-  it('cancels a pending announcement when the view starts loading again', () => {
-    const { rerender } = renderView();
-
-    typeText('judy');
-    rerender(<CatalogView state={{ status: 'loading' }} onRetry={vi.fn()} repositories={browserLikeRepositories()} />);
-    expect(vi.getTimerCount()).toBe(0);
-    wait(ANNOUNCE_DELAY_MS * 2);
-
-    expect(liveRegion()).toHaveTextContent(/^Haetaan kortteja…$/);
-  });
-
-  it('drops an earlier announcement when new data arrives', () => {
-    const { rerender } = renderView();
-
-    typeText('judy');
-    wait(ANNOUNCE_DELAY_MS);
-    expect(liveRegion()).toHaveTextContent(/^Näytetään 1 \/ 6 korttia\.$/);
-
-    typeText('');
-    wait(ANNOUNCE_DELAY_MS);
-    rerender(<CatalogView state={ready()} onRetry={vi.fn()} repositories={browserLikeRepositories()} />);
-    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\.$/);
-  });
-
-  // UX-002 (K9, UX.md 5.6): the loaded message also tells the filter result when a search is kept over a retry.
-  const reload = (rerender: ReturnType<typeof render>['rerender'], state: CatalogState) => {
-    rerender(<CatalogView state={{ status: 'loading' }} onRetry={vi.fn()} repositories={browserLikeRepositories()} />);
-    rerender(<CatalogView state={state} onRetry={vi.fn()} repositories={browserLikeRepositories()} />);
-  };
-
-  it('combines the loaded message with the filter result after a successful retry (UX-002)', () => {
-    const { rerender, container } = renderView(ready(cards, 8));
-    typeText('johnny');
-    wait(ANNOUNCE_DELAY_MS);
-
-    reload(rerender, ready());
-    expect(statusText(container)).toBe('2 / 6 korttia');
-    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\. Näytetään 2 \/ 6 korttia\.$/);
-
-    typeText('xyz');
-    reload(rerender, ready());
-    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\. Hakua vastaavia kortteja ei löytynyt\.$/);
-  });
-
-  it('combines the partial message with the filter result after a retry (UX-002)', () => {
-    const { rerender, container } = renderView(ready(cards, 8));
-    typeText('johnny');
-    wait(ANNOUNCE_DELAY_MS);
-
-    reload(rerender, ready(cards, 8));
-    expect(statusText(container)).toBe('2 / 6 korttia');
-    expect(liveRegion()).toHaveTextContent(/^Näytetään 2 \/ 6 korttia\. Osa korteista puuttuu listasta\.$/);
-
-    typeText('xyz');
-    reload(rerender, ready(cards, 8));
-    expect(liveRegion()).toHaveTextContent(
-      /^Hakua vastaavia kortteja ei löytynyt\. Osa korteista puuttuu listasta\.$/,
-    );
-  });
-
-  it('does not repeat the filter result right after the combined loaded message (UX-002)', () => {
-    const { rerender } = renderView();
-    typeText('johnny');
-    wait(ANNOUNCE_DELAY_MS);
-    reload(rerender, ready());
-
-    typeText('johnny silver');
-    wait(ANNOUNCE_DELAY_MS);
-    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\. Näytetään 2 \/ 6 korttia\.$/);
-
-    typeText('');
-    wait(ANNOUNCE_DELAY_MS);
-    expect(liveRegion()).toHaveTextContent(/^Näytetään kaikki 6 korttia\.$/);
-  });
-
-  it('keeps the loaded message unchanged while typing, until the delay passes', () => {
-    const { rerender } = renderView();
-    typeText('johnny');
-    wait(ANNOUNCE_DELAY_MS);
-    reload(rerender, ready());
-
-    typeText('judy');
-    expect(liveRegion()).toHaveTextContent(/^6 korttia ladattu\. Näytetään 2 \/ 6 korttia\.$/);
-    wait(ANNOUNCE_DELAY_MS);
-    expect(liveRegion()).toHaveTextContent(/^Näytetään 1 \/ 6 korttia\.$/);
-  });
-
-  it('says "1 kortti" when all of a single received card is shown again (TXT-009)', () => {
-    renderView(ready(cards.slice(3, 4), 151));
+  it('says "1 kortti" when all of a single card is shown again (TXT-009)', () => {
+    renderView(cards.slice(3, 4));
 
     typeText('xyz');
     wait(ANNOUNCE_DELAY_MS);

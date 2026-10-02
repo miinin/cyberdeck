@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf } from '../domain/collection';
@@ -28,67 +27,6 @@ import { useCollection } from './useCollection';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
 import type { Announcement } from './useDelayedAnnouncement';
-import type { CatalogState } from './useCardCatalog';
-
-interface ViewModel {
-  /** Visible status line under the heading (empty in the error state). */
-  status: string;
-  /** Text for the polite live region. */
-  live: string;
-  notice: { tone: 'danger' | 'warning'; title: string; body: string } | null;
-  emptyMessage: string | null;
-  showRetry: boolean;
-  /** Loaded cards that can be searched. Empty in every state without a list (UX.md 5.8). */
-  cards: readonly Card[];
-  /** Fewer usable cards than the API reported (the PARTIAL state). */
-  missingCards: boolean;
-}
-
-/**
- * Maps the loading state to what the view shows (UX.md 4.5). PM decision 2026-09-30:
- * any failed page is the ERROR state; PARTIAL means all pages loaded but fewer usable
- * cards than the API's total (e.g. invalid cards were skipped).
- */
-function toViewModel(state: CatalogState): ViewModel {
-  const base = { notice: null, emptyMessage: null, showRetry: false, cards: [], missingCards: false };
-  switch (state.status) {
-    case 'loading':
-      return { ...base, status: texts.loading, live: texts.loading };
-    case 'error':
-      return {
-        ...base,
-        status: '',
-        live: texts.errorLive,
-        notice: { tone: 'danger', title: texts.errorTitle, body: texts.errorBody },
-        showRetry: true,
-      };
-    case 'ready': {
-      const { cards, reportedTotal } = state.catalog;
-      if (cards.length < reportedTotal) {
-        return {
-          ...base,
-          status: texts.partialStatus(cards.length, reportedTotal),
-          live: texts.partialLive(cards.length, reportedTotal),
-          notice: { tone: 'warning', title: texts.partialTitle, body: texts.partialBody },
-          showRetry: true,
-          cards,
-          missingCards: true,
-        };
-      }
-      if (cards.length === 0) {
-        return {
-          ...base,
-          status: texts.emptyStatus,
-          live: texts.emptyLive,
-          emptyMessage: texts.emptyBody,
-          showRetry: true,
-        };
-      }
-      // More cards than `total` is an API inconsistency: the visible count follows the visible rows.
-      return { ...base, status: cardCount(cards.length), live: texts.loaded(cards.length), cards };
-    }
-  }
-}
 
 /** What the live region says about a filter result (UX.md 5.6). The key identifies state + count. */
 function describeResult(active: boolean, shown: number, all: number): Announcement {
@@ -114,30 +52,26 @@ function collectionSummary(snapshot: CollectionSnapshot, cards: readonly Card[])
 }
 
 export function CatalogView({
-  state,
-  onRetry,
+  cards: allCards,
   repositories,
 }: {
-  state: CatalogState;
-  onRetry: () => void;
+  /** All cards, bundled with the app (D-013). A stable reference: it also owns the live announcements. */
+  cards: readonly Card[];
   /** Created once in App (a stable reference). */
   repositories: Repositories;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  // Lives here, above the form, so it survives a retry (UX.md 5.8, WCAG 3.3.7).
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
   const ownedOnlyRef = useRef<HTMLInputElement>(null);
   const [ownedOnlyChecked, setOwnedOnly] = useState(false);
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
-  const view = toViewModel(state);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
   const [persistence, setPersistence] = useState<PersistenceState>('idle');
   const persistenceResultRef = useRef<HTMLParagraphElement>(null);
   /** Set by the button: the result paragraph takes focus once it is rendered. */
   const focusPersistenceResult = useRef(false);
-  const allCards = view.cards;
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
   if (ownedOnlyChecked && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
@@ -153,33 +87,16 @@ export function CatalogView({
 
   const filtered = visibleCards(criteria, ownedOnly, kept);
   const filterActive = isActive(criteria, ownedOnly);
-  const showFilters = allCards.length > 0;
 
-  // The search is kept over a retry (5.8), so the loaded message tells the filter result of the
-  // criteria in use when this state arrived (K9, UX-002). Frozen per state: later changes are
-  // announced with the delay, not by rewriting the loaded message.
-  const [loadedWith, setLoadedWith] = useState({ state, criteria, ownedOnly });
-  if (loadedWith.state !== state) setLoadedWith({ state, criteria, ownedOnly });
-  const loadedActive = isActive(loadedWith.criteria, loadedWith.ownedOnly);
-  const loadResult = describeResult(
-    loadedActive,
-    visibleCards(loadedWith.criteria, loadedWith.ownedOnly, NO_KEYS).length,
-    allCards.length,
-  );
-  const loadedFiltered = showFilters && loadedActive;
-  const loadedLive = !loadedFiltered
-    ? view.live
-    : view.missingCards
-      ? texts.partialFilteredLive(loadResult.text)
-      : texts.loadedFilteredLive(allCards.length, loadResult.text);
-
-  // The loaded message already told this result, so the same result is not announced again.
-  const announcer = useDelayedAnnouncement(state, showFilters ? loadResult.key : null);
+  // The cards are there from the first render, so the live region starts with the loaded message.
+  // It already tells the unfiltered result, so that result is not announced again right away.
+  const allShown = describeResult(false, allCards.length, allCards.length);
+  const announcer = useDelayedAnnouncement(allCards, allShown.key);
   const collectionAnnouncer = useCollectionAnnouncements(announcer, collectionStore, allCards, collection.saveError);
-  const collectionNotices = showFilters ? loadNotices(collection, repositories.persistent) : [];
+  const collectionNotices = loadNotices(collection, repositories.persistent);
   useLoadNoticeAnnouncement(
     announcer,
-    state,
+    allCards,
     collection.loadCount,
     collectionNotices.map((notice) => notice.live).join(' '),
   );
@@ -239,23 +156,11 @@ export function CatalogView({
   const updateCriteria = (next: CardFilterCriteria, when: 'later' | 'now' | 'never') =>
     updateFilters(next, ownedOnly, when);
 
-  const handleRetry = () => {
-    // The retry button disappears while loading; keep focus from falling to <body> (UX.md 4.6).
-    headingRef.current?.focus();
-    onRetry();
-  };
-
   const handleClearFilters = () => {
     updateFilters(EMPTY_CRITERIA, false, 'now', true);
     // The button disappears with the empty result; the search field is the natural next step (UX.md 5.7).
     searchInputRef.current?.focus();
   };
-
-  const retryButton: ReactNode = view.showRetry ? (
-    <button type="button" className="button-primary" onClick={handleRetry}>
-      {texts.retry}
-    </button>
-  ) : null;
 
   const owned: OwnedColumn | undefined =
     collection.phase === 'unavailable'
@@ -276,8 +181,8 @@ export function CatalogView({
         ? collectionSummary(collection, allCards)
         : null;
 
-  const status = showFilters && filterActive ? texts.filteredStatus(filtered.length, allCards.length) : view.status;
-  const noResults = showFilters && filtered.length === 0;
+  const status = filterActive ? texts.filteredStatus(filtered.length, allCards.length) : cardCount(allCards.length);
+  const noResults = filtered.length === 0;
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
   const noOwnedCards = noResults && ownedOnly && !isFilterActive(criteria);
 
@@ -291,49 +196,37 @@ export function CatalogView({
       <h1 ref={headingRef} tabIndex={-1}>
         {texts.heading}
       </h1>
-      <p id="card-status" className="status-line" hidden={status === ''}>
+      <p id="card-status" className="status-line">
         {status}
       </p>
-      {/* Decorative only: the state is told by the status line and the live region (UX.md 7.5). */}
-      {state.status === 'loading' && <span className="loading-bar" aria-hidden="true" />}
-      {showFilters && summary !== null && (
+      {summary !== null && (
         <p id="collection-summary" className="status-line is-summary">
           {summary}
         </p>
       )}
-      {/* Stays mounted across all states so screen readers announce each change. */}
+      {/* Stays mounted so screen readers announce each change. */}
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
-        {announcer.text ?? loadedLive}
+        {announcer.text ?? texts.loaded(allCards.length)}
       </div>
 
-      {view.notice !== null && (
-        <div className={`notice notice-${view.notice.tone}`}>
-          <h2>{view.notice.title}</h2>
-          <p>{view.notice.body}</p>
-          {retryButton}
-        </div>
-      )}
+      <CollectionNotices
+        snapshot={collection}
+        persistent={repositories.persistent}
+        onDismiss={(kind) => {
+          collectionStore.dismissNotice(kind);
+          focusHeading();
+        }}
+        onDismissSaveError={() => {
+          collectionStore.dismissSaveError();
+          focusHeading();
+        }}
+        onReload={() => {
+          focusHeading();
+          collectionStore.reload();
+        }}
+      />
 
-      {showFilters && (
-        <CollectionNotices
-          snapshot={collection}
-          persistent={repositories.persistent}
-          onDismiss={(kind) => {
-            collectionStore.dismissNotice(kind);
-            focusHeading();
-          }}
-          onDismissSaveError={() => {
-            collectionStore.dismissSaveError();
-            focusHeading();
-          }}
-          onReload={() => {
-            focusHeading();
-            collectionStore.reload();
-          }}
-        />
-      )}
-
-      {showFilters && collection.phase === 'ready' && repositories.persistent && (
+      {collection.phase === 'ready' && repositories.persistent && (
         <StorageReminder
           state={persistence}
           resultRef={persistenceResultRef}
@@ -341,42 +234,33 @@ export function CatalogView({
         />
       )}
 
-      {view.emptyMessage !== null && (
-        <div className="empty">
-          <p>{view.emptyMessage}</p>
-          {retryButton}
-        </div>
-      )}
-
-      {showFilters && (
-        <CardFilters
-          criteria={criteria}
-          typeOptions={filterOptions(
-            KNOWN_CARD_TYPES,
-            allCards.map((card) => card.type),
-            criteria.types,
-          )}
-          colorOptions={filterOptions(
-            KNOWN_CARD_COLORS,
-            allCards.map((card) => card.color),
-            criteria.colors,
-          )}
-          searchInputRef={searchInputRef}
-          ownedOnly={collection.phase === 'ready' ? ownedOnly : undefined}
-          ownedOnlyRef={ownedOnlyRef}
-          onToggleOwnedOnly={() => updateFilters(criteria, !ownedOnly, 'later')}
-          onQueryChange={(query, composing) =>
-            updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
-          }
-          onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
-          onToggleColor={(color) =>
-            updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
-          }
-          onSearchSubmit={() =>
-            announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))
-          }
-        />
-      )}
+      <CardFilters
+        criteria={criteria}
+        typeOptions={filterOptions(
+          KNOWN_CARD_TYPES,
+          allCards.map((card) => card.type),
+          criteria.types,
+        )}
+        colorOptions={filterOptions(
+          KNOWN_CARD_COLORS,
+          allCards.map((card) => card.color),
+          criteria.colors,
+        )}
+        searchInputRef={searchInputRef}
+        ownedOnly={collection.phase === 'ready' ? ownedOnly : undefined}
+        ownedOnlyRef={ownedOnlyRef}
+        onToggleOwnedOnly={() => updateFilters(criteria, !ownedOnly, 'later')}
+        onQueryChange={(query, composing) =>
+          updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
+        }
+        onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
+        onToggleColor={(color) =>
+          updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
+        }
+        onSearchSubmit={() =>
+          announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))
+        }
+      />
 
       {noResults && (
         <div className="empty">

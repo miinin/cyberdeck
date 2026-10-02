@@ -179,3 +179,95 @@ Päätöksessä on kuusi osaa. Rakenne ja allekirjoitukset ovat ARCHITECTURE.md:
 5. Nämä tehdään ennen T-013:a.
 **Perustelu:** Käyttäjän päätös.
 **Seuraukset:** T-025 (teemavalitsin), T-026 (korttidata, korvaa T-003:n), T-027 (korttikuvat). Digiturva päivittää SECURITY.md:n R-1:n, R-2:n ja luvun 10 seuraavassa katselmoinnissa.
+
+## D-013 · Korttidata JSON-tiedostona buildissa, päivityskomento ja korttikuvat Viten assetteina · 2026-10-02 · Päättäjä: PM (Arkkitehdin ehdotus); osan 4 riippuvuus: PM ja Digiturva
+**Tila:** Voimassa (PM hyväksyi 2026-10-02: osat 1–3 ilman kustannuksia, riippuvuuksia ja lukitusta. Osan 4 devDependency `sharp` hyväksytty PM:n puolesta ehdolla, että Digiturva tarkistaa sen T-027:n katselmoinnissa.) Toteuttaa D-012:n kohdat 1 ja 2. Korvaa D-006:n osuuden "data haetaan käyttäjän selaimessa" ja T-003:n (välimuisti). Rakenne: ARCHITECTURE.md luku 13.
+**Konteksti:** D-012: kortit kovakoodataan sovellukseen, eikä niitä haeta joka käynnillä. Käyttäjä toimittaa 151 korttikuvan paketin, jonka tiedostonimiä ja muotoa ei vielä tunneta. Nykyinen rajapintakerros (`src/api/`) hakee 3 sivua (noin 1,4 Mt, 4–6 s) jokaisella käynnillä, ja käyttöliittymällä on lataus-, virhe- ja osittaisen datan tilat. Kokoelma viittaa kortteihin avaimella `Card.key` (D-008 kohta 2), jonka on pysyttävä samana. Testit ja lint eivät vielä ole CI:ssä (T-004): workflowt ajavat vain `npm ci && npm run build`.
+
+Päätöksessä on viisi osaa.
+
+### 1. Datan muoto ja sijainti
+**Vaihtoehdot:**
+- **A) `src/data/cards.json` importataan buildiin (yksinkertaisin mahdollinen). (ehdotus)**
+  + Data on käytössä synkronisesti heti sovelluksen käynnistyessä: ei verkkopyyntöä, ei lataus- eikä virhetilaa. Vite tukee JSON-importia sellaisenaan, ja yli 10 kt:n JSON tuotetaan muodossa `JSON.parse("…")`, joka on nopea (Viten `json.stringify: 'auto'`, tarkistettu `node_modules/vite/dist/node/index.d.ts` 2026-10-02).
+  + `tsc` tarkistaa buildissa, että JSON vastaa `Card`-tyyppiä (`resolveJsonModule`), joten väärän muotoinen data rikkoo buildin myös CI:ssä.
+  − Kasvattaa pääpakettia: 151 korttia × noin 200 tavua ≈ 30 kt (noin 5 kt gzip). Nykyinen JS-paketti on 260 kt (82 kt gzip, mitattu 2026-10-02), joten lisäys on pieni.
+  − Datan muutos vaihtaa JS-paketin tiivisteen, jolloin selain lataa paketin uudelleen. Päivityksiä on harvoin, joten haitta on merkityksetön.
+- **B) `public/cards.json` haetaan omalta originilta (`fetch('/cards.json')`).**
+  + Erillinen tiedosto, jonka voi päivittää ilman JS:n muutosta.
+  − Lataus- ja virhetilat ja `useCardCatalog` jäävät, eli sovellus hakee yhä "joka kerta erikseen", vain eri osoitteesta. `public/`-tiedoston nimessä ei ole tiivistettä, joten välimuisti on joko lyhyt tai data voi vanhentua. `tsc` ei tarkista dataa.
+- **C) Päivityskomento tuottaa TypeScript-moduulin (`cards.generated.ts`).**
+  + Tyyppitarkistus kuten A:ssa.
+  − Generoitu koodi joutuu lintin piiriin, eikä tiedostoa voi lukea datana (kuvatuonti, diff). Ei etua A:han nähden.
+
+**Valinta: A.** Tiedoston muoto:
+```json
+{ "format": "cyberdeck.cards", "version": 1, "cards": [ { "id": "…", "slug": "v-streetkid", "name": "V", "subname": "Streetkid", "displayName": "V — Streetkid", "type": "Legend", "color": "Red", "cost": null, "key": "v-streetkid" } ] }
+```
+- Kentät ja niiden järjestys ovat täsmälleen `Card`-mallin kentät. Ei aikaleimaa eikä `reportedTotal`ia, jotta sama lähdedata tuottaa samat tavut. Päivityspäivä näkyy git-historiasta.
+- Korttien järjestys on rajapinnan järjestys, koska se on nykyinen näyttöjärjestys (rules.md 5.3). Jos kaksi peräkkäistä ajoa tuottaa eri järjestyksen, Koodari eskaloi. Vaihtoehto on lajittelu avaimella, mutta se muuttaa näyttöjärjestystä ja vaatii UX:n.
+- **Validointi** tehdään yhdellä funktiolla `parseCardFile(json: unknown): Card[]` (`src/domain/cardFile.ts`, heittää virheen) kahdessa kohdassa: päivityskomennossa ennen kirjoitusta ja yksikkötestissä `src/data/cards.test.ts`. Lisäksi `tsc` tarkistaa tyypit buildissa. Ajonaikaista validointia ei tehdä, koska data on oma, tarkistettu build-artefakti.
+- **Käyttöliittymän tilat:** lataus-, virhe- ja osittaisen datan tilat sekä "Yritä uudelleen" poistetaan, koska ne eivät ole enää mahdollisia. Osittainen data estetään jo päivityskomennossa: se ei kirjoita tiedostoa, jos yksikin kortti hylätään. Tyhjän luettelon tila poistetaan, ja testi varmistaa, ettei data ole tyhjä. Suodatuksen "ei tuloksia" -tila säilyy. `useCardCatalog` ja `CatalogState` poistetaan, ja `App` antaa `CatalogView`lle suoraan `cards: readonly Card[]`. Mikään toimiva ominaisuus ei heikkene: lista näkyy heti.
+
+### 2. Päivityskomento `npm run cards:update`
+**Ajotapa, vaihtoehdot:**
+- **A) Viten `runnerImport` (Vite on jo riippuvuus). (ehdotus)** Ohut Node-sisääntulo `scripts/cards-update.mjs` lataa TypeScript-moduulin Viten moduuliajurilla, joka ymmärtää projektin päätteettömät importit. Kokeiltu 2026-10-02: `runnerImport('src/api/mapCard.ts')` toimi Node 24.14:llä noin 75 ms:ssa. − API on merkitty `@experimental` (Vite 8.3.1). Rikkoutuminen näkyy heti kehittäjän komennossa, ei tuotannossa, ja varapolku on B.
+- **B) `tsx` devDependencyna.** Vakaa, mutta uusi riippuvuus (esbuild-binääri) ilman lisähyötyä.
+- **C) Noden oma tyyppien poisto (`node script.ts`).** Ei toimi sellaisenaan: Node vaatii importeihin päätteet, ja projektin koodi käyttää päätteettömiä importteja (kokeiltu: `ERR_MODULE_NOT_FOUND` `src/domain/cardKey`). Vaatisi kaikkien importtien muuttamisen.
+
+**Valinta: A.**
+
+**Toiminta:** `fetchAllCards()` (olemassa oleva rajapintakerros, SR-4 ja SR-5 voimassa) → tarkistukset → `parseCardFile`-kierros → vertailu nykyiseen tiedostoon → kirjoitus vain, jos sisältö muuttui. Komento epäonnistuu (exit 1, tiedostoa ei kosketa), jos haku epäonnistuu, `skipped > 0`, `cards.length !== reportedTotal`, avain tai id toistuu tai validointi hylkää datan. Raportti: korttimäärä sekä lisätyt, poistetut ja muuttuneet avaimet. **Poistunut avain on varoitus**, koska kokoelmassa voi olla rivejä sillä avaimella (D-008: rivit säilyvät ja näkyvät avaimella).
+**Determinismi:** oliot rakennetaan kiinteässä kenttäjärjestyksessä, tuloste on `JSON.stringify(file, null, 2) + "\n"`, ja rivinvaihdot ovat LF (`.gitattributes`: `* text=auto eol=lf`).
+
+**Rajapintakerroksen kohtalo, vaihtoehdot:** A) **`src/api/` säilyy ennallaan, mutta vain päivityskomento käyttää sitä. (ehdotus)** Testit säilyvät, eikä koodi päädy sovelluspakettiin, koska sovellus ei importtaa sitä (ESLint estää). B) Siirto hakemistoon `scripts/`: suurempi diff ilman toiminnallista hyötyä. **Valinta: A.** `CardCatalog` jää rajapintakerroksen tyypiksi, eikä käyttöliittymä enää käytä sitä.
+
+**Uusia riippuvuuksia ei tule** osissa 1–3. **SR-7 (build ei hae verkosta) säilyy:** päivityskomento on kehittäjän käsin ajama komento eikä osa buildia, ja sen tulos katselmoidaan PR:ssä diffinä.
+
+### 3. CSP
+`connect-src 'self' https://api.netdeck.gg` → **`connect-src 'self'`** molemmilla sivustoilla, koska sovellus ei tee enää yhtään `fetch`-kutsua. `'none'` olisi tiukin, mutta `'self'` jättää tien auki MVP-2:lle ilman uutta CSP-muutosta. Lopullisen arvon päättää Digiturva (SR-2, SR-9). `img-src 'self' data:` riittää kuville (osa 4). ARCHITECTURE.md:n luvun 9 kytkös `connect-src` ↔ `NETDECK_CARDS_URL` (ARCH-003) poistuu. Samaan `firebase.json`-muutokseen tulee välimuistisääntö tiivisteellisille asseteille (osa 4), jotta Digiturva katselmoi tiedoston kerran.
+
+### 4. Korttikuvat (T-027)
+**Sijainti, vaihtoehdot:**
+- **A) Viten assetit `src/assets/cards/{sm,lg}/<key>.webp` ja `import.meta.glob`. (ehdotus)** Vite lisää tiedostonimiin sisällön tiivisteen, joten kuvat voi välimuistittaa vuodeksi (`immutable`), ja vaihtunut kuva saa uuden URL:n. Build tietää, millä korteilla on kuva, joten puuttuvasta kuvasta ei tehdä turhaa 404-pyyntöä. Pakettiin tulee vain URL-merkkijonot (noin 302 kpl).
+- **B) `public/cards/<key>.webp`.** Yksinkertaiset ja vakaat URL:t, mutta ei tiivistettä: välimuisti on joko lyhyt (Firebasen oletus `max-age=3600`, todennettu testisivustolta 2026-10-02) tai vaihdettu kuva voi jäädä vanhaksi. Puuttuva kuva selviää vasta 404:stä.
+
+**Valinta: A.**
+
+**Kohdemuoto ja koot:** WebP (kaikki Viten kohdeselaimet tukevat). Kaksi kokoa: `sm` 240 px leveä (listan pikkukuva, 2× noin 120 CSS-px) ja `lg` 720 px leveä (iso kuva, 2× noin 360 CSS-px), laatu 80, kuvasuhde säilyy, ei suurennusta, ja metatiedot (EXIF, GPS) poistetaan. Koot ovat vakioita yhdessä paikassa, ja UX voi muuttaa niitä T-027:n suunnittelussa. Arvio: `sm` 10–15 kt ja `lg` 50–90 kt, yhteensä noin 9–15 Mt 151 kortille (arvio, mitataan tuonnissa).
+
+**Muunnostyökalu, vaihtoehdot:**
+- **A) `sharp` devDependencyna. (ehdotus, vaatii PM:n ja Digiturvan hyväksynnän)** Versio 0.35.5 (julkaistu 2026-09-27, aktiivisesti ylläpidetty), lisenssi Apache-2.0. Esikäännetyt libvips-binäärit (`@img/sharp-*`, lisenssi Apache-2.0 AND LGPL-3.0-or-later) tulevat alustakohtaisina valinnaisina riippuvuuksina. **Ei install- eikä postinstall-skriptejä** (tarkistettu `npm view` sharpille, `@img/sharp-linux-x64`:lle ja `@img/sharp-libvips-linux-x64`:lle 2026-10-02), joten SR-6:n ehto täyttyy. Haitta: `npm ci` lataa myös CI:ssä noin 38 Mt binäärejä (linux-x64), vaikka build ei käytä niitä. Ne eivät päädy `dist/`iin. LGPL-kirjastoa ei levitetä, koska se on vain kehittäjän työkalu.
+- **B) Ei riippuvuutta: kuvat muunnetaan käsin ulkoisella työkalulla** (esim. Squoosh tai `cwebp`), ja komento vain yhdistää, tarkistaa ja kopioi valmiit WebP-tiedostot. Toistettavuus ja koot riippuvat ihmisestä, ja kaksi kokoa × 151 kuvaa on virhealtista käsityötä. Noden vakiokirjastossa ei ole kuvakoodekkeja.
+- **C) Alkuperäiset kuvat sellaisenaan.** Ei muunnosta, mutta koko on tuntematon (painokuvat ovat usein 1–3 Mt kappaleelta), mikä voi kuluttaa Spark-tason siirtokiintiön nopeasti (osa 5).
+
+**Valinta: A.** Jos PM tai Digiturva ei hyväksy sharpia, varapolku on B samalla yhdistämis- ja raportointilogiikalla: muunnosvaihe ohitetaan, ja komento hyväksyy vain valmiit WebP-kuvat oikeissa mitoissa.
+
+**Tuonti `npm run cards:images -- <lähdekansio>`:**
+- Lähdekansio on repon ulkopuolella tai gitignoroidussa kansiossa `card-images-src/`. **Alkuperäisiä kuvia ei commitoida**, vain optimoidut tulosteet.
+- **Yhdistämissääntö** järjestyksessä, ensimmäinen osuma voittaa:
+  1. Valinnainen tiedosto `<lähdekansio>/card-images.map.json` muodossa `{ "<tiedostonimi>": "<card key>" }`. Se ratkaisee poikkeavat nimet (esim. keräilynumerot) ilman koodimuutosta.
+  2. `normalizeCardName(tiedostonimi ilman päätettä) === card.key`. Kattaa muodot `V - Streetkid.png`, `v_streetkid.jpg` ja `Judy Álvarez — Braindance Maestro.webp`.
+  3. Tiedostonimi ilman päätettä pienillä kirjaimilla `=== card.slug` (Netdeckin slug, joka poikkeaa avaimesta 16 kortilla).
+  4. `normalizeCardName(tiedostonimi) === normalizeCardName(card.name)`, **vain jos osumia on yksi** (esim. alaotsikoton kortti). Monta osumaa = monitulkintainen, raportoidaan.
+- **Raportti** (konsoli ja exit-koodi): yhdistetyt (määrä), tiedostot joille ei löytynyt korttia (syy: ei osumaa, monitulkintainen, ristiriita), kortit joilta puuttuu kuva (avain ja näyttönimi), hylätyt tiedostot (ei kuva, liian suuri), ohitetut (piilotiedostot, `Thumbs.db`) ja tulostekansion orvot kuvat (avainta ei ole datassa). Kaksi tiedostoa samalle kortille = ristiriita, eikä kumpaakaan käytetä. Exit 1 vain, jos kansiota ei ole tai yhtään kuvaa ei yhdistetty. Puuttuvat kuvat eivät ole virhe (paikkamerkki).
+- **Turvallisuus:** tulostiedoston nimi muodostetaan vain kortin avaimesta (`isCardKey`), ei koskaan lähteen tiedostonimestä, joten polkujen ohitus ei ole mahdollinen. Sisältö tunnistetaan sharpin metatiedoista, ei päätteestä. Enimmäiskoko on 25 Mt per tiedosto, ja sharpin pikselikatto pidetään oletusarvossa. Map-tiedosto validoidaan: avaimen on oltava datassa, ja tiedostonimen on oltava pelkkä nimi lähdekansiossa.
+- Tuonti kirjoittaa ja korvaa yhdistettyjen korttien kuvat, mutta **ei poista mitään**, jotta osittainen paketti ei hävitä aiempia kuvia. Orvot raportoidaan.
+
+**Näyttö:** `src/data/cardImages.ts` → `getCardImage(key): { small: string; large: string } | null`. Kuva on natiivi `<img loading="lazy" decoding="async" width height>` ilman kirjastoa, ja kiinteät mitat estävät asettelun hyppimisen. Puuttuva kuva → CSS-paikkamerkki ilman pyyntöä, ja latausvirhe (`onError`) → sama paikkamerkki. Alt-teksti ja sijainti tulevat UX:ltä (nimen vieressä oleva pikkukuva on todennäköisesti koristeellinen, `alt=""`). SR-1: rajapinnan `image_url`ia ei käytetä.
+
+**Repon koko:** 302 tiedostoa, noin 9–15 Mt, gitissä. Git LFS hylätään: se vaatisi muutoksia workflowihin (`lfs: true`) ja kuluttaisi LFS-kiintiötä ilman tarvetta. Jokainen kuvia muuttava uusintatuonti kasvattaa historiaa, joten tuonti tehdään harvoin.
+
+**Välimuisti (firebase.json, molemmat sivustot):** uusi `headers`-sääntö `"source": "/assets/**"` → `Cache-Control: public, max-age=31536000, immutable`. Viten tiivisteelliset tiedostot (JS, CSS, fontit ja kuvat) eivät koskaan muutu samassa URL:ssa. Nykyinen `**`-sääntö (CSP ym.) säilyy. Koodari todentaa esikatselussa `curl -sI`:llä, että `/assets/`-tiedostolla on sekä CSP- että Cache-Control-otsake, koska Firebasen dokumentaatio ei kerro, yhdistetäänkö usean säännön otsakkeet.
+
+### 5. Kustannukset ja lukittautuminen
+- **Firebase Hosting, Spark** (firebase.google.com/docs/hosting/usage-quotas-pricing, tarkistettu 2026-10-02): tallennus 10 Gt ja siirto 10 Gt kuukaudessa ilman kustannuksia. Tallennukseen lasketaan myös säilytetyt vanhat julkaisut. Jos tallennus ylittyy, uusia julkaisuja ei voi tehdä. **Jos siirto ylittyy, sivustot poistetaan käytöstä armonajan jälkeen kuukauden loppuun asti** (Blaze: 0,15 $/Gt). Molemmat sivustot (prod ja test) ovat samassa projektissa ja jakavat kiintiön.
+- **Arvio:** ensikäynti on noin 0,1 Mt sovellusta (gzip) ja laiskasti ladatut pikkukuvat (koko lista selattuna 151 × noin 12 kt ≈ 1,8 Mt). Isot kuvat ladataan vain avattaessa. Vuoden välimuistin takia toistuvat käynnit eivät juuri kuluta siirtoa. 10 Gt/kk riittää noin 5 000 täyteen ensikäyntiin kuukaudessa. Korttidatan siirto Netdeckiltä (1,4 Mt per käynti) poistuu kokonaan.
+- **Tallennus:** yksi julkaisu on noin 15–20 Mt. Suositus käyttäjälle: aseta Firebase-konsolissa (Hosting → julkaisuhistorian säilytys) säilytettävien julkaisujen määrä, esim. 10 per sivusto. Esikatselukanavat vanhenevat itsestään.
+- **Ei Blaze-tasoa, ei uusia palveluita eikä uutta lukittautumista.** Data ja kuvat ovat tavallisia staattisia tiedostoja `dist/`issä, ja ne siirtyvät mihin tahansa staattiseen hostingiin.
+
+**Seuraukset:**
+- T-026 toteuttaa osat 1–3 ja osan 4 välimuistisäännön (ARCHITECTURE.md luku 13, luovutus tehtäväkortissa). Digiturva katselmoi (CSP, firebase.json, SR-9) ja päivittää SECURITY.md:n R-1:n, R-2:n ehdot (ehto "dataa ei kopioida omaan Hostingiin" kumoutuu D-012:lla) ja R-6:n sekä PRIVACY.md:n (Netdeck ei enää näe käyttäjien IP-osoitteita). UX katselmoi kevyesti, koska lataus- ja virhetilat poistuvat näkyvistä.
+- T-027 toteuttaa osan 4. Sharp lisätään vasta hyväksynnän jälkeen. Käyttöliittymä ja yhdistämislogiikka voidaan tehdä ja testata ilman kuvapakettia.
+- Avoin velka: testit eivät ole CI:ssä (T-004), joten `parseCardFile`-testi ei estä julkaisua. Tyyppitarkistus estää. T-004:n prioriteetti nousee.
+- Havainto PM:lle (ei kuulu tähän päätökseen): `index.html` tulee välimuistista (`max-age=3600`). Julkaisun jälkeen vanha `index.html` voi tunnin ajan viitata poistettuihin asset-tiedostoihin. Ehdotus: `Cache-Control: no-cache` `index.html`:lle omana velkatehtävänään, kun otsakkeiden yhdistäminen on todennettu.

@@ -665,23 +665,6 @@ main {
   background: var(--color-surface);
 }
 
-/* Loading bar: decorative, aria-hidden, not a progress meter (UX.md 7.5, V3). Static without motion. */
-.loading-bar {
-  position: relative;
-  display: block;
-  height: 4px;
-  overflow: hidden;
-  background: var(--color-border);
-}
-
-.loading-bar::after {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 35%;
-  background: var(--color-info);
-}
-
 /* Search and filter form (UX.md 3.4, 5.4, 5.9) */
 .card-filters {
   display: flex;
@@ -1208,23 +1191,9 @@ main {
     transform: translateY(1px);
   }
 
-  .loading-bar::after {
-    animation: sweep 1.4s linear infinite;
-  }
-
   /* Once when the page opens; the heading stays mounted across states (UX.md 7.7). */
   main > h1 {
     animation: glitch 0.4s steps(1, end) 1;
-  }
-
-  @keyframes sweep {
-    from {
-      transform: translateX(-100%);
-    }
-
-    to {
-      transform: translateX(290%);
-    }
   }
 
   @keyframes glitch {
