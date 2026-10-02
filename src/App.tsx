@@ -14,7 +14,9 @@ export function App({ loadCatalog, repositories }: { loadCatalog?: LoadCatalog; 
   return (
     <>
       <header className="site-header">
-        <div className="container">{texts.appName}</div>
+        <div className="container">
+          <span className="brand">{texts.appName}</span>
+        </div>
       </header>
       <main className="container">
         <CatalogView state={state} onRetry={retry} repositories={openRepositories} />

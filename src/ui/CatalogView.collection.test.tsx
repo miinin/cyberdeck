@@ -110,6 +110,17 @@ describe('CatalogView collection: count control', () => {
     expect(saved.value.entries).toEqual([{ card: 'v-streetkid', count: 1 }]);
   });
 
+  it('highlights only rows with a count above zero (UX.md 7.5)', async () => {
+    const user = userEvent.setup();
+    await renderView(withCollection([{ card: 'v-streetkid', count: 1 }]));
+    expect(row('V, Streetkid')).toHaveClass('is-owned');
+    expect(row('Swordwise Huscle')).not.toHaveClass('is-owned');
+
+    await user.click(minus('V, Streetkid') as HTMLElement);
+    await settle();
+    expect(row('V, Streetkid')).not.toHaveClass('is-owned');
+  });
+
   it('shows saved counts after a reload (a new view with the same storage)', async () => {
     const repositories = withCollection([
       { card: 'v-streetkid', count: 2 },
