@@ -24,7 +24,7 @@ export interface ImportReport {
   readonly unrecognized: readonly string[];
   /** Sideboard cards compared with the collection (not part of the saved deck). */
   readonly sideboardRows: readonly ReportRow[];
-  readonly source: ParsedDeckText['source'] | null;
+  readonly source: NonNullable<ParsedDeckText['source']> | null;
   readonly issues: readonly DeckIssue[];
   /** The deck that "Tallenna pakaksi" would create, with the name from the list or the default. */
   readonly content: DeckContent;

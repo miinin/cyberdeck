@@ -35,3 +35,11 @@
 - Muut pakkasivustot eivät kuulu tähän (ei rajapintaa tai CORS:ia). Niiden pakat tuodaan tekstinä (T-014).
 
 ## Luovutukset
+
+### Luovutus 2026-10-02 · Koodari → PM (Digiturva katselmoi)
+- Mitä tehtiin: linkkihaku tuontinäkymään (oma lomake "Hae pakka Netdeck-linkistä" tekstikentän yläpuolella). Uudet tiedostot: `src/domain/netdeckDeck.ts` (URL-jäsennys, validointi, täsmäys), `src/netdeck/fetchNetdeckDeck.ts` (haku), testit niille; muutettu `deckText.ts` (valinnaiset `sideboard`, `source`), `deckReport.ts` (`sideboardRows`, `source`), `DeckImport.tsx`, `deckTexts.ts`, `firebase.json` (connect-src molemmilla sivustoilla), `firebaseConfig.test.ts`, CHANGELOG.
+- ESLint-ratkaisu: haku ei ole `src/api`:ssa, vaan uudessa kansiossa `src/netdeck/`. Näin `noApiInApp`-kielto (`**/api`, `**/api/**`) koskee edelleen vain kortti-API:a, eikä sääntöä muutettu. Poikkeus kortin kohtaan 2 (tiedostopolku). Domain-kerros ei riipu mistään uudesta. Arkkitehti voi halutessaan kirjata kansion ARCHITECTURE.md:hen.
+- Toteutus: HTTPS-URL ankkuroitu regex (netdeck.gg / www., yksi UUID, URL ≤300 merkkiä), fetch `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`, 10 s aikakatkaisu, Content-Length ja luetun tekstin raja 512 kt, ei uudelleenyritystä, UUID pienillä kirjaimilla. Validointi tiukka: mikä tahansa rakennevirhe (väärä tyyppi, quantity ei 1–99, id >64, >3 vyöhykettä, >300 riviä, tuntematon zone_code) hylkää koko vastauksen. Nimet `cleanText`illä. `image_url` ja muut kentät ohitetaan. Kortit täsmätään `card.id`:llä, varapolkuna `cardKey(name, subname)`. Valinnaisesti luetaan `card.name`/`card.subname` ja `owner.display_name` (oletus: rajapinnan muoto kortin mukaan, oikeaa vastausta ei verkossa testattu).
+- Tunnetut rajoitteet: 512 kt raja tarkistetaan `text()`-luvun jälkeen, jos Content-Length puuttuu (ei striimausta). Lomakkeen tekstit (linkHeading, virheilmoitukset, "Haku lähettää pyynnön Netdeck.gg-palveluun.") kirjoitin itse kortin tekstien mukaan: Sisällöntuottaja/UX tarkistaa. PRIVACY.md jää Digiturvalle. Oikeaa Netdeck-vastausta ei haettu käsin (testit väärennetyllä fetchillä).
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (uusi kerros `src/netdeck` ARCHITECTURE.md:hen).
+- Testit: koko `npm test` 635/635 läpi (39 tiedostoa), `npm run lint` (max-warnings 0) ja `npm run build` läpi, `tsc --noEmit` puhdas.

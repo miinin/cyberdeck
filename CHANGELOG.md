@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pakan haku Netdeck-linkistä: Tuo pakkalista -näkymässä voi liittää netdeck.gg-pakan osoitteen ja painaa Hae pakka. Raportti näyttää, mitä kortteja kokoelmasta puuttuu. Sideboard näytetään erikseen, eikä sitä tallenneta pakkaan. Haku lähettää pyynnön Netdeck.gg-palveluun vain, kun painat Hae pakka.
+
 - Pakkalistan tuonti: Pakat-sivun Tuo pakkalista -painikkeella voi liittää netistä löytyneen pakkalistan tai valita .txt-tiedoston. Tarkistus näyttää, mitä kortteja kokoelmasta puuttuu, missä muissa pakoissasi kortit ovat, mitkä rivit jäivät tunnistamatta ja onko pakka laillinen. Listan voi sen jälkeen tallentaa uudeksi pakaksi nimeä muokaten. Mitään ei tallenneta ennen kuin painat Tallenna pakaksi.
 
 - Pakanrakennus: yläpalkin Pakat-valinnasta voi luoda, nimetä, kopioida ja poistaa pakkoja (poisto kysyy varmistuksen). Pakkaeditorissa kortteja haetaan samoilla suodattimilla kuin Kortit-näkymässä ja lisätään −/+-painikkeilla. Yhteenveto näyttää Legend- ja pääpakkamäärät, värikohtaiset RAM-rajat, rikkeet selkokielellä ja kokoelmasta puuttuvat kortit. Muutokset tallentuvat itsestään. Kortit-näkymässä kortin alla lukee, monessako pakassa se on.

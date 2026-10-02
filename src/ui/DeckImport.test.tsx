@@ -120,3 +120,69 @@ describe('Deck list import', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Tuo pakkalista' })).toHaveFocus());
   });
 });
+
+describe('Deck import from a Netdeck link (T-046)', () => {
+  const UUID = '40502c1f-1111-4222-8333-444455556666';
+  const URL = `https://netdeck.gg/decks/cyberpunk/${UUID}`;
+  const response = {
+    name: 'Linkkipakka',
+    owner: { display_name: 'Tekijä' },
+    zones: [
+      { zone_code: 'legends', cards: [1, 2, 3].map((n) => ({ quantity: 1, card: { id: `id-l${n}` } })) },
+      { zone_code: 'deck', cards: [{ quantity: 3, card: { id: 'id-u0' } }, { quantity: 1, card: { id: 'unknown-id' } }] },
+      { zone_code: 'sideboard', cards: [{ quantity: 2, card: { id: 'id-u1' } }] },
+    ],
+  };
+
+  async function fetchLink(url: string, fetchImpl: typeof fetch) {
+    const { user, repositories } = await openImport();
+    globalThis.fetch = fetchImpl;
+    await user.click(screen.getByLabelText('Netdeck-linkki'));
+    await user.paste(url);
+    await user.click(screen.getByRole('button', { name: 'Hae pakka' }));
+    return { user, repositories };
+  }
+
+  it('shows the privacy notice before the search', async () => {
+    await openImport();
+    expect(screen.getByText(/Haku lähettää pyynnön Netdeck\.gg-palveluun\./)).toBeInTheDocument();
+  });
+
+  it('shows source, a separate sideboard and unknown cards, and saves under the Netdeck name', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response(JSON.stringify(response)));
+    const { user, repositories } = await fetchLink(URL, fetchMock);
+    const report = await screen.findByRole('region', { name: 'Tarkistuksen tulos' });
+    expect(within(report).getByText('Netdeck: Linkkipakka, tekijä Tekijä')).toBeInTheDocument();
+    expect(within(report).getByText('Sideboard (ei mukana pakassa)')).toBeInTheDocument();
+    expect(within(report).getByText(/2 × Unit 1/)).toBeInTheDocument();
+    expect(within(report).getByText('1 unknown-id')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(`https://api.netdeck.gg/api/cyberpunk/decks/${UUID}`, expect.anything());
+
+    expect(screen.getByLabelText('Pakan nimi')).toHaveValue('Linkkipakka');
+    await user.click(screen.getByRole('button', { name: 'Tallenna pakaksi' }));
+    await waitFor(async () => {
+      const saved = (await repositories.decks.list()).value;
+      expect(saved).toHaveLength(1);
+      const keys = (saved[0]?.sections ?? []).flatMap((section) => section.cards.map((row) => row.card));
+      expect(keys).toContain('u0');
+      expect(keys).not.toContain('u1');
+    });
+  });
+
+  it('rejects a foreign address without making a request', async () => {
+    const fetchMock = vi.fn<typeof fetch>();
+    await fetchLink(`https://netdeck.gg.evil.com/decks/cyberpunk/${UUID}`, fetchMock);
+    expect(await screen.findByText(/Linkki ei kelpaa/)).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('explains a missing deck', async () => {
+    await fetchLink(URL, async () => new Response('{}', { status: 404 }));
+    expect(await screen.findByText(/Pakkaa ei löytynyt/)).toBeInTheDocument();
+  });
+
+  it('explains an unreadable response', async () => {
+    await fetchLink(URL, async () => new Response('{"name":5}'));
+    expect(await screen.findByText(/vastausta ei voitu lukea/)).toBeInTheDocument();
+  });
+});
