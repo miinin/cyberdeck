@@ -1,6 +1,6 @@
 # UX · cyberdeck
 
-> Omistaja: UX Designer. Versio 0.9 · 2026-10-02 (T-025). Muutos 0.9: uusi luku 8 (teemavalitsin, D-012): tumma on oletus laitteen asetuksesta riippumatta, vaihtopainike otsikkopalkissa, välähdyksen esto ulkoisella skriptillä, tallennusrajapinnan lisäys. Luvun 3 johdanto ja luvun 7.3 teemapäätös merkitty päivitetyiksi. Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
+> Omistaja: UX Designer. Versio 0.10 · 2026-10-02 (T-026 ja T-027). Muutos 0.10: T-026 poisti lataus-, virhe-, osittaisen ja tyhjän tilan (D-013), joten luvut 4.2, 4.5, 4.6, 5, 6 ja 7 on merkitty vanhentuneiksi näiltä osin. Latauspalkki poistettu (7.5, 7.7, 7.9, 7.10). Uusi luku 9: korttikuvat (T-027). Raportti `docs/reports/UX-006-t027-korttikuvat.md`. Versio 0.9 · 2026-10-02 (T-025). Muutos 0.9: uusi luku 8 (teemavalitsin, D-012): tumma on oletus laitteen asetuksesta riippumatta, vaihtopainike otsikkopalkissa, välähdyksen esto ulkoisella skriptillä, tallennusrajapinnan lisäys. Luvun 3 johdanto ja luvun 7.3 teemapäätös merkitty päivitetyiksi. Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
 > Muutos 0.3 · 2026-10-01 (T-010, MVP-1): uusi luku 5 (haku ja suodatus), korttien väritokenit (3.1.1) sekä tekstikenttä ja valintaruutu (3.4). Luvun 4 kohtiin, joita luku 5 muuttaa, on lisätty viittaus.
 > Muutos 0.4 · 2026-10-01 (T-010, katselmointi UX-002): K9 ratkaistu (latausviesti suodatettuna, 5.6), tyhjennyspainikkeen ilmoitus ja toistokielto (5.6), OSITTAINEN ilman kortteja (5.8). Raportti `docs/reports/UX-002-t010-katselmointi.md`.
 > Muutos 0.5 · 2026-10-01 (T-012, MVP-1): uusi luku 6 (kokoelma): määräkontrolli korttirivillä, korttimainen rivi alle 40 rem:ssä, "Vain omistetut" -suodatin, kokoelman yhteenveto, selainmuistutus ja pysyvän tallennuksen pyyntö, tallennuskerroksen ilmoitukset ja virheet, ruudunlukijailmoitukset ja tarkistuslista. Uudet komponentit: määräpainike ja toissijainen painike (6.4.3).
@@ -198,11 +198,13 @@ Komponenttien toiminta ja rakenne ovat ennallaan. Tässä on ulkoasun muutos. Vi
 ### 3.5 Liike
 
 - Kaikki liike (animaatiot, siirtymät) on kirjoitettu ehdon `@media (prefers-reduced-motion: no-preference)` sisään. Ilman ehtoa tai `reduce`-tilassa ei ole liikettä. Nykyinen `reduce`-ylikirjoitus (`animation-duration: 0.01ms`, `transition-duration: 0.01ms`) säilytetään turvaverkkona.
-- Sallittu liike on lueteltu 7.7:ssä: otsikon yksi lyhyt glitch sivun avautuessa, latauspalkin pyyhkäisy ja värisiirtymät (0.12 s). Mikään ei vilku yli 3 kertaa sekunnissa.
+- Sallittu liike on lueteltu 7.7:ssä: otsikon yksi lyhyt glitch sivun avautuessa, ~~latauspalkin pyyhkäisy~~ (poistettu T-026) ja värisiirtymät (0.12 s). Mikään ei vilku yli 3 kertaa sekunnissa.
 
 ---
 
 ## 4. Näkymä: Korttilista (T-001, MVP-0)
+
+> **Vanhentunut osittain (T-026, D-013, 2026-10-02):** kortit tulevat sovelluksen mukana (`src/data/cards.json`), eikä niitä haeta selaimessa. Tilat LATAUS, VIRHE, OSITTAINEN ja TYHJÄ eivät ole enää mahdollisia, eikä `Yritä uudelleen` -painiketta ole. Voimassa on vain ONNISTUMINEN (lista näkyy heti). Alla olevat kuvaukset näistä tiloista (4.2, 4.5, 4.6 sekä lukujen 5 ja 6 viittaukset OSITTAINEN-tilaan ja latausviestiin) ovat historiaa. Ne säilytetään, koska sama rakenne palaa, jos data haetaan joskus uudelleen verkosta. `role="status"`-alue (4.9) ja tilarivin tulosilmoitukset (5.6) ovat edelleen voimassa suodatuksen osalta.
 
 ### 4.1 Käyttäjä ja tavoite
 
@@ -355,6 +357,8 @@ Kortit esitetään **semanttisena taulukkona** (`<table>`), koska jokaisella kor
 - Kaikki kortit näytetään yhdellä sivulla (151 riviä). Sivutusta tai virtualisointia ei tehdä MVP-0:ssa.
 
 ### 4.5 Tilat ja tarkat tekstit
+
+> **Vanhentunut (T-026):** LATAUS, VIRHE, OSITTAINEN ja TYHJÄ on poistettu. Ainoa voimassa oleva tila on ONNISTUMINEN. Alla olevat tekstit eivät ole enää käytössä.
 
 Tekstit ovat lopullisia MVP-0:aan. ~~Sisällöntuottaja voi tarkistaa ne katselmoinnissa.~~ → 2026-10-01: Sisällöntuottaja tarkisti tekstit (`docs/reports/TXT-001-t001-tarkastus.md`). TYHJÄ-, OSITTAINEN- ja alatunnistetekstit päivitettiin raportin mukaisiksi (commit 6667d77). Toteutuksen lähde on `src/ui/texts.ts`.
 
@@ -1407,7 +1411,7 @@ Referenssi: `docs/design/t021-mallisivu.html` (CSS on kopioitavissa lähes sella
 
 **Tyhjä tila (`.empty`)**: katkoviivareuna, `--color-surface`, kappale ja ensisijainen painike. Ei uusia tekstejä.
 
-**Lataustila**: tilarivi `Haetaan kortteja…`. Valinnainen koriste (V3): sen alle `span.loading-bar` (`aria-hidden="true"`, 4 px korkea `--color-border`-viiva, jossa 35 % leveä `--color-info`-pyyhkäisy). Pyyhkäisy liikkuu vain `no-preference`-tilassa, muuten palkki on paikallaan ja täyttää 35 % vasemmalta. Palkki ei ole edistymismittari eikä kanna tietoa (tila kerrotaan tekstinä ja live-alueella). Palkki näkyy vain LATAUS-tilassa.
+~~**Lataustila**~~ (poistunut T-026: latauspalkki ja lataustila on poistettu): tilarivi `Haetaan kortteja…`. Valinnainen koriste (V3): sen alle `span.loading-bar` (`aria-hidden="true"`, 4 px korkea `--color-border`-viiva, jossa 35 % leveä `--color-info`-pyyhkäisy). Pyyhkäisy liikkuu vain `no-preference`-tilassa, muuten palkki on paikallaan ja täyttää 35 % vasemmalta. Palkki ei ole edistymismittari eikä kanna tietoa (tila kerrotaan tekstinä ja live-alueella). Palkki näkyy vain LATAUS-tilassa.
 
 **Alatunniste (`.site-footer`)**: yläreuna 1 px `--color-border` ja vasemmalla 3 rem leveä 2 px `--color-accent-edge` -viiva, `--font-size-sm`, `--color-text-muted` (7.18 : 1 tai parempi). Epävirallisuusmerkintä sekakirjaimin Rajdhani, lähdemaininta ("Korttitiedot: Netdeck.gg") Share Tech Mono. Tekstit ennallaan (TXT-002).
 
@@ -1497,7 +1501,7 @@ Kaikki liike on `@media (prefers-reduced-motion: no-preference)` -ehdon sisäll�
 | Värisiirtymät (hover, valinta) | `transition: background-color, color, border-color 0.12s ease-out` | Vain värit. Ei liikettä tai koon muutosta. Ehto: `no-preference`. |
 | Painikkeen painallus | `:active { transform: translateY(1px) }` | 1 px, ei animoitu. Pois `reduce`-tilassa kuten kaikki `transform`-siirtymät, käytännössä vaikutus on olematon. |
 | Otsikon glitch | `main > h1 { animation: glitch 0.4s steps(1, end) 1; }`. Kehykset: 0 % ei varjoa, 30 % `text-shadow: -2px 0 #ff2a6d, 2px 0 #1fe0ff` ja `translateX(1px)`, 60 % käänteinen ja `translateX(-1px)`, 100 % lepo. | **Kerran** sivun avautuessa (`1`-toisto). Kaksi siirtymää 0,4 s:ssa, ei vilkkumista (WCAG 2.3.1). Ei toistu uudelleenyrityksen tai tilanmuutoksen yhteydessä (animaatio ajetaan vain, kun elementti syntyy. Koodari varmistaa, ettei `h1` mountata uudestaan joka tilanvaihdolla; jos mountataan, glitch rajataan luokalla, joka lisätään vain ensimmäisellä renderöinnillä). Teksti on luettavissa koko ajan (offsetit 2 px). Glitchin varjoväri `#ff2a6d` on tilapäinen koriste. |
-| Latauspalkin pyyhkäisy | `transform: translateX(-100% → 290%)`, 1.4 s lineaarinen, ääretön | Vain LATAUS-tilassa ja vain `no-preference`. Pienikokoinen (4 px korkea), ei vilku. Latausindikaattorina se täyttää WCAG 2.2.2:n poikkeuksen (olennainen), eikä kyse ole tiedosta. |
+| ~~Latauspalkin pyyhkäisy~~ (poistettu T-026) | `transform: translateX(-100% → 290%)`, 1.4 s lineaarinen, ääretön | Vain LATAUS-tilassa ja vain `no-preference`. Pienikokoinen (4 px korkea), ei vilku. Latausindikaattorina se täyttää WCAG 2.2.2:n poikkeuksen (olennainen), eikä kyse ole tiedosta. |
 
 Ei muita animaatioita (ei parallaxia, ei jatkuvaa hehkun sykettä, ei kohinaa, ei siirtymiä sisällön näkyviin tuloon).
 
@@ -1524,7 +1528,7 @@ Pidä toiminta, DOM-rakenne ja tekstit ennallaan (`src/ui/texts.ts` ei muutu). M
 3. **Otsikkopalkki (`App.tsx`):** kääri sovelluksen nimi `<span className="brand">`-elementtiin. Keltainen merkki on `.site-header .container::before`. Maamerkit ja teksti ennallaan. Otsikkopalkki on musta (`--color-header-bg`) kummassakin teemassa.
 4. **Hakulomake (`CardFilters.tsx`):** lisää `<form>`-elementille luokka `panel` (`className="card-filters panel"`). Mallisivulla Tyyppi- ja Väri-ryhmät ovat `div.fieldsets`-käärössä, joka asettaa ne rinnakkain, kun tilaa on (≥ 40 rem). Kääre on valinnainen: ilman sitä ryhmät pinoutuvat. Valintaruutu-labelit ovat jo `.option`-luokassa. "Vain omistetut" -labelin (`.owned-only .option`) tyyli on mallisivulla.
 5. **Omistettu rivi (`CardList.tsx`):** lisää `<tr>`-elementille luokka `is-owned`, kun rivillä on määrä > 0 ja kokoelma on `ready`-tilassa (tieto on jo saatavilla `owned.countOf(card)`-kutsulla). Pelkkä luokka, ei uutta logiikkaa.
-6. **Latauspalkki (V3):** `<span className="loading-bar" aria-hidden="true" />` LATAUS-tilassa tilarivin jälkeen.
+6. ~~**Latauspalkki (V3):**~~ (poistettu T-026) `<span className="loading-bar" aria-hidden="true" />` LATAUS-tilassa tilarivin jälkeen.
 7. **Painikkeet:** `.button-primary`, `.step-plus`, `.button-secondary` ja `.step-minus` tarvitsevat `position: relative; isolation: isolate` ja `::before`-täytön (3.4). `:focus-visible`-tyyli (`clip-path: none`) pitää olla luettu **myöhemmin** kuin perustyyli. Tarkista fokus näppäimistöllä kaikissa painikkeissa (myös `aria-disabled` + -painike) kummassakin teemassa.
 8. **Glitch:** älä anna `h1`:n mountautua uudelleen tilanvaihdoissa glitchin vuoksi (7.7). Nykyinen `CatalogView` pitää `h1`:n paikallaan, joten pelkkä `main > h1 { animation }` riittää. Ellei, rajaa luokkaan.
 9. **Ei kovakoodattuja arvoja:** kaikki värit, välit ja koot tokeneista. ~~Poikkeukset: glitchin varjovärit ja koristeviivojen keltainen.~~ → 2026-10-02: nekin ovat tokeneita (`--color-glitch-a`, `--color-glitch-b`, `--color-brand-yellow`, 3.1). Poikkeuksia ei ole.
@@ -1538,7 +1542,7 @@ Pidä toiminta, DOM-rakenne ja tekstit ennallaan (`src/ui/texts.ts` ei muutu). M
 |---|---|---|
 | V1 | Teemat | Vaalea ja tumma (7.3). ~~Vain tumma~~ → hylätty D-011:ssä. |
 | V2 | Fontit | Rajdhani (teksti), Share Tech Mono (luvut ja tilarivit) (7.4). |
-| V3 | Latauspalkki (koriste) | Kyllä, voi jättää pois ilman muita muutoksia. |
+| V3 | Latauspalkki (koriste) | ~~Kyllä, voi jättää pois ilman muita muutoksia.~~ → poistettu T-026:ssa (lataustilaa ei ole). |
 | V4 | Sisältöleveys 48 rem → 56 rem | Kyllä. |
 | V5 | Otsikon glitch kerran sivun avautuessa | Kyllä, `reduce`-tilassa ei animaatiota. |
 | V6 | Kortin värinäyte viistettynä neliönä | Kyllä. |
@@ -1757,3 +1761,27 @@ Tokenien arvot pysyvät täsmälleen entisinä, vain valinta muuttuu:
 | A3 | Näytetäänkö viesti, kun teeman tallennus epäonnistuu? | Ei (8.6). Vaikutus on vähäinen. |
 | A4 | "Laitteen mukaan" -vaihtoehto ja teeman synkronointi välilehtien välillä? | Ei (T2, 8.6). Kirjattu `IDEAS.md`:hen. |
 | A5 | Lisätäänkö `<meta name="theme-color" content="#000000">` (otsikkopalkki on musta kummassakin teemassa)? | Ei tässä tehtävässä (laajuus). Kirjattu `IDEAS.md`:hen. |
+
+---
+
+## 9. Korttikuvat (T-027, D-012, D-013)
+
+Kortin kuva tunnistaa kortin (D-012). Katselmointi: `docs/reports/UX-006-t027-korttikuvat.md`.
+
+### 9.1 Ratkaisu
+- Listan ensimmäinen sarake `Kuva`: pikkukuva (`sm`, 160 × 224 px) napissa. Leveys 3.5 rem (desktop) ja 3 rem (alle 40 rem), kuvasuhde 733 / 1024, reuna 1 px `--color-border`.
+- Painallus avaa natiivin modaalisen `<dialog>`in, jossa on iso kuva (`lg`, 720 × 1006 px) ja otsikko (kortin nimi, `lang="en"`). Yksityiskohtanäkymää ei ole.
+- Pikkukuva on koriste (`alt=""`). Napin saavutettava nimi on `Suurenna kuva: <kortin nimi>`. Dialogin kuvan `alt` on kortin nimi.
+- Puuttuva tai latautumaton pikkukuva: katkoviivakehys (`--color-border-strong`), ei nappia eikä tekstiä, `aria-hidden`. Iso kuva ei lataudu: dialogissa `Kuvaa ei voitu ladata.` (`role="alert"`).
+- Mobiili (alle 40 rem): kuva on rivin 2 alussa, ennen tyyppiä ja hintaa. Rivi 1 (nimi ja määräkontrolli) ennallaan.
+
+### 9.2 Dialogi (saavutettavuus)
+- `aria-labelledby` osoittaa `h2`:een. `showModal()` tekee taustasta inertin. Ensimmäinen fokus `Sulje`-painikkeeseen. Sulkeminen: Esc, `Sulje`, klikkaus taustaan. Fokus palaa avanneeseen painikkeeseen (tai hakukenttään, jos rivi on poistunut).
+- Leveys `min(30rem, 100vw - 2 * --space-3)`, korkeus enintään `100dvh - 2 * --space-3`, sisältö vieritettävä (400 % zoom). Ei animaatioita.
+- Taustan vieritys estetty, kun dialogi on auki (`body:has(dialog[open])`).
+
+### 9.3 Tekstit (`texts.ts`)
+`Kuva` (sarakeotsikko) · `Suurenna kuva: ` · `Sulje` · `Kuvaa ei voitu ladata.`
+
+### 9.4 Avoimet
+Vierityspalkin hyppy ja ison kuvan uudelleenyritys: arvio raportissa UX-006. Ideat (nuolinäppäinselaus dialogissa, ruudukkonäkymä, `srcset`) kuuluvat `docs/IDEAS.md`:hen.

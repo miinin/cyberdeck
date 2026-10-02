@@ -41,6 +41,11 @@ export const texts = {
 
   tableCaption: 'Kaikki kortit',
   tableCaptionFiltered: 'Hakua vastaavat kortit',
+  // Card images: T-027 UX handover (PM accepted the dialog on 2026-10-02).
+  columnImage: 'Kuva',
+  enlargeImage: 'Suurenna kuva: ',
+  closeDialog: 'Sulje',
+  imageLoadError: 'Kuvaa ei voitu ladata.',
   columnName: 'Nimi',
   columnTypeAndColor: 'Tyyppi ja väri',
   columnCost: 'Hinta',

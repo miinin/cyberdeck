@@ -52,7 +52,7 @@ const row = (name: string) => {
 };
 const plus = (name: string) => within(row(name)).getByRole('button', { name: `Lisää yksi kappale: ${name}` });
 const minus = (name: string) => within(row(name)).queryByRole('button', { name: `Vähennä yksi kappale: ${name}` });
-const controlCell = (name: string) => within(row(name)).getAllByRole('cell')[2];
+const controlCell = (name: string) => within(row(name)).getAllByRole('cell')[3];
 const summary = (container: HTMLElement) => container.querySelector('#collection-summary');
 
 beforeEach(() => {
@@ -69,7 +69,7 @@ describe('CatalogView collection: count control', () => {
     const headers = within(screen.getByRole('table'))
       .getAllByRole('columnheader')
       .map((header) => header.textContent);
-    expect(headers).toEqual(['Nimi', 'Tyyppi ja väri', 'Hinta', 'Omistan']);
+    expect(headers).toEqual(['Kuva', 'Nimi', 'Tyyppi ja väri', 'Hinta', 'Omistan']);
     expect(plus('V, Streetkid')).toBeInTheDocument();
     expect(minus('V, Streetkid')).toBeNull();
     expect(controlCell('V, Streetkid')).toHaveTextContent('Ei kokoelmassa');
@@ -81,7 +81,7 @@ describe('CatalogView collection: count control', () => {
 
   it('has one decorative separator, between type and color, and none before the cost (UX-005)', async () => {
     await renderView();
-    const [typeCell, costCell] = within(row('V, Streetkid')).getAllByRole('cell');
+    const [, typeCell, costCell] = within(row('V, Streetkid')).getAllByRole('cell');
     const separators = typeCell?.querySelectorAll('.separator') ?? [];
     expect(separators).toHaveLength(1);
     expect(separators[0]).toHaveAttribute('aria-hidden', 'true');
@@ -192,7 +192,7 @@ describe('CatalogView collection: loading states', () => {
     vi.spyOn(repositories.collection, 'load').mockReturnValue(new Promise(() => {}));
     const { container } = await renderView(repositories);
     expect(summary(container)).toHaveTextContent('Haetaan kokoelmaa…');
-    expect(within(row('V, Streetkid')).queryByRole('button')).toBeNull();
+    expect(within(controlCell('V, Streetkid') as HTMLElement).queryByRole('button')).toBeNull();
     expect(controlCell('V, Streetkid')).toHaveTextContent('ladataan');
   });
 
@@ -471,7 +471,7 @@ describe('CatalogView collection: notices', () => {
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText(/välimuisti/)).toBeNull();
-    expect(within(row('V, Streetkid')).queryByRole('button')).toBeNull();
+    expect(within(controlCell('V, Streetkid') as HTMLElement).queryByRole('button')).toBeNull();
     expect(controlCell('V, Streetkid')).toHaveTextContent('–ei muokattavissa');
     expect(summary(container)).toBeNull();
     expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
@@ -489,7 +489,7 @@ describe('CatalogView collection: notices', () => {
     const headers = within(screen.getByRole('table'))
       .getAllByRole('columnheader')
       .map((header) => header.textContent);
-    expect(headers).toEqual(['Nimi', 'Tyyppi ja väri', 'Hinta']);
+    expect(headers).toEqual(['Kuva', 'Nimi', 'Tyyppi ja väri', 'Hinta']);
     expect(screen.queryByRole('checkbox', { name: 'Vain omistetut' })).toBeNull();
     expect(summary(container)).toBeNull();
 

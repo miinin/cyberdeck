@@ -15,6 +15,7 @@ import {
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardFilters } from './CardFilters';
+import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
 import type { OwnedColumn } from './CardList';
 import { CollectionNotices, loadNotices } from './CollectionNotices';
@@ -72,6 +73,9 @@ export function CatalogView({
   const persistenceResultRef = useRef<HTMLParagraphElement>(null);
   /** Set by the button: the result paragraph takes focus once it is rendered. */
   const focusPersistenceResult = useRef(false);
+  /** The card in the enlarged image dialog, and the thumbnail button that opened it (T-027 UX). */
+  const [openCard, setOpenCard] = useState<Card | null>(null);
+  const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
   if (ownedOnlyChecked && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
@@ -186,6 +190,20 @@ export function CatalogView({
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
   const noOwnedCards = noResults && ownedOnly && !isFilterActive(criteria);
 
+  const handleOpenImage = (card: Card, opener: HTMLButtonElement) => {
+    imageOpenerRef.current = opener;
+    setOpenCard(card);
+  };
+
+  const handleCloseImage = () => {
+    setOpenCard(null);
+    // Back to the thumbnail; if its row is gone, the search field is the nearest stable place.
+    const opener = imageOpenerRef.current;
+    imageOpenerRef.current = null;
+    if (opener?.isConnected) opener.focus();
+    else searchInputRef.current?.focus();
+  };
+
   const handleShowAll = () => {
     updateFilters(criteria, false, 'now', true);
     ownedOnlyRef.current?.focus();
@@ -280,8 +298,11 @@ export function CatalogView({
           cards={filtered}
           caption={filterActive ? texts.tableCaptionFiltered : texts.tableCaption}
           owned={owned}
+          onOpenImage={handleOpenImage}
         />
       )}
+
+      <CardImageDialog card={openCard} onClose={handleCloseImage} />
     </>
   );
 }

@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-02 (PM, T-025 Done)
+# STATUS · päivitetty 2026-10-02 (PM, T-026 ja T-027 Done)
 
 ## Yhdellä lauseella
 MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). MVP-1 on pilkottu tehtäviksi T-010–T-015 (D-007).
@@ -9,8 +9,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-026 | PM | Review (PR #8) | Koodari ja Digiturva valmiit (SEC-005: ei Critical/High). Esikatselun curl-tarkistus (SEC-016), sitten Done ja test. |
-| T-027 | Koodari | In Progress | Worktree `.claude/worktrees/t-027` (haara `t-027-korttikuvat`, T-026:n päältä). Käyttäjä nosti kuvat kaiken muun edelle 2026-10-02. UX-suunnitelma ja sharp hyväksytty. |
+| – | – | – | Kuvat ovat testisivustolla. Odotetaan käyttäjän lupaa jatkaa (käyttäjä 2026-10-02: "kun kuvat ovat toiminnassa, pyydä lupaa jatkaa"). |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -38,6 +37,8 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-027 Korttikuvat: pikkukuva listassa ja iso kuva dialogissa, 151/151 (2026-10-02, PR #9)
+- T-026 Korttidata sovelluksen mukana (2026-10-02, PR #8)
 - T-025 Teemavalitsin, tumma oletuksena (2026-10-02, PR #7)
 - T-021 Ulkoasu: Cyberpunk 2077 -henkinen ilme (2026-10-02)
 - T-012 Kokoelma (2026-10-01)
@@ -47,7 +48,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-026 valmiiksi, sitten T-027 (kuvat ovat jo `public/cards/`-kansiossa) (D-012). Sen jälkeen T-013 → T-014 → T-015 (järjestys riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta.
+1. T-013 → T-014 → T-015 (riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta. T-029 ja T-032 (velka, pieniä) ennen seuraavaa rinnakkaista työtä.
 2. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
 
 **Tokenien säästö (käyttäjä 2026-10-02):** tokenit kuluvat nopeasti, ja käyttöraja katkaisi kaksi rinnakkaista Koodaria. Aja yksi agentti kerrallaan, pidä tehtävänannot lyhyinä ja tyhjennä istunto (`/clear`) tehtävien välissä.

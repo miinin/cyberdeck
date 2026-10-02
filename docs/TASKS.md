@@ -30,7 +30,10 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-023 | Leveä asettelu suurella tekstillä: 640 px + teksti 200 % vierittyy vaakasuunnassa 224 px (UX-008:n jatko, esim. container query) | 2 | Should | Koodari | Backlog | UX |
 | T-024 | [velka] Satunnaisesti aikakatkaistuva testi "formats large counts the Finnish way" (1 024 riviä) koko sarjan kuormassa | 1 | Should | Koodari | Backlog | – |
 | T-025 | Teemavalitsin: tumma oletuksena, käyttäjä voi vaihtaa (D-012) | 1 | Must | UX → Koodari | Done | UX, Digiturva (kevyt) |
-| T-026 | Korttidata sovelluksen mukana, ei hakua joka käynnillä (D-012, korvaa T-003:n) | 1 | Must | Arkkitehti → Koodari | Review | Digiturva, UX tarvittaessa |
-| T-027 | Korttikuvat näkyviin käyttäjän 151 kuvan paketista (D-012) | 1 | Must | Arkkitehti → UX → Koodari | In Progress | UX, Digiturva |
+| T-026 | Korttidata sovelluksen mukana, ei hakua joka käynnillä (D-012, korvaa T-003:n) | 1 | Must | Arkkitehti → Koodari | Done | Digiturva, UX tarvittaessa |
+| T-027 | Korttikuvat näkyviin käyttäjän 151 kuvan paketista (D-012) | 1 | Must | Arkkitehti → UX → Koodari | Done | UX, Digiturva |
 | T-028 | [velka] Teeman vaihdon siirtymät ja reduced-motion-sääntö: `transition: none` reduce-tilassa ja ei 0,12 s:n siirtymiä teeman vaihdossa (UX-005-2, UX-005-3) | 2 | Could | Koodari | Backlog | UX |
 | T-029 | [velka] `.claude/` pois ESLintin ja Vitestin piiristä, jotta worktreet eivät riko `npm run lint`/`npm test`:iä pääkansiossa (T-025:n koodikatselmointi). Tehdään T-026:n jälkeen (sama konfiguraatio). | 1 | Should | Koodari | Backlog (T-026) | – |
+| T-030 | [velka] Sivun hyppy, kun korttidialogi avautuu: `html { scrollbar-gutter: stable }` (UX-040) | 2 | Could | Koodari | Backlog | UX |
+| T-031 | [velka] Ison korttikuvan latausvirhe nollataan dialogin sulkeutuessa, jotta uusi yritys on mahdollinen (UX-041) | 2 | Could | Koodari | Backlog | – |
+| T-032 | [velka] `/public/*.webp` .gitignoreen, jotta alkuperäiset kuvat eivät päädy repoon tai paikalliseen buildiin (SEC-019, L-005) | 1 | Should | Koodari | Backlog | – |

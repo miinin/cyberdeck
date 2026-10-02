@@ -53,10 +53,12 @@ describe('App', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('never shows images (card images are out of scope, R-1)', () => {
+  // D-012 brought card images in scope (T-027); they must come from the app's own origin (SR-1, img-src 'self').
+  it('shows card images only from the bundled assets, never from an external URL', () => {
     const { container } = render(<App cards={cards} repositories={createMemoryRepositories()} />);
 
-    expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(container.querySelector('img')).toBeNull();
+    const images = [...container.querySelectorAll('img')];
+    expect(images).toHaveLength(1);
+    for (const image of images) expect(image.getAttribute('src')).not.toMatch(/^(https?:)?\/\//);
   });
 });

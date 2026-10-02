@@ -1,7 +1,7 @@
 # T-027 · Korttikuvat näkyviin (151 kuvan paketti käyttäjältä)
-**Tila:** Ready (rakennetaan T-026:n päälle) · **Omistaja:** Arkkitehti (osa T-026:n ADR:ää) → UX → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
+**Tila:** Done · **Omistaja:** Arkkitehti (osa T-026:n ADR:ää) → UX → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** Arkkitehti ☐ (tiedostomuoto, nimeäminen, sijainti, koot, tuontikomento) · UX ☐ (missä ja miten kuva näkyy)
-**Katselmoinnit:** Koodikatselmointi ☐ · UX ☐ · Digiturva ☐ (tiedostot, `img-src`, R-1)
+**Katselmoinnit:** Koodikatselmointi ☐ · UX ☐ · Digiturva ☑ (SEC-006-t027: ei Critical-, High- eikä Medium-löydöksiä; sharp hyväksyttävissä; SEC-019 Low, SEC-020 Info)
 **Riippuvuudet:** T-026. Toteutus voidaan tehdä valmiiksi paikkamerkkikuvilla ennen kuin paketti saapuu.
 **Haara:** `t-027-korttikuvat`
 
@@ -69,3 +69,55 @@ Pelaaja tunnistaa kortin kuvasta (D-012). Kun käyttäjän kuvapaketti saapuu, k
 
 ### Checkpoint 2026-10-02 · PM
 - UX:n dialogiratkaisu hyväksytty (`CardImageDialog`). sharp hyväksytty sm-kuviin (D-013 osa 4), ja Digiturva tarkistaa sen katselmoinnissa. Käyttäjä nosti T-027:n kaiken muun edelle (2026-10-02). Tila Ready, kun T-026 on Done.
+
+### Checkpoint 2026-10-02 · Koodari
+- Suunnitelma (toteutettu): (1) `matchImages` + testit, (2) `importImages` + sharp-muunnin + `cards:images` + map-tiedosto, (3) tuonti ja optimoidut kuvat, (4) `cardImages`, `CardImage`, `CardImageDialog`, lista ja CSS, (5) dokumentit.
+- Tehty: commitit 071b4a0 (tuonti), a42ed2d (kuvat), 49f69b6 (käyttöliittymä) ja dokumentticommit.
+- Kesken: –
+- Seuraava askel: katselmoinnit (UX ja Digiturva).
+- Avoimet kysymykset: ei blokkaavia (katso luovutus).
+- Muutetut tiedostot: package.json, package-lock.json, .gitignore, scripts/cards-images.mjs, scripts/cards/{matchImages,importImages}.ts (+ testit), scripts/cards/convertImage.mjs (+ testi), scripts/cards/card-images.map.json, src/domain/cardImage.ts, src/data/cardImages.ts (+ testi), src/assets/cards/{sm,lg}/*.webp (302), src/ui/{CardImage,CardImageDialog}.tsx (+ testi), src/ui/{CardList,CatalogView,texts}.ts(x), src/styles.css, src/test/setup.ts, src/App.test.tsx, src/ui/CatalogView*.test.tsx, docs/ARCHITECTURE.md, CHANGELOG.md.
+
+**Tuontiraportti** (`npm run cards:images -- <pääkansio>/public/cards`, 2026-10-02, noin 17 s):
+- Lähde: 151 WebP-tiedostoa, 733 × 1024 px, yhteensä 14 Mt. Alkuperäisiä ei commitoitu.
+- Muunnettu 151 / yhdistetty 151. Säännöt: `key` 130, `slug` 9, `map` 12. Kortittomia tiedostoja 0, hylättyjä 0, ohitettuja 0, kuvattomia kortteja 0, orpoja 0.
+- Tulosteet: `sm` 160 × 224 px, yhteensä 1,7 Mt (noin 11 kt/kuva). `lg` 720 × 1006 px, yhteensä 11 Mt (noin 73 kt/kuva). Metatiedot poistettu (tarkistettu sharpilla).
+- **Kaksi paketin tiedostoa oli nimetty väärin** (tarkistettu katsomalla kuvat): `Modded_Muramasa.webp` on oikeasti *Bootleg Black Sapphire Show* ja `Panam_Palmer_Nomad_Cavalry_ri17.webp` on *Panam Palmer — Strength Through Family*. Oikea Modded Muramasa on `Modded_Muramasa_lwjp.webp`. Korjattu map-tiedostolla. Kaikkien 151 kuvan nimialue käytiin läpi kontaktiarkeilla, ja muut nimet täsmäsivät. Osalla Legend-korteista nimi on kuvan yläosassa rajauksen ulkopuolella, joten ne tarkistettiin vain tiedostonimen perusteella.
+- Map-tiedoston 12 riviä: 6 tiedostoa, joista aksenttikirjain puuttuu (`Gilded_Mat_n`, `Judy_lvarez` ×2, `Les_l_mens`, `El_Sombrer_n`, `Muamar_Reyes_El_Capit_n`), 3 satunnaisella päätteellä (`_v7sd`, `_vleh`, `_bxcf`) ja edellä mainitut 3.
+
+## Luovutukset (Koodari)
+
+### Luovutus 2026-10-02 · Koodari → PM → UX ja Digiturva
+- **Mitä tehtiin:** `npm run cards:images -- <kansio>` (sharp, yhdistäminen map → avain → slug → nimi, raportti). 151 kortin kuvat `src/assets/cards/{sm,lg}/<key>.webp` (12,7 Mt). Listan ensimmäinen sarake "Kuva": pikkukuva napissa, joka avaa natiivin modaalidialogin isolla kuvalla. Puuttuva kuva tai latausvirhe → katkoviivakehys. Toteutuksen poikkeamat suunnitelmasta: ARCHITECTURE.md "T-027 · Koodari".
+- **Mitä pyydän:**
+  - UX: katselmointi (lista, mobiilin rivi 2, dialogi, fokus, axe). Tarkista erityisesti: dialogin avaus piilottaa sivun vierityspalkin (`body:has(dialog[open]) { overflow: hidden }`), jolloin sisältö hyppää desktopilla noin 15 px sivulle. Korjaus olisi esim. `scrollbar-gutter: stable`, jos UX haluaa.
+  - Digiturva: sharp-riippuvuus (`npm audit`: 0 haavoittuvuutta asennuksen jälkeen), tuontiskriptin polut ja map-tiedoston validointi, `img-src 'self' data:` riittää (kuvat ovat `/assets/`-polussa).
+- **Mistä katsoa:** commitit 071b4a0, a42ed2d, 49f69b6 ja dokumentticommit haarassa `t-027-korttikuvat`. Ajo: `npm ci`, `npm run dev`. Tuonti uudelleen: `npm run cards:images -- <kansio>`.
+- **Tunnetut rajoitteet ja riskit:**
+  - Haara on tehty `t-026-korttidata`-haarasta, joten diff `origin/test...HEAD` sisältää myös T-026:n. T-027:n oma diff: `git diff a844792..HEAD`.
+  - Repo kasvaa 12,7 Mt (302 binääriä), kuten D-013 arvioi.
+  - Isoon kuvaan ei ole uudelleenyritystä: jos `lg` epäonnistuu kerran, saman kortin dialogi näyttää virheen, kunnes sivu ladataan uudelleen.
+  - Selaintarkistus tehtiin paikallisesti headless-Chromella (`vite preview`): 320 px (tumma teema) ja 1280 px (vaalea). Ei vaakavieritystä 320 px:ssä, laiska lataus toimii (17 / 151 kuvaa ladattu 320 px:ssä, 38 / 151 desktopilla), dialogi aukeaa, fokus menee Sulje-nappiin, Esc sulkee ja fokus palaa pikkukuvaan. 400 % zoomia, ruudunlukijaa ja axea ei ajettu (UX).
+  - Pääkansion `public/cards` ja tämän worktreen seuraamaton `public/` (151 alkuperäistä kuvaa, ei minun tekemäni) eivät ole gitissä. Worktreen `public/` päätyy paikalliseen `dist/`iin, jos buildaa tässä kansiossa, mutta CI:n puhtaaseen buildiin se ei vaikuta. Sen voi poistaa.
+- **Testit:** `npm test` 24 tiedostoa, 455 testiä läpi. `npm run lint` 0 virhettä ja varoitusta. `npm run build` (sis. `tsc --noEmit`) läpi.
+- **Uusi riippuvuus:** `sharp@0.35.5` (devDependency, tarkka versio). Apache-2.0, libvips-binäärit LGPL-3.0-or-later, ei install-skriptejä (Arkkitehdin tarkistus 2026-10-02).
+- Koodikatselmointi: tehty · Pakollisia korjattu 2 (raportin järjestys riippui `localeCompare`n lokaalista → koodiyksikköjärjestys; muuntamatta jääneen kuvan kortti puuttui kuvattomien listasta väärässä järjestyksessä → lasketaan korttien järjestyksessä) · Suosituksia 2 (vierityspalkin hyppy dialogissa UX:lle; ison kuvan uudelleenyritys, ei velkatehtävää ennen UX:n kantaa)
+
+### Luovutus 2026-10-02 · UX → PM (katselmointi, UX-006)
+- **Mitä tehtiin:** T-027:n UX-katselmointi ja T-026:n kevyt katselmointi esikatselussa (PR #9). Raportti `docs/reports/UX-006-t027-korttikuvat.md`. UX.md päivitetty (v0.10): poistuneet tilat ja latauspalkki merkitty vanhentuneiksi (4, 4.5, 7.5, 7.7, 7.9, 7.10), uusi luku 9 (korttikuvat).
+- **Tulos:** axe 0 rikkomusta listassa ja dialogissa (320 ja 1280 px). Näppäimistö, fokus (Sulje, Esc → takaisin nappiin), taustan inertti, tausta-klikkaus, paikkamerkki, 320 px sekä 200 ja 400 % zoom OK, ei vaakavieritystä. Critical 0, High 0, Medium 0, Low 3 (UX-040 scrollbar-gutter, UX-041 ison kuvan uudelleenyritys, UX-042 Info). **Veto: ei, ei blokkaavia.**
+- **Suositukset:** UX-040 (`html { scrollbar-gutter: stable }`, yksi rivi) korjattavaksi, jos Koodari koskee CSS:ää muutenkin, muuten velka. UX-041 velka (kiertotie: sivun päivitys, harvinainen).
+- **Rajoitteet:** ruudunlukijaa ei ajettu. Vierityspalkin hyppyä ei voitu mitata headless-selaimessa.
+
+### Luovutus 2026-10-02 · Digiturva → PM
+- **Mitä tehtiin:** tietoturva- ja tietosuojakatselmointi `git diff a844792..HEAD` ja esikatselu PR #9. Raportti `docs/reports/SEC-006-t027-korttikuvat.md`. SECURITY.md luku 15 (kuvien uhkamalli, R-1:n tekniset ehdot todennettu) ja muutosloki, PRIVACY.md muutosloki. SEC-016 (T-026) merkitty Varmistetuksi SEC-005-raporttiin (PR #9:n esikatselun `curl -sI`: CSP `connect-src 'self'`, `/assets/**` vuoden välimuisti).
+- **sharp@0.35.5:** hyväksyttävissä. Apache-2.0 (libvips LGPL-3.0-or-later, devDependency, ei `dist/`issä), ei install-skriptejä (lockfilessa `hasInstallScript` 0), 31 uutta pakettia kaikki npm-rekisteristä tiivisteineen, `npm audit` 0.
+- **Hyväksymiskriteeri "omalla originilla, ei `image_url`ia":** todennettu esikatselussa (`/assets/<key>-<hash>.webp`, `image/webp`, `nosniff`, CSP ennallaan; `image_url` ei bundlessa).
+- **Löydökset:** Critical 0 · High 0 · Medium 0 · Low 1 (SEC-019: worktreen `public/*.webp`-alkuperäiset eivät ole `.gitignore`ssa; poista ne ja harkitse `/public/*.webp` ignoreen) · Info 1 (SEC-020: alkuperäiset `test`-historiassa c31f42c, ei toimenpidettä).
+- **Veto:** ei. Done-tilaa ei estetä tietoturvan perusteella.
+- **Testit:** `npx vitest run` 26 tiedostoa, 484 testiä läpi. Metatiedot tarkistettu kaikista 302 kuvasta.
+
+### Checkpoint 2026-10-02 · PM (Done)
+- Definition of Done: hyväksymiskriteerit todennettu (esikatselu PR #8/#9), `npm test` 484/484, lint ja build läpi, koodikatselmointi tehty, Digiturva (SEC-005, SEC-006: ei Critical/High; SEC-016 Varmistettu), UX (UX-006: ei blokkaavia), CHANGELOG ja dokumentaatio päivitetty. Testikäyttäjä ja Dokumentoija MVP-1:n lopussa (D-009).
+- Low-löydökset velaksi: T-030 (UX-040), T-031 (UX-041), T-032 (SEC-019). PM poisti worktreestä omat kopionsa alkuperäisistä kuvista (SEC-019).
+- Tila Done. T-026 ja T-027 yhdistetään testiin peräkkäin.

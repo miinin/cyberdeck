@@ -1010,6 +1010,81 @@ main {
   display: none;
 }
 
+/* Card thumbnail (T-027 UX): 63/88 frame, the button opens the enlarged image. */
+.card-table .col-image {
+  padding-inline-end: 0;
+}
+
+.card-image {
+  display: block;
+  width: 3.5rem;
+  height: auto;
+  aspect-ratio: 733 / 1024;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.card-image--missing {
+  border: 1px dashed var(--color-border-strong);
+}
+
+.card-image-button {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.card-image-button:hover .card-image {
+  border-color: var(--color-info);
+}
+
+/* Enlarged image (T-027 UX). No padding on the dialog itself: a click on it is a click on the backdrop. */
+.card-dialog {
+  width: min(30rem, 100vw - 2 * var(--space-3));
+  max-width: none;
+  max-height: calc(100dvh - 2 * var(--space-3));
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.card-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.card-dialog-body {
+  padding: var(--space-4);
+}
+
+.card-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.card-dialog-header h2 {
+  margin: 0;
+  font-size: var(--font-size-card-name);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.card-dialog-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
 /* Narrow screens: each row is a card-like grid (UX.md 6.4.4, A1). Roles are explicit in CardList. */
 @media (max-width: 39.99rem) {
   .card-table,
@@ -1090,6 +1165,16 @@ main {
     max-width: 100%;
     align-self: center;
     margin-inline-start: auto;
+  }
+
+  /* The thumbnail starts line 2, before type and cost; line 1 stays name and control (T-027 UX). */
+  .card-table tbody .col-image {
+    order: 3;
+    flex: none;
+  }
+
+  .card-image {
+    width: 3rem;
   }
 
   .card-table tbody .col-type {
