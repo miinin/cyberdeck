@@ -135,6 +135,60 @@ describe('Deck editor', () => {
     expect(within(searchList()).getAllByRole('listitem')).toHaveLength(1);
   });
 
+  it('refuses a second Legend with the same name, says so in a status message and lets it be closed', async () => {
+    const user = userEvent.setup();
+    const repositories = openEditor([['l1', 1]]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    const row = within(searchList()).getByText('L1').closest('li') as HTMLElement;
+    expect(row).toHaveClass('is-dimmed');
+    await user.click(within(row).getByRole('button', { name: 'Lisää pakkaan: L1' }));
+    const message = screen.getByText('Pakassa on jo Legend nimeltä L1.');
+    expect(message.closest('[role="status"]')).not.toBeNull();
+    expect(screen.getByText('Legendit 1/3 · Pääpakka 0/40–50')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Sulje ilmoitus' }));
+    expect(screen.queryByText('Pakassa on jo Legend nimeltä L1.')).not.toBeInTheDocument();
+    await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'l1', count: 1 }]));
+  });
+
+  it('hides the Legend message by itself after about four seconds', async () => {
+    const user = userEvent.setup();
+    openEditor([['l1', 1]]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await user.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: L1' }));
+    expect(screen.getByText('Pakassa on jo Legend nimeltä L1.')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Pakassa on jo Legend nimeltä L1.')).not.toBeInTheDocument(), {
+      timeout: 5000,
+    });
+  }, 8000);
+
+  it('shows Power and Rarity on the result rows', async () => {
+    openEditor([]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    const row = within(searchList()).getByText('Unit 3').closest('li') as HTMLElement;
+    expect(row).toHaveTextContent('Unit · Red · Cost 1 · Power 1 · RAM 1 · Common');
+  });
+
+  it('switches the results to an image grid, adds with the image and remembers the choice', async () => {
+    const user = userEvent.setup();
+    const repositories = openEditor([]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await user.click(screen.getByRole('radio', { name: 'Kuvat' }));
+    expect(await repositories.preferences.loadDeckPickView()).toBe('images');
+    const imageButton = within(searchList()).getAllByRole('button', { name: 'Lisää pakkaan: Unit 3' })[0] as HTMLElement;
+    await user.click(imageButton);
+    await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'u3', count: 1 }]));
+    expect(within(searchList()).getByText('Pakassa 1', { selector: '.visually-hidden' })).toBeInTheDocument();
+  });
+
+  it('opens in the saved image view', async () => {
+    const repositories = createMemoryRepositories({ initial: { ...storedDecks([{ ...base, cards: [] }]) } });
+    await repositories.preferences.saveDeckPickView('images');
+    renderRoute('#/pakat/a', repositories);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await waitFor(() => expect(screen.getByRole('radio', { name: 'Kuvat' })).toBeChecked());
+    expect(searchList()).toHaveClass('pick-images');
+  });
+
   it('tells when the deck does not exist', async () => {
     renderRoute('#/pakat/missing', createMemoryRepositories());
     expect(await screen.findByRole('alert')).toHaveTextContent('Pakkaa ei löytynyt');

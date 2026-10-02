@@ -102,6 +102,11 @@ export const deckTexts = {
   searchResults: (shown: number, all: number) => `${shown} / ${all} korttia`,
   noSearchResults: 'Hakua vastaavia kortteja ei löytynyt.',
   dimmedHint: (reason: string) => `${reason} Voit silti lisätä kortin.`,
+  sameLegend: (name: string) => `Pakassa on jo Legend nimeltä ${name}.`,
+  toastClose: 'Sulje ilmoitus',
+  pickViewLegend: 'Näkymä',
+  pickViewList: 'Lista',
+  pickViewImages: 'Kuvat',
   distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',
 
   saveSaved: 'Tallennettu',
