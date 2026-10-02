@@ -1,10 +1,10 @@
-# STATUS · päivitetty 2026-10-02 (PM, T-013 Done, valmis /clear-komentoon)
+# STATUS · päivitetty 2026-10-02 (PM, MVP-1:n Must-tehtävät valmiit)
 
 ## Yhdellä lauseella
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
 
 ## MVP-taso
-Työn alla: MVP-1 · Valmiina: T-004, T-010–T-014, T-021, T-025–T-027, T-033–T-040. Jäljellä Must: T-015 (vienti ja tuonti). MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
+Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-015, T-021, T-025–T-027, T-033–T-040, T-045, T-046). Seuraavaksi MVP-1:n loppukatselmoinnit. MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
@@ -39,6 +39,7 @@ Työn alla: MVP-1 · Valmiina: T-004, T-010–T-014, T-021, T-025–T-027, T-033
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-015 Pakan vienti ja tuonti tiedostona (2026-10-02, PR #18)
 - T-046 Pakan haku Netdeck-linkistä (2026-10-02, PR #17)
 - T-045 Pakkaeditorin hiominen ja kuvanäkymä (2026-10-02, PR #16)
 - T-014 Pakkalistan tuonti ja raportti (2026-10-02, PR #15)
@@ -63,7 +64,8 @@ Työn alla: MVP-1 · Valmiina: T-004, T-010–T-014, T-021, T-025–T-027, T-033
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-015 (pakan vienti ja tuonti .json/.txt, huomioi SEC-021). Sitten T-041 ja T-044 (pakkojen ulkoasu).
+1. MVP-1:n loppukatselmoinnit (D-014): UX (saavutettavuusauditointi koko sovellukselle, myös 320 px ja värien merkitys), Sisällöntuottaja (uudet tekstit: deckTexts.ts, texts.ts), Testikäyttäjä (koko taso) ja Dokumentoija (README, CHANGELOG). Sen jälkeen /julkaise.
+2. Velat: T-044 (tuontiraportin ja linkkikentän ulkoasu), T-047 (SEC-023/024), T-041 (DeckEditorin pilkkominen), T-042, T-043.
 2. MVP-1:n loppukatselmoinnit (UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija) ja sen jälkeen /julkaise.
 2. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
 

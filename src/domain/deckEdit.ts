@@ -32,7 +32,9 @@ export function checkDeckName(input: string): DeckNameResult {
 /** Name for a copy: "<name> (kopio)", shortened so it still fits the limit, made unique. */
 export function copyDeckName(name: string, existing: readonly string[]): string {
   const suffix = ' (kopio)';
-  const base = `${name.slice(0, MAX_DECK_NAME_LENGTH - suffix.length - 4).trimEnd()}${suffix}`;
+  // Cut by code points so an emoji is never split (SEC-026).
+  const kept = Array.from(name).slice(0, MAX_DECK_NAME_LENGTH - suffix.length - 4).join('');
+  const base = `${kept.trimEnd()}${suffix}`;
   return uniqueDeckName(existing, base);
 }
 

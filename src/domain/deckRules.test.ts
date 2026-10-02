@@ -202,6 +202,10 @@ describe('deck editing helpers', () => {
     expect(uniqueDeckName(['Uusi pakka', 'Uusi pakka 2'])).toBe('Uusi pakka 3');
     expect(copyDeckName('Oma', ['Oma'])).toBe('Oma (kopio)');
     expect(copyDeckName('x'.repeat(100), []).length).toBeLessThanOrEqual(100);
+    // SEC-026: an emoji at the cut point is kept whole, never split into a lone surrogate.
+    const copy = copyDeckName('a' + '🔥'.repeat(100), []);
+    expect(copy).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
+    expect(copy.endsWith('🔥 (kopio)')).toBe(true);
   });
 
   it('withDeckCount adds, changes and removes a card', () => {

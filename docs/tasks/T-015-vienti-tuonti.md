@@ -1,5 +1,5 @@
 # T-015 · Pakan vienti ja tuonti .json- ja .txt-tiedostona
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must
 **Malli:** D-014. Digiturva katselmoi (tiedostot, epäluotettava syöte).
 **Haara:** `t-015-vienti-tuonti`
 **Sitovat vaatimukset:** SR-18, SR-19, SR-17 (.txt), SR-14, SR-15 (`sed -n '/^\*\*SR-18/,/^### 11.7/p' docs/SECURITY.md`). Vaihtomuoto D-007/D-008 (`grep -n "cyberdeck.deck" docs/DECISIONS.md`): `{ format: "cyberdeck.deck", version: 1, deck: { name, sections: [{ name, cards: [{ card, name, count }] }] } }`.
@@ -35,3 +35,6 @@ Pelaaja varmuuskopioi pakkansa tai jakaa sen kaverille tiedostona, ja kaveri tuo
 
 ### Luovutus 2026-10-02 · Digiturva → PM
 - Katselmointi `docs/reports/SEC-010-t015-vienti-tuonti.md`: SR-18 ja SR-19 täyttyvät, ei Critical/High/Medium. SEC-026 (Low, kopion nimen `slice` deckEdit.ts:35, backlog), SEC-027 (Info). SEC-021 varmistettu, R-13 suljettu. Ei estä Done-tilaa.
+
+### PM 2026-10-02 · Done (D-014)
+- PR #18: CI vihreä. Digiturva SEC-010: ei Critical/High, R-13 suljettu, SEC-021 Varmistettu. PM korjasi SEC-026:n (kopion nimen katkaisu koodipisteittäin) regressiotestillä, joka kaatuu ilman korjausta. SEC-027 (Info) jätetään ennalleen. Selaimessa ei kokeiltu latausta, vain testit.
