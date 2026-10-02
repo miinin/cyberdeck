@@ -167,3 +167,15 @@ Päätöksessä on kuusi osaa. Rakenne ja allekirjoitukset ovat ARCHITECTURE.md:
 4. V3–V8: UX:n oletukset hyväksytty (PM).
 **Perustelu:** Käyttäjän päätös.
 **Seuraukset:** UX päivittää UX.md:n luvut 3 ja 7 sekä mallisivun, ja sen jälkeen Koodari toteuttaa.
+
+## D-012 · Korttidata ja korttikuvat sovelluksen mukaan, teemavalitsin · 2026-10-02 · Päättäjä: käyttäjä
+**Tila:** Voimassa. Muuttaa D-006:ta (data haetaan rajapinnasta, kuvat myöhemmin) ja D-011:n kohtaa 2 (teema seuraa laitteen asetusta).
+**Konteksti:** Käyttäjä ei halua, että kortit haetaan joka kerta erikseen. Käyttäjä toimittaa 151 korttikuvan paketin. SECURITY.md luku 7: korttikuville ei löytynyt käyttöoikeutta (R-1). Datan käyttöehdot ovat epäselvät (R-2), ja nyt data jaetaan omalta palvelimelta eikä haeta käyttäjän selaimessa.
+**Päätös:**
+1. Korttidata kovakoodataan sovellukseen (staattinen data buildissa). Sitä ei haeta Netdeckin rajapinnasta jokaisella käynnillä. Arkkitehti tekee ADR:n (päivitystapa, rajapintakerroksen kohtalo, CSP).
+2. Korttikuvat sisällytetään sovellukseen ja näytetään testi- ja tuotantosivustolla. Sovellus valmistellaan niin, että käyttäjän toimittamat kuvat tulevat näkyviin.
+3. **Riskit R-1 ja R-2 hyväksytty** tässä laajuudessa (käyttäjä 2026-10-02): kuvat ja data omalla julkisella palvelimella. Ei-kaupallisuus ja epävirallisuusmerkintä säilyvät (SECURITY.md luku 7).
+4. Väriteema on käyttäjän helposti valittavissa. Oletus on tumma teema.
+5. Nämä tehdään ennen T-013:a.
+**Perustelu:** Käyttäjän päätös.
+**Seuraukset:** T-025 (teemavalitsin), T-026 (korttidata, korvaa T-003:n), T-027 (korttikuvat). Digiturva päivittää SECURITY.md:n R-1:n, R-2:n ja luvun 10 seuraavassa katselmoinnissa.

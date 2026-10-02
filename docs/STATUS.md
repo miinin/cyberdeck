@@ -9,7 +9,8 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-013 | PM | Seuraavaksi | Pakat: kortti ja UX-suunnittelu (D-009: UX Sonnetilla) |
+| T-025 | UX Designer | Ready (suunnittelu) | Teemavalitsin, haara `t-025-teemavalitsin` (D-012) |
+| T-026 | Arkkitehti | Ready (suunnittelu) | ADR: korttidata ja kuvat sovellukseen, haara `t-026-korttidata` (worktree) (D-012) |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -45,7 +46,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-013 → T-014 → T-015 (järjestys riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta.
+1. T-025 ja T-026 rinnakkain, sitten T-027 (kuvat, kun paketti saapuu) (D-012). Sen jälkeen T-013 → T-014 → T-015 (järjestys riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta.
 2. Backlogissa T-002–T-009 (velka ja parannukset), T-003 (välimuisti) ennen T-013:a, jos lataus häiritsee.
 
 ## Julkaisuputki
