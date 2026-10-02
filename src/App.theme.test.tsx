@@ -47,13 +47,16 @@ describe('theme toggle', () => {
     expect(themeAttribute()).toBe('dark');
   });
 
-  it('is in the header, is the first tab stop and toggles with the mouse, Enter and Space', async () => {
+  it('is in the header, is reachable with Tab and toggles with the mouse, Enter and Space', async () => {
     const user = userEvent.setup();
     const repositories = createMemoryRepositories();
     const button = await renderApp(repositories);
 
     expect(screen.getByRole('banner')).toContainElement(button);
     expect(button).toHaveAttribute('type', 'button');
+    // Since T-013 the main navigation links come before the toggle in the tab order.
+    await user.tab();
+    await user.tab();
     await user.tab();
     expect(button).toHaveFocus();
 

@@ -52,7 +52,7 @@ const browserStorageApis = ['localStorage', 'sessionStorage', 'indexedDB'];
 const browserStorageMessage = 'SR-12: use the storage layer (src/storage) instead of browser storage.';
 
 export default defineConfig(
-  globalIgnores(['dist', 'coverage', 'node_modules']),
+  globalIgnores(['dist', 'coverage', 'node_modules', '.claude/**']),
   js.configs.recommended,
   tseslint.configs.strict,
   {

@@ -15,3 +15,6 @@ Thumbs.db
 card-images-src/
 # Original card images from the user (T-027 imports them; D-013)
 public/cards/
+
+# Generated card image copies (T-032)
+/public/*.webp

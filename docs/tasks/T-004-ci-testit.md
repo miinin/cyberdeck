@@ -24,3 +24,10 @@ Rikkinäinen koodi ei pääse testisivustolle eikä tuotantoon. Testit ja lint a
 - Ei uutta CI-palvelua eikä maksullisia ominaisuuksia.
 
 ## Luovutukset
+
+### Luovutus 2026-10-02 · Koodari → PM (Digiturva kevyt katselmointi workflowista)
+- Mitä tehtiin: T-029 `.claude/**` pois ESLintistä (`globalIgnores`) ja Vitestistä (`exclude`). T-024: raskas 1 024 rivin renderöintitesti korvattu `cardCount`-muotoilutestillä (`src/ui/texts.test.ts`), sama asia todennetaan. T-032 `/public/*.webp` .gitignoreen. Kaikkiin kolmeen workflowiin `persist-credentials: false` sekä `npm ci`, `npm run lint`, `npm test` ennen buildia (triggerit, permissions ja deploy-vaiheet koskemattomina). ARCH-003: `src/firebaseConfig.test.ts` vertaa prod- ja test-sivuston otsakkeita.
+- Lisäksi: `src/App.theme.test.tsx` kaatui deterministisesti (T-013 lisäsi navigaatiolinkit ennen teemakytkintä, joten kytkin ei ole enää ensimmäinen Tab-kohde). Testi korjattu tabuloimaan linkkien yli. Tuotantokoodi ennallaan.
+- Mitä pyydän: Digiturvan kevyt katselmointi (.github/workflows), PM todentaa PR:n workflow-ajon.
+- Testit: `npm test` 3 kertaa, 34 tiedostoa / 559 testiä läpi joka kerta, ajat 22 s, 22 s, 21 s. Lint ja build läpi.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (theme-testi) · Suosituksia 0
