@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-025 | Koodari | In Progress | Toteutus UX.md:n luvun 8 mukaan, haara `t-025-teemavalitsin` |
+| T-025 | Koodari → UX, Digiturva | Review | Toteutettu (haara `t-025-teemavalitsin`, c31f42c). UX- ja Digiturva-katselmointi. Avoinna PM:lle: CONTENT.md-sanasto ja CHANGELOG (Koodarin luku estettiin), katso kortin luovutus |
 | T-026 | Arkkitehti | Ready (suunnittelu) | ADR: korttidata ja kuvat sovellukseen, haara `t-026-korttidata` (worktree) (D-012) |
 
 ## Blokkerit
