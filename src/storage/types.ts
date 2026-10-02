@@ -40,6 +40,8 @@ export interface DeckRepository {
 export type Theme = 'dark' | 'light';
 
 export type CatalogViewMode = 'grid' | 'table';
+/** Deck editor search results as a text list or an image grid (T-045). */
+export type DeckPickView = 'list' | 'images';
 
 /** User preferences that are not data (UX.md 8.7). Stored as raw strings, not in an envelope. */
 export interface PreferencesRepository {
@@ -53,6 +55,9 @@ export interface PreferencesRepository {
   /** Saved "edit collection" switch, or null when the user has not chosen (the UI then picks a default). */
   loadEditMode(): Promise<boolean | null>;
   saveEditMode(on: boolean): Promise<boolean>;
+  /** Saved deck editor result view, or 'list' when nothing valid is saved. Never rejects because of storage problems. */
+  loadDeckPickView(): Promise<DeckPickView>;
+  saveDeckPickView(view: DeckPickView): Promise<DeckPickView>;
 }
 
 export interface Repositories {

@@ -9,6 +9,7 @@ import {
   deckCounts,
   deckTotals,
   groupDeck,
+  hasSameNameLegend,
   ramLimits,
   toCardsByKey,
   validateDeck,
@@ -25,9 +26,10 @@ import {
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { StorageError } from '../storage';
-import type { Repositories, StorageErrorKind } from '../storage';
+import type { DeckPickView, Repositories, StorageErrorKind } from '../storage';
 import { CardFilters } from './CardFilters';
 import { CardName } from './CardName';
+import { DeckPickImage } from './DeckPickImage';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
 import { texts } from './texts';
@@ -36,18 +38,23 @@ import { useCollection } from './useCollection';
 /** A change is saved this long after the last edit (T-013). */
 export const AUTOSAVE_DELAY_MS = 500;
 
+/** The "same Legend" message stays this long (T-045). */
+export const TOAST_MS = 4000;
+
 type SaveState = 'saved' | 'dirty' | 'saving' | 'error';
 type SaveErrorKind = StorageErrorKind | 'unknown';
 
 const errorKind = (error: unknown): SaveErrorKind => (error instanceof StorageError ? error.kind : 'unknown');
 
-/** "Unit · Red · Cost 3 · RAM 1": plain values, missing ones left out. */
+/** "Unit · Red · Cost 3 · Power 2 · RAM 1 · Rare": plain values, missing ones left out. */
 function cardMeta(card: Card): string {
   return [
     card.type,
     card.color,
     card.cost === null ? null : `Cost ${card.cost}`,
+    card.power === null ? null : `Power ${card.power}`,
     card.ram === null ? null : `RAM ${card.ram}`,
+    card.rarity,
   ]
     .filter((part) => part !== null)
     .join(' · ');
@@ -116,6 +123,9 @@ export function DeckEditor({
   const contentRef = useRef(content);
   const [nameText, setNameText] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [pickView, setPickView] = useState<DeckPickView>('list');
+  const pickViewChosen = useRef(false);
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
   const [notice, setNotice] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -185,6 +195,20 @@ export function DeckEditor({
     };
   }, [repository, deckId]);
 
+  // The result view is remembered like the catalog view (T-045); a choice made before loading wins.
+  useEffect(() => {
+    void repositories.preferences.loadDeckPickView().then((saved) => {
+      if (!pickViewChosen.current) setPickView(saved);
+    });
+  }, [repositories]);
+
+  // The "same Legend" message goes away by itself after 4 s (T-045).
+  useEffect(() => {
+    if (toast === null) return;
+    const id = setTimeout(() => setToast(null), TOAST_MS);
+    return () => clearTimeout(id);
+  }, [toast]);
+
   useEffect(() => {
     if (phase !== 'loading') headingRef.current?.focus();
   }, [phase]);
@@ -226,6 +250,10 @@ export function DeckEditor({
 
   const setCount = (card: Card, count: number) => {
     const base = contentRef.current;
+    if (count > (deckCounts(base).get(card.key) ?? 0) && hasSameNameLegend(card, base, cardsByKey)) {
+      setToast(deckTexts.sameLegend(card.name));
+      return;
+    }
     const isNew = !deckCounts(base).has(card.key);
     if (isNew && count > 0 && distinctRows(base) >= MAX_DECK_DISTINCT_CARDS) {
       setNotice(deckTexts.distinctLimit);
@@ -244,6 +272,12 @@ export function DeckEditor({
     }
     setNameError(null);
     if (result.name !== contentRef.current.name) schedule({ ...contentRef.current, name: result.name });
+  };
+
+  const handlePickView = (next: DeckPickView) => {
+    pickViewChosen.current = true;
+    setPickView(next);
+    repositories.preferences.saveDeckPickView(next).catch(() => undefined);
   };
 
   const handleRetry = () => {
@@ -406,11 +440,73 @@ export function DeckEditor({
             }
             onSearchSubmit={() => undefined}
           />
+          <fieldset className="view-select pick-view">
+            <legend>{deckTexts.pickViewLegend}</legend>
+            <div className="options">
+              {(
+                [
+                  ['list', deckTexts.pickViewList],
+                  ['images', deckTexts.pickViewImages],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className="option">
+                  <input
+                    type="radio"
+                    name="deck-pick-view"
+                    value={value}
+                    checked={pickView === value}
+                    onChange={() => handlePickView(value)}
+                  />{' '}
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <p className="status-line" role="status">
             {deckTexts.searchResults(filtered.length, cards.length)}
           </p>
+          <div role="status" className="toast-slot">
+            {toast !== null && (
+              <p className="toast">
+                <span>{toast}</span>
+                <button type="button" className="button-secondary" onClick={() => setToast(null)}>
+                  {deckTexts.toastClose}
+                </button>
+              </p>
+            )}
+          </div>
           {filtered.length === 0 ? (
             <p className="empty">{deckTexts.noSearchResults}</p>
+          ) : pickView === 'images' ? (
+            <ul className="search-results pick-images" aria-label={deckTexts.searchHeading}>
+              {filtered.map((card) => {
+                const blocker = addBlocker(card, content, cardsByKey);
+                const hintId = `blocker-image-${card.key}`;
+                const count = counts.get(card.key) ?? 0;
+                return (
+                  <DeckPickImage
+                    key={card.key}
+                    card={card}
+                    dimmed={blocker !== null}
+                    hint={
+                      blocker !== null && (
+                        <span id={hintId} className="card-row-meta">
+                          {hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker)}
+                        </span>
+                      )
+                    }
+                    onAdd={() => setCount(card, count + 1)}
+                  >
+                    <Stepper
+                      name={card.displayName}
+                      count={count}
+                      onChange={(next) => setCount(card, next)}
+                      describedBy={blocker !== null ? hintId : undefined}
+                    />
+                  </DeckPickImage>
+                );
+              })}
+            </ul>
           ) : (
             <ul className="search-results" aria-label={deckTexts.searchHeading}>
               {filtered.map((card) => {
@@ -425,7 +521,7 @@ export function DeckEditor({
                       <span className="card-row-meta">{cardMeta(card)}</span>
                       {blocker !== null && (
                         <span id={hintId} className="card-row-meta">
-                          {deckTexts.dimmedHint(blocker)}
+                          {hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker)}
                         </span>
                       )}
                     </span>

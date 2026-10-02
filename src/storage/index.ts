@@ -14,6 +14,7 @@ export type {
   Repositories,
   Theme,
   CatalogViewMode,
+  DeckPickView,
 } from './types';
 export { StorageError } from './errors';
 export type { StorageErrorKind } from './errors';
