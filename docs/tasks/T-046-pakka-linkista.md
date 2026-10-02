@@ -43,3 +43,6 @@
 - Tunnetut rajoitteet: 512 kt raja tarkistetaan `text()`-luvun jälkeen, jos Content-Length puuttuu (ei striimausta). Lomakkeen tekstit (linkHeading, virheilmoitukset, "Haku lähettää pyynnön Netdeck.gg-palveluun.") kirjoitin itse kortin tekstien mukaan: Sisällöntuottaja/UX tarkistaa. PRIVACY.md jää Digiturvalle. Oikeaa Netdeck-vastausta ei haettu käsin (testit väärennetyllä fetchillä).
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (uusi kerros `src/netdeck` ARCHITECTURE.md:hen).
 - Testit: koko `npm test` 635/635 läpi (39 tiedostoa), `npm run lint` (max-warnings 0) ja `npm run build` läpi, `tsc --noEmit` puhdas.
+
+### Luovutus 2026-10-02 · Digiturva → PM
+- Katselmointi tehty: `docs/reports/SEC-009-t046-netdeck-linkki.md`. Ei Critical/High (Low: SEC-023 striimaamaton kokoraja, SEC-024 siivoamaton id-label; Info: SEC-025). CSP todennettu esikatselussa, testit 642/642, `npm audit` 0. SECURITY.md (SR-20, R-17, luku 16) ja PRIVACY.md (rivi 9b) päivitetty. Ei vetoa.
