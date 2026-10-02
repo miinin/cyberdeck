@@ -1,5 +1,5 @@
 # T-026 · Korttidata sovelluksen mukana (ei hakua joka käynnillä)
-**Tila:** Ready · **Omistaja:** Arkkitehti → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
+**Tila:** In Progress · **Omistaja:** Arkkitehti → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** Arkkitehti ☐ (ADR, kattaa myös T-027:n kuvat)
 **Katselmoinnit:** Koodikatselmointi ☐ · Digiturva ☐ (data, CSP ja firebase.json, R-2) · UX ☐ (vain jos käyttäjälle näkyvät tilat muuttuvat)
 **Riippuvuudet:** –. Korvaa T-003:n (välimuisti).
@@ -51,3 +51,9 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
   - A2: Poistuvien tilojen (lataus, virhe, osittainen) testien poisto on rules.md 6:n poikkeus. D-013 perustelee sen, mutta PM:n hyväksyntä kirjataan tähän korttiin.
   - A3: Havainto `index.html`:n välimuistista (`max-age=3600`, D-013:n seuraukset). Ehdotus: oma velkatehtävä.
 - **Testit:** Arkkitehti ei toteuttanut koodia. Kokeiltu: `runnerImport` lataa `src/api/mapCard.ts`:n ja tuottaa fixtuurista oikean kortin. Noden natiivi TS-import epäonnistuu päätteettömiin importteihin. `npx vite build` → JS 260 kt (82 kt gzip). Testisivuston `Cache-Control: max-age=3600` mitattu `curl -sI`:llä.
+
+### Checkpoint 2026-10-02 · PM (D-013 hyväksytty)
+- D-013 hyväksytty (osat 1–3). `sharp` (osa 4, T-027) hyväksytty ehdolla, että Digiturva tarkistaa sen T-027:ssä.
+- A2: poistuvien tilojen (lataus, virhe, osittainen, tyhjä) testit saa poistaa, koska tilat poistuvat sovelluksesta (rules.md 6:n poikkeus, PM hyväksyy). Muut testit eivät saa heikentyä.
+- A3: `index.html`:n välimuistiotsake kuuluu jo T-009:ään (SEC-011). T-004:n prioriteetti nostettu (Should → Must), koska `parseCardFile`-testi ei vielä estä julkaisua.
+- Tila In Progress. Seuraava askel: Koodari toteuttaa luovutuksen askeleet 1–6 tässä worktreessä.

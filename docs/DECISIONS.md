@@ -181,7 +181,7 @@ Päätöksessä on kuusi osaa. Rakenne ja allekirjoitukset ovat ARCHITECTURE.md:
 **Seuraukset:** T-025 (teemavalitsin), T-026 (korttidata, korvaa T-003:n), T-027 (korttikuvat). Digiturva päivittää SECURITY.md:n R-1:n, R-2:n ja luvun 10 seuraavassa katselmoinnissa.
 
 ## D-013 · Korttidata JSON-tiedostona buildissa, päivityskomento ja korttikuvat Viten assetteina · 2026-10-02 · Päättäjä: PM (Arkkitehdin ehdotus); osan 4 riippuvuus: PM ja Digiturva
-**Tila:** Ehdotettu (Arkkitehti 2026-10-02). Toteuttaa D-012:n kohdat 1 ja 2. Korvaa D-006:n osuuden "data haetaan käyttäjän selaimessa" ja T-003:n (välimuisti). Rakenne: ARCHITECTURE.md luku 13.
+**Tila:** Voimassa (PM hyväksyi 2026-10-02: osat 1–3 ilman kustannuksia, riippuvuuksia ja lukitusta. Osan 4 devDependency `sharp` hyväksytty PM:n puolesta ehdolla, että Digiturva tarkistaa sen T-027:n katselmoinnissa.) Toteuttaa D-012:n kohdat 1 ja 2. Korvaa D-006:n osuuden "data haetaan käyttäjän selaimessa" ja T-003:n (välimuisti). Rakenne: ARCHITECTURE.md luku 13.
 **Konteksti:** D-012: kortit kovakoodataan sovellukseen, eikä niitä haeta joka käynnillä. Käyttäjä toimittaa 151 korttikuvan paketin, jonka tiedostonimiä ja muotoa ei vielä tunneta. Nykyinen rajapintakerros (`src/api/`) hakee 3 sivua (noin 1,4 Mt, 4–6 s) jokaisella käynnillä, ja käyttöliittymällä on lataus-, virhe- ja osittaisen datan tilat. Kokoelma viittaa kortteihin avaimella `Card.key` (D-008 kohta 2), jonka on pysyttävä samana. Testit ja lint eivät vielä ole CI:ssä (T-004): workflowt ajavat vain `npm ci && npm run build`.
 
 Päätöksessä on viisi osaa.
