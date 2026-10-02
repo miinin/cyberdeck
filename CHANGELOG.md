@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Kaikki näkymät käyttävät nyt ruudun leveyden (enintään 2560 px), ja reunoille jää kapeat kaistat. Kortit-sivulla suodattimet ovat leveällä ruudulla vasemmalla omassa, mukana vierivässä paneelissaan ja kortit ruudukossa sen oikealla puolella. Ruudukon kuvakoon voi valita (Pieni, Keski tai Iso). Valitut suodattimet näkyvät tulosten yläpuolella siruina, joista suodattimen voi poistaa yhdellä painalluksella. Kapealla ruudulla hakukenttä on aina näkyvissä ja muut suodattimet avautuvat Suodattimet-painikkeesta, joka kertoo valintojen määrän.
+
 - Pakkaeditori käyttää koko leveyden: leveällä ruudulla haku ja tulokset ovat vasemmalla ja pakka omassa, mukana vierivässä sarakkeessa oikealla. Yhteenveto on tiivis ja siinä on kustannuskäyrä (korttien määrä Costin mukaan). Pakkalistan rivi on yksi tiivis rivi: väriraita, määrä, nimi (kuva aukeaa nimeä painamalla), puuttuu-merkki, Cost ja pienet −/+. Kuvat-näkymässä kortin päällä lukee, montako kopiota pakassa on.
 
 - Taulukko-näkymän sarakeotsikoista (Nimi, Tyyppi, Rarity, Cost, Power, RAM) voi lajitella: ensimmäinen painallus nousevaan, toinen laskevaan ja kolmas palauttaa alkuperäisen järjestyksen. Puuttuvat arvot ovat aina viimeisinä. Lajittelua ei tallenneta.

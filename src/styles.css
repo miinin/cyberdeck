@@ -106,8 +106,9 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  --content-max-width: 56rem;
-  --editor-max-width: 100rem;
+  /* Page width (T-050): content uses the screen; only running text is kept narrow (.prose). */
+  --page-max-width: 160rem;
+  --prose-max-width: 44rem;
   --target-min: 2.75rem;
   --cut: 0.625rem;
   --cut-inner: calc(var(--cut) - 1px);
@@ -133,7 +134,7 @@
   --focus-offset: 3px;
   --ease: 0.12s ease-out;
 
-  --gutter: var(--space-4);
+  --gutter: clamp(1rem, 2vw, 3rem);
   --cell-padding-x: var(--space-2);
 }
 
@@ -182,7 +183,6 @@
 
 @media (min-width: 40rem) {
   :root {
-    --gutter: var(--space-6);
     --cell-padding-x: var(--space-3);
   }
 }
@@ -278,15 +278,19 @@ h1:focus:not(:focus-visible) {
 }
 
 /* Layout */
+/* Every view (header, main, footer) uses the same width, so logo, navigation and content line up (T-050). */
 .container {
-  max-width: var(--content-max-width);
+  max-width: var(--page-max-width);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
 
-/* The deck editor is wider so search and deck fit side by side (T-049). */
-.container-wide {
-  max-width: var(--editor-max-width);
+/* Readable line length for running text: notices, empty states, forms (T-050). */
+.prose,
+.notice,
+.empty,
+.storage-reminder {
+  max-width: var(--prose-max-width);
 }
 
 /* Header: black in both themes (UX.md 7.5, V11). Not sticky. */
@@ -1127,8 +1131,9 @@ body:has(dialog[open]) {
 
 /* Card grid (T-034): image on top, then name, type and color, game values and the collection control. */
 .card-grid {
+  --card-min: 14rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), 100%), 1fr));
   gap: var(--space-4);
   margin: 0;
   padding: 0;
@@ -1316,9 +1321,12 @@ body:has(dialog[open]) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-4);
-  margin-block: var(--space-3);
+  gap: var(--space-2) var(--space-6);
+  margin-block: 0 var(--space-3);
+}
+
+.list-toolbar .edit-switch {
+  margin-inline-start: auto;
 }
 
 .view-select {
@@ -2200,4 +2208,211 @@ button.deck-line-name:focus-visible {
 
 .deck-line > .button-secondary {
   grid-column: 3 / -1;
+}
+
+/*
+ * Cards page layout (T-050a). Below 64rem one column: the search field, the "Suodattimet" button that
+ * opens the other filters, then the results. From 64rem the filters are a side panel on the left.
+ */
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+}
+
+.page-head-status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.catalog-layout {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.catalog-filters,
+.catalog-results {
+  min-width: 0;
+}
+
+.catalog-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.catalog-filters .card-filters {
+  margin-block-end: 0;
+}
+
+/* The button names the panel below 64rem; the heading is for screen readers there. */
+.filters-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  font-size: var(--font-size-base);
+}
+
+.filter-toggle {
+  align-self: flex-start;
+  margin-block-start: var(--space-3);
+}
+
+/* Chevron drawn with borders: down when closed, up when open. */
+.filter-toggle-icon {
+  display: inline-block;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  margin-inline-start: var(--space-2);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-0.15rem) rotate(45deg);
+}
+
+.filter-toggle[aria-expanded='true'] .filter-toggle-icon {
+  transform: translateY(0.15rem) rotate(-135deg);
+}
+
+.filter-panel {
+  margin-block-start: var(--space-2);
+}
+
+/* Selected filters as removable chips above the results. */
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-end: var(--space-4);
+}
+
+.active-filters-label {
+  margin-inline-end: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2rem;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border: 1px solid var(--color-info);
+  border-radius: 0;
+  background: var(--color-selected-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 0.4rem), calc(100% - 0.4rem) 100%, 0 100%);
+}
+
+.filter-chip:hover {
+  background: var(--color-surface-hover);
+  text-decoration: underline;
+}
+
+.filter-chip:focus-visible {
+  outline-offset: -4px;
+}
+
+.filter-chip-x {
+  color: var(--color-info);
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
+.active-filters-clear {
+  min-height: 1.5rem;
+  margin-inline-start: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.active-filters-clear:hover {
+  color: var(--color-text);
+}
+
+/* Image size: the smallest grid card still fits the count control. */
+.catalog-results[data-image-size='small'] .card-grid {
+  --card-min: 11rem;
+}
+
+.catalog-results[data-image-size='large'] .card-grid {
+  --card-min: 18rem;
+}
+
+.catalog-results .table-scroll {
+  max-width: 100rem;
+}
+
+@media (min-width: 64rem) {
+  .catalog-layout {
+    grid-template-columns: 17rem minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  .page-head-status {
+    align-items: flex-end;
+    text-align: end;
+  }
+
+  .filters-heading {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+
+  /* Side panel: each group stacked, the choices wrap inside it. */
+  .catalog-filters .field input[type='search'] {
+    max-width: none;
+  }
+
+  .catalog-filters .card-filters .fieldsets {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .catalog-filters .card-filters fieldset {
+    display: block;
+    margin-block-start: var(--space-4);
+  }
+
+  .catalog-filters .card-filters legend {
+    margin-block-end: var(--space-2);
+  }
+
+  .catalog-filters .owned-only .option {
+    font-weight: var(--font-weight-normal);
+  }
+}
+
+/* Sticky only when the window is tall enough; nothing gets stuck when zoomed (WCAG 1.4.10). */
+@media (min-width: 64rem) and (min-height: 40rem) {
+  .catalog-filters {
+    position: sticky;
+    top: var(--space-4);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 }

@@ -159,7 +159,11 @@ describe('CatalogView search and filters: no results', () => {
       ),
     ).toBeInTheDocument();
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { level: 2 })).not.toBeInTheDocument();
+    // No notice: only the layout headings (T-050a).
+    expect(screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      'Suodattimet',
+      'Tulokset',
+    ]);
     // The search text stays so the user can see and fix it.
     expect(searchBox()).toHaveValue('silverhandd');
 

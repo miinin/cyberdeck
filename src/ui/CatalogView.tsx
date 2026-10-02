@@ -22,13 +22,17 @@ import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
 import { CardTable } from './CardTable';
 import { ListToolbar } from './ListToolbar';
+import type { ImageSize } from './ListToolbar';
+import { ActiveFilters } from './ActiveFilters';
+import type { ActiveFilter } from './ActiveFilters';
+import { WIDE_QUERY } from './useMediaQuery';
 import type { OwnedColumn } from './CardList';
 import { CollectionNotices, loadNotices } from './CollectionNotices';
 import { countIn } from './collectionStore';
 import type { CollectionSnapshot } from './collectionStore';
 import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
-import { cardCount, texts } from './texts';
+import { cardCount, colorNames, texts } from './texts';
 import { useCollection } from './useCollection';
 import { useDecks } from './useDecks';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
@@ -102,6 +106,8 @@ export function CatalogView({
   // List view and the edit switch are remembered like the theme (T-040). The edit switch has no saved
   // value until the user chooses; then it starts on for an empty collection and off otherwise, decided once.
   const [view, setView] = useState<CatalogViewMode>('grid');
+  // Grid image size (T-050a): session state, not saved.
+  const [imageSize, setImageSize] = useState<ImageSize>('medium');
   const [editMode, setEditMode] = useState<boolean | null>(null);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const userChose = useRef({ view: false, edit: false });
@@ -280,19 +286,54 @@ export function CatalogView({
     collectionAllRef.current?.focus();
   };
 
+  // Chips for the selected values, in the order of the form (T-050a). The search text has its own field.
+  const activeFilters: ActiveFilter[] = [
+    ...(collectionFilter === 'all'
+      ? []
+      : [
+          {
+            id: 'collection',
+            label: collectionFilter === 'owned' ? texts.collectionOwned : texts.collectionMissing,
+            onRemove: () => updateFilters(criteria, 'all', 'later'),
+          },
+        ]),
+    ...criteria.types.map((type) => ({
+      id: `type:${type}`,
+      label: type,
+      lang: 'en',
+      onRemove: () => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later'),
+    })),
+    ...criteria.colors.map((color) => ({
+      id: `color:${color}`,
+      label: colorNames.get(color) ?? color,
+      lang: 'en',
+      onRemove: () => updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later'),
+    })),
+    ...criteria.rarities.map((rarity) => ({
+      id: `rarity:${rarity}`,
+      label: rarity,
+      lang: 'en',
+      onRemove: () => updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later'),
+    })),
+  ];
+
   return (
     <>
-      <h1 ref={headingRef} tabIndex={-1}>
-        {texts.heading}
-      </h1>
-      <p id="card-status" className="status-line">
-        {status}
-      </p>
-      {summary !== null && (
-        <p id="collection-summary" className="status-line is-summary">
-          {summary}
-        </p>
-      )}
+      <div className="page-head">
+        <h1 ref={headingRef} tabIndex={-1}>
+          {texts.heading}
+        </h1>
+        <div className="page-head-status">
+          <p id="card-status" className="status-line">
+            {status}
+          </p>
+          {summary !== null && (
+            <p id="collection-summary" className="status-line is-summary">
+              {summary}
+            </p>
+          )}
+        </div>
+      </div>
       {/* Stays mounted so screen readers announce each change. */}
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {announcer.text ?? texts.loaded(allCards.length)}
@@ -324,68 +365,91 @@ export function CatalogView({
         />
       )}
 
-      <CardFilters
-        criteria={criteria}
-        typeOptions={filterOptions(
-          KNOWN_CARD_TYPES,
-          allCards.map((card) => card.type),
-          criteria.types,
-        )}
-        colorOptions={filterOptions(
-          KNOWN_CARD_COLORS,
-          allCards.map((card) => card.color),
-          criteria.colors,
-        )}
-        rarityOptions={filterOptions(
-          KNOWN_CARD_RARITIES,
-          allCards.map((card) => card.rarity),
-          criteria.rarities,
-        )}
-        searchInputRef={searchInputRef}
-        collectionFilter={collection.phase === 'ready' ? collectionFilter : undefined}
-        collectionAllRef={collectionAllRef}
-        onCollectionFilterChange={(next) => updateFilters(criteria, next, 'later')}
-        onQueryChange={(query, composing) =>
-          updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
-        }
-        onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
-        onToggleColor={(color) =>
-          updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
-        }
-        onToggleRarity={(rarity) =>
-          updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later')
-        }
-        onSearchSubmit={() =>
-          announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))
-        }
-      />
+      <div className="catalog-layout">
+        <section className="catalog-filters" aria-labelledby="filters-heading">
+          <h2 id="filters-heading" className="filters-heading">
+            {texts.filtersHeading}
+          </h2>
+          <CardFilters
+            criteria={criteria}
+            typeOptions={filterOptions(
+              KNOWN_CARD_TYPES,
+              allCards.map((card) => card.type),
+              criteria.types,
+            )}
+            colorOptions={filterOptions(
+              KNOWN_CARD_COLORS,
+              allCards.map((card) => card.color),
+              criteria.colors,
+            )}
+            rarityOptions={filterOptions(
+              KNOWN_CARD_RARITIES,
+              allCards.map((card) => card.rarity),
+              criteria.rarities,
+            )}
+            searchInputRef={searchInputRef}
+            collectionFilter={collection.phase === 'ready' ? collectionFilter : undefined}
+            collectionAllRef={collectionAllRef}
+            onCollectionFilterChange={(next) => updateFilters(criteria, next, 'later')}
+            onQueryChange={(query, composing) =>
+              updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
+            }
+            onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
+            onToggleColor={(color) =>
+              updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
+            }
+            onToggleRarity={(rarity) =>
+              updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later')
+            }
+            onSearchSubmit={() =>
+              announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))
+            }
+            collapsibleBelow={WIDE_QUERY}
+          />
+        </section>
 
-      {noResults && (
-        <div className="empty">
-          <p>{noOwnedCards ? texts.ownedOnlyEmptyBody : texts.noResultsBody}</p>
-          <button
-            type="button"
-            className="button-primary"
-            onClick={noOwnedCards ? handleShowAll : handleClearFilters}
-          >
-            {noOwnedCards ? texts.showAllCards : texts.clearFilters}
-          </button>
-        </div>
-      )}
+        <section className="catalog-results" aria-labelledby="results-heading" data-image-size={imageSize}>
+          <h2 id="results-heading" className="visually-hidden">
+            {texts.resultsHeading}
+          </h2>
+          <ListToolbar
+            view={view}
+            onViewChange={handleViewChange}
+            editable={collection.phase === 'ready' ? editable : undefined}
+            onEditChange={handleEditChange}
+            imageSize={view === 'grid' ? imageSize : undefined}
+            onImageSizeChange={setImageSize}
+          />
 
-      <ListToolbar
-        view={view}
-        onViewChange={handleViewChange}
-        editable={collection.phase === 'ready' ? editable : undefined}
-        onEditChange={handleEditChange}
-      />
+          <ActiveFilters
+            filters={activeFilters}
+            // The empty state has its own button for the same action (no two buttons with one name).
+            showClear={filterActive && !(noResults && !noOwnedCards)}
+            onClear={handleClearFilters}
+            searchInputRef={searchInputRef}
+          />
 
-      {filtered.length > 0 &&
-        (view === 'table' ? (
-          <CardTable cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
-        ) : (
-          <CardList cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
-        ))}
+          {noResults && (
+            <div className="empty">
+              <p>{noOwnedCards ? texts.ownedOnlyEmptyBody : texts.noResultsBody}</p>
+              <button
+                type="button"
+                className="button-primary"
+                onClick={noOwnedCards ? handleShowAll : handleClearFilters}
+              >
+                {noOwnedCards ? texts.showAllCards : texts.clearFilters}
+              </button>
+            </div>
+          )}
+
+          {filtered.length > 0 &&
+            (view === 'table' ? (
+              <CardTable cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+            ) : (
+              <CardList cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+            ))}
+        </section>
+      </div>
 
       <CardImageDialog card={openCard} onClose={handleCloseImage} />
     </>

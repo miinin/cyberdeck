@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardColor } from './CardColor';
 import { colorNames, texts } from './texts';
+import { useMediaQuery } from './useMediaQuery';
 
 /** Longest accepted search text (PM 2026-10-01). No message is shown at the limit (UX.md 5.3). */
 export const SEARCH_MAX_LENGTH = 100;
@@ -26,6 +28,17 @@ export interface CardFiltersProps {
   onToggleRarity: (rarity: string) => void;
   /** Enter in the search field: announce the result now (UX.md 5.6). */
   onSearchSubmit: () => void;
+  /**
+   * Media query from which the filters are always shown (T-050). Below it they sit in a panel opened with
+   * the "Suodattimet" button; the search field stays visible. Undefined: always shown, no button.
+   */
+  collapsibleBelow?: string;
+}
+
+/** How many choices are selected; "Kaikki" in "Kokoelma" is not a choice (T-050a). */
+export function selectedFilterCount(criteria: CardFilterCriteria, collectionFilter: CollectionFilter | undefined) {
+  const collection = collectionFilter !== undefined && collectionFilter !== 'all' ? 1 : 0;
+  return criteria.types.length + criteria.colors.length + criteria.rarities.length + collection;
 }
 
 const COLLECTION_OPTIONS: readonly (readonly [CollectionFilter, string])[] = [
@@ -49,7 +62,13 @@ export function CardFilters({
   onToggleColor,
   onToggleRarity,
   onSearchSubmit,
+  collapsibleBelow,
 }: CardFiltersProps) {
+  // Without matchMedia (tests) the panel counts as wide: always open.
+  const alwaysOpen = useMediaQuery(collapsibleBelow ?? 'all', true) || collapsibleBelow === undefined;
+  const [open, setOpen] = useState(false);
+  const selected = selectedFilterCount(criteria, collectionFilter);
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onQueryChange(event.target.value, (event.nativeEvent as InputEvent).isComposing === true);
   };
@@ -102,87 +121,102 @@ export function CardFilters({
         />
       </div>
 
-      {collectionFilter !== undefined && (
-        <fieldset className="owned-only">
-          <legend>{texts.collectionLegend}</legend>
-          <div className="options">
-            {COLLECTION_OPTIONS.map(([value, label]) => (
-              <label key={value} className="option">
-                <input
-                  ref={value === 'all' ? collectionAllRef : undefined}
-                  type="radio"
-                  name="collection-filter"
-                  value={value}
-                  checked={collectionFilter === value}
-                  onChange={() => onCollectionFilterChange(value)}
-                />{' '}
-                {label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+      {!alwaysOpen && (
+        <button
+          type="button"
+          className="button-secondary filter-toggle"
+          aria-expanded={open}
+          aria-controls="filter-panel"
+          onClick={() => setOpen(!open)}
+        >
+          {texts.filtersToggle(selected)}
+          <span className="filter-toggle-icon" aria-hidden="true" />
+        </button>
       )}
 
-      <p id="filter-hint" className="visually-hidden">
-        {texts.filterHint}
-      </p>
+      <div id="filter-panel" className="filter-panel" hidden={!alwaysOpen && !open}>
+        {collectionFilter !== undefined && (
+          <fieldset className="owned-only">
+            <legend>{texts.collectionLegend}</legend>
+            <div className="options">
+              {COLLECTION_OPTIONS.map(([value, label]) => (
+                <label key={value} className="option">
+                  <input
+                    ref={value === 'all' ? collectionAllRef : undefined}
+                    type="radio"
+                    name="collection-filter"
+                    value={value}
+                    checked={collectionFilter === value}
+                    onChange={() => onCollectionFilterChange(value)}
+                  />{' '}
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
 
-      <div className="fieldsets">
-        <fieldset aria-describedby="filter-hint">
-          <legend>{texts.typeLegend}</legend>
-          <div className="options">
-            {typeOptions.map((type) => (
-              <label key={type} className="option">
-                <input
-                  type="checkbox"
-                  name="type"
-                  value={type}
-                  checked={criteria.types.includes(type)}
-                  onChange={() => onToggleType(type)}
-                />{' '}
-                <span lang="en">{type}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <p id="filter-hint" className="visually-hidden">
+          {texts.filterHint}
+        </p>
 
-        <fieldset aria-describedby="filter-hint">
-          <legend>{texts.colorLegend}</legend>
-          <div className="options">
-            {colorOptions.map((color) => (
-              <label key={color} className="option option-color" title={colorNames.get(color) ?? color}>
-                <input
-                  type="checkbox"
-                  name="color"
-                  value={color}
-                  checked={criteria.colors.includes(color)}
-                  onChange={() => onToggleColor(color)}
-                />{' '}
-                <span>
-                  <CardColor color={color} swatchOnly />
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <div className="fieldsets">
+          <fieldset aria-describedby="filter-hint">
+            <legend>{texts.typeLegend}</legend>
+            <div className="options">
+              {typeOptions.map((type) => (
+                <label key={type} className="option">
+                  <input
+                    type="checkbox"
+                    name="type"
+                    value={type}
+                    checked={criteria.types.includes(type)}
+                    onChange={() => onToggleType(type)}
+                  />{' '}
+                  <span lang="en">{type}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
-        <fieldset aria-describedby="filter-hint">
-          <legend>{texts.rarityLegend}</legend>
-          <div className="options">
-            {rarityOptions.map((rarity) => (
-              <label key={rarity} className="option">
-                <input
-                  type="checkbox"
-                  name="rarity"
-                  value={rarity}
-                  checked={criteria.rarities.includes(rarity)}
-                  onChange={() => onToggleRarity(rarity)}
-                />{' '}
-                <span lang="en">{rarity}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+          <fieldset aria-describedby="filter-hint">
+            <legend>{texts.colorLegend}</legend>
+            <div className="options">
+              {colorOptions.map((color) => (
+                <label key={color} className="option option-color" title={colorNames.get(color) ?? color}>
+                  <input
+                    type="checkbox"
+                    name="color"
+                    value={color}
+                    checked={criteria.colors.includes(color)}
+                    onChange={() => onToggleColor(color)}
+                  />{' '}
+                  <span>
+                    <CardColor color={color} swatchOnly />
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset aria-describedby="filter-hint">
+            <legend>{texts.rarityLegend}</legend>
+            <div className="options">
+              {rarityOptions.map((rarity) => (
+                <label key={rarity} className="option">
+                  <input
+                    type="checkbox"
+                    name="rarity"
+                    value={rarity}
+                    checked={criteria.rarities.includes(rarity)}
+                    onChange={() => onToggleRarity(rarity)}
+                  />{' '}
+                  <span lang="en">{rarity}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </div>
       </div>
     </form>
   );
