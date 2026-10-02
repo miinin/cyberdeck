@@ -4,6 +4,7 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Taulukko-näkymän sarakeotsikoista (Nimi, Tyyppi, Rarity, Cost, Power, RAM) voi lajitella: ensimmäinen painallus nousevaan, toinen laskevaan ja kolmas palauttaa alkuperäisen järjestyksen. Puuttuvat arvot ovat aina viimeisinä. Lajittelua ei tallenneta.
 - Pakan vienti ja tuonti tiedostona: pakkalistassa ja pakkaeditorissa on painikkeet Vie .json ja Vie .txt. Tuo pakkalista -näkymä hyväksyy nyt myös viedyn .json-tiedoston (enintään 256 kt). Tuotu pakka tallennetaan aina uutena pakkana, eikä se ylikirjoita mitään. Pitkän pakan nimen katkaisu ei enää riko emojia.
 - Pakan haku Netdeck-linkistä: Tuo pakkalista -näkymässä voi liittää netdeck.gg-pakan osoitteen ja painaa Hae pakka. Raportti näyttää, mitä kortteja kokoelmasta puuttuu. Sideboard näytetään erikseen, eikä sitä tallenneta pakkaan. Haku lähettää pyynnön Netdeck.gg-palveluun vain, kun painat Hae pakka.
 - Pakkaeditorin hiominen: hakulistan rivit ovat tasaisia (−/määrä/+ aina oikealla) ja näyttävät myös Powerin ja Rarityn. Väri-suodatin on pelkkiä värejä (nimi näkyy kursorin alla). Samannimisen Legendin lisäys estetään ilmoituksella. Hakulistan voi vaihtaa Kuvat-näkymään, jossa kortin kuvaa painamalla kortti lisätään pakkaan, ja valinta säilyy. Tyyppimerkin viistetty kulma piirtyy reunan väreillä.

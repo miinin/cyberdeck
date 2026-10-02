@@ -1,5 +1,5 @@
 # T-048 · Taulukkonäkymän lajittelu sarakkeittain
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Should (STATUS, Seuraavaksi 1)
+**Tila:** Review · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Should (STATUS, Seuraavaksi 1)
 **Malli:** D-014, ei erillistä katselmointia (ei syötettä, tallennusta eikä riippuvuuksia). PM tarkistaa esikatselusta.
 **Haara:** `t-048-taulukon-lajittelu`
 
@@ -13,3 +13,8 @@
 7. Tekstit `texts.ts`:ään. `npm test`, lint ja build läpi. CHANGELOG `[Julkaisematon]`.
 
 ## Luovutukset
+### Luovutus (Koodari → PM)
+- Uusi `src/domain/cardSort.ts` (`sortCards`, puhdas, vakaa, null aina viimeisenä, toissijaisesti nimi) + `cardSort.test.ts`.
+- `src/ui/CardTable.tsx`: `SortHeader`-painikkeet sarakkeille Nimi, Tyyppi, Rarity, Cost, Power, RAM; kierto nouseva → laskeva → oletus; `aria-sort` vain aktiiviselle; ▲/▼ `aria-hidden`. Tila komponentin `useState`:ssa. Komponenttitesti `CardTable.test.tsx`. Tyylit `styles.css`.
+- Ei uusia tekstejä (käytetty olemassa olevia sarakeotsikoita). Hinta-sarakkeen otsikko on olemassa olevan mukaan "Cost". Rarity lajitellaan aakkosjärjestyksessä (ei pelin harvinaisuusjärjestyksessä). CHANGELOG päivitetty.
+- Testit 687/687, lint ja build läpi. Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (Rarity pelin järjestykseen, jos halutaan).

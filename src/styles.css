@@ -1879,3 +1879,21 @@ body:has(dialog[open]) {
   font-size: var(--font-size-sm);
   overflow-wrap: anywhere;
 }
+
+.card-table .sort-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.card-table .sort-button:hover {
+  text-decoration: underline;
+}
+
+.card-table .sort-button:focus-visible {
+  outline: 2px solid var(--color-focus, currentColor);
+  outline-offset: 2px;
+}
