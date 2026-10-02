@@ -4,7 +4,7 @@ import type { Deck, DeckContent } from './deck';
 import { validateDeck } from './deckRules';
 import type { CardsByKey, DeckIssue } from './deckRules';
 import { DEFAULT_IMPORT_NAME } from './deckText';
-import type { ParsedDeckText } from './deckText';
+import type { ImportedRow, ParsedDeckText } from './deckText';
 
 export interface ReportRow {
   readonly card: Card;
@@ -22,6 +22,9 @@ export interface ImportReport {
   readonly missingTotal: number;
   readonly missingRows: readonly ReportRow[];
   readonly unrecognized: readonly string[];
+  /** Sideboard cards compared with the collection (not part of the saved deck). */
+  readonly sideboardRows: readonly ReportRow[];
+  readonly source: ParsedDeckText['source'] | null;
   readonly issues: readonly DeckIssue[];
   /** The deck that "Tallenna pakaksi" would create, with the name from the list or the default. */
   readonly content: DeckContent;
@@ -34,13 +37,14 @@ export function buildImportReport(
   decks: readonly Deck[],
   cardsByKey: CardsByKey,
 ): ImportReport {
-  const rows = parsed.rows.map(({ card, count }): ReportRow => {
+  const toRow = ({ card, count }: ImportedRow): ReportRow => {
     const have = owned.get(card.key) ?? 0;
     const inDecks = decks
       .filter((deck) => deck.sections.some((section) => section.cards.some((row) => row.card === card.key)))
       .map((deck) => deck.name);
     return { card, needed: count, owned: have, missing: Math.max(0, count - have), inDecks };
-  });
+  };
+  const rows = parsed.rows.map(toRow);
   const content: DeckContent = {
     name: parsed.name ?? DEFAULT_IMPORT_NAME,
     sections: [{ name: '', cards: parsed.rows.map(({ card, count }) => ({ card: card.key, count })) }],
@@ -51,6 +55,8 @@ export function buildImportReport(
     missingTotal: missingRows.reduce((sum, row) => sum + row.missing, 0),
     missingRows,
     unrecognized: parsed.unrecognized,
+    sideboardRows: (parsed.sideboard ?? []).map(toRow),
+    source: parsed.source ?? null,
     issues: validateDeck(content, cardsByKey),
     content,
   };
