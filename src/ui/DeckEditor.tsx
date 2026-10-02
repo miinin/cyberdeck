@@ -29,19 +29,29 @@ import type { CardFilterCriteria } from '../domain/cardSearch';
 import { StorageError } from '../storage';
 import type { DeckPickView, Repositories, StorageErrorKind } from '../storage';
 import { CardFilters } from './CardFilters';
+import { useCardHoverPreview } from './CardHoverPreview';
 import { CardImageDialog } from './CardImageDialog';
-import { CardName } from './CardName';
+import { CardName, cardNameText } from './CardName';
 import { CostCurve } from './CostCurve';
 import { DeckPickImage } from './DeckPickImage';
+import { DeckPickTable, cardMeta } from './DeckPickTable';
+import type { PickBlocker } from './DeckPickTable';
 import { typeColorClass } from './CardColor';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
+import { ImageSizeSelect } from './ListToolbar';
+import type { ImageSize } from './ListToolbar';
+import { Stepper } from './Stepper';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
+import { EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
 
 /** A change is saved this long after the last edit (T-013). */
 export const AUTOSAVE_DELAY_MS = 500;
+
+/** A count change is announced this long after the last one, so fast repeats are told once (T-050b). */
+export const CHANGE_ANNOUNCE_MS = 400;
 
 /** The "same Legend" message stays this long (T-045). */
 export const TOAST_MS = 4000;
@@ -50,66 +60,6 @@ type SaveState = 'saved' | 'dirty' | 'saving' | 'error';
 type SaveErrorKind = StorageErrorKind | 'unknown';
 
 const errorKind = (error: unknown): SaveErrorKind => (error instanceof StorageError ? error.kind : 'unknown');
-
-/** "Unit · Red · Cost 3 · Power 2 · RAM 1 · Rare": plain values, missing ones left out. */
-function cardMeta(card: Card): string {
-  return [
-    card.type,
-    card.color,
-    card.cost === null ? null : `Cost ${card.cost}`,
-    card.power === null ? null : `Power ${card.power}`,
-    card.ram === null ? null : `RAM ${card.ram}`,
-    card.rarity,
-  ]
-    .filter((part) => part !== null)
-    .join(' · ');
-}
-
-/** − n + for one card. "−" stays focusable at 0 (aria-disabled) so focus is never lost. */
-function Stepper({
-  name,
-  count,
-  onChange,
-  addLabel,
-  describedBy,
-  showCount = true,
-}: {
-  name: string;
-  count: number;
-  onChange: (count: number) => void;
-  addLabel?: string;
-  /** Id of a visible text that explains why adding breaks a rule. */
-  describedBy?: string;
-  /** False when the count is shown elsewhere (deck rows): only the spoken count stays. */
-  showCount?: boolean;
-}) {
-  return (
-    <div className="card-row-controls">
-      <button
-        type="button"
-        className="step step-minus"
-        aria-disabled={count === 0 ? 'true' : undefined}
-        aria-label={deckTexts.removeCard(name)}
-        onClick={() => count > 0 && onChange(count - 1)}
-      >
-        <span aria-hidden="true">{texts.minusSymbol}</span>
-      </button>
-      <span className={showCount ? 'deck-card-count' : 'deck-card-count-spoken'}>
-        {showCount && <span aria-hidden="true">{count}</span>}
-        <span className="visually-hidden">{deckTexts.inDeck(count)}</span>
-      </span>
-      <button
-        type="button"
-        className="step step-plus"
-        aria-label={addLabel ?? deckTexts.addCard(name)}
-        aria-describedby={describedBy}
-        onClick={() => onChange(count + 1)}
-      >
-        <span aria-hidden="true">+</span>
-      </button>
-    </div>
-  );
-}
 
 export function DeckEditor({
   deckId,
@@ -140,6 +90,13 @@ export function DeckEditor({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const collectionAllRef = useRef<HTMLInputElement>(null);
+  const [imageSize, setImageSize] = useState<ImageSize>('medium');
+  const [changeText, setChangeText] = useState('');
+  const changeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const clickAdds = useMediaQuery(FINE_POINTER_QUERY, true);
+  const preview = useCardHoverPreview();
+
+  useEffect(() => () => clearTimeout(changeTimer.current), []);
 
   // Autosave: the newest unsaved content waits in `pending`; saves run one after another.
   const [saveState, setSaveState] = useState<SaveState>('saved');
@@ -270,7 +227,33 @@ export function DeckEditor({
       return;
     }
     setNotice(null);
-    schedule(withDeckCount(base, card.key, count));
+    const next = withDeckCount(base, card.key, count);
+    schedule(next);
+    clearTimeout(changeTimer.current);
+    changeTimer.current = setTimeout(() => {
+      const nextTotals = deckTotals(next, cardsByKey);
+      const copies = deckCounts(next).get(card.key) ?? 0;
+      const name = cardNameText(card);
+      setChangeText(
+        card.type === 'Legend'
+          ? deckTexts.changeAnnounceLegend(name, copies, nextTotals.legends)
+          : deckTexts.changeAnnounce(name, copies, nextTotals.main),
+      );
+    }, CHANGE_ANNOUNCE_MS);
+  };
+
+  const openImage = (card: Card) => {
+    preview.hide();
+    setZoomCard(card);
+  };
+
+  /** The short mark tells a same-name Legend (refused) from a broken limit (allowed, T-045). */
+  const blockerOf = (card: Card): PickBlocker | null => {
+    const blocker = addBlocker(card, content, cardsByKey);
+    if (blocker === null) return null;
+    return hasSameNameLegend(card, content, cardsByKey)
+      ? { reason: blocker, short: deckTexts.blockedLegend }
+      : { reason: deckTexts.dimmedHint(blocker), short: deckTexts.blockedLimit };
   };
 
   const handleName = (text: string) => {
@@ -338,6 +321,7 @@ export function DeckEditor({
       <li
         key={row.card.key}
         className={`deck-line ${typeColorClass(row.card.color)}` + (missingCount > 0 ? ' is-missing' : '')}
+        {...preview.bind(row.card)}
       >
         <span className="deck-line-count" aria-hidden="true">
           {row.count}×
@@ -348,7 +332,7 @@ export function DeckEditor({
           aria-haspopup="dialog"
           aria-label={`${texts.enlargeImage}${row.card.displayName}`}
           title={cardMeta(row.card)}
-          onClick={() => setZoomCard(row.card)}
+          onClick={() => openImage(row.card)}
         >
           <CardName card={row.card} muteSubname />
         </button>
@@ -412,14 +396,24 @@ export function DeckEditor({
           </button>
         </div>
       ) : (
-        <p className="save-status" role="status">
-          {saveState === 'saved' ? deckTexts.saveSaved : saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}
+        // Only "Tallennettu" is spoken (T-050b): the in-between states are shown but would talk over the change message.
+        <p className="save-status">
+          <span role="status">{saveState === 'saved' ? deckTexts.saveSaved : ''}</span>
+          {saveState !== 'saved' && (
+            <span aria-hidden="true">{saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}</span>
+          )}
         </p>
       )}
 
+      <p className="visually-hidden" aria-live="polite" aria-atomic="true">
+        {changeText}
+      </p>
+
       <div className="editor-layout">
-        <section className="editor-search" aria-labelledby="search-heading">
-          <h2 id="search-heading">{deckTexts.searchHeading}</h2>
+        <section className="editor-filters" aria-labelledby="filters-heading">
+          <h2 id="filters-heading" className="filters-heading">
+            {texts.filtersHeading}
+          </h2>
           <CardFilters
             criteria={criteria}
             typeOptions={filterOptions(KNOWN_CARD_TYPES, cards.map((card) => card.type), criteria.types)}
@@ -435,8 +429,16 @@ export function DeckEditor({
               setCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) })
             }
             onSearchSubmit={() => undefined}
+            collapsibleBelow={EDITOR_WIDE_QUERY}
           />
+        </section>
+
+        <section className="editor-search" aria-labelledby="search-heading" data-image-size={imageSize}>
+          <h2 id="search-heading">{deckTexts.searchHeading}</h2>
           <div className="pick-bar">
+            <p className="status-line" role="status">
+              {deckTexts.searchResults(filtered.length, cards.length)}
+            </p>
             <fieldset className="view-select pick-view">
               <legend>{deckTexts.pickViewLegend}</legend>
               <div className="options">
@@ -459,10 +461,9 @@ export function DeckEditor({
                 ))}
               </div>
             </fieldset>
-            <p className="status-line" role="status">
-              {deckTexts.searchResults(filtered.length, cards.length)}
-            </p>
+            {pickView === 'images' && <ImageSizeSelect name="deck-image-size" value={imageSize} onChange={setImageSize} />}
           </div>
+          <p className="hint pick-hint">{deckTexts.pickHint}</p>
           <div role="status" className="toast-slot">
             {toast !== null && (
               <p className="toast">
@@ -476,67 +477,54 @@ export function DeckEditor({
           {filtered.length === 0 ? (
             <p className="empty">{deckTexts.noSearchResults}</p>
           ) : pickView === 'images' ? (
-            <ul className="search-results pick-images" aria-label={deckTexts.searchHeading}>
-              {filtered.map((card) => {
-                const blocker = addBlocker(card, content, cardsByKey);
-                const hintId = `blocker-image-${card.key}`;
-                const count = counts.get(card.key) ?? 0;
-                const reason =
-                  blocker === null ? null : hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker);
-                return (
-                  <DeckPickImage
-                    key={card.key}
-                    card={card}
-                    dimmed={blocker !== null}
-                    title={reason ?? undefined}
-                    badge={count > 0 ? deckTexts.inDeckBadge(count) : null}
-                    hint={
-                      reason !== null && (
-                        <span id={hintId} className="visually-hidden">
-                          {reason}
-                        </span>
-                      )
-                    }
-                    onAdd={() => setCount(card, count + 1)}
-                  >
-                    <Stepper
-                      name={card.displayName}
+            <div className="pick-scroll">
+              <ul className="pick-images" aria-label={deckTexts.searchHeading}>
+                {filtered.map((card) => {
+                  const blocker = blockerOf(card);
+                  const hintId = `blocker-image-${card.key}`;
+                  const count = counts.get(card.key) ?? 0;
+                  return (
+                    <DeckPickImage
+                      key={card.key}
+                      card={card}
                       count={count}
                       onChange={(next) => setCount(card, next)}
-                      describedBy={blocker !== null ? hintId : undefined}
-                    />
-                  </DeckPickImage>
-                );
-              })}
-            </ul>
+                      dimmed={blocker !== null}
+                      title={blocker?.reason}
+                      badge={count > 0 ? deckTexts.inDeckBadge(count) : null}
+                      hoverProps={imageSize === 'small' ? preview.bind(card) : undefined}
+                      hint={
+                        blocker !== null && (
+                          <span id={hintId} className="visually-hidden">
+                            {blocker.reason}
+                          </span>
+                        )
+                      }
+                    >
+                      <Stepper
+                        name={card.displayName}
+                        count={count}
+                        onChange={(next) => setCount(card, next)}
+                        describedBy={blocker !== null ? hintId : undefined}
+                        shortcuts
+                      />
+                    </DeckPickImage>
+                  );
+                })}
+              </ul>
+            </div>
           ) : (
-            <ul className="search-results" aria-label={deckTexts.searchHeading}>
-              {filtered.map((card) => {
-                const blocker = addBlocker(card, content, cardsByKey);
-                const hintId = `blocker-${card.key}`;
-                return (
-                  <li key={card.key} className={'card-row' + (blocker !== null ? ' is-dimmed' : '')}>
-                    <span className="card-row-name">
-                      <span>
-                        <CardName card={card} />
-                      </span>
-                      <span className="card-row-meta">{cardMeta(card)}</span>
-                      {blocker !== null && (
-                        <span id={hintId} className="card-row-meta">
-                          {hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker)}
-                        </span>
-                      )}
-                    </span>
-                    <Stepper
-                      name={card.displayName}
-                      count={counts.get(card.key) ?? 0}
-                      onChange={(count) => setCount(card, count)}
-                      describedBy={blocker !== null ? hintId : undefined}
-                    />
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="pick-scroll">
+              <DeckPickTable
+                cards={filtered}
+                countOf={(card) => counts.get(card.key) ?? 0}
+                blockerOf={blockerOf}
+                onChange={setCount}
+                onOpenImage={openImage}
+                clickAdds={clickAdds}
+                hoverProps={preview.bind}
+              />
+            </div>
           )}
         </section>
 
@@ -639,6 +627,7 @@ export function DeckEditor({
         </div>
       </div>
       <CardImageDialog card={zoomCard} onClose={() => setZoomCard(null)} />
+      {preview.preview}
     </>
   );
 }

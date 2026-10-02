@@ -10,6 +10,37 @@ const IMAGE_SIZE_OPTIONS: readonly (readonly [ImageSize, string])[] = [
   ['large', texts.imageSizeLarge],
 ];
 
+/** Pieni / Keski / Iso for an image grid (T-050a, T-050b). The name keeps radio groups apart. */
+export function ImageSizeSelect({
+  name,
+  value,
+  onChange,
+}: {
+  name: string;
+  value: ImageSize;
+  onChange: (next: ImageSize) => void;
+}) {
+  return (
+    <fieldset className="view-select">
+      <legend>{texts.imageSizeLegend}</legend>
+      <div className="options">
+        {IMAGE_SIZE_OPTIONS.map(([option, label]) => (
+          <label key={option} className="option">
+            <input
+              type="radio"
+              name={name}
+              value={option}
+              checked={value === option}
+              onChange={() => onChange(option)}
+            />{' '}
+            {label}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
 const VIEW_OPTIONS: readonly (readonly [CatalogViewMode, string])[] = [
   ['grid', texts.viewGrid],
   ['table', texts.viewTable],
@@ -55,23 +86,7 @@ export function ListToolbar({
         </div>
       </fieldset>
       {imageSize !== undefined && (
-        <fieldset className="view-select">
-          <legend>{texts.imageSizeLegend}</legend>
-          <div className="options">
-            {IMAGE_SIZE_OPTIONS.map(([value, label]) => (
-              <label key={value} className="option">
-                <input
-                  type="radio"
-                  name="image-size"
-                  value={value}
-                  checked={imageSize === value}
-                  onChange={() => onImageSizeChange?.(value)}
-                />{' '}
-                {label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <ImageSizeSelect name="image-size" value={imageSize} onChange={(next) => onImageSizeChange?.(next)} />
       )}
       {editable !== undefined && (
         <button

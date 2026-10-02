@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pakkaeditorin korttihaku on uudistettu. Rivit-näkymässä on yksi kortti riviä kohti, ja rivillä ovat pikkukuva, Cost-jalokivi, nimi ja alaotsikko, tyyppi ja väri, Power, RAM, Rarity sekä −/+. Kapealla näytöllä arvot näkyvät nimen alla. Kuvat-näkymässä kuvakoon voi valita (Pieni, Keski tai Iso). Korttia napsauttamalla se lisätään pakkaan, ja oikea napsautus tai Shift+napsautus poistaa sen. Näppäimistöllä + lisää ja − poistaa. Kun hiiri pysähtyy rivin tai pakkalistan kortin päälle, kortista näytetään iso kuva. Leveällä näytöllä suodattimet ovat vasemmalla omassa sarakkeessaan, ja kapeammalla ne avautuvat Suodattimet-painikkeesta. Rajan ylittävässä kortissa näkyy merkintä Raja täynnä tai Sama Legend.
+
 - Kaikki näkymät käyttävät nyt ruudun leveyden (enintään 2560 px), ja reunoille jää kapeat kaistat. Kortit-sivulla suodattimet ovat leveällä ruudulla vasemmalla omassa, mukana vierivässä paneelissaan ja kortit ruudukossa sen oikealla puolella. Ruudukon kuvakoon voi valita (Pieni, Keski tai Iso). Valitut suodattimet näkyvät tulosten yläpuolella siruina, joista suodattimen voi poistaa yhdellä painalluksella. Kapealla ruudulla hakukenttä on aina näkyvissä ja muut suodattimet avautuvat Suodattimet-painikkeesta, joka kertoo valintojen määrän.
 
 - Pakkaeditori käyttää koko leveyden: leveällä ruudulla haku ja tulokset ovat vasemmalla ja pakka omassa, mukana vierivässä sarakkeessa oikealla. Yhteenveto on tiivis ja siinä on kustannuskäyrä (korttien määrä Costin mukaan). Pakkalistan rivi on yksi tiivis rivi: väriraita, määrä, nimi (kuva aukeaa nimeä painamalla), puuttuu-merkki, Cost ja pienet −/+. Kuvat-näkymässä kortin päällä lukee, montako kopiota pakassa on.

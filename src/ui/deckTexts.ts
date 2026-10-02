@@ -115,8 +115,17 @@ export const deckTexts = {
   sameLegend: (name: string) => `Pakassa on jo Legend nimeltä ${name}.`,
   toastClose: 'Sulje ilmoitus',
   pickViewLegend: 'Näkymä',
-  pickViewList: 'Lista',
+  pickViewList: 'Rivit',
   pickViewImages: 'Kuvat',
+  // Result picker (T-050b)
+  pickHint: 'Napsauta korttia lisätäksesi. Oikea napsautus tai Shift+napsautus poistaa. Näppäimistöllä + ja −.',
+  resultsCaption: 'Hakutulokset',
+  colInDeck: 'Pakassa',
+  blockedLimit: 'Raja täynnä',
+  blockedLegend: 'Sama Legend',
+  changeAnnounce: (name: string, count: number, main: number) => `${name}: ${count} pakassa. Pääpakka ${main} korttia.`,
+  changeAnnounceLegend: (name: string, count: number, legends: number) =>
+    `${name}: ${count} pakassa. Legendejä ${legends}/${LEGEND_COUNT}.`,
   distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',
 
   saveSaved: 'Tallennettu',

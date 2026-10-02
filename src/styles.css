@@ -1750,19 +1750,60 @@ body:has(dialog[open]) {
   color: var(--color-warning);
 }
 
+/*
+ * Deck editor layout (T-050b). One column below 64rem. From 64rem the picker and the deck side by side,
+ * with the filters above the picker. From 100rem three columns: filters, picker and deck.
+ * DOM order = visual order: filters, results, deck.
+ */
 .editor-layout {
   display: grid;
   gap: var(--space-4);
   align-items: start;
 }
 
-/* From 75rem: search and results on the left, the deck in a sticky column on the right (T-049). */
-@media (min-width: 75rem) {
+@media (min-width: 64rem) {
   .editor-layout {
-    grid-template-columns: minmax(0, 1fr) clamp(22rem, 27vw, 28rem);
-    gap: var(--space-6);
+    grid-template-columns: minmax(0, 1fr) clamp(24rem, 22vw, 30rem);
+    /* The deck spans both rows; extra height goes to the results row, not between filters and results. */
+    grid-template-rows: auto 1fr;
+    gap: var(--space-3) var(--space-6);
   }
 
+  .editor-filters {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .editor-search {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .editor-side {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+@media (min-width: 100rem) {
+  .editor-layout {
+    grid-template-columns: 17rem minmax(0, 1fr) clamp(24rem, 22vw, 30rem);
+    grid-template-rows: auto;
+  }
+
+  .editor-search {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .editor-side {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}
+
+/* Sticky only when the window is tall enough; nothing gets stuck when zoomed (WCAG 1.4.10). */
+@media (min-width: 64rem) and (min-height: 40rem) {
   .editor-side {
     position: sticky;
     top: var(--space-3);
@@ -1770,13 +1811,19 @@ body:has(dialog[open]) {
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+}
 
-  .search-results {
-    max-height: none;
-    overflow: visible;
+@media (min-width: 100rem) and (min-height: 40rem) {
+  .editor-filters {
+    position: sticky;
+    top: var(--space-3);
+    max-height: calc(100vh - 2 * var(--space-3));
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 
+.editor-filters,
 .editor-search,
 .editor-side,
 .editor-deck {
@@ -1821,7 +1868,6 @@ body:has(dialog[open]) {
   margin-block: var(--space-2) var(--space-3);
 }
 
-.search-results,
 .deck-cards {
   display: flex;
   flex-direction: column;
@@ -1829,20 +1875,6 @@ body:has(dialog[open]) {
   margin: var(--space-3) 0 0;
   padding: 0;
   list-style: none;
-}
-
-.search-results {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-/* Wide list results: several rows next to each other (T-049). */
-@media (min-width: 75rem) {
-  .search-results:not(.pick-images) {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
-    gap: var(--space-2);
-  }
 }
 
 .card-row {
@@ -2239,13 +2271,15 @@ button.deck-line-name:focus-visible {
   min-width: 0;
 }
 
-.catalog-filters {
+.catalog-filters,
+.editor-filters {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.catalog-filters .card-filters {
+.catalog-filters .card-filters,
+.editor-filters .card-filters {
   margin-block-end: 0;
 }
 
@@ -2372,7 +2406,7 @@ button.deck-line-name:focus-visible {
     text-align: end;
   }
 
-  .filters-heading {
+  .catalog-filters .filters-heading {
     position: static;
     width: auto;
     height: auto;
@@ -2414,5 +2448,360 @@ button.deck-line-name:focus-visible {
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+}
+
+/* Deck editor filters as a side panel from 100rem, as on the Cards page from 64rem (T-050b). */
+@media (min-width: 100rem) {
+  .editor-filters .filters-heading {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+
+  .editor-filters .field input[type='search'] {
+    max-width: none;
+  }
+
+  .editor-filters .card-filters .fieldsets {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .editor-filters .card-filters fieldset {
+    display: block;
+    margin-block-start: var(--space-4);
+  }
+
+  .editor-filters .card-filters legend {
+    margin-block-end: var(--space-2);
+  }
+}
+
+/*
+ * Result picker (T-050b). The picker's own width decides which columns fit (container query), since
+ * the deck column takes a share of the screen.
+ */
+.editor-search {
+  container: picker / inline-size;
+}
+
+.pick-hint {
+  margin-block: var(--space-2) 0;
+}
+
+/* The hint talks about clicking; devices without a mouse do not need it. */
+@media not all and (pointer: fine) {
+  .pick-hint {
+    display: none;
+  }
+}
+
+/* Below 64rem the deck is under the results: the results scroll in their own box so the deck stays near. */
+@media (max-width: 63.999rem) {
+  .pick-scroll {
+    max-height: 70vh;
+    overflow-y: auto;
+    margin-block-start: var(--space-3);
+    border-block: 1px solid var(--color-border);
+  }
+}
+
+.pick-table {
+  inline-size: 100%;
+  margin-block-start: var(--space-3);
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.pick-table th,
+.pick-table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: middle;
+}
+
+.pick-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.pick-table .col-image {
+  inline-size: 4rem;
+}
+
+.pick-table .col-cost {
+  inline-size: 3.75rem;
+  text-align: center;
+}
+
+.pick-table .col-type {
+  inline-size: 11rem;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.pick-table .col-number {
+  inline-size: 5rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.pick-table .col-rarity {
+  inline-size: 7.5rem;
+  font-size: var(--font-size-sm);
+}
+
+.pick-table .col-deck {
+  inline-size: 8.5rem;
+}
+
+.pick-table tbody tr:nth-child(even) {
+  background: var(--color-surface);
+}
+
+.pick-table tbody tr:hover {
+  background: var(--color-surface-hover);
+}
+
+@media (pointer: fine) {
+  .pick-table tbody tr {
+    cursor: pointer;
+  }
+}
+
+/* In the deck: an edge stripe and a bold count (the count itself carries the information). */
+.pick-table tr.is-in-deck > :first-child {
+  box-shadow: inset 3px 0 0 var(--color-accent-edge);
+}
+
+.pick-table .deck-card-count,
+.pick-image .deck-card-count {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+}
+
+.is-in-deck .deck-card-count {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.pick-table .col-image .card-image-button,
+.pick-table .col-image .card-image {
+  inline-size: 3rem;
+  block-size: 4.2rem;
+  object-fit: cover;
+  object-position: top;
+}
+
+.pick-table th.col-name {
+  overflow-wrap: anywhere;
+}
+
+.pick-name {
+  font-weight: var(--font-weight-bold);
+}
+
+.pick-subname {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+}
+
+/* The same values as the hidden columns; only shown when they are hidden. */
+.pick-meta {
+  display: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+}
+
+.pick-color {
+  color: var(--color-text-muted);
+}
+
+/* Dimmed = adding breaks a rule: only the image and the name fade, buttons and text keep their contrast. */
+.pick-table tr.is-dimmed .col-image,
+.pick-table tr.is-dimmed .pick-name {
+  opacity: 0.6;
+}
+
+.pick-blocked {
+  display: block;
+  margin-block-start: 2px;
+  color: var(--color-warning);
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.cost-gem {
+  --badge-color: var(--color-border-strong);
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border: 2px solid var(--badge-color);
+  border-radius: 50%;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+/* Smaller −/+ (32 px) in the picker, as in the deck rows. */
+.pick-table .step,
+.pick-image .step {
+  --cut: 0.4rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --cut-inner-2: calc(var(--cut) - 2px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner)), calc(100% - var(--cut-inner)) 100%, 0 100%);
+  --shape-chamfer-inner-2: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner-2)), calc(100% - var(--cut-inner-2)) 100%, 0 100%);
+  inline-size: 2rem;
+  block-size: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  font-size: var(--font-size-base);
+}
+
+.pick-table .card-row-controls,
+.pick-image .card-row-controls {
+  gap: var(--space-1);
+}
+
+/* Narrow picker: type, Power, RAM and Rarity move under the name. */
+@container picker (max-width: 54rem) {
+  .pick-table .col-type,
+  .pick-table .col-number,
+  .pick-table .col-rarity {
+    display: none;
+  }
+
+  .pick-meta {
+    display: block;
+  }
+}
+
+/* Very narrow (phones): Cost is in the line under the name too. */
+@container picker (max-width: 26rem) {
+  .pick-table .col-cost {
+    display: none;
+  }
+
+  .pick-table .col-image {
+    inline-size: 3.5rem;
+  }
+
+  .pick-table .col-deck {
+    inline-size: 7rem;
+  }
+}
+
+/* Image grid: Pieni 9rem, Keski 13rem, Iso 17rem. */
+.pick-images {
+  --card-min: 13rem;
+  display: grid;
+  /* At least two cards side by side, also on a phone. */
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), calc(50% - var(--space-3) / 2)), 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.editor-search[data-image-size='small'] .pick-images {
+  --card-min: 9rem;
+}
+
+.editor-search[data-image-size='large'] .pick-images {
+  --card-min: 17rem;
+}
+
+.pick-image {
+  align-items: stretch;
+  text-align: start;
+}
+
+.pick-image.is-in-deck {
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+}
+
+.pick-image-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+
+.pick-image-foot .pick-image-name {
+  display: block;
+  flex: 1 1 5rem;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: var(--font-weight-bold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pick-image .pick-badge {
+  right: var(--space-1);
+  left: auto;
+}
+
+/* Hover preview (T-050b): one shared image beside the row; never on touch. */
+.card-hover-preview {
+  position: fixed;
+  z-index: 50;
+  inline-size: 18rem;
+  block-size: auto;
+  aspect-ratio: 733 / 1024;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.45);
+  pointer-events: none;
+}
+
+@media not all and (hover: hover) {
+  .card-hover-preview {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card-hover-preview {
+    animation: preview-in 120ms ease-out;
+  }
+}
+
+@keyframes preview-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .cost-gem {
+    border-color: CanvasText;
+  }
+
+  .pick-table tr.is-in-deck > :first-child {
+    border-inline-start: 3px solid Highlight;
   }
 }

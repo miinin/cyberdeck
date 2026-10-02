@@ -1,0 +1,125 @@
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { PointerEvent } from 'react';
+import type { Card } from '../domain/card';
+import { CARD_IMAGE_ASPECT, CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
+import { getCardImage } from '../data/cardImages';
+import { HOVER_QUERY, useMediaQuery } from './useMediaQuery';
+
+/** The mouse rests this long on a row before the bigger image appears (T-050b). */
+export const PREVIEW_DELAY_MS = 250;
+
+/** Space between the trigger (or the pointer) and the image, in px. */
+const GAP = 12;
+
+interface Shown {
+  card: Card;
+  /** Where the trigger was when the image was asked for. */
+  rect: DOMRect;
+  /** Pointer x, used when there is no room beside the whole trigger (a full-width row). */
+  x: number;
+}
+
+export interface HoverPreviewProps {
+  onPointerEnter?: (event: PointerEvent<HTMLElement>) => void;
+  onPointerLeave?: () => void;
+}
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
+
+/**
+ * Left and top of the preview: beside the trigger where there is room (right first), otherwise next to
+ * the pointer above or below the trigger, so the trigger itself is never covered (WCAG 1.4.13).
+ */
+function place({ rect, x }: Shown, width: number, height: number): { left: number; top: number } {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const centred = clamp(rect.top + rect.height / 2 - height / 2, GAP, Math.max(GAP, vh - height - GAP));
+  if (rect.right + GAP + width <= vw) return { left: rect.right + GAP, top: centred };
+  if (rect.left - GAP - width >= 0) return { left: rect.left - GAP - width, top: centred };
+  const left = x + 2 * GAP + width <= vw ? x + 2 * GAP : clamp(x - 2 * GAP - width, GAP, Math.max(GAP, vw - width - GAP));
+  const roomAbove = rect.top - GAP;
+  const roomBelow = vh - rect.bottom - GAP;
+  const top = roomAbove >= roomBelow ? Math.max(GAP, rect.top - GAP - height) : rect.bottom + GAP;
+  return { left, top };
+}
+
+/** The shared bigger image. Decorative: the same card is on the row as text and opens in the image dialog. */
+function CardHoverPreview({ shown }: { shown: Shown | null }) {
+  const ref = useRef<HTMLImageElement>(null);
+  const image = shown === null ? null : getCardImage(shown.card.key);
+
+  // Set through the CSSOM: the content security policy does not allow style attributes.
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (element === null || shown === null) return;
+    // 288 px = 18rem, the CSS width, in case layout is not measured yet.
+    const width = element.offsetWidth || 288;
+    const { left, top } = place(shown, width, width * CARD_IMAGE_ASPECT);
+    element.style.setProperty('left', `${Math.round(left)}px`);
+    element.style.setProperty('top', `${Math.round(top)}px`);
+  }, [shown]);
+
+  if (shown === null || image === null) return null;
+  return (
+    <img
+      ref={ref}
+      key={shown.card.key}
+      className="card-hover-preview"
+      src={image.large}
+      width={CARD_IMAGE_WIDTH.lg}
+      height={cardImageHeight('lg')}
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+    />
+  );
+}
+
+/**
+ * Hover preview for result rows and deck rows (T-050b). Only a mouse that rests 250 ms opens it; leaving,
+ * scrolling, Esc or opening the image dialog (`hide`) closes it. Touch and keyboard never open it.
+ */
+export function useCardHoverPreview() {
+  const canHover = useMediaQuery(HOVER_QUERY, true);
+  const [shown, setShown] = useState<Shown | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const hide = useCallback(() => {
+    clearTimeout(timer.current);
+    setShown(null);
+  }, []);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  useEffect(() => {
+    if (shown === null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') hide();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('scroll', hide, { capture: true, passive: true });
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('scroll', hide, { capture: true });
+    };
+  }, [shown, hide]);
+
+  const bind = useCallback(
+    (card: Card): HoverPreviewProps => {
+      if (!canHover) return {};
+      return {
+        onPointerEnter: (event) => {
+          if (event.pointerType !== 'mouse') return;
+          const trigger = event.currentTarget;
+          const x = event.clientX;
+          clearTimeout(timer.current);
+          timer.current = setTimeout(() => setShown({ card, rect: trigger.getBoundingClientRect(), x }), PREVIEW_DELAY_MS);
+        },
+        onPointerLeave: hide,
+      };
+    },
+    [canHover, hide],
+  );
+
+  return { bind, hide, preview: <CardHoverPreview shown={shown} /> };
+}
