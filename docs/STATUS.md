@@ -1,15 +1,14 @@
-# STATUS · päivitetty 2026-10-02 (PM)
+# STATUS · päivitetty 2026-10-02 (PM, T-025 Done)
 
 ## Yhdellä lauseella
 MVP-0 on valmis: versio 0.1.0 (T-001, kävelevä luuranko) on julkaistu tuotantoon 2026-10-01 (PR #2, Deploy production -ajo 36827198836 onnistui). MVP-1 on pilkottu tehtäviksi T-010–T-015 (D-007).
 
 ## MVP-taso
-Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
+Työn alla: MVP-1 · Valmiina: 3/6 alkuperäisestä tehtävästä (T-010–T-015) sekä D-012:n lisätehtävistä T-021 ja T-025. MVP-0 valmis.
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-025 | Koodari → UX, Digiturva | Review | Toteutettu pääkansiossa (haara `t-025-teemavalitsin`, luovutus 41dfbe9). Seuraavaksi: PM lisää CONTENT.md:n termin "teema" ja CHANGELOG-merkinnän (Koodarin luku estettiin, katso kortin luovutus), avaa PR:n testiin, sitten UX- ja Digiturva-katselmointi (A1: `public/theme-init.js`). |
 | T-026 | Koodari | In Progress (keskeytetty) | Worktree `.claude/worktrees/t-026` (haara `t-026-korttidata`). Data ja komento valmiit, firebase.json commitoitu testaamatta (8e35488). Katso kortin PM-checkpoint 2026-10-02: uusi Koodari jatkaa askeleista 5–6, sitten koodikatselmointi ja luovutus. |
 | T-027 | – | Backlog (T-026) | Kuvat ovat `public/cards/`-kansiossa (151 × .webp, 14 Mt, gitignoroitu). Käyttäjän vastaukset kirjattu T-027-korttiin (t-026-haara). Mahdollisesti sharpia ei tarvita. |
 
@@ -39,6 +38,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-025 Teemavalitsin, tumma oletuksena (2026-10-02, PR #7)
 - T-021 Ulkoasu: Cyberpunk 2077 -henkinen ilme (2026-10-02)
 - T-012 Kokoelma (2026-10-01)
 - T-010 Haku ja suodatus (2026-10-01)
@@ -47,7 +47,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-025 katselmointiin ja T-026 valmiiksi, sitten T-027 (kuvat ovat jo `public/cards/`-kansiossa) (D-012). Sen jälkeen T-013 → T-014 → T-015 (järjestys riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta.
+1. T-026 valmiiksi, sitten T-027 (kuvat ovat jo `public/cards/`-kansiossa) (D-012). Sen jälkeen T-013 → T-014 → T-015 (järjestys riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta.
 2. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
 
 **Tokenien säästö (käyttäjä 2026-10-02):** tokenit kuluvat nopeasti, ja käyttöraja katkaisi kaksi rinnakkaista Koodaria. Aja yksi agentti kerrallaan, pidä tehtävänannot lyhyinä ja tyhjennä istunto (`/clear`) tehtävien välissä.

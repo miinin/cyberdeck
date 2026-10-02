@@ -1,7 +1,7 @@
 # T-025 · Teemavalitsin: tumma oletuksena, käyttäjä voi vaihtaa
-**Tila:** Review · **Omistaja:** Koodari → UX, Digiturva · **MVP:** 1 · **Prioriteetti:** Must (D-012)
+**Tila:** Done · **Omistaja:** Koodari → UX, Digiturva · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** UX ☑ (UX.md luku 8, v0.9)
-**Katselmoinnit:** Koodikatselmointi ☑ · UX ☐ · Digiturva ☑ (SEC-004)
+**Katselmoinnit:** Koodikatselmointi ☑ · UX ☑ (UX-005) · Digiturva ☑ (SEC-004)
 **Riippuvuudet:** T-021 (Done)
 **Haara:** `t-025-teemavalitsin`
 
@@ -89,3 +89,14 @@ Käyttäjä valitsee väriteeman helposti. Tumma teema on oletus (D-012), koska 
 - Mistä katsoa: SEC-004-raportti, PRIVACY.md (rivi 10, luvut 5 ja 6), SECURITY.md (SR-12).
 - Tunnetut rajoitteet ja riskit: SEC-014 (Info, `theme-init.js` välimuistissa enintään tunnin) ja SEC-015 (Info, tulevan "Poista kaikki tiedot" -toiminnon on poistettava myös teema-avain). Firefoxia ja Safaria ei testattu. Havainto UX:lle: body-tausta jäi hetkeksi tummaksi vaihdon jälkeen (todennäköisesti CSS-siirtymä), välitetty UX-katselmointiin.
 - Testit: Vitest 456/456 ja ESLint läpi (ilman `.claude/**`). PR #7:n esikatselussa Chrome headless: CSP-rikkomuksia 0, oletus tumma, vaihto ja tallennus toimivat, vihamielinen arvo jättää tumman teeman.
+
+### Luovutus 2026-10-02 · UX Designer → PM (PM kirjasi)
+- Mitä tehtiin: T-025:n UX-katselmointi, raportti docs/reports/UX-005-teemavalitsin.md (commit b1cd503). UX.md 8.4:n DOM-esimerkki päivitetty vastaamaan hyväksyttyä toteutusta (kääre-span).
+- Tulos: ei blokkaavia löydöksiä, veto ei. Low: UX-005-1 (320 px rivitys, hyväksytty), UX-005-2 ja UX-005-3 (siirtymät teeman vaihdossa ja reduced-motion-sääntö, backlogiin → T-028). Digiturvan havainto tummasta taustasta johtui headless-Chromen reduce-tilasta (UX-005-3), käyttäjä ei näe viivettä.
+- Testit: axe 0 rikkomusta molemmissa teemoissa (320 ja 1280 px), näppäimistö, välistys, 200 % juurifontti ja forced-colors paikallisella buildilla CSP:n kanssa. Ei tarkistettu: oikea ruudunlukija, selaimen oma zoom.
+
+### Done-tarkistus 2026-10-02 · PM
+- Hyväksymiskriteerit 1–5 todennettu Koodarin, Digiturvan (esikatselu-URL, CSP) ja UX:n selainajoissa.
+- PM ajoi itse: Vitest 19 tiedostoa, 456/456 läpi · ESLint 0 varoitusta · `npm run build` läpi (kaikki ilman `.claude/**`, velka T-029).
+- Koodikatselmointi ☑ · UX ☑ (UX-005) · Digiturva ☑ (SEC-004) · CONTENT.md ja CHANGELOG päivitetty (94c4be6). Ei avoimia blokkaavia löydöksiä.
+- Tila: **Done**. Yhdistetään test-haaraan.
