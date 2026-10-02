@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardColor } from './CardColor';
-import { colorNames, texts } from './texts';
+import { texts } from './texts';
 import { useMediaQuery } from './useMediaQuery';
 
 /** Longest accepted search text (PM 2026-10-01). No message is shown at the limit (UX.md 5.3). */
@@ -183,7 +183,7 @@ export function CardFilters({
             <legend>{texts.colorLegend}</legend>
             <div className="options">
               {colorOptions.map((color) => (
-                <label key={color} className="option option-color" title={colorNames.get(color) ?? color}>
+                <label key={color} className="option option-color">
                   <input
                     type="checkbox"
                     name="color"
@@ -192,7 +192,7 @@ export function CardFilters({
                     onChange={() => onToggleColor(color)}
                   />{' '}
                   <span>
-                    <CardColor color={color} swatchOnly />
+                    <CardColor color={color} />
                   </span>
                 </label>
               ))}

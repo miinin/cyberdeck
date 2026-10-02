@@ -82,7 +82,22 @@ describe('Deck editor result picker', () => {
     expect(row).toHaveTextContent('Sama Legend');
     const add = within(row).getByRole('button', { name: 'Lisää pakkaan: L1' });
     expect(add).toHaveAccessibleDescription('Pakassa on jo Legend L1.');
-    expect(rowOf('Big')).toHaveTextContent('Raja täynnä');
+    expect(rowOf('Big')).toHaveTextContent('Yli rajan');
+  });
+
+  it('gives a same-name Legend the same reason as its mark, also with three Legends (UX-045)', async () => {
+    await openEditor([['l1', 1], ['l2', 1], ['l3', 1]]);
+    const row = rowOf('L1');
+    expect(row).toHaveTextContent('Sama Legend');
+    expect(within(row).getByRole('button', { name: 'Lisää pakkaan: L1' })).toHaveAccessibleDescription(
+      'Pakassa on jo Legend L1.',
+    );
+  });
+
+  it('"Siirry pakkaan" skips from the results to the deck (UX-044)', async () => {
+    await openEditor([]);
+    fireEvent.click(screen.getByRole('button', { name: 'Siirry pakkaan' }));
+    expect(screen.getByRole('heading', { level: 2, name: /pakan kortit/ })).toHaveFocus();
   });
 
   it('marks a row that is in the deck', async () => {

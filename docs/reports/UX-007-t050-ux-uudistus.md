@@ -41,61 +41,62 @@ Arvio nyt: **ulkoasu 4/5, toiminnot 4/5**. Kun UX-043–UX-048 on korjattu, arvi
 **Odotettu:** fokusoitu nappi näkyy aina. · **Havaittu:** 2/60 askeleella nappi on kokonaan otsakerivin (33 px) alla, koska Shift+Tab vierittää elementin ikkunan yläreunaan.
 **Vaikutus:** WCAG 2.2 AA 2.4.11 (Focus Not Obscured) ei täyty. Näppäimistökäyttäjä ei näe, missä fokus on.
 **Korjausehdotus:** `.pick-table :is(button, [tabindex]) { scroll-margin-top: 3rem; }` (otsakkeen korkeus ja väli). Lisäksi sticky-otsake samaan `@media (min-height: 40rem)` -ehtoon kuin muutkin sticky-elementit (määrittelyn sääntö).
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ### UX-044 · Hakutuloksista ei pääse näppäimistöllä pakkaan ilman satoja Tab-painalluksia · Medium
 **Sijainti:** `src/ui/DeckEditor.tsx` (poimijan ja pakkasarakkeen välissä) · **Tehtävä:** T-050b/c
 **Toistaminen:** L/XL-koko: aloita hakukentästä ja paina Tab, kunnes fokus on pakkasarakkeessa. · **Havaittu:** 151 riviä × 3 pysähdystä, eli noin 450 askelta. Ohitusreittiä ei ole (alapalkki on vain alle 64rem).
 **Vaikutus:** Ruudunlukija pääsee pakkaan maamerkillä (2.4.1 täyttyy), mutta näkevälle näppäimistökäyttäjälle pakan tarkistaminen on käytännössä mahdotonta.
 **Korjausehdotus:** Työkalurivin ("151 / 151 korttia") yhteyteen linkkinappi **"Siirry pakkaan"**, joka vie fokuksen pakan otsikkoon (sama toiminto kuin alapalkin "Näytä pakka"). Pakkasarakkeen sticky-otsakkeeseen **"Siirry hakuun"** (sama kuin "Takaisin hakuun"). Molemmat voivat näkyä vain fokuksessa (skip link -tyyli).
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ### UX-045 · Estetyn Legendin merkki ja ruudunlukijan teksti ovat ristiriidassa · Medium
 **Sijainti:** `src/ui/DeckEditor.tsx:258–263` (`blockerOf`), `src/domain/deckRules.ts:181–190` · **Tehtävä:** T-050b
 **Toistaminen:** 1) Lisää 3 Legendiä (esim. V). 2) Katso V:n riviä. · **Havaittu:** näkyvä merkki on "Sama Legend", mutta `aria-describedby` sanoo "Pakassa on jo 3 Legendiä.", koska `addBlocker` palauttaa ensin määräsäännön. Lisäksi "Raja täynnä" kuulostaa estolta, vaikka kortin voi lisätä (piilotettu teksti "Voit silti lisätä kortin." ei näy näkevälle).
 **Vaikutus:** Näkevä ja ruudunlukijan käyttäjä saavat eri syyn. "Raja täynnä" saa käyttäjän luulemaan, ettei lisääminen onnistu.
 **Korjausehdotus:** Kun `hasSameNameLegend` on tosi, syy on aina `Pakassa on jo Legend {nimi}.` Määräsäännön lyhyt merkki on **"Yli rajan"** ja `title` = koko syy (vaihtoehto: "Raja täynnä, voi lisätä"). Teksti `deckTexts.blockedLimit`.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ### UX-046 · Legend-kuvat vievät pakkasarakkeen näkyvän osan, ja pääpakka jää taitteen alle · Medium
 **Sijainti:** `src/ui/DeckList.tsx`, `src/styles.css` (`.legend-slot`) · **Tehtävä:** T-050c
 **Toistaminen:** 1920×1080, pakassa 3 Legendiä. · **Havaittu:** kolme täysikokoista kortinkuvaa (noin 130×185 px) ja nimirivit. Pääpakan ensimmäinen laatta alkaa noin y=1050 eli ikkunan alareunasta. 2850 px:ssä kuvat ovat noin 190×270 px.
 **Vaikutus:** Käyttäjän palautteen ydin ("oleellinen tieto on vaikea nähdä") toteutuu vain osittain, koska pakan sisältö pitää vierittää esiin.
 **Korjausehdotus:** Legend-paikat matalammiksi. Kuva rajataan yläosaan (`aspect-ratio: 733/600; object-fit: cover; object-position: top`) ja korkeus on enintään 8rem, tai Legendit näytetään samana laattana kuin pääpakka ja kuva aukeaa hoverilla tai dialogilla. Tavoite: 1080 px:n korkeudessa näkyy otsake, Legendit ja vähintään 8 pääpakan laattaa.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ### UX-047 · Pakkalaatat ovat ahtaita: nimi katkeaa ja kuvakaistale jää piiloon · Low
 **Sijainti:** `src/styles.css:2982` (`.deck-tile`), pakkasarakkeen leveys `clamp(24rem, 22vw, 30rem)` / ≥ 140rem 38rem · **Tehtävä:** T-050c
 **Havaittu:** 1920 px:ssä "Kerry Eurodyne, The Las…" ja "Meredith Stout, Stone C…". "puuttuu 2" vie noin 60 px jokaisella rivillä, ja kuvakaistale jää ×N:n ja Stepperin alle (opasiteetti 0.38). Samaan aikaan poimijan Nimi-sarakkeessa on 400–600 px tyhjää (UX-048).
 **Korjausehdotus:** Pakkasarake leveämmäksi XL:ssä (esim. `clamp(26rem, 26vw, 40rem)`). "puuttuu N" nimen alle pienellä tai lyhyenä merkkinä, jonka koko teksti on visually-hidden. Kuvakaistale nimen ja määrän väliin, ei Stepperin alle.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ### UX-048 · Poimijan Nimi-sarake venyy tyhjäksi leveällä näytöllä · Low
 **Sijainti:** `src/styles.css` (`.pick-table`, max 110rem) · **Tehtävä:** T-050b
 **Havaittu:** 1920 px:ssä Nimen ja Tyypin välissä on noin 380 px tyhjää ja 2850 px:ssä noin 570 px. Silmä joutuu hyppäämään rivin yli.
 **Korjausehdotus:** Nimi-sarakkeelle `max-width: 22rem` ja ylimääräinen tila pakkasarakkeelle (UX-047), tai taulukon maksimileveydeksi noin 80rem.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ### UX-049 · Alapalkin teksti katkeaa kesken lukuvälin, ja 400 %:lla sticky-elementit vievät 45 % näkymästä · Low
 **Sijainti:** `src/ui/DeckEditor.tsx` / `deckTexts.mobileBar`, `src/styles.css:3254` (`.deck-bar`) · **Tehtävä:** T-050c
 **Havaittu:** 320–375 px: "Pakka 36/40–" / "50 · Legendit 7/3". 400 % (320×225): alapalkki 68 px ja taulukko-otsake 33 px.
 **Korjausehdotus:** Luvut `white-space: nowrap` -spaniin ("36/40–50" ja "Legendit 7/3"). `@media (max-height: 30rem)`: alapalkki `position: static` ja taulukko-otsake ei sticky (ks. UX-043).
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ### UX-050 · "Takaisin hakuun" näyttää tavalliselta tekstiltä · Low
 **Sijainti:** pakkaosion alku mobiilissa (`DeckEditor.tsx`/`DeckList.tsx`, linkkinappi) · **Tehtävä:** T-050c
 **Havaittu:** 320 px:ssä teksti on ilman alleviivausta tai nappikehystä, eikä sen toiminto erotu (Nielsen 6, tunnistettavuus).
 **Korjausehdotus:** Linkkityyli (alleviivaus ja accent-väri) ja nuoli "← Takaisin hakuun", tai `button-secondary`.
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ### UX-051 · Vaalean teeman "puuttuu N" kuvakaistaleen päällä on kontrastirajalla · Low
 **Sijainti:** `src/styles.css:3011` (`:root[data-theme='light'] .deck-tile-art { opacity: 0.28 }`) · **Tehtävä:** T-050c
 **Havaittu:** pikselimittaus ilman tekstin varjoa: p10 4.54:1, pahin pikseli 4.32:1 (vaatimus 4.5). Varjon kanssa raja täyttyy, mutta marginaali on pieni ja riippuu kortin kuvasta. Tumma teema on reilusti yli.
 **Korjausehdotus:** Opasiteetiksi 0.2 vaaleassa teemassa tai "puuttuu" pois kaistaleen päältä (UX-047).
-**Tila:** Avoin
+**Tila:** Korjattu (T-050: Fix UX-007 findings)
 
 ## Huomio (ei T-050:n löydös)
 - Väri-suodattimen vaihtoehdot ovat pelkkiä värilaattoja (T-045, `title`, saavutettava nimi kunnossa). Värisokealle Red- ja Green-laattojen ero on pieni. Arvioidaan MVP-tason saavutettavuusauditoinnissa.
+  **Korjattu:** laatoissa näkyy nyt värin nimi (Red/Yellow/Green/Blue, lang="en") värilaatan vieressä.
 
 ## Korjausjärjestys
 1. UX-043 (High, veto): `scroll-margin-top` ja sticky-otsake vain `min-height: 40rem`.

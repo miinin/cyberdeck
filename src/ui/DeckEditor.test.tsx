@@ -24,7 +24,7 @@ describe('Deck editor', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Oma pakka' })).toBeInTheDocument();
     // Sticky deck head (T-050c): the progress bar carries the main deck count, Legends are under it.
     expect(screen.getByRole('progressbar', { name: 'Pääpakka 6/40–50' })).toBeInTheDocument();
-    expect(screen.getByText('Legendit 1/3')).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: /pakan kortit/ })).getByText('Legendit 1/3')).toBeInTheDocument();
     expect(screen.getByText(/RAM-rajat: Red 2/)).toBeInTheDocument();
     expect(screen.getByText('Legendejä on 1, pitää olla tasan 3.')).toBeInTheDocument();
     expect(screen.getByText('Pääpakassa on 6 korttia, vähintään 40.')).toBeInTheDocument();
@@ -167,7 +167,7 @@ describe('Deck editor', () => {
     await user.click(within(row).getByRole('button', { name: 'Lisää pakkaan: L1' }));
     const message = screen.getByText('Pakassa on jo Legend nimeltä L1.');
     expect(message.closest('[role="status"]')).not.toBeNull();
-    expect(screen.getByText('Legendit 1/3')).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: /pakan kortit/ })).getByText('Legendit 1/3')).toBeInTheDocument();
     expect(screen.getByRole('progressbar', { name: 'Pääpakka 0/40–50' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Sulje ilmoitus' }));
     expect(screen.queryByText('Pakassa on jo Legend nimeltä L1.')).not.toBeInTheDocument();

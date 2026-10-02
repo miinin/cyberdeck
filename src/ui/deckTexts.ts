@@ -118,8 +118,10 @@ export const deckTexts = {
   pickHint: 'Napsauta korttia lisätäksesi. Oikea napsautus tai Shift+napsautus poistaa. Näppäimistöllä + ja −.',
   resultsCaption: 'Hakutulokset',
   colInDeck: 'Pakassa',
-  blockedLimit: 'Raja täynnä',
+  /** A broken limit still lets the card be added, so the mark must not sound like a refusal (UX-045). */
+  blockedLimit: 'Yli rajan',
   blockedLegend: 'Sama Legend',
+  sameLegendReason: (name: string) => `Pakassa on jo Legend ${name}.`,
   changeAnnounce: (name: string, count: number, main: number) => `${name}: ${count} pakassa. Pääpakka ${main} korttia.`,
   changeAnnounceLegend: (name: string, count: number, legends: number) =>
     `${name}: ${count} pakassa. Legendejä ${legends}/${LEGEND_COUNT}.`,
@@ -140,9 +142,9 @@ export const deckTexts = {
   typesLabel: 'Tyypit',
   colorShare: (color: string, count: number, pct: number) => `${color} ${count} (${pct} %)`,
   typeShare: (type: string, count: number) => `${type} ${count}`,
-  mobileBar: (main: number, legends: number) =>
-    `Pakka ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK} · Legendit ${legends}/${LEGEND_COUNT}`,
+  mobileBarMain: (main: number) => `Pakka ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
   showDeck: 'Näytä pakka',
+  goToDeck: 'Siirry pakkaan',
   backToSearch: 'Takaisin hakuun',
   distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',
 

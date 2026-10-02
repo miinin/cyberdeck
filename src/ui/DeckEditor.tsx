@@ -254,13 +254,17 @@ export function DeckEditor({
     setZoomCard(card);
   };
 
-  /** The short mark tells a same-name Legend (refused) from a broken limit (allowed, T-045). */
+  /**
+   * The short mark tells a same-name Legend (refused) from a broken limit (allowed, T-045). The reason
+   * always matches the mark: a same-name Legend wins over the Legend count (UX-045).
+   */
   const blockerOf = (card: Card): PickBlocker | null => {
+    if (hasSameNameLegend(card, content, cardsByKey)) {
+      return { reason: deckTexts.sameLegendReason(card.name), short: deckTexts.blockedLegend };
+    }
     const blocker = addBlocker(card, content, cardsByKey);
     if (blocker === null) return null;
-    return hasSameNameLegend(card, content, cardsByKey)
-      ? { reason: blocker, short: deckTexts.blockedLegend }
-      : { reason: deckTexts.dimmedHint(blocker), short: deckTexts.blockedLimit };
+    return { reason: deckTexts.dimmedHint(blocker), short: deckTexts.blockedLimit };
   };
 
   const handleName = (text: string) => {
@@ -435,6 +439,10 @@ export function DeckEditor({
             <p className="status-line" role="status">
               {deckTexts.searchResults(filtered.length, cards.length)}
             </p>
+            {/* Skip past the results to the deck, shown when focused (UX-044). */}
+            <button type="button" className="link-button focus-reveal" onClick={showDeck}>
+              {deckTexts.goToDeck}
+            </button>
             <fieldset className="view-select pick-view">
               <legend>{deckTexts.pickViewLegend}</legend>
               <div className="options">
@@ -526,7 +534,9 @@ export function DeckEditor({
 
         <div className="deck-bar" hidden={deckInView}>
           <p className="deck-bar-text">
-            <span>{deckTexts.mobileBar(totals.main, legendsCount)}</span> {legalityMark}
+            <span className="deck-bar-part">{deckTexts.mobileBarMain(totals.main)}</span>
+            <span aria-hidden="true">·</span>
+            <span className="deck-bar-part">{deckTexts.legendsProgress(legendsCount)}</span> {legalityMark}
           </p>
           <button type="button" className="button-primary deck-bar-button" onClick={showDeck}>
             {deckTexts.showDeck}
@@ -556,13 +566,13 @@ export function DeckEditor({
               aria-label={deckTexts.mainProgress(totals.main)}
             />
             <p className="deck-head-sub">{deckTexts.legendsProgress(legendsCount)}</p>
+            <p className="deck-back">
+              <button type="button" className="link-button" onClick={() => searchInputRef.current?.focus()}>
+                <span aria-hidden="true">← </span>
+                {deckTexts.backToSearch}
+              </button>
+            </p>
           </div>
-
-          <p className="deck-back">
-            <button type="button" className="link-button" onClick={() => searchInputRef.current?.focus()}>
-              {deckTexts.backToSearch}
-            </button>
-          </p>
 
           <div aria-live="polite" aria-atomic="true">
             {issues.length === 0 ? (

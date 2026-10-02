@@ -109,7 +109,7 @@ describe('Mobile deck bar', () => {
     const user = userEvent.setup();
     openEditor([['l1', 1], ['u0', 2]]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
-    expect(screen.getByText('Pakka 2/40–50 · Legendit 1/3')).toBeInTheDocument();
+    expect(document.querySelector('.deck-bar-text')).toHaveTextContent(/^Pakka 2\/40–50·Legendit 1\/3/);
     await user.click(screen.getByRole('button', { name: 'Näytä pakka' }));
     expect(screen.getByRole('heading', { level: 2, name: /pakan kortit/ })).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Takaisin hakuun' }));
