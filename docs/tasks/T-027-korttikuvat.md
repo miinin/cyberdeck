@@ -1,5 +1,5 @@
 # T-027 · Korttikuvat näkyviin (151 kuvan paketti käyttäjältä)
-**Tila:** Ready (rakennetaan T-026:n päälle) · **Omistaja:** Arkkitehti (osa T-026:n ADR:ää) → UX → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
+**Tila:** Done · **Omistaja:** Arkkitehti (osa T-026:n ADR:ää) → UX → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** Arkkitehti ☐ (tiedostomuoto, nimeäminen, sijainti, koot, tuontikomento) · UX ☐ (missä ja miten kuva näkyy)
 **Katselmoinnit:** Koodikatselmointi ☐ · UX ☐ · Digiturva ☑ (SEC-006-t027: ei Critical-, High- eikä Medium-löydöksiä; sharp hyväksyttävissä; SEC-019 Low, SEC-020 Info)
 **Riippuvuudet:** T-026. Toteutus voidaan tehdä valmiiksi paikkamerkkikuvilla ennen kuin paketti saapuu.
@@ -116,3 +116,8 @@ Pelaaja tunnistaa kortin kuvasta (D-012). Kun käyttäjän kuvapaketti saapuu, k
 - **Löydökset:** Critical 0 · High 0 · Medium 0 · Low 1 (SEC-019: worktreen `public/*.webp`-alkuperäiset eivät ole `.gitignore`ssa; poista ne ja harkitse `/public/*.webp` ignoreen) · Info 1 (SEC-020: alkuperäiset `test`-historiassa c31f42c, ei toimenpidettä).
 - **Veto:** ei. Done-tilaa ei estetä tietoturvan perusteella.
 - **Testit:** `npx vitest run` 26 tiedostoa, 484 testiä läpi. Metatiedot tarkistettu kaikista 302 kuvasta.
+
+### Checkpoint 2026-10-02 · PM (Done)
+- Definition of Done: hyväksymiskriteerit todennettu (esikatselu PR #8/#9), `npm test` 484/484, lint ja build läpi, koodikatselmointi tehty, Digiturva (SEC-005, SEC-006: ei Critical/High; SEC-016 Varmistettu), UX (UX-006: ei blokkaavia), CHANGELOG ja dokumentaatio päivitetty. Testikäyttäjä ja Dokumentoija MVP-1:n lopussa (D-009).
+- Low-löydökset velaksi: T-030 (UX-040), T-031 (UX-041), T-032 (SEC-019). PM poisti worktreestä omat kopionsa alkuperäisistä kuvista (SEC-019).
+- Tila Done. T-026 ja T-027 yhdistetään testiin peräkkäin.

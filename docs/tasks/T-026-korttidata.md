@@ -1,5 +1,5 @@
 # T-026 · Korttidata sovelluksen mukana (ei hakua joka käynnillä)
-**Tila:** In Progress · **Omistaja:** Arkkitehti → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
+**Tila:** Done · **Omistaja:** Arkkitehti → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** Arkkitehti ☐ (ADR, kattaa myös T-027:n kuvat)
 **Katselmoinnit:** Koodikatselmointi ☐ · Digiturva ☑ (SEC-005-t026: ei Critical- eikä High-löydöksiä; SEC-016 Medium: otsakkeet todennettava esikatselussa) · UX ☐ (vain jos käyttäjälle näkyvät tilat muuttuvat)
 **Riippuvuudet:** –. Korvaa T-003:n (välimuisti).
@@ -101,3 +101,8 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
 - Yhdistetty `origin/test` haaraan (ristiriidat T-025:n kanssa ratkaistu; `App.theme.test.tsx` käyttää nyt `cards={[]}`). `npm test` 466/466, lint ja build läpi.
 - Esikatselu https://cyberdeck-tcg-test--pr8-t-026-korttidata-upqu8vmd.web.app (`curl -sI`): `/` → CSP `connect-src 'self'` + `Cache-Control: max-age=3600`. `/assets/index-xO3cEatC.js` → sama CSP + `Cache-Control: public, max-age=31536000, immutable`. Bundlessa 0 osumaa "netdeck". SEC-016:n ehdot täyttyvät (Digiturvan raportin kriteerit); Digiturva merkitsee Varmistettu seuraavassa katselmoinnissaan.
 - UX:n kevyt katselmointi (poistuneet tilat) tehdään yhdessä T-027:n UX-katselmoinnin kanssa, koska T-027 rakentuu tämän päälle. T-026 ja T-027 yhdistetään testiin peräkkäin, kun T-027 on katselmoitu (käyttäjä priorisoi kuvat 2026-10-02).
+
+### Checkpoint 2026-10-02 · PM (Done)
+- Definition of Done: hyväksymiskriteerit todennettu (esikatselu PR #8/#9), `npm test` 484/484, lint ja build läpi, koodikatselmointi tehty, Digiturva (SEC-005, SEC-006: ei Critical/High; SEC-016 Varmistettu), UX (UX-006: ei blokkaavia), CHANGELOG ja dokumentaatio päivitetty. Testikäyttäjä ja Dokumentoija MVP-1:n lopussa (D-009).
+- Low-löydökset velaksi: T-030 (UX-040), T-031 (UX-041), T-032 (SEC-019). PM poisti worktreestä omat kopionsa alkuperäisistä kuvista (SEC-019).
+- Tila Done. T-026 ja T-027 yhdistetään testiin peräkkäin.
