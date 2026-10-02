@@ -30,6 +30,14 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
 - Avoimet kysymykset: PM:lle luovutuksessa (A1–A3).
 - Muutetut tiedostot: docs/DECISIONS.md, docs/ARCHITECTURE.md, docs/tasks/T-026-korttidata.md, docs/tasks/T-027-korttikuvat.md, docs/STATUS.md
 
+### Suunnitelma 2026-10-02 · Koodari
+1. `src/domain/cardFile.ts` + testit (toCardFile, parseCardFile).
+2. Päivityskomento: `scripts/cards/updateCards.ts`, `cardFileDiff.ts`, `scripts/cards-update.mjs` + testit, package.json, tsconfig, ESLint (scripts).
+3. `npm run cards:update` oikeaa rajapintaa vasten, determinismi (toinen ajo = No changes) ja avainvertailu.
+4. `src/data/cards.ts` + testi, App ja CatalogView ilman lataustiloja, useCardCatalog pois, ESLintin api-kielto.
+5. firebase.json (CSP connect-src 'self', /assets/** Cache-Control), STATUS.md ajo-ohje, CHANGELOG, ARCHITECTURE.md toteutusosa.
+6. Koodikatselmointi ja luovutus. Esikatselun curl-todennus PM:lle, koska PR:ää ei avata tässä.
+
 ## Luovutukset
 
 ### Luovutus 2026-10-02 · Arkkitehti → PM → Koodari
