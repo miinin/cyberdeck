@@ -1,7 +1,7 @@
 # T-021 · Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme
-**Tila:** Odottaa käyttäjän hyväksyntää mallisivulle (UX-suunnittelu valmis) · **Omistaja:** UX Designer → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-010)
+**Tila:** Review · **Omistaja:** Koodari → UX Designer (katselmointi) · **MVP:** 1 · **Prioriteetti:** Must (D-010)
 **Suunnittelu:** UX ☐ (tutkimus, visuaalinen suunta, tokenit, komponentit, mallisivu)
-**Katselmoinnit (D-010):** Koodikatselmointi ☐ · UX ☐ · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
+**Katselmoinnit (D-010):** Koodikatselmointi ☑ · UX ☐ · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
 **Riippuvuudet:** T-010, T-012 (Done)
 **Haara:** `t-021-ulkoasu`
 
@@ -72,9 +72,32 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 - UX.md v0.7 ja mallisivu (molemmat teemat) valmiit, commit 52a9c78. V9–V11: UX:n oletukset hyväksytty (käytettävyysvalintoja, käyttäjä voi muuttaa).
 - Tila In Progress. Seuraava askel: Koodari toteuttaa UX.md:n luvun 7.9 mukaan.
 
+### Luovutus 2026-10-02 · Koodari → UX Designer
+- **Mitä tehtiin:** UX.md 7.9:n mukainen toteutus. Vaalea teema on `:root`-oletus ja tumma `@media (prefers-color-scheme: dark)`. Mallisivun `data-theme`-säännöt ja skripti jätettiin pois. Fontit isännöidään itse (Rajdhani 500/700, Share Tech Mono 400, Googlen woff2-tiedostot sellaisenaan). `texts.ts` ja toimintalogiikka ovat ennallaan. DOM-muutokset: `span.brand` otsakkeessa, `div.fieldsets` Tyyppi- ja Väri-ryhmien ympärillä, `tr.is-owned` (vain kun kokoelma on ready ja määrä > 0), `.is-summary` yhteenvedossa ja `span.loading-bar[aria-hidden]` vain LATAUS-tilassa.
+- **Mitä pyydän:** UX-katselmointi (käytettävyys, saavutettavuus ja ulkoasu molemmissa teemoissa). Erityisesti näppäimistöpolku, ruudunlukija ja 400 % zoom oikeassa selaimessa, koska niitä en tehnyt.
+- **Mistä katsoa:** `git diff origin/test...t-021-ulkoasu -- src`. Ajo: `npm run build`, sitten `npx vite preview` (tai PR:n esikatselu, kun PM avaa PR:n).
+- **Poikkeamat mallisivusta ja tulkinnat** (UX.md voittaa):
+  1. Siirtymät (`transition`) ja painalluksen `:active`-siirtymä ovat `prefers-reduced-motion: no-preference` -ehdon sisällä (UX.md 3.3, 3.5, 7.7). Mallisivulla siirtymät olivat ilman ehtoa.
+  2. Mallisivun bugi: `.step { --cut: .5rem }` ei muuta muotoa, koska `--shape-chamfer` lasketaan `:root`issa. Toteutuksessa muodot määritellään `.step`issä uudelleen, joten määräpainikkeiden viiste on oikeasti 0.5rem.
+  3. UX.md on ristiriidassa kortin nimen koosta (7.4: 1.25rem, 7.5: 1.0625rem). Käytin 1.25rem (7.4 ja mallisivu, päivitetty D-011:n jälkeen). Kapean näkymän omistetun rivin kisko on 3 px UX.md 7.5:n mukaan (mallisivulla 4 px).
+  4. Uudet tokenit literaalien välttämiseksi (UX voi kirjata ne UX.md:n lukuun 3): `--color-brand-yellow`, `--color-glitch-a`, `--color-glitch-b`, `--font-size-card-name` (1.25rem), `--line-height-tight` (1.2), `--letter-spacing-button`, `--letter-spacing-table-head`, `--letter-spacing-h2`, `--letter-spacing-brand`, `--font-weight-mono` (400), `--shape-swatch` ja `--shape-brand`. `--radius` poistettiin (UX.md 3.3). Vaalean teeman `--heading-bar` käyttää `--color-text`-tokenia (sama arvo `#0e0f14`).
+  5. Työpöydällä Tyyppi ja Väri eivät mahdu rinnakkain 56 rem:n leveyteen, joten ne rivittyvät allekkain. Rivien väli on asetettu samaksi kuin pinottuna (12 px).
+- **Selaintarkistus** (Chrome headless, puppeteer-core ja axe-core 4 scratchpadissa, ei projektiin): axe (wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa, best-practice) löysi 0 rikkomusta 10 ajossa: molemmat teemat × 320 px ja 1200 px (lista ja omistettu rivi) sekä VIRHE- ja LATAUS-tila 320 px:ssä. `color-contrast` jää axessa tilaan "incomplete", koska bodyssa on taustakuvia (hehkut ja viivapinta). Kontrastit nojaavat siksi UX.md 7.6:n laskelmiin. Vaakavieritys oli 0 px kaikissa ajoissa (320 px vastaa 400 % zoomia 1280 px:n ikkunassa). Tekstin välistys (1.4.12) 320 px:ssä: ei vaakavieritystä eikä leikkautuvia elementtejä. Kaikki kolme fonttia latautuivat (`document.fonts`). Fokusrengas on 3 px `--color-focus` (vaalea rgb(0,95,115), tumma rgb(31,224,255)), ja viistettyjen painikkeiden `clip-path` on fokuksessa `none`. `reduce`-tilassa animaatioita on 0 (otsikko ja latauspalkki). `forced-colors: active`: painikkeiden ja paneelien reunat näkyvät. Kuvakaappaukset tarkistettu silmämääräisesti, ja otsikon glitch näkyy sivun avautuessa.
+- **Ei tehty:** ruudunlukija, koko näppäimistöpolku käsin, oikea selaimen zoom (vain viewport-emulointi), Firefox ja Safari. Jos `:has()` ei ole tuettu, valitun chipin tausta puuttuu, mutta ruksi näkyy.
+- **Tunnetut rajoitteet ja riskit:** `firebase.json` ja riippuvuudet ovat ennallaan, joten Digiturvaa ei tarvita (D-010). Buildissa fontit ovat erillisinä tiedostoina `dist/assets/`-kansiossa, eikä CSS:ssä ole `data:`-URI:ja (`assetsInlineLimit: 0` oli jo käytössä). 320 px:ssä tyyppi ja värin nimi rivittyvät kahdelle riville kapeassa nimisarakkeessa (V9:n mukainen, hyväksytty seuraus).
+- **Testit:** `npm test`: 17 tiedostoa, 427 testiä läpi (uusia 2: omistetun rivin korostus ja latauspalkki). `npm run lint`: 0 varoitusta. `npm run build` onnistui. L-002-tarkistus: muutetuissa tiedostoissa ei ole näkymättömiä merkkejä.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (määräpainikkeiden `--cut` ei vaikuttanut muotoon; korjattu ennen committia) · Suosituksia 1 (UX.md:n tokenilistan päivitys kohdan 4 mukaan; UX:n tiedosto, ei koodivelkaa)
+
 ### Suunnitelma 2026-10-02 · Koodari
 1. Fontit ja OFL-lisenssit `src/assets/fonts/`, `@font-face` ja lisenssit CONTENT.md:hen. Build: fontit erillisinä tiedostoina.
 2. `styles.css`: tokenit (vaalea `:root`, tumma `prefers-color-scheme: dark`) ja komponenttityylit mallisivulta UX.md 3 ja 7 mukaan. Kaikki siirtymät ja animaatiot `prefers-reduced-motion: no-preference` -ehtoon.
 3. Luokkalisäykset (UX.md 7.9): `.brand` (App), `panel` ja `.fieldsets` (CardFilters), `is-owned` (CardList), `is-summary` ja `loading-bar` (CatalogView). Ei logiikkamuutoksia.
 4. Selaintarkistus (axe, 320 px ja työpöytä, molemmat teemat, reduce) Edge headlessilla scratchpadista.
 5. CHANGELOG, koodikatselmointi, checkpoint ja luovutus UX:lle.
+
+### Checkpoint 2026-10-02 · Koodari
+- Tehty: fd69151 (fontit ja OFL-lisenssit, CONTENT.md, `.gitattributes`: `*.woff2 binary`), 04a619d (styles.css uusittu; luokat `.brand`, `panel`, `.fieldsets`, `is-owned`, `is-summary`, `.loading-bar`; 2 uutta testiä), 3b4c22d (suodatinryhmien väli, CHANGELOG).
+- Kesken: ei.
+- Seuraava askel: UX katselmoi toteutuksen (UX-raportti).
+- Avoimet kysymykset: ei blokkaavia. Huomiot UX:lle luovutuksessa.
+- Muutetut tiedostot: `src/styles.css`, `src/App.tsx`, `src/ui/CardFilters.tsx`, `src/ui/CardList.tsx`, `src/ui/CatalogView.tsx`, `src/ui/CatalogView.test.tsx`, `src/ui/CatalogView.collection.test.tsx`, `src/assets/fonts/*`, `docs/CONTENT.md`, `CHANGELOG.md`, `.gitattributes`, tämä kortti, `docs/STATUS.md`.
