@@ -1,0 +1,200 @@
+import type { Card } from './card';
+import type { CardKey } from './cardKey';
+import type { DeckContent } from './deck';
+
+/** Deck rules (T-013). Sources: cyberpunktcg.com/gameplay-guide and ripperdeck.gg/rules, see the task card. */
+export const LEGEND_COUNT = 3;
+export const MIN_MAIN_DECK = 40;
+export const MAX_MAIN_DECK = 50;
+export const MAX_COPIES = 3;
+
+export type DeckIssueType =
+  | 'legend-count'
+  | 'legend-duplicate'
+  | 'main-size'
+  | 'copies'
+  | 'ram'
+  | 'unknown-card';
+
+export interface DeckIssue {
+  readonly type: DeckIssueType;
+  /** Unknown cards are a warning (the deck may still be legal); everything else breaks a rule. */
+  readonly severity: 'error' | 'warning';
+  /** Plain Finnish explanation for the player. Card names are shown as they are in the data. */
+  readonly message: string;
+  /** Cards the issue is about (empty for count rules). */
+  readonly cards: readonly CardKey[];
+}
+
+export type CardsByKey = ReadonlyMap<CardKey, Card>;
+
+export function toCardsByKey(cards: readonly Card[]): Map<CardKey, Card> {
+  return new Map(cards.map((card) => [card.key, card]));
+}
+
+/** Copies of each card over all sections (a card may be in several sections). */
+export function deckCounts(deck: DeckContent): Map<CardKey, number> {
+  const counts = new Map<CardKey, number>();
+  for (const section of deck.sections) {
+    for (const { card, count } of section.cards) counts.set(card, (counts.get(card) ?? 0) + count);
+  }
+  return counts;
+}
+
+export interface DeckTotals {
+  /** Legend cards, copies counted. */
+  readonly legends: number;
+  /** Everything that is known and not a Legend. */
+  readonly main: number;
+  readonly unknown: readonly CardKey[];
+}
+
+export function deckTotals(deck: DeckContent, cardsByKey: CardsByKey): DeckTotals {
+  let legends = 0;
+  let main = 0;
+  const unknown: CardKey[] = [];
+  for (const [key, count] of deckCounts(deck)) {
+    const card = cardsByKey.get(key);
+    if (card === undefined) unknown.push(key);
+    else if (card.type === 'Legend') legends += count;
+    else main += count;
+  }
+  return { legends, main, unknown };
+}
+
+/**
+ * RAM limit per color: the sum of the RAM of the deck's Legends of that color. A color no Legend
+ * gives has no entry, so nothing of that color can be played (the limit is 0).
+ */
+export function ramLimits(deck: DeckContent, cardsByKey: CardsByKey): Map<string, number> {
+  const limits = new Map<string, number>();
+  for (const [key, count] of deckCounts(deck)) {
+    const card = cardsByKey.get(key);
+    if (card === undefined || card.type !== 'Legend' || card.color === null) continue;
+    limits.set(card.color, (limits.get(card.color) ?? 0) + (card.ram ?? 0) * count);
+  }
+  return limits;
+}
+
+function names(cards: readonly Card[]): string {
+  return cards.map((card) => card.displayName).join(', ');
+}
+
+/** Returns every rule the deck breaks, in a fixed order. No errors means the deck is legal. */
+export function validateDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckIssue[] {
+  const issues: DeckIssue[] = [];
+  const counts = deckCounts(deck);
+  const totals = deckTotals(deck, cardsByKey);
+  const limits = ramLimits(deck, cardsByKey);
+
+  if (totals.legends !== LEGEND_COUNT) {
+    issues.push({
+      type: 'legend-count',
+      severity: 'error',
+      message: `Legendejä on ${totals.legends}, pitää olla tasan ${LEGEND_COUNT}.`,
+      cards: [],
+    });
+  }
+
+  // Legend names are unique by name alone: the subname does not make two "V" cards different.
+  const legendsByName = new Map<string, { keys: CardKey[]; copies: number }>();
+  for (const [key, count] of counts) {
+    const card = cardsByKey.get(key);
+    if (card === undefined || card.type !== 'Legend') continue;
+    const entry = legendsByName.get(card.name) ?? { keys: [], copies: 0 };
+    entry.keys.push(key);
+    entry.copies += count;
+    legendsByName.set(card.name, entry);
+  }
+  for (const [name, entry] of legendsByName) {
+    if (entry.copies > 1) {
+      issues.push({
+        type: 'legend-duplicate',
+        severity: 'error',
+        message: `Legendien nimien pitää olla erilaiset, mutta ${name} on mukana ${entry.copies} kertaa.`,
+        cards: entry.keys,
+      });
+    }
+  }
+
+  if (totals.main < MIN_MAIN_DECK || totals.main > MAX_MAIN_DECK) {
+    const limit = totals.main < MIN_MAIN_DECK ? `vähintään ${MIN_MAIN_DECK}` : `enintään ${MAX_MAIN_DECK}`;
+    issues.push({
+      type: 'main-size',
+      severity: 'error',
+      message: `Pääpakassa on ${totals.main} korttia, ${limit}.`,
+      cards: [],
+    });
+  }
+
+  for (const [key, count] of counts) {
+    const card = cardsByKey.get(key);
+    if (card === undefined || card.type === 'Legend' || count <= MAX_COPIES) continue;
+    issues.push({
+      type: 'copies',
+      severity: 'error',
+      message: `${card.displayName}: ${count} kopiota, enintään ${MAX_COPIES}.`,
+      cards: [key],
+    });
+  }
+
+  const overRam = new Map<string, Card[]>();
+  for (const key of counts.keys()) {
+    const card = cardsByKey.get(key);
+    if (card === undefined || card.type === 'Legend' || card.color === null || card.ram === null) continue;
+    if (card.ram > (limits.get(card.color) ?? 0)) {
+      overRam.set(card.color, [...(overRam.get(card.color) ?? []), card]);
+    }
+  }
+  for (const [color, cards] of overRam) {
+    const limit = limits.get(color) ?? 0;
+    const reason = limit === 0 ? `Legendeillä ei ole väriä ${color}` : `${color}-värin RAM-raja on ${limit}`;
+    issues.push({
+      type: 'ram',
+      severity: 'error',
+      message: `${reason}, mutta ylittää: ${names(cards)}.`,
+      cards: cards.map((card) => card.key),
+    });
+  }
+
+  if (totals.unknown.length > 0) {
+    issues.push({
+      type: 'unknown-card',
+      severity: 'warning',
+      message: `Pakassa on ${totals.unknown.length} korttia, jota ei löydy korttitiedoista: ${totals.unknown.join(', ')}.`,
+      cards: totals.unknown,
+    });
+  }
+
+  return issues;
+}
+
+/** Issues that break a rule (a deck without these is legal). */
+export function errorsOf(issues: readonly DeckIssue[]): DeckIssue[] {
+  return issues.filter((issue) => issue.severity === 'error');
+}
+
+/**
+ * Why adding one more copy of `card` would break a rule, or null when it would not. Adding is still
+ * allowed so an unfinished deck can be built; this only explains the dimmed state (T-013).
+ */
+export function addBlocker(card: Card, deck: DeckContent, cardsByKey: CardsByKey): string | null {
+  const counts = deckCounts(deck);
+  if (card.type === 'Legend') {
+    const totals = deckTotals(deck, cardsByKey);
+    if (totals.legends >= LEGEND_COUNT) return `Pakassa on jo ${LEGEND_COUNT} Legendiä.`;
+    for (const [key, count] of counts) {
+      const other = cardsByKey.get(key);
+      if (count > 0 && other?.type === 'Legend' && other.name === card.name) {
+        return `Pakassa on jo Legend ${card.name}.`;
+      }
+    }
+    return null;
+  }
+  if ((counts.get(card.key) ?? 0) >= MAX_COPIES) return `Pakassa on jo ${MAX_COPIES} kopiota.`;
+  if (card.color !== null && card.ram !== null) {
+    const limit = ramLimits(deck, cardsByKey).get(card.color) ?? 0;
+    if (card.ram > limit) return `RAM ${card.ram} ylittää ${card.color}-värin rajan ${limit}.`;
+  }
+  return null;
+}
