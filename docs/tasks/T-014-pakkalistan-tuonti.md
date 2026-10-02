@@ -45,3 +45,6 @@ Pelaaja liittää netistä löytämänsä pakkalistan ja näkee heti, mitä kort
 - Sivuhuomio: `App.test.tsx` D-013 -testi aikakatkesi 5 s:n rajalla koko sarjassa myös ilman T-014:ää (päällä: aikaraja 20 s, vain tämä testi).
 - Testit: `npx vitest run` 582/582, `eslint .` ja `tsc --noEmit` ja `npm run build` läpi.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (DeckImport voisi käyttää useCollection-hookia; nykyinen suora `collection.load()` riittää kertakäyttöön)
+
+### Luovutus 2026-10-02 · Digiturva → PM
+- Katselmointi `docs/reports/SEC-008-t014-tuonti.md`: SR-17, SR-14 ja SR-15 täyttyvät, ei Critical/High/Medium; SEC-021 (Low, nimen katkaisu surrogaattiparin kohdalta) ja SEC-022 (Info, 10 000 merkin rivi testiin); App.test.tsx:n 20 s aikaraja hyväksyttävä. Ei estä Done-tilaa. SECURITY.md: R-9 suljettu, R-13 päivitetty.
