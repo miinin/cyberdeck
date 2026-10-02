@@ -14,7 +14,7 @@ function card(name: string, subname: string | null = null, slug?: string): Card 
     color: 'Red',
     cost: 1,
     power: null,
-    ram: null,
+    ram: null, rarity: null,
     key,
   };
 }

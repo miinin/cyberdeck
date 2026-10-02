@@ -66,6 +66,9 @@ export const texts = {
   filterHint: 'Valitse yksi tai useampi. Ilman valintaa näytetään kaikki.',
   typeLegend: 'Tyyppi',
   colorLegend: 'Väri',
+  rarityLegend: 'Harvinaisuus',
+  columnRarity: 'Rarity',
+  noRarity: 'ei harvinaisuutta',
   filteredStatus: (shown: number, all: number) => cardShare(shown, all),
   filteredLive: (shown: number, all: number) => `Näytetään ${cardShare(shown, all)}.`,
   // TXT-009: a single card is "1 kortti", not "kaikki 1 korttia".

@@ -11,7 +11,7 @@ import { ANNOUNCE_DELAY_MS } from './useDelayedAnnouncement';
 const COLLECTION_KEY = 'cyberdeck:collection';
 
 function card(slug: string, name: string, subname: string | null, type = 'Unit', color: string | null = 'Red'): Card {
-  return { id: `id-${slug}`, key: slug, slug, name, subname, displayName: name, type, color, cost: 2, power: null, ram: null };
+  return { id: `id-${slug}`, key: slug, slug, name, subname, displayName: name, type, color, cost: 2, power: null, ram: null, rarity: null };
 }
 
 const cards: Card[] = [

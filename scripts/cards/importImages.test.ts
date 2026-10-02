@@ -3,7 +3,7 @@ import { CARD_IMAGES_DIR, CARD_IMAGES_MAP_PATH, MAX_SOURCE_BYTES, importImages, 
 import type { ImportImagesDeps } from './importImages';
 
 function card(key: string, name: string): Card {
-  return { id: `id-${key}`, slug: key, name, subname: null, displayName: name, type: 'Unit', color: null, cost: 1, power: null, ram: null, key };
+  return { id: `id-${key}`, slug: key, name, subname: null, displayName: name, type: 'Unit', color: null, cost: 1, power: null, ram: null, rarity: null, key };
 }
 
 const cards = [card('corpo-security', 'Corpo Security'), card('gilded-maton', 'Gilded Matón'), card('octant', 'Octant')];

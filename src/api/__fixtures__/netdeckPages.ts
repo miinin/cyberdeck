@@ -9,6 +9,7 @@ export const realShapeCard = {
   canonical_name: 'V — Streetkid',
   card_type: 'Legend',
   color: 'Red',
+  rarity: 'Rare',
   cost: null,
   power: null,
   rules_text: 'When you {Call} this Legend, draw a card.',

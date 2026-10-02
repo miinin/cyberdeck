@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Korttilistassa näkyy harvinaisuus (Rarity), ja sen voi valita suodattimeksi. Kokoelma-valinnalla voi näyttää kaikki, omistetut tai puuttuvat kortit. Omistetun kortin reunus ja määrä ovat nyt keltaiset.
+
 - Pelin termit englanniksi (Cost, Red, Yellow, Green, Blue). Kortin tyyppi näkyy merkkinä, jonka reunan väri kertoo kortin värin. Kokoelman painikkeet ovat kortin keskellä, ja omistuksen reunaväri on hillitympi.
 
 ### Muutettu

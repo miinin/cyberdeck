@@ -16,7 +16,7 @@ const cards: Card[] = [
     color: 'Red',
     cost: null,
     power: null,
-    ram: null,
+    ram: null, rarity: null,
     key: 'v-streetkid',
   },
 ];

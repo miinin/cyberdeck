@@ -8,6 +8,7 @@ import type { Repositories } from '../storage';
 import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
+  KNOWN_CARD_RARITIES,
   KNOWN_CARD_TYPES,
   filterCards,
   filterOptions,
@@ -272,6 +273,11 @@ export function CatalogView({
           allCards.map((card) => card.color),
           criteria.colors,
         )}
+        rarityOptions={filterOptions(
+          KNOWN_CARD_RARITIES,
+          allCards.map((card) => card.rarity),
+          criteria.rarities,
+        )}
         searchInputRef={searchInputRef}
         collectionFilter={collection.phase === 'ready' ? collectionFilter : undefined}
         collectionAllRef={collectionAllRef}
@@ -282,6 +288,9 @@ export function CatalogView({
         onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
         onToggleColor={(color) =>
           updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
+        }
+        onToggleRarity={(rarity) =>
+          updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later')
         }
         onSearchSubmit={() =>
           announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))

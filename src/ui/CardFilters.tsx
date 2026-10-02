@@ -12,6 +12,7 @@ export interface CardFiltersProps {
   criteria: CardFilterCriteria;
   typeOptions: readonly string[];
   colorOptions: readonly string[];
+  rarityOptions: readonly string[];
   searchInputRef: Ref<HTMLInputElement>;
   /** "Kokoelma" radio group value; undefined leaves the group out (collection not ready, UX.md 6.6). */
   collectionFilter?: CollectionFilter;
@@ -22,6 +23,7 @@ export interface CardFiltersProps {
   onQueryChange: (query: string, composing: boolean) => void;
   onToggleType: (type: string) => void;
   onToggleColor: (color: string) => void;
+  onToggleRarity: (rarity: string) => void;
   /** Enter in the search field: announce the result now (UX.md 5.6). */
   onSearchSubmit: () => void;
 }
@@ -37,6 +39,7 @@ export function CardFilters({
   criteria,
   typeOptions,
   colorOptions,
+  rarityOptions,
   searchInputRef,
   collectionFilter,
   collectionAllRef,
@@ -44,6 +47,7 @@ export function CardFilters({
   onQueryChange,
   onToggleType,
   onToggleColor,
+  onToggleRarity,
   onSearchSubmit,
 }: CardFiltersProps) {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -157,6 +161,24 @@ export function CardFilters({
                 <span>
                   <CardColor color={color} />
                 </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset aria-describedby="filter-hint">
+          <legend>{texts.rarityLegend}</legend>
+          <div className="options">
+            {rarityOptions.map((rarity) => (
+              <label key={rarity} className="option">
+                <input
+                  type="checkbox"
+                  name="rarity"
+                  value={rarity}
+                  checked={criteria.rarities.includes(rarity)}
+                  onChange={() => onToggleRarity(rarity)}
+                />{' '}
+                <span lang="en">{rarity}</span>
               </label>
             ))}
           </div>

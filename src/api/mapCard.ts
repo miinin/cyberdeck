@@ -49,6 +49,7 @@ export function mapCard(raw: unknown): Card | null {
     cost: finiteNumber(fields.cost),
     power: finiteNumber(fields.power),
     ram: finiteNumber(fields.ram),
+    rarity: nonEmptyString(fields.rarity),
     key,
   };
 }

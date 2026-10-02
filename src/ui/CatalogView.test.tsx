@@ -20,6 +20,7 @@ function card(index: number, overrides: Partial<Card> = {}): Card {
     cost: index,
     power: null,
     ram: null,
+    rarity: null,
     key: `card-${index}`,
     ...overrides,
   };
@@ -61,7 +62,7 @@ describe('CatalogView', () => {
   it('shows the power and RAM of a card next to its cost', () => {
     renderView([card(1, { cost: 2, power: 3000, ram: 0 })]);
 
-    expect(stats(screen.getByRole('listitem'))).toEqual({ Cost: '2', Power: '3000', RAM: '0' });
+    expect(stats(screen.getByRole('listitem'))).toEqual({ Cost: '2', Power: '3000', RAM: '0', Rarity: '–ei harvinaisuutta' });
   });
 
   it('shows every card with name, type and cost at once', () => {
@@ -77,7 +78,7 @@ describe('CatalogView', () => {
     const [first, second, third] = rows as [HTMLElement, HTMLElement, HTMLElement];
     expect(within(first).getByRole('heading', { level: 3 })).toHaveTextContent('V, Streetkid');
     expect(first.querySelector('.card-type')).toHaveTextContent('Legend');
-    expect(stats(first)).toEqual({ Cost: '–ei hintaa', Power: '–ei poweria', RAM: '–ei RAMia' });
+    expect(stats(first)).toEqual({ Cost: '–ei hintaa', Power: '–ei poweria', RAM: '–ei RAMia', Rarity: '–ei harvinaisuutta' });
     expect(within(second).getByRole('heading', { level: 3 })).toHaveTextContent('Swordwise Huscle');
     expect(stats(second).Cost).toBe('3');
     expect(stats(third).Cost).toBe('0');

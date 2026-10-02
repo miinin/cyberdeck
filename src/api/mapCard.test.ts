@@ -14,6 +14,7 @@ describe('mapCard', () => {
       cost: null,
       power: null,
       ram: null,
+      rarity: 'Rare',
       key: 'v-streetkid',
     });
   });
@@ -84,5 +85,13 @@ describe('mapCard power and RAM', () => {
 
   it.each([null, undefined, '3', Number.NaN])('maps power and RAM %s to null', (value) => {
     expect(mapCard(rawCard(1, { power: value, ram: value }))).toMatchObject({ power: null, ram: null });
+  });
+});
+
+describe('mapCard: rarity', () => {
+  it('copies a rarity string and uses null when it is missing or blank', () => {
+    expect(mapCard(rawCard(1, { rarity: 'Rare' }))).toMatchObject({ rarity: 'Rare' });
+    expect(mapCard(rawCard(1, { rarity: '  ' }))).toMatchObject({ rarity: null });
+    expect(mapCard(rawCard(1, { rarity: 5 }))).toMatchObject({ rarity: null });
   });
 });

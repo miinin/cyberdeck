@@ -23,7 +23,7 @@ function card(slug: string, name: string, subname: string | null, type: string, 
     color,
     cost: null,
     power: null,
-    ram: null,
+    ram: null, rarity: null,
   };
 }
 
@@ -164,7 +164,7 @@ describe('filterCards: types and colors', () => {
   });
 
   it('shows cards of any selected color (OR within the group)', () => {
-    expect(slugs(filterCards(cards, { ...EMPTY_CRITERIA, colors: ['Blue', 'Yellow'] }))).toEqual([
+    expect(slugs(filterCards(cards, { ...EMPTY_CRITERIA, colors: ['Blue', 'Yellow'], rarities: [] }))).toEqual([
       'v-streetkid',
       'sombreron',
       'pinch',
@@ -180,17 +180,17 @@ describe('filterCards: types and colors', () => {
 
   it('combines search text, types and colors with AND', () => {
     expect(search('johnny', { types: ['Unit'] })).toEqual(['johnny-fighting']);
-    expect(search('johnny', { types: ['Unit', 'Legend'], colors: ['Red'] })).toEqual([
+    expect(search('johnny', { types: ['Unit', 'Legend'], colors: ['Red'], rarities: [] })).toEqual([
       'johnny-renegade',
       'johnny-fighting',
     ]);
-    expect(search('v', { types: ['Legend'], colors: ['Blue'] })).toEqual(['v-streetkid']);
-    expect(search('johnny', { colors: ['Blue'] })).toEqual([]);
+    expect(search('v', { types: ['Legend'], colors: ['Blue'], rarities: [] })).toEqual(['v-streetkid']);
+    expect(search('johnny', { colors: ['Blue'], rarities: [] })).toEqual([]);
   });
 
   it('does not change the input list', () => {
     const copy = [...cards];
-    filterCards(cards, { query: 'johnny', types: ['Unit'], colors: ['Red'] });
+    filterCards(cards, { query: 'johnny', types: ['Unit'], colors: ['Red'], rarities: [] });
     expect(cards).toEqual(copy);
   });
 });
@@ -200,7 +200,7 @@ describe('isFilterActive', () => {
     expect(isFilterActive(EMPTY_CRITERIA)).toBe(false);
     expect(isFilterActive({ ...EMPTY_CRITERIA, query: 'v' })).toBe(true);
     expect(isFilterActive({ ...EMPTY_CRITERIA, types: ['Unit'] })).toBe(true);
-    expect(isFilterActive({ ...EMPTY_CRITERIA, colors: ['Red'] })).toBe(true);
+    expect(isFilterActive({ ...EMPTY_CRITERIA, colors: ['Red'], rarities: [] })).toBe(true);
   });
 });
 
@@ -235,5 +235,23 @@ describe('toggleValue', () => {
   it('adds a missing value and removes a present one', () => {
     expect(toggleValue(['Red'], 'Blue')).toEqual(['Red', 'Blue']);
     expect(toggleValue(['Red', 'Blue'], 'Red')).toEqual(['Blue']);
+  });
+});
+
+describe('filterCards: rarity', () => {
+  const withRarity = (slug: string, rarity: string | null): Card => ({
+    ...card(slug, slug, null, 'Unit', null),
+    rarity,
+  });
+  const cardsByRarity = [withRarity('a', 'Common'), withRarity('b', 'Rare'), withRarity('c', null), withRarity('d', 'Epic')];
+
+  it('keeps cards of any selected rarity (OR) and drops cards without one', () => {
+    const result = filterCards(cardsByRarity, { ...EMPTY_CRITERIA, rarities: ['Rare', 'Epic'] });
+    expect(result.map((c) => c.slug)).toEqual(['b', 'd']);
+  });
+
+  it('does not filter with no rarity selected and counts as an active filter when selected', () => {
+    expect(filterCards(cardsByRarity, EMPTY_CRITERIA)).toHaveLength(4);
+    expect(isFilterActive({ ...EMPTY_CRITERIA, rarities: ['Rare'] })).toBe(true);
   });
 });
