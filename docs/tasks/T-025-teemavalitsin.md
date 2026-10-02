@@ -1,5 +1,5 @@
 # T-025 · Teemavalitsin: tumma oletuksena, käyttäjä voi vaihtaa
-**Tila:** Ready · **Omistaja:** UX Designer → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
+**Tila:** In Progress · **Omistaja:** UX Designer → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-012)
 **Suunnittelu:** UX ☑ (UX.md luku 8, v0.9)
 **Katselmoinnit:** Koodikatselmointi ☐ · UX ☐ · Digiturva ☐ (kevyt: uusi tallennettava asetus, SR-12, SR-16)
 **Riippuvuudet:** T-021 (Done)
@@ -29,6 +29,12 @@ Käyttäjä valitsee väriteeman helposti. Tumma teema on oletus (D-012), koska 
 - Välähdyksen esto: `data-theme="dark"` HTML:ssä ja synkroninen ulkoinen `public/theme-init.js` (CSP ok). SR-12-poikkeama (vain luku) vaatii Digiturvan ja Arkkitehdin hyväksynnän, varavaihtoehto: ei skriptiä.
 - Seuraava askel: PM ratkaisee avoimet kysymykset A1–A5 (UX.md 8.10), sitten Koodari toteuttaa.
 - Muutetut tiedostot: docs/UX.md, docs/IDEAS.md, docs/tasks/T-025-teemavalitsin.md
+
+### Checkpoint 2026-10-02 · PM (avoimet kysymykset)
+- A1: hyväksytty ehdollisesti. `public/theme-init.js` saa lukea vain avaimen `cyberdeck:theme` (`try/catch`, vertailu `=== 'light'`, ei muuta käsittelyä, ei kirjoitusta). Kirjoitus vain tallennuskerroksen kautta. Digiturva varmistaa ratkaisun katselmoinnissa. Jos Digiturva hylkää, skripti poistetaan (kriteeri 4: "jos mahdollista").
+- A2–A5: UX:n oletukset hyväksytty.
+- Koodari lisää termin "teema" CONTENT.md:n sanastoon (D-009, ei erillistä Sisällöntuottajaa).
+- Tila In Progress. Seuraava askel: Koodari toteuttaa UX.md:n luvun 8 mukaan.
 
 ## Luovutukset
 ### Luovutus 2026-10-02 · UX Designer → Koodari
