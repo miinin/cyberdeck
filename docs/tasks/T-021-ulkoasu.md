@@ -1,5 +1,5 @@
 # T-021 · Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme
-**Tila:** Review · **Omistaja:** Koodari → UX Designer (katselmointi) · **MVP:** 1 · **Prioriteetti:** Must (D-010)
+**Tila:** UX-katselmointi tehty (UX-004), odottaa PM:n päätöstä · **Omistaja:** Koodari → UX Designer (katselmointi) · **MVP:** 1 · **Prioriteetti:** Must (D-010)
 **Suunnittelu:** UX ☐ (tutkimus, visuaalinen suunta, tokenit, komponentit, mallisivu)
 **Katselmoinnit (D-010):** Koodikatselmointi ☑ · UX ☐ · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
 **Riippuvuudet:** T-010, T-012 (Done)
@@ -101,3 +101,15 @@ Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiselt�
 - Seuraava askel: UX katselmoi toteutuksen (UX-raportti).
 - Avoimet kysymykset: ei blokkaavia. Huomiot UX:lle luovutuksessa.
 - Muutetut tiedostot: `src/styles.css`, `src/App.tsx`, `src/ui/CardFilters.tsx`, `src/ui/CardList.tsx`, `src/ui/CatalogView.tsx`, `src/ui/CatalogView.test.tsx`, `src/ui/CatalogView.collection.test.tsx`, `src/assets/fonts/*`, `docs/CONTENT.md`, `CHANGELOG.md`, `.gitattributes`, tämä kortti, `docs/STATUS.md`.
+
+### Checkpoint 2026-10-02 · UX Designer (katselmointi UX-004)
+- Tehty: toteutuksen UX-katselmointi oikeassa selaimessa (Chrome, puppeteer-core ja axe-core scratchpadissa) PR #6:n esikatselusta: kaksi teemaa × 320 px ja 1280 px, kaikki tilat, kontrastit renderöidyltä sivulta, näppäimistöpolku, 400 % ja tekstin 200 % suurennus, liikkeen vähentäminen, forced-colors. UX.md versioon 0.8 (Koodarin tokenit kirjattu, 7.4/7.5-ristiriita ratkaistu, uusi 7.12). Raportti `docs/reports/UX-004-t021-ulkoasu.md`.
+- Seuraava askel: PM päättää, korjataanko UX-007 ja UX-008 tässä tehtävässä (suositus) vai omana tehtävänä. UX-009 (kisko 3 → 4 px) kuuluu samaan korjaukseen. UX-010 backlogiin.
+- Muutetut tiedostot: `docs/UX.md`, `docs/reports/UX-004-t021-ulkoasu.md`, tämä kortti.
+
+### Luovutus 2026-10-02 · UX Designer → PM
+- Mitä tehtiin: katselmointi. axe 0 rikkomusta 24 ajossa, kontrastit mitattu (teksti ≥ 5.97 : 1, UI ≥ 3.77 : 1, fokus ≥ 5.88 : 1), kaikki tilat, näppäimistö, fokus, reduce, forced-colors ja 320 px / 400 % ok. Ilme on Cyberpunk-henkinen molemmissa teemoissa ja käytettävyys säilyy.
+- Löydökset: UX-007 Medium (kapean rivin korkeus, lista 43 % pidempi: tiivistä tyyppi/väri/hinta yhdelle riville ja pystysisäväli `--space-2`), UX-008 Medium (vaakavieritys 320 px:ssä tekstin 200 % suurennuksella: painikkeet ja chipit rivittyviksi, `.count-control` ei kiinteää `min-width`ia kapealla, `.brand` kirjainväli), UX-009 Low (kisko 4 px myös kapealla), UX-010 Low (natiivi hakukentän ×, backlog).
+- Mitä pyydän: PM päättää korjauksista. Jos korjataan, Koodari tekee UX-007–UX-009 ja UX varmistaa uudelleen (skripti: `html { font-size: 200% }` 320 px:ssä, taulukon yläreunan sijainti 320 px:ssä).
+- Veto: ei. UX hyväksyy T-021:n Done-tilaan omalta osaltaan. Medium-löydökset suositellaan korjattavaksi, mutta eivät ole blokkaavia.
+- Rajoitteet: ruudunlukija, Firefox, Safari ja oikeat mobiililaitteet testaamatta. Enimmäismäärän (999) tilaa ei testattu käsin.

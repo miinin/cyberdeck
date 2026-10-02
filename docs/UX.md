@@ -1,11 +1,12 @@
 # UX · cyberdeck
 
-> Omistaja: UX Designer. Versio 0.7 · 2026-10-02 (T-021). Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
+> Omistaja: UX Designer. Versio 0.8 · 2026-10-02 (T-021). Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
 > Muutos 0.3 · 2026-10-01 (T-010, MVP-1): uusi luku 5 (haku ja suodatus), korttien väritokenit (3.1.1) sekä tekstikenttä ja valintaruutu (3.4). Luvun 4 kohtiin, joita luku 5 muuttaa, on lisätty viittaus.
 > Muutos 0.4 · 2026-10-01 (T-010, katselmointi UX-002): K9 ratkaistu (latausviesti suodatettuna, 5.6), tyhjennyspainikkeen ilmoitus ja toistokielto (5.6), OSITTAINEN ilman kortteja (5.8). Raportti `docs/reports/UX-002-t010-katselmointi.md`.
 > Muutos 0.5 · 2026-10-01 (T-012, MVP-1): uusi luku 6 (kokoelma): määräkontrolli korttirivillä, korttimainen rivi alle 40 rem:ssä, "Vain omistetut" -suodatin, kokoelman yhteenveto, selainmuistutus ja pysyvän tallennuksen pyyntö, tallennuskerroksen ilmoitukset ja virheet, ruudunlukijailmoitukset ja tarkistuslista. Uudet komponentit: määräpainike ja toissijainen painike (6.4.3).
 > Muutos 0.6 · 2026-10-02 (T-021, D-010): periaate 7 päivitetty, luku 3 (tokenit ja komponentit) uusittu Cyberpunk 2077 -henkiseen ilmeeseen (vain tumma teema, Chakra Petch ja Share Tech Mono, viistetyt kulmat, keltainen ja syaani korostus) ja uusi luku 7 (tutkimus, päätökset, kontrastilaskelmat, liike, ohje Koodarille). Referenssi: `docs/design/t021-mallisivu.html`. Toiminta, rakenne ja tekstit lukuissa 4–6 eivät muutu. (Korvattu muutoksella 0.7: vaalea ja tumma teema, Rajdhani.)
 > Muutos 0.7 · 2026-10-02 (T-021, D-011): suunta hyväksytty. Sovelluksessa on sekä vaalea että tumma Cyberpunk-teema (`prefers-color-scheme`), fontti on Rajdhani (500 ja 700, kokoja nostettu) ja Share Tech Mono säilyy luvuille ja tilariveille. Luvun 3 tokenit kahdelle teemalle, luvut 7.3, 7.4, 7.6 (kontrastit molemmille teemoille), 7.9 ja 7.10 päivitetty. Mallisivu näyttää molemmat teemat (teemapainikkeet ja rinnakkaisnäkymä).
+> Muutos 0.8 · 2026-10-02 (T-021, katselmointi UX-004): Koodarin toteutuksessa lisäämät tokenit kirjattu lukuun 3 (3.1–3.3), 7.4/7.5-ristiriita kortin nimen koosta ratkaistu (1.25rem, `--font-size-card-name`), omistetun rivin kisko 4 px molemmissa asetteluissa (7.5), 7.9:n kohta 9 päivitetty (literaalit ovat nyt tokeneita) ja uusi 7.12 (katselmoinnin havainnot ja suositukset).
 > Tämä oli alun perin minimitason design-järjestelmä, joka riittää MVP-0:aan. MVP-1 laajentaa sitä (lomakkeet, navigaatio, haku, kokoelman merkintä). Määrittely ei sido kehykseen: tokenit ovat CSS-muuttujia, ja rakenne kuvataan semanttisena HTML:nä.
 
 ---
@@ -67,7 +68,9 @@ Kontrastit on laskettu WCAG 2.x -kaavalla 2026-10-02. Täydellinen parikohtainen
 | `--color-owned` | `rgba(252,238,9,.30)` | `rgba(252,238,9,.05)` | Omistetun rivin tausta |
 | `--color-owned-hover` | `rgba(252,238,9,.45)` | `rgba(252,238,9,.09)` | Omistetun rivin tausta hoverissa tai fokuksessa |
 | `--color-swatch-edge` | `#0e0f14` | `transparent` | Korttivärin näytteen 1 px:n reuna (vaalealla, jotta vaaleat värit erottuvat) |
-| `--heading-bar` | `linear-gradient(90deg,#0e0f14 0 65%,#fcee09 65%)` | `#fcee09` | h1:n alaviiva (koriste) |
+| `--color-brand-yellow` | `#fcee09` | `#fcee09` | Koriste kummassakin teemassa: otsikkopalkin viiva ja merkki, alatunnisteen ja h1:n viivan keltainen osa. Ei tekstiä eikä tiedon kantajaa. (Koodari lisäsi, T-021.) |
+| `--color-glitch-a`, `--color-glitch-b` | `#ff2a6d`, `#1fe0ff` | `#ff2a6d`, `#1fe0ff` | Otsikon glitchin kaksi tilapäistä varjoväriä (7.7). Vain `no-preference`-tilassa, 0,4 s. |
+| `--heading-bar` | `linear-gradient(90deg, var(--color-text) 0 65%, var(--color-brand-yellow) 65%)` | `var(--color-brand-yellow)` | h1:n alaviiva (koriste) |
 | `--glow-accent` | `none` | `0 0 .75rem rgba(252,238,9,.35)` | Hehku h1:n alaviivassa (vain tumma) |
 | `--page-glow-a` | `rgba(31,224,255,.16)` | `rgba(31,224,255,.10)` | Taustan syaanihehku oikeassa yläkulmassa |
 | `--page-glow-b` | `rgba(252,238,9,.22)` | `rgba(252,238,9,.06)` | Taustan keltainen hehku vasemmassa yläkulmassa |
@@ -106,12 +109,19 @@ Fontti on Rajdhani (D-011), joka on kapea ja pienikokoisen näköinen. Siksi kai
 | `--font-size-sm` | `1rem` (16 px) | Alaotsikko (subname), ohjetekstit, labelit, alatunniste, taulukon otsikot. **Ei pienempää tekstiä.** (~~0.875rem~~ → 1rem) |
 | `--font-size-lg` | `1.375rem` | Sovelluksen nimi, h2, + ja − -merkit (~~1.25rem~~) |
 | `--font-size-xl` | `2.25rem` | h1 (~~1.75rem~~) |
+| `--font-size-card-name` | `1.25rem` | Kortin nimi taulukossa ja korttirivillä (ratkaisu 7.4/7.5-ristiriitaan: 7.4:n arvo on voimassa) |
 | `--line-height-body` | `1.5` | Leipäteksti |
 | `--line-height-heading` | `1.15` | Otsikot |
+| `--line-height-tight` | `1.2` | Painikkeet ja kortin nimi (useampirivinen teksti, joka ei saa aueta liikaa) |
 | `--letter-spacing-body` | `0.01em` | Leipäteksti (Rajdhanin tiivis kirjainväli avataan hieman) |
-| `--letter-spacing-caps` | `0.08em` | Versaalit otsikot (h1). Painikkeissa `0.06em`, labeleissa ja legendeissä `0.08em`, taulukon otsikoissa `0.1em`. |
+| `--letter-spacing-caps` | `0.08em` | Versaalit otsikot (h1), labelit ja legendit |
+| `--letter-spacing-button` | `0.06em` | Painikkeet |
+| `--letter-spacing-table-head` | `0.1em` | Taulukon otsikkorivi |
+| `--letter-spacing-h2` | `0.05em` | h2 (ilmoituslaatikoiden otsikot) |
+| `--letter-spacing-brand` | `0.2em` | Sovelluksen nimi otsikkopalkissa |
 | `--font-weight-normal` | `500` | Leipäteksti (Rajdhani Medium). ~~400~~: Regular on pienikokoisena liian ohut. Share Tech Mono: 400 (ainoa paino). |
 | `--font-weight-bold` | `700` | Otsikot, kortin nimi, painikkeet, labelit |
+| `--font-weight-mono` | `400` | Share Tech Mono (ainoa paino) |
 
 - Kaikki koot `rem`-yksiköissä, jotta selaimen tekstikokoasetus toimii. `html`-elementin fonttikokoa ei lukita pikseleihin.
 - **Versaalit (`text-transform: uppercase`) vain lyhyissä teksteissä:** h1, h2, painikkeet, kenttien labelit ja legendit, taulukon otsikot, sovelluksen nimi. Leipäteksti, ohjeet, ilmoitusten tekstit, kortin nimet ja alaotsikot pysyvät sekakirjaimisina. Versaalit tehdään CSS:llä, jolloin ruudunlukija lukee tekstin normaalisti.
@@ -130,6 +140,9 @@ Fontti on Rajdhani (D-011), joka on kapea ja pienikokoisen näköinen. Siksi kai
 | `--cut-inner`, `--cut-inner-2` | `calc(var(--cut) - 1px)` ja `calc(var(--cut) - 2px)`: sisäkerroksen viiste 1 px:n (toissijainen) ja 2 px:n (ensisijainen) reunalle |
 | `--shape-chamfer` | `polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%)` |
 | `--shape-chamfer-inner`, `--shape-chamfer-inner-2` | sama monikulmio, mutta `--cut` korvattu `--cut-inner`- tai `--cut-inner-2`-arvolla |
+| `--shape-swatch` | `polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%)`: korttivärin näytteen muoto |
+| `--shape-brand` | `polygon(0 0, 100% 0, 100% 55%, 55% 100%, 0 100%)`: otsikkopalkin merkin muoto |
+| Huom. `.step` | Määräpainikkeiden `--cut: 0.5rem` ei muuta `--shape-*`-arvoja, koska ne lasketaan `:root`issa. Siksi `.step` määrittelee `--shape-chamfer`-muuttujat uudelleen itse (mallisivun virhe, korjattu toteutuksessa). |
 | `--focus-ring` | `3px solid var(--color-focus)` |
 | `--focus-offset` | `3px` |
 | `--target-min` | `2.75rem` (44 px) |
@@ -1378,11 +1391,11 @@ Referenssi: `docs/design/t021-mallisivu.html` (CSS on kopioitavissa lähes sella
 - Otsikkorivi: tausta `--color-surface`, ylä 3 px `--color-accent-edge`, ala 1 px `--color-border-strong`, teksti `--color-text-muted`, versaalit, `--font-size-sm`, `letter-spacing: 0.1em`.
 - Rivi: alareuna 1 px `--color-border`, sisäväli `--space-3` pysty. Hover ja `:focus-within`: tausta `--color-surface-raised`. (Rivit eivät ole interaktiivisia. Korostus auttaa seuraamaan riviä leveällä näytöllä määräkontrolliin asti ja näyttää, missä fokus on.)
 - **Omistettu rivi** (`.is-owned`, määrä > 0): tausta `--color-owned` (hover `--color-owned-hover`), nimisolun vasemmassa reunassa 4 px kisko `--color-accent-edge` (`box-shadow: inset`; keltainen tummalla, musta vaalealla). Tieto välittyy myös määrälukemasta ("2"), ei vain värillä.
-- Kortin nimi: lihavoitu `1.0625rem`. Alaotsikko `--font-size-sm`, `--color-text-muted`.
+- Kortin nimi: lihavoitu `--font-size-card-name` (`1.25rem`). ~~`1.0625rem`~~ → 2026-10-02 (UX-004): 7.4:n ja mallisivun arvo on voimassa, koska Rajdhani on kapea. Alaotsikko `--font-size-sm`, `--color-text-muted`.
 - Hinta: Share Tech Mono `1.125rem`, oikealle tasattu. Puuttuva hinta "–" ennallaan.
 - Värinäyte: 0.875 rem viistetty neliö (`clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%)`) värin nimen vieressä.
 
-**Taulukko alle 40 rem** (kortti-ruudukko, rakenne ennallaan luvun 6.4.4 mukaan): rivi on ruudukko (nimi / tyyppi ja väri / hinta vasemmalla, määräkontrolli oikealla), alareuna 1 px `--color-border`. Omistetun rivin kisko on rivin vasemmassa reunassa (`tr.is-owned::before`, 3 px).
+**Taulukko alle 40 rem** (kortti-ruudukko, rakenne ennallaan luvun 6.4.4 mukaan): rivi on ruudukko (nimi / tyyppi ja väri / hinta vasemmalla, määräkontrolli oikealla), alareuna 1 px `--color-border`. Omistetun rivin kisko on rivin vasemmassa reunassa (`tr.is-owned::before`, 4 px, kuten leveässä asettelussa).
 
 **Määräkontrolli (`.count-control`)**: ennallaan `[−] n [+]`, varattu leveys ennallaan. `+`: keltainen täyttö, `--color-on-accent`, viistetty kulma (`--cut: 0.5rem`). `−`: toissijainen tyyli (1 px `--color-border-strong` -reuna sisäkerroksella, tausta `--color-surface-raised`). Määrälukema: Share Tech Mono `1.375rem`, `--color-count`. Hover: `+` ja `−` reunat/täyttö `--color-accent-2`. Fokus: leikkaus pois ja `--focus-ring`. Enimmäismäärä (`aria-disabled`): `+` raidoitettu tausta (`--color-surface-hover`/`--color-surface-raised` vinoraidat) ja `--color-text-muted`-merkki. Aria-disabled-nappi pysyy fokusoitavana, ja fokusrengas näkyy kuten muillakin.
 
@@ -1512,7 +1525,7 @@ Pidä toiminta, DOM-rakenne ja tekstit ennallaan (`src/ui/texts.ts` ei muutu). M
 6. **Latauspalkki (V3):** `<span className="loading-bar" aria-hidden="true" />` LATAUS-tilassa tilarivin jälkeen.
 7. **Painikkeet:** `.button-primary`, `.step-plus`, `.button-secondary` ja `.step-minus` tarvitsevat `position: relative; isolation: isolate` ja `::before`-täytön (3.4). `:focus-visible`-tyyli (`clip-path: none`) pitää olla luettu **myöhemmin** kuin perustyyli. Tarkista fokus näppäimistöllä kaikissa painikkeissa (myös `aria-disabled` + -painike) kummassakin teemassa.
 8. **Glitch:** älä anna `h1`:n mountautua uudelleen tilanvaihdoissa glitchin vuoksi (7.7). Nykyinen `CatalogView` pitää `h1`:n paikallaan, joten pelkkä `main > h1 { animation }` riittää. Ellei, rajaa luokkaan.
-9. **Ei kovakoodattuja arvoja:** kaikki värit, välit ja koot tokeneista. Poikkeukset: glitchin varjovärit `#ff2a6d` ja `#1fe0ff` sekä otsikkopalkin ja alatunnisteen koristeviivojen keltainen `#fcee09`. Ne voi nimetä tokeneiksi (`--color-glitch`, `--color-brand-yellow`), jos haluaa välttää literaalit.
+9. **Ei kovakoodattuja arvoja:** kaikki värit, välit ja koot tokeneista. ~~Poikkeukset: glitchin varjovärit ja koristeviivojen keltainen.~~ → 2026-10-02: nekin ovat tokeneita (`--color-glitch-a`, `--color-glitch-b`, `--color-brand-yellow`, 3.1). Poikkeuksia ei ole.
 10. **Testit:** olemassa olevien testien pitää mennä läpi. Uusia toimintatestejä ei tarvita. Aja axe-core kummassakin teemassa (Playwrightin tai selaimen `prefers-color-scheme`-emulointi) ja tarkista käsin 320 px, 400 % zoom, näppäimistöpolku ja `prefers-reduced-motion: reduce`.
 
 ### 7.10 Päätökset ja avoimet kysymykset
@@ -1544,3 +1557,11 @@ Pidä toiminta, DOM-rakenne ja tekstit ennallaan (`src/ui/texts.ts` ei muutu). M
 - Ei pelin logoja, kuvia, ääntä, tavaramerkkejä eikä pelin omia fontteja.
 - Ei uusia npm-riippuvuuksia. Fontit ovat staattisia tiedostoja.
 - Jatkoideat (`prefers-contrast`-tuki, tulostustyyli, siirtymäanimaatiot, teemavalitsin) on kirjattu `docs/IDEAS.md`:hen.
+
+### 7.12 Katselmoinnin havainnot ja suositukset (UX-004, 2026-10-02)
+
+Raportti: `docs/reports/UX-004-t021-ulkoasu.md`. Toteutus vastaa tämän luvun ja luvun 3 määrittelyä. Ratkaisut, jotka kuuluvat määrittelyyn:
+- **Siirtymät ja `:active`-siirtymä** ovat `prefers-reduced-motion: no-preference` -ehdon sisällä (3.3, 3.5, 7.7). Mallisivu oli tässä väljempi. Toteutus on oikein, ja mallisivu on vain havainnollistus.
+- **Tyyppi- ja Väri-ryhmät** rivittyvät työpöydälläkin allekkain, koska 56 rem:n leveyteen ne eivät mahdu rinnakkain. Tämä on hyväksytty ratkaisu (rivien väli sama kuin pinottuna, 3.4).
+- **Mobiilin rivikorkeus ja lista:** Rajdhanin korotetut koot (V9) kasvattivat kapean näkymän riviä 104 px:stä 140 px:iin ja korttilistan ensimmäisen rivin sijaintia 934 px:stä 1284 px:iin (320 px). Suositus UX-007: tiivistä kapean rivin tyyppi-, väri- ja hintarivit (esim. `display: flex; flex-wrap: wrap; column-gap: var(--space-2)` yhdelle riville) ja rivin pystysisäväli `--space-2`.
+- **Tekstin suurennus (vain teksti) 200 % kapealla näytöllä:** vaakavieritystä syntyy 320 px:ssä (531 px, ennen T-021:tä 495 px). Suositus UX-008: `.count-control`in varattu `min-width` ei saa kasvaa `rem`-yksiköissä kapealla asettelulla, painikkeet `max-width: 100%` ja `white-space: normal`, chipit saavat rivittyä.
