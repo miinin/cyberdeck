@@ -1634,9 +1634,11 @@ Jos ei mahdu (esim. 200 % tekstin suurennus tai 400 % zoom), rivitys sallittu:
     <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"
           stroke="currentColor" stroke-width="2" stroke-linecap="square" fill="none" />
   </svg>
-  <span>Vaalea</span><span class="theme-toggle-suffix"> teema</span>
+  <span><span>Vaalea</span> <span class="theme-toggle-suffix">teema</span></span>
 </button>
 ```
+
+> Päivitetty T-025:n katselmoinnissa (UX-005): toteutuksessa tekstit ovat yhden kääre-`span`in sisällä ja sanaväli on oma tekstisolmunsa. Alkuperäinen rakenne (välilyönti jälkiliitteen sisällä) antoi flex-`gap`in ja `dom-accessibility-api`n kanssa nimen "Vaaleateema". Toteutuksen rakenne on hyväksytty.
 
 - **Saavutettava nimi** tulee sisällöstä: `Vaalea teema`. Ikoni on `aria-hidden`, eikä `aria-label`ia käytetä, jotta nimi sisältää näkyvän tekstin (WCAG 2.5.3). Tilan ilmoittaa vain `aria-pressed="true"` (vaalea käytössä) tai `"false"` (tumma käytössä). Attribuutti on aina olemassa. Ei `title`-attribuuttia (ei toimi kosketuksella eikä näppäimistöllä).
 - **Teksti:** näkyvä `Vaalea` ja jälkiliite ` teema`. Jälkiliite näkyy vain ≥ 40 rem:n leveydellä. Alle 40 rem:n se piilotetaan visuaalisesti `.visually-hidden`-tyylillä (3.4), mutta se jää ruudunlukijalle, joten nimi on kaikilla leveyksillä `Vaalea teema`. Tekstit lisätään `src/ui/texts.ts`:ään: `themeToggleLabel: 'Vaalea'` ja `themeToggleSuffix: 'teema'` (välilyönti tuotetaan rakenteessa, ei merkkijonossa). Versaalit CSS:llä (`text-transform: uppercase`, kuten painikkeet), `--font-size-sm`, `--font-weight-bold`, `--letter-spacing-button`. Sana "teema" lisätään CONTENT.md:n sanastoon (Sisällöntuottaja).
