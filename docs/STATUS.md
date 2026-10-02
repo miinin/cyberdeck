@@ -9,8 +9,9 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-025 | Koodari → UX, Digiturva | Review | Toteutettu (haara `t-025-teemavalitsin`, c31f42c). UX- ja Digiturva-katselmointi. Avoinna PM:lle: CONTENT.md-sanasto ja CHANGELOG (Koodarin luku estettiin), katso kortin luovutus |
-| T-026 | Arkkitehti | Ready (suunnittelu) | ADR: korttidata ja kuvat sovellukseen, haara `t-026-korttidata` (worktree) (D-012) |
+| T-025 | Koodari → UX, Digiturva | Review | Toteutettu pääkansiossa (haara `t-025-teemavalitsin`, luovutus 41dfbe9). Seuraavaksi: PM lisää CONTENT.md:n termin "teema" ja CHANGELOG-merkinnän (Koodarin luku estettiin, katso kortin luovutus), avaa PR:n testiin, sitten UX- ja Digiturva-katselmointi (A1: `public/theme-init.js`). |
+| T-026 | Koodari | In Progress (keskeytetty) | Worktree `.claude/worktrees/t-026` (haara `t-026-korttidata`). Data ja komento valmiit, firebase.json commitoitu testaamatta (8e35488). Katso kortin PM-checkpoint 2026-10-02: uusi Koodari jatkaa askeleista 5–6, sitten koodikatselmointi ja luovutus. |
+| T-027 | – | Backlog (T-026) | Kuvat ovat `public/cards/`-kansiossa (151 × .webp, 14 Mt, gitignoroitu). Käyttäjän vastaukset kirjattu T-027-korttiin (t-026-haara). Mahdollisesti sharpia ei tarvita. |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)
@@ -46,8 +47,10 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-025 ja T-026 rinnakkain, sitten T-027 (kuvat, kun paketti saapuu) (D-012). Sen jälkeen T-013 → T-014 → T-015 (järjestys riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta.
-2. Backlogissa T-002–T-009 (velka ja parannukset), T-003 (välimuisti) ennen T-013:a, jos lataus häiritsee.
+1. T-025 katselmointiin ja T-026 valmiiksi, sitten T-027 (kuvat ovat jo `public/cards/`-kansiossa) (D-012). Sen jälkeen T-013 → T-014 → T-015 (järjestys riippuvuuksien mukaan). T-014 tarvitsee käyttäjän vastauksen pakkalistan tallennuksesta.
+2. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
+
+**Tokenien säästö (käyttäjä 2026-10-02):** tokenit kuluvat nopeasti, ja käyttöraja katkaisi kaksi rinnakkaista Koodaria. Aja yksi agentti kerrallaan, pidä tehtävänannot lyhyinä ja tyhjennä istunto (`/clear`) tehtävien välissä.
 
 ## Julkaisuputki
 - GitHub: https://github.com/miinin/cyberdeck
