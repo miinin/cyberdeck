@@ -1,5 +1,5 @@
 # T-046 · Pakan haku Netdeck-linkistä: "mitä minulta puuttuu tästä pakasta"
-**Tila:** Ready · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02)
+**Tila:** Done · **Omistaja:** Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-02)
 **Malli:** D-014. Digiturva katselmoi, koska selain kutsuu taas ulkoista palvelua (CSP, tietosuoja, epäluotettava JSON). Muutos poikkeaa D-013:n `connect-src 'self'`-linjasta, mutta käyttäjä pyysi linkkihakua 2026-10-02. PM kirjaa päätöksen D-015:ksi.
 **Haara:** `t-046-pakka-linkista`
 
@@ -46,3 +46,7 @@
 
 ### Luovutus 2026-10-02 · Digiturva → PM
 - Katselmointi tehty: `docs/reports/SEC-009-t046-netdeck-linkki.md`. Ei Critical/High (Low: SEC-023 striimaamaton kokoraja, SEC-024 siivoamaton id-label; Info: SEC-025). CSP todennettu esikatselussa, testit 642/642, `npm audit` 0. SECURITY.md (SR-20, R-17, luku 16) ja PRIVACY.md (rivi 9b) päivitetty. Ei vetoa.
+
+### PM 2026-10-02 · Done (D-014, D-015)
+- PR #17: CI vihreä. Esikatselussa oikea Netdeck-pakka (d6fc7253-…) haettiin linkistä: nimi, tekijä ja raportti (43 puuttuvaa) oikein. Digiturva SEC-009: ei Critical/High.
+- Velaksi: T-047 (SEC-023 rungon luku paloittain, SEC-024 card.id:n siivous). Linkkikentän tyyli T-044:ään.

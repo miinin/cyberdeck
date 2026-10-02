@@ -39,6 +39,7 @@ Työn alla: MVP-1 · Valmiina: T-004, T-010–T-014, T-021, T-025–T-027, T-033
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-046 Pakan haku Netdeck-linkistä (2026-10-02, PR #17)
 - T-045 Pakkaeditorin hiominen ja kuvanäkymä (2026-10-02, PR #16)
 - T-014 Pakkalistan tuonti ja raportti (2026-10-02, PR #15)
 - T-004 Lint ja testit CI:hin, T-024, T-029, T-032 (2026-10-02, PR #14)
