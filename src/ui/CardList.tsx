@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import { CardColor } from './CardColor';
 import { CardImage } from './CardImage';
@@ -14,9 +15,12 @@ export interface OwnedColumn {
   onLimit: (card: Card) => void;
 }
 
-/** Owned-box highlight (UX.md 7.5): only when the collection is ready and the count is above zero. */
-function isOwned(card: Card, owned: OwnedColumn | undefined): boolean {
-  return owned?.mode === 'ready' && owned.countOf(card) > 0;
+/** Box state (UX.md 7.5): only when the collection is ready; a 1 px edge colour, never a size change. */
+function collectionState(card: Card, owned: OwnedColumn | undefined): string {
+  if (owned?.mode !== 'ready') return '';
+  const count = owned.countOf(card);
+  if (count >= playsetSize(card)) return 'is-owned is-playset';
+  return count > 0 ? 'is-owned' : '';
 }
 
 /** One game value (cost, power, RAM). A missing value shows a dash and a hidden spoken equivalent. */
@@ -58,7 +62,7 @@ export function CardList({
   return (
     <ul className="card-grid" aria-label={caption}>
       {cards.map((card) => (
-        <li key={card.id} className={isOwned(card, owned) ? 'card-box is-owned' : 'card-box'}>
+        <li key={card.id} className={'card-box ' + collectionState(card, owned)}>
           <CardImage card={card} onOpen={onOpenImage} />
           <h3 className="card-name">
             <span lang="en">{card.name}</span>

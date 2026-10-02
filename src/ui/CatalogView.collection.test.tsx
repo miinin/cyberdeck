@@ -64,11 +64,11 @@ afterEach(() => {
 });
 
 describe('CatalogView collection: count control', () => {
-  it('adds a collection control with only "+" for cards not in the collection', async () => {
+  it('shows "−" disabled, 0 and "+" for cards not in the collection', async () => {
     await renderView();
     expect(row('V, Streetkid').querySelector('.card-collection')).not.toBeNull();
     expect(plus('V, Streetkid')).toBeInTheDocument();
-    expect(minus('V, Streetkid')).toBeNull();
+    expect(minus('V, Streetkid')).toBeDisabled();
     expect(controlCell('V, Streetkid')).toHaveTextContent('Ei kokoelmassa');
     within(plus('V, Streetkid'))
       .getAllByText('V')
@@ -111,6 +111,20 @@ describe('CatalogView collection: count control', () => {
     expect(row('V, Streetkid')).not.toHaveClass('is-owned');
   });
 
+  it('marks a full playset (Legend 1, others 3) with a check mark and spoken text', async () => {
+    await renderView(
+      withCollection([
+        { card: 'v-streetkid', count: 1 },
+        { card: 'swordwise-huscle', count: 2 },
+      ]),
+    );
+    expect(row('V, Streetkid')).toHaveClass('is-playset');
+    expect(row('V, Streetkid')).toHaveTextContent('Pelisarja täynnä');
+    expect(row('Swordwise Huscle')).toHaveClass('is-owned');
+    expect(row('Swordwise Huscle')).not.toHaveClass('is-playset');
+    expect(row('Swordwise Huscle')).not.toHaveTextContent('Pelisarja täynnä');
+  });
+
   it('shows saved counts after a reload (a new view with the same storage)', async () => {
     const repositories = withCollection([
       { card: 'v-streetkid', count: 2 },
@@ -130,7 +144,7 @@ describe('CatalogView collection: count control', () => {
     await user.click(minusButton as HTMLElement);
     await settle();
 
-    expect(minus('V, Streetkid')).toBeNull();
+    expect(minus('V, Streetkid')).toBeDisabled();
     expect(plus('V, Streetkid')).toBe(plusButton); // the same element
     expect(plusButton).toHaveFocus();
     expect(summary(container)).toHaveTextContent('Kokoelmassa ei ole vielä kortteja.');
@@ -709,7 +723,7 @@ describe('CatalogView collection: live announcements', () => {
     });
     trigger();
     await settle();
-    expect(minus('V, Streetkid')).toBeNull();
+    expect(minus('V, Streetkid')).toBeDisabled();
     expect(plus('V, Streetkid')).toHaveFocus();
   });
 });

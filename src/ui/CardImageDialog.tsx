@@ -7,7 +7,7 @@ import { CardName, cardNameText } from './CardName';
 import { texts } from './texts';
 
 /**
- * The enlarged card image in a native modal dialog (T-027 UX). Esc, "Sulje" and a click on the
+ * The enlarged card image in a native modal dialog (T-027 UX). Esc, the "×" button and a click on the
  * backdrop close it; every way ends in the dialog's close event, which calls `onClose`.
  */
 export function CardImageDialog({ card, onClose }: { card: Card | null; onClose: () => void }) {
@@ -41,8 +41,8 @@ export function CardImageDialog({ card, onClose }: { card: Card | null; onClose:
             <h2 id="card-dialog-title" lang="en">
               <CardName card={card} />
             </h2>
-            <button type="button" className="button-secondary" onClick={close}>
-              {texts.closeDialog}
+            <button type="button" className="button-secondary dialog-close" aria-label={texts.closeDialog} onClick={close}>
+              {texts.closeSymbol}
             </button>
           </div>
           {image !== null && failedKey !== card.key ? (

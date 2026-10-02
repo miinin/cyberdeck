@@ -45,6 +45,8 @@ export const texts = {
   columnImage: 'Kuva',
   enlargeImage: 'Suurenna kuva: ',
   closeDialog: 'Sulje',
+  closeSymbol: '×',
+  playsetFull: 'Pelisarja täynnä',
   imageLoadError: 'Kuvaa ei voitu ladata.',
   columnName: 'Nimi',
   columnTypeAndColor: 'Tyyppi ja väri',
