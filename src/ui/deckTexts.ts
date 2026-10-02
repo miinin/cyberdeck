@@ -115,12 +115,16 @@ export const deckTexts = {
   saveFailed: (kind: StorageErrorKind | 'unknown') => `Ei tallennettu. ${deckTexts.actionFailed(kind)}`,
   saveRetry: 'Yritä tallentaa uudelleen',
 
+  // Export (T-015)
+  exportJson: 'Vie .json',
+  exportTxt: 'Vie .txt',
+
   // Import (T-014)
   importButton: 'Tuo pakkalista',
   importHeading: 'Tuo pakkalista',
-  importIntro: 'Liitä pakkalista tekstikenttään tai valitse .txt-tiedosto. Rivit ovat muotoa "3 Kortin nimi - Alaotsikko".',
+  importIntro: 'Liitä pakkalista tekstikenttään tai valitse .txt- tai .json-tiedosto. Rivit ovat muotoa "3 Kortin nimi - Alaotsikko".',
   importTextLabel: 'Pakkalista',
-  importFileLabel: 'Tai valitse .txt-tiedosto',
+  importFileLabel: 'Tai valitse .txt- tai .json-tiedosto',
   importCheck: 'Tarkista lista',
   importBack: 'Takaisin pakkoihin',
   importErrors: {
@@ -129,6 +133,9 @@ export const deckTexts = {
     'too-many-lines': 'Listassa on liian monta riviä. Enintään 64 kt, 300 riviä ja 300 merkkiä riviä kohti.',
     'line-too-long': 'Listassa on liian pitkä rivi. Enintään 64 kt, 300 riviä ja 300 merkkiä riviä kohti.',
     'file-too-big': 'Tiedosto on liian suuri. Enintään 64 kt.',
+    'json-too-long': 'Tiedosto on liian suuri. Enintään 256 kt.',
+    'not-json': 'Tiedostoa ei voitu lukea. Tarkista, että se on cyberdeckista viety .json-tiedosto.',
+    'not-deck': 'Tiedosto ei ole cyberdeckin pakka.',
     'file-unreadable': 'Tiedostoa ei voitu lukea. Kokeile liittää sen sisältö tekstikenttään.',
   },
   // Netdeck link (T-046)

@@ -43,7 +43,7 @@ export type ParseDeckTextResult = { ok: true; deck: ParsedDeckText } | { ok: fal
 const LINE_PATTERN = /^(\S+)\s+(.+)$/;
 const COUNT_PATTERN = /^\d{1,2}$/;
 /** Looks cards up by their key, or by name alone when exactly one card has that name. */
-function createLookup(cards: readonly Card[]): (normalized: string) => Card | undefined {
+export function createLookup(cards: readonly Card[]): (normalized: string) => Card | undefined {
   const byKey = new Map<CardKey, Card>();
   const byName = new Map<string, Card[]>();
   for (const card of cards) {
@@ -109,6 +109,6 @@ export function parseDeckText(text: string, cards: readonly Card[]): ParseDeckTe
 
   if (!seenContent) return { ok: false, error: 'empty' };
   const cleaned = rawName === null ? null : cleanText(rawName, 1, Number.MAX_SAFE_INTEGER);
-  const name = cleaned === null ? null : cleaned.slice(0, MAX_DECK_NAME_LENGTH).trimEnd();
+  const name = cleaned === null ? null : Array.from(cleaned).slice(0, MAX_DECK_NAME_LENGTH).join('').trimEnd();
   return { ok: true, deck: { name, rows: [...counts.values()], unrecognized } };
 }

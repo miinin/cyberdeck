@@ -10,6 +10,7 @@ import type { LoadNotice, Repositories, StorageErrorKind } from '../storage';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 import { DeckImport } from './DeckImport';
 import { deckTexts } from './deckTexts';
+import { ExportButtons } from './ExportButtons';
 import { useDecks } from './useDecks';
 
 const dateFormat = new Intl.DateTimeFormat('fi-FI', { dateStyle: 'short', timeStyle: 'short' });
@@ -334,6 +335,7 @@ export function DecksView({
                       >
                         {deckTexts.remove}
                       </button>
+                      <ExportButtons deck={deck} cardsByKey={cardsByKey} />
                     </div>
                   )}
                 </li>

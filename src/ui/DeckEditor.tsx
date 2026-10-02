@@ -32,6 +32,7 @@ import { CardName } from './CardName';
 import { DeckPickImage } from './DeckPickImage';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
+import { ExportButtons } from './ExportButtons';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
 
@@ -347,6 +348,9 @@ export function DeckEditor({
       <h1 ref={headingRef} tabIndex={-1}>
         {content.name}
       </h1>
+      <div className="row-actions">
+        <ExportButtons deck={content} cardsByKey={cardsByKey} />
+      </div>
 
       <div className="deck-name-field">
         <label htmlFor="deck-name">{deckTexts.nameLabel}</label>

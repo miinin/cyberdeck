@@ -58,14 +58,14 @@ describe('Deck list import', () => {
     const file = new File(['x'], 'big.txt', { type: 'text/plain' });
     Object.defineProperty(file, 'size', { value: 64 * 1024 + 1 });
     const read = vi.spyOn(file, 'text');
-    await user.upload(screen.getByLabelText('Tai valitse .txt-tiedosto'), file);
+    await user.upload(screen.getByLabelText('Tai valitse .txt- tai .json-tiedosto'), file);
     expect(await screen.findByRole('alert')).toHaveTextContent('Tiedosto on liian suuri');
     expect(read).not.toHaveBeenCalled();
   });
 
   it('reads a small file into the text field', async () => {
     const { user } = await openImport();
-    await user.upload(screen.getByLabelText('Tai valitse .txt-tiedosto'), new File(['1 L1'], 'a.txt', { type: 'text/plain' }));
+    await user.upload(screen.getByLabelText('Tai valitse .txt- tai .json-tiedosto'), new File(['1 L1'], 'a.txt', { type: 'text/plain' }));
     await waitFor(() => expect(screen.getByLabelText('Pakkalista')).toHaveValue('1 L1'));
   });
 

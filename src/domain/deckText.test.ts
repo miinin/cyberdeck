@@ -108,3 +108,11 @@ describe('parseDeckText', () => {
     expect(({} as Record<string, unknown>).polluted).toBeUndefined();
   });
 });
+
+describe('parseDeckText name length (SEC-021)', () => {
+  it('cuts the name by code point, so an emoji is not split', () => {
+    const name = `${'a'.repeat(99)}🔥🔥`;
+    const result = parsed(`# ${name}\n1 Detonate`);
+    expect(result.name).toBe(`${'a'.repeat(99)}🔥`);
+  });
+});
