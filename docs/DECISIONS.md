@@ -146,3 +146,13 @@ Päätöksessä on kuusi osaa. Rakenne ja allekirjoitukset ovat ARCHITECTURE.md:
 **Päätös:** B. Käyttäjä pyysi tekemään kulutuksesta siedettävämpää ("liikaa tarkasteluja, etenkin näin alkuvaiheessa").
 **Perustelu:** Laadun kannalta tärkeimmät tarkistukset (Koodarin katselmointi, UX käyttäjälle näkyviin muutoksiin ja Digiturva riskialttiisiin) säilyvät. Rikkomistestaus ja dokumentaatio ovat tehokkaampia koko MVP-tasolle kerralla. Sonnet riittää teksti- ja selaintarkastuksiin.
 **Seuraukset:** agents.md v1.3 ("Yhteispeli" → oletukset). rules.md 7.2:n Definition of Done tulkitaan näin: Testikäyttäjä- ja Dokumentoija-kohdat täyttyvät MVP-tason lopussa. PM tyhjentää oman istuntonsa (`/clear`) tehtävien välissä, koska tila on tiedostoissa. Käynnissä olevat T-010:n ja T-011:n katselmoinnit viedään loppuun.
+
+## D-010 · Ulkoasun uudistus Cyberpunk 2077 -henkiseksi ennen pakkoja · 2026-10-02 · Päättäjä: käyttäjä
+**Tila:** Voimassa
+**Konteksti:** Sovellus toimii, mutta ulkoasu on käyttäjän mukaan "ei minkään näköinen". UX.md:n periaate 7 rajasi cyberpunk-hengen pelkkään korostusväriin.
+**Päätös:**
+1. Seuraavaksi tehdään T-021: koko palvelun visuaalinen ilme Cyberpunk 2077 -pelin tyyliin. Se ohittaa T-013:n järjestyksessä.
+2. Prioriteetit: **1) käytettävyys** (kaiken on oltava intuitiivista ja helppokäyttöistä), **2) palvelu näyttää coolilta ja tuntuu Cyberpunk 2077 -henkiseltä alusta loppuun.** Ristiriidassa käytettävyys ja saavutettavuus (WCAG 2.2 AA) voittavat.
+3. Tehtävään osallistuvat vain UX Designer ja Koodari. Muita katselmointeja ei tilata. Poikkeus: jos `firebase.json` (CSP) tai riippuvuudet muuttuvat, Digiturva tekee kevyen tarkistuksen (D-009).
+**Perustelu:** Käyttäjän päätös.
+**Seuraukset:** UX.md:n periaate 7 päivitetään. Pelin tavaramerkit, logot, kuvat ja pelin omat fontit eivät tule sovellukseen (tekijänoikeus, SECURITY.md luku 7): ilme rakennetaan omilla väreillä, muodoilla ja avoimen lisenssin fonteilla.

@@ -25,3 +25,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-018 | Mobiilin kompakti suodatinlomake: tulos näkyviin pienellä näytöllä (B-011, UX-006), sarakkeiden rivitys (UX-003, B-002) | 2 | Should | Koodari | Backlog | UX |
 | T-019 | [velka] Kokoelman määrämuutos renderöi koko taulukon: mittaa ja tarvittaessa `memo` (T-012:n koodikatselmoinnin suositus) | 1 | Could | Koodari | Backlog | – |
 | T-020 | [velka] Painallussarjan osittain onnistunut tallennus kerrotaan ruudunlukijalle virheen lisäksi (T-012:n koodikatselmoinnin suositus) | 2 | Could | Koodari | Backlog | UX |
+| T-021 | Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme, käytettävyys ensin (D-010) | 1 | Must | UX → Koodari | Ready | UX (Digiturva vain firebase.jsonin tai riippuvuuksien muuttuessa) |
