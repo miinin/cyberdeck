@@ -24,6 +24,7 @@
 | 7 | Tuotu tiedosto tai liitetty teksti | Käyttäjä tai kaveri (T-014, T-015) | Pakan tuonti | Luetaan muistiin, tallennetaan vain hyväksytty pakka | Kuten 1 | Kuten 2 | Tiedostoa ei tallenneta sellaisenaan eikä lähetetä minnekään (SR-15) |
 | 8 | IP-osoite, selaimen tiedot (User-Agent), pyyntöjen ajankohdat ja polut | Selain automaattisesti | Sivun toimitus | **Firebase Hosting (Google)**, globaali CDN | Google; projektin omistaja Firebase-konsolin kautta, jos lokit tai Cloud Logging -integraatio on käytössä | **Kyllä** (IP-osoite) | Ei omaa lokitusta. `Referrer-Policy: no-referrer` (SR-3). Säilytysaika ja lokien saatavuus: **tarkistettava** Firebasen tietosuojadokumentaatiosta (firebase.google.com/support/privacy). |
 | 9 | IP-osoite, selaimen tiedot, Origin-otsake | Selain automaattisesti, kun korttidata haetaan | Korttidatan haku | **Netdeck.gg** (sijainti ja säilytys tuntemattomia) | Netdeck.gg | **Kyllä** (IP-osoite) | `credentials: 'omit'` ja `referrerPolicy: 'no-referrer'` (SR-4). Origin paljastaa, että pyyntö tulee cyberdeckistä. Netdeckin tietosuojaehtoja ei löytynyt (SECURITY.md luku 7). Välimuisti (T-003) vähentäisi pyyntöjä. |
+| 10 | Teemavalinta: raakamerkkijono `light` tai `dark` | Käyttäjä painaa otsikkopalkin Vaalea teema -painiketta (T-025) | Valitun väriteeman muistaminen | localStorage-avain `cyberdeck:theme`. Kirjoitus vain tallennuskerroksen kautta, `public/theme-init.js` lukee sen ennen ensimmäistä piirtoa (A1, SR-12) | Kuten 1 | Ei. Kaksi mahdollista arvoa, ei tunnista henkilöä eikä laitetta. | Vain teema. Ei aikaleimaa eikä historiaa. Avainta ei luoda, ellei käyttäjä vaihda teemaa (tumma oletus ilman tallennusta). |
 
 **Ei kerätä:** nimiä, sähköposteja, käyttäjätunnuksia, laite- tai mainostunnisteita, sijaintia, analytiikkaa, virheraportointia ulkoiseen palveluun, evästeitä. Ei ulkoisia fontteja eikä CDN-skriptejä (SR-2).
 
@@ -49,7 +50,7 @@ Tuotanto, testisivusto ja esikatselukanavat ovat eri origineja, joten niiden sel
 
 | Tieto | Säilytys | Poisto |
 |---|---|---|
-| Kokoelma, pakat, varakopio, välimuisti | Kunnes käyttäjä poistaa ne tai selain siivoaa ne | Sovelluksen poistotoiminnot (pakan poisto T-013). Selaimen asetus "Poista sivuston tiedot" poistaa kaiken. **Suositus:** sovellukseen "Poista kaikki tiedot tästä selaimesta" -toiminto vahvistuksella (ehdotus IDEAS.md:hen PM:lle). |
+| Kokoelma, pakat, varakopio, välimuisti, teemavalinta | Kunnes käyttäjä poistaa ne tai selain siivoaa ne | Sovelluksen poistotoiminnot (pakan poisto T-013). Teeman voi palauttaa tummaksi painikkeella, mutta avain jää arvolla `dark`. Selaimen asetus "Poista sivuston tiedot" poistaa kaiken. **Suositus:** sovellukseen "Poista kaikki tiedot tästä selaimesta" -toiminto vahvistuksella (ehdotus IDEAS.md:hen PM:lle). Toiminnon on poistettava kaikki `cyberdeck:`-etuliitteiset avaimet, myös `cyberdeck:theme` (SEC-015). |
 | – | Selain voi poistaa datan ilman käyttäjän toimea: yksityinen ikkuna (suljettaessa), tallennustilan loppuminen, Safarin (WebKit ITP) noin 7 vuorokauden käyttämättömyysraja skriptin kirjoittamalle tallennustilalle | Riski R-10 (SECURITY.md). Käyttäjälle kerrotaan, että tiedot ovat vain tässä selaimessa ja että viennillä voi tehdä varmuuskopion. **T-012:** kokoelmanäkymä kertoo, että kokoelma tallentuu vain tähän selaimeen, ja käyttäjä voi painikkeesta pyytää pysyvää tallennusta (`navigator.storage.persist()`). Pyyntö ja vain-luku-tarkistus (`persisted()`) ovat selaimen sisäisiä eivätkä lähetä tietoja minnekään. Vienti (T-015) puuttuu vielä. |
 | Vientitiedostot | Käyttäjän hallinnassa | Käyttäjä poistaa itse |
 | Hosting-lokit (Google) | **Tarkistettava** (Firebasen dokumentaatio) | Ei kehittäjän hallinnassa |
@@ -62,7 +63,7 @@ Tuotanto, testisivusto ja esikatselukanavat ovat eri origineja, joten niiden sel
 ## 6. Evästeet ja seuranta
 
 - Ei evästeitä. Ei analytiikkaa, mainoksia, seurantapikseleitä, upotuksia eikä ulkoisia fontteja.
-- Selaimen tallennustilaa käytetään vain luvun 2 riveihin 1–5 (SR-12, SR-16).
+- Selaimen tallennustilaa käytetään vain luvun 2 riveihin 1–5 ja 10 (SR-12, SR-16). Teemavalinta (rivi 10) on käyttäjän itse tekemä asetus, ei eväste eikä seurantaa.
 - Jos analytiikkaa tai virheraportointia halutaan myöhemmin, se vaatii suostumuksen ennen latausta, PRIVACY.md:n päivityksen ja Digiturvan katselmoinnin.
 
 ## 7. MVP-2:n ennakointi (avoin)
@@ -93,3 +94,4 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 | 2026-10-01 | Ensimmäinen versio: MVP-0:n ja MVP-1:n tietoinventaario, sijainti, käsittelyperuste-ehdotus, säilytys ja poisto, evästeet, MVP-2:n ennakointi, avoimet kysymykset K-P1–K-P4 | T-011 |
 | 2026-10-01 | Inventaario toteutuksen mukaiseksi (katselmointi SEC-002-t011): localStorage-avaimet, osion nimet, pakkojen `createdAt` ja `updatedAt`, kääreen `savedAt`, koetallennusavain ja enintään 3 varmuuskopiota tietokokonaisuutta kohden. SR-16 täyttyy: ei henkilö-, laite- tai käyttäjätunnisteita eikä tokeneita. | T-011 |
 | 2026-10-01 | Katselmointi SEC-003-t012: kokoelman merkintä toteutettu (rivi 1), ei uusia tallennettavia kenttiä, evästeitä tai kolmansia osapuolia. Pysyvän tallennuksen pyyntö (luku 5) ja K-P2:n tila päivitetty. | T-012 |
+| 2026-10-02 | Katselmointi SEC-004-t025: teemavalinta `cyberdeck:theme` lisätty inventaarioon (rivi 10), säilytykseen ja poistoon (luku 5) ja tallennustilan käyttöön (luku 6). Ei henkilötieto, SR-16 täyttyy. | T-025 |
