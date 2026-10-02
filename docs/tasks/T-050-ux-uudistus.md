@@ -137,7 +137,7 @@ Aktiiviset: [Red ×] [Unit ×] Tyhjennä suodattimet
 - **Rivin korkeus** noin 4.75rem (pikkukuva määrää). Vuororivit `--color-surface-2`-tyylillä. Hover korostaa rivin taustaa.
 - **Pakassa oleva kortti:** rivillä on vasemmassa reunassa 3px korostusraita, ja määrä on lihavoitu (ei pelkkä väri, sillä määrä näkyy numerona).
 - **Estetty kortti** (`addBlocker`): rivi himmennetään (opacity 0.6 vain kuvalle ja nimelle, ei napeille eikä tekstille kontrastin vuoksi), ja merkki **"Raja täynnä"** tai **"Sama Legend"** näkyy Pakassa-solussa.
-- Alle 48rem: sarakkeet Tyyppi, Voima, RAM ja Harvinaisuus piilotetaan, ja niiden arvot näytetään nimen alla metarivinä "Unit · Red · Cost 4 · Power 6 · RAM 1 · Rare" (`cardMeta`, lyhenne pysyy englanninkielisenä pelitermeinä). Rivi pysyy yhtenä korttina per rivi.
+- Alle 48rem: sarakkeet Tyyppi, Power, RAM ja Harvinaisuus piilotetaan, ja niiden arvot näytetään nimen alla metarivinä "Unit · Red · Cost 4 · Power 6 · RAM 1 · Rare" (`cardMeta`, lyhenne pysyy englanninkielisenä pelitermeinä). Rivi pysyy yhtenä korttina per rivi.
 
 ### Kuvanäkymä "Kuvat"
 - Kuvakoko-valitsin **Pieni** 9rem, **Keski** 13rem (oletus) ja **Iso** 17rem. Sama komponentti kuin T-050a:n kohdassa 3, sama `--card-min`-muuttuja `.pick-images`-ruudukossa. Kuvat `md` (360 px) ja `srcset` `lg` (720 px) 2x-näytöille.
