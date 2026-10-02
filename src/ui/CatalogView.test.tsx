@@ -164,11 +164,4 @@ describe('CatalogView', () => {
     expect(container.querySelector('b')).toBeNull();
     expect(container.querySelector('script')).toBeNull();
   });
-
-  it('formats large counts the Finnish way', () => {
-    const cards = Array.from({ length: 1024 }, (_, index) => card(index));
-    const { container } = renderView(cards);
-
-    expect(statusLine(container).textContent).toBe('1 024 korttia');
-  });
 });

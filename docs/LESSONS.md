@@ -26,3 +26,8 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 **Mitä tapahtui:** Käyttäjä kopioi 151 korttikuvaa (14 Mt) pääkansion `public/cards/`-hakemistoon, kun T-025:n Koodari työskenteli samassa kansiossa. Koodari commitoi ne teemavalitsimen haaraan (c31f42c), luultavasti komennolla `git add -A`. PM poisti kuvat seurannasta uudella commitilla, mutta ne jäivät haaran historiaan.
 **Miksi:** Commitoitiin kaikki muuttuneet tiedostot tarkistamatta, kuuluvatko ne tehtävään.
 **Jatkossa:** Lisää commitiin vain tehtävän tiedostot nimeltä. Tarkista `git status` ennen jokaista committia. Jos työpuussa on tiedostoja, joita et itse luonut, älä commitoi niitä, vaan kerro niistä PM:lle.
+
+## L-006 · 2026-10-02 · Test-haaraan päätyi kaatuva testi
+**Mitä tapahtui:** T-013:n navigaatiolinkit muuttivat Tab-järjestystä, ja `App.theme.test.tsx` kaatui test-haarassa. Koodari ajoi vain osan testeistä (kevyt malli, aikaraja), eikä CI ajanut testejä.
+**Miksi:** Kokonaista sarjaa ei ajettu ennen yhdistämistä, ja koko sarja kaatui muutenkin satunnaisesti (T-024), joten osittaisiin ajoihin oli totuttu.
+**Jatkossa:** T-004 ajaa lintin ja testit jokaisessa PR:ssä ja ennen julkaisua. PM yhdistää testiin vasta, kun PR:n tarkistukset ovat vihreät.
