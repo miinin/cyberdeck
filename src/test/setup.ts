@@ -27,4 +27,6 @@ afterEach(() => {
   cleanup();
   // Stored data must not leak from one test to the next (ARCHITECTURE.md 12.8).
   localStorage.clear();
+  // The theme lives on <html>, outside the rendered tree (T-025).
+  document.documentElement.removeAttribute('data-theme');
 });

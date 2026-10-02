@@ -21,3 +21,8 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 **Mitä tapahtui:** UX Designer (T-021-katselmointi) siivosi omat headless-ajonsa komennolla `taskkill /F /IM msedge.exe`. Komento sulkee kaikki Edge-prosessit, myös käyttäjän avoimet selainikkunat.
 **Miksi:** L-001 oli kirjattu, mutta aliagentti lukee LESSONS.md:stä vain tehtäväänsä koskevat kohdat, eikä PM:n tehtävänanto toistanut kieltoa selaintestauksen yhteydessä.
 **Jatkossa:** Prosessia ei koskaan pysäytetä nimen, kuvan (`/IM`) tai portin perusteella, vain oman käynnistetyn prosessin PID:llä tai puppeteerin `browser.close()`-kutsulla. Headless-selain käynnistetään aina omalla väliaikaisella profiilillaan (`--user-data-dir` scratchpad-kansioon). PM toistaa tämän kiellon jokaisessa tehtävänannossa, jossa agentti ajaa selainta tai palvelinta.
+
+## L-005 · 2026-10-02 · Koodari commitoi käyttäjän kuvat väärään tehtävähaaraan
+**Mitä tapahtui:** Käyttäjä kopioi 151 korttikuvaa (14 Mt) pääkansion `public/cards/`-hakemistoon, kun T-025:n Koodari työskenteli samassa kansiossa. Koodari commitoi ne teemavalitsimen haaraan (c31f42c), luultavasti komennolla `git add -A`. PM poisti kuvat seurannasta uudella commitilla, mutta ne jäivät haaran historiaan.
+**Miksi:** Commitoitiin kaikki muuttuneet tiedostot tarkistamatta, kuuluvatko ne tehtävään.
+**Jatkossa:** Lisää commitiin vain tehtävän tiedostot nimeltä. Tarkista `git status` ennen jokaista committia. Jos työpuussa on tiedostoja, joita et itse luonut, älä commitoi niitä, vaan kerro niistä PM:lle.

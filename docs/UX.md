@@ -1,6 +1,6 @@
 # UX · cyberdeck
 
-> Omistaja: UX Designer. Versio 0.8 · 2026-10-02 (T-021). Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
+> Omistaja: UX Designer. Versio 0.9 · 2026-10-02 (T-025). Muutos 0.9: uusi luku 8 (teemavalitsin, D-012): tumma on oletus laitteen asetuksesta riippumatta, vaihtopainike otsikkopalkissa, välähdyksen esto ulkoisella skriptillä, tallennusrajapinnan lisäys. Luvun 3 johdanto ja luvun 7.3 teemapäätös merkitty päivitetyiksi. Alkuperäinen versio 0.2 (T-001, MVP-0). Muutos 0.2: katselmoinnin UX-001 tarkennukset lukuihin 4.3, 4.4 ja 4.9 (raportti `docs/reports/UX-001-t001-katselmointi.md`).
 > Muutos 0.3 · 2026-10-01 (T-010, MVP-1): uusi luku 5 (haku ja suodatus), korttien väritokenit (3.1.1) sekä tekstikenttä ja valintaruutu (3.4). Luvun 4 kohtiin, joita luku 5 muuttaa, on lisätty viittaus.
 > Muutos 0.4 · 2026-10-01 (T-010, katselmointi UX-002): K9 ratkaistu (latausviesti suodatettuna, 5.6), tyhjennyspainikkeen ilmoitus ja toistokielto (5.6), OSITTAINEN ilman kortteja (5.8). Raportti `docs/reports/UX-002-t010-katselmointi.md`.
 > Muutos 0.5 · 2026-10-01 (T-012, MVP-1): uusi luku 6 (kokoelma): määräkontrolli korttirivillä, korttimainen rivi alle 40 rem:ssä, "Vain omistetut" -suodatin, kokoelman yhteenveto, selainmuistutus ja pysyvän tallennuksen pyyntö, tallennuskerroksen ilmoitukset ja virheet, ruudunlukijailmoitukset ja tarkistuslista. Uudet komponentit: määräpainike ja toissijainen painike (6.4.3).
@@ -34,7 +34,7 @@
 
 > **Päivitetty 2026-10-02 (T-021, D-010, D-011; versio 0.7).** Luvun 3 tokenit ja komponentit on uusittu Cyberpunk 2077 -henkiseen ilmeeseen. Sovelluksessa on **sekä vaalea että tumma teema**, ja ne seuraavat `prefers-color-scheme`-asetusta kuten ennenkin. Perustelut, tutkimus, kontrastilaskelmat ja komponenttien visuaaliset yksityiskohdat ovat luvussa 7. Kun lukujen 4–6 tekstit mainitsevat värin, reunan tai painikkeen ulkoasun, voimassa ovat tämän luvun ja luvun 7 arvot. Lukujen 4–6 toiminta, rakenne, tekstit ja saavutettavuusvaatimukset eivät muutu.
 
-Tokenit määritellään CSS-muuttujina `:root`-tasolla: vaalea teema on oletus, ja tumma teema otetaan käyttöön `@media (prefers-color-scheme: dark)` -kyselyllä. Erillistä teemavalitsinta ei ole. `color-scheme: light dark` asetetaan `:root`iin, jotta selaimen omat osat (vierityspalkit, lomakekentät) seuraavat teemaa. Teemakohtaiset arvot ovat vain tässä taulukossa, ja komponenttityylit käyttävät pelkästään tokeneita, joten komponentteihin ei tarvita erillisiä teemasääntöjä.
+Tokenit määritellään CSS-muuttujina `:root`-tasolla. ~~Vaalea teema on oletus, ja tumma teema otetaan käyttöön `@media (prefers-color-scheme: dark)` -kyselyllä. Erillistä teemavalitsinta ei ole. `color-scheme: light dark` asetetaan `:root`iin.~~ → 2026-10-02 (T-025, D-012, luku 8): **tumma teema on oletus** laitteen asetuksesta riippumatta, ja vaalea otetaan käyttöön `:root[data-theme='light']`-valitsimella, kun käyttäjä valitsee sen teemapainikkeella. `prefers-color-scheme`-kyselyä ei käytetä. `color-scheme` (`dark` tai `light`) asetetaan teeman mukana, jotta selaimen omat osat (vierityspalkit, lomakekentät) seuraavat teemaa. Taulukon arvot ovat ennallaan. Teemakohtaiset arvot ovat vain tässä taulukossa, ja komponenttityylit käyttävät pelkästään tokeneita, joten komponentteihin ei tarvita erillisiä teemasääntöjä.
 
 ### 3.1 Värit
 
@@ -1336,7 +1336,7 @@ Lähteet haettu 2026-10-02. Lähteet ovat kolmannen osapuolen analyyseja ja yhte
 | Viistetyt (`clip-path`) kohteet, jotka saavat fokuksen, ilman varaa | `clip-path` leikkaisi fokusrenkaan. Fokuksessa leikkaus poistetaan (3.4). |
 | Parallax, liikkuva tausta, äänet | Ei lisää käytettävyyttä, riski vestibulaarioireille. |
 
-**Teemapäätös (D-011): sekä vaalea että tumma.** Sovellus seuraa selaimen `prefers-color-scheme`-asetusta kuten ennenkin, ja molemmat teemat ovat selvästi Cyberpunk-henkisiä. ~~Aiempi ehdotus (v0.6): vain tumma.~~ → hylätty D-011:ssä.
+**Teemapäätös (D-011): sekä vaalea että tumma.** ~~Sovellus seuraa selaimen `prefers-color-scheme`-asetusta kuten ennenkin~~ → 2026-10-02 (D-012, luku 8): tumma on oletus ja käyttäjä vaihtaa teeman painikkeella. Molemmat teemat ovat selvästi Cyberpunk-henkisiä. ~~Aiempi ehdotus (v0.6): vain tumma.~~ → hylätty D-011:ssä.
 
 - **Tumma teema:** lähes musta tausta, keltainen täyttö, syaani fokus ja hover. Tämä on pelin tunnistettavin ilme.
 - **Vaalea teema:** kermanvalkoinen "paperi" (pelin käyttöliittymän beige pinta, HUDS+GUIS), musta teksti ja **musta reuna keltaisen täytön ympärillä**. Keltaisen tekstikontrasti vaalealla taustalla on vain 1.06 : 1, joten keltainen on vaalealla aina täyttöväri mustan reunan sisällä eikä koskaan teksti, viiva tai fokusrengas. Tiedon, hoverin ja fokuksen väri on tummansyaani `#005f73` (6.39 : 1). Otsikkopalkki on musta kummassakin teemassa, joten Cyberpunk-kehys ja keltainen merkki säilyvät. Muodot (viisteet, kulmasulut, raidoitukset) ovat samat, mutta kulmasulut ja otsikon alaviiva ovat vaalealla mustia.
@@ -1567,3 +1567,193 @@ Raportti: `docs/reports/UX-004-t021-ulkoasu.md`. Toteutus vastaa tämän luvun j
 - **Tyyppi- ja Väri-ryhmät** rivittyvät työpöydälläkin allekkain, koska 56 rem:n leveyteen ne eivät mahdu rinnakkain. Tämä on hyväksytty ratkaisu (rivien väli sama kuin pinottuna, 3.4).
 - **Mobiilin rivikorkeus ja lista:** Rajdhanin korotetut koot (V9) kasvattivat kapean näkymän riviä 104 px:stä 140 px:iin ja korttilistan ensimmäisen rivin sijaintia 934 px:stä 1284 px:iin (320 px). Suositus UX-007: tiivistä kapean rivin tyyppi-, väri- ja hintarivit (esim. `display: flex; flex-wrap: wrap; column-gap: var(--space-2)` yhdelle riville) ja rivin pystysisäväli `--space-2`.
 - **Tekstin suurennus (vain teksti) 200 % kapealla näytöllä:** vaakavieritystä syntyy 320 px:ssä (531 px, ennen T-021:tä 495 px). Suositus UX-008: `.count-control`in varattu `min-width` ei saa kasvaa `rem`-yksiköissä kapealla asettelulla, painikkeet `max-width: 100%` ja `white-space: normal`, chipit saavat rivittyä.
+
+---
+
+## 8. Teemavalitsin (T-025, D-012)
+
+> Lisätty versiossa 0.9 · 2026-10-02. Tämä luku **korvaa** luvun 3 lauseen "vaalea teema on oletus ja tumma seuraa `prefers-color-scheme`-asetusta, erillistä teemavalitsinta ei ole" ja luvun 7.3 teemapäätöksen "seuraa selaimen asetusta" (D-012 kohta 4 muuttaa D-011:n kohtaa 2). Tokenien **arvot** eivät muutu, vain se, mikä teema on oletus ja miten toinen otetaan käyttöön. Lukujen 4–7 toiminta, rakenne ja tekstit säilyvät.
+
+### 8.1 Tavoite ja päätökset
+
+Käyttäjä näkee tumman Cyberpunk-teeman ensimmäisellä käynnillä laitteen asetuksesta riippumatta ja voi vaihtaa vaaleaan yhdellä näkyvällä painikkeella. Valinta säilyy.
+
+| # | Päätös | Perustelu |
+|---|---|---|
+| T1 | **Oletus on tumma, aina.** `prefers-color-scheme` ei vaikuta mihinkään. | D-012 kohta 4 ja kortin ensimmäinen kriteeri. Tumma on pelin tunnistettavin ilme. |
+| T2 | **Kolmatta vaihtoehtoa "laitteen mukaan" ei tehdä.** | (a) D-012 määrää oletuksen tummaksi laitteesta riippumatta, joten "laitteen mukaan" olisi toinen oletus. (b) Kolmitilainen kontrolli vaatii radioryhmän tai kiertävän painikkeen, jossa nykyinen ja seuraava tila sekoittuvat, ja se vie otsikkopalkista tilaa 320 px:ssä. (c) Vaaleaa haluava valitsee sen kerran, ja valinta säilyy. Ehdotus on kirjattu `docs/IDEAS.md`:hen. |
+| T3 | **Kontrolli on yksi vaihtopainike** (`<button type="button" aria-pressed>`) otsikkopalkin oikeassa reunassa. Radioryhmää ja `role="switch"`-ratkaisua ei käytetä. | Kaksi tilaa, yksi painike: pienin kontrolli, joka mahtuu 320 px:iin. `aria-pressed` on vakiintunut kaksiasentoiselle vaihtopainikkeelle, ja nimi pysyy samana tilasta riippumatta (nimi, joka muuttuu `aria-pressed`-tilan mukana, sekoittaa ruudunlukijan). `role="switch"` vaatisi "päällä/pois"-ajattelun, joka ei sovi teemaan. |
+| T4 | **Painikkeen nimi on "Vaalea teema".** Tila "painettu" tarkoittaa, että vaalea teema on käytössä, ja "ei painettu" että tumma (oletus) on käytössä. | Painike nimeää sen, minkä käyttäjä voi ottaa käyttöön. Oletus on tumma, joten poikkeama (vaalea) on se, mikä kytketään päälle. |
+| T5 | **Ei live-ilmoitusta.** | Ruudunlukija ilmoittaa `aria-pressed`-muutoksen fokusoidusta painikkeesta itse ("Vaalea teema, vaihtopainike, painettu"). Erillinen `aria-live` antaisi tuplailmoituksen. Fokus pysyy painikkeessa, ja sama elementti säilyy (ei uudelleenmontausta). |
+| T6 | **Ei välähdystä latauksessa:** staattinen `data-theme="dark"` HTML:ssä ja pieni ulkoinen skripti `<head>`issa, joka ottaa tallennetun vaalean valinnan käyttöön ennen ensimmäistä piirtoa (8.7). | CSP (`script-src 'self'`, `style-src 'self'`) kieltää inline-skriptit ja `style`-attribuutit, mutta saman originin tiedosto kelpaa. |
+
+### 8.2 Polku
+
+```
+Ensimmäinen käynti
+  → sivu piirtyy tummana (laitteen asetuksesta riippumatta)
+  → painike [☼ Vaalea] "ei painettu"
+      └─ käyttäjä painaa → vaalea teema heti, painike "painettu", valinta tallennetaan
+Seuraava käynti tai sivun päivitys
+  ├─ tallennettu "light"                          → sivu piirtyy heti vaaleana (ei tummaa välähdystä)
+  ├─ tallennettu "dark", ei mitään tai tuntematon → tumma
+  └─ tallennus ei käytössä (estetty tai epäonnistuu) → vaihto toimii istunnon ajan, uusi käynti alkaa tummana
+```
+
+### 8.3 Sijainti ja rautalanka
+
+Painike on `<header>`in sisällä, `.container`-rivin viimeinen elementti (DOM-järjestys: koristemerkki → sovelluksen nimi → painike), tasattu oikealle (`margin-inline-start: auto`, `flex: none`). Se on ensimmäinen sarkainpysähdys sivulla. Ei omaa `<nav>`-elementtiä eikä otsikkoa. Otsikkopalkki on musta kummassakin teemassa, joten painikkeen värit eivät riipu teemasta (8.5).
+
+```
+320 px, yksi rivi (tavoite, jos mahtuu):
+┌────────────────────────────────┐
+│ ◢ CYBERDECK         [☼ VAALEA] │  musta otsikkopalkki, keltainen viiva alla
+└────────────────────────────────┘
+>= 640 px (40 rem):
+┌──────────────────────────────────────────────────────┐
+│ ◢ CYBERDECK                         [☼ VAALEA TEEMA] │
+└──────────────────────────────────────────────────────┘
+Jos ei mahdu (esim. 200 % tekstin suurennus tai 400 % zoom), rivitys sallittu:
+┌────────────────────────────────┐
+│ ◢ CYBERDECK                    │
+│                    [☼ VAALEA]  │  painike omalle riville oikeaan reunaan
+└────────────────────────────────┘
+```
+
+- `.site-header .container` saa `flex-wrap: wrap` ja `row-gap: var(--space-2)`. Vaakavieritystä ei saa syntyä missään leveydessä (320 px, 200 % ja 400 % zoom). Yhden rivin ei tarvitse säilyä, mutta Koodari mittaa 320 px:ssä ja kirjaa, mahtuuko se (arvio: merkki 18 px + väli 12 px + nimi noin 140 px + väli 12 px + painike noin 105 px = noin 287 px, käytettävissä 288 px, eli erittäin tiukka). Jos ei mahdu, rivitys on hyväksytty ratkaisu, eikä sisäväliä tai nimen kirjainväliä muuteta sen vuoksi.
+- Korkeus: painikkeen vähimmäiskorkeus ja -leveys `--target-min` (44 px). Otsikkopalkin pystysisäväli `--space-3` säilyy, jolloin palkki kasvaa noin 57 px:stä noin 68 px:iin. Fokusrenkaalle (3 px + 3 px väli) jää 12 px tilaa ylä- ja alapuolelle, eikä mikään leikkaa sitä (`overflow` ei ole asetettu).
+
+### 8.4 Painikkeen sisältö, tekstit ja ikoni
+
+**DOM (tarkka rakenne):**
+
+```html
+<button type="button" class="theme-toggle" aria-pressed="false">
+  <svg class="theme-toggle-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2" />
+    <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"
+          stroke="currentColor" stroke-width="2" stroke-linecap="square" fill="none" />
+  </svg>
+  <span><span>Vaalea</span> <span class="theme-toggle-suffix">teema</span></span>
+</button>
+```
+
+> Päivitetty T-025:n katselmoinnissa (UX-005): toteutuksessa tekstit ovat yhden kääre-`span`in sisällä ja sanaväli on oma tekstisolmunsa. Alkuperäinen rakenne (välilyönti jälkiliitteen sisällä) antoi flex-`gap`in ja `dom-accessibility-api`n kanssa nimen "Vaaleateema". Toteutuksen rakenne on hyväksytty.
+
+- **Saavutettava nimi** tulee sisällöstä: `Vaalea teema`. Ikoni on `aria-hidden`, eikä `aria-label`ia käytetä, jotta nimi sisältää näkyvän tekstin (WCAG 2.5.3). Tilan ilmoittaa vain `aria-pressed="true"` (vaalea käytössä) tai `"false"` (tumma käytössä). Attribuutti on aina olemassa. Ei `title`-attribuuttia (ei toimi kosketuksella eikä näppäimistöllä).
+- **Teksti:** näkyvä `Vaalea` ja jälkiliite ` teema`. Jälkiliite näkyy vain ≥ 40 rem:n leveydellä. Alle 40 rem:n se piilotetaan visuaalisesti `.visually-hidden`-tyylillä (3.4), mutta se jää ruudunlukijalle, joten nimi on kaikilla leveyksillä `Vaalea teema`. Tekstit lisätään `src/ui/texts.ts`:ään: `themeToggleLabel: 'Vaalea'` ja `themeToggleSuffix: 'teema'` (välilyönti tuotetaan rakenteessa, ei merkkijonossa). Versaalit CSS:llä (`text-transform: uppercase`, kuten painikkeet), `--font-size-sm`, `--font-weight-bold`, `--letter-spacing-button`. Sana "teema" lisätään CONTENT.md:n sanastoon (Sisällöntuottaja).
+- **Ikoni:** inline-SVG yllä, ei ulkoisia resursseja eikä kuvatiedostoa tai data-URI:a. Piirtovärinä `currentColor`. Koko 20 × 20 px, väli tekstiin `--space-2`. **Tilan erottelu ilman väriä:** `aria-pressed="false"` → ympyrä on ääriviiva (`fill: none`). `aria-pressed="true"` → ympyrä on täytetty (CSS: `.theme-toggle[aria-pressed='true'] .theme-toggle-icon circle { fill: currentColor; }`). CSP sallii tämän, koska täyttö tulee tyylitiedostosta eikä `style`-attribuutista.
+- Ikoni on aurinko (vaalea teema). Kuuta ei tarvita, koska kontrolleja on yksi ja teksti kertoo, mitä se tekee.
+- **CSP-huomio Koodarille:** `style-src 'self'` estää myös `style="…"`-attribuutit. Älä käytä Reactin `style`-propia painikkeessa tai muualla. Kaikki tyylit tyylitiedostossa.
+
+### 8.5 Ulkoasu (tokenit, tilat, kontrastit)
+
+Painike ei käytä teemakohtaisia sivupintoja, koska otsikkopalkki on musta kummassakin teemassa. **Uusia tokeneita ei tarvita:** painike käyttää olemassa olevia otsikkopalkin ja korostuksen tokeneita. Rakenne on sama kuin toissijaisella painikkeella (3.4): painikkeen tausta on reuna, `::before` (`inset: 2px`, `--shape-chamfer-inner-2`, `z-index: -1`, `isolation: isolate` painikkeessa) on täyttö, ulkomuoto `clip-path: var(--shape-chamfer)`. Paikalliset muuttujat `.theme-toggle`ssa: `--toggle-edge`, `--toggle-fill`, `--toggle-text`.
+
+| Tila | `--toggle-edge` | `--toggle-fill` | `--toggle-text` | Muu |
+|---|---|---|---|---|
+| Ei painettu (tumma käytössä), lepo | `--color-header-text` | `--color-header-bg` | `--color-header-text` | Ikoni ääriviiva |
+| Ei painettu, hover | `--color-accent-2` | `--color-header-bg` | `--color-accent-2` | `text-decoration: underline` |
+| Painettu (vaalea käytössä), lepo | `--color-accent` | `--color-accent` | `--color-on-accent` | Ikoni täytetty |
+| Painettu, hover | `--color-accent-2` | `--color-accent-2` | `--color-on-accent` | `text-decoration: underline` |
+| Aktiivinen (painettu alas) | sama kuin tila | sama | sama | siirtyy 1 px alas (vain `no-preference`) |
+| Fokus (`:focus-visible`) | sama kuin tila | sama | sama | `clip-path: none`, `outline: 3px solid var(--color-accent-2)`, `outline-offset: var(--focus-offset)` |
+
+**Fokusrengas on tässä `--color-accent-2`, ei `--color-focus`**, koska rengas piirtyy mustaa otsikkopalkkia vasten, ja vaalean teeman `--color-focus` (`#005f73`) olisi mustaa vasten vain 2.63 : 1 (alle 3 : 1). Kaikki ratkaisut ovat samat kummassakin teemassa, koska otsikkopalkki on musta (`#000000` tummalla, `#0e0f14` vaalealla).
+
+Kontrastit (laskettu WCAG 2.x -kaavalla 2026-10-02):
+
+| Väripari | Käyttö | Tumma | Vaalea |
+|---|---|---|---|
+| `--color-header-text` / `--color-header-bg` | Teksti ja reuna, lepo | 18.53 | 16.89 |
+| `--color-accent-2` / `--color-header-bg` | Hover-teksti ja -reuna, fokusrengas | 13.16 | 12.00 |
+| `--color-on-accent` / `--color-accent` | Painettu, teksti ja ikoni | 16.17 | 15.84 |
+| `--color-on-accent` / `--color-accent-2` | Painettu hover, teksti ja ikoni | 12.25 | 12.00 |
+| `--color-accent` / `--color-header-bg` | Painetun täyttö otsikkopalkkia vasten | 17.37 | 15.84 |
+
+Kaikki ≥ 3 : 1 (UI) ja ≥ 4.5 : 1 (teksti). Tila ei välity pelkällä värillä: painettu = täytetty ikoni ja täytetty tausta, ei painettu = ääriviivaikoni ja täyttämätön tausta. `forced-colors: active` -tilassa taustavärit ylikirjoittuvat, mutta ikonin täyttö (`currentColor`) erottaa tilat edelleen. Hover ei perustu pelkkään väriin (alleviivaus).
+
+Siirtymät (`--ease`, 0.12 s) vain `prefers-reduced-motion: no-preference` -ehdon sisällä, kuten muissa painikkeissa (3.5). **Teeman vaihtoon ei lisätä omaa animaatiota** (ei häivytystä eikä pyyhkäisyä): teema vaihtuu heti. Mikään ei vilku.
+
+### 8.6 Toiminta
+
+- Painallus (Enter, väli, hiiri, kosketus) vaihtaa teeman: `aria-pressed` kääntyy ja `<html>`-elementin `data-theme` vaihtuu (`light` tai `dark`) **heti ja synkronisesti** painalluksen yhteydessä, ennen tallennusta. Tallennus tehdään sen jälkeen. Tallennuksen epäonnistuminen ei peruuta vaihtoa.
+- **Tallennuksen epäonnistuessa** (SR-13: tallennus estetty, kiintiö täynnä, muistinvarainen tila) teema pysyy vaihdettuna istunnon ajan. **Erillistä virheilmoitusta ei näytetä**, koska menetys on vähäinen (teema palaa tummaksi) eikä ilmoitus palvele käyttäjää. Virhe kirjataan vain `console.warn`-kutsulla ilman tarpeettomia tietoja. Jos selainmuistutus (6.7) on muutenkin näkyvissä, se kattaa asian.
+- Sovellus ei kuuntele laitteen `prefers-color-scheme`-asetusta.
+- Tuntematon tai korruptoitunut tallennettu arvo → tumma. Arvoa ei kirjoiteta uudelleen ennen kuin käyttäjä vaihtaa teeman.
+- Toinen välilehti: muutos näkyy toisessa välilehdessä vasta sivun päivityksessä (`storage`-tapahtuman kuuntelua ei vaadita). Idea kirjattu `docs/IDEAS.md`:hen.
+
+### 8.7 Välähdyksen esto ja tallennus (Koodarille ja Arkkitehdille)
+
+**Ratkaisu (suositus, tarkka):**
+
+1. `index.html`: `<html lang="fi" data-theme="dark">`. Tumma on siis oletus ilman skriptiä, ja CSS:ssä `:root` on tumma (8.8).
+2. Uusi tiedosto `public/theme-init.js` (Vite kopioi sellaisenaan `dist/`in juureen). Ladataan **`<head>`issa ennen tyylitiedostoa** tavallisena synkronisena skriptinä: `<script src="/theme-init.js"></script>` (ei `type="module"`, ei `defer`, ei `async`, koska muuten se ei ehdi ennen ensimmäistä piirtoa). Saman originin tiedostona se sopii CSP:hen `script-src 'self'`, eikä CSP:tä muuteta. Koodari tarkistaa, että Vite jättää viittauksen ennalleen (`dist/index.html`).
+   ```js
+   // Applies the saved light theme before the first paint (UX.md 8.7). Reads one key, writes nothing.
+   try {
+     if (window.localStorage.getItem('cyberdeck:theme') === 'light') {
+       document.documentElement.setAttribute('data-theme', 'light');
+     }
+   } catch (error) {
+     // Storage blocked: stay on the dark default.
+   }
+   ```
+3. **Tallennusavain:** `cyberdeck:theme`, arvo raakamerkkijono `light` tai `dark` (ei versioitua JSON-käärettä, koska esilataus ei saa riippua kääreen jäsentämisestä). Avain ja arvot määritellään yhdessä paikassa tallennuskerroksessa (`src/storage/keys.ts`). Yksikkötesti lukee `public/theme-init.js`:n tekstin ja varmistaa, että siinä on sama avain ja arvo `light`, jotta kopiot eivät eriydy.
+4. **SR-12-poikkeama (avoin kysymys A1):** `public/theme-init.js` lukee `localStorage`a tallennuskerroksen ulkopuolella (lint-sääntö ei koske `public/`-hakemistoa). Perustelu: vain luku, yksi avain, ei dataa eikä henkilötietoa (SR-16 täyttyy), ja ilman sitä vaalean valinnan tehnyt näkisi tumman välähdyksen jokaisella latauksella. Kaikki kirjoitus ja varsinainen asetuksen hallinta ovat tallennuskerroksessa. **Varavaihtoehto, jos poikkeamaa ei hyväksytä:** skripti jätetään pois. Silloin sivu piirtyy aina tummana ja React vaihtaa vaaleaan ensimmäisen renderöinnin jälkeen (tumma välähdys vaalean valinnan tehneille). Kortin kriteeri 4 sallii tämän ("jos se on mahdollista").
+5. React alustaa tilan synkronisesti `document.documentElement.dataset.theme`-arvosta (`'light'` → vaalea, muu → tumma), jotta ensimmäinen renderöinti vastaa jo piirrettyä. Sen jälkeen se lukee tallennuskerroksesta (`preferences.loadTheme()`) ja korjaa tilan, jos arvo poikkeaa (kattaa tilanteet, joissa skripti puuttuu, kuten testit). `data-theme`-attribuutin asettaminen on DOM-toiminto, ei tallennusta, joten se saa olla UI-koodissa.
+
+**Tallennuskerroksen rajapintalisäys (Koodarille, `src/storage/types.ts` ja `index.ts`; Arkkitehti saa tarkistaa):**
+
+```ts
+export type Theme = 'dark' | 'light';
+
+export interface PreferencesRepository {
+  /** Saved theme, or 'dark' when nothing valid is saved. Never rejects because of storage problems. */
+  loadTheme(): Promise<Theme>;
+  /** Resolves with the saved theme. Rejects with StorageError when saving fails (the UI keeps the theme for the session). */
+  saveTheme(theme: Theme): Promise<Theme>;
+}
+// Repositories gets a new field: preferences: PreferencesRepository
+```
+
+- `openBrowserRepositories()` ja `createMemoryRepositories()` täydennetään, ja muistinvarainen toteutus palvelee testejä.
+- Tuntematon arvo (muu kuin `light` tai `dark`) luetaan `'dark'`ksi eikä sitä korjata. Ei `sessionStorage`a eikä evästeitä.
+- PRIVACY.md:n tietoinventaarioon uusi rivi: `cyberdeck:theme` (teemavalinta, ei henkilötieto). Digiturva päivittää.
+
+### 8.8 CSS-rakenne (tokenit)
+
+Tokenien arvot pysyvät täsmälleen entisinä, vain valinta muuttuu:
+
+- `:root` sisältää yhteiset tokenit ja **tumman teeman arvot** (nykyisen `@media (prefers-color-scheme: dark)` -lohkon arvot), ja `color-scheme: dark`.
+- `:root[data-theme='light']` ylikirjoittaa vaalean teeman arvot (nykyisen `:root`in vaaleat arvot) ja asettaa `color-scheme: light`. Täsmällisyys (0,2,0) voittaa `:root`in.
+- `@media (prefers-color-scheme: dark)` -lohko **poistetaan kokonaan**. Tyylitiedoston alun kommentit päivitetään. Luvun 3 johdanto ja luvun 7.3 teemapäätös on merkitty tämän luvun mukaisesti (v0.9).
+- Jos `data-theme`-attribuutti puuttuu tai on tuntematon (testit, virhe), käytössä on tumma.
+- Komponenteilla ei saa olla omia teemasääntöjä, kuten tähänkin asti.
+
+### 8.9 Saavutettavuusvaatimukset (tarkistuslista Koodarille)
+
+- [ ] Painike on `<button type="button">` ja `<header>`in sisällä. Ei `div`- eikä `a`-elementtiä. Ei uutta otsikkoa eikä uutta maamerkkiä (`<nav>`ia ei lisätä).
+- [ ] Saavutettava nimi `Vaalea teema` kaikilla leveyksillä (jälkiliite jää ruudunlukijalle alle 40 rem:n). `aria-pressed` on aina olemassa (`"true"` tai `"false"`). Nimi ei vaihdu tilan mukana. Ikoni `aria-hidden="true"` ja `focusable="false"`.
+- [ ] Testi: `getByRole('button', { name: 'Vaalea teema', pressed: false })` löytyy ensimmäisellä käynnillä.
+- [ ] Ei `aria-live`-aluetta eikä tilan ilmoitusta muuhun alueeseen (T5). Fokus pysyy painikkeessa painalluksen jälkeen, ja sama DOM-elementti säilyy (ei `key`-vaihtoa eikä ehdollista renderöintiä).
+- [ ] Sarkaimella painike on ensimmäinen pysähdys. Enter ja väli vaihtavat. Fokusrengas näkyy (3 px, `--color-accent-2`) eikä leikkaudu (`clip-path: none` fokuksessa).
+- [ ] Kosketusalue vähintään 44 × 44 px (`--target-min`) 320 px:ssä ja 200 % zoomilla.
+- [ ] Ei vaakavieritystä 320 px:ssä, 200 % zoomilla eikä 400 % zoomilla. Rivitys sallittu (8.3). Tekstin välistyksen muutokset (1.4.12) eivät katkaise tekstiä.
+- [ ] Hover ei perustu pelkkään väriin (alleviivaus). Tila näkyy ikonin ja painikkeen täytöstä (1.4.1).
+- [ ] Kontrastit 8.5:n taulukon mukaiset. axe ajettu kummassakin teemassa (oletus ja `data-theme="light"`) ilman virheitä.
+- [ ] `prefers-reduced-motion`: ei omaa teemanvaihtoanimaatiota. Siirtymät vain `no-preference`-ehdon sisällä.
+- [ ] Ei `style`-attribuutteja eikä inline-skriptiä (CSP). Buildin jälkeen `dist/theme-init.js` on olemassa ja `dist/index.html` viittaa siihen ennen tyylitiedostoa.
+- [ ] Tallennettu `light` → ensimmäinen piirto on vaalea (tarkista `npm run preview`issä tai esikatselussa: ei tummaa välähdystä, esim. Performance-paneelin kuvakaappauksilla).
+- [ ] Testit: (1) oletus on tumma, vaikka `matchMedia('(prefers-color-scheme: light)')` palauttaa `matches: true`. (2) Painallus vaihtaa `data-theme`in ja `aria-pressed`in. (3) Valinta tallennetaan, ja uusi `App`-renderöinti tallennetuilla arvoilla alkaa vaaleana. (4) Tallennus epäonnistuu (`saveTheme` hylkää) → teema silti vaihtuu, ei virhenäkymää. (5) Tuntematon arvo → tumma. (6) `theme-init.js`:n avain vastaa `keys.ts`:ää. (7) axe molemmissa teemoissa.
+- [ ] Koodikatselmoija varmistaa, että tokenien arvot ovat täsmälleen ennallaan (diff) ja että `@media (prefers-color-scheme: dark)` on poistettu.
+
+### 8.10 Avoimet kysymykset (oletus valittu, PM ratkaisee)
+
+| # | Kysymys | Oletus |
+|---|---|---|
+| A1 | Hyväksyvätkö Digiturva ja Arkkitehti sen, että `public/theme-init.js` lukee `localStorage`a tallennuskerroksen ulkopuolella (SR-12-poikkeama, 8.7 kohta 4)? | Kyllä: vain luku, yksi avain. Jos ei: varavaihtoehto (ei skriptiä, vaalean valinnan tehneille tumma välähdys). |
+| A2 | Raakamerkkijono `light` tai `dark` avaimessa `cyberdeck:theme` (ei versioitua käärettä)? | Kyllä: esilataus ei saa riippua kääreen jäsentämisestä, eikä arvo ole data. Arkkitehti voi muuttaa. |
+| A3 | Näytetäänkö viesti, kun teeman tallennus epäonnistuu? | Ei (8.6). Vaikutus on vähäinen. |
+| A4 | "Laitteen mukaan" -vaihtoehto ja teeman synkronointi välilehtien välillä? | Ei (T2, 8.6). Kirjattu `IDEAS.md`:hen. |
+| A5 | Lisätäänkö `<meta name="theme-color" content="#000000">` (otsikkopalkki on musta kummassakin teemassa)? | Ei tässä tehtävässä (laajuus). Kirjattu `IDEAS.md`:hen. |

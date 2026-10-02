@@ -5,6 +5,7 @@ import { openBrowserRepositories } from './storage';
 import type { Repositories } from './storage';
 import { CatalogView } from './ui/CatalogView';
 import { texts } from './ui/texts';
+import { ThemeToggle } from './ui/ThemeToggle';
 
 /** `cards` defaults to the bundled data (D-013); tests pass a small list and in-memory repositories. */
 export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; repositories?: Repositories }) {
@@ -16,6 +17,7 @@ export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; 
       <header className="site-header">
         <div className="container">
           <span className="brand">{texts.appName}</span>
+          <ThemeToggle preferences={openRepositories.preferences} />
         </div>
       </header>
       <main className="container">

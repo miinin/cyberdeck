@@ -2,7 +2,7 @@ import type { DeckContent } from '../domain/deck';
 import { MAX_DECKS } from '../domain/deck';
 import { encodeEnvelope } from './envelope';
 import { StorageError } from './errors';
-import { BACKUP_PREFIX, COLLECTION_KEY, DECKS_KEY } from './keys';
+import { BACKUP_PREFIX, COLLECTION_KEY, DECKS_KEY, THEME_KEY } from './keys';
 import { createMemoryStore } from './keyValueStore';
 import type { KeyValueStore } from './keyValueStore';
 import { createRepositories } from './repositories';
@@ -400,5 +400,66 @@ describe('two tabs', () => {
   it('returns a no-op unsubscribe without a subscribe function', () => {
     const { collection } = setup();
     expect(() => collection.subscribe(() => {})()).not.toThrow();
+  });
+});
+
+describe('preferences: theme (T-025, UX.md 8.7)', () => {
+  it('loads the dark default when nothing is saved', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadTheme()).toBe('dark');
+    expect(store.getItem(THEME_KEY)).toBeNull();
+  });
+
+  it('saves the raw string that a new instance on the same store reads back', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.saveTheme('light')).toBe('light');
+    expect(store.getItem(THEME_KEY)).toBe('light');
+    expect(await createRepositories({ store, persistent: true }).preferences.loadTheme()).toBe('light');
+
+    await preferences.saveTheme('dark');
+    expect(store.getItem(THEME_KEY)).toBe('dark');
+    expect(await preferences.loadTheme()).toBe('dark');
+  });
+
+  it.each(['LIGHT', ' light', '"light"', '', '{"theme":"light"}'])(
+    'reads the unknown value %j as dark and does not rewrite it',
+    async (raw) => {
+      const { preferences, store } = setup({ [THEME_KEY]: raw });
+      expect(await preferences.loadTheme()).toBe('dark');
+      expect(store.getItem(THEME_KEY)).toBe(raw);
+    },
+  );
+
+  it('loads dark instead of rejecting when reading storage throws', async () => {
+    const base = createMemoryStore({ [THEME_KEY]: 'light' });
+    const store: KeyValueStore = {
+      ...base,
+      getItem: () => {
+        throw new DOMException('blocked', 'SecurityError');
+      },
+    };
+    const { preferences } = setup({}, { store });
+    expect(await preferences.loadTheme()).toBe('dark');
+  });
+
+  it('rejects with quota or unavailable when saving fails and keeps the previous value', async () => {
+    const base = createMemoryStore({ [THEME_KEY]: 'dark' });
+    const quota = setup({}, { store: failingStore(base, quotaError()) });
+    await expectStorageError(quota.preferences.saveTheme('light'), 'quota');
+    const blocked = setup({}, { store: failingStore(base, new DOMException('blocked', 'SecurityError')) });
+    await expectStorageError(blocked.preferences.saveTheme('light'), 'unavailable');
+    expect(base.getItem(THEME_KEY)).toBe('dark');
+  });
+
+  it('rejects an unknown theme from the caller without writing', async () => {
+    const { preferences, store } = setup();
+    await expectStorageError(preferences.saveTheme('blue' as 'dark'), 'invalid-input');
+    expect(store.getItem(THEME_KEY)).toBeNull();
+  });
+
+  it('does not touch the collection or deck keys', async () => {
+    const { preferences, store } = setup();
+    await preferences.saveTheme('light');
+    expect(store.keys()).toEqual([THEME_KEY]);
   });
 });
