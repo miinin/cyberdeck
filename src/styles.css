@@ -719,19 +719,15 @@ main {
   outline-offset: 2px;
 }
 
-.filter-hint {
-  margin-block-start: var(--space-4);
-}
-
 .card-filters fieldset {
   min-width: 0;
-  margin: var(--space-2) 0 0;
+  margin: var(--space-1) 0 0;
   padding: 0;
   border: 0;
 }
 
 .card-filters fieldset + fieldset {
-  margin-block-start: var(--space-3);
+  margin-block-start: var(--space-1);
 }
 
 .card-filters legend {
@@ -741,8 +737,15 @@ main {
 .options {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-block-start: var(--space-2);
+  gap: var(--space-1);
+}
+
+/* Legend and chips on one row when there is room (T-038). */
+.card-filters fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
 }
 
 /* Checkbox label as a "chip": the whole label is the click target (UX.md 3.4). */
@@ -750,12 +753,13 @@ main {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-width: var(--target-min);
+  min-width: 1.5rem;
   max-width: 100%;
-  min-height: var(--target-min);
-  padding: 0 var(--space-3);
+  min-height: 1.75rem;
+  padding: 0 var(--space-2);
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface-raised);
+  font-size: var(--font-size-sm);
   overflow-wrap: anywhere;
   cursor: pointer;
 }
@@ -777,8 +781,8 @@ main {
   display: inline-grid;
   place-content: center;
   flex: none;
-  inline-size: 1.375rem;
-  block-size: 1.375rem;
+  inline-size: 1rem;
+  block-size: 1rem;
   margin: 0;
   border: 2px solid var(--color-border-strong);
   border-radius: 0;
@@ -788,8 +792,8 @@ main {
 
 .option input::after {
   content: '';
-  width: 0.8rem;
-  height: 0.8rem;
+  width: 0.6rem;
+  height: 0.6rem;
   background: var(--color-on-accent);
   clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
   transform: scale(0);
@@ -811,7 +815,7 @@ main {
 
 /* "Vain omistetut" (UX.md 6.6) */
 .owned-only {
-  margin-block-start: var(--space-3);
+  margin-block-start: var(--space-2);
 }
 
 .owned-only .option {
@@ -829,15 +833,69 @@ main {
     display: flex;
     flex-wrap: wrap;
     /* Row gap + the fieldset margin = --space-3, as when stacked. */
-    gap: var(--space-1) var(--space-8);
+    gap: var(--space-1) var(--space-6);
   }
 
   .card-filters fieldset + fieldset {
-    margin-block-start: var(--space-2);
+    margin-block-start: var(--space-1);
   }
 }
 
-/* Browser-only reminder and persistent storage (UX.md 6.7) */
+/* Persistent storage button in the header (T-038): icon only, explanation as tooltip on hover and focus. */
+.header-actions {
+  display: flex;
+  margin-inline-start: auto;
+}
+
+.header-actions + .theme-toggle {
+  margin-inline-start: 0;
+}
+
+.storage-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--target-min);
+  block-size: var(--target-min);
+  padding: 0;
+  border: 1px solid var(--color-header-text);
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+  cursor: pointer;
+}
+
+.storage-button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.storage-button[aria-disabled='true'] {
+  cursor: default;
+}
+
+.storage-tooltip {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline-end: 0;
+  z-index: 10;
+  inline-size: max-content;
+  max-inline-size: min(20rem, calc(100vw - 2 * var(--gutter)));
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  text-align: start;
+  visibility: hidden;
+}
+
+.storage-button:hover .storage-tooltip,
+.storage-button:focus-visible .storage-tooltip {
+  visibility: visible;
+}
+
+/* Result text after a request (UX.md 6.7) */
 .storage-reminder {
   display: flex;
   flex-direction: column;

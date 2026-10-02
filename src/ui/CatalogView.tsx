@@ -58,11 +58,14 @@ function collectionSummary(snapshot: CollectionSnapshot, cards: readonly Card[])
 export function CatalogView({
   cards: allCards,
   repositories,
+  headerSlot = null,
 }: {
   /** All cards, bundled with the app (D-013). A stable reference: it also owns the live announcements. */
   cards: readonly Card[];
   /** Created once in App (a stable reference). */
   repositories: Repositories;
+  /** Header element for the persistent storage button (rendered by App). */
+  headerSlot?: HTMLElement | null;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -257,6 +260,7 @@ export function CatalogView({
         <StorageReminder
           state={persistence}
           resultRef={persistenceResultRef}
+          slot={headerSlot}
           onRequest={handleRequestPersistence}
         />
       )}

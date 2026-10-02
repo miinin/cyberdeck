@@ -36,7 +36,9 @@ async function settle() {
 }
 
 async function renderView(repositories: Repositories = createMemoryRepositories(), list: Card[] = cards) {
-  const result = render(<CatalogView cards={list} repositories={repositories} />);
+  const slot = document.createElement('div');
+  document.body.appendChild(slot);
+  const result = render(<CatalogView cards={list} repositories={repositories} headerSlot={slot} />);
   await settle();
   return { ...result, repositories };
 }
@@ -755,14 +757,9 @@ describe('CatalogView collection: browser reminder and persistent storage', () =
     const persist = vi.fn(async () => true);
     stubStorageManager({ persist, persisted: vi.fn(async () => false) });
     await renderView(persistentMemory());
-    expect(
-      screen.getByText(
-        'Kokoelma tallentuu vain tähän selaimeen tällä laitteella. Se ei siirry toiselle laitteelle eikä toiseen selaimeen.',
-      ),
-    ).toBeInTheDocument();
     const button = screen.getByRole('button', { name: 'Pyydä pysyvää tallennusta' });
     expect(button).toHaveAccessibleDescription(
-      'Pysyvä tallennus pyytää selainta säilyttämään kokoelman, vaikka laitteen tallennustila vähenee. Selaimen tietojen tyhjennys poistaa kokoelman silti.',
+      'Kokoelma tallentuu vain tähän selaimeen tällä laitteella. Se ei siirry toiselle laitteelle eikä toiseen selaimeen. Pysyvä tallennus pyytää selainta säilyttämään kokoelman, vaikka laitteen tallennustila vähenee. Selaimen tietojen tyhjennys poistaa kokoelman silti.',
     );
     expect(persist).not.toHaveBeenCalled();
   });
@@ -773,7 +770,7 @@ describe('CatalogView collection: browser reminder and persistent storage', () =
       false,
       'Selain ei antanut lupaa pysyvään tallennukseen. Kokoelma tallentuu silti, mutta selain voi poistaa sen, jos laitteen tila loppuu. Älä tyhjennä selaimen tietoja.',
     ],
-  ])('the button asks once (answer %s); the result replaces it, takes focus and is announced', async (answer, text) => {
+  ])('the button asks once (answer %s); the result is shown, takes focus and is announced', async (answer, text) => {
     let resolve: (value: boolean) => void = () => {};
     const persist = vi.fn(() => new Promise<boolean>((done) => (resolve = done)));
     stubStorageManager({ persist, persisted: vi.fn(async () => false) });
@@ -783,13 +780,12 @@ describe('CatalogView collection: browser reminder and persistent storage', () =
     fireEvent.click(button);
     expect(button).toHaveAttribute('aria-busy', 'true');
     expect(button).toHaveAttribute('aria-disabled', 'true');
-    expect(button).toHaveTextContent('Pyydä pysyvää tallennusta');
     fireEvent.click(button);
     expect(persist).toHaveBeenCalledTimes(1);
 
     await act(async () => resolve(answer));
     await settle();
-    expect(screen.queryByRole('button', { name: 'Pyydä pysyvää tallennusta' })).toBeNull();
+    expect(screen.getByRole('button', { name: text })).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText(text, { selector: 'p' })).toHaveFocus();
     expect(live()).toHaveTextContent(text);
   });
@@ -799,7 +795,9 @@ describe('CatalogView collection: browser reminder and persistent storage', () =
     stubStorageManager({ persist, persisted: vi.fn(async () => true) });
     await renderView(persistentMemory());
     expect(
-      screen.getByText('Selain on luvannut säilyttää kokoelmasi. Selaimen tietojen tyhjennys poistaa sen silti.'),
+      screen.getByRole('button', {
+        name: 'Selain on luvannut säilyttää kokoelmasi. Selaimen tietojen tyhjennys poistaa sen silti.',
+      }),
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Pyydä pysyvää tallennusta' })).toBeNull();
     expect(persist).not.toHaveBeenCalled();
