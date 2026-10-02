@@ -1,6 +1,6 @@
 # agents.md — Agenttitiimi
 
-> Versio 1.2 · 2026-09-30 (muutokset: katso "Muutokset tähän tiedostoon")
+> Versio 1.3 · 2026-10-01 (muutokset: katso "Muutokset tähän tiedostoon")
 > Tämä tiedosto määrittelee tiimin roolit, vastuut ja yhteispelin. **Jokainen agentti noudattaa `rules.md`:tä**, joka menee tämän tiedoston edelle ristiriitatilanteessa.
 
 ---
@@ -83,12 +83,18 @@ PROJEKTIPÄÄLLIKKÖ ────── Suunnitelma, tehtävät, MVP, valvonta, 
 9. Käyttäjä       Kokeilee testisivustolla ja julkaisee tuotantoon komennolla /julkaise
 ```
 
-Kaikki vaiheet eivät koske jokaista tehtävää. PM merkitsee tehtäväkorttiin, mitkä suunnittelut ja katselmoinnit tarvitaan. Oletukset:
-- **käyttäjälle näkyvä muutos** = UX + Testikäyttäjä
-- **data, syöte, autentikointi, henkilötiedot, riippuvuudet tai rajapinnat** = Digiturva
-- **uusi tai muuttuva tekstisisältö** (ohjeet, tehtävät, sivutekstit) = Sisällöntuottaja
-- **uusi osa, tietomalli, rajapinta tai teknologia** = Arkkitehti
-- **muutos, joka vaikuttaa käyttöön, asennukseen tai ajoon** = Dokumentoija
+Kaikki vaiheet eivät koske jokaista tehtävää. PM merkitsee tehtäväkorttiin, mitkä suunnittelut ja katselmoinnit tarvitaan.
+
+**Kevennetty malli (D-009, voimassa 2026-10-01 alkaen).** Agentit ovat kalliita, joten jokainen tehtävä saa vain sen, mitä sen riski vaatii. Oletukset:
+- **Koodari** tekee aina koodikatselmoinnin, päivittää CHANGELOGin `[Julkaisematon]`-osion ja tarkistaa omat tekstinsä CONTENT.md:n sanastoa vasten.
+- **käyttäjälle näkyvä muutos** = UX (käytettävyys, saavutettavuus ja mikrokopio samalla katselmoinnilla)
+- **data, syöte, tiedostot, autentikointi, henkilötiedot, riippuvuudet, workflowt tai firebase.json** = Digiturva
+- **uusi osa, tietomalli, rajapinta tai teknologia** = Arkkitehti suunnittelee. Katselmointi vain, jos toteutus poikkeaa ADR:stä.
+- **laaja tekstisisältö** (ohjeet, käyttöohjeet, tietosuojaseloste) = Sisällöntuottaja. Mikrokopion tarkistaa UX.
+- **Testikäyttäjä ja Dokumentoija** kerran jokaisen MVP-tason lopussa koko tasolle, ei tehtäväkohtaisesti. Poikkeus: PM voi tilata Testikäyttäjän riskialttiille tehtävälle (esim. tiedostojen tuonti).
+- **Suunnittelu:** pieni käyttöliittymämuutos ilman uutta näkymää ei tarvitse erillistä UX-suunnittelua. UX katselmoi toteutuksen.
+
+**Mallit ja rinnakkaisuus (D-009):** Koodari, Arkkitehti ja Digiturva ajetaan Opuksella. UX, Sisällöntuottaja, Testikäyttäjä ja Dokumentoija ajetaan Sonnetilla (PM antaa `model: "sonnet"`). Enintään kaksi agenttia kerrallaan. Aliagentti lukee aloituksessa vain rules.md:n luvun 0, agents.md:stä oman roolinsa, STATUS.md:n, oman tehtäväkorttinsa ja tehtävän kannalta tarvittavat dokumentin osat (rules.md 2 kohta 7: "vain tarvittava").
 
 ### Vastuunjako (RACI)
 
@@ -558,3 +564,4 @@ Tätä tiedostoa ja rules.md:tä muuttaa vain PM käyttäjän hyväksynnällä. 
 | 1.0 | 2026-09-30 | Ensimmäinen versio: PM, Koodari, Digiturva, UX Designer, Testikäyttäjä | käyttäjä |
 | 1.1 | 2026-09-30 | Uudet roolit Arkkitehti, Sisällöntuottaja ja kielentarkastaja sekä Dokumentoija. Koodikatselmointi siirretty Koodarille, tietosuoja (GDPR) Digiturvalle ja saavutettavuusauditointi ja -seloste UX Designerille. Pikaopas Claude Coden komentoihin ja MUISTILAPPU.md. | käyttäjä |
 | 1.2 | 2026-09-30 | Pysyvä test-haara ja testisivusto (D-003). Rinnakkaiset tehtävät omissa worktreeissään (`/rinnakkain`). Työnkulkuun lisätty testiin yhdistäminen ja käyttäjän julkaisu. Ristiriidat rules.md v1.2:n kanssa poistettu. | käyttäjä |
+| 1.3 | 2026-10-01 | Kevennetty katselmointimalli, roolien mallit (Opus tai Sonnet) ja enintään kaksi rinnakkaista agenttia (D-009). | käyttäjä |

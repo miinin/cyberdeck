@@ -1,30 +1,104 @@
-/* Design tokens: docs/UX.md luku 3. All colours, spacing and font sizes come from here. */
+/*
+ * Visual style: Cyberpunk 2077 inspired (T-021, D-010, D-011). Spec: docs/UX.md luku 3 ja 7,
+ * reference mockup docs/design/t021-mallisivu.html.
+ * All colours, spacing and font sizes come from the tokens below. The dark theme is the default (D-012);
+ * the light theme is used only with data-theme="light" on <html> (theme toggle, UX.md 8). The device's
+ * prefers-color-scheme is ignored. All motion is inside prefers-reduced-motion: no-preference.
+ */
+
+/* Self-hosted fonts (SIL OFL 1.1, licences next to the files). CSP allows only font-src 'self'. */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./assets/fonts/rajdhani-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./assets/fonts/rajdhani-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/share-tech-mono-400.woff2') format('woff2');
+}
+
+/* Design tokens: docs/UX.md luku 3. Dark theme (default, D-012). Components use only tokens, so no per-component theme rules. */
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 
-  --color-bg: #ffffff;
-  --color-surface: #f3f4f6;
-  --color-text: #16181d;
-  --color-text-muted: #4b5262;
-  --color-border: #d5d9e0;
-  --color-border-strong: #767d8c;
-  --color-accent: #a3004f;
-  --color-on-accent: #ffffff;
-  --color-danger: #b3261e;
-  --color-danger-surface: #fdecec;
-  --color-warning: #8a5a00;
-  --color-warning-surface: #fff6db;
-  --color-focus: var(--color-accent);
+  --color-bg: #0b0c10;
+  --color-surface: #13151b;
+  --color-surface-raised: #1b1e27;
+  --color-surface-hover: #262a36;
+  --color-text: #f1f1ec;
+  --color-text-muted: #a9afbd;
+  --color-border: #2b303b;
+  --color-border-strong: #7b8396;
+  --color-accent: #fcee09;
+  --color-on-accent: #0b0c10;
+  --color-accent-edge: #fcee09;
+  --color-accent-2: #1fe0ff;
+  --color-info: #1fe0ff;
+  --color-focus: var(--color-info);
+  --color-selected-surface: #0c2a31;
+  --color-danger: #ff5a73;
+  --color-danger-surface: #2a0d15;
+  --color-warning: #ffa726;
+  --color-warning-surface: #2b1a05;
+  --color-header-bg: #000000;
+  --color-header-text: #f1f1ec;
+  --color-bracket: #fcee09;
+  --color-count: #fcee09;
+  --color-owned: transparent;
+  --color-success: #39e08a;
+  --color-owned-hover: var(--color-surface-raised);
+  --color-swatch-edge: transparent;
+  /* Decorative only, same in both themes: header lines and the brand mark, the heading glitch (UX.md 7.5, 7.7). */
+  --color-brand-yellow: #fcee09;
+  --color-glitch-a: #ff2a6d;
+  --color-glitch-b: #1fe0ff;
+  --heading-bar: var(--color-brand-yellow);
+  --glow-accent: 0 0 0.75rem rgba(252, 238, 9, 0.35);
+  --page-glow-a: rgba(31, 224, 255, 0.1);
+  --page-glow-b: rgba(252, 238, 9, 0.06);
+  --scanline: rgba(255, 255, 255, 0.022);
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-size-base: 1rem;
-  --font-size-sm: 0.875rem;
-  --font-size-lg: 1.25rem;
-  --font-size-xl: 1.75rem;
+  /* Card colors (UX.md 3.1.1): only for the decorative swatch, never for text. */
+  --color-card-red: #ff4d5e;
+  --color-card-yellow: #ffd400;
+  --color-card-green: #39e08a;
+  --color-card-blue: #4d9dff;
+  --color-card-unknown: transparent;
+
+  --font-sans: 'Rajdhani', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --font-size-base: 1.125rem;
+  --font-size-sm: 1rem;
+  --font-size-lg: 1.375rem;
+  --font-size-xl: 2.25rem;
+  --font-size-card-name: 1.25rem;
   --line-height-body: 1.5;
-  --line-height-heading: 1.2;
-  --font-weight-normal: 400;
+  --line-height-heading: 1.15;
+  --line-height-tight: 1.2;
+  --letter-spacing-body: 0.01em;
+  --letter-spacing-caps: 0.08em;
+  --letter-spacing-button: 0.06em;
+  --letter-spacing-table-head: 0.1em;
+  --letter-spacing-h2: 0.05em;
+  --letter-spacing-brand: 0.2em;
+  --font-weight-normal: 500;
   --font-weight-bold: 700;
+  /* Share Tech Mono has a single weight. */
+  --font-weight-mono: 400;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -32,30 +106,78 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  --content-max-width: 48rem;
-  --radius: 0.375rem;
-  --focus-ring: 3px solid var(--color-focus);
+  --content-max-width: 56rem;
+  --editor-max-width: 100rem;
   --target-min: 2.75rem;
+  --cut: 0.625rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --cut-inner-2: calc(var(--cut) - 2px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner)),
+    calc(100% - var(--cut-inner)) 100%,
+    0 100%
+  );
+  --shape-chamfer-inner-2: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner-2)),
+    calc(100% - var(--cut-inner-2)) 100%,
+    0 100%
+  );
+  --shape-swatch: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%);
+  --shape-brand: polygon(0 0, 100% 0, 100% 55%, 55% 100%, 0 100%);
+  --focus-ring: 3px solid var(--color-focus);
+  --focus-offset: 3px;
+  --ease: 0.12s ease-out;
 
   --gutter: var(--space-4);
   --cell-padding-x: var(--space-2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0f1115;
-    --color-surface: #1a1d24;
-    --color-text: #e9ebf0;
-    --color-text-muted: #a9b0bd;
-    --color-border: #2c313b;
-    --color-border-strong: #7d8494;
-    --color-accent: #ff6bb0;
-    --color-on-accent: #0f1115;
-    --color-danger: #ff8a80;
-    --color-danger-surface: #3a1414;
-    --color-warning: #f2c14e;
-    --color-warning-surface: #33290f;
-  }
+/* Light theme: chosen with the theme toggle (UX.md 8.8). (0,2,0) beats :root. */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-bg: #f3f0e6;
+  --color-surface: #ebe7d9;
+  --color-surface-raised: #fbf9f1;
+  --color-surface-hover: #ddd8c6;
+  --color-text: #0e0f14;
+  --color-text-muted: #4a4f5c;
+  --color-border: #cfc9b5;
+  --color-border-strong: #5f6676;
+  /* Yellow is a fill colour only: never text or a thin line on the light background (UX.md 3.1). */
+  --color-accent: #fcee09;
+  --color-on-accent: #0e0f14;
+  --color-accent-edge: #0e0f14;
+  --color-accent-2: #1fe0ff;
+  --color-info: #005f73;
+  --color-selected-surface: #d4f3f8;
+  --color-danger: #b00030;
+  --color-danger-surface: #ffe3e8;
+  --color-warning: #8a4b00;
+  --color-warning-surface: #fff0d0;
+  --color-header-bg: #0e0f14;
+  --color-header-text: #f1f1ec;
+  --color-bracket: #0e0f14;
+  --color-count: #0e0f14;
+  --color-owned: transparent;
+  --color-success: #17713f;
+  --color-owned-hover: var(--color-surface-raised);
+  --color-swatch-edge: #0e0f14;
+  --heading-bar: linear-gradient(90deg, var(--color-text) 0 65%, var(--color-brand-yellow) 65%);
+  --glow-accent: none;
+  --page-glow-a: rgba(31, 224, 255, 0.16);
+  --page-glow-b: rgba(252, 238, 9, 0.22);
+  --scanline: rgba(0, 0, 0, 0.03);
+
+  --color-card-red: #d32f45;
+  --color-card-yellow: #f2c200;
+  --color-card-green: #1b9e5a;
+  --color-card-blue: #1f6fd1;
 }
 
 @media (min-width: 40rem) {
@@ -72,14 +194,27 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-body);
+  overflow-wrap: break-word;
+  /* Glows and scanlines are background images only: nothing is drawn over the text (UX.md 7.3). */
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(48rem 20rem at 85% -8%, var(--page-glow-a), transparent 70%),
+    radial-gradient(36rem 16rem at 0% 0%, var(--page-glow-b), transparent 70%),
+    repeating-linear-gradient(0deg, var(--scanline) 0 1px, transparent 1px 4px);
+  background-attachment: fixed;
 }
 
 h1,
@@ -90,11 +225,29 @@ h2 {
 }
 
 h1 {
+  position: relative;
+  padding-block-end: var(--space-3);
   font-size: var(--font-size-xl);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+/* Decorative bar under the heading. */
+h1::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 3.5rem;
+  height: 4px;
+  background: var(--heading-bar);
+  box-shadow: var(--glow-accent);
 }
 
 h2 {
   font-size: var(--font-size-lg);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-h2);
 }
 
 p {
@@ -103,7 +256,7 @@ p {
 
 :focus-visible {
   outline: var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: var(--focus-offset);
 }
 
 /* The heading is focused programmatically after "Yritä uudelleen" (UX.md 4.6). */
@@ -131,11 +284,55 @@ h1:focus:not(:focus-visible) {
   padding-inline: var(--gutter);
 }
 
+/* The deck editor is wider so search and deck fit side by side (T-049). */
+.container-wide {
+  max-width: var(--editor-max-width);
+}
+
+/* Header: black in both themes (UX.md 7.5, V11). Not sticky. */
 .site-header {
-  background: var(--color-surface);
+  position: relative;
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 7rem;
+  height: 3px;
+  background: var(--color-brand-yellow);
+}
+
+.site-header .container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  row-gap: var(--space-2);
   padding-block: var(--space-3);
+}
+
+/* Decorative chamfered mark before the name: not a logo, no text. */
+.site-header .container::before {
+  content: '';
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  background: var(--color-brand-yellow);
+  clip-path: var(--shape-brand);
+}
+
+.brand {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-brand);
 }
 
 main {
@@ -145,54 +342,325 @@ main {
   padding-block: var(--space-6);
 }
 
+/* Machine-like status lines: monospace HUD readout (UX.md 7.4). */
 .status-line {
   color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-mono);
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
 
+.status-line.is-summary {
+  color: var(--color-info);
+}
+
 .site-footer {
+  position: relative;
+  margin-block-start: var(--space-6);
   padding-block: var(--space-6);
+  border-top: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-/* Primary button */
-.button-primary {
+.site-footer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 3rem;
+  height: 2px;
+  background: var(--color-accent-edge);
+}
+
+.site-footer .container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Source credit ("Korttitiedot: Netdeck.gg") in monospace. */
+.site-footer p:last-child {
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-mono);
+  letter-spacing: 0;
+}
+
+/* Panel with HUD corner brackets (UX.md 3.4). Gradients instead of clip-path, so focus rings are not clipped. */
+.panel {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  background:
+    linear-gradient(var(--color-bracket), var(--color-bracket)) 0 0 / 16px 2px no-repeat,
+    linear-gradient(var(--color-bracket), var(--color-bracket)) 0 0 / 2px 16px no-repeat,
+    linear-gradient(var(--color-bracket), var(--color-bracket)) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(var(--color-bracket), var(--color-bracket)) 100% 100% / 2px 16px no-repeat,
+    var(--color-surface);
+}
+
+/*
+ * Buttons (UX.md 3.4). The element background is the edge and ::before is the fill.
+ * Dark theme: edge = fill (yellow). Light theme: black edge around the yellow fill.
+ */
+.button-primary,
+.button-secondary,
+.step,
+.theme-toggle {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: var(--target-min);
   min-height: var(--target-min);
   padding: var(--space-2) var(--space-4);
   border: 0;
-  border-radius: var(--radius);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+  border-radius: 0;
   font: inherit;
   font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-button);
+  text-transform: uppercase;
+  text-align: center;
+  /* Long labels wrap instead of widening the page when text is enlarged (UX-008). */
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
   cursor: pointer;
+  clip-path: var(--shape-chamfer);
 }
 
+.button-primary,
+.step-plus {
+  background: var(--color-accent-edge);
+  color: var(--color-on-accent);
+}
+
+.button-primary::before,
+.step-plus::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: var(--color-accent);
+  clip-path: var(--shape-chamfer-inner-2);
+}
+
+.button-primary:hover::before,
+.step-plus:hover::before {
+  background: var(--color-accent-2);
+}
+
+/* Hover is never colour alone (UX.md 3.4). */
 .button-primary:hover {
   text-decoration: underline;
 }
 
-/* Notice box (error / warning) */
+.button-secondary,
+.step-minus {
+  background: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.button-secondary::before,
+.step-minus::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--color-surface-raised);
+  clip-path: var(--shape-chamfer-inner);
+}
+
+.button-secondary:hover,
+.step-minus:hover {
+  background: var(--color-info);
+  text-decoration: underline;
+}
+
+.button-secondary:hover::before,
+.step-minus:hover::before {
+  background: var(--color-surface-hover);
+}
+
+.button-secondary[aria-disabled='true'] {
+  cursor: progress;
+}
+
+/* Count buttons (UX.md 7.5): smaller chamfer, the symbol is not uppercase text. */
+.step {
+  /* Custom properties resolve where they are declared, so the shapes are redeclared for the smaller cut. */
+  --cut: 0.5rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --cut-inner-2: calc(var(--cut) - 2px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner)),
+    calc(100% - var(--cut-inner)) 100%,
+    0 100%
+  );
+  --shape-chamfer-inner-2: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner-2)),
+    calc(100% - var(--cut-inner-2)) 100%,
+    0 100%
+  );
+  padding: 0;
+  font-size: var(--font-size-lg);
+  letter-spacing: 0;
+}
+
+/* "+" at the maximum count: striped and muted, but still focusable (UX.md 6.4, 7.5). */
+.step-plus[aria-disabled='true'] {
+  background: var(--color-border-strong);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.step-plus[aria-disabled='true']::before {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-surface-hover) 0 4px,
+    var(--color-surface-raised) 4px 8px
+  );
+}
+
+/* After the base rules: the chamfer would clip the focus ring (UX.md 7.9 kohta 7). */
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.step:focus-visible,
+.theme-toggle:focus-visible {
+  clip-path: none;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/*
+ * Theme toggle in the header (UX.md 8.3–8.5). The header is black in both themes, so the toggle uses the
+ * header and accent tokens, not the page surfaces. Same edge and fill structure as the other buttons.
+ */
+.theme-toggle {
+  --toggle-edge: var(--color-header-text);
+  --toggle-fill: var(--color-header-bg);
+  --toggle-text: var(--color-header-text);
+  flex: none;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+  padding-inline: var(--space-2);
+  background: var(--toggle-edge);
+  color: var(--toggle-text);
+  font-size: var(--font-size-sm);
+}
+
+.theme-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: var(--toggle-fill);
+  clip-path: var(--shape-chamfer-inner-2);
+}
+
+/* Hover is never colour alone (UX.md 3.4). */
+.theme-toggle:hover {
+  --toggle-edge: var(--color-accent-2);
+  --toggle-text: var(--color-accent-2);
+  text-decoration: underline;
+}
+
+.theme-toggle[aria-pressed='true'] {
+  --toggle-edge: var(--color-accent);
+  --toggle-fill: var(--color-accent);
+  --toggle-text: var(--color-on-accent);
+}
+
+.theme-toggle[aria-pressed='true']:hover {
+  --toggle-edge: var(--color-accent-2);
+  --toggle-fill: var(--color-accent-2);
+}
+
+/* The ring is drawn on the black header: --color-focus of the light theme would be under 3:1 there (UX.md 8.5). */
+.theme-toggle:focus-visible {
+  outline-color: var(--color-accent-2);
+}
+
+.theme-toggle-icon {
+  flex: none;
+}
+
+/* The state is also shown without colour: filled sun = light theme in use (UX.md 8.4). */
+.theme-toggle[aria-pressed='true'] .theme-toggle-icon circle {
+  fill: currentColor;
+}
+
+/* " teema" only from 40 rem up; below that it stays for screen readers (same as .visually-hidden). */
+.theme-toggle-suffix {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (min-width: 40rem) {
+  .theme-toggle-suffix {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
+/* Notice box (error / warning). The heading carries the information, the stripes are decoration. */
 .notice {
+  --tone: var(--color-danger);
+  --tone-surface: var(--color-danger-surface);
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-4);
-  border-radius: var(--radius);
-  border-left: 4px solid;
+  padding: calc(var(--space-4) + 6px) var(--space-4) var(--space-4) calc(var(--space-4) + 4px);
+  border: 1px solid var(--tone);
+  border-left: 4px solid var(--tone);
+  background: var(--tone-surface);
+}
+
+.notice::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 6px;
+  background: repeating-linear-gradient(135deg, var(--tone) 0 8px, transparent 8px 16px);
+}
+
+.notice h2 {
+  color: var(--tone);
 }
 
 .notice-danger {
-  background: var(--color-danger-surface);
-  border-left-color: var(--color-danger);
+  --tone: var(--color-danger);
+  --tone-surface: var(--color-danger-surface);
 }
 
 .notice-warning {
-  background: var(--color-warning-surface);
-  border-left-color: var(--color-warning);
+  --tone: var(--color-warning);
+  --tone-surface: var(--color-warning-surface);
 }
 
 .empty {
@@ -200,30 +668,259 @@ main {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
-}
-
-/* Card table (UX.md 4.4) */
-.card-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.card-table th,
-.card-table td {
-  padding: var(--space-2) var(--cell-padding-x);
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
-  vertical-align: top;
-}
-
-.card-table thead th {
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border-strong);
   background: var(--color-surface);
+}
+
+/* Search and filter form (UX.md 3.4, 5.4, 5.9) */
+.card-filters {
+  display: flex;
+  flex-direction: column;
+  /* main has a --space-4 gap; together they make --space-6 before the table. */
+  margin-block-end: var(--space-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field label,
+.card-filters legend {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+.hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.field input[type='search'] {
+  width: 100%;
+  min-height: var(--target-min);
+  margin-block-start: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+}
+
+.field input[type='search']:hover {
+  border-color: var(--color-info);
+}
+
+.field input[type='search']:focus-visible {
+  border-color: var(--color-info);
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.card-filters fieldset {
+  min-width: 0;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.card-filters fieldset + fieldset {
+  margin-block-start: var(--space-1);
+}
+
+.card-filters legend {
+  padding: 0;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* Legend and chips on one row when there is room (T-038). */
+.card-filters fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+/* Checkbox label as a "chip": the whole label is the click target (UX.md 3.4). */
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 1.5rem;
+  max-width: 100%;
+  min-height: 1.75rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.option:hover {
+  border-color: var(--color-info);
+  background: var(--color-surface-hover);
+  text-decoration: underline;
+}
+
+.option:has(input:checked) {
+  border-color: var(--color-info);
+  background: var(--color-selected-surface);
+}
+
+/* Native checkbox restyled; the tick is drawn with clip-path (no images: CSP img-src 'self'). */
+.option input {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin: 0;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  cursor: pointer;
+}
+
+.option input::after {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--color-on-accent);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+  transform: scale(0);
+}
+
+.option input:checked {
+  border-color: var(--color-accent-edge);
+  background-color: var(--color-accent);
+}
+
+.option input:checked::after {
+  transform: scale(1);
+}
+
+.option input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* "Vain omistetut" (UX.md 6.6) */
+.owned-only {
+  margin-block-start: var(--space-2);
+}
+
+.owned-only .option {
+  align-self: flex-start;
   font-weight: var(--font-weight-bold);
 }
 
-.card-table .card-name {
-  font-weight: var(--font-weight-bold);
-  overflow-wrap: anywhere;
+@media (min-width: 40rem) {
+  .field input[type='search'] {
+    max-width: 24rem;
+  }
+
+  /* "Tyyppi" and "Väri" side by side when there is room. */
+  .card-filters .fieldsets {
+    display: flex;
+    flex-wrap: wrap;
+    /* Row gap + the fieldset margin = --space-3, as when stacked. */
+    gap: var(--space-1) var(--space-6);
+  }
+
+  .card-filters fieldset + fieldset {
+    margin-block-start: var(--space-1);
+  }
+}
+
+/* Persistent storage button in the header (T-038): icon only, explanation as tooltip on hover and focus. */
+.header-actions {
+  display: flex;
+  margin-inline-start: auto;
+}
+
+.header-actions + .theme-toggle {
+  margin-inline-start: 0;
+}
+
+.storage-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--target-min);
+  block-size: var(--target-min);
+  padding: 0;
+  border: 1px solid var(--color-header-text);
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+  cursor: pointer;
+}
+
+.storage-button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.storage-button[aria-disabled='true'] {
+  cursor: default;
+}
+
+.storage-tooltip {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline-end: 0;
+  z-index: 10;
+  inline-size: max-content;
+  max-inline-size: min(20rem, calc(100vw - 2 * var(--gutter)));
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  text-align: start;
+  visibility: hidden;
+}
+
+.storage-button:hover .storage-tooltip,
+.storage-button:focus-visible .storage-tooltip {
+  visibility: visible;
+}
+
+/* Result text after a request (UX.md 6.7) */
+.storage-reminder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-info);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* The result takes focus programmatically after the request (UX.md 6.7), like the heading. */
+.storage-result:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.storage-reminder .button-secondary {
+  font-size: var(--font-size-base);
 }
 
 .card-subname {
@@ -233,16 +930,191 @@ main {
   font-weight: var(--font-weight-normal);
 }
 
-.card-table .col-fit {
-  width: 1%;
-  white-space: nowrap;
+.card-color {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
-.card-table .col-number {
-  text-align: right;
+/* Decorative color swatch, always next to the color name (UX.md 3.1.1, 5.4). */
+.color-swatch {
+  display: inline-block;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  border: 1px solid var(--color-swatch-edge);
+  vertical-align: -1px;
+  clip-path: var(--shape-swatch);
+}
+
+.color-swatch-red {
+  background: var(--color-card-red);
+}
+
+.color-swatch-yellow {
+  background: var(--color-card-yellow);
+}
+
+.color-swatch-green {
+  background: var(--color-card-green);
+}
+
+.color-swatch-blue {
+  background: var(--color-card-blue);
+}
+
+.color-swatch-unknown {
+  background: var(--color-card-unknown);
+}
+
+.count-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  /* Reserved for "[−] n [+]" so the name column keeps its width (UX.md 6.4.4). */
+  min-width: calc(3 * var(--target-min) + 2 * var(--space-2));
+}
+
+.count {
+  min-width: 2.75ch;
+  color: var(--color-count);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-mono);
+  line-height: 1;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
+/* Enlarged image (T-027 UX). No padding on the dialog itself: a click on it is a click on the backdrop. */
+.card-dialog {
+  width: min(30rem, 100vw - 2 * var(--space-3));
+  max-width: none;
+  max-height: calc(100dvh - 2 * var(--space-3));
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.card-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.card-dialog-body {
+  padding: var(--space-4);
+}
+
+.card-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.card-dialog-header h2 {
+  margin: 0;
+  font-size: var(--font-size-card-name);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.card-dialog-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* Windows high contrast: shapes and decorations may disappear, borders keep components visible (UX.md 7.8). */
+@media (forced-colors: active) {
+  .button-primary,
+  .button-secondary,
+  .step,
+  .theme-toggle {
+    border: 2px solid ButtonText;
+    clip-path: none;
+  }
+
+  .panel,
+  .notice,
+  .empty {
+    border: 1px solid CanvasText;
+  }
+
+  .option input:checked {
+    forced-color-adjust: none;
+    background-color: Highlight;
+  }
+}
+
+/* All motion (UX.md 3.5, 7.7): only when the user has not asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .button-primary,
+  .button-secondary,
+  .step,
+  .theme-toggle,
+  .button-primary::before,
+  .step-plus::before,
+  .button-secondary::before,
+  .step-minus::before,
+  .theme-toggle::before {
+    transition: background-color var(--ease), color var(--ease);
+  }
+
+  .field input[type='search'] {
+    transition: border-color var(--ease);
+  }
+
+  .option {
+    transition: background-color var(--ease), border-color var(--ease);
+  }
+
+  .button-primary:active,
+  .button-secondary:active,
+  .step:active,
+  .theme-toggle:active {
+    transform: translateY(1px);
+  }
+
+  /* Once when the page opens; the heading stays mounted across states (UX.md 7.7). */
+  main > h1 {
+    animation: glitch 0.4s steps(1, end) 1;
+  }
+
+  @keyframes glitch {
+    0% {
+      text-shadow: none;
+    }
+
+    30% {
+      text-shadow:
+        -2px 0 var(--color-glitch-a),
+        2px 0 var(--color-glitch-b);
+      transform: translateX(1px);
+    }
+
+    60% {
+      text-shadow:
+        2px 0 var(--color-glitch-a),
+        -2px 0 var(--color-glitch-b);
+      transform: translateX(-1px);
+    }
+
+    100% {
+      text-shadow: none;
+      transform: none;
+    }
+  }
+}
+
+/* Safety net (UX.md 3.5). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -251,4 +1123,1081 @@ main {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Card grid (T-034): image on top, then name, type and color, game values and the collection control. */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.card-box:hover,
+.card-box:focus-within {
+  background: var(--color-surface-raised);
+}
+
+/* Not owned: neutral grey count (T-035). */
+.card-box {
+  --color-count: var(--color-text-muted);
+}
+
+/* Owned card (count > 0). The count itself carries the information, not the colour (UX.md 7.5). */
+.card-box.is-owned {
+  border-color: color-mix(in srgb, var(--color-accent) 38%, var(--color-border));
+  --color-count: var(--color-accent-edge);
+}
+
+.card-box.is-playset {
+  border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border));
+  --color-count: var(--color-success);
+}
+
+.card-box.is-owned:hover,
+.card-box.is-owned:focus-within {
+  background: var(--color-owned-hover);
+}
+
+.card-name {
+  margin: 0;
+  font-size: var(--font-size-card-name);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.card-type {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.card-type .card-color {
+  display: inline;
+  white-space: nowrap;
+}
+
+.card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.card-stat {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.card-stat dt::after {
+  content: ':';
+}
+
+.card-stat dd {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-collection {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+
+.card-collection .count-control {
+  justify-content: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Card image (T-027, T-034): the button opens the enlarged image. */
+.card-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 733 / 1024;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.card-image--missing {
+  border: 1px dashed var(--color-border-strong);
+}
+
+.card-image-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.card-image-button:hover .card-image {
+  border-color: var(--color-info);
+}
+
+/* "−" at count 0: visible and in place, but muted (T-035). */
+.step-minus:disabled {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.dialog-close {
+  flex: none;
+  font-size: var(--font-size-lg);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Card type as a badge; the border shows the card colour, the text names the type (T-036). */
+.type-badge {
+  --badge-color: var(--color-border-strong);
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border: 1px solid var(--badge-color);
+  color: var(--badge-color);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  clip-path: polygon(0 0, calc(100% - 0.5em) 0, 100% 0.5em, 100% 100%, 0 100%);
+  position: relative;
+}
+
+/* The clip-path cuts the border too, so the bevel is drawn as a diagonal line. */
+.type-badge::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: calc(0.5em + 1px);
+  height: calc(0.5em + 1px);
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    var(--badge-color) calc(50% - 0.5px),
+    var(--badge-color) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  pointer-events: none;
+}
+
+.type-badge-red { --badge-color: var(--color-card-red); }
+.type-badge-yellow { --badge-color: var(--color-card-yellow); }
+.type-badge-green { --badge-color: var(--color-card-green); }
+.type-badge-blue { --badge-color: var(--color-card-blue); }
+
+/* Light theme: coloured border only, text keeps full contrast. */
+:root[data-theme='light'] .type-badge {
+  color: var(--color-text);
+}
+
+/* List toolbar (T-040): view selector and the edit switch above the list. */
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-block: var(--space-3);
+}
+
+.view-select {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.view-select legend {
+  padding: 0;
+  float: left;
+}
+
+.edit-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.edit-switch:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.edit-switch-track {
+  display: inline-flex;
+  align-items: center;
+  inline-size: 2.5rem;
+  block-size: 1.25rem;
+  padding: 2px;
+  border: 2px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+}
+
+.edit-switch-thumb {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  background: var(--color-border-strong);
+}
+
+.edit-switch[aria-checked='true'] .edit-switch-track {
+  border-color: var(--color-accent-edge);
+  justify-content: flex-end;
+}
+
+.edit-switch[aria-checked='true'] .edit-switch-thumb {
+  background: var(--color-accent-edge);
+}
+
+/* Table view (T-040): scrolls sideways inside its own region on narrow screens, not the whole page. */
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+}
+
+.table-scroll:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.card-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  /* Not owned: neutral grey count, as in the grid. */
+  --color-count: var(--color-text-muted);
+}
+
+.card-table th,
+.card-table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.card-table thead th {
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-bold);
+}
+
+.card-table .cell-name {
+  min-inline-size: 10rem;
+  font-weight: var(--font-weight-bold);
+  white-space: normal;
+}
+
+.card-table .cell-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.card-table .cell-image {
+  inline-size: 2.5rem;
+  min-inline-size: 2.5rem;
+}
+
+.card-table .cell-image .card-image-button,
+.card-table .cell-image .card-image {
+  inline-size: 2.5rem;
+}
+
+.card-table .cell-collection .count-control {
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.card-table .count-control--readonly {
+  min-inline-size: 3.5rem;
+}
+
+.card-table tbody tr:hover {
+  background: var(--color-surface-raised);
+}
+
+/* Row state: a 1 px-wide edge like the grid box, plus the coloured count and the check mark. */
+.card-table tr.is-owned {
+  --color-count: var(--color-accent-edge);
+}
+
+.card-table tr.is-owned > :first-child {
+  box-shadow: inset 3px 0 0 var(--color-accent-edge);
+}
+
+.card-table tr.is-playset {
+  --color-count: var(--color-success);
+}
+
+.card-table tr.is-playset > :first-child {
+  box-shadow: inset 3px 0 0 var(--color-success);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+.link-button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Main navigation in the header and deck building (T-013). Header colours are fixed in both themes. */
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.main-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  color: var(--color-header-text);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-button);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+
+.main-nav a:hover {
+  border-bottom-color: var(--color-header-text);
+}
+
+.main-nav a[aria-current='page'] {
+  border-bottom-color: var(--color-brand-yellow);
+}
+
+.main-nav a:focus-visible {
+  outline: 2px solid var(--color-brand-yellow);
+  outline-offset: 2px;
+}
+
+.deck-toolbar {
+  margin-block: var(--space-4);
+}
+
+.deck-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deck-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.deck-name {
+  overflow-wrap: anywhere;
+}
+
+.deck-counts,
+.deck-updated {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.deck-status {
+  font-weight: var(--font-weight-bold);
+}
+
+.deck-status.is-legal {
+  color: var(--color-success);
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+
+.deck-rename,
+.deck-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.deck-rename input,
+.deck-name-field input {
+  width: 100%;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.deck-rename input:hover,
+.deck-name-field input:hover {
+  border-color: var(--color-info);
+}
+
+.deck-rename input:focus-visible,
+.deck-name-field input:focus-visible {
+  border-color: var(--color-info);
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.deck-rename input[aria-invalid='true'],
+.deck-name-field input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.deck-import-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 40rem;
+}
+
+.deck-import-form textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.deck-import-form textarea:focus-visible {
+  border-color: var(--color-info);
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.deck-import-form textarea[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.import-report {
+  margin-block-start: var(--space-6);
+}
+
+.import-rows {
+  padding-inline-start: var(--space-4);
+}
+
+.import-missing {
+  color: var(--color-warning);
+  font-weight: var(--font-weight-bold);
+}
+
+.field-error {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+.confirm-dialog {
+  max-width: min(30rem, calc(100vw - 2 * var(--gutter)));
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.confirm-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+/* Deck editor: search left, deck right from 60rem up; stacked below that. */
+.editor-back {
+  margin-block: var(--space-3);
+}
+
+.deck-name-field {
+  max-width: 32rem;
+  margin-block: var(--space-4);
+}
+
+.save-status {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.save-status.is-error {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+.deck-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-accent-edge);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+}
+
+.summary-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.summary-counts p:empty {
+  display: none;
+}
+
+.summary-main {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+}
+
+.summary-ok {
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+}
+
+.deck-summary h2,
+.deck-section h2,
+.editor-search h2 {
+  font-size: var(--font-size-base);
+}
+
+.issue-list {
+  margin: 0;
+  padding-inline-start: var(--space-4);
+}
+
+.issue-list li {
+  color: var(--color-danger);
+}
+
+.issue-list li.is-warning {
+  color: var(--color-warning);
+}
+
+.editor-layout {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* From 75rem: search and results on the left, the deck in a sticky column on the right (T-049). */
+@media (min-width: 75rem) {
+  .editor-layout {
+    grid-template-columns: minmax(0, 1fr) clamp(22rem, 27vw, 28rem);
+    gap: var(--space-6);
+  }
+
+  .editor-side {
+    position: sticky;
+    top: var(--space-3);
+    max-height: calc(100vh - 2 * var(--space-3));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .search-results {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+.editor-search,
+.editor-side,
+.editor-deck {
+  min-width: 0;
+}
+
+.editor-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+}
+
+.editor-head .editor-back {
+  margin-block: var(--space-3) var(--space-2);
+}
+
+.editor-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-4);
+}
+
+.editor-meta .deck-name-field {
+  margin-block: 0;
+}
+
+.editor-meta .row-actions {
+  margin-block-start: 0;
+}
+
+.editor-head + .save-status,
+.editor-head + .notice {
+  margin-block: var(--space-2) var(--space-3);
+}
+
+.search-results,
+.deck-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.search-results {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Wide list results: several rows next to each other (T-049). */
+@media (min-width: 75rem) {
+  .search-results:not(.pick-images) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+    gap: var(--space-2);
+  }
+}
+
+.card-row {
+  /* Info on the left, the control always in the right column (T-045). */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-height: 3.5rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+/* Dimmed = adding would break a rule. Text stays above 4.5:1 (opacity is not used); the reason is shown as text. */
+.card-row.is-dimmed {
+  border-style: dashed;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.card-row.is-missing {
+  border-color: var(--color-warning);
+}
+
+.card-row-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.card-row-meta {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.card-row-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.deck-section {
+  margin-block-end: var(--space-4);
+}
+
+.deck-section > h2 {
+  padding-block-end: var(--space-1);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.deck-group-title {
+  margin-block: var(--space-3) var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+.deck-card-count {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: var(--font-weight-bold);
+}
+
+.card-decks {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Colour filter chips show only the ball (T-045). */
+.option-color .color-swatch {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+
+/* Deck editor: toast, result view selector and image grid (T-045). */
+.pick-view {
+  margin: 0;
+}
+
+.pick-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-block-start: var(--space-3);
+}
+
+.pick-bar .status-line {
+  margin: 0;
+}
+
+.toast-slot:empty {
+  display: none;
+}
+
+.toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-warning);
+  background: var(--color-surface-raised);
+}
+
+.pick-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--space-3);
+}
+
+.pick-image {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.pick-image.is-dimmed {
+  border-style: dashed;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.pick-image-button {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.pick-image-button .card-image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.pick-image-name {
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.card-table .sort-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.card-table .sort-button:hover {
+  text-decoration: underline;
+}
+
+.card-table .sort-button:focus-visible {
+  outline: 2px solid var(--color-focus, currentColor);
+  outline-offset: 2px;
+}
+
+/* Deck list rows (T-049): colour stripe, "3×", name, missing badge, Cost chip and small −/+. */
+.deck-cards {
+  gap: 2px;
+  margin-block-start: var(--space-1);
+}
+
+.deck-line {
+  /* count | name | missing | Cost | −/+ : fixed columns keep the chips in line from row to row. */
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 4.75rem 2rem auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2rem;
+  padding: 2px var(--space-1) 2px var(--space-2);
+  border-inline-start: 3px solid var(--badge-color, var(--color-border-strong));
+  background: var(--color-surface);
+}
+
+.deck-line:hover {
+  background: var(--color-surface-hover);
+}
+
+.deck-line.is-missing {
+  background: var(--color-warning-surface);
+}
+
+.deck-line-count {
+  grid-column: 1;
+  color: var(--color-count);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.deck-line-name {
+  grid-column: 2;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button.deck-line-name {
+  cursor: zoom-in;
+}
+
+button.deck-line-name:hover {
+  text-decoration: underline;
+}
+
+button.deck-line-name:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.name-sub {
+  color: var(--color-text-muted);
+}
+
+.deck-line-missing {
+  grid-column: 3;
+  justify-self: end;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-warning);
+  color: var(--color-warning);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.deck-line-chip {
+  grid-column: 4;
+  justify-self: end;
+  min-inline-size: 1.5rem;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.deck-line .card-row-controls {
+  grid-column: 5;
+  gap: 2px;
+}
+
+.deck-line .step {
+  --cut: 0.3rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --cut-inner-2: calc(var(--cut) - 2px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner)), calc(100% - var(--cut-inner)) 100%, 0 100%);
+  --shape-chamfer-inner-2: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner-2)), calc(100% - var(--cut-inner-2)) 100%, 0 100%);
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  font-size: var(--font-size-base);
+}
+
+.deck-card-count-spoken {
+  display: contents;
+}
+
+/* Cost curve (T-049): decorative bars, the same data is in a hidden table. */
+.cost-curve-title {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+.cost-curve-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1);
+  block-size: 7rem;
+}
+
+.cost-curve-col {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  align-items: end;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.cost-curve-count {
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.cost-curve-col.is-empty .cost-curve-count,
+.cost-curve-col.is-empty .cost-curve-label {
+  color: var(--color-text-muted);
+}
+
+.cost-curve-bar {
+  inline-size: 100%;
+  max-inline-size: 1.75rem;
+  min-block-size: 2px;
+  background: var(--color-accent-edge);
+  clip-path: polygon(0 0, calc(100% - 0.3rem) 0, 100% 0.3rem, 100% 100%, 0 100%);
+}
+
+.cost-curve-col.is-empty .cost-curve-bar {
+  background: var(--color-border-strong);
+}
+
+.cost-curve-label {
+  color: var(--color-text-muted);
+}
+
+/* Image grid badge, e.g. "3 pakassa" (T-049). */
+.pick-badge {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-1);
+  padding: 0 var(--space-2);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  clip-path: var(--shape-chamfer);
+}
+
+.pick-image-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.deck-line > .button-secondary {
+  grid-column: 3 / -1;
 }

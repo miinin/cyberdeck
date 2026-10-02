@@ -1,35 +1,29 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, within } from '@testing-library/react';
 import { App } from './App';
-import { CardApiError } from './api';
-import type { CardCatalog } from './api';
+import { CARDS } from './data/cards';
+import type { Card } from './domain/card';
+import { createMemoryRepositories } from './storage';
+import { cardCount } from './ui/texts';
 
-const catalog: CardCatalog = {
-  cards: [
-    {
-      id: 'id-1',
-      slug: 'v-streetkid',
-      name: 'V',
-      subname: 'Streetkid',
-      displayName: 'V — Streetkid',
-      type: 'Legend',
-      color: 'Red',
-      cost: null,
-    },
-  ],
-  reportedTotal: 1,
-  skipped: 0,
-};
-
-const loadCatalog = async () => catalog;
-
-beforeEach(() => {
-  vi.spyOn(console, 'error').mockImplementation(() => {});
-});
+const cards: Card[] = [
+  {
+    id: 'id-1',
+    slug: 'v-streetkid',
+    name: 'V',
+    subname: 'Streetkid',
+    displayName: 'V — Streetkid',
+    type: 'Legend',
+    color: 'Red',
+    cost: null,
+    power: null,
+    ram: null, rarity: null,
+    key: 'v-streetkid',
+  },
+];
 
 describe('App', () => {
-  it('has the landmarks and footer notices', async () => {
-    render(<App loadCatalog={loadCatalog} />);
+  it('has the landmarks and footer notices', () => {
+    render(<App cards={cards} repositories={createMemoryRepositories()} />);
 
     expect(screen.getByRole('banner')).toHaveTextContent('Cyberdeck');
     expect(screen.getByRole('main')).toBeInTheDocument();
@@ -38,33 +32,35 @@ describe('App', () => {
       'Cyberdeck on epävirallinen Cyberpunk TCG -fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä.',
     );
     expect(footer).toHaveTextContent('Korttitiedot: Netdeck.gg');
-    expect(await screen.findByRole('table')).toBeInTheDocument();
+    expect(screen.getByRole('list')).toBeInTheDocument();
   });
 
-  it('loads cards and shows them', async () => {
-    render(<App loadCatalog={loadCatalog} />);
+  it('shows the given cards on the first render', () => {
+    render(<App cards={cards} repositories={createMemoryRepositories()} />);
 
-    expect(await screen.findByRole('rowheader')).toHaveTextContent('V, Streetkid');
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('V, Streetkid');
     expect(screen.getByRole('status')).toHaveTextContent('1 kortti ladattu.');
   });
 
-  it('recovers from an error when the user retries', async () => {
-    const load = vi
-      .fn<(signal: AbortSignal) => Promise<CardCatalog>>()
-      .mockRejectedValueOnce(new CardApiError('http', 'HTTP 500', { status: 500 }))
-      .mockResolvedValueOnce(catalog);
-    render(<App loadCatalog={load} />);
+  it('shows the bundled cards on the first render without any request (D-013)', () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const { container } = render(<App repositories={createMemoryRepositories()} />);
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Yritä uudelleen' }));
+    // Synchronous queries: no loading state, the list is there at once.
+    expect(container.querySelector('#card-status')).toHaveTextContent(cardCount(CARDS.length));
+    const rows = within(screen.getByRole('list', { name: 'Kaikki kortit' })).getAllByRole('heading', { level: 3 });
+    expect(rows).toHaveLength(CARDS.length);
+    expect(screen.queryByText('Haetaan kortteja…')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Yritä uudelleen' })).not.toBeInTheDocument();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  }, 20_000); // renders every card; slow when the whole suite runs in parallel
 
-    expect(await screen.findByRole('table')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Korttien haku epäonnistui' })).not.toBeInTheDocument();
-  });
+  // D-012 brought card images in scope (T-027); they must come from the app's own origin (SR-1, img-src 'self').
+  it('shows card images only from the bundled assets, never from an external URL', () => {
+    const { container } = render(<App cards={cards} repositories={createMemoryRepositories()} />);
 
-  it('never shows images (card images are out of scope, R-1)', async () => {
-    const { container } = render(<App loadCatalog={loadCatalog} />);
-
-    await screen.findByRole('table');
-    expect(container.querySelector('img')).toBeNull();
+    const images = [...container.querySelectorAll('img')];
+    expect(images).toHaveLength(1);
+    for (const image of images) expect(image.getAttribute('src')).not.toMatch(/^(https?:)?\/\//);
   });
 });

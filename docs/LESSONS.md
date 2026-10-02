@@ -6,3 +6,28 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 **Mitä tapahtui:** Dokumentoija testasi `npm run dev`:iä, huomasi portin 5173 varatuksi ja siivosi lopuksi komennolla `npx kill-port 5173`. Portissa pyöri käyttäjän toisen projektin (Eduks Saavutettavuusopas) kehityspalvelin, joka todennäköisesti pysähtyi.
 **Miksi:** Prosessi pysäytettiin portin perusteella eikä oman käynnistetyn prosessin tunnisteen perusteella.
 **Jatkossa:** Älä koskaan pysäytä prosessia portin tai nimen perusteella. Pysäytä vain itse käynnistämäsi prosessi (PID). Käytä testeissä vapaata porttia (`--port 0` tai `--strictPort` tarkistuksella) äläkä koske toisten projektien prosesseihin.
+
+## L-002 · 2026-10-01 · Unicode-escapet muuttuivat näkymättömiksi merkeiksi lähdekoodissa
+**Mitä tapahtui:** Koodari (T-011) kirjoitti tiedostoon merkkijonoja ja regexin, joissa oli `\u`-escapeja (suunnanohjausmerkit U+202A–U+202E ja U+2066–U+2069 sekä yhdistyvä merkki U+0308). Työkaluketju muutti osan escapeista oikeiksi merkeiksi, joten lähdekoodiin päätyi näkymättömiä suunnanohjausmerkkejä (Trojan Source -riski). Testit menivät silti läpi, joten virhe ei näkynyt.
+**Miksi:** Kirjoitustyökalun syöte tulkitsi `\uXXXX`-jaksot. Näkymättömiä merkkejä ei huomaa diffistä.
+**Jatkossa:** Kun kirjoitat ohjaus-, suunnanohjaus- tai yhdistyviä merkkejä koodiin, tarkista tiedosto skriptillä, joka etsii merkit U+0080–U+009F, U+200B–U+200F, U+202A–U+202E, U+2066–U+2069 ja U+0300–U+036F, ja korjaa ne escapeiksi. Escapen voi tuottaa skriptissä esim. `String.fromCharCode(92) + 'u…'`.
+
+## L-003 · 2026-10-01 · user-event jumittuu Vitestin valeajastimien kanssa
+**Mitä tapahtui:** T-010:n live-alueen testit (`vi.useFakeTimers()` + `userEvent.setup({ advanceTimers })`) aikakatkaistiin 5 s:n jälkeen.
+**Miksi:** Testing Libraryn async-kääre odottaa jokaisen toiminnon jälkeen oikeaa `setTimeout(0)`:aa ja siirtää aikaa vain Jestin valeajastimilla (`jest`-globaali). Vitestissä ajastin ei koskaan laukea.
+**Jatkossa:** Ajastinriippuvaisissa näkymätesteissä käytä `fireEvent`iä ja `act(() => vi.advanceTimersByTime(ms))`. Käytä user-eventiä testeissä, joissa ajastimet ovat oikeita.
+
+## L-004 · 2026-10-02 · L-001 toistui: agentti sulki kaikki selainprosessit nimen perusteella
+**Mitä tapahtui:** UX Designer (T-021-katselmointi) siivosi omat headless-ajonsa komennolla `taskkill /F /IM msedge.exe`. Komento sulkee kaikki Edge-prosessit, myös käyttäjän avoimet selainikkunat.
+**Miksi:** L-001 oli kirjattu, mutta aliagentti lukee LESSONS.md:stä vain tehtäväänsä koskevat kohdat, eikä PM:n tehtävänanto toistanut kieltoa selaintestauksen yhteydessä.
+**Jatkossa:** Prosessia ei koskaan pysäytetä nimen, kuvan (`/IM`) tai portin perusteella, vain oman käynnistetyn prosessin PID:llä tai puppeteerin `browser.close()`-kutsulla. Headless-selain käynnistetään aina omalla väliaikaisella profiilillaan (`--user-data-dir` scratchpad-kansioon). PM toistaa tämän kiellon jokaisessa tehtävänannossa, jossa agentti ajaa selainta tai palvelinta.
+
+## L-005 · 2026-10-02 · Koodari commitoi käyttäjän kuvat väärään tehtävähaaraan
+**Mitä tapahtui:** Käyttäjä kopioi 151 korttikuvaa (14 Mt) pääkansion `public/cards/`-hakemistoon, kun T-025:n Koodari työskenteli samassa kansiossa. Koodari commitoi ne teemavalitsimen haaraan (c31f42c), luultavasti komennolla `git add -A`. PM poisti kuvat seurannasta uudella commitilla, mutta ne jäivät haaran historiaan.
+**Miksi:** Commitoitiin kaikki muuttuneet tiedostot tarkistamatta, kuuluvatko ne tehtävään.
+**Jatkossa:** Lisää commitiin vain tehtävän tiedostot nimeltä. Tarkista `git status` ennen jokaista committia. Jos työpuussa on tiedostoja, joita et itse luonut, älä commitoi niitä, vaan kerro niistä PM:lle.
+
+## L-006 · 2026-10-02 · Test-haaraan päätyi kaatuva testi
+**Mitä tapahtui:** T-013:n navigaatiolinkit muuttivat Tab-järjestystä, ja `App.theme.test.tsx` kaatui test-haarassa. Koodari ajoi vain osan testeistä (kevyt malli, aikaraja), eikä CI ajanut testejä.
+**Miksi:** Kokonaista sarjaa ei ajettu ennen yhdistämistä, ja koko sarja kaatui muutenkin satunnaisesti (T-024), joten osittaisiin ajoihin oli totuttu.
+**Jatkossa:** T-004 ajaa lintin ja testit jokaisessa PR:ssä ja ennen julkaisua. PM yhdistää testiin vasta, kun PR:n tarkistukset ovat vihreät.

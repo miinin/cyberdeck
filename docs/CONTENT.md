@@ -1,6 +1,6 @@
 # CONTENT · cyberdeck
 
-> Omistaja: Sisällöntuottaja. Versio 0.1 · 2026-10-01 (T-001, MVP-0).
+> Omistaja: Sisällöntuottaja. Versio 0.3 · 2026-10-01 (0.1: T-001, MVP-0 · 0.2: T-010 haku ja suodatus, sanasto K6–K8 · 0.3: T-012 kokoelman termit UX.md 6.14:n mukaan, lisännyt Koodari PM:n luvalla).
 > Kohderyhmä, kielitaso, äänensävy, sanasto, sisältöjen sijainti ja oikeudet. Mikrokopion rakenne ja tilakohtaiset tekstit ovat `docs/UX.md`:n luvuissa 2 ja 4.5. Tämä tiedosto määrää sanaston ja kielen.
 
 ---
@@ -22,7 +22,7 @@
 ## 3. Kirjoitusohjeet
 
 - **Lukumäärät:** numeroina ja taivutettuina: "1 kortti", "2 korttia", "0 korttia". Yli 999: välilyönti tuhaterottimena (`Intl.NumberFormat('fi-FI')`): "1 024 korttia".
-- **Osuus:** "120 / 151 korttia" (välilyönnit kauttaviivan ympärillä). Vältetään lukusanojen taivutusta ("151:stä").
+- **Osuus:** "120 / 151 korttia" (välilyönnit kauttaviivan ympärillä). Vältetään lukusanojen taivutusta ("151:stä"). Osuusmuodossa "korttia" ei taivu luvun mukaan: "1 / 151 korttia" (UX.md 5.6).
 - **Puuttuva arvo:** ajatusviiva "–" (U+2013), ruudunlukijalle piilotettu sanallinen vastine ("ei hintaa").
 - **Kolme pistettä:** yksi merkki "…" (U+2026), esim. "Haetaan kortteja…".
 - **Sivun otsikko (title):** "Näkymä · Cyberdeck", välissä keskipiste (U+00B7) välilyöntien kanssa.
@@ -40,26 +40,44 @@ Yksi käsite = yksi termi. Uusi termi lisätään tähän heti, kun sitä käyte
 | **kortti** | Yksi Cyberpunk TCG:n kortti (korttitaso, ei painos) | `slug`, `id` | Painokset (alt-art ym.) ovat MVP-1:n kysymys K5. |
 | **Kortit** | Näkymän otsikko: kaikki pelin kortit | – | MVP-1:ssä erotetaan "kokoelma" (omat kortit) ja "pakat". |
 | **nimi** | Kortin nimi ja mahdollinen alaotsikko | `name`, `subname` | Näytetään englanniksi. Ruudunlukija: "V, Streetkid". |
-| **tyyppi** | Korttityyppi | `card_type` | Arvot englanniksi, katso alla. |
+| **alaotsikko** | Nimen alla oleva tarkenne, joka erottaa saman hahmon kortit toisistaan (esim. Johnny Silverhand: Rocking Renegade) | `subname` | Hakukentän ohjeessa (T-010). Ei "alanimi" eikä "tarkenne". |
+| **tyyppi** | Korttityyppi | `card_type` | Arvot englanniksi, katso alla. Suodattimen otsikko (legend) "Tyyppi". |
+| **väri** | Kortin väri | `color` | Arvot **suomeksi** (K6, PM hyväksyi 2026-10-01), katso alla. Suodattimen otsikko (legend) "Väri". Väri näytetään aina tekstinä, värinäyte on vain koriste. |
+| **Tyyppi ja väri** | Korttitaulukon sarakeotsikko: tyyppi ja sen alla väri | `card_type`, `color` | K8 (PM 2026-10-01). Ruudunlukija lukee solun "Unit, Punainen". Ei erillistä Väri-saraketta. |
 | **hinta** | Kortin pelaamisen hinta pelin sisäisessä valuutassa (eddiet, €$) | `cost` | **Ei rahallinen arvo.** Sarakeotsikko "Hinta", puuttuva arvo "ei hintaa". Kaikilla Legendeillä ei ole hintaa, mutta osalla on (Go Solo). Ei käytetä "€"-merkkiä otsikossa (sekoittuu euroon). Päätös K1, katso TXT-001. |
 | **Legend** | Korttityyppi: legenda | `card_type` | Englanniksi kuten fyysisissä korteissa (K2). |
 | **Unit** | Korttityyppi: yksikkö | `card_type` | " |
 | **Gear** | Korttityyppi: varuste | `card_type` | " |
 | **Program** | Korttityyppi: ohjelma | `card_type` | " |
+| **Punainen** | Väri | `color: "Red"` | Suomeksi (K6). Värejä ei ole painettu kortteihin sanoina, toisin kuin tyypit. Pieni alkukirjain juoksevassa tekstissä ("punainen Unit"). |
+| **Keltainen** | Väri | `color: "Yellow"` | " |
+| **Vihreä** | Väri | `color: "Green"` | " |
+| **Sininen** | Väri | `color: "Blue"` | " |
+| (tuntematon väri) | Rajapinnan uusi arvo | `color` | Näytetään sellaisenaan englanniksi (`lang="en"`). Puuttuva väri: "–" ja ruudunlukijalle "ei väriä". |
 | **korttitiedot** | Korttien tiedot (nimi, tyyppi, hinta) ulkoisesta lähteestä | – | Käyttäjälle ei sanota "rajapinta" eikä "tietokanta". |
-| **hakea / haku** | Korttitietojen lataaminen lähteestä | – | "Haetaan kortteja…", "Korttien haku epäonnistui". Ei "ladata" ja "hakea" sekaisin samassa tilassa (poikkeus: live-alueen "ladattu", UX.md 4.5). |
+| **hakea / haku** (1) | Korttitietojen lataaminen lähteestä | – | "Haetaan kortteja…", "Korttien haku epäonnistui". Ei "ladata" ja "hakea" sekaisin samassa tilassa (poikkeus: live-alueen "ladattu", UX.md 4.5). |
+| **hakea / haku** (2) | Kortin etsiminen listasta nimellä tai alaotsikolla | – | K7 (PM 2026-10-01): label "Hae nimellä", maamerkki "Hae ja suodata kortteja", painike "Tyhjennä haku ja suodattimet". Kenttään kirjoitettu teksti on **hakusana**. Merkitykset eivät näy samaan aikaan, koska hakukenttä on piilossa lataus- ja virhetilassa (UX.md 5.8). Uudessa tekstissä merkitys (1) kirjoitetaan aina muotoon "korttien haku" tai "haetaan kortteja" ja merkitys (2) muotoon "haku" tai "hakusana" vain hakukentän yhteydessä. |
+| **suodattaa / suodatin** | Listan rajaaminen tyypin tai värin mukaan | – | "Hae ja suodata kortteja", "poista valintoja suodattimista". Ei "filtteri". |
+| **valinta** | Suodattimessa valittu vaihtoehto (valintaruutu) | – | "Valitse yksi tai useampi", "poista valintoja". |
+| **hakua vastaavat kortit** | Tulos, kun hakusana tai valinta on käytössä | – | Taulukon kuvateksti "Hakua vastaavat kortit" ja tyhjä tila "Hakua vastaavia kortteja ei löytynyt." (TXT-008). Tässä "haku" kattaa hakusanan ja valinnat, kuten maamerkki "Hae ja suodata kortteja". |
 | **Yritä uudelleen** | Painike, joka hakee kaikki kortit alusta | – | Aina sama teksti. |
+| **kokoelma** | Käyttäjän omat kortit ja niiden määrät tässä selaimessa | `Collection` | T-012 (UX.md 6.14). "Kokoelmassa 3 eri korttia, yhteensä 5 kappaletta." Otsikko "Kortit" pysyy ennallaan. Ei "tallennuskerros", "avain" tai "localStorage" käyttäjälle. |
+| **omistaa / omistetut** | Kortti, jota käyttäjällä on vähintään yksi kappale | – | T-012. Sarakeotsikko "Omistan", suodatin "Vain omistetut". |
+| **kappale** | Yksi fyysinen kortti | `count` | T-012. Taivutus: "1 kappale", "2 kappaletta". Ei "kopio" eikä "kpl" käyttöliittymätekstissä. |
+| **eri kortti** | Kokoelman yksittäinen kortti määrästä riippumatta | – | T-012. "1 eri kortti", "3 eri korttia". |
+| **pysyvä tallennus** | Pyyntö selaimelle säilyttää tiedot, vaikka laitteen tallennustila vähenee | `navigator.storage.persist` | T-012. Painike "Pyydä pysyvää tallennusta". Ei lupaa, että tiedot säilyvät selaimen tietojen tyhjennyksessä. |
+| **teema** | Sovelluksen väriteema: tumma (oletus) tai vaalea | – | T-025 (UX.md 8). Vaihdetaan otsikkopalkin painikkeella "Vaalea teema". Ei "tila", "moodi" eikä "skin". |
 
-Suomenkieliset vastineet (legenda, yksikkö, varuste, ohjelma) ovat tässä vain selitykseksi. Käyttöliittymässä käytetään englanninkielisiä tyyppejä, kunnes käyttäjä päättää toisin (K2).
+Suomenkieliset vastineet (legenda, yksikkö, varuste, ohjelma) ovat tässä vain selitykseksi. Käyttöliittymässä käytetään englanninkielisiä tyyppejä, kunnes käyttäjä päättää toisin (K2). Värit sen sijaan ovat suomeksi (K6). K6–K8 ovat tekstivalintoja, jotka käyttäjä voi muuttaa myöhemmin (T-010:n kortti, PM:n checkpoint 2026-10-01).
 
 ## 5. Sisältöjen sijainti
 
 | Sisältö | Sijainti | Kuka muokkaa |
 |---|---|---|
-| Käyttöliittymätekstit | `src/ui/texts.ts` | Koodari Sisällöntuottajan raportin (TXT-*) perusteella, tai Sisällöntuottaja, jos PM osoittaa tiedoston kortissa |
+| Käyttöliittymätekstit (myös värien nimet `colorNames`) | `src/ui/texts.ts` | Koodari Sisällöntuottajan raportin (TXT-*) perusteella, tai Sisällöntuottaja, jos PM osoittaa tiedoston kortissa |
 | Sivun otsikko ja kieli | `index.html` (`<title>`, `lang="fi"`) | Koodari |
 | Korttien nimet, tyypit ja hinnat | Netdeck.gg:n rajapinta ajonaikaisesti, ei tallenneta repoon | – |
-| Tilakohtaiset tekstit (määrittely) | `docs/UX.md` 4.5 | UX Designer, kieli Sisällöntuottaja |
+| Tilakohtaiset tekstit (määrittely) | `docs/UX.md` 4.5, 5.6 ja 6.5–6.9 | UX Designer, kieli Sisällöntuottaja |
 
 ## 6. Sisältöjen oikeudet ja lähteet
 
@@ -69,5 +87,7 @@ Suomenkieliset vastineet (legenda, yksikkö, varuste, ohjelma) ovat tässä vain
 | Korttikuvat | – | **Ei käytetä** | R-1, D-006: käyttäjä tuo kuvat myöhemmin, kun käyttöoikeus on selvä. |
 | Pelin nimi "Cyberpunk TCG" ja tavaramerkit | WeirdCo / CD PROJEKT RED | Vain kuvailevassa merkityksessä tekstinä, ei logoja | SECURITY.md 7. Ei kaupallisuutta. |
 | Epävirallisuusmerkintä ja lähdemaininta | Oma teksti | Sivun alatunniste | SECURITY.md 7, TXT-001. Tarkistettava: vaatiiko CD PROJEKT RED:n Fan Content Guidelines englanninkielisen merkinnän tälle sovellukselle. |
+| Fontti Rajdhani (500, 700), woff2 latin | Google Fonts (google/fonts, ofl/rajdhani), itse isännöity: `src/assets/fonts/rajdhani-*.woff2` | Sovelluksen kaikki teksti (T-021, D-011) | SIL Open Font License 1.1, lisenssi `src/assets/fonts/OFL-Rajdhani.txt`. Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com). Tiedostot sellaisenaan, ei muokattu. |
+| Fontti Share Tech Mono (400), woff2 latin | Google Fonts (google/fonts, ofl/sharetechmono), itse isännöity: `src/assets/fonts/share-tech-mono-400.woff2` | Luvut ja tilarivit (T-021) | SIL Open Font License 1.1, lisenssi `src/assets/fonts/OFL-ShareTechMono.txt`. Copyright (c) 2012, Carrois Type Design, Ralph du Carrois, Reserved Font Name 'Share'. Tiedostoa ei saa muokata eikä nimetä uudelleen (varattu fonttinimi). |
 
-Lähteet: `docs/SECURITY.md` luku 7 (tarkistettu 2026-09-30), `docs/DECISIONS.md` D-006, Netdeck.gg:n rajapinnan vastaus 2026-10-01 (151 korttia, tyypit Legend 27, Unit 73, Gear 17, Program 34; sääntöteksteissä "Pay this Legend's cost", "costs -1 €$").
+Lähteet: `docs/UX.md` 5.2 (värien arvot: Red 38, Yellow 37, Green 38, Blue 38, tarkistettu 2026-10-01), `docs/SECURITY.md` luku 7 (tarkistettu 2026-09-30), `docs/DECISIONS.md` D-006, Netdeck.gg:n rajapinnan vastaus 2026-10-01 (151 korttia, tyypit Legend 27, Unit 73, Gear 17, Program 34; sääntöteksteissä "Pay this Legend's cost", "costs -1 €$").

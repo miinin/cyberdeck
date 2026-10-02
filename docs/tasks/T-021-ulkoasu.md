@@ -1,0 +1,154 @@
+# T-021 · Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme
+**Tila:** Done · **Omistaja:** UX Designer → Koodari · **MVP:** 1 · **Prioriteetti:** Must (D-010)
+**Suunnittelu:** UX ☑ (tutkimus, visuaalinen suunta, tokenit, komponentit, mallisivu)
+**Katselmoinnit (D-010):** Koodikatselmointi ☑ · UX ☑ (UX-004) · Digiturva vain, jos `firebase.json` tai riippuvuudet muuttuvat
+**Riippuvuudet:** T-010, T-012 (Done)
+**Haara:** `t-021-ulkoasu`
+
+## Tavoite
+Palvelu on helppokäyttöinen ja näyttää ja tuntuu Cyberpunk 2077 -henkiseltä alusta loppuun (D-010). Käytettävyys on ensisijainen, tyyli toissijainen.
+
+## Hyväksymiskriteerit
+- [x] UX on selvittänyt Cyberpunk 2077:n visuaalisen kielen (värit, typografia, muodot, käyttöliittymäelementit, liike) ja kirjannut tiivistelmän lähteineen UX.md:hen sekä sen, mitä siitä otetaan ja mitä jätetään pois käytettävyyden tai saavutettavuuden vuoksi.
+- [x] UX.md:n tokenit (värit, typografia, välit, reunat, varjot ja hehkut, liike) ja komponentit (painikkeet, kentät, valintaruudut, taulukko ja korttirivi, ilmoituslaatikot, otsake ja alatunniste) on päivitetty uuteen ilmeeseen. Käyttäjä on hyväksynyt suunnan mallisivusta ennen toteutusta.
+- [x] Koko nykyinen sovellus (otsake, haku ja suodattimet, korttilista, kokoelman kontrollit, kaikki tilat ja ilmoitukset, alatunniste) käyttää uutta ilmettä. Kovakoodattuja värejä tai välejä ei ole tokenien ulkopuolella.
+- [x] Käytettävyys ei heikkene: kaikki nykyiset toiminnot ja tekstit säilyvät, toiminnot löytyvät yhtä helposti tai helpommin, ja nykyiset testit menevät läpi.
+- [x] WCAG 2.2 AA: kontrastit (teksti 4.5:1, UI ja fokus 3:1, myös hover- ja fokustilat), fokus näkyy, 320 px ja 400 % zoom ilman vaakavieritystä, axe 0 rikkomusta. Animaatiot ja glitch-efektit kunnioittavat `prefers-reduced-motion`-asetusta, eikä mikään vilku yli 3 kertaa sekunnissa.
+
+## Rajaukset (ei kuulu tähän)
+- Uudet toiminnot tai näkymät (pakat ovat T-013)
+- Pelin logot, kuvat, ääni, tavaramerkit tai pelin omat fontit (tekijänoikeus, D-010)
+- Fontit tai muut resurssit kolmannen osapuolen palvelimilta (CSP sallii vain `'self'`). Fontit itse isännöitynä vain avoimella lisenssillä (esim. SIL OFL), ja lisenssi kirjataan CONTENT.md:n sisältöjen oikeuksiin.
+- Uudet npm-riippuvuudet (jos välttämättömiä, PM päättää ja Digiturva tarkistaa)
+- T-018:n mobiilin kompakti suodatinlomake. UX voi kuitenkin huomioida UX-006:n, jos se ratkeaa ilmeen yhteydessä ilman uutta toimintoa.
+
+## Työloki
+### Checkpoint 2026-10-02 · PM
+- Kortti määritelty käyttäjän pyynnöstä (D-010), tila Ready, haara `t-021-ulkoasu` test-haarasta.
+- Kulku: 1) UX tutkii ja suunnittelee ja tekee staattisen mallisivun `docs/design/t021-mallisivu.html`, 2) PM näyttää mallisivun käyttäjälle hyväksyttäväksi, 3) Koodari toteuttaa, 4) UX katselmoi.
+
+### Checkpoint 2026-10-02 · UX Designer
+- Tehty: tutkimus (lähteet UX.md 7.2), UX.md päivitetty versioon 0.6 (periaate 7, luku 3 tokenit ja komponentit, uusi luku 7), mallisivu `docs/design/t021-mallisivu.html` (itsenäinen, fontit upotettu vain mallia varten; tarkistettu Edge headlessilla 320 px (iframe) ja 1200 px). Lähdekoodia ei muutettu.
+- Seuraava askel: PM näyttää mallisivun käyttäjälle hyväksyttäväksi. Hyväksynnän jälkeen Koodari toteuttaa UX.md 7.9:n mukaan, sitten UX katselmoi.
+- Avoimet kysymykset: V1–V8 (UX.md 7.10), oletukset valittu.
+- Muutetut tiedostot: `docs/UX.md`, `docs/design/t021-mallisivu.html`, `docs/IDEAS.md`, tämä kortti.
+
+## Luovutukset
+### Luovutus 2026-10-02 · UX Designer → PM (sitten Koodari)
+- Mitä tehtiin: Cyberpunk 2077 -tutkimus ja visuaalinen suunta. Värit: lähes musta tausta (`#0b0c10`), keltainen pääkorostus (`#fcee09`), syaani toissijainen ja fokus (`#1fe0ff`), punainen virhe (`#ff5a73`), oranssi varoitus (`#ffa726`). Fontit: Chakra Petch (teksti) ja Share Tech Mono (luvut). Muodot: viistetty oikea alakulma painikkeissa, HUD-kulmasulut hakupaneelissa, vinoraidat ilmoituksissa. Vain tumma teema. Kaikki kontrastit laskettu (UX.md 7.6): teksti ≥ 5.97 : 1, UI ≥ 3.77 : 1, fokus 12.25 : 1. Liike vain `prefers-reduced-motion: no-preference` (yksi 0,4 s glitch otsikossa, latauspalkki).
+- Mitä pyydän: 1) PM näyttää mallisivun käyttäjälle ja pyytää hyväksynnän suunnalle (avaa tiedosto selaimessa, kokeile 320 px ja työpöytä). 2) PM ratkaisee V1–V8 (UX.md 7.10), erityisesti V1: vaalean teeman poisto kirjataan päätökseksi (rules.md 5.3). 3) Hyväksynnän jälkeen Koodari toteuttaa UX.md 7.9:n mukaan.
+- Mistä katsoa: `docs/design/t021-mallisivu.html` (avaa suoraan selaimessa, ei palvelinta), `docs/UX.md` luvut 1 (periaate 7), 3 ja 7.
+- Fontit Koodarille (SIL OFL 1.1, Googlen woff2, latin-alijoukko, ladataan kerran repoon `src/assets/fonts/` ja isännöidään itse, CSP `font-src 'self'`):
+  - Chakra Petch 400: https://fonts.gstatic.com/s/chakrapetch/v13/cIf6MapbsEk7TDLdtEz1BwkWn6pg.woff2
+  - Chakra Petch 700: https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkeJI91R5_F.woff2
+  - Share Tech Mono 400: https://fonts.gstatic.com/s/sharetechmono/v16/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2
+  - OFL.txt: https://raw.githubusercontent.com/google/fonts/main/ofl/chakrapetch/OFL.txt ja https://raw.githubusercontent.com/google/fonts/main/ofl/sharetechmono/OFL.txt. Lisenssit kirjataan CONTENT.md:n sisältöjen oikeuksiin. Share Tech Mono: varattu fonttinimi "Share", älä muokkaa tiedostoa.
+- Tunnetut rajoitteet ja riskit: tutkimuslähteet ovat kolmannen osapuolen analyyseja (ei CDPR:n tyyliohjetta), joten värit ovat likiarvoja. Mallisivun korttitiedot ovat esimerkkejä. Mallisivun CSS käyttää `clip-path`-muotoja ja `:has()`-valitsinta (toimii nykyselaimissa, ilman `:has()`:ia valitun chipin tausta puuttuu mutta ruksi näkyy). Glitch-animaatio ja hover/fokus on tarkistettu vain ulkoasun osalta. Axe, näppäimistöpolku ja ruudunlukija ajetaan vasta toteutuksen katselmoinnissa. Vite ei saa inline-liittää fontteja `data:`-muotoon (CSP), tarkista build.
+- Testit: ei koodimuutoksia, ei testejä ajettu. Mallisivu renderöity Edge headlessilla ja tarkistettu kuvakaappauksista (320 px iframe, 1200 px).
+- Veto: ei.
+
+### Checkpoint 2026-10-02 · PM (käyttäjän päätökset, D-011)
+- Käyttäjä hyväksyi mallisivun suunnan. V1: myös vaalea teema (seuraa laitteen asetusta). V2: Rajdhani. V3–V8: UX:n oletukset hyväksytty.
+- Seuraava askel: UX lisää vaalean teeman ja vaihtaa fontin (UX.md ja mallisivu). Sitten Koodari toteuttaa.
+
+### Checkpoint 2026-10-02 · UX Designer (D-011)
+- Tehty: UX.md versioon 0.7 (luku 3: tokenit vaalealle ja tummalle teemalle, Rajdhani, nostetut fonttikoot; luvut 7.3, 7.4, 7.6, 7.9, 7.10 päivitetty). Mallisivu `docs/design/t021-mallisivu.html` näyttää molemmat teemat: teemapainikkeet (automaattinen, vaalea, tumma) ja "Rinnakkain"-näkymä (kaksi iframea). Skripti vain mallisivulla. Tarkistettu Edge headlessilla: 1100 px ja 320 px (iframe), molemmat teemat. IDEAS.md: vaalea teema merkitty toteutetuksi.
+- Seuraava askel: Koodari toteuttaa UX.md 7.9:n mukaan. Sen jälkeen UX katselmoi (axe kummassakin teemassa).
+- Avoimet kysymykset: V9–V11 (UX.md 7.10), oletukset valittu.
+
+### Luovutus 2026-10-02 · UX Designer → PM → Koodari (päivitys D-011:n jälkeen)
+- Mitä tehtiin: vaalea teema (kermanvalkoinen `#f3f0e6`, teksti `#0e0f14`, keltainen täyttö mustalla reunalla, tummansyaani `#005f73` fokukselle ja tiedolle, otsikkopalkki musta) ja fontti Rajdhani. Kontrastit laskettu molemmille teemoille (UX.md 7.6): vaalea teksti ≥ 5.10 : 1, UI ≥ 4.03 : 1, fokus 6.39 : 1. Tumma ennallaan (teksti ≥ 5.97, UI ≥ 3.77, fokus 12.25).
+- **Päivitetyt fonttitiedot Koodarille** (SIL OFL 1.1, Googlen woff2, latin-alijoukko; ladataan kerran repoon `src/assets/fonts/`, itse isännöity, CSP `font-src 'self'`; Chakra Petch on poistunut):
+  - Rajdhani 500: https://fonts.gstatic.com/s/rajdhani/v17/LDI2apCSOBg7S-QT7pb0EPOreec.woff2
+  - Rajdhani 700: https://fonts.gstatic.com/s/rajdhani/v17/LDI2apCSOBg7S-QT7pa8FvOreec.woff2
+  - Share Tech Mono 400 (luvut, tilarivit; säilyy): https://fonts.gstatic.com/s/sharetechmono/v16/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2
+  - OFL.txt: https://raw.githubusercontent.com/google/fonts/main/ofl/rajdhani/OFL.txt ja https://raw.githubusercontent.com/google/fonts/main/ofl/sharetechmono/OFL.txt. Tekijänoikeusrivit: Rajdhani "Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com)", Share Tech Mono "Copyright (c) 2012, Carrois Type Design, Ralph du Carrois, Reserved Font Name 'Share'" (älä muokkaa tiedostoa). Lisenssit CONTENT.md:n sisältöjen oikeuksiin. Yhteiskoko noin 44 kB.
+  - Rajdhanin luettavuus: leipäteksti 18 px paino 500, pienin teksti 16 px (ennen 14 px), lihavat 700. Share Tech Mono säilyy luvuille ja tilariveille (kiinteä leveys, selkeämmät numerot, HUD-lukema).
+- Mitä pyydän: Koodari toteuttaa UX.md 7.9:n mukaan. Vaalea teema on `:root`-oletus ja tumma `@media (prefers-color-scheme: dark)` -lohkossa. Mallisivun `[data-theme]`-säännöt ja skripti eivät kuulu sovellukseen.
+- Mistä katsoa: `docs/design/t021-mallisivu.html` (avaa selaimessa, "Rinnakkain" näyttää molemmat teemat), UX.md luvut 3 ja 7.
+- Tunnetut rajoitteet: Rajdhanin tasaleveitä numeroita ei varmistettu, siksi numerot jäävät monolle. Axe, ruudunlukija ja zoom ajetaan toteutuksen katselmoinnissa. Veto: ei.
+
+### Checkpoint 2026-10-02 · PM
+- UX.md v0.7 ja mallisivu (molemmat teemat) valmiit, commit 52a9c78. V9–V11: UX:n oletukset hyväksytty (käytettävyysvalintoja, käyttäjä voi muuttaa).
+- Tila In Progress. Seuraava askel: Koodari toteuttaa UX.md:n luvun 7.9 mukaan.
+
+### Luovutus 2026-10-02 · Koodari → UX Designer
+- **Mitä tehtiin:** UX.md 7.9:n mukainen toteutus. Vaalea teema on `:root`-oletus ja tumma `@media (prefers-color-scheme: dark)`. Mallisivun `data-theme`-säännöt ja skripti jätettiin pois. Fontit isännöidään itse (Rajdhani 500/700, Share Tech Mono 400, Googlen woff2-tiedostot sellaisenaan). `texts.ts` ja toimintalogiikka ovat ennallaan. DOM-muutokset: `span.brand` otsakkeessa, `div.fieldsets` Tyyppi- ja Väri-ryhmien ympärillä, `tr.is-owned` (vain kun kokoelma on ready ja määrä > 0), `.is-summary` yhteenvedossa ja `span.loading-bar[aria-hidden]` vain LATAUS-tilassa.
+- **Mitä pyydän:** UX-katselmointi (käytettävyys, saavutettavuus ja ulkoasu molemmissa teemoissa). Erityisesti näppäimistöpolku, ruudunlukija ja 400 % zoom oikeassa selaimessa, koska niitä en tehnyt.
+- **Mistä katsoa:** `git diff origin/test...t-021-ulkoasu -- src`. Ajo: `npm run build`, sitten `npx vite preview` (tai PR:n esikatselu, kun PM avaa PR:n).
+- **Poikkeamat mallisivusta ja tulkinnat** (UX.md voittaa):
+  1. Siirtymät (`transition`) ja painalluksen `:active`-siirtymä ovat `prefers-reduced-motion: no-preference` -ehdon sisällä (UX.md 3.3, 3.5, 7.7). Mallisivulla siirtymät olivat ilman ehtoa.
+  2. Mallisivun bugi: `.step { --cut: .5rem }` ei muuta muotoa, koska `--shape-chamfer` lasketaan `:root`issa. Toteutuksessa muodot määritellään `.step`issä uudelleen, joten määräpainikkeiden viiste on oikeasti 0.5rem.
+  3. UX.md on ristiriidassa kortin nimen koosta (7.4: 1.25rem, 7.5: 1.0625rem). Käytin 1.25rem (7.4 ja mallisivu, päivitetty D-011:n jälkeen). Kapean näkymän omistetun rivin kisko on 3 px UX.md 7.5:n mukaan (mallisivulla 4 px).
+  4. Uudet tokenit literaalien välttämiseksi (UX voi kirjata ne UX.md:n lukuun 3): `--color-brand-yellow`, `--color-glitch-a`, `--color-glitch-b`, `--font-size-card-name` (1.25rem), `--line-height-tight` (1.2), `--letter-spacing-button`, `--letter-spacing-table-head`, `--letter-spacing-h2`, `--letter-spacing-brand`, `--font-weight-mono` (400), `--shape-swatch` ja `--shape-brand`. `--radius` poistettiin (UX.md 3.3). Vaalean teeman `--heading-bar` käyttää `--color-text`-tokenia (sama arvo `#0e0f14`).
+  5. Työpöydällä Tyyppi ja Väri eivät mahdu rinnakkain 56 rem:n leveyteen, joten ne rivittyvät allekkain. Rivien väli on asetettu samaksi kuin pinottuna (12 px).
+- **Selaintarkistus** (Chrome headless, puppeteer-core ja axe-core 4 scratchpadissa, ei projektiin): axe (wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa, best-practice) löysi 0 rikkomusta 10 ajossa: molemmat teemat × 320 px ja 1200 px (lista ja omistettu rivi) sekä VIRHE- ja LATAUS-tila 320 px:ssä. `color-contrast` jää axessa tilaan "incomplete", koska bodyssa on taustakuvia (hehkut ja viivapinta). Kontrastit nojaavat siksi UX.md 7.6:n laskelmiin. Vaakavieritys oli 0 px kaikissa ajoissa (320 px vastaa 400 % zoomia 1280 px:n ikkunassa). Tekstin välistys (1.4.12) 320 px:ssä: ei vaakavieritystä eikä leikkautuvia elementtejä. Kaikki kolme fonttia latautuivat (`document.fonts`). Fokusrengas on 3 px `--color-focus` (vaalea rgb(0,95,115), tumma rgb(31,224,255)), ja viistettyjen painikkeiden `clip-path` on fokuksessa `none`. `reduce`-tilassa animaatioita on 0 (otsikko ja latauspalkki). `forced-colors: active`: painikkeiden ja paneelien reunat näkyvät. Kuvakaappaukset tarkistettu silmämääräisesti, ja otsikon glitch näkyy sivun avautuessa.
+- **Ei tehty:** ruudunlukija, koko näppäimistöpolku käsin, oikea selaimen zoom (vain viewport-emulointi), Firefox ja Safari. Jos `:has()` ei ole tuettu, valitun chipin tausta puuttuu, mutta ruksi näkyy.
+- **Tunnetut rajoitteet ja riskit:** `firebase.json` ja riippuvuudet ovat ennallaan, joten Digiturvaa ei tarvita (D-010). Buildissa fontit ovat erillisinä tiedostoina `dist/assets/`-kansiossa, eikä CSS:ssä ole `data:`-URI:ja (`assetsInlineLimit: 0` oli jo käytössä). 320 px:ssä tyyppi ja värin nimi rivittyvät kahdelle riville kapeassa nimisarakkeessa (V9:n mukainen, hyväksytty seuraus).
+- **Testit:** `npm test`: 17 tiedostoa, 427 testiä läpi (uusia 2: omistetun rivin korostus ja latauspalkki). `npm run lint`: 0 varoitusta. `npm run build` onnistui. L-002-tarkistus: muutetuissa tiedostoissa ei ole näkymättömiä merkkejä.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (määräpainikkeiden `--cut` ei vaikuttanut muotoon; korjattu ennen committia) · Suosituksia 1 (UX.md:n tokenilistan päivitys kohdan 4 mukaan; UX:n tiedosto, ei koodivelkaa)
+
+### Suunnitelma 2026-10-02 · Koodari
+1. Fontit ja OFL-lisenssit `src/assets/fonts/`, `@font-face` ja lisenssit CONTENT.md:hen. Build: fontit erillisinä tiedostoina.
+2. `styles.css`: tokenit (vaalea `:root`, tumma `prefers-color-scheme: dark`) ja komponenttityylit mallisivulta UX.md 3 ja 7 mukaan. Kaikki siirtymät ja animaatiot `prefers-reduced-motion: no-preference` -ehtoon.
+3. Luokkalisäykset (UX.md 7.9): `.brand` (App), `panel` ja `.fieldsets` (CardFilters), `is-owned` (CardList), `is-summary` ja `loading-bar` (CatalogView). Ei logiikkamuutoksia.
+4. Selaintarkistus (axe, 320 px ja työpöytä, molemmat teemat, reduce) Edge headlessilla scratchpadista.
+5. CHANGELOG, koodikatselmointi, checkpoint ja luovutus UX:lle.
+
+### Checkpoint 2026-10-02 · Koodari
+- Tehty: fd69151 (fontit ja OFL-lisenssit, CONTENT.md, `.gitattributes`: `*.woff2 binary`), 04a619d (styles.css uusittu; luokat `.brand`, `panel`, `.fieldsets`, `is-owned`, `is-summary`, `.loading-bar`; 2 uutta testiä), 3b4c22d (suodatinryhmien väli, CHANGELOG).
+- Kesken: ei.
+- Seuraava askel: UX katselmoi toteutuksen (UX-raportti).
+- Avoimet kysymykset: ei blokkaavia. Huomiot UX:lle luovutuksessa.
+- Muutetut tiedostot: `src/styles.css`, `src/App.tsx`, `src/ui/CardFilters.tsx`, `src/ui/CardList.tsx`, `src/ui/CatalogView.tsx`, `src/ui/CatalogView.test.tsx`, `src/ui/CatalogView.collection.test.tsx`, `src/assets/fonts/*`, `docs/CONTENT.md`, `CHANGELOG.md`, `.gitattributes`, tämä kortti, `docs/STATUS.md`.
+
+### Checkpoint 2026-10-02 · UX Designer (katselmointi UX-004)
+- Tehty: toteutuksen UX-katselmointi oikeassa selaimessa (Chrome, puppeteer-core ja axe-core scratchpadissa) PR #6:n esikatselusta: kaksi teemaa × 320 px ja 1280 px, kaikki tilat, kontrastit renderöidyltä sivulta, näppäimistöpolku, 400 % ja tekstin 200 % suurennus, liikkeen vähentäminen, forced-colors. UX.md versioon 0.8 (Koodarin tokenit kirjattu, 7.4/7.5-ristiriita ratkaistu, uusi 7.12). Raportti `docs/reports/UX-004-t021-ulkoasu.md`.
+- Seuraava askel: PM päättää, korjataanko UX-007 ja UX-008 tässä tehtävässä (suositus) vai omana tehtävänä. UX-009 (kisko 3 → 4 px) kuuluu samaan korjaukseen. UX-010 backlogiin.
+- Muutetut tiedostot: `docs/UX.md`, `docs/reports/UX-004-t021-ulkoasu.md`, tämä kortti.
+
+### Luovutus 2026-10-02 · UX Designer → PM
+- Mitä tehtiin: katselmointi. axe 0 rikkomusta 24 ajossa, kontrastit mitattu (teksti ≥ 5.97 : 1, UI ≥ 3.77 : 1, fokus ≥ 5.88 : 1), kaikki tilat, näppäimistö, fokus, reduce, forced-colors ja 320 px / 400 % ok. Ilme on Cyberpunk-henkinen molemmissa teemoissa ja käytettävyys säilyy.
+- Löydökset: UX-007 Medium (kapean rivin korkeus, lista 43 % pidempi: tiivistä tyyppi/väri/hinta yhdelle riville ja pystysisäväli `--space-2`), UX-008 Medium (vaakavieritys 320 px:ssä tekstin 200 % suurennuksella: painikkeet ja chipit rivittyviksi, `.count-control` ei kiinteää `min-width`ia kapealla, `.brand` kirjainväli), UX-009 Low (kisko 4 px myös kapealla), UX-010 Low (natiivi hakukentän ×, backlog).
+- Mitä pyydän: PM päättää korjauksista. Jos korjataan, Koodari tekee UX-007–UX-009 ja UX varmistaa uudelleen (skripti: `html { font-size: 200% }` 320 px:ssä, taulukon yläreunan sijainti 320 px:ssä).
+- Veto: ei. UX hyväksyy T-021:n Done-tilaan omalta osaltaan. Medium-löydökset suositellaan korjattavaksi, mutta eivät ole blokkaavia.
+- Rajoitteet: ruudunlukija, Firefox, Safari ja oikeat mobiililaitteet testaamatta. Enimmäismäärän (999) tilaa ei testattu käsin.
+
+### Checkpoint 2026-10-02 · Koodari (korjauskierros UX-004)
+- Tehty: 0b6395c (UX-007, UX-008 ja UX-009: `src/styles.css`, UX.md 6.4.4 ja 7.5 päivitetty PM:n luvalla). Raportti `docs/reports/UX-004-t021-ulkoasu.md`: UX-007–UX-009 merkitty Korjattu.
+- Kesken: ei. UX-010 jää backlogiin (PM).
+- Seuraava askel: UX varmistaa korjaukset.
+- Muutetut tiedostot: `src/styles.css`, `docs/UX.md`, `docs/reports/UX-004-t021-ulkoasu.md`, tämä kortti.
+
+### Luovutus 2026-10-02 · Koodari → UX Designer (korjausten varmistus)
+- Mitä tehtiin:
+  - UX-007: kapea rivi on nyt `display: flex; flex-wrap: wrap`. 1. rivi: nimi (`flex: 1 1 6rem`) ja kontrolli oikeassa reunassa. 2. rivi: tyyppi · väri ja hinta, rivittyy (näkymätön `tr::after`, `flex-basis: 100%`, pakottaa rivinvaihdon). Pystysisäväli `--space-2`. Järjestys on vain visuaalinen (`order`). DOM, lukujärjestys ja ARIA-roolit ovat ennallaan, ja kontrolli on rivin ainoa fokusoitava osa.
+  - UX-008: painikkeet `max-width: 100%`, `white-space: normal`, `overflow-wrap: anywhere`, `text-align: center`; `.option` `max-width: 100%`, `overflow-wrap: anywhere`; `.brand` `min-width: 0`, `overflow-wrap: anywhere`; kapealla `.count-control` `min-width: 0` ja `flex-wrap: wrap`.
+  - UX-009: kapean asettelun kisko 4 px.
+  - Ensin kokeiltu kolmesarakkeinen grid hylättiin: hintasarake sai leveyden 0 ja rivittyi merkki kerrallaan (mitattu 219 px:n keskikorkeus).
+- Mitä pyydän: korjausten varmistus (UX-007–UX-009), erityisesti visuaalinen arvio uudesta kapeasta rivistä ja se, että `+` ei siirry `−`:n ilmestyessä.
+- Mistä katsoa: commit 0b6395c, `src/styles.css` kohta `@media (max-width: 39.99rem)`. UX.md 7.5 "Taulukko alle 40 rem" ja "Määräkontrolli".
+- Mittaukset (Chrome headless, oma väliaikainen profiili scratchpadissa, suljettu vain `browser.close()`-kutsulla (L-004); kaksi riviä merkitty omistetuksi):
+
+| Kokoonpano | Rivin korkeus (ka / min–max) | Sivun korkeus | Vaakavieritys |
+|---|---|---|---|
+| 320 px, vaalea ja tumma | 85 / 85–103 px (UX-004: 140 px) | 14 386 px (UX-004: 23 901 px) | 0 px |
+| 1200 px, molemmat | 76 px (ennallaan) | 12 570 px | 0 px |
+| 320 px, teksti 200 % | 377 / 265–494 px | 62 322 px | 0 px (UX-004: 531 px) |
+| 1280 px, teksti 200 % | 151 px | 25 131 px | 0 px |
+| 640 px, teksti 200 % | 344 px | 55 159 px | 224 px (UX-004: 864 px) |
+
+- Muut: taulukon yläreuna 320 px:ssä on ennallaan 1284 px (suodatinpaneeli, UX-006/T-018). Solun sisäinen ylivuoto tai päällekkäisyys kontrollin kanssa: 0 kaikissa ajoissa. axe 0 rikkomusta (320 px ja 1200 px, molemmat teemat). Kuvakaappaukset tarkistettu.
+- Tunnetut rajoitteet ja riskit: 640 px + teksti 200 % vierittää yhä 224 px. Syy on se, että leveä taulukko on käytössä, koska 40 rem:n mediakysely ei reagoi tekstikokoon. Tämä ei kuulunut UX-008:n 320 px:n rajaukseen. Ehdotus jatkoon: kapea asettelu kontekstin leveyden mukaan (esim. container query), PM päättää. Ilman omistettua määrää kapea rivi on matalampi, joten kontrollin puuttuva varaus muuttaa nimen rivitystä, kun `−` ilmestyy (`+` pysyy paikallaan). Testi "formats large counts the Finnish way" (1 024 riviä) epäonnistui kerran koko sarjan ajossa ja meni läpi yksinään ja kahdessa seuraavassa koko ajossa. Todennäköisesti aikakatkaisu kuormassa. Testiä ei muutettu tässä tehtävässä.
+- Testit: `npm test` 427/427 läpi (kahdesti), `npm run lint` 0 varoitusta, `npm run build` onnistui.
+- Koodikatselmointi: tehty · Pakollisia korjattu 1 (gridin hintasarake rivittyi merkki kerrallaan, korvattu flex-rivillä ennen committia) · Suosituksia 1 (640 px + teksti 200 %, ks. rajoitteet)
+
+### Luovutus 2026-10-02 · UX Designer → PM (korjausten varmistus)
+- Mitä tehtiin: UX-007, UX-008 ja UX-009 varmistettu selaimessa (PR #6:n esikatselu, molemmat teemat, 320 px ja teksti 200 % 320 px:ssä, axe 0 rikkomusta). Rivi 140 → 85 px, sivu 23 901 → 14 410 px, vaakavieritys 0 px myös 200 %:n tekstillä, kisko 4 px. Uusi kaksirivinen korttirivi on käytettävä (+ pysyy paikallaan, järjestys visuaalisesti eri kuin DOM:ssa mutta fokus vain kontrollissa). Uusi UX-011 (Low, nimi rivittyy uudelleen − ilmestyessä) hyväksytty. Raportti `docs/reports/UX-004-t021-ulkoasu.md`.
+- Veto: ei. UX hyväksyy T-021:n Done-tilaan. UX-010 → T-022 ja 640 px + teksti 200 % → T-023 (PM).
+- Selain ajettu omalla väliaikaisella profiililla ja suljettu `browser.close()`-kutsulla (L-004).
+
+### Checkpoint 2026-10-02 · PM (Done)
+- Definition of Done tarkistettu: käyttäjä hyväksyi suunnan (D-011), hyväksymiskriteerit todennettu (UX-004: axe 0 rikkomusta molemmissa teemoissa, kontrastit mitattu renderöidyltä sivulta, 320 px, 400 % ja teksti 200 % 320 px:ssä ilman vaakavieritystä, liikkeen vähentäminen), testit 427/427, lint ja build läpi, koodikatselmointi tehty, UX-007–UX-009 korjattu ja varmistettu, CHANGELOG, CONTENT.md (fonttilisenssit) ja UX.md v0.8 päivitetty. Digiturvaa ei tarvittu (ei firebase.json- eikä riippuvuusmuutoksia).
+- Jatkoon: UX-006 ja UX-011 → T-018, UX-010 → T-022, 640 px + teksti 200 % → T-023, epävakaa testi → T-024. Oppi L-004.
+- Tila Done, yhdistetty test-haaraan.
