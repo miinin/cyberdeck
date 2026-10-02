@@ -11,7 +11,8 @@ function runThemeInit() {
   new Function(themeInitSource)();
 }
 
-afterEach(() => {
+// The static default of index.html; src/test/setup.ts removes the attribute after each test.
+beforeEach(() => {
   document.documentElement.setAttribute('data-theme', 'dark');
 });
 
