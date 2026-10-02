@@ -10,7 +10,7 @@ Työn alla: MVP-1 · Valmiina: 3/6 tehtävää (T-010–T-015). MVP-0 valmis.
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
 | T-025 | UX Designer | Ready (suunnittelu) | Teemavalitsin, haara `t-025-teemavalitsin` (D-012) |
-| T-026 | Arkkitehti | Ready (suunnittelu) | ADR: korttidata ja kuvat sovellukseen, haara `t-026-korttidata` (worktree) (D-012) |
+| T-026 | Arkkitehti → Koodari | Ready (suunnittelu valmis: D-013 Ehdotettu) | PM hyväksyy D-013:n, sitten Koodari toteuttaa kortin luovutuksen mukaan. T-027: sharpin hyväksyntä (PM ja Digiturva) ja kysymykset K-I1–K-I4 käyttäjälle |
 
 ## Blokkerit
 - Ei blokkereita. (gh löytyy polusta `C:\Program Files\GitHub CLI\gh.exe`, jos komento `gh` ei toimi.)

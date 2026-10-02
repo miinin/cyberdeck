@@ -3,10 +3,11 @@
 > Omistaja: Arkkitehti. Koodari päivittää toteutuksen yksityiskohdat (osio "Toteutuksen yksityiskohdat").
 > Päivitetty 2026-10-01 (Arkkitehti, T-001:n katselmointi ARCH-001: poikkeamat hyväksytty ja kirjattu lukuihin 3, 5, 7 ja 9). Teknologiapäätös: D-005 (tila: Voimassa).
 > Päivitetty 2026-10-01 (Arkkitehti, T-011): tietomalli ja paikallinen tallennuskerros, luku 12 sekä muutokset lukuihin 1, 3, 4 ja 6. Päätös: D-008 (tila: Ehdotettu).
+> Päivitetty 2026-10-02 (Arkkitehti, T-026 ja T-027): korttidata ja korttikuvat sovelluksen mukana, uusi luku 13 sekä merkinnät lukuihin 1, 5, 7, 9, 10 ja 11. Päätös: D-013 (tila: Ehdotettu).
 
 ## 1. Yleiskuva
 
-Cyberdeck on selaimessa toimiva yhden sivun sovellus (SPA). MVP-0:ssa ja MVP-1:ssä ei ole omaa palvelinta eikä tietokantaa. Selain hakee korttidatan suoraan Netdeck.gg:n julkisesta rajapinnasta. Firebase Hosting jakaa vain staattiset tiedostot.
+Cyberdeck on selaimessa toimiva yhden sivun sovellus (SPA). MVP-0:ssa ja MVP-1:ssä ei ole omaa palvelinta eikä tietokantaa. ~~Selain hakee korttidatan suoraan Netdeck.gg:n julkisesta rajapinnasta.~~ → T-026 (D-013): korttidata on buildissa (`src/data/cards.json`), ja vain kehittäjän päivityskomento kutsuu Netdeck.gg:tä. Kaavio ja kerrokset: luku 13.1. Firebase Hosting jakaa vain staattiset tiedostot.
 
 ```
 ┌──────────── Selain ─────────────────────────────────────────┐
@@ -34,7 +35,7 @@ ui/ ──► storage/index.ts ──► domain/ (Collection, Deck, CardKey, val
               └─► localStorage (vain storage/keyValueStore.ts koskee siihen)
 ```
 
-**Riippuvuuksien suunta:** `ui → api → domain`, `ui → storage → domain` ja `ui → domain`. `storage` ei tuo `api`a, `ui`:ta eikä Reactia. `domain` ei tuo mitään. `api` ei tuo Reactia. Vain `api/` tuntee Netdeck.gg:n URL:n ja raakadatan muodon (PROJECT.md:n riski "rajapinta muuttuu tai sulkeutuu"). Jos rajapinta vaihtuu, muutetaan vain `api/`.
+**Riippuvuuksien suunta:** `ui → api → domain`, `ui → storage → domain` ja `ui → domain`. `storage` ei tuo `api`a, `ui`:ta eikä Reactia. `domain` ei tuo mitään. `api` ei tuo Reactia. Vain `api/` tuntee Netdeck.gg:n URL:n ja raakadatan muodon (PROJECT.md:n riski "rajapinta muuttuu tai sulkeutuu"). Jos rajapinta vaihtuu, muutetaan vain `api/`. **T-026 (D-013):** sovellus ei enää importtaa `api`a. Uusi suunta on `ui → data → domain`, ja `api`a käyttää vain `scripts/` (luku 13.1).
 
 ## 2. Teknologiat (D-005)
 
@@ -116,6 +117,8 @@ Testit ovat testattavan tiedoston vieressä (`*.test.ts(x)`). Ei `components/`-,
   - **Huom. flat config:** saman säännön (`no-restricted-imports`) myöhempi lohko korvaa aiemman eikä yhdistä niitä. API- ja storage-mallit on siksi annettava samassa lohkossa (`patterns: [apiInternals, storageInternals]`).
 
 ## 5. Rajapintakerros (`src/api/`)
+
+> T-026 (D-013): kerros säilyy ennallaan, mutta sitä käyttää vain päivityskomento `npm run cards:update` (luku 13.4), ei selain.
 
 ### 5.1 Netdeck.gg-rajapinta (todennettu 2026-09-30)
 
@@ -246,6 +249,8 @@ export interface Card {
 
 ## 7. Käyttöliittymäkerros (`src/ui/`)
 
+> T-026 (D-013): `useCardCatalog`, `CatalogState` sekä lataus-, virhe- ja osittaisen datan tilat poistuvat. `CatalogView` saa `cards`-listan suoraan (luku 13.5). Alla oleva kuvaa T-001:n ja T-012:n tilaa.
+
 ```ts
 // useCardCatalog.ts
 export type CatalogState =
@@ -291,6 +296,7 @@ export function App(props: { loadCatalog?: (signal: AbortSignal) => Promise<Card
 - `npm run build` = tyyppitarkistus + `vite build` → `dist/`. Tyyppivirhe rikkoo buildin, jolloin workflow ei julkaise.
 - Workflowt (`.github/workflows/`) ajavat vain `npm ci && npm run build`. Testit ja lint ajetaan paikallisesti ennen luovutusta (rules.md 6). Niiden lisääminen PR-workflowhun on suositeltu jatkotehtävä.
 - ~~`firebase.json` ei muutu.~~ → T-001: `firebase.json`:n molemmilla sivustoilla (prod, test) on sama `headers`-osio: CSP (`connect-src 'self' https://api.netdeck.gg`, ei `unsafe-inline`- eikä `unsafe-eval`-lähteitä) ja SR-3:n otsakkeet. Sisällöstä päättää Digiturva (SR-2, SR-3, SR-9).
+  - **T-026 (D-013):** `connect-src 'self'` ja välimuistisääntö `/assets/**` (luku 13.7). Alla oleva `connect-src`-kytkös poistuu.
   - Kytkökset, jotka on pidettävä yhdenmukaisina: CSP:n `connect-src` ↔ `NETDECK_CARDS_URL` (`api/netdeckClient.ts`) sekä prod- ja test-lohkojen otsakkeet keskenään (JSON ei salli yhteistä lohkoa). Jos rajapinnan osoite vaihtuu, myös CSP:tä on muutettava, muuten selain estää haun. Katso ARCH-001, löydös ARCH-003.
   - `vite.config.ts`: `assetsInlineLimit: 0`, jotta CSP ei tarvitse `data:`-lähteitä skripteille.
 
@@ -298,12 +304,13 @@ export function App(props: { loadCatalog?: (signal: AbortSignal) => Promise<Card
 
 | Palvelu | Käyttö | Kustannus | Riski ja torjunta |
 |---|---|---|---|
-| Netdeck.gg API | korttidata, luku selaimesta | ilmainen, ei avainta | muutos tai sulkeutuminen → eristetty `api/`-kerrokseen. Välimuisti on jatkotehtävä. Käyttöehtoja ei ole tarkistettu (Digiturva). |
-| Firebase Hosting | staattinen jakelu, 2 sivustoa | Spark (ilmainen) | ei dataa, ei lukitusta |
+| Netdeck.gg API | ~~korttidata, luku selaimesta~~ → T-026: vain kehittäjän komento `cards:update` (D-013) | ilmainen, ei avainta | muutos tai sulkeutuminen → eristetty `api/`-kerrokseen. Välimuisti on jatkotehtävä. Käyttöehtoja ei ole tarkistettu (Digiturva). |
+| Firebase Hosting | staattinen jakelu, 2 sivustoa; T-026 ja T-027: myös korttidata ja -kuvat | Spark (ilmainen): 10 Gt tallennus (myös vanhat julkaisut) ja 10 Gt/kk siirto, sivustot jakavat kiintiön (D-013 osa 5) | ei lukitusta (staattiset tiedostot). Siirtokiintiön ylitys poistaa sivustot käytöstä kuukauden loppuun: kuvat ladataan laiskasti, ja niillä on vuoden välimuisti. |
+| sharp (devDependency, T-027) | kuvien muunnos WebP:ksi kehittäjän koneella | ilmainen, Apache-2.0 + LGPL-3.0 (libvips) | ehdotettu, vaatii PM:n ja Digiturvan hyväksynnän (D-013 osa 4) |
 
 ## 11. Tunnettu rakenteellinen velka ja jatkotehtäväehdotukset (PM priorisoi)
 
-1. **Korttidatan välimuisti** (MVP-1:n alussa): yksi lataus on noin 1,4 Mt ja noin 4–6 s. Muunnettujen `Card`-olioiden tallennus `localStorage`en aikaleimalla ja taustapäivitys. Pienentää myös rajapinnan sulkeutumisen riskiä. Oma ADR.
+1. ~~**Korttidatan välimuisti** (MVP-1:n alussa):~~ → korvattu, D-012 ja D-013: data on buildissa (T-026). yksi lataus on noin 1,4 Mt ja noin 4–6 s. Muunnettujen `Card`-olioiden tallennus `localStorage`en aikaleimalla ja taustapäivitys. Pienentää myös rajapinnan sulkeutumisen riskiä. Oma ADR.
 2. **Testit ja lint CI:hin** (T-004): `npm test && npm run lint` preview-workflowhun ennen buildia.
 3. **ESLint-saavutettavuusliitännäinen** (T-005), kun ESLint 10:n kanssa yhteensopiva versio on saatavilla (eslint-plugin-jsx-a11y 6.10.2 tukee vain ESLint 9:ää).
 
@@ -581,6 +588,221 @@ Toteutusjärjestys niin, että jokainen askel on commitoitavissa ja testit menev
 5. ESLint-säännöt luvun 4 mukaan. Varmista, että lint estää `localStorage`n käytön esim. `src/ui/`-tiedostossa (kokeile ja poista kokeilu).
 
 Ei käyttöliittymää, ei hookeja, eikä `App`ia muuteta (T-012). Ei uusia riippuvuuksia. Poikkeamat tästä luvusta kirjataan perusteluineen "Toteutuksen yksityiskohdat" -osioon.
+
+## 13. Korttidata ja korttikuvat sovelluksen mukana (T-026, T-027, D-013)
+
+Päätös ja vaihtoehtojen vertailu: D-013 (tila: Ehdotettu). Tämä luku kuvaa rakenteen ja rajapinnat. Se korvaa lukujen 1, 5, 7 ja 10 ajonaikaisen haun (merkitty niihin).
+
+### 13.1 Yleiskuva
+
+```
+KEHITTÄJÄN KONE (käsin, harvoin)                      SELAIN (ei verkkokutsuja korttidatalle)
+─────────────────────────────────                     ──────────────────────────────────────
+npm run cards:update                                   main.tsx → App
+  scripts/cards-update.mjs  (Viten runnerImport)         │  cards = CARDS (src/data/cards.ts)
+    └─ scripts/cards/updateCards.ts                      ▼
+         ├─ src/api  fetchAllCards()  ──HTTPS──► Netdeck  CatalogView({ cards, repositories })
+         ├─ src/domain/cardFile.ts  parseCardFile           └─ CardList → CardImage (T-027)
+         └─ kirjoittaa src/data/cards.json  ──────────►            └─ getCardImage(key)  (src/data/cardImages.ts)
+                                                                        └─ /assets/<key>-<hash>.webp (oma origin)
+npm run cards:images -- <kansio>      (T-027)
+  scripts/cards-images.mjs  (runnerImport)
+    └─ scripts/cards/importImages.ts
+         ├─ matchImages.ts  (puhdas: nimet → avaimet)
+         ├─ convertImage.ts (sharp → WebP sm/lg)
+         └─ kirjoittaa src/assets/cards/{sm,lg}/<key>.webp
+```
+
+**Riippuvuuksien suunta (uusi):** `ui → data → domain`, `ui → storage → domain`, `ui → domain`. `scripts → api → domain` ja `scripts → domain`. **Sovelluskoodi (`src/ui`, `src/data`, `src/domain`, `src/storage`, `App.tsx`, `main.tsx`) ei importtaa `src/api`a lainkaan**, joten Netdeck-koodi ei päädy pakettiin. `src/data` ei importtaa Reactia, `ui`:ta, `storage`a eikä `api`a.
+
+### 13.2 Hakemistot ja tiedostot
+
+```
+/
+├── package.json             + "cards:update": "node scripts/cards-update.mjs"
+│                            + "cards:images": "node scripts/cards-images.mjs"     (T-027)
+│                            + devDependency "sharp": "0.35.5"                     (T-027, vasta hyväksynnän jälkeen)
+├── tsconfig.json            + "resolveJsonModule": true, include + "scripts"
+├── eslint.config.js         + scripts/**: Node-globaalit; sovelluskoodille api-kielto (13.6)
+├── firebase.json            connect-src 'self'; + /assets/** Cache-Control (13.7)
+├── .gitignore               + card-images-src/                                    (T-027)
+├── scripts/
+│   ├── cards-update.mjs     ohut sisääntulo: runnerImport('scripts/cards/updateCards.ts') → main(), exit-koodi
+│   ├── cards-images.mjs     sama T-027:lle (importImages.ts)
+│   └── cards/
+│       ├── updateCards.ts        updateCards(deps): haku → tarkistus → diff → kirjoitus
+│       ├── updateCards.test.ts   väärennetty fetch ja muistinvarainen tiedosto, ei verkkoa
+│       ├── cardFileDiff.ts       diffCardFiles(old, next): { added, removed, changed }
+│       ├── matchImages.ts        T-027: puhdas yhdistäminen
+│       ├── matchImages.test.ts
+│       ├── convertImage.ts       T-027: sharp-kääre (ainoa tiedosto, joka importtaa sharpin)
+│       ├── importImages.ts       T-027: tiedostojärjestelmä + raportti
+│       └── importImages.test.ts  T-027: väliaikaiskansio, sharpilla luodut pienet testikuvat
+└── src/
+    ├── domain/
+    │   ├── cardImage.ts          T-027: CARD_IMAGE_WIDTH, CARD_IMAGE_ASPECT (vakiot)
+    │   ├── cardFile.ts           CARD_FILE_FORMAT, CARD_FILE_VERSION, CardFile, parseCardFile, toCardFile
+    │   └── cardFile.test.ts
+    ├── data/
+    │   ├── cards.json            GENEROITU (cards:update). Ei käsin muokata.
+    │   ├── cards.ts              export const CARDS: readonly Card[]
+    │   ├── cards.test.ts         parseCardFile(cards.json) onnistuu, ≥ 1 kortti, avaimet yksilöllisiä
+    │   ├── cardImages.ts         T-027: getCardImage(key)
+    │   └── cardImages.test.ts    T-027
+    ├── assets/cards/             T-027: GENEROITU (cards:images)
+    │   ├── sm/<key>.webp
+    │   └── lg/<key>.webp
+    ├── api/                      ENNALLAAN, vain scripts/ käyttää (D-013 osa 2)
+    └── ui/
+        ├── useCardCatalog.ts     POISTETAAN (+ testi)
+        ├── CatalogView.tsx       props { cards, repositories }; lataus-, virhe-, osittainen ja tyhjä tila pois
+        └── CardImage.tsx         T-027: kuva tai paikkamerkki (UX määrittää paikan)
+```
+
+### 13.3 Datatiedosto ja validointi (`src/domain/cardFile.ts`)
+
+```ts
+export const CARD_FILE_FORMAT = 'cyberdeck.cards';
+export const CARD_FILE_VERSION = 1;
+/** Upper bound for every text field, so a broken source cannot bloat the bundle. */
+export const MAX_CARD_TEXT_LENGTH = 200;
+
+export interface CardFile {
+  format: typeof CARD_FILE_FORMAT;
+  version: typeof CARD_FILE_VERSION;
+  cards: Card[];
+}
+
+/** Builds the file object with a fixed key order (format, version, cards; Card fields in model order). */
+export function toCardFile(cards: readonly Card[]): CardFile;
+
+/**
+ * Validates a parsed card file and returns the cards. Throws Error with a developer message
+ * on the first problem. Rules:
+ * - root is an object with exactly format === CARD_FILE_FORMAT, version === CARD_FILE_VERSION, cards: array (length ≥ 1)
+ * - each card has exactly the Card fields (no extra fields), id/slug/name/displayName/type: non-empty strings,
+ *   subname/color: non-empty string or null, cost: finite number or null, all strings ≤ MAX_CARD_TEXT_LENGTH
+ * - key === cardKey(name, subname) and isCardKey(key)
+ * - key and id unique across the file
+ */
+export function parseCardFile(json: unknown): Card[];
+```
+
+- Domain-kerros: ei riippuvuuksia (käyttää `cardKey.ts`:ää). Puhdas funktio, ei tiedostojärjestelmää.
+- `src/data/cards.ts`:
+  ```ts
+  import type { Card } from '../domain/card';
+  import file from './cards.json';
+  /** All cards, bundled at build time (D-013). Validated by cards:update and cards.test.ts. */
+  export const CARDS: readonly Card[] = file.cards;
+  ```
+  Jos `tsc` ei hyväksy JSON-tyypin sijoitusta `Card[]`:ksi (esim. `null`-kenttien päättely), Koodari käyttää yhtä `as Card[]` -muunnosta ja kommenttia, joka viittaa testiin. Ei ajonaikaista validointia.
+
+### 13.4 Päivityskomento (`scripts/cards/updateCards.ts`)
+
+```ts
+export interface UpdateCardsDeps {
+  fetchFn?: typeof fetch;                       // default globalThis.fetch; tests inject a fake
+  readText: (path: string) => Promise<string | null>; // null when the file does not exist
+  writeText: (path: string, text: string) => Promise<void>;
+  log: (line: string) => void;
+}
+export type UpdateCardsResult =
+  | { status: 'unchanged'; count: number }
+  | { status: 'written'; count: number; diff: CardFileDiff }
+  | { status: 'failed'; reason: string };        // file untouched
+
+export const CARDS_JSON_PATH = 'src/data/cards.json';
+export function serializeCardFile(file: CardFile): string; // JSON.stringify(file, null, 2) + '\n'
+export async function updateCards(deps: UpdateCardsDeps): Promise<UpdateCardsResult>;
+export async function main(): Promise<number>;   // node:fs/promises, console.log; returns exit code
+```
+
+Kulku: `fetchAllCards({ fetchFn })` → epäonnistuu, jos `skipped > 0`, `cards.length !== reportedTotal` tai tuloksessa on toistuva avain → `toCardFile(cards)` → `parseCardFile(JSON.parse(serializeCardFile(file)))` (kierros) → luetaan vanha tiedosto. Jos vanha on olemassa ja `parseCardFile` hyväksyy sen, lasketaan `diffCardFiles` ja raportoidaan. Rikkinäinen vanha tiedosto ei estä uuden kirjoittamista, mutta siitä tulee varoitus. Sama merkkijono → `unchanged`, muuten kirjoitus.
+
+Raportin rivit (englanniksi, kehittäjän konsoli): `Cards: 151`, `Added (n): key, …`, `Removed (n): key, …  WARNING: saved collections may refer to these keys`, `Changed (n): key (fields), …`, `Wrote src/data/cards.json` tai `No changes`.
+
+`scripts/cards-update.mjs`:
+```js
+import { runnerImport } from 'vite';
+const { module } = await runnerImport('./scripts/cards/updateCards.ts', { configFile: false, logLevel: 'error' });
+process.exitCode = await module.main();
+```
+(`root` on `process.cwd()`, joten komento ajetaan repon juuresta, kuten `npm run` tekee.)
+
+### 13.5 Käyttöliittymän muutokset (T-026)
+
+- `App`: `export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; repositories?: Repositories })`. Ei `useCardCatalog`ia. Testit antavat pienen korttilistan propsina kuten ennen `loadCatalog`ia.
+- `CatalogView`: props `{ cards: readonly Card[]; repositories: Repositories }`. `toViewModel` sievenee valmiin listan tapaukseen: tilarivi näyttää korttimäärän heti, eikä `notice`a, `showRetry`tä, `missingCards`ia eikä latauspalkkia enää ole. Poistuvat tekstit (`loading`, `error*`, `partial*`, `retry`, `empty*`) poistetaan `texts.ts`:stä vain, jos mikään muu ei käytä niitä. `partialFilteredLive` ja muut suodatuksen tekstit säilyvät, jos niitä käytetään.
+- Testit: lataus-, virhe-, uudelleenyritys- ja osittaisen tilan testit poistetaan, koska tila ei ole enää mahdollinen (rules.md 6: ei heikennetä, vaan poistuneen ominaisuuden testit poistuvat sen mukana, ja PM hyväksyy tämän D-013:lla). Lista-, suodatus- ja kokoelmatestit säilyvät ja saavat kortit propsina. Uusi testi: `App` ilman propsia renderöi `CARDS`-datan kortin heti (synkronisesti, ilman `findBy`/`waitFor`ia).
+- Alatunnisteen lähdemaininta (`footerSource`, "Korttitiedot: Netdeck.gg") säilyy.
+
+### 13.6 Kerrosrajan valvonta (ESLint)
+
+- `src/ui/**`, `src/App.tsx`, `src/main.tsx`, `src/storage/**`, `src/data/**` ja `src/domain/**`: kielletään `**/api` ja `**/api/**` kokonaan (viesti: "The app uses bundled card data (src/data); src/api is only for scripts/ (D-013)."). Huomaa luvun 4 flat config -sääntö: kaikki `no-restricted-imports`-mallit samassa lohkossa per tiedostojoukko.
+- `src/data/**`: kielletään lisäksi `react`, `**/ui`, `**/ui/**`, `**/storage`, `**/storage/**`.
+- `scripts/**/*.{ts,mjs}`: `globals.node`. Skriptit saavat importata `src/api`n (vain `index.ts`), `src/domain`in ja `src/data`n.
+- `src/api/**` testeineen säilyy lintin ja testien piirissä.
+
+### 13.7 firebase.json
+
+Molemmille sivustoille (`prod`, `test`), identtisinä (ARCH-003):
+```json
+"headers": [
+  { "source": "**", "headers": [ { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" }, …muut SR-3:n otsakkeet ennallaan… ] },
+  { "source": "/assets/**", "headers": [ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" } ] }
+]
+```
+Todennus esikatselussa: `curl -sI <esikatselu-URL>/assets/<jokin tiedosto>` näyttää sekä `Content-Security-Policy`- että `Cache-Control: public, max-age=31536000, immutable` -otsakkeen, ja `curl -sI <esikatselu-URL>/` näyttää CSP:n, jossa on `connect-src 'self'`. Jos CSP puuttuu asset-vastauksesta, CSP lisätään myös `/assets/**`-sääntöön, ja asiasta ilmoitetaan Digiturvalle.
+
+### 13.8 Korttikuvat (T-027)
+
+```ts
+// src/domain/cardImage.ts (puhdas, myös skriptit importtaavat tämän)
+/** Output widths in px; one place for UX to change (D-013 osa 4). */
+export const CARD_IMAGE_WIDTH = { sm: 240, lg: 720 } as const;
+export const CARD_IMAGE_ASPECT = 88 / 63;   // korkeus / leveys, korttiformaatti 63 × 88 mm (tarkistetaan kuvapaketista)
+
+// src/data/cardImages.ts
+export interface CardImage { small: string; large: string }
+export function getCardImage(key: CardKey): CardImage | null;
+
+// Toteutus:
+const small = import.meta.glob<string>('../assets/cards/sm/*.webp', { eager: true, query: '?url', import: 'default' });
+const large = import.meta.glob<string>('../assets/cards/lg/*.webp', { eager: true, query: '?url', import: 'default' });
+// → Map<CardKey, CardImage>: avain = tiedostonimi ilman päätettä, vain jos isCardKey ja molemmat koot löytyvät.
+```
+
+```ts
+// scripts/cards/matchImages.ts (puhdas, ei tiedostojärjestelmää)
+export type MatchRule = 'map' | 'key' | 'slug' | 'name';
+export interface ImageMatchReport {
+  matched: { file: string; key: CardKey; rule: MatchRule }[];
+  unmatched: { file: string; reason: 'no-match' | 'ambiguous' | 'conflict' | 'invalid-map-entry' }[];
+  ignored: string[];              // hidden files, Thumbs.db, desktop.ini, non-image extensions
+  missingCards: { key: CardKey; displayName: string }[];
+}
+export function matchImages(fileNames: readonly string[], cards: readonly Card[], map?: Readonly<Record<string, string>>): ImageMatchReport;
+
+// scripts/cards/convertImage.ts (ainoa sharpia käyttävä tiedosto)
+export const MAX_SOURCE_BYTES = 25 * 1024 * 1024;
+export async function convertImage(sourcePath: string, outputs: { sm: string; lg: string }): Promise<void>;
+// sharp(source, { failOn: 'error' }).rotate().resize({ width, withoutEnlargement: true }).webp({ quality: 80 }).toFile(...)
+// (metatiedot jäävät pois oletuksena, koska withMetadata()-kutsua ei tehdä)
+
+// scripts/cards/importImages.ts
+export async function importImages(sourceDir: string, deps): Promise<{ exitCode: number; report: ImageMatchReport & { rejected: …; orphans: CardKey[] } }>;
+```
+
+- Hyväksytyt lähdemuodot: PNG, JPEG ja WebP (tunnistus sharpin `metadata().format`ista). Pääte vain esisuodattaa.
+- `<CardImage card size="sm|lg">` (UX määrittää sijainnin ja alt-tekstin): `getCardImage(card.key)` → `<img src loading="lazy" decoding="async" width height alt>` tai paikkamerkki (`<span className="card-image card-image--missing" aria-hidden="true">`). `onError` vaihtaa paikkamerkkiin.
+- Ennen kuvapakettia: `src/assets/cards/` puuttuu tai on tyhjä, ja `getCardImage` palauttaa aina `null` (kaikilla paikkamerkki). Testeissä Vitest tukee `import.meta.glob`ia. Yhdistämislogiikka testataan nimilistoilla, ja muunnos pienellä kuvalla, jonka sharp luo testissä (`sharp({ create: … })`). Oikeita korttikuvia ei commitoida testidataksi.
+
+### 13.9 Kytkökset, jotka on pidettävä yhdenmukaisina
+
+- `Card`-malli ↔ `parseCardFile`in kenttälista ↔ `toCardFile`n kenttäjärjestys. Uusi kenttä `Card`iin = kaikki kolme ja `cards.json` uudelleen (`cards:update`).
+- `cardKey()` ↔ tallennetut avaimet ↔ kuvatiedostojen nimet. `cardKey`n muutos vaatii migraation (D-008 kohta 4) ja kuvien uudelleennimeämisen.
+- `CARD_IMAGE_WIDTH` ↔ `convertImage`n leveydet (sama vakio `src/domain/cardImage.ts`:stä; skriptit eivät importtaa `src/data/cardImages.ts`:ää, koska siinä on Viten `import.meta.glob`).
 
 ## Toteutuksen yksityiskohdat
 

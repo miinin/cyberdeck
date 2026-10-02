@@ -23,4 +23,31 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
 ### Checkpoint 2026-10-02 · PM
 - Kortti määritelty (D-012), tila Ready. Seuraava askel: Arkkitehti tekee ADR:n (data ja kuvat), sitten Koodari.
 
+### Checkpoint 2026-10-02 · Arkkitehti
+- Tehty: ADR D-013 (tila: Ehdotettu) ja ARCHITECTURE.md luku 13 (rakenne, rajapinnat, lint ja firebase.json). Kattaa myös T-027:n kuvat.
+- Kesken: –
+- Seuraava askel: PM hyväksyy D-013:n osat 1–3 (ei kustannuksia, ei uusia riippuvuuksia), jonka jälkeen Koodari toteuttaa alla olevan luovutuksen mukaan.
+- Avoimet kysymykset: PM:lle luovutuksessa (A1–A3).
+- Muutetut tiedostot: docs/DECISIONS.md, docs/ARCHITECTURE.md, docs/tasks/T-026-korttidata.md, docs/tasks/T-027-korttikuvat.md, docs/STATUS.md
+
 ## Luovutukset
+
+### Luovutus 2026-10-02 · Arkkitehti → PM → Koodari
+- **Mitä tehtiin:** ADR D-013 ja ARCHITECTURE.md luku 13. Valinnat: data tiedostossa `src/data/cards.json`, joka importataan buildiin (ei fetchiä, ei lataustilaa). Päivityskomento `npm run cards:update` ajetaan Viten `runnerImport`illa (ei uutta riippuvuutta) ja käyttää olemassa olevaa `fetchAllCards`/`mapCard`ia. `src/api/` säilyy vain skriptin käytössä. CSP: `connect-src 'self'`. `/assets/**` saa vuoden välimuistin.
+- **Mitä pyydän:** PM: D-013:n hyväksyntä (osat 1–3 eivät maksa eivätkä lukitse). Koodari: toteutus alla olevin askelin.
+- **Mistä katsoa:** D-013 (DECISIONS.md), ARCHITECTURE.md 13.1–13.7 ja 13.9.
+- **Toteutusaskeleet (jokainen oma commit, testit vihreinä):**
+  1. `src/domain/cardFile.ts` + testit (`toCardFile`, `parseCardFile`: kelvollinen, ylimääräinen kenttä, puuttuva kenttä, väärä tyyppi, `key !== cardKey(name, subname)`, toistuva avain tai id, tyhjä lista, väärä `format` tai `version`, yli 200 merkin teksti).
+  2. `scripts/cards/updateCards.ts`, `cardFileDiff.ts` ja `scripts/cards-update.mjs` + testit väärennetyllä `fetchFn`illä ja muistinvaraisilla `readText`/`writeText`-funktioilla (ei verkkoa: setup.ts estää). Testaa vähintään: kirjoitus, `unchanged` (sama tuloste tavu tavulta), `skipped > 0` → `failed` eikä kirjoitusta, määrän poikkeama → `failed`, poistetun avaimen varoitus. `package.json`: `"cards:update": "node scripts/cards-update.mjs"`. `tsconfig.json`: `resolveJsonModule` ja `scripts` includeen. ESLint: `scripts/**` Node-globaalit (13.6).
+  3. Aja `npm run cards:update` **kerran** (3 pyyntöä Netdeckiin, SR-5) ja commitoi `src/data/cards.json`. Aja se toisen kerran ja varmista, että tulos on `No changes` (determinismi, myös korttien järjestys). Jos järjestys vaihtuu, pysähdy ja eskaloi PM:lle (D-013 osa 1). Varmista, että **kaikki 151 avainta ovat samat kuin `mapCard`in nykyiset** (D-008, hyväksymiskriteeri 3). Datan avaimet ovat samat kuin ennen, koska sama `mapCard` tuottaa ne.
+  4. `src/data/cards.ts` + `cards.test.ts`. Käyttöliittymä: `App` ja `CatalogView` 13.5:n mukaan, `useCardCatalog` ja sen testi pois, tilojen testit päivitetään. ESLint: sovelluskoodille `api`-kielto (13.6).
+  5. `firebase.json` 13.7:n mukaan (molemmat sivustot identtisinä). STATUS.md:n ajo-ohje: `npm run cards:update` ja maininta, ettei sovellus enää kutsu Netdeckiä selaimessa. CHANGELOG `[Julkaisematon]`: "Kortit näkyvät heti ilman latausta."
+  6. Esikatselussa `curl -sI` (13.7) ja selaimen konsoli: ei CSP-virheitä, Network-välilehdellä ei pyyntöjä api.netdeck.gg:hen.
+- **Hyväksymiskriteerien todennus:** (1) `grep -r "api.netdeck.gg" dist/` ei löydä mitään, ja esikatselun verkkoliikenteessä ei ole Netdeck-pyyntöjä. (2) Komento ja STATUS.md:n ohje. (3) Avainvertailu askeleessa 3. (4) Tilat 13.5:n mukaan. (5) CSP 13.7, `npm test`, `npm run lint` ja `npm run build`.
+- **Tunnetut rajoitteet ja riskit:** `runnerImport` on Viten kokeellinen API (varapolku: `tsx` devDependencyna, vaatii PM:n luvan). Testit eivät ole CI:ssä (T-004), joten semanttinen validointi ei estä julkaisua, mutta tyyppitarkistus estää. Firebase-otsakkeiden yhdistäminen usean säännön kesken todennetaan esikatselussa (13.7).
+- **Katselmoinnit:** Digiturva (firebase.json, CSP, SR-9; päivittää SECURITY.md:n R-1:n, R-2:n ehdot, R-6:n ja PRIVACY.md:n Netdeckin osalta). UX kevyesti (lataus- ja virhetilat poistuvat näkyvistä). Arkkitehti vain, jos toteutus poikkeaa luvusta 13.
+- **Avoimet kysymykset PM:lle:**
+  - A1: D-013:n hyväksyntä (osat 1–3 eivät vaadi käyttäjää: ei kustannuksia, ei riippuvuuksia, ei lukitusta).
+  - A2: Poistuvien tilojen (lataus, virhe, osittainen) testien poisto on rules.md 6:n poikkeus. D-013 perustelee sen, mutta PM:n hyväksyntä kirjataan tähän korttiin.
+  - A3: Havainto `index.html`:n välimuistista (`max-age=3600`, D-013:n seuraukset). Ehdotus: oma velkatehtävä.
+- **Testit:** Arkkitehti ei toteuttanut koodia. Kokeiltu: `runnerImport` lataa `src/api/mapCard.ts`:n ja tuottaa fixtuurista oikean kortin. Noden natiivi TS-import epäonnistuu päätteettömiin importteihin. `npx vite build` → JS 260 kt (82 kt gzip). Testisivuston `Cache-Control: max-age=3600` mitattu `curl -sI`:llä.
