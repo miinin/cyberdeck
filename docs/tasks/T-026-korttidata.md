@@ -96,3 +96,8 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
 - **Mistä katsoa:** raportti yllä, `git diff origin/test -- docs/SECURITY.md docs/PRIVACY.md`.
 - **Tunnetut rajoitteet ja riskit:** Hostingin sääntöjen yhdistymistä ei voitu todentaa (paikallinen Hosting-emulaattori ei palauta `firebase.json`:n otsakkeita). Epäonnistuminen ei heikennä tietoturvaa, koska `index.html`:n CSP tulee `**`-säännöstä. SEC-017 kuuluu T-004:ään.
 - **Testit:** `npm test` 437/437, `npm run lint` 0 varoitusta, `npm run build` läpi, `npm audit` 0, salaisuushaku diffistä ja historiasta 0 osumaa, `grep -ri netdeck dist/` vain alatunnisteen tekstit.
+
+### Checkpoint 2026-10-02 · PM (esikatselu, SEC-016)
+- Yhdistetty `origin/test` haaraan (ristiriidat T-025:n kanssa ratkaistu; `App.theme.test.tsx` käyttää nyt `cards={[]}`). `npm test` 466/466, lint ja build läpi.
+- Esikatselu https://cyberdeck-tcg-test--pr8-t-026-korttidata-upqu8vmd.web.app (`curl -sI`): `/` → CSP `connect-src 'self'` + `Cache-Control: max-age=3600`. `/assets/index-xO3cEatC.js` → sama CSP + `Cache-Control: public, max-age=31536000, immutable`. Bundlessa 0 osumaa "netdeck". SEC-016:n ehdot täyttyvät (Digiturvan raportin kriteerit); Digiturva merkitsee Varmistettu seuraavassa katselmoinnissaan.
+- UX:n kevyt katselmointi (poistuneet tilat) tehdään yhdessä T-027:n UX-katselmoinnin kanssa, koska T-027 rakentuu tämän päälle. T-026 ja T-027 yhdistetään testiin peräkkäin, kun T-027 on katselmoitu (käyttäjä priorisoi kuvat 2026-10-02).
