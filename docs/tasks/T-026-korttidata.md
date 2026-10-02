@@ -39,8 +39,8 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
 6. Koodikatselmointi ja luovutus. Esikatselun curl-todennus PM:lle, koska PR:ää ei avata tässä.
 
 ### Checkpoint 2026-10-02 · Koodari (jatko)
-- Tehty: firebase.json (8e35488) tarkistettu 13.7:ää vasten: molemmat sivustot identtiset, ,  → , muut SR-3-otsakkeet ennallaan, JSON kelpaa. Determinismi: toinen  → , . Avainvertailu: 151 korttia, 151 uniikkia avainta ja id:tä; / ei muuttunut, ja  (cards.test.ts) tarkistaa jokaisen avaimen :ta vasten. Kuollut latauspalkin CSS poistettu (dfcca96). Ajo-ohje, CHANGELOG ja ARCHITECTURE.md:n toteutusosa (3f6fda8).
-- Kesken: esikatselun -todennus (askel 6), koska PR:ää ei avattu tässä.
+- Tehty: firebase.json (8e35488) tarkistettu 13.7:ää vasten: molemmat sivustot identtiset, `connect-src 'self'`, `/assets/**` → `Cache-Control: public, max-age=31536000, immutable`, muut SR-3-otsakkeet ennallaan, JSON kelpaa. Determinismi: toinen `npm run cards:update` → `Cards: 151`, `No changes`. Avainvertailu: 151 korttia, 151 uniikkia avainta ja id:tä; `mapCard` ja `cardKey` eivät muuttuneet, ja `parseCardFile` (cards.test.ts) tarkistaa jokaisen avaimen `cardKey(name, subname)`:ta vasten. Kuollut latauspalkin CSS poistettu (dfcca96). Ajo-ohje, CHANGELOG ja ARCHITECTURE.md:n toteutusosa (3f6fda8).
+- Kesken: esikatselun `curl -sI` -todennus (askel 6), koska PR:ää ei avattu tässä.
 - Seuraava askel: PM avaa PR:n ja todentaa esikatselussa 13.7:n otsakkeet; Digiturva ja UX katselmoivat.
 - Avoimet kysymykset: –
 - Muutetut tiedostot: src/styles.css, docs/STATUS.md (vain ajo-ohje), CHANGELOG.md, docs/ARCHITECTURE.md
@@ -80,16 +80,10 @@ Kortit näkyvät heti ilman verkkohakua, eikä sovellus riipu Netdeckin rajapinn
 - Muutetut tiedostot: scripts/, src/data/, src/domain/cardFile.ts, src/ui/*, src/App.tsx, firebase.json, package.json.
 
 ### Luovutus 2026-10-02 · Koodari → PM → Digiturva, UX
-- **Mitä tehtiin:** korttidata  (151 korttia) sovelluksen mukana,  (validoi, deterministinen, ei osittaista dataa), lataus-, virhe-, osittainen ja tyhjä tila poistettu (PM A2), ESLint estää :n sovelluskoodissa, CSP ,  vuoden välimuisti. Commitit: a6ed3ac, 1741578, 56709e9, 4a57aa1, 8e35488, dfcca96, 3f6fda8.
-- **Mitä pyydän:** PM: PR testiin ja esikatselussa  (CSP:ssä ) ja  (sekä CSP että ). Jos CSP puuttuu asset-vastauksesta, CSP lisätään -sääntöön (13.7). Digiturva: firebase.json, CSP,  (SR-5, SR-7), SECURITY.md R-1/R-2/R-6 ja PRIVACY.md (Netdeck). UX: kevyt katselmointi, lataus- ja virhetilat poistuivat; UX.md 4.5/7.5 kuvaa yhä latauspalkin ja poistuneet tilat (UX:n tiedosto, en muokannut).
-- **Mistä katsoa:** ; ARCHITECTURE.md "T-026 · Koodari 2026-10-02"; STATUS.md ajo-ohje.
-- **Hyväksymiskriteerit:** (1)  ei löydä mitään (selaimen Network-tarkistus esikatselussa tekemättä). (2) komento + ajo-ohje. (3) avaimet: katso checkpoint. (4) tilat 13.5:n mukaan. (5) CSP muutettu; esikatselutodennus tekemättä.
-- **Tunnetut rajoitteet ja riskit:** firebase.jsonin otsakkeiden yhdistymistä ei ole todennettu Hostingissa.  on Viten kokeellinen API. Testit eivät ole CI:ssä (T-004).
-- **Testit:** Unknown command: "test"
-
-
-Did you mean this?
-  npm test # Test a package
-To see a list of supported npm commands, run:
-  npm help 19 tiedostoa, 437 testiä läpi ·  0 varoitusta ·  läpi (JS 286 kt, 90 kt gzip).
-- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (kuollut -CSS, korjattu heti dfcca96). Huomio UX:lle: UX.md:n poistuneiden tilojen kuvaukset.
+- **Mitä tehtiin:** korttidata `src/data/cards.json` (151 korttia) sovelluksen mukana, `npm run cards:update` (validoi, deterministinen, ei osittaista dataa), lataus-, virhe-, osittainen ja tyhjä tila poistettu (PM A2), ESLint estää `src/api`:n sovelluskoodissa, CSP `connect-src 'self'`, `/assets/**` vuoden välimuisti. Commitit: a6ed3ac, 1741578, 56709e9, 4a57aa1, 8e35488, dfcca96, 3f6fda8.
+- **Mitä pyydän:** PM: PR testiin ja esikatselussa `curl -sI <URL>/` (CSP:ssä `connect-src 'self'`) ja `curl -sI <URL>/assets/<tiedosto>` (sekä CSP että `Cache-Control: public, max-age=31536000, immutable`). Jos CSP puuttuu asset-vastauksesta, CSP lisätään `/assets/**`-sääntöön (13.7). Digiturva: firebase.json, CSP, `cards:update` (SR-5, SR-7), SECURITY.md R-1/R-2/R-6 ja PRIVACY.md (Netdeck). UX: kevyt katselmointi, lataus- ja virhetilat poistuivat; UX.md 4.5/7.5 kuvaa yhä latauspalkin ja poistuneet tilat (UX:n tiedosto, en muokannut).
+- **Mistä katsoa:** `git diff origin/test...t-026-korttidata`; ARCHITECTURE.md "T-026 · Koodari 2026-10-02"; STATUS.md ajo-ohje.
+- **Hyväksymiskriteerit:** (1) `grep -r api.netdeck.gg dist/` ei löydä mitään (selaimen Network-tarkistus esikatselussa tekemättä). (2) komento + ajo-ohje. (3) avaimet: katso checkpoint. (4) tilat 13.5:n mukaan. (5) CSP muutettu; esikatselutodennus tekemättä.
+- **Tunnetut rajoitteet ja riskit:** firebase.jsonin otsakkeiden yhdistymistä ei ole todennettu Hostingissa. `runnerImport` on Viten kokeellinen API. Testit eivät ole CI:ssä (T-004).
+- **Testit:** `npm test` 19 tiedostoa, 437 testiä läpi · `npm run lint` 0 varoitusta · `npm run build` läpi (JS 286 kt, 90 kt gzip).
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (kuollut `.loading-bar`-CSS, korjattu heti dfcca96). Huomio UX:lle: UX.md:n poistuneiden tilojen kuvaukset.
