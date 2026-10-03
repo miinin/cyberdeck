@@ -79,7 +79,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 
 ## Julkaisuputki
 - GitHub: https://github.com/miinin/cyberdeck
-- Testisivusto: https://cyberdeck-tcg-test.web.app (test-haara)
+- Testisivusto: https://cyberdeck-tcg-dev.web.app (test-haara)
 - Tuotanto: https://cyberdeck-tcg.web.app (main-haara, vain /julkaise)
 - Kulku: t-XXX-haara → PR testiin (esikatselu-URL) → test → /julkaise → main (D-001, D-003)
 - Workflowt ajavat `npm ci && npm run build` ja julkaisevat `dist/`-kansion.

@@ -113,3 +113,8 @@ Uhkamalli (STRIDE) ja turvavaatimukset SR-21–SR-29 valmiit: `docs/reports/SEC-
 
 ### Luovutus Arkkitehti → PM · 2026-10-03 (K-P8)
 D-017:ään lisätty "Muutos K-P8": testisivusto uuteen Spark-projektiin `cyberdeck-tcg-dev` (vaihtoehto A; URL vaihtuu, koska site id ei siirry), config buildin `MODE`:n mukaan + tarkka host-tarkistus + dist-tarkistus, juuri aina `users`. Konsolitehtävät 1–13 päivitetty, uusi infratehtävä T-054a0 (Digiturva katselmoi workflowt). Seuraavaksi: käyttäjä tekee tehtävät 1–8, sitten T-054a0 Koodarille.
+
+## Luovutus T-054a0 (Koodari, 2026-10-03)
+Tehty: `.firebaserc` (alias `test` → `cyberdeck-tcg-dev`, targetit projekteittain), `package.json` `build:test`, `deploy-test.yml` ja `preview.yml` (projectId `cyberdeck-tcg-dev`, salaisuus `FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG_DEV`, `npm run build:test`), testisivuston URL `CLAUDE.md`, `README.md`, `docs/STATUS.md`, `docs/SECURITY.md`. `deploy-prod.yml` ja `firebase.json` ennallaan; tuotannon salaisuus vain deploy-prodissa (grep). Ei deployta eikä konsoliajoja.
+**Käyttäjän tehtävät ennen yhdistämistä testiin:** konsolitehtävät 1–8 (projekti `cyberdeck-tcg-dev`, Spark, Hosting-sivusto, palvelutili roolein Firebase Hosting Admin + API Keys Viewer, GitHub-salaisuus `FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG_DEV`). Yhdistämisen jälkeen: tarkista `https://cyberdeck-tcg-dev.web.app` ja PR-esikatselu, sitten konsolitehtävä 13 (vanha testisivusto pois). Digiturvan katselmointi jäljellä.
+Testit: npm test, lint, build, build:test läpi. Commit-vaiheessa Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0.

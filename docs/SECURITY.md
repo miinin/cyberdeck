@@ -216,7 +216,7 @@ Vain käyttäjä voi hyväksyä riskin (rules.md 8).
    └─ Vienti: tallennuskerros ──► Blob ──► ladattava tiedosto (.json/.txt) ──► käyttäjä jakaa sen itse
 ```
 
-Ei palvelinta, ei kirjautumista, ei verkkoliikennettä tallennukseen liittyen. Tuotanto (`cyberdeck-tcg.web.app`), testi (`cyberdeck-tcg-test.web.app`) ja jokainen esikatselukanava ovat eri origineja, joten niiden tallennustilat ovat automaattisesti erillään (testidata ei sekoitu tuotantodataan MVP-1:ssä).
+Ei palvelinta, ei kirjautumista, ei verkkoliikennettä tallennukseen liittyen. Tuotanto (`cyberdeck-tcg.web.app`), testi (`cyberdeck-tcg-dev.web.app`) ja jokainen esikatselukanava ovat eri origineja, joten niiden tallennustilat ovat automaattisesti erillään (testidata ei sekoitu tuotantodataan MVP-1:ssä).
 
 ### 11.2 Uudet suojattavat asiat
 

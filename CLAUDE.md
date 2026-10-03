@@ -24,7 +24,7 @@ t-XXX-haara → PR testiin (esikatselu) → PM yhdistää testiin → /julkaise 
 ```
 - Haarat `t-XXX-nimi` tehdään `test`-haarasta. PR: `gh pr create --base test` (gh: `"C:\Program Files\GitHub CLI\gh.exe"`).
 - `main` = tuotanto, vain käyttäjän `/julkaise`-komennolla. Hook kysyy luvan main-pushiin, `gh pr merge`:en ja `firebase deploy`:hin.
-- GitHub: https://github.com/miinin/cyberdeck · Testi: https://cyberdeck-tcg-test.web.app · Tuotanto: https://cyberdeck-tcg.web.app
+- GitHub: https://github.com/miinin/cyberdeck · Testi: https://cyberdeck-tcg-dev.web.app · Tuotanto: https://cyberdeck-tcg.web.app
 
 ## Pikakomennot
 `/tilanne` · `/jatka` · `/tehtava T-XXX` · `/julkaise` (`/rinnakkain` vain erikseen pyydettäessä, koska se kuluttaa paljon)
