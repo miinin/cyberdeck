@@ -1,7 +1,7 @@
 # T-054 · Google-kirjautuminen ja pakkojen ja kokoelman pilvitallennus
 **Tila:** Backlog (suunniteltu, odottaa D-017:n hyväksyntää ja Digiturvan uhkamallia) · **Omistaja:** Koodari (vaiheittain) · **MVP:** 2 · **Prioriteetti:** Must
 **Päätökset:** D-016 (käyttäjä), D-017 (Arkkitehti, Ehdotettu). **Haara:** `t-054-kirjautuminen-ja-pilvitallennus` (suunnittelu); toteutus vaiheittain haaroihin `t-054a-…`, `t-054b-…` jne.
-**Katselmoinnit:** Digiturva ☐ (uhkamalli ja säännöt ennen b:tä, riippuvuus a:ssa, koodi b:ssä ja c:ssä) · Arkkitehti ☐ (b:n tietomalli ja c:n synkronointi) · UX ja Sisällöntuottaja ☐ (kirjautumis-, yhdistämis- ja uloskirjautumisdialogit ennen c:tä) · Testikäyttäjä ☐ (d:n jälkeen kahdella laitteella)
+**Katselmoinnit:** Digiturva ◐ (uhkamalli ja sääntöluonnos ✓ 2026-10-03 SEC-011; riippuvuus a:ssa, koodi b:ssä ja c:ssä) · Arkkitehti ☐ (b:n tietomalli ja c:n synkronointi) · UX ja Sisällöntuottaja ☐ (kirjautumis-, yhdistämis- ja uloskirjautumisdialogit ennen c:tä) · Testikäyttäjä ☐ (d:n jälkeen kahdella laitteella)
 **Riippuvuudet:** käyttäjän konsolitehtävät (alla) ennen a:n testausta testisivustolla.
 
 ## Tavoite
@@ -62,6 +62,14 @@ Komentorivi (T-054b:n jälkeen, ennen b:n yhdistämistä testiin; hook kysyy luv
 - [ ] Poisto-oikeus: käyttäjän päätös (alla) toteutettu.
 - [ ] Testikäyttäjä kahdella laitteella ja offline-tilassa. UX-katselmointi dialogeista.
 
+## Digiturvan turvavaatimukset (ehdotus hyväksymiskriteereiksi, PM hyväksyy)
+Uhkamalli ja vaatimukset: `docs/reports/SEC-011-t054-uhkamalli.md`, sääntöluonnos `docs/reports/SEC-011-t054-liite-firestore.rules`, tietosuoja PRIVACY.md luku 10 (luonnos).
+- **T-054a:** SR-21 (tarkka host-lista, tuntematon host → kirjautuminen pois, juuri ei oletuksena `users`, `select_account`, ei tokenien käsittelyä), SR-24 (tarkka CSP, ei jokerimerkkejä, XFO/frame-ancestors/COOP/no-referrer ennallaan), SR-25 (konsoli: API restrictions pakollinen, referrer-rajaus ilman `*.web.app`:ia, ks. SEC-028), SR-27 (`no-console` `src/account/**`), SR-28 (`firebase@12.19.0` tarkkana, `@grpc/grpc-js`-override, `dist/`-tarkistus), SR-29 kohta 2 (16+ ja tietosuojateksti dialogissa).
+- **T-054b:** SR-22 (säännöt liitteen mukaan, production mode ennen deployta, käsin todennus kuudella tapauksella), SR-23 kohdat 1–6, 8–9 (validointi, ei mappien levitystä, virheellinen ≠ poisto, `MAX_DECKS + 1`).
+- **T-054c:** SR-23 kohta 7 (toisella laitteella poistettu tili ei palaudu automaattisesti), SR-26 kohdat 1–3 (`last-uid` pois, minimi-ilmoitus jaetusta koneesta, suositus "Poista tiedot tästä selaimesta").
+- **T-054d:** SR-26 kohdat 4–5 ("Poista tilin tiedot", Auth-käyttäjän poisto K-P5), SR-29 kohdat 3–4 (seloste ennen avaamista muille).
+- **Käyttäjälle PM:n kautta:** R-18 / K-P8 (testisivuston koodi pääsee saman käyttäjän tuotantodataan), K-P5–K-P7. Konsolitehtävä 8 päivitettävä SEC-028:n mukaan, D-017 kohta 7 SEC-029:n mukaan.
+
 ## Käyttäjän päätettävät asiat
 - D-017:n hyväksyntä (uusi riippuvuus `firebase` noin 63 kt gzip vain kirjautuville, CSP:n laajennus Googlen osoitteisiin).
 - Firestoren sijainti: suositus `europe-north1` (pysyvä valinta).
@@ -77,3 +85,6 @@ Komentorivi (T-054b:n jälkeen, ennen b:n yhdistämistä testiin; hook kysyy luv
 ## Luovutukset
 ### Luovutus Arkkitehti → PM · 2026-10-03
 Suunnittelu valmis: ADR D-017 (Ehdotettu), tämä kortti ja vaiheet a–d. Seuraavaksi: käyttäjän hyväksyntä D-017:lle ja päätökset yllä, konsolitehtävät 1–8, Digiturvan uhkamalli ja sääntövaatimukset (ennen b:tä), sitten T-054a Koodarille.
+
+### Luovutus Digiturva → PM · 2026-10-03
+Uhkamalli (STRIDE) ja turvavaatimukset SR-21–SR-29 valmiit: `docs/reports/SEC-011-t054-uhkamalli.md`, sääntöluonnos liitteenä (ei repon juuressa), PRIVACY.md luku 10 luonnoksena, SECURITY.md luku 17 ja riskit R-18–R-20. Löydökset: 2 Medium (SEC-028 API-avaimen rajaus, SEC-030 yhteinen projekti → R-18 käyttäjän hyväksyttäväksi), 3 Low, 2 Info. `firebase@12.19.0` hyväksyttävä ehdoin SR-28. Veto: ei blokkaa T-054a:ta. T-054b:tä ei yhdistetä testiin ennen sääntöjen deployta ja käsin todennusta. Seuraavaksi: PM hyväksyy SR:t kriteereiksi, päivittää konsolitehtävän 8 ja D-017 kohdan 7, vie K-P5–K-P8 käyttäjälle.

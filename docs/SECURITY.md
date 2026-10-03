@@ -186,10 +186,13 @@ Huomiot:
 | R-11 | Usean välilehden kilpailutilanne: kaksi välilehteä kirjoittaa saman avaimen, ja myöhempi kirjoitus hävittää ensimmäisen muutokset | Low–Medium (tietojen menetys) | Arkkitehti / Koodari | Avoin, minimoitu (T-011, SEC-002-katselmointi): tuore luku ennen jokaista kirjoitusta ilman awaitia välissä, muutokset kohdistuvat riviin tai yhteen pakkaan, `storage`-tapahtuman tilaus. Jäljelle jää: vanhentuneessa näkymässä oleva välilehti voi tallentaa pakan vanhan sisällön. T-012 ja T-013 lataavat näkymän uudelleen `subscribe`-kutsun kautta. **T-012 toteutettu (SEC-003-t012):** kokoelma luetaan uudelleen toisen välilehden muutoksesta, omat tallennukset ovat peräkkäisiä, ja vanhat vastaukset hylätään. Jäännös: absoluuttinen määrä vanhentuneesta näkymästä millisekuntien ikkunassa (SEC-013, Info). |
 | R-12 | Korttidatan välimuisti (T-003) ja käyttäjän data jakavat saman origin-kohtaisen kiintiön (localStorage noin 5 Mt). Välimuisti voi täyttää tilan, jolloin kokoelman tallennus epäonnistuu. | Low–Medium | Arkkitehti | ~~Avoin~~ → **Poistunut** (T-026, D-013: T-003 korvattu, korttidataa ei tallenneta selaimeen). Aiempi torjunta: Torjunta SR-13: käyttäjän data ensin, välimuisti poistetaan ensimmäisenä kiintiövirheessä, eri avaimet. |
 | R-13 | Kaverilta saatu .json- tai .txt-tiedosto on epäluotettava syöte (XSS, jättitiedosto, prototyypin saastutus, olemassa olevan pakan ylikirjoitus) | Medium (ennen torjuntaa) | Koodari | ~~Avoin~~ → **Suljettu** 2026-10-02 (T-015, SEC-010-t015: SR-18 ja SR-19 toteutettu ja todennettu). Torjunta SR-17–SR-19 (T-014, T-015). **T-014 (SEC-008-t014):** teksti- ja .txt-tuonnin torjunta SR-17, SR-14 ja SR-15 toteutettu ja todennettu (kokoraja ennen lukemista, rivi- ja pituusrajat, lineaariset regexit, `Map`-haut, tallennus aina uudeksi pakaksi). Jäljellä: .json-tuonti ja vienti (T-015, SR-18, SR-19). |
-| R-14 | Firebase-projektin web-konfiguraatio on luettavissa osoitteesta `/__/firebase/init.json` (B-010). API-avainta ei ole rajattu. | Low nyt, High jos Auth tai Firestore otetaan käyttöön ilman rajauksia | Käyttäjä / Koodari (T-009) | Avoin. Ei hyödynnettävissä MVP-1:ssä, koska sovellus ei käytä Firebase-palveluita Hostingin lisäksi. Ehto ennen MVP-2:ta: luvun 12 vaatimukset MVP2-1–MVP2-3. Polkua ei voi poistaa Hostingista, joten tieto hyväksytään julkiseksi; suojaus perustuu rajauksiin ja sääntöihin. |
+| R-14 | Firebase-projektin web-konfiguraatio on luettavissa osoitteesta `/__/firebase/init.json` (B-010). API-avainta ei ole rajattu. | Low nyt, High jos Auth tai Firestore otetaan käyttöön ilman rajauksia | Käyttäjä / Koodari (T-009) | Avoin. **T-054 (SEC-011):** torjunta SR-22 (säännöt ennen dataa, production mode) ja SR-25 (API restrictions, authorized domains); ennakkoehdot MVP2-2 ja MVP2-3 korvattu näillä. Ei hyödynnettävissä MVP-1:ssä, koska sovellus ei käytä Firebase-palveluita Hostingin lisäksi. Ehto ennen MVP-2:ta: luvun 12 vaatimukset MVP2-1–MVP2-3. Polkua ei voi poistaa Hostingista, joten tieto hyväksytään julkiseksi; suojaus perustuu rajauksiin ja sääntöihin. |
 | R-15 | Nimistä jää poistamatta LRM, RLM, ALM, U+2028, U+2029 ja U+FEFF (SEC-005, raportti SEC-002-t011) | Low | Koodari | ~~Avoin~~ → **Korjattu** (commit 15812ba, todennettu SEC-003-t012:ssa: `UNSAFE_CHARACTERS` kattaa merkit). |
 | R-16 | Kiintiövirhe koetallennuksessa vaihtaa sovelluksen muistinvaraiseen tilaan ja piilottaa tallennetun datan (SEC-006, raportti SEC-002-t011) | Low (kasvaa T-003:n myötä, R-12) | Koodari | ~~Avoin~~ → **Korjattu** (commit 7dc05c5, todennettu SEC-003-t012:ssa: kiintiövirhe koetallennuksessa palauttaa oikean tallennustilan, testi). |
 | R-17 | Linkkihaku (T-046, D-015): selain hakee käyttäjän pyynnöstä epäluotettavan JSON-vastauksen osoitteesta `api.netdeck.gg`. Haitallinen tai rikkinäinen vastaus, rajapinnan muutos tai katoaminen, Netdeck näkee käyttäjän IP-osoitteen ja Originin. | Low | Koodari / PM | Avoin, torjuttu SR-20:llä (SEC-009-t046). Jäännös: vastauksen runko luetaan kokonaan ennen kokorajaa, jos Content-Length puuttuu (SEC-023), Netdeckin tietosuojaehtoja ei löydy (PRIVACY.md rivi 9). Linkkihaun katoaminen ei estä tekstituontia (T-014). |
+| R-18 | Testi- ja tuotantosivusto käyttävät samaa Firebase-projektia (D-017). Testisivuston koodi (mikä tahansa testiin yhdistetty PR) voi testisivustolle kirjautuneen käyttäjän tokenilla lukea, muuttaa tai poistaa saman käyttäjän tuotantodatan `users/{uid}`, koska säännöt eivät näe pyynnön sivustoa (SEC-030). | Medium | PM / käyttäjä | Avoin, **vaatii käyttäjän hyväksynnän** (PRIVACY K-P8). Torjunta: SR-21 kohta 2 (juuri ei oletuksena `users`), vain kehittäjä ja testaajat kirjautuvat testisivustolle, PR-katselmointi. Pysyvä korjaus: erillinen testiprojekti (MVP2-1, D-017 vaihtoehto D). |
+| R-19 | Kuka tahansa Google-käyttäjä voi omalla uid:llään kuluttaa Sparkin päiväkiintiön tai 1 GiB:n, koska säännöt eivät rajaa dokumenttien määrää (SEC-032) | Low | PM / käyttäjä | Avoin. Paikallinen ensin: sovellus toimii, vain synkronointi katkeaa päiväksi. Ei kustannuksia (Spark). Kokorajat SR-22. App Check myöhemmin, jos väärinkäyttöä havaitaan. |
+| R-20 | Jaettu tietokone: tilin pakat ja kokoelma jäävät selaimeen uloskirjautuessa (käyttäjän valinta D-017), ja Google-istunto voi jäädä selaimeen | Low | PM / UX | Avoin. Torjunta SR-26 (ilmoitus, `last-uid` poistetaan, `prompt: 'select_account'`, tilin data ei näy uloskirjautuneena, suositus poistopainikkeesta). PRIVACY.md 10.6. |
 
 ## 10. Hyväksytyt riskit
 
@@ -323,7 +326,7 @@ Kohdetehtävä on merkitty jokaiseen vaatimukseen. Rajat ovat Digiturvan ehdotuk
 | T-014 | SR-17, SR-14, SR-15 |
 | T-015 | SR-18, SR-19, SR-17 (.txt), SR-14, SR-15 |
 
-## 12. MVP-2: ennakoidut vaatimukset Firebase-kirjautumiselle (avoimet)
+## 12. MVP-2: ennakoidut vaatimukset Firebase-kirjautumiselle (kirjautuminen ja pilvitallennus tarkennettu luvussa 17)
 
 Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-2:n suunnittelu ottavat ne huomioon. Digiturva tekee MVP-2:n uhkamallin ja tarkentaa nämä ennen ensimmäistä MVP-2-tehtävää. Tila kaikilla: **Avoin**.
 
@@ -352,6 +355,7 @@ Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-
 | 2026-10-02 | Katselmointi `reports/SEC-008-t014-tuonti.md`: SR-17, SR-14 ja SR-15 täyttyvät T-014:ssä. R-9 suljettu (T-004), R-13 päivitetty tuonnin osalta. Löydökset SEC-021 (Low, nimen katkaisu surrogaattiparin kohdalta) ja SEC-022 (Info). | T-014 |
 | 2026-10-02 | Katselmointi `reports/SEC-009-t046-netdeck-linkki.md`: linkkihaku Netdeckistä (D-015). Uusi SR-20 ja riski R-17, luku 16. CSP `connect-src 'self' https://api.netdeck.gg` todennettu esikatselussa. Löydökset SEC-023 ja SEC-024 (Low) ja SEC-025 (Info). | T-046 |
 | 2026-10-02 | Katselmointi `reports/SEC-010-t015-vienti-tuonti.md`: SR-18 ja SR-19 täyttyvät (kokoraja ennen lukemista, JSON.parse ilman reviveriä, format/version, `__proto__`-testi, uusi id, tiedostonimen suodatus, .txt-injektio estetty, Blob + revoke). CSP ei muuttunut. R-13 suljettu, SEC-021 varmistettu. Löydökset SEC-026 (Low) ja SEC-027 (Info). | T-015 |
+| 2026-10-03 | Uhkamalli `reports/SEC-011-t054-uhkamalli.md` (T-054, D-016, D-017): luku 17, turvavaatimukset SR-21–SR-29, sääntöluonnos liitteenä, riskit R-18–R-20, R-14 päivitetty. Löydökset SEC-028 ja SEC-030 (Medium), SEC-029, SEC-031, SEC-032 (Low), SEC-033, SEC-034 (Info). | T-054 |
 
 ## 14. T-026: korttidata buildissa (D-013)
 
@@ -379,3 +383,21 @@ Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-
 3. Vastauksen koko enintään 512 kt (Content-Length ja luettu teksti) ennen `JSON.parse`a.
 4. Vain `name`, `owner.display_name`, `zones[].zone_code` (legends/deck/sideboard), `cards[].quantity` (1–99), `card.id` (≤64), `card.name`/`subname`. Tekstit `cleanText`illä, enintään 3 vyöhykettä ja 300 riviä, mikä tahansa rakennevirhe hylkää koko vastauksen. `image_url`ia ja muita kenttiä ei käytetä (SR-1).
 5. Kaikki vastauksesta peräisin oleva renderöidään tekstinä. Virheviestit ovat kiinteitä, eivätkä ne sisällä vastauksen tai virheen sisältöä.
+
+## 17. T-054: Google-kirjautuminen ja pilvitallennus (D-016, D-017)
+
+Korvaa luvun 12 ennakoidut vaatimukset MVP2-2, MVP2-3, MVP2-5–MVP2-9 kirjautumisen ja pilvitallennuksen osalta. MVP2-1 (erillinen testiprojekti) jää toteuttamatta D-017:n mukaisesti, jäännösriski R-18. MVP2-4 (vaihtolistat) on yhä avoin.
+
+- **Järjestelmä:** Firebase Auth (vain Google, uudelleenohjaus sivuston omassa domainissa, popup vain localhostissa), Firestore Lite (`europe-north1`), paikallinen ensin -synkronointi. Data `users/{uid}` (tuotanto) ja `test_users/{uid}` (testi, localhost) samassa projektissa. SDK ladataan vain kirjautuville.
+- **Uhkamalli (STRIDE), vaatimukset ja löydökset:** `reports/SEC-011-t054-uhkamalli.md`. Sääntöluonnos: `reports/SEC-011-t054-liite-firestore.rules`. Tietosuoja: PRIVACY.md luku 10.
+- **Turvavaatimukset (tila: Avoin, ehdotettu hyväksymiskriteereiksi):**
+  - **SR-21** Kirjautuminen: vain Google, `select_account`, tarkka host-lista (tuntematon host → kirjautuminen pois, juuri ei koskaan oletuksena `users`), ei omaa tokenien käsittelyä, vain `firebase/app`, `firebase/auth`, `firebase/firestore/lite`.
+  - **SR-22** Firestore-säännöt: vain omistaja ja Google, vain sallitut juuret, polut ja avaimet, kokorajat, meta `rev` +1 ja palvelimen aika, kaikki muu kielletty. Production mode ennen deployta, käsin todennus testisivustolla. SR-9 laajenee sääntöihin ja konsoliasetuksiin.
+  - **SR-23** Pilvidata epäluotettavaa: sama validointi kuin paikallisesti, ei mappien levitystä, virheellinen dokumentti ei ole poisto, uudempi versio lukitsee, poistettu tili ei palaudu toiselta laitteelta automaattisesti.
+  - **SR-24** CSP ja otsakkeet: D-017 kohta 9 tarkkana, ei jokerimerkkejä. `frame-ancestors 'none'`, `X-Frame-Options: DENY`, COOP `same-origin` ja `no-referrer` säilyvät. Todennettu: `/__/auth/*` ei saa `firebase.json`in otsakkeita.
+  - **SR-25** Konsoli: API restrictions pakollinen, referrer-rajaus vain tarkoilla osoitteilla (ei `*.web.app`), authorized domains vain omat, vain Google-kirjautuminen, Data Access -lokit pois.
+  - **SR-26** Uloskirjautuminen, jaettu kone ja "Poista tilin tiedot" (GDPR 17).
+  - **SR-27** Lokit: ei uid:tä, sähköpostia, tokeneita eikä pilvidataa konsoliin, `no-console` hakemistoon `src/account/**`, ei analytiikkaa.
+  - **SR-28** Riippuvuus `firebase@12.19.0` tarkalla versiolla, `@grpc/grpc-js`-override (SEC-031), build-tarkistus.
+  - **SR-29** Tietosuoja: Firestoreen vain uid, pakat, kokoelma ja meta. 16+ ja tietosuojateksti kirjautumisdialogissa, seloste ennen avaamista muille.
+- **Riskit:** R-14 (torjutaan SR-22:lla ja SR-25:llä), uudet R-18, R-19, R-20.
