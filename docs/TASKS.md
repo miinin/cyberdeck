@@ -63,3 +63,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-056 | Pakan jakaminen linkillä (#/jaa/<data>) | 1 | Should | Koodari | Done | Digiturva (syöte URLista) |
 | T-057 | "Ylittää rajan" -merkintä vasta, kun raja on ylitetty | 1 | Must | PM | Done | – |
 | T-058 | Sideboard pakkaan (tietomalli, Firestore-säännöt, editori, jako ja vienti) | 1 | Should | Koodari | Backlog | Digiturva (säännöt) |
+| T-059 | RAM-suodattimeen 4 ja 5+ (4+ pois) | 1 | Must | PM | Done | – |
