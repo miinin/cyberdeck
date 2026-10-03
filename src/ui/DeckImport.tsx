@@ -501,6 +501,8 @@ export function DeckImport({
 
             <div className="import-stats">
               <DeckStats
+                deck={report.content}
+                cardsByKey={cardsByKey}
                 curve={view.curve}
                 colors={view.colors}
                 groups={view.grouped.groups}

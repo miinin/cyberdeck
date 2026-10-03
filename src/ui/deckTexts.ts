@@ -11,6 +11,24 @@ function issueCount(count: number): string {
   return `${count} ${count === 1 ? 'rike' : 'rikettä'}`;
 }
 
+const decimalFormat = new Intl.NumberFormat('fi-FI', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+/** "3,2" (T-053). */
+export function formatDecimal(value: number): string {
+  return decimalFormat.format(value);
+}
+
+/**
+ * "39 %" as a whole number (T-053). A chance that is not certain never rounds to "100 %" and a chance
+ * above zero never to "0 %", so the table does not promise more than it knows.
+ */
+export function formatPercent(probability: number): string {
+  const pct = Math.round(probability * 100);
+  if (pct === 0 && probability > 0) return '< 1 %';
+  if (pct === 100 && probability < 1) return '> 99 %';
+  return `${pct} %`;
+}
+
 export const deckTexts = {
   navLabel: 'Päävalikko',
   navCards: 'Kortit',
@@ -147,6 +165,50 @@ export const deckTexts = {
   typesLabel: 'Tyypit',
   colorShare: (color: string, count: number, pct: number) => `${color} ${count} (${pct} %)`,
   typeShare: (type: string, count: number) => `${type} ${count}`,
+  // More statistics and the test hand (T-053)
+  avgCost: 'Keskihinta',
+  avgPower: 'Keski-Power',
+  mainCards: 'Kortteja',
+  noValue: 'ei tietoa',
+  powerHeading: 'Power-jakauma (Unitit)',
+  powerCaption: 'Pääpakan Unitit Powerin mukaan',
+  powerValue: 'Power',
+  ramDistLabel: 'RAM',
+  ramShare: (ram: number, count: number) => `${ram} × ${count}`,
+  raritiesLabel: 'Harvinaisuudet',
+  rarityUnknown: 'Ei tietoa',
+  raritiesShare: (rarity: string, count: number) => `${rarity} ${count}`,
+  cheapOpening: (cost: number) => `Vähintään yksi Cost ≤ ${cost} -kortti aloituskädessä`,
+  oddsHeading: 'Nostotodennäköisyydet',
+  oddsCaption: 'Todennäköisyys nostaa vähintään yksi kopio',
+  oddsCard: 'Kortti',
+  oddsCopies: 'Kpl',
+  oddsOpening: 'Aloituskäsi',
+  oddsTurn: (turn: number) => `Vuoro ${turn}`,
+  oddsNote: (hand: number, draws: number) =>
+    `Oletus: ${hand} kortin aloituskäsi, ei mulligania, ${draws} nosto joka vuoro (myös aloittajan 1. vuorolla).`,
+  testHandOpen: 'Nosta testikäsi',
+  testHandEmpty: 'Lisää pakkaan kortteja, niin voit nostaa testikäden.',
+  testHandTitle: 'Testikäsi',
+  testHandDraw: 'Nosta kortti',
+  testHandMulligan: 'Mulligan',
+  testHandMulliganUsed: 'Mulligan käytetty',
+  testHandNew: 'Uusi käsi',
+  testHandInHand: (count: number) => `Kädessä ${count}`,
+  testHandInLibrary: (count: number) => `Pakassa ${count}`,
+  testHandLibraryEmpty: 'Pakka on tyhjä',
+  testHandMulliganState: (used: boolean) => `Mulligan: ${used ? 'käytetty' : 'käyttämättä'}`,
+  testHandSmallDeck: (hand: number) => `Pakassa on alle ${hand} korttia.`,
+  testHandList: (count: number) => `Käsi, ${cardCount(count)}`,
+  testHandNewest: '(uusin)',
+  testHandLegends: 'Legendien järjestys',
+  testHandNoLegends: 'Ei Legendejä.',
+  testHandLegendsHint: 'Jos aloitat, kaksi ensimmäistä ovat käytettyjä.',
+  testHandNote: (hand: number, draws: number) =>
+    `Oletus: ${hand} kortin aloituskäsi, yksi mulligan (koko käsi takaisin ja ${hand} uutta), ${draws} nosto vuorossa. Legendit ovat erillään pakasta.`,
+  testHandAnnounceNew: (names: readonly string[]) => `Uusi käsi: ${names.join(', ')}.`,
+  testHandAnnounceDraw: (name: string, count: number) => `Nostit: ${name}. Kädessä ${cardCount(count)}.`,
+  testHandAnnounceMulligan: (names: readonly string[]) => `Mulligan tehty. Uusi käsi: ${names.join(', ')}.`,
   mobileBarMain: (main: number) => `Pakka ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
   showDeck: 'Näytä pakka',
   goToDeck: 'Siirry pakkaan',

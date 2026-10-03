@@ -658,6 +658,8 @@ export function DeckEditor({
           )}
 
           <DeckStats
+            deck={content}
+            cardsByKey={cardsByKey}
             curve={curve}
             colors={colors}
             groups={grouped.groups}

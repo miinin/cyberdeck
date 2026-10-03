@@ -1,5 +1,5 @@
 # T-053 · Lisää pakan tietoja ja testikäden nosto
-**Tila:** Ready · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-03)
+**Tila:** Review · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-03)
 **Malli:** D-014. Määrittely: UX Designer (tutkimus ja kortti). Ei uusia riippuvuuksia, ei tallennusta, ei tietomallimuutosta.
 **Haara:** `t-053-pakan-tiedot-ja-testikasi`
 
@@ -94,3 +94,21 @@
 - Työkalut: https://cyberdecktools.com/deck-builder/ · https://exburst.dev/cyberpunk/deckbuilder · Moxfield ja Archidekt (playtest, tilastot; yleistieto)
 
 ## Luovutukset
+
+### 2026-10-03 · Koodari → PM (Review)
+**Tehty:** `src/domain/deckStats.ts` (keskiarvot, Power-käyrä, RAM- ja harvinaisuusjakauma, hypergeometrinen todennäköisyys tulona, nostotodennäköisyydet, halpa avaus; vakiot `OPENING_HAND`, `DRAWS_PER_TURN`, `MULLIGANS` yhdessä paikassa), `src/domain/testHand.ts` (shuffle, startHand, drawCard, canMulligan, mulligan, injektoitava RNG), `ValueCurve` (CostCurve yleistetty, pylväsmäärä CSS-muuttujalla), `DeckStats` (yhteenvetolaatat, testikäsinappi, halpa avaus, Power-jakauma, RAM, harvinaisuudet, Nostotodennäköisyydet-details) ja `TestHandDialog` (natiivi showModal, live-alue, fokuksen hallinta). Tekstit `deckTexts.ts`:ssä. Testit: `deckStats.test.ts`, `testHand.test.ts`, `DeckStats.test.tsx`.
+
+**Valinnat (harkinnan mukaan):**
+- Dialogin leveys `min(100vw - 1rem, max(96rem, 70vw))` ja kortin minimileveys `clamp(9rem, 10vw, 15rem)` kortin 72rem- ja 22vw-arvojen sijaan. Näin 6–7 kortin käsi mahtuu yhdelle riville 1920 ja 2850 px:llä (kuten rautalangassa), ja puhelimessa kortteja on 2 rinnakkain. 22vw:llä riville olisi mahtunut vain 4.
+- Käden kuvat ovat tavallisia `img`-elementtejä (alt = kortin nimi "V, Streetkid" kuten CardImageDialogissa), eivät CardImage-nappeja: suurennus modaalin päälle olisi turha, ja kuvat ovat jo isoja. Puuttuva kuva näkyy katkoviivakehyksenä, jossa on nimi (role="img").
+- Prosentit näytetään muodossa "< 1 %" ja "> 99 %", kun pyöristys antaisi harhaanjohtavasti 0 tai 100.
+- Nostotodennäköisyystaulukko renderöidään vasta, kun details avataan. Pitkää piilotettua sisältöä ei ole DOMissa, ja DeckEditorin testit pysyivät ennallaan.
+- Uusin kortti korostetaan vain noston jälkeen (aloituskädessä kaikki ovat uusia). Fokus siirtyy disabloituneelta napilta ensimmäiseen käytössä olevaan järjestyksessä Nosta kortti → Mulligan → Uusi käsi.
+- Disabloidulla napilla on himmeä täyttö ja opacity 0.6 (uusi `:disabled`-tyyli button-primary- ja button-secondary-luokille).
+- Yhteenveto on `<dl>`-laattoina T-050:n korostereunan tyylissä eikä pelkkänä tekstirivinä. Halpa avaus on testikäsinapin alla.
+
+**Tarkistukset:** `npm test` 769/769 (uusia 24), lint ja build läpi. Kuvakaappaukset 320, 375, 1920 ja 2850 px kummallakin teemalla (scratchpad `i-*.png`): sivulla ei ole vaakavieritystä millään leveydellä. axe (Tilastot ja details auki sekä dialogi auki, 375 ja 2850 px): 0 rikettä.
+
+Koodikatselmointi: tehty · Pakollisia korjattu 1 (dl-elementin aria-label ilman roolia poistettu) · Suosituksia 1 (velka: testikäsi lukee pakan avaushetkellä; koska dialogi on modaalinen, pakka ei voi muuttua sen ollessa auki)
+
+**Seuraavaksi:** PM tarkistaa esikatselusta. Digiturvaa ei tarvita (ei riippuvuuksia, tallennusta tai syötettä).
