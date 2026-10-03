@@ -46,7 +46,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-039 | Teemavalitsin pelkkänä aurinko- ja kuu-ikonina | 1 | Must | PM (pieni, D-014) | Done | – |
 | T-040 | Selaus ja muokkaus erilleen (Muokkaa kokoelmaa -kytkin), kompakti taulukkonäkymä | 1 | Must | Koodari (D-014) | Done | UX ja Sisällöntuottaja MVP-1:n lopussa (uudet tekstit) |
 | T-041 | [velka] Pakkaeditorin rivit tiiviimmiksi (nyt noin 130 px per kortti) ja DeckEditor.tsx:n pilkkominen | 1 | Should | Koodari | Done (rivit T-045:ssä; DeckEditorin pilkkominen jäljellä) | UX |
-| T-042 | [velka] Pakkaeditori kahdessa välilehdessä: viimeinen tallennus voittaa (storage-tapahtuma tai versiotarkistus) | 2 | Could | Koodari | Backlog | – |
+| T-042 | [velka] Pakkaeditori kahdessa välilehdessä: viimeinen tallennus voittaa (storage-tapahtuma tai versiotarkistus) | 2 | Could | Koodari | Done (T-054d) | – |
 | T-043 | [velka] Pakan nimikenttiin maxLength=100 (SEC-007 Low) | 2 | Could | Koodari | Backlog | – |
 | T-044 | Tuontiraportin ulkoasu ja Netdeck-linkkikentän tyyli: tiivis taulukko tai kuvat pelkän listan sijaan, toimintojen korostus | 2 | Should | Koodari | Yhdistetty T-051:een | UX |
 | T-045 | Hiominen: tyyppimerkin kulma, värisuodatin palloina, Legend-nimen esto, yhtenäiset rivit, Power, kuvanäkymä pakkaeditoriin (sisältää T-041:n rivien tiivistyksen) | 1 | Must | Koodari | Done | PM esikatselu |
@@ -58,4 +58,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-051 | Pakat-sivu ja tuontiraportti T-050:n tyyliin (sis. T-044) | 1 | Should | Koodari | Done (PR #22) | PM kuvakaappaukset, BREAK-003 |
 | T-052 | Hover-esikatselun korvaus, isommat kuvat, Cost/Power/RAM-suodattimet, värilaatat, estomerkkibugi | 1 | Must | Koodari | Done | PM kuvakaappaukset |
 | T-053 | Pakan tilastot (keskiarvot, Power-, RAM- ja harvinaisuusjakauma, nostotodennäköisyydet) ja testikäsi | 1 | Must | Koodari | Done | PM kuvakaappaukset, axe |
-| T-054 | Google-kirjautuminen ja pakkojen ja kokoelman pilvitallennus (D-016, D-017; vaiheet a–d) | 2 | Must | Koodari (vaiheittain) | Backlog (suunniteltu, odottaa D-017:n hyväksyntää ja Digiturvan uhkamallia) | Digiturva, Arkkitehti, UX, Sisällöntuottaja, Testikäyttäjä |
+| T-054 | Google-kirjautuminen ja pakkojen ja kokoelman pilvitallennus (D-016, D-017; vaiheet a–d) | 2 | Must | Koodari (vaiheittain) | Done | Digiturva, Arkkitehti, UX, Sisällöntuottaja, Testikäyttäjä |
