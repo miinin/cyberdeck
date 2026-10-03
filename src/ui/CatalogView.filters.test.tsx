@@ -402,3 +402,32 @@ describe('CatalogView search and filters: live region', () => {
     expect(container.querySelector('[aria-live="assertive"]')).toBeNull();
   });
 });
+
+describe('CatalogView: Cost, Power and RAM filters (T-052)', () => {
+  const numbered = [
+    { ...card('a', 'Alpha', null, 'Unit', 'Red'), cost: 2, power: 3, ram: 1 },
+    { ...card('b', 'Beta', null, 'Unit', 'Blue'), cost: 9, power: 12, ram: 2 },
+    { ...card('c', 'Gamma', null, 'Legend', 'Blue'), cost: null, power: null, ram: 2 },
+  ];
+
+  it('offers the values of the data as number keys and drops cards without the value', async () => {
+    const user = userEvent.setup();
+    renderView(numbered);
+    const costGroup = screen.getByRole('group', { name: 'Cost' });
+    expect(within(costGroup).getAllByRole('checkbox').map((box) => box.getAttribute('value'))).toEqual(['2', '9+']);
+    expect(within(screen.getByRole('group', { name: 'Power' })).getAllByRole('checkbox')).toHaveLength(2);
+    await user.click(within(costGroup).getByRole('checkbox', { name: '9+' }));
+    expect(rowNames()).toEqual(['Beta']);
+    await user.click(within(screen.getByRole('group', { name: 'RAM' })).getByRole('checkbox', { name: '1' }));
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
+  });
+
+  it('shows a removable chip such as "Cost 2"', async () => {
+    const user = userEvent.setup();
+    renderView(numbered);
+    await user.click(within(screen.getByRole('group', { name: 'Cost' })).getByRole('checkbox', { name: '2' }));
+    expect(rowNames()).toEqual(['Alpha']);
+    await user.click(screen.getByRole('button', { name: 'Poista suodatin: Cost 2' }));
+    expect(rowNames()).toEqual(['Alpha', 'Beta', 'Gamma']);
+  });
+});

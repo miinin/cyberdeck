@@ -4,6 +4,13 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pakan Tilastot-osiossa on enemmän tietoa: yhteenveto (Keskihinta, Keski-Power ja korttien määrä), Power-jakauma Uniteille, RAM-jakauma, harvinaisuudet ja todennäköisyys saada vähintään yksi Cost ≤ 2 -kortti aloituskäteen. Avattavassa Nostotodennäköisyydet-taulukossa näkyy jokaiselle kortille todennäköisyys nostaa vähintään yksi kopio aloituskäteen sekä vuoroihin 1, 3 ja 5 mennessä. Uusi Nosta testikäsi -painike avaa esimerkkikäden (6 korttia isoina kuvina) ja Legendien satunnaisen järjestyksen. Kädessä voi nostaa kortin, tehdä yhden mulliganin tai nostaa uuden käden. Laskut olettavat 6 kortin aloituskäden ja yhden noston vuorossa, ja Legendit ovat erillään pakasta.
+
+- Suodattimissa on nyt Cost, Power ja RAM sekä Kortit-sivulla että pakkaeditorissa. Arvot ovat pieninä numeronäppäiminä (esimerkiksi Cost 1–8 ja 9+), ja niistä voi valita useamman. Kortti, jolla arvoa ei ole, ei näy, kun suodatin on päällä. Valinnat näkyvät tulosten yläpuolella poistettavina merkkeinä ("Cost 3"), nyt myös pakkaeditorissa. Värisuodattimen värilaatat pysyvät laatikkonsa sisällä.
+- Kortin iso esikatselu kelluu hiiren vieressä rivin ylä- tai alapuolella, eikä hakutaulukon viereen jää enää tyhjää kaistaletta. Taulukot täyttävät koko leveyden, myös Kortit-sivulla. Esikatselu toimii nyt myös Kortit-sivun Taulukko-näkymässä. Esc ja vieritys sulkevat sen.
+- Kuvat ovat isompia: Pieni on entinen Normaali, Normaali entinen Iso, ja uusi Iso on noin 25rem leveä (puhelimessa yksi kortti riviä kohti). Iso koko käyttää tarkempaa kuvatiedostoa.
+- Korjattu: tyhjässä pakassa Unit-, Gear- ja Program-riveillä ei enää näy merkintää Ylittää rajan. RAM-rajat tarkistetaan vasta, kun pakassa on Legend. Kapealla näytöllä Kortit-sivun taulukko ei enää levennä sivua.
+
 - Kortit-sivun ruudukon korttiruudut ovat kevyemmät ja samassa tyylissä kuin pakkaeditori. Nimen vieressä on Cost-jalokivi, ja sen alla on yksi tiivis rivi, jossa ovat tyyppimerkki, Power ja RAM pieninä merkkeinä sekä Rarity. Pakoissa-tieto ja kokoelman määrä tai −/+ ovat ruudun alareunassa. Pakat-sivun korttien toiminnot ovat siistinä ruudukkona: Avaa omalla rivillään, sitten Nimeä uudelleen ja Kopioi, Vie .json ja Vie .txt, ja viimeisenä Poista.
 
 - Pakkaeditorin yläosa on tiivistetty yhdeksi riviksi. Ylhäällä on pieni linkki Takaisin pakkoihin, ja sen alla pakan nimi otsikkona, jota voi muokata suoraan. Tallennustila näkyy pienenä merkkinä (✓ Tallennettu), ja Vie .json- ja Vie .txt-painikkeet ovat oikealla. Puhelimessa merkki ja vientipainikkeet rivittyvät nimen alle. Tuo pakkalista -näkymän paluulinkki on samanlainen.

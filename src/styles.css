@@ -1461,6 +1461,8 @@ body:has(dialog[open]) {
 
 /* Table view (T-040): scrolls sideways inside its own region on narrow screens, not the whole page. */
 .table-scroll {
+  /* Containing block for the visually hidden texts in the cells, so they scroll with the table and never widen the page (T-052). */
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--color-border);
 }
@@ -1502,7 +1504,11 @@ body:has(dialog[open]) {
 .card-table .cell-number {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  text-align: end;
+  text-align: center;
+}
+
+.card-table thead .cell-number {
+  font-family: inherit;
 }
 
 .card-table .cell-image {
@@ -2051,10 +2057,80 @@ h3,
   font-size: var(--font-size-sm);
 }
 
-/* Colour filter chips: the swatch and the colour name, so hue is not the only cue (UX-007). */
+/*
+ * Colour filter chips: the swatch and the colour name, so hue is not the only cue (UX-007). The swatch
+ * is centred in the chip on its own line box, so it never pokes out of the border (T-052).
+ */
+.option-color > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
 .option-color .color-swatch {
-  inline-size: 1.125rem;
-  block-size: 1.125rem;
+  flex: none;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  vertical-align: middle;
+}
+
+/*
+ * Cost, Power and RAM (T-052): compact number keys. The native checkbox stays for keyboard and screen
+ * readers but is drawn by the key itself: a selected key is filled with the accent and set in bold.
+ */
+.options-number {
+  gap: var(--space-1);
+}
+
+.option-number {
+  position: relative;
+  justify-content: center;
+  gap: 0;
+  min-inline-size: 2.25rem;
+  min-block-size: 2rem;
+  padding: 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.option-number:hover {
+  text-decoration: none;
+}
+
+.option-number input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+  background: none;
+  opacity: 0;
+}
+
+.option-number input:focus-visible {
+  outline: none;
+}
+
+.option-number:has(input:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.option-number:has(input:checked) {
+  border-color: var(--color-accent-edge);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (forced-colors: active) {
+  .option-number:has(input:checked) {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
 }
 
 /* Deck editor: toast, result view selector and image grid (T-045). */
@@ -2175,7 +2251,8 @@ h3,
 
 .cost-curve-bars {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  /* --bars: number of bars, set by ValueCurve (7 for Cost, 9 for Power, T-053). */
+  grid-template-columns: repeat(var(--bars, 7), minmax(0, 1fr));
   gap: var(--space-1);
   block-size: 7rem;
 }
@@ -2380,15 +2457,15 @@ h3,
 
 /* Image size: the smallest grid card still fits the count control. */
 .catalog-results[data-image-size='small'] .card-grid {
-  --card-min: 11rem;
+  --card-min: 14rem;
 }
 
-.catalog-results[data-image-size='large'] .card-grid {
+.catalog-results[data-image-size='medium'] .card-grid {
   --card-min: 18rem;
 }
 
-.catalog-results .table-scroll {
-  max-width: 100rem;
+.catalog-results[data-image-size='large'] .card-grid {
+  --card-min: 25rem;
 }
 
 @media (min-width: 64rem) {
@@ -2711,9 +2788,9 @@ h3,
   }
 }
 
-/* Image grid: Pieni 9rem, Keski 13rem, Iso 17rem. */
+/* Image grid (T-052): Pieni 13rem, Normaali 17rem, Iso 25rem. */
 .pick-images {
-  --card-min: 13rem;
+  --card-min: 17rem;
   display: grid;
   /* At least two cards side by side, also on a phone. */
   grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), calc(50% - var(--space-3) / 2)), 1fr));
@@ -2724,11 +2801,13 @@ h3,
 }
 
 .editor-search[data-image-size='small'] .pick-images {
-  --card-min: 9rem;
+  --card-min: 13rem;
 }
 
+/* Iso: one card per row on a phone, so it is bigger than Normaali there too. */
 .editor-search[data-image-size='large'] .pick-images {
-  --card-min: 17rem;
+  --card-min: 25rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), 100%), 1fr));
 }
 
 .pick-image {
@@ -2768,7 +2847,8 @@ h3,
 .card-hover-preview {
   position: fixed;
   z-index: 50;
-  inline-size: 18rem;
+  /* 18rem on ordinary screens, up to 24rem on very wide ones (T-052). */
+  inline-size: clamp(18rem, 14vw, 24rem);
   block-size: auto;
   aspect-ratio: 733 / 1024;
   border: 1px solid var(--color-border-strong);
@@ -2812,9 +2892,26 @@ h3,
   }
 }
 
-/* The name column never stretches into a wide gap (UX-048): the extra room goes to the deck column. */
-.pick-table {
-  max-inline-size: 72rem;
+/*
+ * The picker table fills its column (T-052, no empty strip beside it). In a wide picker the fixed
+ * columns grow a little and the thumbnail gets bigger, so the extra room is not all one gap after the name.
+ */
+@container picker (min-width: 80rem) {
+  .pick-table .col-type {
+    inline-size: 13rem;
+  }
+
+  .pick-table .col-number {
+    inline-size: 6.5rem;
+  }
+
+  .pick-table .col-rarity {
+    inline-size: 10rem;
+  }
+
+  .pick-table .col-deck {
+    inline-size: 10rem;
+  }
 }
 
 /*
@@ -3455,6 +3552,272 @@ button.legality:focus-visible {
   display: block;
   block-size: 100%;
   background: var(--badge-color, var(--color-border-strong));
+}
+
+/* Summary tiles (T-053): average Cost, average Power and main deck size. */
+.stat-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.stat-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  padding: var(--space-2) clamp(var(--space-2), 1vw, var(--space-3));
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-accent-edge);
+  background: var(--color-surface-raised);
+}
+
+.stat-summary dt {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.stat-summary dd {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-tight);
+}
+
+.test-hand-open {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.stat-number {
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* Disabled actions (T-053): a muted fill and no pointer, so they do not look clickable. */
+.button-primary:disabled,
+.button-secondary:disabled {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+  opacity: 0.6;
+}
+
+.button-primary:disabled::before,
+.button-secondary:disabled::before {
+  background: var(--color-surface);
+}
+
+/* Draw odds (T-053): closed by default, the table scrolls inside its own region. */
+.stat-odds {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.stat-odds > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--target-min);
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+  cursor: pointer;
+  list-style: none;
+}
+
+.stat-odds > summary::-webkit-details-marker {
+  display: none;
+}
+
+.stat-odds > summary::before {
+  content: '';
+  flex: none;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-block-end: 2px solid var(--color-accent-edge);
+  border-inline-end: 2px solid var(--color-accent-edge);
+  transform: rotate(-45deg);
+}
+
+.stat-odds[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.stat-odds > summary:hover {
+  background: var(--color-surface-hover);
+  text-decoration: underline;
+}
+
+.stat-odds > summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.stat-odds[open] > summary {
+  border-block-end: 1px solid var(--color-border);
+}
+
+.stat-odds .table-scroll {
+  border: 0;
+}
+
+.stat-odds > .hint {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+}
+
+.odds-table .cell-name {
+  min-inline-size: 7rem;
+}
+
+.odds-table thead th {
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.odds-table tbody tr:nth-child(even) {
+  background: var(--color-surface-raised);
+}
+
+/* Test hand dialog (T-053): wide on big screens, full width on phones, the content scrolls. */
+.test-hand-dialog {
+  --hand-card: clamp(9rem, 10vw, 15rem);
+  /* About 7 cards in a row from 1920 px up; wider on very large screens so the cards stay big. */
+  inline-size: min(100vw - 1rem, max(96rem, 70vw));
+  max-inline-size: none;
+  max-block-size: 100dvh;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--color-border-strong);
+  border-block-start: 3px solid var(--color-accent-edge);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.test-hand-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.test-hand-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) clamp(var(--space-4), 2vw, var(--space-8)) var(--space-6);
+}
+
+.test-hand-body p {
+  margin: 0;
+}
+
+.test-hand-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.test-hand-header h2 {
+  margin: 0;
+}
+
+.test-hand-status {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.test-hand-warning {
+  color: var(--color-warning);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-bold);
+}
+
+.test-hand-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.test-hand-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--hand-card), 50% - var(--space-3) / 2), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hand-card {
+  position: relative;
+  min-inline-size: 0;
+}
+
+.hand-card-image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 733 / 1024;
+  border-radius: 4.5% / 3.2%;
+}
+
+.hand-card-missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  border: 1px dashed var(--color-border-strong);
+  background: var(--color-surface);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* The newest drawn card: an accent frame, and "(uusin)" for screen readers. */
+.hand-card.is-newest .hand-card-image {
+  outline: 3px solid var(--color-accent-edge);
+  outline-offset: 3px;
+  box-shadow: var(--glow-accent);
+}
+
+.test-hand-legends {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.test-hand-label {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (forced-colors: active) {
+  .stat-summary > div,
+  .stat-odds,
+  .hand-card-missing {
+    border: 1px solid CanvasText;
+  }
+
+  .hand-card.is-newest .hand-card-image {
+    outline-color: Highlight;
+  }
 }
 
 /* Mobile bottom bar (below 64rem): the deck state and a way to it. Hidden while the deck is on screen. */

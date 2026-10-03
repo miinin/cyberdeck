@@ -20,9 +20,90 @@ export interface CardFilterCriteria {
   colors: readonly string[];
   /** Selected rarities. Empty = all rarities (also cards without one). */
   rarities: readonly string[];
+  /** Selected Cost values as number filter options ("3", "9+"). Empty = all (also cards without Cost). */
+  costs: readonly string[];
+  /** Selected Power values as number filter options. Empty = all. */
+  powers: readonly string[];
+  /** Selected RAM values as number filter options. Empty = all. */
+  rams: readonly string[];
 }
 
-export const EMPTY_CRITERIA: CardFilterCriteria = { query: '', types: [], colors: [], rarities: [] };
+/** The criteria keys of the number filters (T-052). */
+export type NumberFilterGroup = 'costs' | 'powers' | 'rams';
+
+export const EMPTY_CRITERIA: CardFilterCriteria = {
+  query: '',
+  types: [],
+  colors: [],
+  rarities: [],
+  costs: [],
+  powers: [],
+  rams: [],
+};
+
+/**
+ * From these values up the number filters have a single "N+" option (T-052): Cost 9+, Power 10+, RAM 4+.
+ * Below the cap every value found in the data is its own option.
+ */
+export const NUMBER_FILTER_CAPS = { cost: 9, power: 10, ram: 4 } as const;
+
+/** The number filter option a value belongs to: 3 → "3", 12 with cap 10 → "10+". */
+export function numberOption(value: number, cap: number): string {
+  return value >= cap ? `${cap}+` : String(value);
+}
+
+/** Smallest value an option stands for, for ordering: "3" → 3, "10+" → 10. */
+function optionStart(option: string): number {
+  return Number.parseInt(option, 10);
+}
+
+/**
+ * Options for a number filter: one per value in the data below the cap, then "N+" if any value reaches
+ * the cap, plus any selected option (so it can always be removed), in numeric order. `null` is no option.
+ */
+export function numberFilterOptions(
+  values: Iterable<number | null>,
+  cap: number,
+  selected: readonly string[] = [],
+): string[] {
+  const options = new Set<string>(selected);
+  for (const value of values) {
+    if (value !== null && Number.isFinite(value)) options.add(numberOption(value, cap));
+  }
+  return [...options].sort((a, b) => optionStart(a) - optionStart(b) || a.length - b.length);
+}
+
+const NUMBER_FIELDS: readonly (readonly [NumberFilterGroup, keyof typeof NUMBER_FILTER_CAPS])[] = [
+  ['costs', 'cost'],
+  ['powers', 'power'],
+  ['rams', 'ram'],
+];
+
+/** Options of every number filter group for these cards, keeping the selected ones. */
+export function numberFilterOptionsFor(
+  cards: readonly Card[],
+  criteria: CardFilterCriteria,
+): Record<NumberFilterGroup, string[]> {
+  const options = (group: NumberFilterGroup, field: keyof typeof NUMBER_FILTER_CAPS) =>
+    numberFilterOptions(
+      cards.map((card) => card[field]),
+      NUMBER_FILTER_CAPS[field],
+      criteria[group],
+    );
+  return { costs: options('costs', 'cost'), powers: options('powers', 'power'), rams: options('rams', 'ram') };
+}
+
+/**
+ * True when the value matches one of the selected options ("3" exactly, "9+" from 9 up). Nothing
+ * selected matches every value; a card without the value (null) never matches a selection.
+ */
+export function matchesNumberFilter(value: number | null, selected: readonly string[]): boolean {
+  if (selected.length === 0) return true;
+  if (value === null) return false;
+  return selected.some((option) =>
+    option.endsWith('+') ? value >= optionStart(option) : value === optionStart(option),
+  );
+}
 
 const COMBINING_MARKS = /\p{M}/gu;
 /** Invisible format characters such as zero-width spaces and direction marks (B-014). */
@@ -46,18 +127,19 @@ export function normalizeForSearch(text: string): string {
     .trim();
 }
 
-/** True when the search text, a type or a color narrows the list. */
+/** True when the search text or any filter group narrows the list. */
 export function isFilterActive(criteria: CardFilterCriteria): boolean {
   return (
     normalizeForSearch(criteria.query) !== '' || criteria.types.length > 0 || criteria.colors.length > 0 ||
-    criteria.rarities.length > 0
+    criteria.rarities.length > 0 || criteria.costs.length > 0 || criteria.powers.length > 0 ||
+    criteria.rams.length > 0
   );
 }
 
 /**
  * Cards matching all of: every word of the search text (each a part of "name subname", in any
- * order, B-013), one of the selected types (OR), one of the selected colors (OR). An empty group
- * does not filter. The original order is kept.
+ * order, B-013), and in every group (type, color, rarity, Cost, Power, RAM) one of the selected values
+ * (OR within a group). An empty group does not filter. The original order is kept.
  */
 export function filterCards(cards: readonly Card[], criteria: CardFilterCriteria): Card[] {
   const normalizedQuery = normalizeForSearch(criteria.query);
@@ -70,6 +152,9 @@ export function filterCards(cards: readonly Card[], criteria: CardFilterCriteria
     if (types.size > 0 && !types.has(card.type)) return false;
     if (colors.size > 0 && (card.color === null || !colors.has(card.color))) return false;
     if (rarities.size > 0 && (card.rarity === null || !rarities.has(card.rarity))) return false;
+    for (const [group, field] of NUMBER_FIELDS) {
+      if (!matchesNumberFilter(card[field], criteria[group])) return false;
+    }
     if (words.length === 0) return true;
     const searchable = normalizeForSearch(card.subname === null ? card.name : `${card.name} ${card.subname}`);
     return words.every((word) => searchable.includes(word));

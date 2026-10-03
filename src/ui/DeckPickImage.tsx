@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
-import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
+import { CARD_IMAGE_SIZES, CARD_IMAGE_WIDTH, cardImageHeight, cardImageSrcSet } from '../domain/cardImage';
 import { getCardImage } from '../data/cardImages';
 import type { HoverPreviewProps } from './CardHoverPreview';
 import { CardName } from './CardName';
@@ -63,7 +63,8 @@ export function DeckPickImage({
           <img
             className="card-image"
             src={image.medium}
-            srcSet={`${image.medium} 1x, ${image.large} 2x`}
+            srcSet={cardImageSrcSet(image)}
+            sizes={CARD_IMAGE_SIZES}
             width={CARD_IMAGE_WIDTH.md}
             height={cardImageHeight('md')}
             alt=""

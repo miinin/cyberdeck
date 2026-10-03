@@ -12,6 +12,7 @@ import {
   KNOWN_CARD_TYPES,
   filterCards,
   filterOptions,
+  numberFilterOptionsFor,
   isFilterActive,
   toggleValue,
 } from '../domain/cardSearch';
@@ -23,7 +24,8 @@ import { CardList } from './CardList';
 import { CardTable } from './CardTable';
 import { ListToolbar } from './ListToolbar';
 import type { ImageSize } from './ListToolbar';
-import { ActiveFilters } from './ActiveFilters';
+import { ActiveFilters, criteriaFilters } from './ActiveFilters';
+import { useCardHoverPreview } from './CardHoverPreview';
 import type { ActiveFilter } from './ActiveFilters';
 import { WIDE_QUERY } from './useMediaQuery';
 import type { OwnedColumn } from './CardList';
@@ -32,7 +34,7 @@ import { countIn } from './collectionStore';
 import type { CollectionSnapshot } from './collectionStore';
 import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
-import { cardCount, colorNames, texts } from './texts';
+import { cardCount, texts } from './texts';
 import { useCollection } from './useCollection';
 import { useDecks } from './useDecks';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
@@ -102,6 +104,8 @@ export function CatalogView({
   /** The card in the enlarged image dialog, and the thumbnail button that opened it (T-027 UX). */
   const [openCard, setOpenCard] = useState<Card | null>(null);
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
+  // Bigger image beside a table row on mouse hover (T-052); the grid already shows the images.
+  const preview = useCardHoverPreview();
 
   // List view and the edit switch are remembered like the theme (T-040). The edit switch has no saved
   // value until the user chooses; then it starts on for an empty collection and off otherwise, decided once.
@@ -268,6 +272,7 @@ export function CatalogView({
   const noOwnedCards = noResults && ownedOnly && !isFilterActive(criteria);
 
   const handleOpenImage = (card: Card, opener: HTMLButtonElement) => {
+    preview.hide();
     imageOpenerRef.current = opener;
     setOpenCard(card);
   };
@@ -286,7 +291,7 @@ export function CatalogView({
     collectionAllRef.current?.focus();
   };
 
-  // Chips for the selected values, in the order of the form (T-050a). The search text has its own field.
+  // Chips for the selected values, in the order of the form (T-050a, T-052).
   const activeFilters: ActiveFilter[] = [
     ...(collectionFilter === 'all'
       ? []
@@ -297,24 +302,7 @@ export function CatalogView({
             onRemove: () => updateFilters(criteria, 'all', 'later'),
           },
         ]),
-    ...criteria.types.map((type) => ({
-      id: `type:${type}`,
-      label: type,
-      lang: 'en',
-      onRemove: () => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later'),
-    })),
-    ...criteria.colors.map((color) => ({
-      id: `color:${color}`,
-      label: colorNames.get(color) ?? color,
-      lang: 'en',
-      onRemove: () => updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later'),
-    })),
-    ...criteria.rarities.map((rarity) => ({
-      id: `rarity:${rarity}`,
-      label: rarity,
-      lang: 'en',
-      onRemove: () => updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later'),
-    })),
+    ...criteriaFilters(criteria, (next) => updateCriteria(next, 'later')),
   ];
 
   return (
@@ -387,6 +375,7 @@ export function CatalogView({
               allCards.map((card) => card.rarity),
               criteria.rarities,
             )}
+            numberOptions={numberFilterOptionsFor(allCards, criteria)}
             searchInputRef={searchInputRef}
             collectionFilter={collection.phase === 'ready' ? collectionFilter : undefined}
             collectionAllRef={collectionAllRef}
@@ -400,6 +389,9 @@ export function CatalogView({
             }
             onToggleRarity={(rarity) =>
               updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later')
+            }
+            onToggleNumber={(group, value) =>
+              updateCriteria({ ...criteria, [group]: toggleValue(criteria[group], value) }, 'later')
             }
             onSearchSubmit={() =>
               announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))
@@ -444,13 +436,21 @@ export function CatalogView({
 
           {filtered.length > 0 &&
             (view === 'table' ? (
-              <CardTable cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+              <CardTable
+                cards={filtered}
+                caption={listCaption}
+                owned={owned}
+                decksOf={decksOf}
+                onOpenImage={handleOpenImage}
+                hoverProps={preview.bind}
+              />
             ) : (
               <CardList cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
             ))}
         </section>
       </div>
 
+      {view === 'table' && preview.preview}
       <CardImageDialog card={openCard} onClose={handleCloseImage} />
     </>
   );

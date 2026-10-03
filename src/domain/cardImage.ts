@@ -14,3 +14,14 @@ export const CARD_IMAGE_ASPECT = 1024 / 733;
 export function cardImageHeight(size: CardImageSize): number {
   return Math.round(CARD_IMAGE_WIDTH[size] * CARD_IMAGE_ASPECT);
 }
+
+/**
+ * Both image files with their widths. With `sizes="auto"` (lazy images) the browser picks by the rendered
+ * size, so the big "Iso" grid (25rem, T-052) gets the 720 px file and a table thumbnail the 360 px one.
+ * Browsers without "auto" use 18rem.
+ */
+export function cardImageSrcSet(image: { medium: string; large: string }): string {
+  return `${image.medium} ${CARD_IMAGE_WIDTH.md}w, ${image.large} ${CARD_IMAGE_WIDTH.lg}w`;
+}
+
+export const CARD_IMAGE_SIZES = 'auto, 18rem';
