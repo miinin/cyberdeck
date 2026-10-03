@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-03 (PM, T-052 ja T-053 julkaistu)
+# STATUS · päivitetty 2026-10-03 (PM, T-054 kesken: a ja b valmiit haarassa, c ja d seuraavaksi)
 
 ## Yhdellä lauseella
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | – | Ei keskeneräisiä tehtäviä. |
+| T-054 | PM | a0, a, b valmiit haarassa `t-054-kirjautuminen-ja-pilvitallennus` (pushattu, ei PR:ää) | Käyttäjän konsolitehtävät (kortin loppu "PM:n infrakirjaus" ja D-017 Muutos K-P8), sitten T-054c (synkronointi) ja T-054d. PR testiin vasta, kun GitHub-salaisuus on olemassa, tietokannat ovat europe-north1:ssä ja säännöt on deployattu (SEC-014:n todennuslista). |
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
