@@ -10,6 +10,7 @@ import { countOf, EMPTY_COLLECTION, MAX_COLLECTION_COUNT, MAX_COLLECTION_ENTRIES
 import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
 import type { Deck, DeckContent, DeckId } from '../domain/deck';
+import { isUid } from '../domain/uid';
 import { isDeckId, parseCollection, parseDeckContent, parseDeckList } from '../domain/validate';
 import type { Parsed } from '../domain/validate';
 import { decodeEnvelope, encodeEnvelope } from './envelope';
@@ -26,6 +27,8 @@ import {
   VIEW_KEY,
   EDIT_MODE_KEY,
   DECK_PICK_VIEW_KEY,
+  ACCOUNT_LAST_UID_KEY,
+  ACCOUNT_REDIRECT_PENDING_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
 import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS } from './migrations';
@@ -289,6 +292,23 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     subscribe: (listener) => subscribe(DECKS_KEY, listener),
   };
 
+  function readHint(key: string): string | null {
+    try {
+      return store.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  function writeHint(key: string, value: string | null) {
+    try {
+      if (value === null) store.removeItem(key);
+      else store.setItem(key, value);
+    } catch {
+      // Ignored on purpose (see the account hints below).
+    }
+  }
+
   const preferences: PreferencesRepository = {
     loadTheme: async () => {
       try {
@@ -357,6 +377,14 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       }
       return view;
     },
+    // Account hints never throw: a failed write only means the SDK is not preloaded next time.
+    loadLastUid: () => {
+      const raw = readHint(ACCOUNT_LAST_UID_KEY);
+      return raw !== null && isUid(raw) ? raw : null;
+    },
+    saveLastUid: (uid: string | null) => writeHint(ACCOUNT_LAST_UID_KEY, uid !== null && isUid(uid) ? uid : null),
+    loadRedirectPending: () => readHint(ACCOUNT_REDIRECT_PENDING_KEY) === '1',
+    saveRedirectPending: (pending: boolean) => writeHint(ACCOUNT_REDIRECT_PENDING_KEY, pending ? '1' : null),
   };
 
   return { collection, decks, preferences, persistent: options.persistent };

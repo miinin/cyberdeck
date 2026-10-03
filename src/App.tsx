@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { createBrowserAccountServices } from './account';
+import type { AccountServices } from './account';
 import { CARDS } from './data/cards';
 import type { Card } from './domain/card';
 import { openBrowserRepositories } from './storage';
@@ -10,11 +12,25 @@ import { deckTexts } from './ui/deckTexts';
 import { useHashRoute } from './ui/useHashRoute';
 import { texts } from './ui/texts';
 import { ThemeToggle } from './ui/ThemeToggle';
+import { AccountMenu } from './ui/AccountMenu';
 
-/** `cards` defaults to the bundled data (D-013); tests pass a small list and in-memory repositories. */
-export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; repositories?: Repositories }) {
+/**
+ * `cards` defaults to the bundled data (D-013); tests pass a small list, in-memory repositories and
+ * fake account services (T-054a).
+ */
+export function App({
+  cards = CARDS,
+  repositories,
+  account,
+}: {
+  cards?: readonly Card[];
+  repositories?: Repositories;
+  account?: AccountServices;
+}) {
   // Opened once per page load; tests pass in-memory repositories.
   const [openRepositories] = useState(() => repositories ?? openBrowserRepositories());
+  // Creating the services loads nothing; the Firebase SDK loads only when needed (SR-21 kohta 5).
+  const [accountServices] = useState(() => account ?? createBrowserAccountServices(openRepositories.preferences));
   // The persistent storage button lives in the header but its state in the catalog view.
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
   const { route, navigate } = useHashRoute();
@@ -33,6 +49,7 @@ export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; 
             </a>
           </nav>
           <span className="header-actions" ref={setHeaderSlot} />
+          <AccountMenu auth={accountServices.auth} />
           <ThemeToggle preferences={openRepositories.preferences} />
         </div>
       </header>

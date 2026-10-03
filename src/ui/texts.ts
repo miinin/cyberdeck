@@ -1,3 +1,4 @@
+import type { AuthErrorKind } from '../account';
 import { MAX_COLLECTION_ENTRIES } from '../domain/collection';
 
 // User-facing texts. Source: docs/UX.md luvut 4.5, 5 and 6 (UX Designer). The footer is based on
@@ -37,6 +38,29 @@ export const texts = {
   themeToggleSuffix: 'teema',
   themeToggleTitleLight: 'Vaihda vaaleaan teemaan',
   themeToggleTitleDark: 'Vaihda tummaan teemaan',
+  // Account (T-054a). The dialog body follows the PRIVACY.md luku 10 draft (Digiturva, SR-29 kohta 2);
+  // the other texts are working copy until UX and Sisällöntuottaja review them before T-054c.
+  accountSignIn: 'Kirjaudu',
+  accountSigningIn: 'Kirjaudutaan…',
+  accountMenu: 'Tili',
+  accountDialogTitle: 'Kirjaudu Google-tilillä',
+  accountAgeLimit: 'Kirjautuminen on tarkoitettu 16 vuotta täyttäneille.',
+  accountPrivacy:
+    'Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla Suomessa, ja voit poistaa ne milloin tahansa.',
+  accountContinue: 'Jatka Googleen',
+  accountCancel: 'Peruuta',
+  accountClose: 'Sulje',
+  accountUnavailableTitle: 'Kirjautuminen ei ole käytössä',
+  accountUnavailableBody: 'Kirjautuminen toimii vain sovelluksen omassa osoitteessa, ei esikatselussa.',
+  accountSignedInAs: (email: string | null) =>
+    email === null ? 'Kirjautuneena Google-tilillä' : `Kirjautuneena: ${email}`,
+  accountSignOut: 'Kirjaudu ulos',
+  /** Fixed messages by AuthErrorKind (SR-21 kohta 4). */
+  accountErrors: {
+    network: 'Kirjautuminen ei onnistunut, koska yhteyttä ei saatu. Yritä uudelleen.',
+    'popup-blocked': 'Selain esti kirjautumisikkunan. Salli ponnahdusikkunat tälle sivulle ja yritä uudelleen.',
+    unknown: 'Kirjautuminen ei onnistunut. Yritä uudelleen.',
+  } satisfies Record<AuthErrorKind, string>,
   heading: 'Kortit',
   /** Live region text when the list is shown (UX.md 4.5). */
   loaded: (count: number) => `${cardCount(count)} ladattu.`,

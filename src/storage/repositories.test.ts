@@ -2,7 +2,16 @@ import type { DeckContent } from '../domain/deck';
 import { MAX_DECKS } from '../domain/deck';
 import { encodeEnvelope } from './envelope';
 import { StorageError } from './errors';
-import { BACKUP_PREFIX, COLLECTION_KEY, DECKS_KEY, EDIT_MODE_KEY, THEME_KEY, VIEW_KEY } from './keys';
+import {
+  ACCOUNT_LAST_UID_KEY,
+  ACCOUNT_REDIRECT_PENDING_KEY,
+  BACKUP_PREFIX,
+  COLLECTION_KEY,
+  DECKS_KEY,
+  EDIT_MODE_KEY,
+  THEME_KEY,
+  VIEW_KEY,
+} from './keys';
 import { createMemoryStore } from './keyValueStore';
 import type { KeyValueStore } from './keyValueStore';
 import { createRepositories } from './repositories';
@@ -507,5 +516,55 @@ describe('preferences: deck editor result view (T-045)', () => {
     await expectStorageError(preferences.saveDeckPickView('grid' as 'list'), 'invalid-input');
     const odd = setup({ 'cyberdeck:deck-pick-view': 'cards' });
     expect(await odd.preferences.loadDeckPickView()).toBe('list');
+  });
+});
+
+describe('preferences: account hints (T-054a, D-017 kohta 1)', () => {
+  it('saves, reads back and removes the last uid', () => {
+    const { preferences, store } = setup();
+    expect(preferences.loadLastUid()).toBeNull();
+    preferences.saveLastUid('abcXYZ123');
+    expect(store.getItem(ACCOUNT_LAST_UID_KEY)).toBe('abcXYZ123');
+    expect(preferences.loadLastUid()).toBe('abcXYZ123');
+    preferences.saveLastUid(null);
+    expect(store.getItem(ACCOUNT_LAST_UID_KEY)).toBeNull();
+  });
+
+  it.each(['', 'a/b', 'cyberdeck:x', 'ä', 'a'.repeat(129)])('never stores or returns the invalid uid %j', (uid) => {
+    const { preferences, store } = setup({ [ACCOUNT_LAST_UID_KEY]: uid });
+    expect(preferences.loadLastUid()).toBeNull();
+    preferences.saveLastUid(uid);
+    expect(store.getItem(ACCOUNT_LAST_UID_KEY)).toBeNull();
+  });
+
+  it('saves and clears the redirect flag', () => {
+    const { preferences, store } = setup();
+    expect(preferences.loadRedirectPending()).toBe(false);
+    preferences.saveRedirectPending(true);
+    expect(store.getItem(ACCOUNT_REDIRECT_PENDING_KEY)).toBe('1');
+    expect(preferences.loadRedirectPending()).toBe(true);
+    preferences.saveRedirectPending(false);
+    expect(store.getItem(ACCOUNT_REDIRECT_PENDING_KEY)).toBeNull();
+  });
+
+  it('never throws when storage fails', () => {
+    const failing: KeyValueStore = {
+      getItem: () => {
+        throw new DOMException('blocked', 'SecurityError');
+      },
+      setItem: () => {
+        throw new DOMException('full', 'QuotaExceededError');
+      },
+      removeItem: () => {
+        throw new DOMException('blocked', 'SecurityError');
+      },
+      keys: () => [],
+    };
+    const { preferences } = createRepositories({ store: failing, persistent: true });
+    expect(preferences.loadLastUid()).toBeNull();
+    expect(preferences.loadRedirectPending()).toBe(false);
+    expect(() => preferences.saveLastUid('abc')).not.toThrow();
+    expect(() => preferences.saveLastUid(null)).not.toThrow();
+    expect(() => preferences.saveRedirectPending(true)).not.toThrow();
   });
 });

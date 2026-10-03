@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Yläpalkissa on Kirjaudu-painike (kapealla näytöllä henkilökuvake). Se avaa ikkunan, joka kertoo 16 vuoden ikärajasta ja siitä, mitä tilille tallennetaan, ja Jatka Googleen -painike vie Google-kirjautumiseen. Kirjautuneena painike on nimeltään Tili, ja sen valikossa näkyvät kirjautunut sähköposti ja Kirjaudu ulos. Pakat ja kokoelma eivät vielä tallennu tilille. Kirjautuminen toimii vain sovelluksen omassa osoitteessa (testisivustolla ja tuotannossa), ei PR-esikatseluissa. Ilman kirjautumista sovellus toimii kuten ennen eikä ota yhteyttä Googleen.
+
 - Pakan Tilastot-osiossa on enemmän tietoa: yhteenveto (Keskihinta, Keski-Power ja korttien määrä), Power-jakauma Uniteille, RAM-jakauma, harvinaisuudet ja todennäköisyys saada vähintään yksi Cost ≤ 2 -kortti aloituskäteen. Avattavassa Nostotodennäköisyydet-taulukossa näkyy jokaiselle kortille todennäköisyys nostaa vähintään yksi kopio aloituskäteen sekä vuoroihin 1, 3 ja 5 mennessä. Uusi Nosta testikäsi -painike avaa esimerkkikäden (6 korttia isoina kuvina) ja Legendien satunnaisen järjestyksen. Kädessä voi nostaa kortin, tehdä yhden mulliganin tai nostaa uuden käden. Laskut olettavat 6 kortin aloituskäden ja yhden noston vuorossa, ja Legendit ovat erillään pakasta.
 
 - Suodattimissa on nyt Cost, Power ja RAM sekä Kortit-sivulla että pakkaeditorissa. Arvot ovat pieninä numeronäppäiminä (esimerkiksi Cost 1–8 ja 9+), ja niistä voi valita useamman. Kortti, jolla arvoa ei ole, ei näy, kun suodatin on päällä. Valinnat näkyvät tulosten yläpuolella poistettavina merkkeinä ("Cost 3"), nyt myös pakkaeditorissa. Värisuodattimen värilaatat pysyvät laatikkonsa sisällä.

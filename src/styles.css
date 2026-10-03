@@ -857,8 +857,142 @@ main {
   margin-inline-start: auto;
 }
 
-.header-actions + .theme-toggle {
+.header-actions ~ .theme-toggle {
   margin-inline-start: 0;
+}
+
+/*
+ * Account button and menu in the header (T-054a). Same edge and fill structure and header tokens as the
+ * theme toggle, so it reads on the black header in both themes.
+ */
+.account {
+  position: relative;
+  flex: none;
+}
+
+.account-button {
+  --toggle-edge: var(--color-header-text);
+  --toggle-fill: var(--color-header-bg);
+  --toggle-text: var(--color-header-text);
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: var(--space-2);
+  border: 0;
+  border-radius: 0;
+  background: var(--toggle-edge);
+  color: var(--toggle-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-button);
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: var(--shape-chamfer);
+}
+
+.account-icon {
+  flex: none;
+}
+
+/* Icon only below 40 rem so the header row still fits at 375 px; the text stays the button's name. */
+.account-button-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (min-width: 40rem) {
+  .account-button {
+    gap: var(--space-2);
+  }
+
+  .account-button-label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
+/* Below 40 rem the header actions sit closer together, so brand row 2 holds nav + three buttons. */
+@media (max-width: 39.99rem) {
+  .site-header .container {
+    column-gap: var(--space-2);
+  }
+}
+
+.account-button::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: var(--toggle-fill);
+  clip-path: var(--shape-chamfer-inner-2);
+}
+
+.account-button:hover,
+.account-button[aria-expanded='true'] {
+  --toggle-edge: var(--color-accent-2);
+  --toggle-text: var(--color-accent-2);
+  text-decoration: underline;
+}
+
+.account-button[aria-disabled='true'] {
+  cursor: progress;
+}
+
+.account-button:focus-visible {
+  clip-path: none;
+  outline: var(--focus-ring);
+  outline-color: var(--color-accent-2);
+  outline-offset: var(--focus-offset);
+}
+
+.account-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + var(--space-2));
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 2 * var(--gutter)));
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.account-menu[hidden] {
+  display: none;
+}
+
+.account-email {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.account-error {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
 }
 
 .storage-button {
@@ -1041,7 +1175,8 @@ body:has(dialog[open]) {
   .button-primary,
   .button-secondary,
   .step,
-  .theme-toggle {
+  .theme-toggle,
+  .account-button {
     border: 2px solid ButtonText;
     clip-path: none;
   }
@@ -1068,7 +1203,9 @@ body:has(dialog[open]) {
   .step-plus::before,
   .button-secondary::before,
   .step-minus::before,
-  .theme-toggle::before {
+  .theme-toggle::before,
+  .account-button,
+  .account-button::before {
     transition: background-color var(--ease), color var(--ease);
   }
 
@@ -1083,7 +1220,8 @@ body:has(dialog[open]) {
   .button-primary:active,
   .button-secondary:active,
   .step:active,
-  .theme-toggle:active {
+  .theme-toggle:active,
+  .account-button:active {
     transform: translateY(1px);
   }
 

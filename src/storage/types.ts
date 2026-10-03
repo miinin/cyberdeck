@@ -58,6 +58,13 @@ export interface PreferencesRepository {
   /** Saved deck editor result view, or 'list' when nothing valid is saved. Never rejects because of storage problems. */
   loadDeckPickView(): Promise<DeckPickView>;
   saveDeckPickView(view: DeckPickView): Promise<DeckPickView>;
+  /** Account hint (T-054a): uid of the last signed-in account, or null when none or invalid. Never throws. */
+  loadLastUid(): string | null;
+  /** Saves a valid uid, or removes the hint for null or an invalid uid. Never throws (a hint only). */
+  saveLastUid(uid: string | null): void;
+  /** true when a sign-in redirect was started and its result has not been read yet. Never throws. */
+  loadRedirectPending(): boolean;
+  saveRedirectPending(pending: boolean): void;
 }
 
 export interface Repositories {
