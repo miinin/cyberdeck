@@ -82,7 +82,8 @@ describe('Deck editor result picker', () => {
     expect(row).toHaveTextContent('Sama Legend');
     const add = within(row).getByRole('button', { name: 'Lisää pakkaan: L1' });
     expect(add).toHaveAccessibleDescription('Pakassa on jo Legend L1.');
-    expect(rowOf('Big')).toHaveTextContent('Ylittää rajan');
+    // T-057: a card not yet over a limit gets no mark, even if the next copy would break it.
+    expect(rowOf('Big')).not.toHaveTextContent('Ylittää rajan');
   });
 
   it('shows no block marks on the main deck rows of an empty deck (T-052)', async () => {

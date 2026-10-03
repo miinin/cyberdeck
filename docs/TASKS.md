@@ -61,3 +61,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-054 | Google-kirjautuminen ja pakkojen ja kokoelman pilvitallennus (D-016, D-017; vaiheet a–d) | 2 | Must | Koodari (vaiheittain) | Done | Digiturva, Arkkitehti, UX, Sisällöntuottaja, Testikäyttäjä |
 | T-055 | Yläpalkin järjestys (tili oikeaan ylänurkkaan) ja pysyvän selaintallennuksen napin poisto | 1 | Should | PM | Done | – |
 | T-056 | Pakan jakaminen linkillä (#/jaa/<data>) | 1 | Should | Koodari | Done | Digiturva (syöte URLista) |
+| T-057 | "Ylittää rajan" -merkintä vasta, kun raja on ylitetty | 1 | Must | PM | Done | – |
+| T-058 | Sideboard pakkaan (tietomalli, Firestore-säännöt, editori, jako ja vienti) | 1 | Should | Koodari | Backlog | Digiturva (säännöt) |
