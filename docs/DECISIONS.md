@@ -394,3 +394,9 @@ Päätöksessä on viisi osaa.
 - PRIVACY.md: uusi käsittely (uid, pakat, kokoelma, Googlen kirjautumistiedot Firebase Authissa, sijainti EU), 16+ ja poisto-oikeus (käyttäjä päättää, tehdäänkö MVP:hen "Poista tilin tiedot" -toiminto vai pelkkä ohje, ks. kortti).
 - Käyttäjän tehtävät Firebase- ja Google Cloud -konsolissa (lista T-054-kortissa) ennen T-054a:n testausta.
 - Kokoelman pilkkominen, reaaliaikaisuus (`onSnapshot`) ja sääntöjen emulaattoritestit → IDEAS.md.
+
+**D-017, käyttäjän hyväksyntä 2026-10-03:**
+- Ratkaisu B hyväksytty.
+- Firestoren sijainti: `europe-north1`.
+- Poisto-oikeus toteutetaan "Poista tilin tiedot" -painikkeena, joka poistaa pilvidatan vahvistuksen jälkeen.
+- Uloskirjautuminen ei poista tilin tietoja selaimesta. Uloskirjautuessa käyttäjälle kerrotaan, että tiedot jäävät tähän selaimeen. Digiturva arvioi jaetun koneen riskin ja antaa tarvittaessa ohjeen.
