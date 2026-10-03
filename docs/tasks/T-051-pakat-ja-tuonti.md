@@ -1,5 +1,5 @@
 # T-051 · Pakat-sivu ja tuontiraportti T-050:n tyyliin (sisältää T-044:n)
-**Tila:** Review · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
 **Malli:** D-014. PM käynnisti käyttäjän yöluvalla 2026-10-03 ("yllätä positiivisesti"). Ei uutta riippuvuutta eikä tietomallia.
 **Haara:** `t-050-ux-uudistus` (sama yö-PR #22)
 

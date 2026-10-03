@@ -1,5 +1,5 @@
 # T-050 · UX-uudistus: koko leveyden asettelu ja pakkaeditori
-**Tila:** Ready (määrittely) · **Omistaja:** UX Designer → Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done (määrittely) · **Omistaja:** UX Designer → Koodari (Sonnet) · **MVP:** 1 · **Prioriteetti:** Must
 **Malli:** D-014. Ei uusia riippuvuuksia eikä tietomallin muutosta. Ei uutta tallennettavaa asetusta (kuvakoko ei tallennu, ks. IDEAS-ehdotus lopussa).
 **Haara:** `t-050-ux-uudistus` (vaiheittain: T-050a, T-050b ja T-050c omina committeinaan tai omina PR:inään)
 

@@ -54,5 +54,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-047 | [velka] Netdeck-vastauksen runko luetaan paloittain 512 kt:n rajaan asti (SEC-023), tunnistamattoman card.id:n siivous (SEC-024) | 2 | Should | Koodari | Backlog | Digiturva |
 | T-048 | Taulukkonäkymän lajittelu sarakkeittain | 1 | Should | Koodari | Done | PM esikatselu |
 | T-049 | Pakkaeditorin asettelu ja pakkalistan ulkoasu (leveä asettelu, tiivis lista, kustannuskäyrä) | 1 | Must | Koodari | Done | PM kuvakaappaukset |
-| T-050 | UX-uudistus: koko leveys, korttipoimija, pakkasarake (a–c), UX-007 | 1 | Must | Koodari | Review (PR #22) | UX-007, BREAK-003, kielentarkastus |
-| T-051 | Pakat-sivu ja tuontiraportti T-050:n tyyliin (sis. T-044) | 1 | Should | Koodari | Review (PR #22) | PM kuvakaappaukset, BREAK-003 |
+| T-050 | UX-uudistus: koko leveys, korttipoimija, pakkasarake (a–c), UX-007 | 1 | Must | Koodari | Done (PR #22) | UX-007, BREAK-003, kielentarkastus |
+| T-051 | Pakat-sivu ja tuontiraportti T-050:n tyyliin (sis. T-044) | 1 | Should | Koodari | Done (PR #22) | PM kuvakaappaukset, BREAK-003 |
