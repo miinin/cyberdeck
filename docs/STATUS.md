@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-054 | PM | a0, a, b valmiit haarassa `t-054-kirjautuminen-ja-pilvitallennus` (pushattu, ei PR:ää) | Käyttäjän konsolitehtävät (kortin loppu "PM:n infrakirjaus" ja D-017 Muutos K-P8), sitten T-054c (synkronointi) ja T-054d. PR testiin vasta, kun GitHub-salaisuus on olemassa, tietokannat ovat europe-north1:ssä ja säännöt on deployattu (SEC-014:n todennuslista). |
+| T-054 | PM | a0, a, b valmiit haarassa `t-054-kirjautuminen-ja-pilvitallennus` (pushattu, ei PR:ää) | **Käyttäjä loi tietokannat uudelleen 2026-10-03: tuotanto `eur3` (EU-monialue), testi `europe-north1`.** Kirjaa D-017:ään ja PRIVACY.md:hen, ja korjaa kirjautumisdialogin sijaintiteksti (SEC-038: ei "Suomessa", vaan esim. "EU:ssa"). Muut käyttäjän konsolitehtävät (kortin loppu "PM:n infrakirjaus" ja D-017 Muutos K-P8), sitten T-054c (synkronointi) ja T-054d. PR testiin vasta, kun GitHub-salaisuus on olemassa, tietokannat ovat europe-north1:ssä ja säännöt on deployattu (SEC-014:n todennuslista). |
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
