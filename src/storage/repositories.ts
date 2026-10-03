@@ -17,6 +17,7 @@ import { decodeEnvelope, encodeEnvelope } from './envelope';
 import type { EnvelopeSpec, Migration } from './envelope';
 import { StorageError, toStorageError } from './errors';
 import {
+  accountKeyPrefix,
   BACKUP_PREFIX,
   COLLECTION_KEY,
   COLLECTION_SCHEMA_VERSION,
@@ -37,6 +38,9 @@ import type {
   DeckRepository,
   Loaded,
   LoadNotice,
+  LocalData,
+  SyncBase,
+  SyncStorage,
   PreferencesRepository,
   Repositories,
   Theme,
@@ -53,6 +57,11 @@ export interface RepositoryOptions {
   newId?: () => string;
   /** Default: no change events. */
   subscribe?: (keys: readonly string[], listener: () => void) => () => void;
+  /**
+   * Account uid (T-054c, D-017 kohta 4): collection, decks, backups and the sync base live under
+   * `cyberdeck:u:{uid}:`. Without it the keys are the signed-out ones. Preferences are never namespaced.
+   */
+  namespace?: string;
   /** Tests only; default []. */
   migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[] };
 }
@@ -88,15 +97,50 @@ function specWith<T>(
   return { currentVersion: testMigrations.length + 1, migrations: testMigrations, parse };
 }
 
+/** Reads the stored sync base. Anything unexpected is no base: the next sync then merges both sides. */
+function parseSyncBase(raw: string | null): SyncBase | null {
+  if (raw === null) return null;
+  try {
+    const data: unknown = JSON.parse(raw);
+    if (typeof data !== 'object' || data === null || !('v' in data) || data.v !== 1) return null;
+    const { rev, decks, collection } = data as Record<string, unknown>;
+    if (typeof rev !== 'number' || !Number.isSafeInteger(rev) || rev < 0 || !Array.isArray(decks)) return null;
+    const parsedCollection = parseCollection(collection);
+    if (parsedCollection === null || parsedCollection.dropped > 0) return null;
+    const rows: { id: DeckId; updatedAt: string }[] = [];
+    for (const row of decks as unknown[]) {
+      if (typeof row !== 'object' || row === null) return null;
+      const { id, updatedAt } = row as Record<string, unknown>;
+      if (!isDeckId(id) || typeof updatedAt !== 'string') return null;
+      rows.push({ id, updatedAt });
+    }
+    return { rev, decks: rows, collection: parsedCollection.value };
+  } catch {
+    return null;
+  }
+}
+
 export function createRepositories(options: RepositoryOptions): Repositories {
   const { store } = options;
   const now = options.now ?? (() => new Date());
   const newId = options.newId ?? (() => crypto.randomUUID());
   const subscribeTo = options.subscribe;
+  if (options.namespace !== undefined && !isUid(options.namespace)) throw new StorageError('invalid-input', 'Invalid uid');
+  const prefix = options.namespace === undefined ? null : accountKeyPrefix(options.namespace);
+  const collectionKey = prefix === null ? COLLECTION_KEY : `${prefix}collection`;
+  const decksKey = prefix === null ? DECKS_KEY : `${prefix}decks`;
+  const backupPrefix = prefix === null ? BACKUP_PREFIX : `${prefix}backup:`;
+  const syncBaseKey = `${prefix ?? 'cyberdeck:'}sync-base`;
+  /** Same-tab listeners: `ui` hear sync-driven writes, `changes` hear every write (the sync engine). */
+  const uiListeners = new Set<() => void>();
+  const changeListeners = new Set<() => void>();
+  const callAll = (listeners: Set<() => void>) => {
+    for (const listener of [...listeners]) listener();
+  };
 
   const collectionAggregate: Aggregate<Collection> = {
     name: 'collection',
-    key: COLLECTION_KEY,
+    key: collectionKey,
     spec: specWith(COLLECTION_SCHEMA_VERSION, COLLECTION_MIGRATIONS, options.migrations?.collection, parseCollection),
     empty: EMPTY_COLLECTION,
     toData: (collection) => ({ entries: collection.entries }),
@@ -104,7 +148,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
 
   const decksAggregate: Aggregate<Deck[]> = {
     name: 'decks',
-    key: DECKS_KEY,
+    key: decksKey,
     spec: specWith(DECKS_SCHEMA_VERSION, DECKS_MIGRATIONS, options.migrations?.decks, parseDeckList),
     empty: [],
     toData: (decks) => ({ decks }),
@@ -120,7 +164,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
 
   /** Copies `raw` to a new backup key and prunes the oldest backups of the same entity. Throws StorageError. */
   function backup(aggregate: AggregateId, raw: string, at: Date): string {
-    const prefix = `${BACKUP_PREFIX}${aggregate.name}:`;
+    const prefix = `${backupPrefix}${aggregate.name}:`;
     try {
       const base = `${prefix}${at.toISOString()}`;
       let backupKey = base;
@@ -221,11 +265,17 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     } catch (error) {
       throw toStorageError(error, 'write');
     }
+    callAll(changeListeners);
     return result;
   }
 
   function subscribe(key: string, listener: () => void): () => void {
-    return subscribeTo ? subscribeTo([key], listener) : () => {};
+    uiListeners.add(listener);
+    const unsubscribe = subscribeTo ? subscribeTo([key], listener) : () => {};
+    return () => {
+      uiListeners.delete(listener);
+      unsubscribe();
+    };
   }
 
   /** Validates deck content from the caller. Anything the validator would drop is an error, not a silent fix. */
@@ -251,7 +301,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         return { next, result: next };
       });
     },
-    subscribe: (listener) => subscribe(COLLECTION_KEY, listener),
+    subscribe: (listener) => subscribe(collectionKey, listener),
   };
 
   const decks: DeckRepository = {
@@ -289,7 +339,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         return { next: next.length === current.length ? current : next, result: undefined };
       });
     },
-    subscribe: (listener) => subscribe(DECKS_KEY, listener),
+    subscribe: (listener) => subscribe(decksKey, listener),
   };
 
   function readHint(key: string): string | null {
@@ -387,5 +437,79 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     saveRedirectPending: (pending: boolean) => writeHint(ACCOUNT_REDIRECT_PENDING_KEY, pending ? '1' : null),
   };
 
-  return { collection, decks, preferences, persistent: options.persistent };
+  const serialize = (data: LocalData) => JSON.stringify([data.decks, data.collection.entries]);
+
+  function readLocal(): LocalData | null {
+    const decksDecoded = decodeEnvelope(readRaw(decksKey), decksAggregate.spec);
+    const collectionDecoded = decodeEnvelope(readRaw(collectionKey), collectionAggregate.spec);
+    if (decksDecoded.kind === 'newer' || decksDecoded.kind === 'corrupt') return null;
+    if (collectionDecoded.kind === 'newer' || collectionDecoded.kind === 'corrupt') return null;
+    return {
+      decks: decksDecoded.kind === 'ok' ? decksDecoded.value : [],
+      collection: collectionDecoded.kind === 'ok' ? collectionDecoded.value : EMPTY_COLLECTION,
+    };
+  }
+
+  const sync: SyncStorage = {
+    read() {
+      try {
+        return readLocal();
+      } catch {
+        return null;
+      }
+    },
+    apply(expected, next) {
+      const current = readLocal();
+      if (current === null || serialize(current) !== serialize(expected)) return false;
+      if (serialize(next) === serialize(current)) return true;
+      mutate(decksAggregate, () => ({ next: [...next.decks], result: undefined }));
+      mutate(collectionAggregate, () => ({ next: next.collection, result: undefined }));
+      callAll(uiListeners);
+      return true;
+    },
+    loadBase() {
+      try {
+        return parseSyncBase(readRaw(syncBaseKey));
+      } catch {
+        return null;
+      }
+    },
+    saveBase(base) {
+      writeHint(syncBaseKey, base === null ? null : JSON.stringify({ v: 1, ...base }));
+    },
+    backupAll() {
+      const at = now();
+      for (const aggregate of [decksAggregate, collectionAggregate]) {
+        const raw = readRaw(aggregate.key);
+        if (raw !== null) backup(aggregate, raw, at);
+      }
+    },
+    clear() {
+      try {
+        store.removeItem(decksKey);
+        store.removeItem(collectionKey);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      callAll(uiListeners);
+      callAll(changeListeners);
+    },
+    onChange(listener) {
+      changeListeners.add(listener);
+      const unsubscribe = subscribeTo ? subscribeTo([decksKey, collectionKey], listener) : () => {};
+      return () => {
+        changeListeners.delete(listener);
+        unsubscribe();
+      };
+    },
+  };
+
+  return {
+    collection,
+    decks,
+    preferences,
+    persistent: options.persistent,
+    sync,
+    forAccount: (uid) => createRepositories({ ...options, namespace: uid }),
+  };
 }

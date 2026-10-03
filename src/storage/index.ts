@@ -20,6 +20,9 @@ export type {
   Theme,
   CatalogViewMode,
   DeckPickView,
+  LocalData,
+  SyncBase,
+  SyncStorage,
 } from './types';
 export { StorageError } from './errors';
 export type { StorageErrorKind } from './errors';

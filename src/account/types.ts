@@ -44,9 +44,11 @@ export interface AuthClient {
   signOut(): Promise<void>;
 }
 
-/** Services the app gets from the account layer. `cloud` arrives in T-054b. */
+/** Services the app gets from the account layer. */
 export interface AccountServices {
   auth: AuthClient;
+  /** The cloud copy of one account (Firestore in the app, memory in tests). The uid must be valid. */
+  cloud(uid: string): CloudStore;
 }
 
 /** Storage for the account hints; `PreferencesRepository` implements it (src/storage). */

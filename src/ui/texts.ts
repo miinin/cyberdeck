@@ -46,7 +46,10 @@ export const texts = {
   accountDialogTitle: 'Kirjaudu Google-tilillä',
   accountAgeLimit: 'Kirjautuminen on tarkoitettu 16 vuotta täyttäneille.',
   accountPrivacy:
-    'Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla Suomessa, ja voit poistaa ne milloin tahansa.',
+    'Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa.',
+  accountPrivacyGoogle:
+    'Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa, ei pakkojesi ja kokoelmasi mukana.',
+  accountPrivacyController: 'Rekisterinpitäjä: [nimi ja sähköposti lisätään].',
   accountContinue: 'Jatka Googleen',
   accountCancel: 'Peruuta',
   accountClose: 'Sulje',
@@ -55,6 +58,28 @@ export const texts = {
   accountSignedInAs: (email: string | null) =>
     email === null ? 'Kirjautuneena Google-tilillä' : `Kirjautuneena: ${email}`,
   accountSignOut: 'Kirjaudu ulos',
+  // Sync status in the account menu (T-054c). Working copy until UX and Sisällöntuottaja review it.
+  accountSyncSyncing: 'Tallennetaan tilille…',
+  accountSyncSaved: (time: string) => `Tallennettu tilille klo ${time}`,
+  accountSyncWaiting: 'Muutokset tallennetaan tilille automaattisesti.',
+  accountSyncOffline: 'Ei yhteyttä, muutokset tallessa tällä laitteella.',
+  accountSyncError: 'Tilille tallennus ei onnistunut, muutokset ovat tallessa tällä laitteella.',
+  accountSyncLocked: 'Tili on päivitetty uudempaan versioon. Lataa sivu uudelleen.',
+  accountSyncNow: 'Synkronoi nyt',
+  // Sign-out with unsynced changes and the notice after signing out (T-054c, D-017).
+  accountSignOutWarnTitle: 'Kaikkia muutoksia ei ole tallennettu tilille',
+  accountSignOutWarnBody:
+    'Muutokset ovat tallessa tässä selaimessa ja siirtyvät tilille, kun kirjaudut samalla tilillä uudelleen.',
+  accountSignOutAnyway: 'Kirjaudu silti ulos',
+  accountSignedOutNotice:
+    'Kirjauduit ulos. Tilisi tiedot jäävät tähän selaimeen. Jos käytät jaettua konetta, poista ne ennen kuin lähdet: kirjaudu sisään ja valitse "Poista tilin tiedot".',
+  accountSignedOutDismiss: 'Sulje ilmoitus',
+  // First sign-in with data on both sides (T-054c).
+  accountChooseTitle: 'Tässä selaimessa ja tilillä on tietoja',
+  accountChooseBody:
+    'Voit yhdistää selaimen pakat ja kokoelman tilin tietoihin tai käyttää vain tilin tietoja. Selaimen tiedoista tehdään varmuuskopio, eikä mitään poisteta ennen kuin tallennus tilille on onnistunut.',
+  accountChooseMerge: 'Yhdistä',
+  accountChooseAccountOnly: 'Käytä vain tilin tietoja',
   /** Fixed messages by AuthErrorKind (SR-21 kohta 4). */
   accountErrors: {
     network: 'Kirjautuminen ei onnistunut, koska yhteyttä ei saatu. Yritä uudelleen.',

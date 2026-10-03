@@ -67,10 +67,46 @@ export interface PreferencesRepository {
   saveRedirectPending(pending: boolean): void;
 }
 
+/** Decks and collection together: what the sync engine reads and replaces (T-054c). */
+export interface LocalData {
+  decks: Deck[];
+  collection: Collection;
+}
+
+/** The state both sides had at the last successful sync: the base of the three-way merge (D-017 kohta 6). */
+export interface SyncBase {
+  rev: number;
+  decks: readonly { id: DeckId; updatedAt: string }[];
+  collection: Collection;
+}
+
+/** Local data access for the sync engine and the first sign-in. Never throws except `apply`. */
+export interface SyncStorage {
+  /** null = a stored aggregate is unreadable or has a newer schema: nothing may be synced or overwritten. */
+  read(): LocalData | null;
+  /**
+   * Replaces the stored data with `next` if it still equals `expected` (false = it changed meanwhile, nothing
+   * written). Unreadable or older data is backed up first. Notifies the UI. Throws StorageError.
+   */
+  apply(expected: LocalData, next: LocalData): boolean;
+  loadBase(): SyncBase | null;
+  saveBase(base: SyncBase | null): void;
+  /** Copies the raw decks and collection to backup keys (SR-11). */
+  backupAll(): void;
+  /** Removes the decks and collection keys (after a successful transfer). */
+  clear(): void;
+  /** Called after any local write, in this tab (all writes) and in other tabs (storage event). */
+  onChange(listener: () => void): () => void;
+}
+
 export interface Repositories {
   collection: CollectionRepository;
   decks: DeckRepository;
   preferences: PreferencesRepository;
   /** false = browser storage is not in use and data lives only in memory (the UI shows a notice, SR-13). */
   persistent: boolean;
+  /** Local data access for syncing (T-054c). */
+  sync: SyncStorage;
+  /** Repositories of one account's data in the same store (keys `cyberdeck:u:{uid}:*`), same preferences. */
+  forAccount(uid: string): Repositories;
 }

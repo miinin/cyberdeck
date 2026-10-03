@@ -17,6 +17,10 @@ export const DECK_PICK_VIEW_KEY = 'cyberdeck:deck-pick-view';
  */
 export const ACCOUNT_LAST_UID_KEY = 'cyberdeck:account:last-uid';
 export const ACCOUNT_REDIRECT_PENDING_KEY = 'cyberdeck:account:redirect-pending';
+/** Key prefix of one account's data in this browser (T-054c, D-017 kohta 4). The uid must be valid (isUid). */
+export function accountKeyPrefix(uid: string): string {
+  return `cyberdeck:u:${uid}:`;
+}
 /** Followed by `<aggregate>:<ISO timestamp>`. Only keys with this prefix are ever pruned (SR-13). */
 export const BACKUP_PREFIX = 'cyberdeck:backup:';
 

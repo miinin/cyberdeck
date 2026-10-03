@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import type { AuthClient, AuthState } from '../account';
+import type { AccountSession, AuthClient, AuthState, SessionStatus } from '../account';
 import { texts } from './texts';
 
 /**
@@ -8,7 +8,17 @@ import { texts } from './texts';
  * previews) the same dialog says so. Signed in: a disclosure with the email (from memory only) and
  * "Kirjaudu ulos".
  */
-export function AccountMenu({ auth }: { auth: AuthClient }) {
+export function AccountMenu({
+  auth,
+  session = null,
+  onSignedOut,
+}: {
+  auth: AuthClient;
+  /** The sync session of the signed-in account (T-054c). */
+  session?: AccountSession | null;
+  /** Called after the user signed out with the menu (the app shows the notice). */
+  onSignedOut?: () => void;
+}) {
   const state = useSyncExternalStore(auth.onChange, auth.state);
 
   // Restores an earlier session; loads nothing for a user who never signed in (SR-21 kohta 5).
@@ -16,7 +26,7 @@ export function AccountMenu({ auth }: { auth: AuthClient }) {
 
   // Separate components, so signing in or out resets the dialog and menu state by unmounting.
   if (state.status === 'signed-in' && state.user !== null) {
-    return <SignedInMenu auth={auth} email={state.user.email} />;
+    return <SignedInMenu auth={auth} email={state.user.email} session={session} onSignedOut={onSignedOut} />;
   }
   return <SignInButton auth={auth} state={state} />;
 }
@@ -34,8 +44,42 @@ function AccountLabel({ text }: { text: string }) {
   );
 }
 
-function SignedInMenu({ auth, email }: { auth: AuthClient; email: string | null }) {
+const timeFormat = new Intl.DateTimeFormat('fi-FI', { hour: 'numeric', minute: '2-digit' });
+
+const NO_SESSION = () => () => {};
+
+function syncText(status: SessionStatus | null): string {
+  if (status === null) return texts.accountSyncWaiting;
+  const { state, lastSyncedAt } = status.sync;
+  if (state === 'offline') return texts.accountSyncOffline;
+  if (state === 'error') return texts.accountSyncError;
+  if (state === 'locked') return texts.accountSyncLocked;
+  if (state === 'syncing' || status.phase !== 'running') return texts.accountSyncSyncing;
+  return lastSyncedAt === null ? texts.accountSyncWaiting : texts.accountSyncSaved(timeFormat.format(lastSyncedAt));
+}
+
+function SignedInMenu({
+  auth,
+  email,
+  session,
+  onSignedOut,
+}: {
+  auth: AuthClient;
+  email: string | null;
+  session: AccountSession | null;
+  onSignedOut?: () => void;
+}) {
+  const status = useSyncExternalStore(session?.onChange ?? NO_SESSION, () => session?.status() ?? null);
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  async function signOut() {
+    await auth.signOut();
+    if (auth.state().status === 'signed-out') onSignedOut?.();
+  }
+  // Unsynced changes (or a failed last round) are warned about once before signing out.
+  const unsynced = status !== null && (status.sync.pending || status.sync.state !== 'idle');
+
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
@@ -63,9 +107,41 @@ function SignedInMenu({ auth, email }: { auth: AuthClient; email: string | null 
       </button>
       <div id="account-menu" className="account-menu" hidden={!menuOpen}>
         <p className="account-email">{texts.accountSignedInAs(email)}</p>
-        <button type="button" className="button-secondary" onClick={() => void auth.signOut()}>
-          {texts.accountSignOut}
-        </button>
+        <p className="account-sync" role="status">
+          {syncText(status)}
+        </p>
+        {session !== null && (
+          <button type="button" className="button-secondary" onClick={() => void session.syncNow()}>
+            {texts.accountSyncNow}
+          </button>
+        )}
+        {confirmingSignOut ? (
+          <div role="alert">
+            <p>
+              <strong>{texts.accountSignOutWarnTitle}</strong>
+            </p>
+            <p>{texts.accountSignOutWarnBody}</p>
+            <div className="row-actions">
+              <button type="button" className="button-secondary" onClick={() => setConfirmingSignOut(false)}>
+                {texts.accountCancel}
+              </button>
+              <button type="button" className="button-primary" onClick={() => void signOut()}>
+                {texts.accountSignOutAnyway}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="button-secondary"
+            onClick={() => {
+              if (unsynced) setConfirmingSignOut(true);
+              else void signOut();
+            }}
+          >
+            {texts.accountSignOut}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -119,6 +195,8 @@ function SignInButton({ auth, state }: { auth: AuthClient; state: AuthState }) {
                 <h2 id="account-dialog-title">{texts.accountDialogTitle}</h2>
                 <p>{texts.accountAgeLimit}</p>
                 <p>{texts.accountPrivacy}</p>
+                <p>{texts.accountPrivacyGoogle}</p>
+                <p>{texts.accountPrivacyController}</p>
                 {error !== null && (
                   <p className="account-error" role="alert">
                     {texts.accountErrors[error]}
