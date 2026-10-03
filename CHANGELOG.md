@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pakkaeditorin yläosa on tiivistetty yhdeksi riviksi. Ylhäällä on pieni linkki Takaisin pakkoihin, ja sen alla pakan nimi otsikkona, jota voi muokata suoraan. Tallennustila näkyy pienenä merkkinä (✓ Tallennettu), ja Vie .json- ja Vie .txt-painikkeet ovat oikealla. Puhelimessa merkki ja vientipainikkeet rivittyvät nimen alle. Tuo pakkalista -näkymän paluulinkki on samanlainen.
+
 - Pakat-sivu on uudistettu. Pakat näkyvät kortteina koko leveydellä: ylhäällä Legendien kuvat bannerina, sitten pakan nimi, värit, pääpakan edistymispalkki (m/40–50), Laillinen tai rikkeiden määrä, montako korttia kokoelmasta puuttuu ja muokkausaika. Toiminnot (Avaa, Nimeä uudelleen, Kopioi, Poista, Vie .json, Vie .txt) ovat kortin alaosassa. Sivun yläosassa ja tyhjän sivun aloituslaatikossa ovat painikkeet Uusi pakka, Tuo pakkalista ja Hae Netdeckistä, joka avaa tuonnin suoraan linkkikenttään.
 
 - Tuo pakkalista -näkymä on uudistettu. Netdeck-linkki ja pakkalista ovat rinnakkaisissa paneeleissa. Tarkistuksen tulos näyttää samalta kuin pakkaeditorin pakkasarake: yhteenveto edistymispalkilla ja laillisuudella, Tallenna pakaksi -lomake heti sen alla, Legendit kuvina, pääpakka tyypeittäin Cost-jalokiven ja "puuttuu N" -merkinnän kanssa sekä tilastot. Tunnistamattomat rivit näkyvät korostettuna laatikkona tulosten alussa.

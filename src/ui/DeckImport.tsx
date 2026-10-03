@@ -221,8 +221,9 @@ export function DeckImport({
 
   return (
     <>
-      <p>
-        <button type="button" className="button-secondary" onClick={onClose}>
+      <p className="editor-crumb">
+        <button type="button" className="link-button" onClick={onClose}>
+          <span aria-hidden="true">← </span>
           {deckTexts.importBack}
         </button>
       </p>

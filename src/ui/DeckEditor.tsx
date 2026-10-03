@@ -347,8 +347,9 @@ export function DeckEditor({
             <p>{phase === 'not-found' ? deckTexts.editorNotFound : deckTexts.listUnavailable}</p>
           </div>
         )}
-        <p className="editor-back">
-          <button type="button" className="button-secondary" onClick={onBack}>
+        <p className="editor-crumb">
+          <button type="button" className="link-button" onClick={onBack}>
+            <span aria-hidden="true">← </span>
             {deckTexts.backToList}
           </button>
         </p>
@@ -358,20 +359,22 @@ export function DeckEditor({
 
   return (
     <>
+      {/* One compact header row (T-050): back link, the name as an editable title, save badge, export. */}
       <div className="editor-head">
-        <div className="editor-title">
-          <p className="editor-back">
-            <button type="button" className="button-secondary" onClick={onBack}>
-              {deckTexts.backToList}
-            </button>
-          </p>
-          <h1 ref={headingRef} tabIndex={-1} className="editor-name">
-            {content.name}
-          </h1>
-        </div>
-        <div className="editor-meta">
-          <div className="deck-name-field">
-            <label htmlFor="deck-name">{deckTexts.nameLabel}</label>
+        <p className="editor-crumb">
+          <button type="button" className="link-button" onClick={onBack}>
+            <span aria-hidden="true">← </span>
+            {deckTexts.backToList}
+          </button>
+        </p>
+        <h1 ref={headingRef} tabIndex={-1} className="editor-name visually-hidden">
+          {content.name}
+        </h1>
+        <div className="editor-titlebar">
+          <div className="deck-name-field editor-name-field">
+            <label htmlFor="deck-name" className="visually-hidden">
+              {deckTexts.nameLabel}
+            </label>
             <input
               id="deck-name"
               type="text"
@@ -380,7 +383,7 @@ export function DeckEditor({
               aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
               onChange={(event) => handleName(event.target.value)}
             />
-            <p id="deck-name-hint" className="hint">
+            <p id="deck-name-hint" className="visually-hidden">
               {deckTexts.nameHint}
             </p>
             {nameError !== null && (
@@ -389,27 +392,30 @@ export function DeckEditor({
               </p>
             )}
           </div>
-          <div className="row-actions">
-            <ExportButtons deck={content} cardsByKey={cardsByKey} />
+          <div className="editor-tools">
+            {saveState !== 'error' && (
+              // Only "Tallennettu" is spoken (T-050b): the in-between states are shown but would talk over the change message.
+              <p className={`save-status save-badge${saveState === 'saved' ? ' is-saved' : ''}`}>
+                <span role="status">{saveState === 'saved' ? deckTexts.saveSaved : ''}</span>
+                {saveState !== 'saved' && (
+                  <span aria-hidden="true">{saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}</span>
+                )}
+              </p>
+            )}
+            <div className="row-actions">
+              <ExportButtons deck={content} cardsByKey={cardsByKey} />
+            </div>
           </div>
         </div>
       </div>
 
-      {saveState === 'error' ? (
+      {saveState === 'error' && (
         <div className="notice notice-danger" role="alert">
           <p>{deckTexts.saveFailed(saveError ?? 'unknown')}</p>
           <button type="button" className="button-secondary" onClick={handleRetry}>
             {deckTexts.saveRetry}
           </button>
         </div>
-      ) : (
-        // Only "Tallennettu" is spoken (T-050b): the in-between states are shown but would talk over the change message.
-        <p className="save-status">
-          <span role="status">{saveState === 'saved' ? deckTexts.saveSaved : ''}</span>
-          {saveState !== 'saved' && (
-            <span aria-hidden="true">{saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}</span>
-          )}
-        </p>
       )}
 
       <p className="visually-hidden" aria-live="polite" aria-atomic="true">
