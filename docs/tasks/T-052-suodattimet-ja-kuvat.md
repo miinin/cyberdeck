@@ -1,5 +1,5 @@
 # T-052 · Hover-esikatselun korvaus, isommat kuvat, Cost/Power/RAM-suodattimet, värilaattojen korjaus
-**Tila:** Review · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-03)
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-03)
 **Malli:** D-014. Käyttäjä on poissa ja kielsi luvan kysymisen. PM yhdistää testiin, kun PR:n tarkistukset ovat vihreät.
 **Haara:** `t-052-suodattimet-ja-kuvat`
 

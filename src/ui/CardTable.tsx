@@ -26,10 +26,10 @@ export function Value({ value, missing }: { value: number | string | null; missi
 type SortState = { key: SortKey; direction: SortDirection } | null;
 
 /** One sortable column header: a button inside the th, with aria-sort on the active th only. */
-function SortHeader({ label, column, sort, onSort }: { label: string; column: SortKey; sort: SortState; onSort: (column: SortKey) => void }) {
+function SortHeader({ label, column, sort, onSort, numeric = false }: { label: string; column: SortKey; sort: SortState; onSort: (column: SortKey) => void; numeric?: boolean }) {
   const active = sort !== null && sort.key === column ? sort.direction : null;
   return (
-    <th scope="col" aria-sort={active === null ? undefined : active === 'asc' ? 'ascending' : 'descending'}>
+    <th scope="col" className={numeric ? 'cell-number' : undefined} aria-sort={active === null ? undefined : active === 'asc' ? 'ascending' : 'descending'}>
       <button type="button" className="sort-button" onClick={() => onSort(column)}>
         {label}
         {active !== null && <span aria-hidden="true"> {active === 'asc' ? '▲' : '▼'}</span>}
@@ -78,9 +78,9 @@ export function CardTable({
             <SortHeader label={texts.columnName} column="name" sort={sort} onSort={onSort} />
             <SortHeader label={texts.columnType} column="type" sort={sort} onSort={onSort} />
             <SortHeader label={texts.columnRarity} column="rarity" sort={sort} onSort={onSort} />
-            <SortHeader label={texts.columnCost} column="cost" sort={sort} onSort={onSort} />
-            <SortHeader label={texts.columnPower} column="power" sort={sort} onSort={onSort} />
-            <SortHeader label={texts.columnRam} column="ram" sort={sort} onSort={onSort} />
+            <SortHeader label={texts.columnCost} column="cost" sort={sort} onSort={onSort} numeric />
+            <SortHeader label={texts.columnPower} column="power" sort={sort} onSort={onSort} numeric />
+            <SortHeader label={texts.columnRam} column="ram" sort={sort} onSort={onSort} numeric />
             {owned !== undefined && <th scope="col">{texts.columnCollection}</th>}
           </tr>
         </thead>

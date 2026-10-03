@@ -1504,7 +1504,11 @@ body:has(dialog[open]) {
 .card-table .cell-number {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  text-align: end;
+  text-align: center;
+}
+
+.card-table thead .cell-number {
+  font-family: inherit;
 }
 
 .card-table .cell-image {
