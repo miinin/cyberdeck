@@ -4,6 +4,9 @@ import { cleanup } from '@testing-library/react';
 // Tests must never load or call the real Firebase SDK (D-017 kohta 8, SR-27 kohta 4): the only module
 // that imports it throws instead. Account tests pass fake auth (src/account/memory.ts) or fake modules.
 vi.mock('../account/firebase/loadFirebase', () => ({
+  loadFirestore: vi.fn(async () => {
+    throw new Error('Real Firebase is disabled in tests');
+  }),
   loadFirebase: vi.fn(async () => {
     throw new Error('Real Firebase is disabled in tests');
   }),

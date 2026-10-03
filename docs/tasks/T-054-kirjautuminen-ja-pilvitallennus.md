@@ -59,14 +59,14 @@ Edellyttää konsolitehtävät 1–8. Oma haara `t-054a0-testiprojekti`, pieni m
 - [x] `npm test`, `npm run lint`, `npm run build` läpi.
 
 ### T-054b · Firestore-repository ja säännöt (vaatii Digiturvan uhkamallin)
-- [ ] `envelope.ts`: `decodeEnvelopeValue(value, spec)`, ja `decodeEnvelope` käyttää sitä. Vanhat testit läpi ennallaan.
-- [ ] `src/account/firebase/firestoreCloudStore.ts` (`CloudStore`: `readMeta`, `readAll`, `commit(change, expectedRev)` `runTransaction`illa, meta-revin tarkistus, `CloudError`-luokittelu) ja `memory.ts`: `createMemoryCloud()` samalla sopimuksella. Sopimustestit ajetaan muistitoteutusta vasten.
-- [ ] Tietomalli D-017 kohta 3: `users/{uid}`, `users/{uid}/decks/{deckId}`, `users/{uid}/collection/main` molemmissa projekteissa (ei `test_users`-juurta, D-017 Muutos K-P8). Pilvestä luettu data validoidaan samoilla `parse*`-funktioilla, ja virheelliset rivit pudotetaan (lasketaan). Uudempi skeemaversio → `locked`.
-- [ ] Kokoelman koodatun koon tarkistus (alle 900 000 tavua) ennen kirjoitusta → `CloudError('too-large')`.
-- [ ] `firestore.rules` (vain omistaja, vain sallitut polut ja kentät, kokorajat, kaikki muu kielletty) ja tyhjä `firestore.indexes.json`, `firebase.json`iin `firestore`-osio. Digiturva katselmoi säännöt. Käyttäjä deployaa (konsolitehtävä 9) ennen yhdistämistä testiin.
+- [x] `envelope.ts`: `decodeEnvelopeValue(value, spec)`, ja `decodeEnvelope` käyttää sitä. Vanhat testit läpi ennallaan.
+- [x] `src/account/firebase/firestoreCloudStore.ts` (`CloudStore`: `readMeta`, `readAll`, `commit(change, expectedRev)` `runTransaction`illa, meta-revin tarkistus, `CloudError`-luokittelu) ja `memory.ts`: `createMemoryCloud()` samalla sopimuksella. Sopimustestit ajetaan muistitoteutusta vasten.
+- [x] Tietomalli D-017 kohta 3: `users/{uid}`, `users/{uid}/decks/{deckId}`, `users/{uid}/collection/main` molemmissa projekteissa (ei `test_users`-juurta, D-017 Muutos K-P8). Pilvestä luettu data validoidaan samoilla `parse*`-funktioilla, ja virheelliset rivit pudotetaan (lasketaan). Uudempi skeemaversio → `locked`.
+- [x] Kokoelman koodatun koon tarkistus (alle 900 000 tavua) ennen kirjoitusta → `CloudError('too-large')`.
+- [x] `firestore.rules` (vain omistaja, vain sallitut polut ja kentät, kokorajat, kaikki muu kielletty) ja tyhjä `firestore.indexes.json`, `firebase.json`iin `firestore`-osio. Digiturva katselmoi säännöt. **(Digiturvan katselmointi jäljellä.)** Käyttäjä deployaa (konsolitehtävä 9) ennen yhdistämistä testiin.
 - [ ] Säännöt deployattu testiprojektiin (konsolitehtävä 12, `--project test`) ennen yhdistämistä testiin ja tuotantoprojektiin ennen julkaisua.
 - [ ] Käsin testisivustolla: toisen käyttäjän polkuun kirjoitus ja luku hylätään (selaimen konsolista), oma polku toimii.
-- [ ] Testit, lint, build läpi.
+- [x] Testit, lint, build läpi.
 
 ### T-054c · Synkronointi, ensimmäinen siirto ja yhdistämisdialogi
 - [ ] `createRepositories({ namespace })` ja samassa välilehdessä toimiva `notify`. Tilin avaimet `cyberdeck:u:{uid}:…`, uid validoidaan. Kirjautumattoman avaimet ennallaan.
@@ -158,3 +158,18 @@ Koodikatselmointi: tehty · Pakollisia korjattu 2 (uloskirjautuessa painike näy
 - SEC-039 (Info) Firestore-origin CSP:ssä etukäteen, SEC-040 (Info) `redirect-pending`-avain hyväksytty.
 - Korjattu suoraan: PRIVACY.md rivi 11 ja 10.3 Muutos K-P8:n mukaisiksi (ei `test_users`), Firestoren nykyinen sijainti kirjattu.
 - Avoinna: CSP:n ja kirjautumisen käsin varmistus testisivustolla (SEC-033).
+
+## Luovutus T-054b (Koodari, 2026-10-03)
+**Tehty (haara `t-054-kirjautuminen-ja-pilvitallennus`, ei pushattu, ei deployta eikä firebase-komentoja):**
+- `src/storage/envelope.ts`: `decodeEnvelopeValue(value, spec)`, `decodeEnvelope` = JSON.parse + se. `storage/index.ts` vie lisäksi `COLLECTION_ENVELOPE_SPEC`in (sama versio, migraatiot ja `parseCollection` kuin localStoragessa).
+- `src/account/types.ts`: `CloudMeta { rev, newer }`, `CloudDoc<T>` (`missing | ok | invalid`), `CloudSnapshot { meta, decks, invalidDeckIds, collection, dropped, locked, limitExceeded }`, `CloudChange { putDecks, deleteDecks, collection? }`, `CloudStore`. `cloudError.ts`: `CloudError` ja `toCloudError` (vain Firestoren `code`, `Object.hasOwn`-haku).
+- `src/account/cloudCodec.ts` (puhdas, yhteinen molemmille toteutuksille): juuri `users`, pakan id dokumentin id:stä (`isDeckId`), dokumentit `decodeEnvelopeValue` + `parseDeck`/`parseCollection`, vain tunnetut kentät (ei levitystä), virheellinen dokumentti → `invalidDeckIds`/`collection: invalid` + `dropped` (ei poisto, SR-23.3), uudempi versio → `locked`, yli `MAX_DECKS` → `limitExceeded`. `checkChange`: pakat ja kokoelma validoidaan, enintään 500 kirjoitusta, kokoelman JSON-UTF-8-koko alle 900 000 tavua → `too-large`.
+- `src/account/firebase/firestoreCloudStore.ts`: Firestore Lite (`loadFirestore` uutena funktiona `loadFirebase.ts`:ssä, `getApp()` = auth-asiakkaan oletussovellus), uid tarkistetaan (SR-23.8), `readAll` = meta + decks (`limit(MAX_DECKS + 1)`) + collection, `commit` `runTransaction`illa: meta luetaan uudelleen, newer → `locked`, rev ≠ odotettu → `conflict`, meta `{ schemaVersion, rev + 1, updatedAt: serverTimestamp() }`. SDK:n latausvirhe → `offline`, uusi yritys seuraavalla kutsulla.
+- `memory.ts`: `createMemoryCloud({ uid, now, maxCollectionBytes })` samalla sopimuksella + `setRaw/getRaw/paths/reads/failNext`. `setup.ts` mockaa myös `loadFirestore`n.
+- `firestore.rules` liitteen A mukaan, **poikkeama: vain juuri `users` (`match /users/{uid}`), `{root}`-parametri ja `test_users` pois (D-017 Muutos K-P8)**, muuten sisältö sama. `firestore.indexes.json` tyhjä, `firebase.json`iin `firestore`-osio. `src/firestoreRules.test.ts` tarkistaa staattisesti: ei `if true`, ei `read`/`write`, ei `test_users`/`{document=**}`, tarkat match-polut ja jokainen allow alkaa `isOwner(uid)`.
+- IDEAS.md: emulaattoritestit (Javaa ei ole koneella, eikä uutta riippuvuutta lisätty) → **sääntöjen testaus käsin** SR-22.4:n kuudella tapauksella testisivustolla deployn jälkeen.
+**Poikkeamat D-017:stä (Digiturva/PM):** (1) `CloudErrorKind`issa lisäksi `locked` (commit, kun pilven meta on uudempaa versiota, estää vanhan asiakkaan metan alennuksen). (2) `CloudSnapshot`in muoto tarkennettu (yllä), jotta merge (T-054c) erottaa virheellisen poistetusta. (3) `AccountServices.cloud(uid)` ja Appin kytkentä jätetty T-054c:hen, joten Firestore ei vielä ole buildissa eikä pääpaketti kasva (pääpaketti 127,26 kt gzip). (4) Pakkadokumentin skeemaversio on oma vakio (1), koska localStoragen pakkamigraatiot koskevat listamuotoa.
+**Testit:** `npm test` 895/895 (58 tiedostoa; uusia: sopimustestit muisti- ja Firestore-toteutukselle valemoduuleilla, `toCloudError`, säännöt, `decodeEnvelopeValue`), `npm run lint` 0, `npm run build` ja `npm run build:test` läpi, check-dist-env (test) OK. Ei oikeaa verkkoa.
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1
+**Velka:** kokoelman koko arvioidaan JSON-UTF-8-pituudella, joka on Firestoren laskentaa suurempi (turvallinen suuntaan).
+**Ennen yhdistämistä testiin (käyttäjä):** tietokannat uudelleen `europe-north1`:een, sitten `firebase deploy --only firestore:rules,firestore:indexes --project test` ja SR-22.4:n käsin todennus (kirjataan tähän). **Seuraavaksi:** Digiturva katselmoi `firestore.rules`in ja poikkeamat, sitten T-054c.

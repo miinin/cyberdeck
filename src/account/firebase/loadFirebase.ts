@@ -9,3 +9,11 @@ export async function loadFirebase() {
 }
 
 export type FirebaseModules = Awaited<ReturnType<typeof loadFirebase>>;
+
+/** Firestore Lite (REST, no cache, D-017 kohta B) for the signed-in user's app, loaded on the first sync. */
+export async function loadFirestore() {
+  const [app, firestore] = await Promise.all([import('firebase/app'), import('firebase/firestore/lite')]);
+  return { app, firestore };
+}
+
+export type FirestoreModules = Awaited<ReturnType<typeof loadFirestore>>;

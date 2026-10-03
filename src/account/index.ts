@@ -5,9 +5,23 @@ import { FIREBASE_SITE, selectAuthMode } from './firebase/sites';
 import { createLazyAuthClient } from './lazyAuthClient';
 import type { AccountHints, AccountServices } from './types';
 
-export type { AccountHints, AccountServices, AccountUser, AuthClient, AuthErrorKind, AuthState } from './types';
-export { createFakeAuth, FAKE_USER } from './memory';
-export type { FakeAuth } from './memory';
+export type {
+  AccountHints,
+  AccountServices,
+  AccountUser,
+  AuthClient,
+  AuthErrorKind,
+  AuthState,
+  CloudChange,
+  CloudDoc,
+  CloudMeta,
+  CloudSnapshot,
+  CloudStore,
+} from './types';
+export { CloudError } from './cloudError';
+export type { CloudErrorKind } from './cloudError';
+export { createFakeAuth, createMemoryCloud, FAKE_USER } from './memory';
+export type { FakeAuth, MemoryCloud, MemoryCloudPath } from './memory';
 
 /**
  * Firebase-backed services for this build and host. Creating them loads nothing; the auth client and the
