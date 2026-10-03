@@ -22,10 +22,11 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
-      - run: npm run build
+      - run: npm run build:test
+      - run: node scripts/check-dist-env.mjs test
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG }}
-          projectId: cyberdeck-tcg
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG_DEV }}
+          projectId: cyberdeck-tcg-dev
           target: test
           channelId: live

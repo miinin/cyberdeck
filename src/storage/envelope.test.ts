@@ -1,6 +1,6 @@
 import { parseCollection } from '../domain/validate';
 import type { Collection } from '../domain/collection';
-import { decodeEnvelope, encodeEnvelope } from './envelope';
+import { decodeEnvelope, decodeEnvelopeValue, encodeEnvelope } from './envelope';
 import type { EnvelopeSpec, Migration } from './envelope';
 
 const collectionSpec: EnvelopeSpec<Collection> = { currentVersion: 1, migrations: [], parse: parseCollection };
@@ -101,5 +101,18 @@ describe('encodeEnvelope', () => {
 
     expect(JSON.parse(raw)).toEqual({ schemaVersion: 1, savedAt: '2026-10-01T12:00:00.000Z', data: value });
     expect(decodeEnvelope(raw, collectionSpec)).toEqual({ kind: 'ok', value, dropped: 0, fromVersion: 1 });
+  });
+});
+
+describe('decodeEnvelopeValue', () => {
+  it('decodes a parsed object like decodeEnvelope decodes its JSON', () => {
+    const value = { schemaVersion: 1, savedAt: SAVED_AT.toISOString(), data: { entries: [{ card: 'detonate', count: 2 }] } };
+    expect(decodeEnvelopeValue(value, collectionSpec)).toEqual(decodeEnvelope(JSON.stringify(value), collectionSpec));
+  });
+
+  it('rejects non-objects and reports newer versions', () => {
+    expect(decodeEnvelopeValue(null, collectionSpec)).toEqual({ kind: 'corrupt' });
+    expect(decodeEnvelopeValue([], collectionSpec)).toEqual({ kind: 'corrupt' });
+    expect(decodeEnvelopeValue({ schemaVersion: 2, data: {} }, collectionSpec)).toEqual({ kind: 'newer', version: 2 });
   });
 });

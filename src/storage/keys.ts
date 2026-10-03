@@ -10,6 +10,19 @@ export const THEME_KEY = 'cyberdeck:theme';
 export const VIEW_KEY = 'cyberdeck:view';
 export const EDIT_MODE_KEY = 'cyberdeck:edit-mode';
 export const DECK_PICK_VIEW_KEY = 'cyberdeck:deck-pick-view';
+/**
+ * Account hints (T-054a, D-017 kohta 1, SR-29 kohta 1): the uid of the last signed-in account, so the
+ * Firebase SDK loads at startup only for users who have signed in, and a flag set just before a sign-in
+ * redirect, so the redirect result is read on return. Raw strings, no envelope, no other personal data.
+ */
+export const ACCOUNT_LAST_UID_KEY = 'cyberdeck:account:last-uid';
+export const ACCOUNT_REDIRECT_PENDING_KEY = 'cyberdeck:account:redirect-pending';
+/** Set while "Poista tilin tiedot" waits for a re-login redirect: the account is deleted when the user returns (T-054d). */
+export const ACCOUNT_DELETE_PENDING_KEY = 'cyberdeck:account:delete-pending';
+/** Key prefix of one account's data in this browser (T-054c, D-017 kohta 4). The uid must be valid (isUid). */
+export function accountKeyPrefix(uid: string): string {
+  return `cyberdeck:u:${uid}:`;
+}
 /** Followed by `<aggregate>:<ISO timestamp>`. Only keys with this prefix are ever pruned (SR-13). */
 export const BACKUP_PREFIX = 'cyberdeck:backup:';
 

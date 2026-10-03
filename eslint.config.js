@@ -46,6 +46,19 @@ const storageInternals = {
   message: "Import the storage layer only through its public index ('../storage').",
 };
 
+// D-017 kohta 8, SR-21 kohta 3: only src/account/firebase/** may import the Firebase SDK.
+const noFirebase = {
+  // A regex, not a glob: the glob 'firebase/**' would also match the relative './firebase/config'.
+  regex: '^@?firebase(/|$)',
+  message: 'Only src/account/firebase/** may import Firebase (D-017 kohta 8).',
+};
+
+// D-017 kohta 8: only account/index.ts is the public API of the account layer.
+const accountInternals = {
+  group: ['**/account/*', '**/account/**'],
+  message: "Import the account layer only through its public index ('../account').",
+};
+
 // SR-12, D-008: only storage/keyValueStore.ts may use browser storage, so nothing bypasses validation,
 // backups and the in-memory fallback (ARCH-008).
 const browserStorageApis = ['localStorage', 'sessionStorage', 'indexedDB'];
@@ -71,10 +84,61 @@ export default defineConfig(
     },
   },
   {
+    // Default for all source files; the layer blocks below replace it and repeat noFirebase.
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [noFirebase] }],
+    },
+  },
+  {
     files: ['src/ui/**', 'src/App.tsx', 'src/main.tsx'],
     rules: {
-      // One block for both layers: a later no-restricted-imports block would replace this one, not merge.
-      'no-restricted-imports': ['error', { patterns: [noApiInApp, storageInternals] }],
+      // One block for all layers: a later no-restricted-imports block would replace this one, not merge.
+      'no-restricted-imports': ['error', { patterns: [noApiInApp, storageInternals, accountInternals, noFirebase] }],
+    },
+  },
+  {
+    files: ['src/account/**'],
+    rules: {
+      // SR-27 kohta 1: nothing from the account layer is written to the console.
+      'no-console': 'error',
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [{ name: 'react', message: 'The account layer does not depend on the UI.' }],
+          patterns: [
+            storageInternals,
+            noFirebase,
+            {
+              group: ['**/ui', '**/ui/**', '**/api', '**/api/**'],
+              message: 'The account layer depends only on the domain and storage layers.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // SR-21 kohta 3: only these SDK entry points, nothing like firebase/analytics.
+    files: ['src/account/firebase/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [{ name: 'react', message: 'The account layer does not depend on the UI.' }],
+          patterns: [
+            storageInternals,
+            {
+              regex: '^@firebase(/|$)|^firebase(?!/(app|auth|firestore/lite)$)(/|$)',
+              message: 'Only firebase/app, firebase/auth and firebase/firestore/lite are allowed (SR-21 kohta 3).',
+            },
+            {
+              group: ['**/ui', '**/ui/**', '**/api', '**/api/**'],
+              message: 'The account layer depends only on the domain and storage layers.',
+            },
+          ],
+        },
+      ],
     },
   },
   {
@@ -86,9 +150,10 @@ export default defineConfig(
           paths: [{ name: 'react', message: 'The domain layer has no dependencies.' }],
           patterns: [
             {
-              group: ['**/api', '**/api/**', '**/ui', '**/ui/**', '**/storage', '**/storage/**'],
+              group: ['**/api', '**/api/**', '**/ui', '**/ui/**', '**/storage', '**/storage/**', '**/account', '**/account/**'],
               message: 'The domain layer has no dependencies.',
             },
+            noFirebase,
           ],
         },
       ],
@@ -103,8 +168,9 @@ export default defineConfig(
           paths: [{ name: 'react', message: 'The data layer depends only on the domain layer.' }],
           patterns: [
             noApiInApp,
+            noFirebase,
             {
-              group: ['**/ui', '**/ui/**', '**/storage', '**/storage/**'],
+              group: ['**/ui', '**/ui/**', '**/storage', '**/storage/**', '**/account', '**/account/**'],
               message: 'The data layer depends only on the domain layer.',
             },
           ],
@@ -120,8 +186,9 @@ export default defineConfig(
         {
           paths: [{ name: 'react', message: 'The storage layer does not depend on the UI.' }],
           patterns: [
+            noFirebase,
             {
-              group: ['**/ui', '**/ui/**', '**/api', '**/api/**'],
+              group: ['**/ui', '**/ui/**', '**/api', '**/api/**', '**/account', '**/account/**'],
               message: 'The storage layer depends only on the domain layer.',
             },
           ],

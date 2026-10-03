@@ -67,7 +67,7 @@ Tuotanto, testisivusto ja esikatselukanavat ovat eri origineja, joten niiden sel
 - Selaimen tallennustilaa käytetään vain luvun 2 riveihin 1–5 ja 10 (SR-12, SR-16). Teemavalinta (rivi 10) on käyttäjän itse tekemä asetus, ei eväste eikä seurantaa.
 - Jos analytiikkaa tai virheraportointia halutaan myöhemmin, se vaatii suostumuksen ennen latausta, PRIVACY.md:n päivityksen ja Digiturvan katselmoinnin.
 
-## 7. MVP-2:n ennakointi (avoin)
+## 7. MVP-2:n ennakointi (kirjautuminen ja pilvitallennus: katso luku 10)
 
 Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-projektin omistaja) alkaa käsitellä henkilötietoja. Ennen ensimmäistä MVP-2-tehtävää Digiturva päivittää tämän tiedoston. Tiedossa olevat kohdat (katso myös SECURITY.md luku 12):
 
@@ -85,7 +85,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 |---|---|---|---|
 | K-P1 | Kuka on rekisterinpitäjä Firebase Hostingin ~~ja Netdeck-yhteyksien~~ IP-osoitteille, ja mikä on käsittelyperuste? (T-026: Netdeck-yhteydet poistuivat käyttäjiltä.) | Käyttäjä Firebase-projektin omistajana, peruste oikeutettu etu. Kerrotaan lyhyessä tietosuojailmoituksessa. | Ei MVP-1:tä |
 | K-P2 | Riittääkö MVP-1:ssä lyhyt tietosuojailmoitus sivulla (esim. "Kokoelma ja pakat tallentuvat vain tähän selaimeen. ~~Sivu hakee korttitiedot Netdeck.gg:stä, joka näkee IP-osoitteesi.~~") ilman suostumusbanneria? | Kyllä. **T-026 (2026-10-02):** Netdeck-maininta ja IP-osoite eivät enää kuulu ilmoitukseen, koska selain ei ota yhteyttä Netdeckiin. Lähdemaininta "Korttitiedot: Netdeck.gg" säilyy (R-2:n ehto), mutta se ei ole tietosuojatieto. Teksti Sisällöntuottajalle ja UX:lle T-012:n tai T-013:n yhteyteen. **Tila 2026-10-01:** T-012 näyttää ensimmäisen puoliskon ("Kokoelma tallentuu vain tähän selaimeen…"). Maininta Netdeck.gg:stä ja IP-osoitteesta puuttuu edelleen ja odottaa käyttäjän vastausta. | Ei |
-| K-P3 | Ovatko MVP-2:n kirjautuvat käyttäjät mahdollisesti alaikäisiä? | Selvitettävä ennen MVP-2:n suunnittelua. Jos kyllä, DPIA-tarve arvioidaan. | Ei MVP-1:tä, blokkaa MVP-2:n |
+| K-P3 | Ovatko MVP-2:n kirjautuvat käyttäjät mahdollisesti alaikäisiä? | Selvitettävä ennen MVP-2:n suunnittelua. Jos kyllä, DPIA-tarve arvioidaan. | ~~Blokkaa MVP-2:n~~ → **Ratkaistu** (käyttäjä, D-016, 2026-10-03): ikäraja 16 vuotta, luku 10. |
 | K-P4 | Hosting-lokien säilytysaika ja Cloud Logging -integraation tila Firebase-projektissa | Käyttäjä tai Koodari tarkistaa Firebase-konsolista (vain luku). Kirjataan lukuun 5. | Ei |
 
 ## 9. Muutosloki
@@ -99,3 +99,75 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 | 2026-10-02 | Katselmointi SEC-005-t026: korttidata buildissa (D-013). Netdeck.gg ei enää näe käyttäjien IP-osoitteita (rivi 9, yhteenveto, luvut 3–5), välimuistirivi 5 poistunut, K-P1 ja K-P2 päivitetty. Ei uusia henkilötietoja, tallennettavia kenttiä, evästeitä tai kolmansia osapuolia. | T-026 |
 | 2026-10-02 | Katselmointi SEC-006-t027: korttikuvat omalta originilta (`/assets/`). Ei uusia henkilötietoja, evästeitä, tallennusavaimia eikä kolmansia osapuolia. Kuvapyynnöt näkyvät vain Firebase Hostingin lokeissa kuten muutkin pyynnöt (rivi 8). Kuvien metatiedot (EXIF, GPS, XMP) poistetaan tuonnissa, joten kuvapaketin tekijän tietoja ei julkaista. | T-027 |
 | 2026-10-02 | Katselmointi SEC-009-t046: linkkihaku Netdeckistä (D-015). Rivi 9b: Netdeck näkee käyttäjän IP-osoitteen vain käyttäjän pyytämässä linkkihaussa. Yhteenveto ja säilytys päivitetty. Ei uusia tallennettavia kenttiä eikä evästeitä. K-P1:n ja K-P2:n Netdeck-maininta tulee taas ajankohtaiseksi linkkihaun osalta (huomautus näkymässä riittää ehdotuksena). | T-046 |
+| 2026-10-03 | Luku 10 (LUONNOS): T-054:n kirjautuminen ja pilvitallennus (D-016, D-017). Uusi inventaario (rivit 11–19), sijainti, peruste, säilytys ja poisto, evästeet, jaettu kone ja avoimet kysymykset K-P5–K-P8. Luku 7 korvattu kirjautumisen osalta luvulla 10, K-P3 ratkaistu (D-016: 16+). Raportti SEC-011-t054. | T-054 |
+| 2026-10-03 | Katselmointi SEC-013-t054a: rivi 11 ja luku 10.3 päivitetty Muutos K-P8:n mukaiseksi (juuri `users` molemmissa projekteissa, `test_users` poistui). Firestoren sijainti on toistaiseksi `nam5`, mikä on korjattava ennen T-054b:tä. Uusi avain `cyberdeck:account:redirect-pending` (arvo `1`) hyväksytty, ei henkilötietoa. Dialogin tietosuojateksti tarkennettava ennen julkaisua (SEC-038). | T-054a |
+
+## 10. MVP-2: kirjautuminen ja pilvitallennus (T-054, LUONNOS)
+
+> **Luonnos 2026-10-03 (Digiturva, SEC-011).** Voimaan, kun T-054 on toteutettu. Korvaa luvun 7 kirjautumisen ja pilvitallennuksen osalta (jaetut vaihtolistat ja kaverit ovat yhä luvussa 7). Päätökset D-016 (käyttäjä) ja D-017. Turvavaatimukset SR-21–SR-29 raportissa `reports/SEC-011-t054-uhkamalli.md`. Ei oikeudellinen kannanotto.
+
+### 10.1 Yhteenveto
+- Kirjautuminen on **vapaaehtoinen** ja vain Google-tilillä. Ilman kirjautumista mikään luvuissa 1–6 ei muutu, eikä selain lataa Firebasen koodia eikä ota yhteyttä Googleen.
+- Kirjautuneen käyttäjän pakat ja kokoelma tallentuvat Firestoreen (Google, EU: tuotanto `eur3`, testi `europe-north1`) ja selaimeen tilikohtaisesti. Googlen tilitiedot (nimi, sähköposti) ovat Firebase Authenticationissa, ei Firestoressa.
+- Rekisterinpitäjä: Miika Miinin, miikamiinin@gmail.com (K-P7). Kirjautumista ei avata muille ennen kuin tämä teksti on lisätty.
+- Firestoreen ei tallenneta sähköpostia, nimeä eikä kuvaa, vaan vain Googlen antama tunniste (uid) polussa sekä pakat ja kokoelma.
+- **Ikäraja 16 vuotta** (D-016). Ikää ei voi tarkistaa teknisesti, vaan siitä kerrotaan kirjautumisdialogissa.
+- **Rekisterinpitäjä** on käyttäjä Firebase-projektin `cyberdeck-tcg` omistajana (D-016). Google (Firebase) toimii käsittelijänä Firebasen ehtojen mukaan.
+
+### 10.2 Tietoinventaario (lisäys lukuun 2)
+
+| # | Tieto | Lähde | Tarkoitus | Missä | Kuka pääsee | Henkilötieto? | Minimointi ja perustelu |
+|---|---|---|---|---|---|---|---|
+| 11 | uid (Firebase Authin pseudonyymi tunniste) | Firebase Auth kirjautuessa | Datan kohdistaminen omistajalle, sääntöjen omistajatarkistus | Firestore-polku `users/{uid}` (tuotanto `cyberdeck-tcg`, testi `cyberdeck-tcg-dev`, D-017 Muutos K-P8), localStorage-avainten nimet `cyberdeck:u:{uid}:…` ja `cyberdeck:account:last-uid` | Käyttäjä; projektin omistaja konsolista; Google käsittelijänä | **Kyllä** (pseudonyymi tunniste) | Ei sähköpostia tunnisteena. `last-uid` poistetaan uloskirjautuessa (SR-26). SR-16:n poikkeus: uid vain avainten nimissä. Lisäksi T-054a: `cyberdeck:account:redirect-pending` (arvo `1`, ei henkilötietoa) asetetaan juuri ennen uudelleenohjausta Googleen ja poistetaan, kun tulos on luettu. |
+| 12 | Pakat pilvessä (kuten rivi 2) | Käyttäjä, synkronointi | Laitteiden välinen tallennus | Firestore `…/{uid}/decks/{deckId}` | Kuten 11 | Mahdollisesti (pakan nimi, kuten rivi 2) | Samat kentät ja rajat kuin selaimessa (SR-11, SR-22). |
+| 13 | Kokoelma pilvessä (kuten rivi 1) | Käyttäjä, synkronointi | Kuten 12 | Firestore `…/{uid}/collection/main` | Kuten 11 | Ei sellaisenaan, mutta liittyy uid:hen | Vain kortin avain ja määrä. |
+| 14 | Synkronoinnin meta: skeemaversio, muutoslaskuri `rev`, palvelimen aika viimeisestä työnnöstä | Sovellus | Synkronointi ja ristiriitojen tunnistus | Firestore `…/{uid}` | Kuten 11 | Liittyy uid:hen (kertoo viimeisen käyttöhetken) | Vain viimeisin aika, ei historiaa. |
+| 15 | Tilin paikallinen kopio ja synkronoinnin pohja | Sovellus | Offline-käyttö, kolmitiemerge | localStorage `cyberdeck:u:{uid}:decks`, `…:collection`, `…:sync` | Laitteen käyttäjät, selainlaajennukset | Kuten 12–14 | **Jää selaimeen uloskirjautuessa** (käyttäjän valinta, D-017). Ei näy uloskirjautuneena. Poisto: SR-26 kohdat 3–4. |
+| 16 | Firebase Auth -istunto: refresh- ja ID-token sekä Googlen profiilin kopio (uid, sähköposti, nimi, kuvan URL) | Firebase Auth SDK | Kirjautumisen säilyminen | Selaimen IndexedDB `firebaseLocalStorageDb` | Laitteen käyttäjät, selainlaajennukset, XSS | **Kyllä** | SDK:n hallinnassa, sovellus ei lue tokeneita (SR-21). `signOut` poistaa. |
+| 17 | Firebase Auth -käyttäjätietue: uid, sähköposti, nimi, kuvan URL, tunnistautumistapa, luonti- ja viimeinen kirjautumisaika | Google-kirjautuminen (oletusscopet `openid email profile`) | Tilin olemassaolo | Firebase Authentication (Googlen globaali palvelu, ei aluevalintaa) | Projektin omistaja konsolista, Google | **Kyllä** | Ei kopioida Firestoreen. Poisto: SR-26 kohta 5 (K-P5). |
+| 18 | Firebase SDK:n heartbeat-tieto (SDK-versiot ja käyttöpäivät) | Firebase app SDK | Googlen SDK-käyttötilasto, lähetetään otsakkeena Firebase-pyyntöjen mukana | Selaimen IndexedDB `firebase-heartbeat-database` | Google | Ei tunnista henkilöä sellaisenaan | Vain kirjautuneilla (SDK ladataan vain heille). |
+| 19 | IP-osoite, selaimen tiedot ja pyyntöjen ajankohdat Auth-, OAuth- ja Firestore-pyynnöissä | Selain automaattisesti | Palvelun toimitus | Google (accounts.google.com, identitytoolkit, securetoken, firestore.googleapis.com) | Google; projektin omistaja vain, jos Cloud Audit Logsin Data Access -lokit otetaan käyttöön (ei oteta, SR-25) | **Kyllä** (IP) | `Referrer-Policy: no-referrer`. Ei omaa lokitusta (SR-27). |
+
+**Ei edelleenkään kerätä:** analytiikkaa, mainostunnisteita, virheraportointia, sijaintia. Sähköpostia ja nimeä ei tallenneta Firestoreen eikä localStorageen (sovellus näyttää sähköpostin vain muistista).
+
+### 10.3 Sijainti
+| Paikka | Sijainti | Huomio |
+|---|---|---|
+| Firestore | Tuotanto `eur3`, testi `europe-north1` (käyttäjän valinta 2026-10-03, pysyvä, D-017). **Tila 2026-10-03: molempien projektien tietokanta on `nam5` (USA)** ja luodaan uudelleen ennen T-054b:tä (SEC-013). | Juuri `users` molemmissa projekteissa: tuotanto `cyberdeck-tcg`, testisivusto ja kehitys `cyberdeck-tcg-dev` (D-017 Muutos K-P8, R-18 poistuu). |
+| Firebase Authentication | Googlen globaali palvelu, ei aluevalintaa | Tietoja voidaan käsitellä EU:n ulkopuolella. Siirron peruste Googlen tietojenkäsittelyehdoissa: **tarkistettava** (firebase.google.com/support/privacy). |
+| Selain | Käyttäjän laite | Kuten luku 3. Tilin kopio jää uloskirjautuessa. |
+
+### 10.4 Käsittelyperuste (ehdotus, käyttäjä päättää)
+- Pilvitallennus on käyttäjän itse pyytämä palvelu (kirjautuminen on vapaaehtoinen ja käyttäjän käynnistämä). Digiturvan ehdotus: peruste on palvelun tarjoaminen käyttäjän pyynnöstä, ja se kerrotaan selosteessa. Ei oikeudellinen kannanotto.
+- Selaimen tallennustila ja IndexedDB (rivit 15, 16 ja 18) ovat välttämättömiä käyttäjän pyytämälle kirjautumiselle, eikä niitä käytetä seurantaan. Arvio: suostumusbanneria ei tarvita (vrt. K-P2).
+
+### 10.5 Säilytys ja poisto
+| Tieto | Säilytys | Poisto |
+|---|---|---|
+| Pilvidata (rivit 11–14) | Kunnes käyttäjä poistaa sen. Käyttämättömät tilit: **K-P6** | "Poista tilin tiedot" -painike vahvistuksella poistaa pakat, kokoelman ja metan pilvestä sekä tilin kopion tästä selaimesta (SR-26 kohta 4, GDPR 17). Toisten laitteiden kopiot eivät palaa pilveen automaattisesti (SR-23 kohta 7). |
+| Firebase Auth -tietue (rivi 17) | Kunnes tili poistetaan | Suositus: sama painike poistaa Auth-käyttäjän (vaatii tuoreen kirjautumisen). Muuten poistopyyntö ylläpitäjälle (**K-P5**). |
+| Tilin kopio selaimessa (rivi 15) | Jää uloskirjautuessa | Valinnainen "Poista tiedot tästä selaimesta" (SR-26 kohta 3), "Poista tilin tiedot", selaimen asetus "Poista sivuston tiedot". |
+| Auth-istunto (rivi 16) | Kunnes käyttäjä kirjautuu ulos | `signOut`. |
+| Googlen lokit (rivi 19) | Googlen käytännön mukaan | Ei ylläpitäjän hallinnassa. |
+| Testisivuston data (`test_users`) | Kehittäjän ja testaajien testidata | Testisivuston "Poista tilin tiedot". Ei tarkoituksella oikeita henkilötietoja (rules.md 10). |
+
+**Rekisteröidyn oikeudet:** pääsy ja siirto toteutuvat sovelluksessa (data näkyy, pakat voi viedä, T-015), poisto painikkeella, oikaisu muokkaamalla. Muut pyynnöt rekisterinpitäjälle (yhteystieto selosteessa, **K-P7**).
+
+### 10.6 Jaettu tietokone (käyttäjän valinta: tiedot jäävät selaimeen)
+- **Digiturvan arvio: Low (R-20).** Selaimeen jäävät pakat ja kokoelma eivät ole arkaluonteisia, mutta pakan nimi voi sisältää nimen. Uloskirjautumisen jälkeen ne eivät näy sovelluksessa, mutta ne voi lukea selaimen kehitystyökaluilla. Google-istunto (accounts.google.com) jää selaimeen, ellei käyttäjä kirjaudu ulos myös Googlesta.
+- **Minimivaatimus (SR-26 kohta 2):** uloskirjautuessa ilmoitus, että tiedot jäivät tähän selaimeen, ja kehotus poistaa ne ja kirjautua ulos Google-tililtä yhteisellä koneella. Lisäksi `prompt: 'select_account'`, jotta seuraava käyttäjä ei kirjaudu huomaamattaan edellisen Google-tilillä. Suositus: poistopainike ilmoituksessa (SR-26 kohta 3).
+
+### 10.7 Evästeet
+Sovellus ei aseta evästeitä. Firebase Auth käyttää IndexedDB:tä (rivi 16). Kirjautumisen aikana Google asettaa omat evästeensä omaan verkkotunnukseensa (accounts.google.com), mikä kerrotaan selosteessa.
+
+### 10.8 Tietosuojaseloste ja kirjautumisdialogi
+- **Kirjautumisdialogi (T-054a), sisältöluonnos:** "Kirjautuminen on tarkoitettu 16 vuotta täyttäneille. Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa." Lisäksi: "Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa" ja rekisterinpitäjän paikkamerkki (toteutettu T-054c:ssä, SEC-038). + linkki selosteeseen. Sisällöntuottaja muotoilee.
+- **Seloste (T-054d, ennen kirjautumisen avaamista muille):** SR-29 kohta 3. Digiturva laatii luonnoksen, käyttäjä hyväksyy.
+
+### 10.9 Avoimet kysymykset käyttäjälle (PM:n kautta)
+| ID | Kysymys | Digiturvan ehdotus | Blokkaako? |
+|---|---|---|---|
+| K-P5 | Poistaako "Poista tilin tiedot" myös Firebase Auth -käyttäjän (sähköposti, nimi ja kuva Googlen Authissa)? | Kyllä (`deleteUser`, tarvittaessa uudelleenkirjautuminen). Muuten selosteeseen ohje poistopyynnöstä. | Ratkaistu 2026-10-03: kyllä (D-017) |
+| K-P6 | Poistetaanko käyttämättömät tilit automaattisesti (esim. 24 kk)? | Ei automaattista poistoa MVP:ssä (Spark ei tarjoa ajastettuja funktioita). Selosteessa: "säilytetään, kunnes poistat tiedot". | Selostetta |
+| K-P7 | Rekisterinpitäjän nimi ja yhteystieto selosteeseen (esim. OAuth-näkymän tukisähköposti)? | Käyttäjä päättää. Ei kirjata repoon ennen päätöstä. | Ratkaistu 2026-10-03: Miika Miinin, miikamiinin@gmail.com |
+| K-P8 | Hyväksyykö käyttäjä jäännösriskin R-18 (testisivuston koodi pääsee testisivustolle kirjautuneen käyttäjän tuotantodataan, koska projekti on yhteinen)? | Hyväksytään, kunhan testisivustolle kirjautuvat vain kehittäjä ja testaajat. Pysyvä korjaus: erillinen testiprojekti (IDEAS). | Ratkaistu 2026-10-03: erillinen testiprojekti (D-017) |

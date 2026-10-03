@@ -10,7 +10,9 @@ export type StorageErrorKind =
   /** MAX_DECKS or MAX_COLLECTION_ENTRIES is full. */
   | 'limit-reached'
   /** update() with an unknown id. */
-  | 'not-found';
+  | 'not-found'
+  /** update() with `expectedUpdatedAt` and the stored deck has a different updatedAt (another tab or a sync). */
+  | 'conflict';
 
 /**
  * Error from the storage layer. `message` and `cause` are for developers only;

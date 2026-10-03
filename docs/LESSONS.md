@@ -35,3 +35,7 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 ## 2026-10-03 · Satunnaiset "Invalid Chai property: toBeInTheDocument" -kaatumiset
 - Yötyössä `npm test` kaatui kahdesti 179 testillä (jest-dom-matcherit eivät latautuneet), ja heti perään kolme ajoa meni läpi 730/730 ilman koodimuutoksia. Taustalla oli noin 19 agenttien jättämää node-prosessia (`vite preview`).
 - Opetus: jos jest-dom-matcherit katoavat yhtäkkiä, aja uudelleen ja sulje vanhat preview-prosessit ennen kuin epäilet koodia tai riippuvuuksia. Agentin pitää sulkea itse käynnistämänsä `vite preview`.
+
+## 2026-10-03 · `firebase deploy --only firestore:rules` loi tietokannan väärään sijaintiin
+- PM yritti ottaa Firestoren API:n käyttöön viemällä kaiken kieltävät säännöt. Deploy loi samalla `(default)`-tietokannan oletussijaintiin `nam5` (USA) molemmissa projekteissa, vaikka päätös oli `europe-north1` (D-017). Sijaintia ei voi muuttaa, ja poisto vaatii käyttäjän.
+- Opetus: luo tietokanta aina ensin eksplisiittisellä sijainnilla (konsoli tai `firestore:databases:create --location`, kun API on päällä) ennen mitään firestore-deployta. API:n saa päälle ilman deployta konsolin API-sivulta.

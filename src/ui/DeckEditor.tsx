@@ -112,7 +112,13 @@ export function DeckEditor({
   // Autosave: the newest unsaved content waits in `pending`; saves run one after another.
   const [saveState, setSaveState] = useState<SaveState>('saved');
   const [saveError, setSaveError] = useState<SaveErrorKind | null>(null);
+  const saveStateRef = useRef<SaveState>('saved');
+  useEffect(() => {
+    saveStateRef.current = saveState;
+  }, [saveState]);
   const pending = useRef<DeckContent | null>(null);
+  /** The updatedAt we last loaded or saved: a different stored value means another tab or a sync changed the deck. */
+  const knownUpdatedAt = useRef<string | undefined>(undefined);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const chain = useRef<Promise<unknown>>(Promise.resolve());
 
@@ -123,9 +129,10 @@ export function DeckEditor({
     pending.current = null;
     setSaveState('saving');
     chain.current = chain.current
-      .then(() => repository.update(deckId, next))
+      .then(() => repository.update(deckId, next, { expectedUpdatedAt: knownUpdatedAt.current }))
       .then(
-        () => {
+        (saved) => {
+          knownUpdatedAt.current = saved.updatedAt;
           setSaveError(null);
           setSaveState((state) => (pending.current === null ? 'saved' : state));
         },
@@ -159,6 +166,7 @@ export function DeckEditor({
           setPhase('not-found');
           return;
         }
+        knownUpdatedAt.current = deck.updatedAt;
         const loaded = { name: deck.name, sections: deck.sections };
         contentRef.current = loaded;
         setContent(loaded);
@@ -171,6 +179,33 @@ export function DeckEditor({
       active = false;
     };
   }, [repository, deckId]);
+
+  // Another tab or a sync changed the stored decks: without unsaved changes of our own the editor shows the
+  // newest version; with them, the conflict shows when saving (T-054d).
+  useEffect(() => {
+    if (phase !== 'ready') return;
+    let active = true;
+    const unsubscribe = repository.subscribe(() => {
+      if (pending.current !== null || saveStateRef.current !== 'saved') return;
+      void repository.get(deckId).then((deck) => {
+        if (!active || pending.current !== null || saveStateRef.current !== 'saved') return;
+        if (deck === null) {
+          setPhase('not-found');
+        } else if (deck.updatedAt !== knownUpdatedAt.current) {
+          knownUpdatedAt.current = deck.updatedAt;
+          const latest = { name: deck.name, sections: deck.sections };
+          contentRef.current = latest;
+          setContent(latest);
+          setNameText(deck.name);
+          setChangeText(deckTexts.reloadedLatest);
+        }
+      }, () => undefined);
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [phase, repository, deckId]);
 
   // The result view is remembered like the catalog view (T-045); a choice made before loading wins.
   useEffect(() => {
@@ -294,6 +329,37 @@ export function DeckEditor({
     repositories.preferences.saveDeckPickView(next).catch(() => undefined);
   };
 
+  // Conflict answers: take the stored deck and drop our unsaved changes, or save ours over it.
+  const handleLoadLatest = () => {
+    clearTimeout(timer.current);
+    pending.current = null;
+    void repository.get(deckId).then((deck) => {
+      if (deck === null) {
+        setPhase('not-found');
+        return;
+      }
+      knownUpdatedAt.current = deck.updatedAt;
+      const latest = { name: deck.name, sections: deck.sections };
+      contentRef.current = latest;
+      setContent(latest);
+      setNameText(deck.name);
+      setSaveError(null);
+      setSaveState('saved');
+      setChangeText(deckTexts.reloadedLatest);
+    });
+  };
+
+  const handleKeepMine = () => {
+    void repository.get(deckId).then((deck) => {
+      if (deck === null) {
+        setSaveError('not-found');
+        return;
+      }
+      knownUpdatedAt.current = deck.updatedAt;
+      handleRetry();
+    });
+  };
+
   const handleRetry = () => {
     if (pending.current === null) pending.current = contentRef.current;
     flush();
@@ -412,7 +478,20 @@ export function DeckEditor({
         </div>
       </div>
 
-      {saveState === 'error' && (
+      {saveState === 'error' && saveError === 'conflict' && (
+        <div className="notice notice-danger" role="alert">
+          <p>{deckTexts.conflictMessage}</p>
+          <div className="row-actions">
+            <button type="button" className="button-secondary" onClick={handleLoadLatest}>
+              {deckTexts.conflictLoadLatest}
+            </button>
+            <button type="button" className="button-secondary" onClick={handleKeepMine}>
+              {deckTexts.conflictKeepMine}
+            </button>
+          </div>
+        </div>
+      )}
+      {saveState === 'error' && saveError !== 'conflict' && (
         <div className="notice notice-danger" role="alert">
           <p>{deckTexts.saveFailed(saveError ?? 'unknown')}</p>
           <button type="button" className="button-secondary" onClick={handleRetry}>

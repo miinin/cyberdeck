@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-03 (PM, T-052 ja T-053 julkaistu)
+# STATUS · päivitetty 2026-10-03 (PM, T-054 kirjautuminen ja pilvitallennus julkaistu)
 
 ## Yhdellä lauseella
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | – | Ei keskeneräisiä tehtäviä. |
+| – | – | – | Ei keskeneräisiä tehtäviä. Seuraavaksi: tekstien UX- ja sisältökatselmointi (T-054:n työversiot), vanhan cyberdeck-tcg-test-sivuston sulku (valinnainen). |
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
@@ -79,7 +79,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 
 ## Julkaisuputki
 - GitHub: https://github.com/miinin/cyberdeck
-- Testisivusto: https://cyberdeck-tcg-test.web.app (test-haara)
+- Testisivusto: https://cyberdeck-tcg-dev.web.app (test-haara)
 - Tuotanto: https://cyberdeck-tcg.web.app (main-haara, vain /julkaise)
 - Kulku: t-XXX-haara → PR testiin (esikatselu-URL) → test → /julkaise → main (D-001, D-003)
 - Workflowt ajavat `npm ci && npm run build` ja julkaisevat `dist/`-kansion.

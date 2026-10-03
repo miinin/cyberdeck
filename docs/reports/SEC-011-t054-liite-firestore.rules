@@ -1,0 +1,112 @@
+rules_version = '2';
+
+// LUONNOS · SEC-011 liite A · T-054 (Digiturva 2026-10-03). EI DEPLOYATTU.
+// Koodari kopioi tämän T-054b:ssä repon juureen nimellä firestore.rules
+// (SR-22). Muutokset tähän tiedostoon vaativat Digiturvan katselmoinnin (SR-9).
+//
+// Tietomalli (D-017 kohta 3):
+//   {root}/{uid}                 meta { schemaVersion, rev, updatedAt }
+//   {root}/{uid}/decks/{deckId}  { schemaVersion, savedAt, data: { name, sections, createdAt, updatedAt } }
+//   {root}/{uid}/collection/main { schemaVersion, savedAt, data: { entries } }
+// root on 'users' (tuotanto) tai 'test_users' (testi, localhost).
+//
+// Säännöt ovat väärinkäytön katto, eivät tietomallin tarkka validointi:
+// listojen alkioita ei voi käydä läpi säännöissä, joten asiakas validoi
+// kaiken luetun datan (SR-23). Merkkijonorajoissa on väljyyttä (nimi 200),
+// koska sääntöjen size() ja asiakkaan merkkien laskenta voivat poiketa.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Vain Google-kirjautuminen kelpaa, vaikka joku ottaisi vahingossa
+    // käyttöön anonyymin tai sähköpostikirjautumisen (SR-21, SR-25).
+    function isGoogleUser() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
+
+    function isOwner(root, uid) {
+      return (root == 'users' || root == 'test_users')
+        && isGoogleUser()
+        && request.auth.uid == uid;
+    }
+
+    function hasExactly(m, ks) {
+      return m.keys().hasAll(ks) && m.keys().hasOnly(ks);
+    }
+
+    // Uudemmat skeemaversiot sallitaan, jotta uusi sovellusversio ei vaadi
+    // sääntöjen deployta. Vanha asiakas lukittuu uudempaan versioon (SR-23).
+    function isVersion(v) {
+      return v is int && v >= 1 && v <= 1000;
+    }
+
+    function isText(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+
+    function isEnvelope(d) {
+      return hasExactly(d, ['schemaVersion', 'savedAt', 'data'])
+        && isVersion(d.schemaVersion)
+        && isText(d.savedAt, 1, 40)
+        && d.data is map;
+    }
+
+    // updatedAt on palvelimen aika (serverTimestamp()), ei asiakkaan kello.
+    function isMeta(d) {
+      return hasExactly(d, ['schemaVersion', 'rev', 'updatedAt'])
+        && isVersion(d.schemaVersion)
+        && d.rev is int
+        && d.updatedAt == request.time;
+    }
+
+    function isDeckDoc(d) {
+      return isEnvelope(d)
+        && hasExactly(d.data, ['name', 'sections', 'createdAt', 'updatedAt'])
+        && isText(d.data.name, 1, 200)
+        && d.data.sections is list
+        && d.data.sections.size() <= 20
+        && isText(d.data.createdAt, 1, 40)
+        && isText(d.data.updatedAt, 1, 40);
+    }
+
+    function isCollectionDoc(d) {
+      return isEnvelope(d)
+        && hasExactly(d.data, ['entries'])
+        && d.data.entries is list
+        && d.data.entries.size() <= 5000;
+    }
+
+    // Juuridokumentti = meta. Juuren listaus (kaikki käyttäjät) ei ole
+    // sallittu kenellekään, koska list-sääntöä ei ole.
+    match /{root}/{uid} {
+      allow get: if isOwner(root, uid);
+      allow create: if isOwner(root, uid)
+        && isMeta(request.resource.data)
+        && request.resource.data.rev == 1;
+      // rev kasvaa täsmälleen yhdellä jokaisessa työnnössä (D-017 kohta 5).
+      allow update: if isOwner(root, uid)
+        && isMeta(request.resource.data)
+        && request.resource.data.rev == resource.data.rev + 1;
+      allow delete: if isOwner(root, uid);
+
+      match /decks/{deckId} {
+        allow get, list: if isOwner(root, uid);
+        allow create, update: if isOwner(root, uid)
+          && deckId.matches('^[A-Za-z0-9_-]{1,64}$')
+          && isDeckDoc(request.resource.data);
+        allow delete: if isOwner(root, uid);
+      }
+
+      match /collection/{docId} {
+        allow get: if isOwner(root, uid) && docId == 'main';
+        allow create, update: if isOwner(root, uid)
+          && docId == 'main'
+          && isCollectionDoc(request.resource.data);
+        allow delete: if isOwner(root, uid) && docId == 'main';
+      }
+    }
+
+    // Kaikki muu on kielletty (Firestoren oletus, kun mikään sääntö ei salli).
+  }
+}

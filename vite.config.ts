@@ -7,6 +7,8 @@ export default defineConfig({
     outDir: 'dist',
     // Keep all assets as separate files so the CSP (SR-2) needs no data: or inline sources for scripts.
     assetsInlineLimit: 0,
+    // T-054a: no preload helper in the main bundle (+0.35 kB gzip); only the lazy Firebase chunk would use it.
+    modulePreload: false,
   },
   test: {
     environment: 'jsdom',

@@ -1,0 +1,231 @@
+import { createMemoryRepositories } from '../../storage';
+import type { Repositories } from '../../storage';
+import { createMemoryCloud } from '../memory';
+import type { MemoryCloud } from '../memory';
+import type { CloudStore } from '../types';
+import { createSyncEngine } from './syncEngine';
+import type { SyncEngine } from './syncEngine';
+
+const UID = 'user123';
+const CONTENT = { name: 'Pakka', sections: [{ name: '', cards: [{ card: 'detonate', count: 2 }] }] };
+
+let clock = Date.parse('2026-10-03T10:00:00.000Z');
+const now = () => new Date((clock += 1000));
+let ids = 0;
+
+/** One "device": its own browser storage, a sync engine without Web Locks and the shared cloud. */
+function device(cloud: CloudStore, options: { debounceMs?: number; intervalMs?: number } = {}) {
+  const repos: Repositories = createMemoryRepositories({ now, newId: () => `deck${(ids += 1)}` }).forAccount(UID);
+  const engine: SyncEngine = createSyncEngine({ uid: UID, cloud, storage: repos.sync, now, locks: null, ...options });
+  return { repos, engine };
+}
+
+let cloud: MemoryCloud;
+beforeEach(() => {
+  cloud = createMemoryCloud({ uid: UID, now });
+  ids = 0;
+});
+
+describe('sync engine', () => {
+  it('uploads local data on the first sync and a second device pulls it', async () => {
+    const a = device(cloud);
+    const deck = await a.repos.decks.create(CONTENT);
+    await a.repos.collection.setCount('detonate', 3);
+    await a.engine.syncNow();
+    expect(a.engine.status()).toMatchObject({ state: 'idle', pending: false });
+    expect(a.engine.status().lastSyncedAt).not.toBeNull();
+    expect(cloud.paths()).toEqual(['collection/main', `decks/${deck.id}`, 'meta']);
+
+    const b = device(cloud);
+    await b.engine.syncNow();
+    expect((await b.repos.decks.list()).value).toEqual([deck]);
+    expect((await b.repos.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 3 }]);
+  });
+
+  it('reads only the meta document when nothing changed', async () => {
+    const a = device(cloud);
+    await a.repos.decks.create(CONTENT);
+    await a.engine.syncNow();
+    const before = cloud.reads;
+    await a.engine.syncNow();
+    expect(cloud.reads - before).toBe(1);
+  });
+
+  it('pushes a local change without reading the other documents', async () => {
+    const a = device(cloud);
+    const deck = await a.repos.decks.create(CONTENT);
+    await a.engine.syncNow();
+    const before = cloud.reads;
+    await a.repos.decks.update(deck.id, { ...CONTENT, name: 'Uusi' });
+    await a.engine.syncNow();
+    // The meta read, plus the transaction's own meta read in the memory store.
+    expect(cloud.reads - before).toBeLessThanOrEqual(2);
+    expect(cloud.getRaw(`decks/${deck.id}`)).toMatchObject({ data: { name: 'Uusi' } });
+  });
+
+  it('propagates a deletion to another device', async () => {
+    const a = device(cloud);
+    const b = device(cloud);
+    const deck = await a.repos.decks.create(CONTENT);
+    await a.engine.syncNow();
+    await b.engine.syncNow();
+    await a.repos.decks.remove(deck.id);
+    await a.engine.syncNow();
+    await b.engine.syncNow();
+    expect((await b.repos.decks.list()).value).toEqual([]);
+  });
+
+  it('merges edits made on two devices', async () => {
+    const a = device(cloud);
+    const b = device(cloud);
+    const first = await a.repos.decks.create(CONTENT);
+    await a.engine.syncNow();
+    await b.engine.syncNow();
+    await a.repos.decks.update(first.id, { ...CONTENT, name: 'Muutettu' });
+    const second = await b.repos.decks.create({ ...CONTENT, name: 'Toinen' });
+    await a.engine.syncNow();
+    await b.engine.syncNow();
+    await a.engine.syncNow();
+    expect((await a.repos.decks.list()).value.map((d) => d.name).sort()).toEqual(['Muutettu', 'Toinen']);
+    expect((await b.repos.decks.list()).value.map((d) => d.id).sort()).toEqual([first.id, second.id].sort());
+  });
+
+  it('retries when another device commits first', async () => {
+    const other = device(cloud);
+    await other.repos.decks.create({ ...CONTENT, name: 'Muualta' });
+    let raced = false;
+    const a = device({
+      readMeta: () => cloud.readMeta(),
+      readAll: async () => {
+        const snapshot = await cloud.readAll();
+        if (!raced) {
+          raced = true;
+          await other.engine.syncNow(); // the other device wins the race after this read
+        }
+        return snapshot;
+      },
+      commit: (change, rev) => cloud.commit(change, rev),
+      deleteAll: () => cloud.deleteAll(),
+    });
+    await a.repos.decks.create(CONTENT);
+    await a.engine.syncNow();
+    expect(a.engine.status().state).toBe('idle');
+    expect((await a.repos.decks.list()).value.map((d) => d.name).sort()).toEqual(['Muualta', 'Pakka']);
+  });
+
+  it('runs another round when the device data changed during the sync', async () => {
+    let edited = false;
+    const a: ReturnType<typeof device> = device({
+      readMeta: () => cloud.readMeta(),
+      readAll: async () => {
+        const snapshot = await cloud.readAll();
+        if (!edited) {
+          edited = true;
+          await a.repos.collection.setCount('detonate', 9);
+        }
+        return snapshot;
+      },
+      commit: (change, rev) => cloud.commit(change, rev),
+      deleteAll: () => cloud.deleteAll(),
+    });
+    await a.repos.decks.create(CONTENT);
+    await a.engine.syncNow();
+    expect(a.engine.status()).toMatchObject({ state: 'idle', pending: false });
+    expect((await a.repos.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 9 }]);
+    expect(cloud.getRaw('collection/main')).toMatchObject({ data: { entries: [{ card: 'detonate', count: 9 }] } });
+  });
+
+  it('shows offline, keeps the changes and recovers', async () => {
+    const a = device(cloud);
+    await a.repos.decks.create(CONTENT);
+    cloud.failNext('offline');
+    await a.engine.syncNow();
+    expect(a.engine.status()).toMatchObject({ state: 'offline', pending: true });
+    expect((await a.repos.decks.list()).value).toHaveLength(1);
+    await a.engine.syncNow();
+    expect(a.engine.status()).toMatchObject({ state: 'idle', pending: false });
+  });
+
+  it('shows error for other cloud errors', async () => {
+    const a = device(cloud);
+    cloud.failNext('quota');
+    await a.engine.syncNow();
+    expect(a.engine.status().state).toBe('error');
+  });
+
+  it('locks when the cloud has a newer schema and writes nothing', async () => {
+    cloud.setRaw('meta', { schemaVersion: 99, rev: 5, updatedAt: '2026-10-03T10:00:00.000Z' });
+    const a = device(cloud);
+    await a.repos.decks.create(CONTENT);
+    await a.engine.syncNow();
+    expect(a.engine.status().state).toBe('locked');
+    expect(cloud.paths()).toEqual(['meta']);
+  });
+
+  it('keeps the local deck and the cloud document when a cloud deck is invalid', async () => {
+    const a = device(cloud);
+    const deck = await a.repos.decks.create(CONTENT);
+    await a.engine.syncNow();
+    cloud.setRaw(`decks/${deck.id}`, { garbage: true });
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    await a.engine.syncNow();
+    expect((await a.repos.decks.list()).value).toEqual([deck]);
+    expect(cloud.getRaw(`decks/${deck.id}`)).toEqual({ garbage: true });
+  });
+
+  it('joins a running round instead of starting a second one', async () => {
+    const a = device(cloud);
+    await a.repos.decks.create(CONTENT);
+    await Promise.all([a.engine.syncNow(), a.engine.syncNow()]);
+    expect(cloud.getRaw('meta')).toMatchObject({ rev: 1 });
+  });
+
+  it('notifies listeners of status changes', async () => {
+    const a = device(cloud);
+    const states: string[] = [];
+    a.engine.onChange(() => states.push(a.engine.status().state));
+    await a.engine.syncNow();
+    expect(states).toEqual(['syncing', 'idle']);
+  });
+});
+
+describe('sync triggers', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('syncs at start, 3 seconds after a change, on focus, when back online and every 5 minutes', async () => {
+    const a = device(cloud);
+    const spy = vi.spyOn(cloud, 'readMeta');
+    a.engine.start();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    await a.repos.decks.create(CONTENT);
+    await vi.advanceTimersByTimeAsync(2900);
+    expect(spy).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(spy).toHaveBeenCalledTimes(2);
+    expect(cloud.paths()).toHaveLength(2);
+
+    window.dispatchEvent(new Event('focus'));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(spy).toHaveBeenCalledTimes(3);
+    window.dispatchEvent(new Event('online'));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(spy).toHaveBeenCalledTimes(4);
+    await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+    expect(spy.mock.calls.length).toBeGreaterThanOrEqual(5);
+    a.engine.stop();
+  });
+
+  it('stops listening after stop()', async () => {
+    const a = device(cloud);
+    a.engine.start();
+    await vi.advanceTimersByTimeAsync(0);
+    a.engine.stop();
+    const spy = vi.spyOn(cloud, 'readMeta');
+    window.dispatchEvent(new Event('focus'));
+    await vi.advanceTimersByTimeAsync(10 * 60 * 1000);
+    expect(spy).not.toHaveBeenCalled();
+  });
+});

@@ -5,7 +5,7 @@ Cyberdeck on epävirallinen apuväline Cyberpunk TCG -korttipelin pelaajille. Se
 Nyt valmiina on ensimmäinen versio: lista kaikista pelin korteista nimen, tyypin ja hinnan kanssa. Korttitiedot haetaan [Netdeck.gg](https://netdeck.gg):n julkisesta rajapinnasta. Kokoelma, pakat ja pakkalistan tuonti tulevat seuraavissa versioissa ([docs/PROJECT.md](docs/PROJECT.md)).
 
 - Tuotanto: https://cyberdeck-tcg.web.app
-- Testisivusto: https://cyberdeck-tcg-test.web.app
+- Testisivusto: https://cyberdeck-tcg-dev.web.app
 
 Cyberdeck ei ole WeirdCon, Netdeck.gg:n eikä CD PROJEKT REDin hyväksymä tai tukema.
 

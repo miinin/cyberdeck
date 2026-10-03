@@ -1,0 +1,109 @@
+rules_version = '2';
+
+// Cyberdeck Firestore rules (T-054b). Source: SEC-011 liite A
+// (docs/reports/SEC-011-t054-liite-firestore.rules) with D-017 Muutos K-P8: the root is always
+// 'users' and the same file is deployed to both projects (cyberdeck-tcg and cyberdeck-tcg-dev).
+// Changes need a Digiturva review (SR-9, SR-22 kohta 5). The user deploys by hand:
+//   firebase deploy --only firestore:rules,firestore:indexes --project test     (before merging to test)
+//   firebase deploy --only firestore:rules,firestore:indexes --project default  (before /julkaise)
+//
+// Data model (D-017 kohta 3):
+//   users/{uid}                  meta { schemaVersion, rev, updatedAt }
+//   users/{uid}/decks/{deckId}   { schemaVersion, savedAt, data: { name, sections, createdAt, updatedAt } }
+//   users/{uid}/collection/main  { schemaVersion, savedAt, data: { entries } }
+//
+// The rules are a ceiling against abuse, not a full validation of the data model: list items cannot be
+// checked here, so the client validates everything it reads (SR-23). String limits have some slack
+// (name 200), because size() in the rules and the client's character count may differ.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Only Google sign-in counts, even if anonymous or email sign-in were enabled by mistake (SR-21, SR-25).
+    function isGoogleUser() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
+
+    function isOwner(uid) {
+      return isGoogleUser() && request.auth.uid == uid;
+    }
+
+    function hasExactly(m, ks) {
+      return m.keys().hasAll(ks) && m.keys().hasOnly(ks);
+    }
+
+    // Newer schema versions are allowed, so a new app version does not need a rules deploy.
+    // An older client locks itself on a newer version (SR-23).
+    function isVersion(v) {
+      return v is int && v >= 1 && v <= 1000;
+    }
+
+    function isText(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+
+    function isEnvelope(d) {
+      return hasExactly(d, ['schemaVersion', 'savedAt', 'data'])
+        && isVersion(d.schemaVersion)
+        && isText(d.savedAt, 1, 40)
+        && d.data is map;
+    }
+
+    // updatedAt is the server time (serverTimestamp()), not the client's clock.
+    function isMeta(d) {
+      return hasExactly(d, ['schemaVersion', 'rev', 'updatedAt'])
+        && isVersion(d.schemaVersion)
+        && d.rev is int
+        && d.updatedAt == request.time;
+    }
+
+    function isDeckDoc(d) {
+      return isEnvelope(d)
+        && hasExactly(d.data, ['name', 'sections', 'createdAt', 'updatedAt'])
+        && isText(d.data.name, 1, 200)
+        && d.data.sections is list
+        && d.data.sections.size() <= 20
+        && isText(d.data.createdAt, 1, 40)
+        && isText(d.data.updatedAt, 1, 40);
+    }
+
+    function isCollectionDoc(d) {
+      return isEnvelope(d)
+        && hasExactly(d.data, ['entries'])
+        && d.data.entries is list
+        && d.data.entries.size() <= 5000;
+    }
+
+    // The user document is the meta. Listing all users is allowed to nobody: there is no list rule.
+    match /users/{uid} {
+      allow get: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && isMeta(request.resource.data)
+        && request.resource.data.rev == 1;
+      // rev grows by exactly one on every push (D-017 kohta 5).
+      allow update: if isOwner(uid)
+        && isMeta(request.resource.data)
+        && request.resource.data.rev == resource.data.rev + 1;
+      allow delete: if isOwner(uid);
+
+      match /decks/{deckId} {
+        allow get, list: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && deckId.matches('^[A-Za-z0-9_-]{1,64}$')
+          && isDeckDoc(request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+
+      match /collection/{docId} {
+        allow get: if isOwner(uid) && docId == 'main';
+        allow create, update: if isOwner(uid)
+          && docId == 'main'
+          && isCollectionDoc(request.resource.data);
+        allow delete: if isOwner(uid) && docId == 'main';
+      }
+    }
+
+    // Everything else is denied (Firestore's default when no rule allows).
+  }
+}

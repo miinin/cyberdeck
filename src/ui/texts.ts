@@ -1,3 +1,4 @@
+import type { AuthErrorKind } from '../account';
 import { MAX_COLLECTION_ENTRIES } from '../domain/collection';
 
 // User-facing texts. Source: docs/UX.md luvut 4.5, 5 and 6 (UX Designer). The footer is based on
@@ -37,6 +38,65 @@ export const texts = {
   themeToggleSuffix: 'teema',
   themeToggleTitleLight: 'Vaihda vaaleaan teemaan',
   themeToggleTitleDark: 'Vaihda tummaan teemaan',
+  // Account (T-054a). The dialog body follows the PRIVACY.md luku 10 draft (Digiturva, SR-29 kohta 2);
+  // the other texts are working copy until UX and Sisällöntuottaja review them before T-054c.
+  accountSignIn: 'Kirjaudu',
+  accountSigningIn: 'Kirjaudutaan…',
+  accountMenu: 'Tili',
+  accountDialogTitle: 'Kirjaudu Google-tilillä',
+  accountAgeLimit: 'Kirjautuminen on tarkoitettu 16 vuotta täyttäneille.',
+  accountPrivacy:
+    'Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa.',
+  accountPrivacyGoogle:
+    'Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa, ei pakkojesi ja kokoelmasi mukana.',
+  accountPrivacyController: 'Rekisterinpitäjä: Miika Miinin, miikamiinin@gmail.com.',
+  accountContinue: 'Jatka Googleen',
+  accountCancel: 'Peruuta',
+  accountClose: 'Sulje',
+  accountUnavailableTitle: 'Kirjautuminen ei ole käytössä',
+  accountUnavailableBody: 'Kirjautuminen toimii vain sovelluksen omassa osoitteessa, ei esikatselussa.',
+  accountSignedInAs: (email: string | null) =>
+    email === null ? 'Kirjautuneena Google-tilillä' : `Kirjautuneena: ${email}`,
+  accountSignOut: 'Kirjaudu ulos',
+  // Sync status in the account menu (T-054c). Working copy until UX and Sisällöntuottaja review it.
+  accountSyncSyncing: 'Tallennetaan tilille…',
+  accountSyncSaved: (time: string) => `Tallennettu tilille klo ${time}`,
+  accountSyncWaiting: 'Muutokset tallennetaan tilille automaattisesti.',
+  accountSyncOffline: 'Ei yhteyttä, muutokset tallessa tällä laitteella.',
+  accountSyncError: 'Tilille tallennus ei onnistunut, muutokset ovat tallessa tällä laitteella.',
+  accountSyncLocked: 'Tili on päivitetty uudempaan versioon. Lataa sivu uudelleen.',
+  accountSyncNow: 'Synkronoi nyt',
+  // Sign-out with unsynced changes and the notice after signing out (T-054c, D-017).
+  accountSignOutWarnTitle: 'Kaikkia muutoksia ei ole tallennettu tilille',
+  accountSignOutWarnBody:
+    'Muutokset ovat tallessa tässä selaimessa ja siirtyvät tilille, kun kirjaudut samalla tilillä uudelleen.',
+  accountSignOutAnyway: 'Kirjaudu silti ulos',
+  accountSignedOutNotice:
+    'Kirjauduit ulos. Tilisi tiedot jäävät tähän selaimeen. Jos käytät jaettua konetta, poista ne ennen kuin lähdet: kirjaudu sisään ja valitse "Poista tilin tiedot".',
+  accountSignedOutDismiss: 'Sulje ilmoitus',
+  // Deleting the account data (T-054d, D-017 K-P5).
+  accountDelete: 'Poista tilin tiedot',
+  accountDeleteTitle: 'Poistetaanko tilin tiedot?',
+  accountDeleteBody:
+    'Pakat ja kokoelma poistetaan tililtä ja tästä selaimesta, ja Google-tilillä kirjautuminen poistetaan tästä palvelusta. Poistoa ei voi perua. Selaimen kirjautumattoman tilan tiedot eivät poistu.',
+  accountDeleteConfirm: 'Poista tiedot ja tili',
+  accountDeleting: 'Poistetaan…',
+  accountDeleteReauth: 'Siirrytään Googleen vahvistamaan kirjautuminen. Poisto valmistuu, kun palaat sivulle.',
+  accountDeleteFailedCloud: 'Tietojen poisto ei onnistunut. Tarkista yhteys ja yritä uudelleen.',
+  accountDeleteFailedAccount: 'Tiedot poistettiin, mutta tilin poisto ei onnistunut. Yritä uudelleen.',
+  accountDeletedNotice: 'Tilin tiedot ja tili on poistettu.',
+  // First sign-in with data on both sides (T-054c).
+  accountChooseTitle: 'Tässä selaimessa ja tilillä on tietoja',
+  accountChooseBody:
+    'Voit yhdistää selaimen pakat ja kokoelman tilin tietoihin tai käyttää vain tilin tietoja. Selaimen tiedoista tehdään varmuuskopio, eikä mitään poisteta ennen kuin tallennus tilille on onnistunut.',
+  accountChooseMerge: 'Yhdistä',
+  accountChooseAccountOnly: 'Käytä vain tilin tietoja',
+  /** Fixed messages by AuthErrorKind (SR-21 kohta 4). */
+  accountErrors: {
+    network: 'Kirjautuminen ei onnistunut, koska yhteyttä ei saatu. Yritä uudelleen.',
+    'popup-blocked': 'Selain esti kirjautumisikkunan. Salli ponnahdusikkunat tälle sivulle ja yritä uudelleen.',
+    unknown: 'Kirjautuminen ei onnistunut. Yritä uudelleen.',
+  } satisfies Record<AuthErrorKind, string>,
   heading: 'Kortit',
   /** Live region text when the list is shown (UX.md 4.5). */
   loaded: (count: number) => `${cardCount(count)} ladattu.`,

@@ -1,12 +1,17 @@
 {
   "projects": {
-    "default": "cyberdeck-tcg"
+    "default": "cyberdeck-tcg",
+    "test": "cyberdeck-tcg-dev"
   },
   "targets": {
     "cyberdeck-tcg": {
       "hosting": {
-        "prod": ["cyberdeck-tcg"],
-        "test": ["cyberdeck-tcg-test"]
+        "prod": ["cyberdeck-tcg"]
+      }
+    },
+    "cyberdeck-tcg-dev": {
+      "hosting": {
+        "test": ["cyberdeck-tcg-dev"]
       }
     }
   }
