@@ -117,3 +117,22 @@ describe('sync storage', () => {
     expect(store.keys().filter((key) => key.startsWith('cyberdeck:backup:'))).toHaveLength(2);
   });
 });
+
+describe('deck update conflict (T-042)', () => {
+  it('rejects an update when the stored updatedAt differs and writes nothing', async () => {
+    const { repos } = open();
+    const deck = await repos.decks.create(CONTENT);
+    await expect(repos.decks.update(deck.id, CONTENT, { expectedUpdatedAt: '2000-01-01T00:00:00.000Z' })).rejects.toMatchObject({
+      kind: 'conflict',
+    });
+    expect((await repos.decks.get(deck.id))?.name).toBe('Pakka');
+  });
+
+  it('updates when the expected updatedAt matches or is not given', async () => {
+    const { repos } = open();
+    const deck = await repos.decks.create(CONTENT);
+    const saved = await repos.decks.update(deck.id, { ...CONTENT, name: 'Uusi' }, { expectedUpdatedAt: deck.updatedAt });
+    expect(saved.name).toBe('Uusi');
+    await expect(repos.decks.update(deck.id, { ...CONTENT, name: 'Vielä uudempi' })).resolves.toMatchObject({ name: 'Vielä uudempi' });
+  });
+});

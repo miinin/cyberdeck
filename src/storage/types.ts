@@ -30,8 +30,11 @@ export interface DeckRepository {
   get(id: DeckId): Promise<Deck | null>;
   /** New id and timestamps; never uses an id from the caller (SR-18). */
   create(content: DeckContent): Promise<Deck>;
-  /** Updates updatedAt. Unknown id → StorageError('not-found'). */
-  update(id: DeckId, content: DeckContent): Promise<Deck>;
+  /**
+   * Updates updatedAt. Unknown id → StorageError('not-found'). With `expectedUpdatedAt`, a stored deck that has
+   * a different updatedAt → StorageError('conflict') and nothing is written (T-042, T-054d).
+   */
+  update(id: DeckId, content: DeckContent, options?: { expectedUpdatedAt?: string }): Promise<Deck>;
   /** Unknown id is not an error. */
   remove(id: DeckId): Promise<void>;
   subscribe(listener: () => void): () => void;

@@ -323,12 +323,16 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         return { next: [...current, deck], result: deck };
       });
     },
-    update: async (id: DeckId, content: DeckContent) => {
+    update: async (id: DeckId, content: DeckContent, updateOptions?: { expectedUpdatedAt?: string }) => {
       const { name, sections } = validContent(content);
       return mutate(decksAggregate, (current, at) => {
         const index = isDeckId(id) ? current.findIndex((deck) => deck.id === id) : -1;
         const existing = current[index];
         if (existing === undefined) throw new StorageError('not-found', 'Deck not found');
+        const expected = updateOptions?.expectedUpdatedAt;
+        if (expected !== undefined && existing.updatedAt !== expected) {
+          throw new StorageError('conflict', 'Deck was changed elsewhere');
+        }
         const deck: Deck = { id, name, sections, createdAt: existing.createdAt, updatedAt: at.toISOString() };
         return { next: current.map((item, itemIndex) => (itemIndex === index ? deck : item)), result: deck };
       });
