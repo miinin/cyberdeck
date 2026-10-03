@@ -360,7 +360,7 @@ Päätöksessä on viisi osaa.
 
 **7. Uloskirjautuminen**
 - Jos tilin paikallinen kopio poikkeaa pohjasta (synkronoimatta), näytetään varoitus, että osa muutoksista ei ole vielä tilillä (Yritä synkronoida / Kirjaudu ulos silti / Peruuta).
-- Sen jälkeen poistetaan `cyberdeck:u:{uid}:*` ja `cyberdeck:account:last-uid`, ja `signOut` poistaa Firebasen istunnon IndexedDB:stä (`firebaseLocalStorageDb`). Lite-SDK ei pidä omaa datavälimuistia. Selaimeen jäävät vain kirjautumattoman tiedot ja asetukset (teema, näkymät).
+- ~~Sen jälkeen poistetaan `cyberdeck:u:{uid}:*`~~ **Muutettu käyttäjän valinnalla 2026-10-03 (SEC-029):** tilin avaimet `cyberdeck:u:{uid}:*` jäävät selaimeen. Vain `cyberdeck:account:last-uid` poistetaan, ja `signOut` poistaa Firebasen istunnon IndexedDB:stä. Uloskirjautuessa näytetään pakollinen ilmoitus (SR, SEC-011), ja Poista tilin tiedot tältä laitteelta -toiminto on tarjolla.
 - Jos istunto katoaa ilman uloskirjautumista (esim. token mitätöity), tilin paikallista kopiota ei poisteta automaattisesti. Seuraava kirjautuminen samalla tilillä jatkaa siitä, ja eri tilin kohdalla kysytään.
 
 **8. Rajapinnat ja testattavuus**

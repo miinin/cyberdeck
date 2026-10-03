@@ -18,7 +18,7 @@ Firebase Console, projekti `cyberdeck-tcg`:
 Google Cloud Console (sama projekti, https://console.cloud.google.com/apis/credentials?project=cyberdeck-tcg):
 6. **APIs & Services → Credentials → OAuth 2.0 Client IDs → "Web client (auto created by Google Service)" → Authorized redirect URIs:** lisää `https://cyberdeck-tcg.web.app/__/auth/handler` ja `https://cyberdeck-tcg-test.web.app/__/auth/handler`, Save. Tämä tarvitaan, koska `authDomain` on sivuston oma domain (uudelleenohjaus samassa originissa).
 7. **APIs & Services → OAuth consent screen (Branding):** tarkista sovelluksen nimi ja tukisähköposti. Lisää halutessasi tietosuojasivun linkki, kun PRIVACY-teksti on julkaistu (T-054d).
-8. (Suositus) **Credentials → API keys → Browser key (auto created by Firebase) → Application restrictions → Websites:** `https://cyberdeck-tcg.web.app/*`, `https://cyberdeck-tcg-test.web.app/*`, `https://*.web.app/*` (esikatselut) ja `http://localhost:*/*`.
+8. **Credentials → API keys → Browser key (auto created by Firebase) → API restrictions (pakollinen, SEC-028):** rajaa avain vain tarvittaviin rajapintoihin (Identity Toolkit API, Token Service API, Cloud Firestore API). Referrer-rajausta (Websites) ei tehdä vielä, koska `*.web.app` ei suojaa mitään ja tarkka rajaus voi `Referrer-Policy: no-referrer`in takia estää kirjautumisen. Se kokeillaan testisivustolla T-054a:n jälkeen.
 
 Komentorivi (T-054b:n jälkeen, ennen b:n yhdistämistä testiin; hook kysyy luvan):
 9. `firebase deploy --only firestore:rules,firestore:indexes` (säännöt koskevat molempia sivustoja heti, D-017 kohta 10).
