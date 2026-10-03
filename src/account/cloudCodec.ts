@@ -138,22 +138,28 @@ export function encodedSize(value: unknown): number {
 
 /**
  * Checks a change before anything is sent (SR-23 kohta 6): valid decks and ids, at most one transaction of
- * writes, and a collection document below MAX_COLLECTION_BYTES. Throws CloudError.
+ * writes, and a collection document below MAX_COLLECTION_BYTES. Returns the change rebuilt from the parsed
+ * values only, so the caller encodes exactly what was validated (cleaned names, normalised timestamps).
+ * Throws CloudError.
  */
-export function checkChange(change: CloudChange, maxCollectionBytes = MAX_COLLECTION_BYTES): void {
+export function checkChange(change: CloudChange, maxCollectionBytes = MAX_COLLECTION_BYTES): CloudChange {
   const writes = change.putDecks.length + change.deleteDecks.length + (change.collection === undefined ? 0 : 1) + 1;
   if (writes > MAX_TRANSACTION_WRITES) throw new CloudError('too-large');
 
-  for (const deck of change.putDecks) {
+  const putDecks = change.putDecks.map((deck) => {
     const parsed = parseDeck(deck);
     if (parsed === null || parsed.dropped > 0) throw new CloudError('unknown');
-  }
+    return parsed.value;
+  });
   if (!change.deleteDecks.every(isDeckId)) throw new CloudError('unknown');
+  const checked: CloudChange = { putDecks, deleteDecks: [...change.deleteDecks] };
 
   if (change.collection !== undefined) {
     const parsed = parseCollection(change.collection);
     if (parsed === null || parsed.dropped > 0) throw new CloudError('unknown');
-    const doc = encodeCollectionDoc(change.collection, new Date(0).toISOString());
+    const doc = encodeCollectionDoc(parsed.value, new Date(0).toISOString());
     if (encodedSize(doc) >= maxCollectionBytes) throw new CloudError('too-large');
+    checked.collection = parsed.value;
   }
+  return checked;
 }

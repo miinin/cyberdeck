@@ -120,9 +120,9 @@ export function createMemoryCloud(
         .map((path) => ({ id: path.slice('decks/'.length), data: read(path) }));
       return buildSnapshot(meta, deckDocs, read('collection/main'));
     },
-    async commit(change, expectedRev) {
+    async commit(requested, expectedRev) {
       failIfAsked();
-      checkChange(change, maxCollectionBytes);
+      const change = checkChange(requested, maxCollectionBytes);
       const meta = readMetaDoc();
       if (meta?.newer) throw new CloudError('locked');
       const rev = meta?.rev ?? 0;

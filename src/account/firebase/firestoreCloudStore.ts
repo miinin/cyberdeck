@@ -88,8 +88,9 @@ export function createFirestoreCloudStore(options: {
         );
       }),
 
-    async commit(change, expectedRev) {
-      checkChange(change);
+    async commit(requested, expectedRev) {
+      // Encode only the validated values (SR-23 kohta 6).
+      const change = checkChange(requested);
       return guard((s) =>
         s.fs.runTransaction(s.db, async (tx) => {
           // Read again inside the transaction: another device may have synced after our read (D-017 kohta 5).

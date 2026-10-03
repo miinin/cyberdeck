@@ -193,6 +193,14 @@ describe.each([
     expect(Object.keys(h.getRaw('meta') as object).sort()).toEqual(['rev', 'schemaVersion', 'updatedAt']);
   });
 
+  it('writes the validated values, not the raw input (SR-23 kohta 6)', async () => {
+    const raw: Deck = { ...deck('d1', '  Pakka‮  '), createdAt: 'x'.repeat(100) };
+    await h.store.commit(change({ putDecks: [raw] }), 0);
+    const stored = h.getRaw('decks/d1') as { data: { name: string; createdAt: string } };
+    expect(stored.data.name).toBe('Pakka');
+    expect(stored.data.createdAt).toBe('1970-01-01T00:00:00.000Z');
+  });
+
   it('increments rev by one, deletes decks and leaves the collection when not given', async () => {
     await h.store.commit(change({ putDecks: [deck('d1'), deck('d2')], collection: COLLECTION }), 0);
     expect(await h.store.commit(change({ deleteDecks: ['d1'] }), 1)).toBe(2);
