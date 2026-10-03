@@ -6,7 +6,12 @@ import {
   filterCards,
   filterOptions,
   isFilterActive,
+  matchesNumberFilter,
   normalizeForSearch,
+  NUMBER_FILTER_CAPS,
+  numberFilterOptions,
+  numberFilterOptionsFor,
+  numberOption,
   toggleValue,
 } from './cardSearch';
 import type { CardFilterCriteria } from './cardSearch';
@@ -190,7 +195,7 @@ describe('filterCards: types and colors', () => {
 
   it('does not change the input list', () => {
     const copy = [...cards];
-    filterCards(cards, { query: 'johnny', types: ['Unit'], colors: ['Red'], rarities: [] });
+    filterCards(cards, { ...EMPTY_CRITERIA, query: 'johnny', types: ['Unit'], colors: ['Red'] });
     expect(cards).toEqual(copy);
   });
 });
@@ -253,5 +258,71 @@ describe('filterCards: rarity', () => {
   it('does not filter with no rarity selected and counts as an active filter when selected', () => {
     expect(filterCards(cardsByRarity, EMPTY_CRITERIA)).toHaveLength(4);
     expect(isFilterActive({ ...EMPTY_CRITERIA, rarities: ['Rare'] })).toBe(true);
+  });
+});
+
+describe('number filters: Cost, Power and RAM (T-052)', () => {
+  const withNumbers = (slug: string, cost: number | null, power: number | null, ram: number | null): Card => ({
+    ...card(slug, slug, null, 'Unit', null),
+    cost,
+    power,
+    ram,
+  });
+  const numbered = [
+    withNumbers('a', 1, 0, 1),
+    withNumbers('b', 3, 4, 2),
+    withNumbers('c', 9, 10, 4),
+    withNumbers('d', 12, 15, 6),
+    withNumbers('legend', null, null, 2),
+  ];
+
+  it('maps a value to its option, with one "N+" option from the cap up', () => {
+    expect(numberOption(3, NUMBER_FILTER_CAPS.cost)).toBe('3');
+    expect(numberOption(9, NUMBER_FILTER_CAPS.cost)).toBe('9+');
+    expect(numberOption(15, NUMBER_FILTER_CAPS.power)).toBe('10+');
+    expect(numberOption(0, NUMBER_FILTER_CAPS.power)).toBe('0');
+  });
+
+  it('lists the values found in the data in numeric order, and keeps a selected option', () => {
+    expect(numberFilterOptions([3, null, 1, 12, 9, 3], 9)).toEqual(['1', '3', '9+']);
+    expect(numberFilterOptions([10, 2, 0, 9], 10)).toEqual(['0', '2', '9', '10+']);
+    expect(numberFilterOptions([1, 2], 4, ['7+', '3'])).toEqual(['1', '2', '3', '7+']);
+    expect(numberFilterOptions([], 4)).toEqual([]);
+  });
+
+  it('matches exact values and "N+" ranges, never null, and everything with nothing selected', () => {
+    expect(matchesNumberFilter(3, ['3'])).toBe(true);
+    expect(matchesNumberFilter(4, ['3'])).toBe(false);
+    expect(matchesNumberFilter(12, ['9+'])).toBe(true);
+    expect(matchesNumberFilter(8, ['9+'])).toBe(false);
+    expect(matchesNumberFilter(0, ['0', '5'])).toBe(true);
+    expect(matchesNumberFilter(null, ['0'])).toBe(false);
+    expect(matchesNumberFilter(null, [])).toBe(true);
+  });
+
+  it('filters by Cost, Power and RAM with OR inside a group and AND between groups', () => {
+    const run = (criteria: Partial<CardFilterCriteria>) =>
+      filterCards(numbered, { ...EMPTY_CRITERIA, ...criteria }).map((c) => c.slug);
+    expect(run({ costs: ['1', '9+'] })).toEqual(['a', 'c', 'd']);
+    expect(run({ powers: ['10+'] })).toEqual(['c', 'd']);
+    expect(run({ rams: ['2'] })).toEqual(['b', 'legend']);
+    expect(run({ costs: ['3', '9+'], rams: ['4+'] })).toEqual(['c', 'd']);
+    // A card without Cost is dropped as soon as a Cost is selected.
+    expect(run({ costs: ['1', '3', '9+'] })).not.toContain('legend');
+    expect(run({})).toHaveLength(5);
+  });
+
+  it('gives the options of all three groups for a card list', () => {
+    expect(numberFilterOptionsFor(numbered, { ...EMPTY_CRITERIA, costs: ['5'] })).toEqual({
+      costs: ['1', '3', '5', '9+'],
+      powers: ['0', '4', '10+'],
+      rams: ['1', '2', '4+'],
+    });
+  });
+
+  it('counts as an active filter when a value is selected', () => {
+    expect(isFilterActive({ ...EMPTY_CRITERIA, costs: ['3'] })).toBe(true);
+    expect(isFilterActive({ ...EMPTY_CRITERIA, powers: ['10+'] })).toBe(true);
+    expect(isFilterActive({ ...EMPTY_CRITERIA, rams: ['1'] })).toBe(true);
   });
 });

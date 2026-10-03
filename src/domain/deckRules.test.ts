@@ -179,6 +179,13 @@ describe('addBlocker', () => {
     const dupe = card('l1b', { name: 'L1', type: 'Legend' });
     expect(addBlocker(dupe, deck([['l1', 1]]), toCardsByKey([...all, dupe]))).toBe('Pakassa on jo Legend L1.');
   });
+  it('blocks nothing in an empty deck: no RAM limits before the first Legend (T-052)', () => {
+    const empty = deck([]);
+    for (const other of all) {
+      if (other.type !== 'Legend') expect(addBlocker(other, empty, byKey)).toBeNull();
+    }
+    expect(addBlocker(at('big'), empty, byKey)).toBeNull();
+  });
 });
 
 

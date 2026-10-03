@@ -193,7 +193,8 @@ export function addBlocker(card: Card, deck: DeckContent, cardsByKey: CardsByKey
     return null;
   }
   if ((counts.get(card.key) ?? 0) >= MAX_COPIES) return `Pakassa on jo ${MAX_COPIES} kopiota.`;
-  if (card.color !== null && card.ram !== null) {
+  // Without a Legend there are no RAM limits yet; the Legend count issue covers it (B-020, T-052).
+  if (card.color !== null && card.ram !== null && deckTotals(deck, cardsByKey).legends > 0) {
     const limit = ramLimits(deck, cardsByKey).get(card.color) ?? 0;
     if (card.ram > limit) return `RAM ${card.ram} ylittää ${card.color}-värin rajan ${limit}.`;
   }

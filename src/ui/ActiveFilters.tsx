@@ -1,6 +1,15 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
-import { texts } from './texts';
+import { toggleValue } from '../domain/cardSearch';
+import type { CardFilterCriteria } from '../domain/cardSearch';
+import { colorNames, texts } from './texts';
+
+/** Legends of the number filter groups, in form order (game terms, English as in the table, T-052). */
+export const NUMBER_GROUPS = [
+  ['costs', texts.columnCost],
+  ['powers', texts.columnPower],
+  ['rams', texts.columnRam],
+] as const;
 
 /** One selected filter value shown as a removable chip (T-050a). */
 export interface ActiveFilter {
@@ -10,6 +19,42 @@ export interface ActiveFilter {
   /** Game terms stay English ("Unit", "Red", "Rare"). */
   lang?: string;
   onRemove: () => void;
+}
+
+/**
+ * Chips for the selected values of the criteria, in the order of the form (T-050a, T-052): types, colors,
+ * rarities, then "Cost 3", "Power 10+", "RAM 2". The search text has its own field. `onChange` gets the
+ * criteria without the removed value.
+ */
+export function criteriaFilters(
+  criteria: CardFilterCriteria,
+  onChange: (next: CardFilterCriteria) => void,
+): ActiveFilter[] {
+  const remove = (group: 'types' | 'colors' | 'rarities' | (typeof NUMBER_GROUPS)[number][0], value: string) => () =>
+    onChange({ ...criteria, [group]: toggleValue(criteria[group], value) });
+  return [
+    ...criteria.types.map((type) => ({ id: `type:${type}`, label: type, lang: 'en', onRemove: remove('types', type) })),
+    ...criteria.colors.map((color) => ({
+      id: `color:${color}`,
+      label: colorNames.get(color) ?? color,
+      lang: 'en',
+      onRemove: remove('colors', color),
+    })),
+    ...criteria.rarities.map((rarity) => ({
+      id: `rarity:${rarity}`,
+      label: rarity,
+      lang: 'en',
+      onRemove: remove('rarities', rarity),
+    })),
+    ...NUMBER_GROUPS.flatMap(([group, legend]) =>
+      criteria[group].map((value) => ({
+        id: `${group}:${value}`,
+        label: `${legend} ${value}`,
+        lang: 'en',
+        onRemove: remove(group, value),
+      })),
+    ),
+  ];
 }
 
 /**

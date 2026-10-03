@@ -24,11 +24,14 @@ import {
   KNOWN_CARD_TYPES,
   filterCards,
   filterOptions,
+  isFilterActive,
+  numberFilterOptionsFor,
   toggleValue,
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { StorageError } from '../storage';
 import type { DeckPickView, Repositories, StorageErrorKind } from '../storage';
+import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import { CardFilters } from './CardFilters';
 import { useCardHoverPreview } from './CardHoverPreview';
 import { CardImageDialog } from './CardImageDialog';
@@ -432,6 +435,7 @@ export function DeckEditor({
             typeOptions={filterOptions(KNOWN_CARD_TYPES, cards.map((card) => card.type), criteria.types)}
             colorOptions={filterOptions(KNOWN_CARD_COLORS, cards.map((card) => card.color), criteria.colors)}
             rarityOptions={filterOptions(KNOWN_CARD_RARITIES, cards.map((card) => card.rarity), criteria.rarities)}
+            numberOptions={numberFilterOptionsFor(cards, criteria)}
             searchInputRef={searchInputRef}
             collectionAllRef={collectionAllRef}
             onCollectionFilterChange={() => undefined}
@@ -441,6 +445,7 @@ export function DeckEditor({
             onToggleRarity={(rarity) =>
               setCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) })
             }
+            onToggleNumber={(group, value) => setCriteria({ ...criteria, [group]: toggleValue(criteria[group], value) })}
             onSearchSubmit={() => undefined}
             collapsibleBelow={EDITOR_WIDE_QUERY}
           />
@@ -480,6 +485,15 @@ export function DeckEditor({
             </fieldset>
             {pickView === 'images' && <ImageSizeSelect name="deck-image-size" value={imageSize} onChange={setImageSize} />}
           </div>
+          <ActiveFilters
+            filters={criteriaFilters(criteria, setCriteria)}
+            showClear={isFilterActive(criteria)}
+            onClear={() => {
+              setCriteria(EMPTY_CRITERIA);
+              searchInputRef.current?.focus();
+            }}
+            searchInputRef={searchInputRef}
+          />
           <p className="hint pick-hint">{deckTexts.pickHint}</p>
           <div role="status" className="toast-slot">
             {toast !== null && (
