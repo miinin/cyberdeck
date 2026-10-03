@@ -290,3 +290,11 @@ Päätöksessä on viisi osaa.
 **Päätös:** B
 **Perustelu:** Ei kustannuksia eikä uusia riippuvuuksia. Pyyntö lähtee vain käyttäjän painalluksesta, ja siitä on huomautus. Vastaus käsitellään epäluotettavana syötteenä (T-046 kriteerit 2–3). Korttidata pysyy buildissa (D-013 ennallaan).
 **Seuraukset:** CSP `connect-src 'self' https://api.netdeck.gg`. PRIVACY.md: IP-osoite näkyy Netdeckille vain linkkihaussa (Digiturva päivittää). Muut pakkasivustot tuodaan tekstinä.
+
+## D-016 · Kirjautuminen ja pilvitallennus: Google-kirjautuminen, vapaaehtoinen tili, 16+, Firebasen ilmaistaso · 2026-10-03 · Päättäjä: käyttäjä
+**Päätös (käyttäjän vastaukset 2026-10-03):**
+- Kirjautuminen vain Google-tilillä (Firebase Authentication).
+- Tili on vapaaehtoinen. Ilman kirjautumista tiedot tallentuvat selaimeen kuten ennen. Ensimmäisellä kirjautumisella selaimen pakat ja kokoelma siirretään tilille, ja jos tilillä on jo tietoja, käyttäjältä kysytään. Sen jälkeen tiedot synkronoituvat laitteiden välillä.
+- Ikäraja 16 vuotta (ratkaisee K-P3:n). Tallennetaan vain välttämätön: Google-tunniste (uid), pakat ja kokoelma. Sähköpostia ja nimeä ei tallenneta tietokantaan, ellei Arkkitehti perustele tarvetta.
+- Vain Firebasen ilmaistaso (Spark), ei maksukorttia. Rekisterinpitäjä on käyttäjä Firebase-projektin omistajana (ratkaisee K-P1:n pilvitallennuksen osalta).
+**Seuraavaksi:** Arkkitehti tekee ADR:n (tietomalli, synkronointi ja ristiriidat, rajapintakerros), ja Digiturva tekee uhkamallin ja Firestoren sääntövaatimukset ennen toteutusta (T-054).
