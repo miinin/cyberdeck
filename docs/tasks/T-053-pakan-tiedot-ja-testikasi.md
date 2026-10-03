@@ -1,5 +1,5 @@
 # T-053 · Lisää pakan tietoja ja testikäden nosto
-**Tila:** Review · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-03)
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must (käyttäjä 2026-10-03)
 **Malli:** D-014. Määrittely: UX Designer (tutkimus ja kortti). Ei uusia riippuvuuksia, ei tallennusta, ei tietomallimuutosta.
 **Haara:** `t-053-pakan-tiedot-ja-testikasi`
 
