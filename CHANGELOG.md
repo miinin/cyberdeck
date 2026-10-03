@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Pakan voi jakaa linkillä: Jaa linkki -painike pakkaeditorissa ja Pakat-sivun pakkakortissa kopioi linkin leikepöydälle. Linkki avaa pakan vain luku -näkymässä (kortit, tilastot, laillisuus ja kokoelmasta puuttuvat kortit), ja Tallenna omaksi pakaksi tekee siitä oman pakan. Rikkinäinen linkki näyttää selkeän virheen.
+
 - Kirjautuneena pakat ja kokoelma tallentuvat tilille ja pysyvät samoina kaikilla laitteilla. Tili-valikossa näkyy tallennuksen tila ("Tallennettu tilille klo ..." tai "Ei yhteyttä, muutokset tallessa tällä laitteella") ja Synkronoi nyt -painike. Ensimmäisessä kirjautumisessa selaimen tiedot siirtyvät tyhjälle tilille, ja jos sekä selaimessa että tilillä on tietoja, valittavana on Yhdistä, Käytä vain tilin tietoja tai Peruuta. Selaimen tiedoista tehdään varmuuskopio. Uloskirjautuessa tilin tiedot jäävät tähän selaimeen, ja siitä kerrotaan; jos muutoksia ei ole tallennettu tilille, kysytään varmistus. Tili-valikon Poista tilin tiedot poistaa pakat ja kokoelman tililtä ja selaimesta sekä itse tilin (tarvittaessa Google pyytää kirjautumaan uudelleen). Kirjautumisikkunassa kerrotaan, että tiedot säilytetään EU:ssa ja että Google-tili (nimi, sähköposti) on Firebase Authenticationissa.
 - Pakkaeditori huomaa, jos pakkaa on muutettu toisessa välilehdessä tai toisella laitteella. Ilman omia tallentamattomia muutoksia editori näyttää uusimman version, ja muuten tarjolla on Lataa uusin tai Pidä omat muutokset (ei enää hiljaa viimeinen tallennus voittaa).
 

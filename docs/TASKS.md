@@ -60,3 +60,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-053 | Pakan tilastot (keskiarvot, Power-, RAM- ja harvinaisuusjakauma, nostotodennäköisyydet) ja testikäsi | 1 | Must | Koodari | Done | PM kuvakaappaukset, axe |
 | T-054 | Google-kirjautuminen ja pakkojen ja kokoelman pilvitallennus (D-016, D-017; vaiheet a–d) | 2 | Must | Koodari (vaiheittain) | Done | Digiturva, Arkkitehti, UX, Sisällöntuottaja, Testikäyttäjä |
 | T-055 | Yläpalkin järjestys (tili oikeaan ylänurkkaan) ja pysyvän selaintallennuksen napin poisto | 1 | Should | PM | Done | – |
+| T-056 | Pakan jakaminen linkillä (#/jaa/<data>) | 1 | Should | Koodari | Done | Digiturva (syöte URLista) |

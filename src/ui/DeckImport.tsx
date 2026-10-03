@@ -45,6 +45,7 @@ export function DeckImport({
   onOpen,
   onClose,
   startAtLink = false,
+  sharedText,
 }: {
   cards: readonly Card[];
   repositories: Repositories;
@@ -53,6 +54,8 @@ export function DeckImport({
   onClose: () => void;
   /** Opened from "Hae Netdeck.gg:stä": focus starts in the link field (T-051). */
   startAtLink?: boolean;
+  /** Shared deck link (T-056): the list is checked on open and the source forms are hidden. */
+  sharedText?: string;
 }) {
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const [text, setText] = useState('');
@@ -72,6 +75,7 @@ export function DeckImport({
   const linkRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (sharedText !== undefined) return;
     if (startAtLink) linkRef.current?.focus();
     else headingRef.current?.focus();
     return () => linkAbort.current?.abort();
@@ -139,6 +143,15 @@ export function DeckImport({
     setTimeout(() => reportRef.current?.focus());
   };
 
+  // Shared link (T-056): the report opens at once, and focus goes to it.
+  useEffect(() => {
+    if (sharedText === undefined) return;
+    const result = parseDeckText(sharedText, cards);
+    if (result.ok) void showReport(result.deck);
+    // Only on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleFetch = async (event: FormEvent) => {
     event.preventDefault();
     setSaveFailure(null);
@@ -176,7 +189,10 @@ export function DeckImport({
     }
     setSaveFailure(null);
     try {
-      const deck = await repositories.decks.create({ name: name.name, sections: report.content.sections });
+      const deck = await repositories.decks.create({
+        name: name.name,
+        sections: report.content.sections,
+      });
       onOpen(deck.id);
     } catch (error) {
       setSaveFailure(error instanceof StorageError ? error.kind : 'unknown');
@@ -228,11 +244,11 @@ export function DeckImport({
         </button>
       </p>
       <h1 ref={headingRef} tabIndex={-1}>
-        {deckTexts.importHeading}
+        {sharedText === undefined ? deckTexts.importHeading : deckTexts.shareHeading}
       </h1>
-      <p>{deckTexts.importIntro}</p>
+      <p>{sharedText === undefined ? deckTexts.importIntro : deckTexts.shareIntro}</p>
 
-      <div className="import-sources">
+      <div className="import-sources" hidden={sharedText !== undefined}>
         <form className="deck-import-form import-source-panel" onSubmit={(event) => void handleFetch(event)} noValidate>
           <h2>{deckTexts.linkHeading}</h2>
           <label htmlFor="import-link">{deckTexts.linkLabel}</label>
@@ -364,7 +380,7 @@ export function DeckImport({
               )}
               <div className="row-actions">
                 <button type="submit" className="button-primary import-save-button" disabled={report.rows.length === 0}>
-                  {deckTexts.reportSaveButton}
+                  {sharedText === undefined ? deckTexts.reportSaveButton : deckTexts.shareSaveButton}
                 </button>
               </div>
             </form>
