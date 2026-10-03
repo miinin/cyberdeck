@@ -42,10 +42,10 @@ export const EMPTY_CRITERIA: CardFilterCriteria = {
 };
 
 /**
- * From these values up the number filters have a single "N+" option (T-052): Cost 9+, Power 10+, RAM 4+.
+ * From these values up the number filters have a single "N+" option (T-052): Cost 9+, Power 10+, RAM 5+ (T-059: 5 vaatii kolme saman väristä Legendiä).
  * Below the cap every value found in the data is its own option.
  */
-export const NUMBER_FILTER_CAPS = { cost: 9, power: 10, ram: 4 } as const;
+export const NUMBER_FILTER_CAPS = { cost: 9, power: 10, ram: 5 } as const;
 
 /** The number filter option a value belongs to: 3 → "3", 12 with cap 10 → "10+". */
 export function numberOption(value: number, cap: number): string {

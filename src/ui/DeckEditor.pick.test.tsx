@@ -95,14 +95,14 @@ describe('Deck editor result picker', () => {
   it('filters by Cost, Power and RAM and shows the choices as removable chips (T-052)', async () => {
     await openEditor([]);
     const ramGroup = screen.getByRole('group', { name: 'RAM' });
-    expect(within(ramGroup).getAllByRole('checkbox').map((box) => box.getAttribute('value'))).toEqual(['1', '2', '4+']);
-    fireEvent.click(within(ramGroup).getByRole('checkbox', { name: '4+' }));
+    expect(within(ramGroup).getAllByRole('checkbox').map((box) => box.getAttribute('value'))).toEqual(['1', '2', '5+']);
+    fireEvent.click(within(ramGroup).getByRole('checkbox', { name: '5+' }));
     expect(within(table()).getAllByRole('rowheader').map((th) => th.querySelector('.pick-name')?.textContent)).toEqual([
       'Big',
     ]);
-    const chip = screen.getByRole('button', { name: 'Poista suodatin: RAM 4+' });
+    const chip = screen.getByRole('button', { name: 'Poista suodatin: RAM 5+' });
     fireEvent.click(chip);
-    expect(within(ramGroup).getByRole('checkbox', { name: '4+' })).not.toBeChecked();
+    expect(within(ramGroup).getByRole('checkbox', { name: '5+' })).not.toBeChecked();
     expect(rowOf('Unit 3')).toBeInTheDocument();
   });
 
