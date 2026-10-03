@@ -100,6 +100,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 | 2026-10-02 | Katselmointi SEC-006-t027: korttikuvat omalta originilta (`/assets/`). Ei uusia henkilötietoja, evästeitä, tallennusavaimia eikä kolmansia osapuolia. Kuvapyynnöt näkyvät vain Firebase Hostingin lokeissa kuten muutkin pyynnöt (rivi 8). Kuvien metatiedot (EXIF, GPS, XMP) poistetaan tuonnissa, joten kuvapaketin tekijän tietoja ei julkaista. | T-027 |
 | 2026-10-02 | Katselmointi SEC-009-t046: linkkihaku Netdeckistä (D-015). Rivi 9b: Netdeck näkee käyttäjän IP-osoitteen vain käyttäjän pyytämässä linkkihaussa. Yhteenveto ja säilytys päivitetty. Ei uusia tallennettavia kenttiä eikä evästeitä. K-P1:n ja K-P2:n Netdeck-maininta tulee taas ajankohtaiseksi linkkihaun osalta (huomautus näkymässä riittää ehdotuksena). | T-046 |
 | 2026-10-03 | Luku 10 (LUONNOS): T-054:n kirjautuminen ja pilvitallennus (D-016, D-017). Uusi inventaario (rivit 11–19), sijainti, peruste, säilytys ja poisto, evästeet, jaettu kone ja avoimet kysymykset K-P5–K-P8. Luku 7 korvattu kirjautumisen osalta luvulla 10, K-P3 ratkaistu (D-016: 16+). Raportti SEC-011-t054. | T-054 |
+| 2026-10-03 | Katselmointi SEC-013-t054a: rivi 11 ja luku 10.3 päivitetty Muutos K-P8:n mukaiseksi (juuri `users` molemmissa projekteissa, `test_users` poistui). Firestoren sijainti on toistaiseksi `nam5`, mikä on korjattava ennen T-054b:tä. Uusi avain `cyberdeck:account:redirect-pending` (arvo `1`) hyväksytty, ei henkilötietoa. Dialogin tietosuojateksti tarkennettava ennen julkaisua (SEC-038). | T-054a |
 
 ## 10. MVP-2: kirjautuminen ja pilvitallennus (T-054, LUONNOS)
 
@@ -116,7 +117,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 
 | # | Tieto | Lähde | Tarkoitus | Missä | Kuka pääsee | Henkilötieto? | Minimointi ja perustelu |
 |---|---|---|---|---|---|---|---|
-| 11 | uid (Firebase Authin pseudonyymi tunniste) | Firebase Auth kirjautuessa | Datan kohdistaminen omistajalle, sääntöjen omistajatarkistus | Firestore-polku `users/{uid}` tai `test_users/{uid}`, localStorage-avainten nimet `cyberdeck:u:{uid}:…` ja `cyberdeck:account:last-uid` | Käyttäjä; projektin omistaja konsolista; Google käsittelijänä | **Kyllä** (pseudonyymi tunniste) | Ei sähköpostia tunnisteena. `last-uid` poistetaan uloskirjautuessa (SR-26). SR-16:n poikkeus: uid vain avainten nimissä. Lisäksi T-054a: `cyberdeck:account:redirect-pending` (arvo `1`, ei henkilötietoa) asetetaan juuri ennen uudelleenohjausta Googleen ja poistetaan, kun tulos on luettu. |
+| 11 | uid (Firebase Authin pseudonyymi tunniste) | Firebase Auth kirjautuessa | Datan kohdistaminen omistajalle, sääntöjen omistajatarkistus | Firestore-polku `users/{uid}` (tuotanto `cyberdeck-tcg`, testi `cyberdeck-tcg-dev`, D-017 Muutos K-P8), localStorage-avainten nimet `cyberdeck:u:{uid}:…` ja `cyberdeck:account:last-uid` | Käyttäjä; projektin omistaja konsolista; Google käsittelijänä | **Kyllä** (pseudonyymi tunniste) | Ei sähköpostia tunnisteena. `last-uid` poistetaan uloskirjautuessa (SR-26). SR-16:n poikkeus: uid vain avainten nimissä. Lisäksi T-054a: `cyberdeck:account:redirect-pending` (arvo `1`, ei henkilötietoa) asetetaan juuri ennen uudelleenohjausta Googleen ja poistetaan, kun tulos on luettu. |
 | 12 | Pakat pilvessä (kuten rivi 2) | Käyttäjä, synkronointi | Laitteiden välinen tallennus | Firestore `…/{uid}/decks/{deckId}` | Kuten 11 | Mahdollisesti (pakan nimi, kuten rivi 2) | Samat kentät ja rajat kuin selaimessa (SR-11, SR-22). |
 | 13 | Kokoelma pilvessä (kuten rivi 1) | Käyttäjä, synkronointi | Kuten 12 | Firestore `…/{uid}/collection/main` | Kuten 11 | Ei sellaisenaan, mutta liittyy uid:hen | Vain kortin avain ja määrä. |
 | 14 | Synkronoinnin meta: skeemaversio, muutoslaskuri `rev`, palvelimen aika viimeisestä työnnöstä | Sovellus | Synkronointi ja ristiriitojen tunnistus | Firestore `…/{uid}` | Kuten 11 | Liittyy uid:hen (kertoo viimeisen käyttöhetken) | Vain viimeisin aika, ei historiaa. |
@@ -131,7 +132,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 ### 10.3 Sijainti
 | Paikka | Sijainti | Huomio |
 |---|---|---|
-| Firestore | `europe-north1` (Suomi), pysyvä valinta (D-017) | Tuotannon data juuressa `users`, testisivuston ja kehityksen juuressa `test_users`, samassa projektissa (R-18). |
+| Firestore | Tavoite `europe-north1` (Suomi), pysyvä valinta (D-017). **Tila 2026-10-03: molempien projektien tietokanta on `nam5` (USA)** ja luodaan uudelleen ennen T-054b:tä (SEC-013). | Juuri `users` molemmissa projekteissa: tuotanto `cyberdeck-tcg`, testisivusto ja kehitys `cyberdeck-tcg-dev` (D-017 Muutos K-P8, R-18 poistuu). |
 | Firebase Authentication | Googlen globaali palvelu, ei aluevalintaa | Tietoja voidaan käsitellä EU:n ulkopuolella. Siirron peruste Googlen tietojenkäsittelyehdoissa: **tarkistettava** (firebase.google.com/support/privacy). |
 | Selain | Käyttäjän laite | Kuten luku 3. Tilin kopio jää uloskirjautuessa. |
 

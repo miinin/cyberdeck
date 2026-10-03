@@ -151,3 +151,10 @@ Koodikatselmointi: tehty · Pakollisia korjattu 2 (uloskirjautuessa painike näy
 2. Tekstit ovat työversioita (dialogin runko PRIVACY.md:n luonnoksesta) → Sisällöntuottaja ja UX ennen T-054c:tä. Tietosuojaselosteen linkki puuttuu (seloste T-054d).
 3. **Dialogi sanoo "Tiedot säilytetään Googlen palvelimilla Suomessa", mutta Firestore on nyt `nam5` (USA) molemmissa projekteissa** (PM:n infrakirjaus). Teksti on totta vasta, kun käyttäjä on luonut tietokannat uudelleen `europe-north1`:een. Pilvitallennusta ei vielä ole (T-054b), joten T-054a ei tallenna mitään Firestoreen.
 **Seuraavaksi:** Digiturva (riippuvuus + override, workflowt, CSP, redirect-pending-avain, dist-tarkistus), sitten PR testiin; testisivustolla kirjautumisen ja CSP:n käsin varmistus Chromessa ja Firefoxissa (konsolitehtävät 9–11 ennen).
+
+### Katselmointi · Digiturva · T-054a · 2026-10-03
+**Tulos:** SEC-013 (`docs/reports/SEC-013-t054a-kirjautuminen.md`): 0 Critical, 0 High, 0 Medium, 1 Low, 2 Info. **Veto: ei** (ei estä Done-tilaa eikä yhdistämistä testiin). `npm test` 846/846, lint 0, build ja build:test läpi, check-dist-env OK, `npm audit` 0.
+- SEC-038 (Low): dialogin tietosuojateksti ("Suomessa", "ei nimeäsi eikä sähköpostiasi") ei pidä paikkaansa, koska Firestore on `nam5` ja Firebase Auth tallentaa sähköpostin ja nimen. Korjattava ennen tuotantojulkaisua tai kirjautumisen avaamista muille.
+- SEC-039 (Info) Firestore-origin CSP:ssä etukäteen, SEC-040 (Info) `redirect-pending`-avain hyväksytty.
+- Korjattu suoraan: PRIVACY.md rivi 11 ja 10.3 Muutos K-P8:n mukaisiksi (ei `test_users`), Firestoren nykyinen sijainti kirjattu.
+- Avoinna: CSP:n ja kirjautumisen käsin varmistus testisivustolla (SEC-033).
