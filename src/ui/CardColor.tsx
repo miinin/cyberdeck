@@ -15,7 +15,7 @@ export function typeBadgeClass(color: string | null): string {
   return color !== null && colorNames.has(color) ? `type-badge type-badge-${color.toLowerCase()}` : 'type-badge';
 }
 
-export function CardColor({ color, swatchOnly = false }: { color: string | null; swatchOnly?: boolean }) {
+export function CardColor({ color }: { color: string | null }) {
   if (color === null) {
     return (
       <>
@@ -27,17 +27,6 @@ export function CardColor({ color, swatchOnly = false }: { color: string | null;
 
   // Game terms are English (T-036).
   const name = colorNames.get(color) ?? color;
-  if (swatchOnly) {
-    // Swatch with a visually hidden name: filter chips show only the ball (T-045).
-    return (
-      <>
-        <span className={`color-swatch ${swatchClass(color)}`} aria-hidden="true" />
-        <span className="visually-hidden" lang="en">
-          {name}
-        </span>
-      </>
-    );
-  }
   return (
     <>
       <span className={`color-swatch ${swatchClass(color)}`} aria-hidden="true" />{' '}

@@ -31,3 +31,7 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 **Mitä tapahtui:** T-013:n navigaatiolinkit muuttivat Tab-järjestystä, ja `App.theme.test.tsx` kaatui test-haarassa. Koodari ajoi vain osan testeistä (kevyt malli, aikaraja), eikä CI ajanut testejä.
 **Miksi:** Kokonaista sarjaa ei ajettu ennen yhdistämistä, ja koko sarja kaatui muutenkin satunnaisesti (T-024), joten osittaisiin ajoihin oli totuttu.
 **Jatkossa:** T-004 ajaa lintin ja testit jokaisessa PR:ssä ja ennen julkaisua. PM yhdistää testiin vasta, kun PR:n tarkistukset ovat vihreät.
+
+## 2026-10-03 · Satunnaiset "Invalid Chai property: toBeInTheDocument" -kaatumiset
+- Yötyössä `npm test` kaatui kahdesti 179 testillä (jest-dom-matcherit eivät latautuneet), ja heti perään kolme ajoa meni läpi 730/730 ilman koodimuutoksia. Taustalla oli noin 19 agenttien jättämää node-prosessia (`vite preview`).
+- Opetus: jos jest-dom-matcherit katoavat yhtäkkiä, aja uudelleen ja sulje vanhat preview-prosessit ennen kuin epäilet koodia tai riippuvuuksia. Agentin pitää sulkea itse käynnistämänsä `vite preview`.

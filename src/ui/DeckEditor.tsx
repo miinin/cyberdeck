@@ -4,8 +4,10 @@ import type { Deck, DeckContent } from '../domain/deck';
 import { MAX_DECK_DISTINCT_CARDS } from '../domain/deck';
 import { checkDeckName, distinctRows, withDeckCount } from '../domain/deckEdit';
 import {
-  LEGEND_COUNT,
+  MAX_MAIN_DECK,
+  MIN_MAIN_DECK,
   addBlocker,
+  colorDistribution,
   costCurve,
   deckCounts,
   deckTotals,
@@ -15,7 +17,6 @@ import {
   toCardsByKey,
   validateDeck,
 } from '../domain/deckRules';
-import type { DeckRow } from '../domain/deckRules';
 import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
@@ -29,19 +30,31 @@ import type { CardFilterCriteria } from '../domain/cardSearch';
 import { StorageError } from '../storage';
 import type { DeckPickView, Repositories, StorageErrorKind } from '../storage';
 import { CardFilters } from './CardFilters';
+import { useCardHoverPreview } from './CardHoverPreview';
 import { CardImageDialog } from './CardImageDialog';
-import { CardName } from './CardName';
-import { CostCurve } from './CostCurve';
+import { cardNameText } from './CardName';
 import { DeckPickImage } from './DeckPickImage';
-import { typeColorClass } from './CardColor';
+import { DeckList } from './DeckList';
+import type { DeckView } from './DeckList';
+import { DeckPickTable } from './DeckPickTable';
+import { DeckStats } from './DeckStats';
+import type { PickBlocker } from './DeckPickTable';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
+import { ImageSizeSelect } from './ListToolbar';
+import type { ImageSize } from './ListToolbar';
+import { Stepper } from './Stepper';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
+import { trackDeckSave } from './useDecks';
+import { EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
 
 /** A change is saved this long after the last edit (T-013). */
 export const AUTOSAVE_DELAY_MS = 500;
+
+/** A count change is announced this long after the last one, so fast repeats are told once (T-050b). */
+export const CHANGE_ANNOUNCE_MS = 400;
 
 /** The "same Legend" message stays this long (T-045). */
 export const TOAST_MS = 4000;
@@ -50,66 +63,6 @@ type SaveState = 'saved' | 'dirty' | 'saving' | 'error';
 type SaveErrorKind = StorageErrorKind | 'unknown';
 
 const errorKind = (error: unknown): SaveErrorKind => (error instanceof StorageError ? error.kind : 'unknown');
-
-/** "Unit · Red · Cost 3 · Power 2 · RAM 1 · Rare": plain values, missing ones left out. */
-function cardMeta(card: Card): string {
-  return [
-    card.type,
-    card.color,
-    card.cost === null ? null : `Cost ${card.cost}`,
-    card.power === null ? null : `Power ${card.power}`,
-    card.ram === null ? null : `RAM ${card.ram}`,
-    card.rarity,
-  ]
-    .filter((part) => part !== null)
-    .join(' · ');
-}
-
-/** − n + for one card. "−" stays focusable at 0 (aria-disabled) so focus is never lost. */
-function Stepper({
-  name,
-  count,
-  onChange,
-  addLabel,
-  describedBy,
-  showCount = true,
-}: {
-  name: string;
-  count: number;
-  onChange: (count: number) => void;
-  addLabel?: string;
-  /** Id of a visible text that explains why adding breaks a rule. */
-  describedBy?: string;
-  /** False when the count is shown elsewhere (deck rows): only the spoken count stays. */
-  showCount?: boolean;
-}) {
-  return (
-    <div className="card-row-controls">
-      <button
-        type="button"
-        className="step step-minus"
-        aria-disabled={count === 0 ? 'true' : undefined}
-        aria-label={deckTexts.removeCard(name)}
-        onClick={() => count > 0 && onChange(count - 1)}
-      >
-        <span aria-hidden="true">{texts.minusSymbol}</span>
-      </button>
-      <span className={showCount ? 'deck-card-count' : 'deck-card-count-spoken'}>
-        {showCount && <span aria-hidden="true">{count}</span>}
-        <span className="visually-hidden">{deckTexts.inDeck(count)}</span>
-      </span>
-      <button
-        type="button"
-        className="step step-plus"
-        aria-label={addLabel ?? deckTexts.addCard(name)}
-        aria-describedby={describedBy}
-        onClick={() => onChange(count + 1)}
-      >
-        <span aria-hidden="true">+</span>
-      </button>
-    </div>
-  );
-}
 
 export function DeckEditor({
   deckId,
@@ -140,6 +93,18 @@ export function DeckEditor({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const collectionAllRef = useRef<HTMLInputElement>(null);
+  const [imageSize, setImageSize] = useState<ImageSize>('medium');
+  const [changeText, setChangeText] = useState('');
+  const changeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const clickAdds = useMediaQuery(FINE_POINTER_QUERY, true);
+  const preview = useCardHoverPreview();
+  const [deckView, setDeckView] = useState<DeckView>('list');
+  const [deckInView, setDeckInView] = useState(false);
+  const sideRef = useRef<HTMLElement>(null);
+  const deckHeadingRef = useRef<HTMLHeadingElement>(null);
+  const issuesHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => () => clearTimeout(changeTimer.current), []);
 
   // Autosave: the newest unsaved content waits in `pending`; saves run one after another.
   const [saveState, setSaveState] = useState<SaveState>('saved');
@@ -227,11 +192,17 @@ export function DeckEditor({
   useEffect(() => {
     const saveNow = (afterRunningSave: boolean) => {
       const next = pending.current;
-      if (next === null) return;
+      // The deck list reads after leaving: it waits for the saves still running (B-017).
+      if (next === null) {
+        if (afterRunningSave) trackDeckSave(chain.current);
+        return;
+      }
       pending.current = null;
       // On unmount, wait for a save already in flight so the older content cannot land last.
       const write = () => repository.update(deckId, next);
-      void (afterRunningSave ? chain.current.then(write) : write()).catch(() => undefined);
+      const save = afterRunningSave ? chain.current.then(write) : write();
+      if (afterRunningSave) trackDeckSave(save);
+      void save.catch(() => undefined);
     };
     const onPageHide = () => saveNow(false);
     window.addEventListener('pagehide', onPageHide);
@@ -270,7 +241,37 @@ export function DeckEditor({
       return;
     }
     setNotice(null);
-    schedule(withDeckCount(base, card.key, count));
+    const next = withDeckCount(base, card.key, count);
+    schedule(next);
+    clearTimeout(changeTimer.current);
+    changeTimer.current = setTimeout(() => {
+      const nextTotals = deckTotals(next, cardsByKey);
+      const copies = deckCounts(next).get(card.key) ?? 0;
+      const name = cardNameText(card);
+      setChangeText(
+        card.type === 'Legend'
+          ? deckTexts.changeAnnounceLegend(name, copies, nextTotals.legends)
+          : deckTexts.changeAnnounce(name, copies, nextTotals.main),
+      );
+    }, CHANGE_ANNOUNCE_MS);
+  };
+
+  const openImage = (card: Card) => {
+    preview.hide();
+    setZoomCard(card);
+  };
+
+  /**
+   * The short mark tells a same-name Legend (refused) from a broken limit (allowed, T-045). The reason
+   * always matches the mark: a same-name Legend wins over the Legend count (UX-045).
+   */
+  const blockerOf = (card: Card): PickBlocker | null => {
+    if (hasSameNameLegend(card, content, cardsByKey)) {
+      return { reason: deckTexts.sameLegendReason(card.name), short: deckTexts.blockedLegend };
+    }
+    const blocker = addBlocker(card, content, cardsByKey);
+    if (blocker === null) return null;
+    return { reason: deckTexts.dimmedHint(blocker), short: deckTexts.blockedLimit };
   };
 
   const handleName = (text: string) => {
@@ -296,7 +297,44 @@ export function DeckEditor({
   };
 
   const filtered = useMemo(() => filterCards(cards, criteria), [cards, criteria]);
+  const colors = useMemo(() => colorDistribution(content, cardsByKey), [content, cardsByKey]);
   const legendsCount = totals.legends;
+
+  // Below 64rem the bottom bar is hidden while the deck column is on screen (T-050c).
+  useEffect(() => {
+    const side = sideRef.current;
+    if (side === null || typeof IntersectionObserver !== 'function') return;
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[entries.length - 1];
+      if (entry !== undefined) setDeckInView(entry.isIntersecting);
+    });
+    observer.observe(side);
+    return () => observer.disconnect();
+  }, [phase]);
+
+  const mainState = totals.main < MIN_MAIN_DECK ? 'under' : totals.main > MAX_MAIN_DECK ? 'over' : 'ok';
+  const legalityMark =
+    issues.length === 0 ? (
+      <span className="legality is-legal">
+        <span aria-hidden="true">✓</span>
+        {deckTexts.legalShort}
+      </span>
+    ) : (
+      <span className="legality is-issues">
+        <span aria-hidden="true">⚠</span>
+        {deckTexts.issuesCount(issues.length)}
+      </span>
+    );
+
+  const showDeck = () => {
+    sideRef.current?.scrollIntoView?.({ block: 'start' });
+    deckHeadingRef.current?.focus({ preventScroll: true });
+  };
+
+  const showIssues = () => {
+    issuesHeadingRef.current?.scrollIntoView?.({ block: 'nearest' });
+    issuesHeadingRef.current?.focus({ preventScroll: true });
+  };
 
   if (phase !== 'ready') {
     return (
@@ -309,8 +347,9 @@ export function DeckEditor({
             <p>{phase === 'not-found' ? deckTexts.editorNotFound : deckTexts.listUnavailable}</p>
           </div>
         )}
-        <p className="editor-back">
-          <button type="button" className="button-secondary" onClick={onBack}>
+        <p className="editor-crumb">
+          <button type="button" className="link-button" onClick={onBack}>
+            <span aria-hidden="true">← </span>
             {deckTexts.backToList}
           </button>
         </p>
@@ -318,69 +357,24 @@ export function DeckEditor({
     );
   }
 
-  const renderChip = (card: Card) => {
-    if (card.cost !== null) {
-      return (
-        <span className="deck-line-chip" title={deckTexts.costChip(card.cost)}>
-          <span aria-hidden="true">{card.cost}</span>
-          <span className="visually-hidden">{deckTexts.costChip(card.cost)}</span>
-        </span>
-      );
-    }
-    if (card.ram !== null) return <span className="deck-line-chip is-ram">{deckTexts.ramChip(card.ram)}</span>;
-    return null;
-  };
-
-  const renderDeckRow = (row: DeckRow) => {
-    const have = collectionReady ? countIn(collection, row.card.key) : null;
-    const missingCount = have !== null ? Math.max(0, row.count - have) : 0;
-    return (
-      <li
-        key={row.card.key}
-        className={`deck-line ${typeColorClass(row.card.color)}` + (missingCount > 0 ? ' is-missing' : '')}
-      >
-        <span className="deck-line-count" aria-hidden="true">
-          {row.count}×
-        </span>
-        <button
-          type="button"
-          className="deck-line-name"
-          aria-haspopup="dialog"
-          aria-label={`${texts.enlargeImage}${row.card.displayName}`}
-          title={cardMeta(row.card)}
-          onClick={() => setZoomCard(row.card)}
-        >
-          <CardName card={row.card} muteSubname />
-        </button>
-        {have !== null && <span className="visually-hidden">{deckTexts.owned(have, row.count)}</span>}
-        {missingCount > 0 && <span className="deck-line-missing">{deckTexts.missingCount(missingCount)}</span>}
-        {renderChip(row.card)}
-        <Stepper
-          name={row.card.displayName}
-          count={row.count}
-          showCount={false}
-          onChange={(count) => setCount(row.card, count)}
-        />
-      </li>
-    );
-  };
-
   return (
     <>
+      {/* One compact header row (T-050): back link, the name as an editable title, save badge, export. */}
       <div className="editor-head">
-        <div className="editor-title">
-          <p className="editor-back">
-            <button type="button" className="button-secondary" onClick={onBack}>
-              {deckTexts.backToList}
-            </button>
-          </p>
-          <h1 ref={headingRef} tabIndex={-1}>
-            {content.name}
-          </h1>
-        </div>
-        <div className="editor-meta">
-          <div className="deck-name-field">
-            <label htmlFor="deck-name">{deckTexts.nameLabel}</label>
+        <p className="editor-crumb">
+          <button type="button" className="link-button" onClick={onBack}>
+            <span aria-hidden="true">← </span>
+            {deckTexts.backToList}
+          </button>
+        </p>
+        <h1 ref={headingRef} tabIndex={-1} className="editor-name visually-hidden">
+          {content.name}
+        </h1>
+        <div className="editor-titlebar">
+          <div className="deck-name-field editor-name-field">
+            <label htmlFor="deck-name" className="visually-hidden">
+              {deckTexts.nameLabel}
+            </label>
             <input
               id="deck-name"
               type="text"
@@ -389,7 +383,7 @@ export function DeckEditor({
               aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
               onChange={(event) => handleName(event.target.value)}
             />
-            <p id="deck-name-hint" className="hint">
+            <p id="deck-name-hint" className="visually-hidden">
               {deckTexts.nameHint}
             </p>
             {nameError !== null && (
@@ -398,28 +392,41 @@ export function DeckEditor({
               </p>
             )}
           </div>
-          <div className="row-actions">
-            <ExportButtons deck={content} cardsByKey={cardsByKey} />
+          <div className="editor-tools">
+            {saveState !== 'error' && (
+              // Only "Tallennettu" is spoken (T-050b): the in-between states are shown but would talk over the change message.
+              <p className={`save-status save-badge${saveState === 'saved' ? ' is-saved' : ''}`}>
+                <span role="status">{saveState === 'saved' ? deckTexts.saveSaved : ''}</span>
+                {saveState !== 'saved' && (
+                  <span aria-hidden="true">{saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}</span>
+                )}
+              </p>
+            )}
+            <div className="row-actions">
+              <ExportButtons deck={content} cardsByKey={cardsByKey} />
+            </div>
           </div>
         </div>
       </div>
 
-      {saveState === 'error' ? (
+      {saveState === 'error' && (
         <div className="notice notice-danger" role="alert">
           <p>{deckTexts.saveFailed(saveError ?? 'unknown')}</p>
           <button type="button" className="button-secondary" onClick={handleRetry}>
             {deckTexts.saveRetry}
           </button>
         </div>
-      ) : (
-        <p className="save-status" role="status">
-          {saveState === 'saved' ? deckTexts.saveSaved : saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}
-        </p>
       )}
 
+      <p className="visually-hidden" aria-live="polite" aria-atomic="true">
+        {changeText}
+      </p>
+
       <div className="editor-layout">
-        <section className="editor-search" aria-labelledby="search-heading">
-          <h2 id="search-heading">{deckTexts.searchHeading}</h2>
+        <section className="editor-filters" aria-labelledby="filters-heading">
+          <h2 id="filters-heading" className="filters-heading">
+            {texts.filtersHeading}
+          </h2>
           <CardFilters
             criteria={criteria}
             typeOptions={filterOptions(KNOWN_CARD_TYPES, cards.map((card) => card.type), criteria.types)}
@@ -435,8 +442,20 @@ export function DeckEditor({
               setCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) })
             }
             onSearchSubmit={() => undefined}
+            collapsibleBelow={EDITOR_WIDE_QUERY}
           />
+        </section>
+
+        <section className="editor-search" aria-labelledby="search-heading" data-image-size={imageSize}>
+          <h2 id="search-heading">{deckTexts.searchHeading}</h2>
           <div className="pick-bar">
+            <p className="status-line" role="status">
+              {deckTexts.searchResults(filtered.length, cards.length)}
+            </p>
+            {/* Skip past the results to the deck, shown when focused (UX-044). */}
+            <button type="button" className="link-button focus-reveal" onClick={showDeck}>
+              {deckTexts.goToDeck}
+            </button>
             <fieldset className="view-select pick-view">
               <legend>{deckTexts.pickViewLegend}</legend>
               <div className="options">
@@ -459,10 +478,9 @@ export function DeckEditor({
                 ))}
               </div>
             </fieldset>
-            <p className="status-line" role="status">
-              {deckTexts.searchResults(filtered.length, cards.length)}
-            </p>
+            {pickView === 'images' && <ImageSizeSelect name="deck-image-size" value={imageSize} onChange={setImageSize} />}
           </div>
+          <p className="hint pick-hint">{deckTexts.pickHint}</p>
           <div role="status" className="toast-slot">
             {toast !== null && (
               <p className="toast">
@@ -476,169 +494,177 @@ export function DeckEditor({
           {filtered.length === 0 ? (
             <p className="empty">{deckTexts.noSearchResults}</p>
           ) : pickView === 'images' ? (
-            <ul className="search-results pick-images" aria-label={deckTexts.searchHeading}>
-              {filtered.map((card) => {
-                const blocker = addBlocker(card, content, cardsByKey);
-                const hintId = `blocker-image-${card.key}`;
-                const count = counts.get(card.key) ?? 0;
-                const reason =
-                  blocker === null ? null : hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker);
-                return (
-                  <DeckPickImage
-                    key={card.key}
-                    card={card}
-                    dimmed={blocker !== null}
-                    title={reason ?? undefined}
-                    badge={count > 0 ? deckTexts.inDeckBadge(count) : null}
-                    hint={
-                      reason !== null && (
-                        <span id={hintId} className="visually-hidden">
-                          {reason}
-                        </span>
-                      )
-                    }
-                    onAdd={() => setCount(card, count + 1)}
-                  >
-                    <Stepper
-                      name={card.displayName}
+            <div className="pick-scroll">
+              <ul className="pick-images" aria-label={deckTexts.searchHeading}>
+                {filtered.map((card) => {
+                  const blocker = blockerOf(card);
+                  const hintId = `blocker-image-${card.key}`;
+                  const count = counts.get(card.key) ?? 0;
+                  return (
+                    <DeckPickImage
+                      key={card.key}
+                      card={card}
                       count={count}
                       onChange={(next) => setCount(card, next)}
-                      describedBy={blocker !== null ? hintId : undefined}
-                    />
-                  </DeckPickImage>
-                );
-              })}
-            </ul>
+                      dimmed={blocker !== null}
+                      title={blocker?.reason}
+                      badge={count > 0 ? deckTexts.inDeckBadge(count) : null}
+                      hoverProps={imageSize === 'small' ? preview.bind(card) : undefined}
+                      hint={
+                        blocker !== null && (
+                          <span id={hintId} className="visually-hidden">
+                            {blocker.reason}
+                          </span>
+                        )
+                      }
+                    >
+                      <Stepper
+                        name={card.displayName}
+                        count={count}
+                        onChange={(next) => setCount(card, next)}
+                        describedBy={blocker !== null ? hintId : undefined}
+                        shortcuts
+                      />
+                    </DeckPickImage>
+                  );
+                })}
+              </ul>
+            </div>
           ) : (
-            <ul className="search-results" aria-label={deckTexts.searchHeading}>
-              {filtered.map((card) => {
-                const blocker = addBlocker(card, content, cardsByKey);
-                const hintId = `blocker-${card.key}`;
-                return (
-                  <li key={card.key} className={'card-row' + (blocker !== null ? ' is-dimmed' : '')}>
-                    <span className="card-row-name">
-                      <span>
-                        <CardName card={card} />
-                      </span>
-                      <span className="card-row-meta">{cardMeta(card)}</span>
-                      {blocker !== null && (
-                        <span id={hintId} className="card-row-meta">
-                          {hasSameNameLegend(card, content, cardsByKey) ? blocker : deckTexts.dimmedHint(blocker)}
-                        </span>
-                      )}
-                    </span>
-                    <Stepper
-                      name={card.displayName}
-                      count={counts.get(card.key) ?? 0}
-                      onChange={(count) => setCount(card, count)}
-                      describedBy={blocker !== null ? hintId : undefined}
-                    />
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="pick-scroll">
+              <DeckPickTable
+                cards={filtered}
+                countOf={(card) => counts.get(card.key) ?? 0}
+                blockerOf={blockerOf}
+                onChange={setCount}
+                onOpenImage={openImage}
+                clickAdds={clickAdds}
+                hoverProps={preview.bind}
+              />
+            </div>
           )}
         </section>
 
-        <div className="editor-side">
-          <section className="deck-summary" aria-labelledby="summary-heading">
-            <h2 id="summary-heading" className="visually-hidden">
-              {deckTexts.summaryHeading}
-            </h2>
-            <div className="summary-counts">
-              <p className="summary-main">{deckTexts.counts(totals.legends, totals.main)}</p>
-              <p>
-                {collectionReady
-                  ? deckTexts.missingFromCollection(missingCopies)
-                  : collection.phase === 'loading'
-                    ? ''
-                    : deckTexts.collectionNotReady}
-              </p>
-              <p>
-                {limits.size === 0
-                  ? deckTexts.ramLimitsNone
-                  : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`}
-              </p>
-            </div>
-            <div aria-live="polite" aria-atomic="true">
-              {issues.length === 0 ? (
-                <p className="summary-ok">{deckTexts.allGood}</p>
-              ) : (
-                <>
-                  <h3 className="visually-hidden">{deckTexts.issuesHeading}</h3>
-                  <ul className="issue-list">
-                    {issues.map((issue) => (
-                      <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
-                        {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
-                        {issue.message}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </div>
-            <CostCurve curve={curve} />
-            <p className="hint">{deckTexts.rulesNote}</p>
-            {notice !== null && (
-              <p className="field-error" role="alert">
-                {notice}
-              </p>
-            )}
-          </section>
+        <div className="deck-bar" hidden={deckInView}>
+          <p className="deck-bar-text">
+            <span className="deck-bar-part">{deckTexts.mobileBarMain(totals.main)}</span>
+            <span aria-hidden="true">·</span>
+            <span className="deck-bar-part">{deckTexts.legendsProgress(legendsCount)}</span> {legalityMark}
+          </p>
+          <button type="button" className="button-primary deck-bar-button" onClick={showDeck}>
+            {deckTexts.showDeck}
+          </button>
+        </div>
 
-          <section className="editor-deck" aria-labelledby="deck-heading">
-            <h2 id="deck-heading" className="visually-hidden">
+        <section className="editor-side" aria-labelledby="deck-heading" ref={sideRef}>
+          <div className="deck-head">
+            <h2 id="deck-heading" className="visually-hidden" ref={deckHeadingRef} tabIndex={-1}>
               {deckTexts.sectionLabel(content.name)}
             </h2>
-            <div className="deck-section">
-              <h2>
-                {deckTexts.legendsHeading} ({legendsCount}/{LEGEND_COUNT})
-              </h2>
-              {grouped.legends.length === 0 ? (
-                <p className="hint">{deckTexts.legendsEmpty}</p>
+            <div className="deck-head-row">
+              <p className="deck-head-main">{deckTexts.mainProgress(totals.main)}</p>
+              {issues.length === 0 ? (
+                legalityMark
               ) : (
-                <ul className="deck-cards">{grouped.legends.map(renderDeckRow)}</ul>
+                <button type="button" className="legality is-issues" onClick={showIssues}>
+                  <span aria-hidden="true">⚠</span>
+                  {deckTexts.issuesCount(issues.length)}
+                </button>
               )}
             </div>
+            <progress
+              className={`deck-progress is-${mainState}`}
+              max={MAX_MAIN_DECK}
+              value={Math.min(totals.main, MAX_MAIN_DECK)}
+              aria-label={deckTexts.mainProgress(totals.main)}
+            />
+            <p className="deck-head-sub">{deckTexts.legendsProgress(legendsCount)}</p>
+            <p className="deck-back">
+              <button type="button" className="link-button" onClick={() => searchInputRef.current?.focus()}>
+                <span aria-hidden="true">← </span>
+                {deckTexts.backToSearch}
+              </button>
+            </p>
+          </div>
+
+          <div aria-live="polite" aria-atomic="true">
+            {issues.length === 0 ? (
+              <p className="visually-hidden">{deckTexts.allGood}</p>
+            ) : (
+              <div className="deck-issues">
+                <h3 ref={issuesHeadingRef} tabIndex={-1} className="deck-issues-title">
+                  {deckTexts.issuesHeading}
+                </h3>
+                <ul className="issue-list">
+                  {issues.map((issue) => (
+                    <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
+                      {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
+                      {issue.message}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          {notice !== null && (
+            <p className="field-error" role="alert">
+              {notice}
+            </p>
+          )}
+
+          <DeckList
+            grouped={grouped}
+            view={deckView}
+            onViewChange={setDeckView}
+            mainCount={totals.main}
+            legendsCount={legendsCount}
+            ownedOf={(card) => (collectionReady ? countIn(collection, card.key) : null)}
+            onChange={setCount}
+            onOpenImage={openImage}
+            hoverProps={preview.bind}
+          />
+          {grouped.unknown.length > 0 && (
             <div className="deck-section">
-              <h2>
-                {deckTexts.mainHeading} ({totals.main})
-              </h2>
-              {grouped.groups.length === 0 && grouped.unknown.length === 0 && (
-                <p className="hint">{deckTexts.deckEmpty}</p>
-              )}
-              {grouped.groups.map((group) => (
-                <div key={group.type}>
-                  <h3 className="deck-group-title" lang="en">
-                    {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
-                  </h3>
-                  <ul className="deck-cards">{group.rows.map(renderDeckRow)}</ul>
-                </div>
-              ))}
-              {grouped.unknown.length > 0 && (
-                <div>
-                  <h3 className="deck-group-title">{deckTexts.unknownHeading}</h3>
-                  <ul className="deck-cards">
-                    {grouped.unknown.map(({ key, count }) => (
-                      <li key={key} className="deck-line">
-                        <span className="deck-line-name">{key}</span>
-                        <button
-                          type="button"
-                          className="button-secondary"
-                          onClick={() => schedule(withDeckCount(contentRef.current, key, 0))}
-                        >
-                          {deckTexts.removeUnknown(key, count)}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <h3 className="deck-group-title">{deckTexts.unknownHeading}</h3>
+              <ul className="deck-tiles">
+                {grouped.unknown.map(({ key, count }) => (
+                  <li key={key} className="deck-unknown">
+                    <span className="deck-unknown-key">{key}</span>
+                    <button
+                      type="button"
+                      className="button-secondary"
+                      onClick={() => schedule(withDeckCount(contentRef.current, key, 0))}
+                    >
+                      {deckTexts.removeUnknown(key, count)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </section>
-        </div>
+          )}
+
+          <DeckStats
+            curve={curve}
+            colors={colors}
+            groups={grouped.groups}
+            mainCount={totals.main}
+            ramLimitsText={
+              limits.size === 0
+                ? deckTexts.ramLimitsNone
+                : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`
+            }
+            missingText={
+              collectionReady
+                ? deckTexts.missingFromCollection(missingCopies)
+                : collection.phase === 'loading'
+                  ? ''
+                  : deckTexts.collectionNotReady
+            }
+          />
+        </section>
       </div>
       <CardImageDialog card={zoomCard} onClose={() => setZoomCard(null)} />
+      {preview.preview}
     </>
   );
 }

@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-03 (PM, julkaisu tuotantoon)
+# STATUS · päivitetty 2026-10-03 yöllä (PM, UX-uudistus PR #22 odottaa käyttäjää)
 
 ## Yhdellä lauseella
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | – | Ei keskeneräisiä tehtäviä. Seuraava: käyttäjän valinta (katso Seuraavaksi). |
+| T-050, T-051 | PM | Review, PR #22 | Käyttäjä katsoo esikatselun ja yhdistää PR #22:n testiin (yötyö 2026-10-03; PM ei yhdistänyt, koska se vaatii luvan). Sen jälkeen /julkaise. |
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
@@ -66,7 +66,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-048 ja T-049 tehty ja julkaistu 2026-10-03. Seuraavaksi T-044 (tuontiraportin ulkoasu) ja suodatinpaneelin tiivistys pakkaeditorissa (T-049:n avoin asia).
+1. PR #22 (T-050 UX-uudistus + T-051 Pakat-sivu ja tuontiraportti) esikatselu → yhdistä testiin → /julkaise. Katselmoinnit: UX-007 (korjattu), BREAK-003 (korjattu), kielentarkastus tehty.
 2. Käyttäjä 2026-10-02: MVP-1:n loppukatselmoinnit (UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija) eivät ole vielä ajankohtaisia, joten ne siirretään myöhemmäksi.
 3. Velat: T-047, T-041 (DeckEditorin pilkkominen), T-042, T-043, T-030, T-031.
 4. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).

@@ -417,7 +417,13 @@ const persistentMemory = (entries: { card: string; count: number }[] = []): Repo
 });
 const live = () => screen.getByRole('status');
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
-const heading2 = () => screen.queryAllByRole('heading', { level: 2 }).map((heading) => heading.textContent);
+// Notice headings only: 'Suodattimet' and 'Tulokset' are the page layout (T-050a).
+const LAYOUT_HEADINGS = ['Suodattimet', 'Tulokset'];
+const heading2 = () =>
+  screen
+    .queryAllByRole('heading', { level: 2 })
+    .map((heading) => heading.textContent)
+    .filter((text) => !LAYOUT_HEADINGS.includes(text ?? ''));
 
 describe('CatalogView collection: notices', () => {
   it('in-memory storage (persistent: false) shows a warning and no browser reminder', async () => {

@@ -3,6 +3,7 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import { CardColor, typeBadgeClass } from './CardColor';
 import { CardImage } from './CardImage';
+import { CostGem } from './DeckPickTable';
 import { CountControl } from './CountControl';
 import type { CountControlMode } from './CountControl';
 import { CardDecks } from './CardDecks';
@@ -27,7 +28,23 @@ export function collectionState(card: Card, owned: OwnedColumn | undefined): str
 }
 
 /** One game value (cost, power, RAM). A missing value shows a dash and a hidden spoken equivalent. */
-function Stat({ label, value, missing }: { label: string; value: number | string | null; missing: string }) {
+function Stat({
+  label,
+  value,
+  missing,
+  className = '',
+  hideLabel = false,
+  children,
+}: {
+  label: string;
+  value: number | string | null;
+  missing: string;
+  className?: string;
+  /** The label is only spoken (the cost gem and rarity speak for themselves visually). */
+  hideLabel?: boolean;
+  /** Replaces the plain value, e.g. with the cost gem. */
+  children?: ReactNode;
+}) {
   let shown: ReactNode = value;
   if (value === null) {
     shown = (
@@ -38,9 +55,9 @@ function Stat({ label, value, missing }: { label: string; value: number | string
     );
   }
   return (
-    <div className="card-stat">
-      <dt>{label}</dt>
-      <dd>{shown}</dd>
+    <div className={'card-stat ' + className}>
+      <dt className={hideLabel ? 'visually-hidden' : undefined}>{label}</dt>
+      <dd>{children ?? shown}</dd>
     </div>
   );
 }
@@ -70,44 +87,60 @@ export function CardList({
       {cards.map((card) => (
         <li key={card.id} className={'card-box ' + collectionState(card, owned)}>
           <CardImage card={card} onOpen={onOpenImage} />
-          <h3 className="card-name">
-            <span lang="en">{card.name}</span>
-            {card.subname !== null && (
-              <>
-                <span className="visually-hidden">, </span>
-                <span className="card-subname" lang="en">
-                  {card.subname}
-                </span>
-              </>
-            )}
-          </h3>
-          <p className="card-type">
-            <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
-              {card.type}
-            </span>
-            <span className="visually-hidden">
-              , <CardColor color={card.color} />
-            </span>
-          </p>
-          <dl className="card-stats">
-            <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} />
-            <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} />
-            <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} />
-            <Stat label={texts.columnRarity} value={card.rarity} missing={texts.noRarity} />
-          </dl>
-          {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
-          {owned !== undefined && (
-            <div className="card-collection">
-              <CountControl
-                card={card}
-                count={owned.countOf(card)}
-                mode={owned.mode}
-                onChange={owned.onChange}
-                onLimit={owned.onLimit}
-                editable={owned.editable}
+          <div className="card-head">
+            <dl className="card-cost">
+              <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
+                {card.cost === null ? undefined : <CostGem card={card} />}
+              </Stat>
+            </dl>
+            <h3 className="card-name">
+              <span lang="en">{card.name}</span>
+              {card.subname !== null && (
+                <>
+                  <span className="visually-hidden">, </span>
+                  <span className="card-subname" lang="en">
+                    {card.subname}
+                  </span>
+                </>
+              )}
+            </h3>
+          </div>
+          <div className="card-meta">
+            <p className="card-type">
+              <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
+                {card.type}
+              </span>
+              <span className="visually-hidden">
+                , <CardColor color={card.color} />
+              </span>
+            </p>
+            <dl className="card-stats">
+              <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} className="stat-chip" />
+              <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip" />
+              <Stat
+                label={texts.columnRarity}
+                value={card.rarity}
+                missing={texts.noRarity}
+                className="card-rarity"
+                hideLabel
               />
-            </div>
-          )}
+            </dl>
+          </div>
+          <div className="card-foot">
+            {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
+            {owned !== undefined && (
+              <div className="card-collection">
+                <CountControl
+                  card={card}
+                  count={owned.countOf(card)}
+                  mode={owned.mode}
+                  onChange={owned.onChange}
+                  onLimit={owned.onLimit}
+                  editable={owned.editable}
+                />
+              </div>
+            )}
+          </div>
         </li>
       ))}
     </ul>

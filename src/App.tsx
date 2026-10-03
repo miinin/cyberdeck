@@ -18,14 +18,11 @@ export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; 
   // The persistent storage button lives in the header but its state in the catalog view.
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
   const { route, navigate } = useHashRoute();
-  // The deck editor uses the full width (T-049); other views keep the reading width.
-  const wide = route.name === 'deck';
-  const containerClass = wide ? 'container container-wide' : 'container';
 
   return (
     <>
       <header className="site-header">
-        <div className={containerClass}>
+        <div className="container">
           <span className="brand">{texts.appName}</span>
           <nav className="main-nav" aria-label={deckTexts.navLabel}>
             <a href="#/" aria-current={route.name === 'cards' ? 'page' : undefined}>
@@ -39,7 +36,7 @@ export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; 
           <ThemeToggle preferences={openRepositories.preferences} />
         </div>
       </header>
-      <main className={containerClass}>
+      <main className="container">
         {route.name === 'cards' && (
           <CatalogView cards={cards} repositories={openRepositories} headerSlot={headerSlot} />
         )}
@@ -61,7 +58,7 @@ export function App({ cards = CARDS, repositories }: { cards?: readonly Card[]; 
         )}
       </main>
       <footer className="site-footer">
-        <div className={containerClass}>
+        <div className="container">
           <p>{texts.footerUnofficial}</p>
           <p>{texts.footerSource}</p>
         </div>
