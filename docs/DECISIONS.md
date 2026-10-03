@@ -298,3 +298,99 @@ Päätöksessä on viisi osaa.
 - Ikäraja 16 vuotta (ratkaisee K-P3:n). Tallennetaan vain välttämätön: Google-tunniste (uid), pakat ja kokoelma. Sähköpostia ja nimeä ei tallenneta tietokantaan, ellei Arkkitehti perustele tarvetta.
 - Vain Firebasen ilmaistaso (Spark), ei maksukorttia. Rekisterinpitäjä on käyttäjä Firebase-projektin omistajana (ratkaisee K-P1:n pilvitallennuksen osalta).
 **Seuraavaksi:** Arkkitehti tekee ADR:n (tietomalli, synkronointi ja ristiriidat, rajapintakerros), ja Digiturva tekee uhkamallin ja Firestoren sääntövaatimukset ennen toteutusta (T-054).
+
+## D-017 · Pilvitallennus: paikallinen ensin, Firebase Auth (Google, uudelleenohjaus) ja Firestore Lite -synkronointi kolmitiemergellä · 2026-10-03 · Päättäjä: Arkkitehti (ehdotus), PM ja käyttäjä hyväksyvät
+**Tila:** Ehdotettu. Toteuttaa D-016:n. Tehtävä T-054 (vaiheet a–d). Digiturvan uhkamalli ja sääntövaatimukset ennen T-054b:tä.
+**Konteksti:** Nykyinen tallennus on synkroninen localStorage-kerros (`src/storage/`): envelope `{schemaVersion, savedAt, data}`, validointi `src/domain/validate.ts`:ssä, varmuuskopiot, `subscribe` vain toisille välilehdille (storage-tapahtuma). UI käyttää vain rajapintoja `CollectionRepository` ja `DeckRepository`. D-016: vain Google, tili vapaaehtoinen, siirto selaimesta tilille, synkronointi laitteiden välillä, 16+, vain Spark. Testi- ja tuotantosivusto ovat **samassa Firebase-projektissa** (`cyberdeck-tcg`), joten niillä on yhteinen Auth ja Firestore.
+**Mitatut koot** (firebase 12.19.0, esbuild 0.28 minify + gzip -9, vain tarvittavat funktiot): `firebase/app` + `firebase/auth` 34 kt; lisäksi `firebase/firestore/lite` yhteensä 63 kt; täysi `firebase/firestore` (persistentLocalCache, onSnapshot) yhteensä 190 kt. Firestore-rajat (dokumentaatio, tarkistettu 2026-10-03): dokumentti enintään 1 MiB; Spark 50 000 lukua, 20 000 kirjoitusta ja 20 000 poistoa päivässä, 1 GiB tallennustilaa.
+
+**Vaihtoehdot:**
+- **A) Firestore lähteenä, täysi modulaarinen SDK.** Kirjautuneena repositoriot lukevat ja kirjoittavat Firestorea. Offline-tila ja välilehdet hoituvat IndexedDB-välimuistilla (`persistentLocalCache` + `persistentMultipleTabManager`) ja reaaliaikaisuus `onSnapshot`illa. + Vähiten omaa synkronointikoodia, reaaliaikainen. − 190 kt gzip. Kaksi rinnakkaista tallennusmallia (localStorage kirjautumatta, IndexedDB-välimuisti kirjautuneena). `setDoc` ei ratkea offline-tilassa ennen palvelimen kuittausta, mikä rikkoo nykyisen "tallennettu"-semantiikan ja `collectionStore`n säännöt. Sääntöjen hylkäämä kirjoitus peruuntuu hiljaa jälkikäteen. Välimuisti on tyhjennettävä uloskirjautuessa (`terminate` + `clearIndexedDbPersistence`).
+- **B) Paikallinen ensin + Firestore Lite (valittu).** localStorage pysyy ainoana paikallisena lähteenä myös kirjautuneena (tilikohtaisella avainetuliitteellä). Erillinen synkronointimoottori vetää ja työntää muutokset Firestore Liten REST-kutsuilla ja yhdistää ne puhtaalla kolmitiemergellä (pohja = viimeksi synkronoitu tila). + UI ja repositoriorajapinnat ennallaan, offline toimii kuten nyt, 63 kt gzip ladataan laiskasti vain kirjautuville, kirjautumattomilta ei lähde pyyntöjä Googlelle, ja synkronointilogiikka on puhdasta ja testattavaa ilman verkkoa. − Omaa synkronointikoodia (arviolta 300–400 riviä ja testit), ei reaaliaikaisuutta (synkronointi tapahtumista ja ajastimella).
+- **C) REST ilman SDK:ta.** Google Identity Services -skripti antaa ID-tokenin, `identitytoolkit`-REST vaihtaa sen Firebase-tokeniksi, ja refresh-tokenin hallinta sekä Firestore REST tehdään itse. + Pienin koko (arviolta alle 10 kt omaa koodia). − Tietoturvakriittinen token- ja istuntokoodi olisi itse tehty, refresh-token tallennettaisiin itse, tulisi uusi ulkoinen skripti (accounts.google.com) ja enemmän virhemahdollisuuksia. Hylätään.
+- (D) Erillinen Firebase-projekti testille: puhtain eristys, mutta vaatii toisen konsoliprojektin, toisen palvelutilin ja salaisuuden workflowhun. Ei nyt, vaan ympäristöjuuri (kohta 2).
+
+**Päätös:** B.
+
+**1. Kirjautuminen**
+- Firebase Auth, vain `GoogleAuthProvider`. `initializeAuth(app, { persistence: indexedDBLocalPersistence, popupRedirectResolver: browserPopupRedirectResolver })`.
+- **Julkaistuilla sivustoilla `signInWithRedirect` ja `authDomain` = sivuston oma host** (`cyberdeck-tcg.web.app` tai `cyberdeck-tcg-test.web.app`). Firebase Hosting tarjoaa `/__/auth/handler`in ja `/__/auth/iframe`n jokaisella sivustolla (reserved URLs), joten kirjautuminen tapahtuu samassa originissa. Silloin kolmannen osapuolen tallennuksen esto (Chrome 115+, Firefox 109+, Safari 16.1+) ei haittaa, ponnahdusikkunaa ei tarvita ja `Cross-Origin-Opener-Policy: same-origin` voi jäädä. Ponnahdusikkuna vaatisi COOP:n löysentämistä arvoon `same-origin-allow-popups`.
+- **Kehityksessä (`vite`, localhost)** `authDomain` = `cyberdeck-tcg.firebaseapp.com` ja `signInWithPopup` (localhost on oletuksena sallittu, eikä Vite lähetä COOP-otsaketta).
+- **PR-esikatselukanavat:** Firebase Auth ei salli jokerimerkkiä authorized domains -listassa. Firebase CLI lisää kanavan domainin automaattisesti, mutta käyttämämme `FirebaseExtended/action-hosting-deploy` ei (sen issue #39). Siksi esikatselussa kirjautuminen on pois käytöstä, ja painike kertoo, ettei kirjautuminen ole käytössä esikatselussa. Kirjautuminen testataan testisivustolla. Sallittujen hostien lista on koodissa (prod, test, localhost).
+- Tietokantaan ei tallenneta sähköpostia eikä nimeä. UI voi näyttää Auth-olion sähköpostin muistissa ("Kirjautuneena: x@…"), jotta käyttäjä tietää, millä tilillä on. Sitä ei tallenneta Firestoreen eikä localStorageen.
+- Firebasen SDK ladataan dynaamisella `import()`:lla vasta, kun käyttäjä painaa "Kirjaudu" tai localStoragessa on vihje aiemmasta kirjautumisesta (`cyberdeck:account:last-uid`). Kirjautumaton käyttäjä ei lataa SDK:ta eikä ota yhteyttä Googleen.
+
+**2. Konfiguraatio**
+- Web-sovelluksen config (apiKey, projectId, appId, messagingSenderId) ei ole salaisuus. Se committataan vakioina tiedostoon `src/account/firebase/config.ts`. `authDomain` valitaan ajossa `location.host`in mukaan sallitulta listalta. Viten env-muuttujia ei käytetä: ei uutta build-polkua, ja sama build käy molemmille sivustoille. Suositus: apiKeylle HTTP-referrer-rajaus Google Cloud Consolessa (prod, test, localhost).
+- **Ympäristöjuuri:** projekti on molemmille sivustoille sama, joten testisivuston ja esikatselun data menee juureen `test_users/{uid}` ja tuotannon data juureen `users/{uid}`. Valinta tehdään ajossa hostin mukaan (`cyberdeck-tcg.web.app` → `users`, muut → `test_users`). Säännöt ovat molemmille juurille samat.
+
+**3. Tietomalli (Firestore)**
+```
+{root}/{uid}                      meta: { schemaVersion: 1, rev: number, updatedAt: timestamp }
+{root}/{uid}/decks/{deckId}       { schemaVersion: 1, savedAt: string, data: { name, sections, createdAt, updatedAt } }
+{root}/{uid}/collection/main      { schemaVersion: 1, savedAt: string, data: { entries: [{ card, count }] } }
+```
+- Envelope on sama kuin localStoragessa, mutta Firestore-mappina eikä JSON-merkkijonona. `envelope.ts` saa funktion `decodeEnvelopeValue(value: unknown, spec)`, ja nykyinen `decodeEnvelope(raw)` on JSON.parse + `decodeEnvelopeValue`. Molemmat käyttävät samaa validointia (`parseDeck`, `parseCollection`) ja samoja migraatioita. Jos pilvessä on uudempi skeemaversio, synkronointi lukittuu (ei kirjoituksia) kuten paikallisessa `newer-version`-tilassa.
+- `deckId` on nykyinen UUID (`isDeckId`). Pakka on oma dokumenttinsa: enintään 500 riviä × noin 120 tavua ≈ 60 kt, kaukana 1 MiB:stä. Pakkoja on enintään 200 (MAX_DECKS).
+- Kokoelma on yksi dokumentti: enintään 5000 riviä × (avain enintään 100 merkkiä + luku) ≈ 600 kt pahimmillaan, alle 1 MiB:n. Synkronointi tarkistaa koodatun koon (raja 900 000 tavua) ennen kirjoitusta ja ilmoittaa virheestä yrittämättä kirjoitusta. Pilkkominen useampaan dokumenttiin tehdään vasta, jos rajat nousevat (IDEAS.md).
+- `meta.rev` kasvaa jokaisessa työnnössä. Sen ansiosta tavallinen synkronointi maksaa yhden luvun, kun mitään ei ole muuttunut.
+- Indeksejä ei tarvita, koska ainoa kysely on `{root}/{uid}/decks`-kokoelman luku. `firestore.indexes.json` on repossa tyhjänä (`{"indexes": [], "fieldOverrides": []}`).
+
+**4. Paikallinen tallennus kirjautuneena**
+- Kirjautumattoman avaimet pysyvät ennallaan (`cyberdeck:decks`, `cyberdeck:collection`), joten nykyisiä tietoja ei migroida.
+- Tilin paikallinen kopio: `cyberdeck:u:{uid}:decks`, `cyberdeck:u:{uid}:collection` sekä synkronoinnin pohja `cyberdeck:u:{uid}:sync` (`{ schemaVersion, rev, decks, collection }`, viimeksi synkronoitu tila). `uid` validoidaan (`^[A-Za-z0-9]{1,128}$`). Kahden tilin tiedot eivät sekoitu samassa selaimessa.
+- `createRepositories` saa option `namespace` (oletus tyhjä = nykyiset avaimet). `App` avaa repositoriot `uid`:n mukaan ja vaihtaa näkymäpuun `key={uid ?? 'local'}`. Näin hookit (`useDecks`, `useCollection`) saavat uuden vakaan viitteen eivätkä itse muutu.
+- Repositoriot saavat lisäksi samassa välilehdessä toimivan muutosilmoituksen (`notify`), jotta synkronoinnin kirjoitukset päivittävät näkymän. Nykyinen `subscribe` kuuntelee sekä storage-tapahtumaa että tätä ilmoitusta.
+
+**5. Synkronointi**
+- **Moottori** on `src/account/sync/syncEngine.ts` ja puhdas merge `src/account/sync/merge.ts`:
+  - Pakat: kolmitiemerge pakoittain (pohja, paikallinen, pilvi). Jos vain toinen on muuttunut, se voittaa. Jos molemmat ovat muuttuneet, suurempi `updatedAt` voittaa (tasapelissä pilvi). Poisto: jos pakka puuttuu toiselta ja toinen on pohjan mukainen, pakka poistetaan. Jos toinen on poistanut ja toinen muokannut, muokattu säilyy. Firestoressa ei tarvita tombstoneja, koska pohja kertoo poistot.
+  - Kokoelma: kolmitiemerge korteittain. Jos molemmat ovat muuttaneet saman kortin eri arvoon, paikallinen voittaa (tämän laitteen muutos on juuri tehty, toisen laitteen muutos on synkronoitu jo aiemmin).
+- **Kierros:** Web Locks (`navigator.locks.request('cyberdeck-sync')`, ei riippuvuutta) varmistaa, että vain yksi välilehti synkronoi kerrallaan. 1) Lue meta (1 luku). 2) Jos `rev` on sama kuin pohjan `rev` ja paikallinen on sama kuin pohja, kierros on valmis. 3) Muuten lue pakat ja kokoelma, yhdistä ja kirjoita paikallinen tulos repositorion kautta (notify ja storage-tapahtuma muille välilehdille). 4) Työnnä muuttuneet dokumentit `runTransaction`illa, joka lukee metan uudelleen ja keskeytyy, jos `rev` on muuttunut välissä (toinen laite ehti ensin). Silloin kierros alkaa alusta, enintään 3 kertaa. Transaktiossa on enintään 200 pakkaa + kokoelma + meta, alle 500 kirjoitusta. 5) Tallenna uusi pohja.
+- **Laukaisijat:** käynnistys kirjautuneena, paikallinen muutos (3 sekunnin viiveellä), `focus`, `visibilitychange` (näkyviin), `online` ja 5 minuutin välein, kun sivu on näkyvissä. Offline-tilassa näkyy "Ei yhteyttä, muutokset ovat tallessa tällä laitteella", ja yritys jatkuu `online`-tapahtumasta.
+- **Kiintiöarvio:** tavallinen kierros maksaa 1 luvun, täysi veto enintään 202 lukua, ja työntö kirjoittaa vain muuttuneet dokumentit. Aktiivinen käyttäjä tekee noin 100 kierrosta päivässä eli muutama sata lukua. Spark riittää kymmenille aktiivisille käyttäjille. Jos käyttäjiä tulee paljon, käyttöä seurataan konsolista.
+- **Tila UI:lle:** `idle | syncing | offline | error | locked` ja viimeisimmän onnistuneen synkronoinnin aika.
+- **T-042 korjataan samalla:** `DeckRepository.update(id, content, options?: { expectedUpdatedAt?: string })`. Jos tallennetun pakan `updatedAt` ei ole odotettu, tulee `StorageError('conflict')`. Pakkaeditori kuuntelee `subscribe`a. Jos omia tallentamattomia muutoksia ei ole, se lataa uuden version. Jos on, se näyttää ilmoituksen, että pakkaa muutettiin toisaalla (Lataa uusin / Pidä omat muutokset, joka tallentaa ilman ehtoa). Sama mekanismi kattaa toisen välilehden ja synkronoinnin tuoman muutoksen. Parametri on valinnainen, joten nykyiset kutsut eivät rikkoudu.
+
+**6. Ensimmäinen kirjautuminen ja yhdistäminen**
+- Jos selaimen (kirjautumattoman) tiedot ovat tyhjät, tilin tiedot vedetään.
+- Jos tili on tyhjä (metaa ei ole), selaimen tiedot työnnetään tilille. Onnistumisen jälkeen kirjautumattoman avaimet tyhjennetään (siirto, ei kopio) ja käyttäjälle kerrotaan, montako pakkaa ja kokoelma siirrettiin.
+- Jos tietoja on molemmissa, näytetään dialogi: **Yhdistä** (oletus: pakat yhteen id:n mukaan, kokoelmasta suurempi määrä korteittain, rajat tarkistetaan), **Käytä vain tilin tietoja** (selaimen tiedot jäävät koskematta kirjautumattoman tilaan) tai **Peruuta** (kirjaudutaan ulos). Tilin tiedot korvaavaa vaihtoehtoa ei tehdä, koska se olisi peruuttamaton. Dialogin tekstit tekevät UX ja Sisällöntuottaja.
+- Ennen siirtoa selaimen tiedoista otetaan varmuuskopio nykyisellä `backup`-mekanismilla.
+
+**7. Uloskirjautuminen**
+- Jos tilin paikallinen kopio poikkeaa pohjasta (synkronoimatta), näytetään varoitus, että osa muutoksista ei ole vielä tilillä (Yritä synkronoida / Kirjaudu ulos silti / Peruuta).
+- Sen jälkeen poistetaan `cyberdeck:u:{uid}:*` ja `cyberdeck:account:last-uid`, ja `signOut` poistaa Firebasen istunnon IndexedDB:stä (`firebaseLocalStorageDb`). Lite-SDK ei pidä omaa datavälimuistia. Selaimeen jäävät vain kirjautumattoman tiedot ja asetukset (teema, näkymät).
+- Jos istunto katoaa ilman uloskirjautumista (esim. token mitätöity), tilin paikallista kopiota ei poisteta automaattisesti. Seuraava kirjautuminen samalla tilillä jatkaa siitä, ja eri tilin kohdalla kysytään.
+
+**8. Rajapinnat ja testattavuus**
+- Uusi kerros `src/account/` (ei Reactia):
+  - `types.ts`: `AuthClient { available: boolean; current(): AccountUser | null; onChange(cb): () => void; signIn(): Promise<void>; signOut(): Promise<void> }`, `AccountUser { uid: string; email: string | null }` ja `CloudStore { readMeta(): Promise<CloudMeta | null>; readAll(): Promise<CloudSnapshot>; commit(change: CloudChange, expectedRev: number): Promise<number> }`. `commit` palauttaa uuden revin tai heittää `CloudError('conflict' | 'offline' | 'denied' | 'quota' | 'too-large' | 'unknown')`.
+  - `firebase/loadFirebase.ts` on ainoa tiedosto, joka tuo `firebase/*`:n (dynaamisesti). Lisäksi `firebase/config.ts`, `firebase/firebaseAuthClient.ts` ja `firebase/firestoreCloudStore.ts`.
+  - `memory.ts`: `createFakeAuth()` ja `createMemoryCloud()` testeille.
+  - `sync/merge.ts` (puhdas), `sync/syncEngine.ts` ja `index.ts` (julkinen rajapinta).
+- `App` saa propin `account?: AccountServices` (`{ auth, cloud(uid) }`). Oletuksena on laiska Firebase-toteutus, ja testit antavat valetoteutuksen.
+- `src/test/setup.ts`: `vi.mock` `loadFirebase`ille niin, että se heittää virheen "Real Firebase is disabled in tests", samaan tapaan kuin `fetch` on estetty.
+- ESLint: vain `src/account/firebase/**` saa tuoda `firebase/*`:n, ja UI tuo vain `../account`in. `src/account/**` saa tuoda `../storage`n julkisen rajapinnan ja `../domain`in.
+
+**9. CSP ja otsakkeet (molemmilla sivustoilla identtiset, ARCH-003)**
+- `script-src 'self' https://apis.google.com` (Auth-SDK lataa `https://apis.google.com/js/api.js`:n uudelleenohjauksen apuiframea varten).
+- `connect-src 'self' https://api.netdeck.gg https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com`.
+- `frame-src 'self'` (authDomain on oma origin, `/__/auth/iframe`). Nyt `default-src 'self'` kattaa sen, mutta se kirjoitetaan näkyviin.
+- **Varmistettava T-054a:ssa testisivustolla:** koskevatko `X-Frame-Options: DENY` ja `frame-ancestors 'none'` myös Hostingin `/__/auth/*`-sivuja. Jos koskevat ja estävät oman originin iframen, arvot muutetaan muotoon `SAMEORIGIN` ja `frame-ancestors 'self'`. Selaimen konsolin CSP-virheet kirjataan korttiin, ja lisäorigineja (esim. `https://www.gstatic.com`) lisätään vain havaitun tarpeen mukaan.
+- `src/firebaseConfig.test.ts` päivitetään: sallittujen originien lista on tarkka (yllä luetellut), ja `script-src` sisältää vain `'self'` ja `https://apis.google.com`.
+
+**10. Säännöt ja deploy**
+- Repoon tulevat `firestore.rules` ja `firestore.indexes.json`, ja `firebase.json`iin `"firestore": { "rules": "firestore.rules", "indexes": "firestore.indexes.json" }`.
+- Säännöt (Digiturva tarkentaa): vain omistaja (`request.auth.uid == uid`), vain juuret `users` ja `test_users`, vain polut meta, `decks/{deckId}` ja `collection/main`. Kenttien tyypit ja sallitut avaimet tarkistetaan, `schemaVersion` on kokonaisluku, ja pakkojen ja kokoelman kokorajat ovat voimassa (`sections.size() <= 20`, `entries.size() <= 5000`, nimi enintään 100 merkkiä, `deckId`-regex). Kaikki muu on kielletty.
+- **Deployn ajaa käyttäjä käsin:** `firebase deploy --only firestore:rules,firestore:indexes` (hook kysyy luvan). Workflown palvelutilillä on Hosting-oikeudet. Sääntöjen deploy vaatisi lisäroolin (Firebase Rules Admin) ja laajentaisi CI:n oikeuksia, eikä sääntöjä muuteta usein. Säännöt koskevat molempia sivustoja heti, joten ne deployataan ennen kuin T-054b yhdistetään testiin.
+- Sääntötestit emulaattorilla (`@firebase/rules-unit-testing` + Java) eivät kuulu tähän (raskas riippuvuus). Säännöt tarkistetaan Digiturvan katselmoinnissa ja käsin testisivustolla. Emulaattoritestit → IDEAS.md.
+
+**Perustelu:** B säilyttää nykyisen tallennuskerroksen takuut (synkroninen luku, muutos ja kirjoitus, varmuuskopiot, validointi) ja pitää UI:n ennallaan. Se toimii offline ilman uutta välimuistimallia, maksaa 63 kt gzip vain kirjautuville ja on testattavissa puhtaina funktioina ilman verkkoa. A:n reaaliaikaisuus ei ole D-016:n vaatimus, ja sen offline-kirjoitusten semantiikka rikkoisi nykyisen tallennusmallin. C siirtäisi tietoturvakriittisen istuntokoodin meille.
+
+**Seuraukset:**
+- Uusi riippuvuus `firebase` (tarkka versio, nyt 12.19.0) → Digiturvan riippuvuuskatselmointi. Siitä tuodaan vain `app`, `auth` ja `firestore/lite`.
+- CSP laajenee (kohta 9), ja `firebaseConfig.test.ts` päivitetään.
+- PRIVACY.md: uusi käsittely (uid, pakat, kokoelma, Googlen kirjautumistiedot Firebase Authissa, sijainti EU), 16+ ja poisto-oikeus (käyttäjä päättää, tehdäänkö MVP:hen "Poista tilin tiedot" -toiminto vai pelkkä ohje, ks. kortti).
+- Käyttäjän tehtävät Firebase- ja Google Cloud -konsolissa (lista T-054-kortissa) ennen T-054a:n testausta.
+- Kokoelman pilkkominen, reaaliaikaisuus (`onSnapshot`) ja sääntöjen emulaattoritestit → IDEAS.md.

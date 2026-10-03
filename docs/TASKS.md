@@ -58,3 +58,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-051 | Pakat-sivu ja tuontiraportti T-050:n tyyliin (sis. T-044) | 1 | Should | Koodari | Done (PR #22) | PM kuvakaappaukset, BREAK-003 |
 | T-052 | Hover-esikatselun korvaus, isommat kuvat, Cost/Power/RAM-suodattimet, värilaatat, estomerkkibugi | 1 | Must | Koodari | Done | PM kuvakaappaukset |
 | T-053 | Pakan tilastot (keskiarvot, Power-, RAM- ja harvinaisuusjakauma, nostotodennäköisyydet) ja testikäsi | 1 | Must | Koodari | Done | PM kuvakaappaukset, axe |
+| T-054 | Google-kirjautuminen ja pakkojen ja kokoelman pilvitallennus (D-016, D-017; vaiheet a–d) | 2 | Must | Koodari (vaiheittain) | Backlog (suunniteltu, odottaa D-017:n hyväksyntää ja Digiturvan uhkamallia) | Digiturva, Arkkitehti, UX, Sisällöntuottaja, Testikäyttäjä |
