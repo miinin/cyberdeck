@@ -306,7 +306,7 @@ describe('number filters: Cost, Power and RAM (T-052)', () => {
     expect(run({ costs: ['1', '9+'] })).toEqual(['a', 'c', 'd']);
     expect(run({ powers: ['10+'] })).toEqual(['c', 'd']);
     expect(run({ rams: ['2'] })).toEqual(['b', 'legend']);
-    expect(run({ costs: ['3', '9+'], rams: ['4+'] })).toEqual(['c', 'd']);
+    expect(run({ costs: ['3', '9+'], rams: ['4', '5+'] })).toEqual(['c', 'd']);
     // A card without Cost is dropped as soon as a Cost is selected.
     expect(run({ costs: ['1', '3', '9+'] })).not.toContain('legend');
     expect(run({})).toHaveLength(5);
@@ -316,7 +316,7 @@ describe('number filters: Cost, Power and RAM (T-052)', () => {
     expect(numberFilterOptionsFor(numbered, { ...EMPTY_CRITERIA, costs: ['5'] })).toEqual({
       costs: ['1', '3', '5', '9+'],
       powers: ['0', '4', '10+'],
-      rams: ['1', '2', '4+'],
+      rams: ['1', '2', '4', '5+'],
     });
   });
 
