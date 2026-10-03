@@ -20,3 +20,6 @@ Parkkipaikka uusille ideoille. Kaikki lisäävät, PM priorisoi (rules.md 0.7).
 | 2026-10-02 | `prefers-contrast: more` -tyyli (vahvemmat reunat) ja tulostustyyli (T-021, 7.8) | UX Designer | Parkissa, MVP-2:n saavutettavuusauditoinnin yhteydessä |
 | 2026-10-02 | Teeman kolmas vaihtoehto "laitteen mukaan" ja teeman synkronointi välilehtien välillä (`storage`-tapahtuma) (T-025, UX.md 8.1 ja 8.6) | UX Designer | Parkissa, vain jos käyttäjät pyytävät |
 | 2026-10-02 | `<meta name="theme-color" content="#000000">` selaimen osoitepalkin väriksi (otsikkopalkki on musta kummassakin teemassa) (T-025, UX.md 8.10 A5) | UX Designer | Parkissa |
+| 2026-10-03 | Pakan avainsana- ja korttitekstitilastot (esim. Blocker-, Quickhack-määrät) sekä korttitekstin näyttö ja haku. Vaatii kortin tekstin ja avainsanat dataan; Card-mallissa niitä ei ole (T-053) | UX Designer / Koodari | Parkissa, kun data saadaan |
+| 2026-10-03 | Sell Tag -määrä ja pakan hinta (kuten CyberdeckTools ja Moxfield). Vaatii Sell Tag- ja hintadatan (T-053) | UX Designer / Koodari | Parkissa, kun data saadaan |
+| 2026-10-03 | Testikäteen vuorolaskuri, korttien siirto pelialueelle ja ExBurstin tapaiset tavoitetodennäköisyydet tyypeittäin (halpa Unit/Gear/Program) (T-053) | Koodari | Parkissa |
