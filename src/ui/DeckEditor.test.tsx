@@ -63,20 +63,18 @@ describe('Deck editor', () => {
     expect(screen.getByText('Pakka on tyhjä. Lisää kortteja hakulistasta.')).toBeInTheDocument();
   });
 
-  it('dims a card that would break a rule, explains why, and still lets it be added', async () => {
+  it('marks a card only once it breaks a rule, explains why, and still lets it be added (T-057)', async () => {
     const user = userEvent.setup();
     openEditor([['l1', 1], ['l2', 1], ['l3', 1]]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     const list = searchList();
-    const bigRow = within(list).getByText('Big').closest('tr') as HTMLElement;
-    expect(bigRow).toHaveClass('is-dimmed');
-    expect(bigRow).toHaveTextContent('RAM 9 ylittää Red-värin rajan 6. Voit silti lisätä kortin.');
-    const add = within(bigRow).getByRole('button', { name: 'Lisää pakkaan: Big' });
-    expect(add).toHaveAccessibleDescription(/RAM 9 ylittää/);
-    await user.click(add);
+    const bigRow = () => within(list).getByText('Big').closest('tr') as HTMLElement;
+    expect(bigRow()).not.toHaveClass('is-dimmed');
+    await user.click(within(bigRow()).getByRole('button', { name: 'Lisää pakkaan: Big' }));
     expect(screen.getByText(/ylittää: Big/)).toBeInTheDocument();
-    // Legends are full, so another Legend is dimmed too (all three are in the deck already).
-    expect(within(list).getByText('L1').closest('tr')).toHaveClass('is-dimmed');
+    expect(bigRow()).toHaveClass('is-dimmed');
+    expect(bigRow()).toHaveTextContent('RAM 9 ylittää Red-värin rajan 6. Voit silti lisätä kortin.');
+    expect(within(bigRow()).getByRole('button', { name: 'Lisää pakkaan: Big' })).toHaveAccessibleDescription(/RAM 9 ylittää/);
   });
 
   it('compares with the collection: owned counts, a missing marker and the number of missing cards', async () => {

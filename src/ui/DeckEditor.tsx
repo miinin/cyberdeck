@@ -16,6 +16,10 @@ import {
   ramLimits,
   toCardsByKey,
   validateDeck,
+  deckCounts as countsOfDeck,
+  deckTotals as totalsOfDeck,
+  LEGEND_COUNT as LEGEND_LIMIT,
+  MAX_COPIES as COPY_LIMIT,
 } from '../domain/deckRules';
 import {
   EMPTY_CRITERIA,
@@ -309,6 +313,13 @@ export function DeckEditor({
     }
     const blocker = addBlocker(card, content, cardsByKey);
     if (blocker === null) return null;
+    // T-057: mark only when the deck is already over a limit, not when the next copy would be.
+    const count = countsOfDeck(content).get(card.key) ?? 0;
+    const over =
+      card.type === 'Legend'
+        ? count > 0 && totalsOfDeck(content, cardsByKey).legends > LEGEND_LIMIT
+        : count > COPY_LIMIT || (count > 0 && blocker.startsWith('RAM'));
+    if (!over) return null;
     return { reason: deckTexts.dimmedHint(blocker), short: deckTexts.blockedLimit };
   };
 
