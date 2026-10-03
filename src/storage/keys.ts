@@ -17,6 +17,8 @@ export const DECK_PICK_VIEW_KEY = 'cyberdeck:deck-pick-view';
  */
 export const ACCOUNT_LAST_UID_KEY = 'cyberdeck:account:last-uid';
 export const ACCOUNT_REDIRECT_PENDING_KEY = 'cyberdeck:account:redirect-pending';
+/** Set while "Poista tilin tiedot" waits for a re-login redirect: the account is deleted when the user returns (T-054d). */
+export const ACCOUNT_DELETE_PENDING_KEY = 'cyberdeck:account:delete-pending';
 /** Key prefix of one account's data in this browser (T-054c, D-017 kohta 4). The uid must be valid (isUid). */
 export function accountKeyPrefix(uid: string): string {
   return `cyberdeck:u:${uid}:`;

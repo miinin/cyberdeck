@@ -58,6 +58,13 @@ export function createLazyAuthClient(options: {
         state.set(loaded.state());
       }, true);
     },
+    async deleteAccount() {
+      try {
+        return await (await load()).deleteAccount();
+      } catch {
+        return 'failed';
+      }
+    },
     async signIn() {
       if (!available) return;
       state.set({ status: 'loading', error: null });

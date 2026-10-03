@@ -68,6 +68,9 @@ export interface PreferencesRepository {
   /** true when a sign-in redirect was started and its result has not been read yet. Never throws. */
   loadRedirectPending(): boolean;
   saveRedirectPending(pending: boolean): void;
+  /** Set while the account deletion waits for a re-login redirect (T-054d). */
+  loadDeletePending(): boolean;
+  saveDeletePending(pending: boolean): void;
 }
 
 /** Decks and collection together: what the sync engine reads and replaces (T-054c). */
@@ -98,6 +101,11 @@ export interface SyncStorage {
   backupAll(): void;
   /** Removes the decks and collection keys (after a successful transfer). */
   clear(): void;
+  /**
+   * Removes everything the account has in this browser: decks, collection, sync base and backups. Only for
+   * account repositories; the signed-out data is never erased this way. Throws StorageError.
+   */
+  eraseAccount(): void;
   /** Called after any local write, in this tab (all writes) and in other tabs (storage event). */
   onChange(listener: () => void): () => void;
 }

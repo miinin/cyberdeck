@@ -9,7 +9,9 @@ import type { FirebaseModules } from './loadFirebase';
 type FakeUser = { uid: string; email: string | null };
 
 /** Minimal stand-in for firebase/app and firebase/auth: records calls, never touches the network. */
-function fakeFirebase(options: { user?: FakeUser | null; signInUser?: FakeUser; signInError?: unknown } = {}) {
+function fakeFirebase(
+  options: { user?: FakeUser | null; signInUser?: FakeUser; signInError?: unknown; deleteError?: unknown } = {},
+) {
   const calls: string[] = [];
   const providers: { params: Record<string, string> }[] = [];
   let authStateListener: ((user: FakeUser | null) => void) | null = null;
@@ -52,6 +54,14 @@ function fakeFirebase(options: { user?: FakeUser | null; signInUser?: FakeUser; 
       signOut: vi.fn(async () => {
         calls.push('signOut');
         auth.currentUser = null;
+      }),
+      deleteUser: vi.fn(async () => {
+        calls.push('deleteUser');
+        if (options.deleteError !== undefined) throw options.deleteError;
+        auth.currentUser = null;
+      }),
+      reauthenticateWithRedirect: vi.fn(async () => {
+        calls.push('reauthenticateWithRedirect');
       }),
     },
   };
@@ -263,5 +273,61 @@ describe('authErrorKind (SR-21 kohta 4)', () => {
 describe('test setup', () => {
   it('blocks the real Firebase SDK in tests (SR-27 kohta 4)', async () => {
     await expect(loadFirebase()).rejects.toThrow('Real Firebase is disabled in tests');
+  });
+});
+
+describe('createFirebaseAuthClient: deleting the account (T-054d, D-017 K-P5)', () => {
+  const USER = { uid: 'abc123', email: 'minä@example.com' };
+
+  async function signedIn(options: Parameters<typeof fakeFirebase>[0] = {}, store = hints()) {
+    const firebase = fakeFirebase({ signInUser: USER, ...options });
+    const client = createFirebaseAuthClient({ env: PROD_ENV, mode: POPUP, hints: store, load: firebase.load });
+    await client.signIn();
+    return { firebase, client, store };
+  }
+
+  it('deletes the Auth user and signs out', async () => {
+    const { firebase, client, store } = await signedIn();
+    expect(await client.deleteAccount()).toBe('deleted');
+    expect(firebase.calls).toContain('deleteUser');
+    expect(client.state().status).toBe('signed-out');
+    expect(store.loadLastUid()).toBeNull();
+  });
+
+  it('asks for a new login when the last one is too old and finishes the deletion after the return', async () => {
+    const { firebase, client, store } = await signedIn({ deleteError: { code: 'auth/requires-recent-login' } });
+    expect(await client.deleteAccount()).toBe('reauth');
+    expect(firebase.calls).toContain('reauthenticateWithRedirect');
+    expect(store.loadDeletePending()).toBe(true);
+    expect(store.loadRedirectPending()).toBe(true);
+
+    // Back from Google: the deletion finishes.
+    const returned = fakeFirebase({ signInUser: USER });
+    const next = createFirebaseAuthClient({ env: PROD_ENV, mode: POPUP, hints: store, load: returned.load });
+    next.start();
+    await vi.waitFor(() => expect(next.state().status).toBe('signed-out'));
+    expect(returned.calls).toEqual(['getRedirectResult', 'deleteUser']);
+    expect(store.loadDeletePending()).toBe(false);
+    expect(store.loadLastUid()).toBeNull();
+  });
+
+  it('does not delete anything after a failed re-login and clears the flag', async () => {
+    const store = hints({ 'cyberdeck:account:redirect-pending': '1', 'cyberdeck:account:delete-pending': '1' });
+    const firebase = fakeFirebase({ signInError: { code: 'auth/user-mismatch' } });
+    const client = createFirebaseAuthClient({ env: PROD_ENV, mode: POPUP, hints: store, load: firebase.load });
+    client.start();
+    await vi.waitFor(() => expect(client.state().error).toBe('unknown'));
+    expect(firebase.calls).not.toContain('deleteUser');
+    expect(store.loadDeletePending()).toBe(false);
+  });
+
+  it('reports failure for other errors and when nobody is signed in', async () => {
+    const { client, store } = await signedIn({ deleteError: { code: 'auth/network-request-failed' } });
+    expect(await client.deleteAccount()).toBe('failed');
+    expect(store.loadDeletePending()).toBe(false);
+    expect(client.state().status).toBe('signed-in');
+
+    const idle = createFirebaseAuthClient({ env: PROD_ENV, mode: POPUP, hints: hints(), load: fakeFirebase().load });
+    expect(await idle.deleteAccount()).toBe('failed');
   });
 });

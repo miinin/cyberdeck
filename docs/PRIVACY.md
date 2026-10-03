@@ -108,7 +108,8 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 
 ### 10.1 Yhteenveto
 - Kirjautuminen on **vapaaehtoinen** ja vain Google-tilillä. Ilman kirjautumista mikään luvuissa 1–6 ei muutu, eikä selain lataa Firebasen koodia eikä ota yhteyttä Googleen.
-- Kirjautuneen käyttäjän pakat ja kokoelma tallentuvat Firestoreen (Google, `europe-north1`, Suomi) ja selaimeen tilikohtaisesti.
+- Kirjautuneen käyttäjän pakat ja kokoelma tallentuvat Firestoreen (Google, EU: tuotanto `eur3`, testi `europe-north1`) ja selaimeen tilikohtaisesti. Googlen tilitiedot (nimi, sähköposti) ovat Firebase Authenticationissa, ei Firestoressa.
+- Rekisterinpitäjä: [nimi ja sähköposti lisätään] (K-P7). Kirjautumista ei avata muille ennen kuin tämä teksti on lisätty.
 - Firestoreen ei tallenneta sähköpostia, nimeä eikä kuvaa, vaan vain Googlen antama tunniste (uid) polussa sekä pakat ja kokoelma.
 - **Ikäraja 16 vuotta** (D-016). Ikää ei voi tarkistaa teknisesti, vaan siitä kerrotaan kirjautumisdialogissa.
 - **Rekisterinpitäjä** on käyttäjä Firebase-projektin `cyberdeck-tcg` omistajana (D-016). Google (Firebase) toimii käsittelijänä Firebasen ehtojen mukaan.
@@ -132,7 +133,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 ### 10.3 Sijainti
 | Paikka | Sijainti | Huomio |
 |---|---|---|
-| Firestore | Tavoite `europe-north1` (Suomi), pysyvä valinta (D-017). **Tila 2026-10-03: molempien projektien tietokanta on `nam5` (USA)** ja luodaan uudelleen ennen T-054b:tä (SEC-013). | Juuri `users` molemmissa projekteissa: tuotanto `cyberdeck-tcg`, testisivusto ja kehitys `cyberdeck-tcg-dev` (D-017 Muutos K-P8, R-18 poistuu). |
+| Firestore | Tuotanto `eur3`, testi `europe-north1` (käyttäjän valinta 2026-10-03, pysyvä, D-017). **Tila 2026-10-03: molempien projektien tietokanta on `nam5` (USA)** ja luodaan uudelleen ennen T-054b:tä (SEC-013). | Juuri `users` molemmissa projekteissa: tuotanto `cyberdeck-tcg`, testisivusto ja kehitys `cyberdeck-tcg-dev` (D-017 Muutos K-P8, R-18 poistuu). |
 | Firebase Authentication | Googlen globaali palvelu, ei aluevalintaa | Tietoja voidaan käsitellä EU:n ulkopuolella. Siirron peruste Googlen tietojenkäsittelyehdoissa: **tarkistettava** (firebase.google.com/support/privacy). |
 | Selain | Käyttäjän laite | Kuten luku 3. Tilin kopio jää uloskirjautuessa. |
 
@@ -160,7 +161,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 Sovellus ei aseta evästeitä. Firebase Auth käyttää IndexedDB:tä (rivi 16). Kirjautumisen aikana Google asettaa omat evästeensä omaan verkkotunnukseensa (accounts.google.com), mikä kerrotaan selosteessa.
 
 ### 10.8 Tietosuojaseloste ja kirjautumisdialogi
-- **Kirjautumisdialogi (T-054a), sisältöluonnos:** "Kirjautuminen on tarkoitettu 16 vuotta täyttäneille. Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla Suomessa, ja voit poistaa ne milloin tahansa." + linkki selosteeseen. Sisällöntuottaja muotoilee.
+- **Kirjautumisdialogi (T-054a), sisältöluonnos:** "Kirjautuminen on tarkoitettu 16 vuotta täyttäneille. Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa." Lisäksi: "Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa" ja rekisterinpitäjän paikkamerkki (toteutettu T-054c:ssä, SEC-038). + linkki selosteeseen. Sisällöntuottaja muotoilee.
 - **Seloste (T-054d, ennen kirjautumisen avaamista muille):** SR-29 kohta 3. Digiturva laatii luonnoksen, käyttäjä hyväksyy.
 
 ### 10.9 Avoimet kysymykset käyttäjälle (PM:n kautta)

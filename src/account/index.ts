@@ -13,6 +13,7 @@ export type {
   AuthClient,
   AuthErrorKind,
   AuthState,
+  DeleteAccountResult,
   CloudChange,
   CloudDoc,
   CloudMeta,
@@ -68,5 +69,6 @@ function createLazyCloudStore(uid: string): CloudStore {
     readMeta: async () => (await load()).readMeta(),
     readAll: async () => (await load()).readAll(),
     commit: async (change, expectedRev) => (await load()).commit(change, expectedRev),
+    deleteAll: async () => (await load()).deleteAll(),
   };
 }

@@ -105,6 +105,7 @@ describe('sync engine', () => {
         return snapshot;
       },
       commit: (change, rev) => cloud.commit(change, rev),
+      deleteAll: () => cloud.deleteAll(),
     });
     await a.repos.decks.create(CONTENT);
     await a.engine.syncNow();
@@ -125,6 +126,7 @@ describe('sync engine', () => {
         return snapshot;
       },
       commit: (change, rev) => cloud.commit(change, rev),
+      deleteAll: () => cloud.deleteAll(),
     });
     await a.repos.decks.create(CONTENT);
     await a.engine.syncNow();

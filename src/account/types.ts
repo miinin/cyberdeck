@@ -42,7 +42,15 @@ export interface AuthClient {
    */
   signIn(): Promise<void>;
   signOut(): Promise<void>;
+  /**
+   * Deletes the Firebase Auth user (D-017 K-P5). `reauth` = a recent login is needed: the page goes to Google and
+   * the deletion finishes after the return. Never rejects. The cloud data must be deleted first (the rules need
+   * the signed-in user).
+   */
+  deleteAccount(): Promise<DeleteAccountResult>;
 }
+
+export type DeleteAccountResult = 'deleted' | 'reauth' | 'failed';
 
 /** Services the app gets from the account layer. */
 export interface AccountServices {
@@ -57,6 +65,8 @@ export interface AccountHints {
   saveLastUid(uid: string | null): void;
   loadRedirectPending(): boolean;
   saveRedirectPending(pending: boolean): void;
+  loadDeletePending(): boolean;
+  saveDeletePending(pending: boolean): void;
 }
 
 /** Cloud meta document `users/{uid}` (D-017 kohta 3). `newer` = a newer app wrote it: sync locks (SR-23 kohta 4). */
@@ -100,4 +110,6 @@ export interface CloudStore {
    * Throws CloudError.
    */
   commit(change: CloudChange, expectedRev: number): Promise<number>;
+  /** Deletes every document under the account (decks, collection and meta). Throws CloudError. */
+  deleteAll(): Promise<void>;
 }

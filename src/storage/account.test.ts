@@ -118,6 +118,33 @@ describe('sync storage', () => {
   });
 });
 
+describe('erasing the account data', () => {
+  it('removes every key of the account, including backups and the base, and nothing else', async () => {
+    const { store, repos } = open();
+    const account = repos.forAccount('user123');
+    await account.decks.create(CONTENT);
+    await account.collection.setCount('detonate', 1);
+    account.sync.backupAll();
+    account.sync.saveBase({ rev: 1, decks: [], collection: { entries: [] } });
+    await repos.forAccount('other456').decks.create(CONTENT);
+    await repos.decks.create(CONTENT);
+    await repos.preferences.saveTheme('light');
+
+    account.sync.eraseAccount();
+    expect(store.keys().filter((key) => key.startsWith('cyberdeck:u:user123:'))).toEqual([]);
+    expect(store.getItem('cyberdeck:u:other456:decks')).not.toBeNull();
+    expect(store.getItem('cyberdeck:decks')).not.toBeNull();
+    expect(store.getItem('cyberdeck:theme')).toBe('light');
+  });
+
+  it('never erases the signed-out data', async () => {
+    const { store, repos } = open();
+    await repos.decks.create(CONTENT);
+    repos.sync.eraseAccount();
+    expect(store.getItem('cyberdeck:decks')).not.toBeNull();
+  });
+});
+
 describe('deck update conflict (T-042)', () => {
   it('rejects an update when the stored updatedAt differs and writes nothing', async () => {
     const { repos } = open();

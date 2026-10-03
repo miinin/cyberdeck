@@ -41,7 +41,7 @@ export function App({
     () => (uid === null ? signedOutRepositories : signedOutRepositories.forAccount(uid)),
     [signedOutRepositories, uid],
   );
-  const [signedOutNotice, setSignedOutNotice] = useState(false);
+  const [notice, setNotice] = useState<'signed-out' | 'deleted' | null>(null);
   // Creating the session starts nothing; the effect starts and (also in Strict Mode) stops it.
   const session = useMemo(
     () =>
@@ -84,16 +84,17 @@ export function App({
           <AccountMenu
             auth={accountServices.auth}
             session={session}
-            onSignedOut={() => setSignedOutNotice(true)}
+            onSignedOut={() => setNotice('signed-out')}
+            onAccountDeleted={() => setNotice('deleted')}
           />
           <ThemeToggle preferences={openRepositories.preferences} />
         </div>
       </header>
-      {signedOutNotice && uid === null && (
+      {notice !== null && uid === null && (
         <div className="container">
           <p className="notice" role="status">
-            {texts.accountSignedOutNotice}{' '}
-            <button type="button" className="button-secondary" onClick={() => setSignedOutNotice(false)}>
+            {notice === 'deleted' ? texts.accountDeletedNotice : texts.accountSignedOutNotice}{' '}
+            <button type="button" className="button-secondary" onClick={() => setNotice(null)}>
               {texts.accountSignedOutDismiss}
             </button>
           </p>

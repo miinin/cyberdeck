@@ -298,6 +298,14 @@ describe.each([
     expect(snapshot.decks).toHaveLength(MAX_DECKS);
   });
 
+  it('deletes everything under the account and nothing else', async () => {
+    await h.store.commit(change({ putDecks: [deck('d1'), deck('d2')], collection: COLLECTION }), 0);
+    await h.store.deleteAll();
+    expect(await h.store.readMeta()).toBeNull();
+    expect(await h.store.readAll()).toMatchObject({ meta: null, decks: [], collection: { kind: 'missing' } });
+    await h.store.deleteAll(); // already empty: fine
+  });
+
   it('turns a meta the rules would never allow into an error', async () => {
     h.setRaw('meta', { schemaVersion: 1, rev: 'x' });
     expect(await cloudErrorKind(h.store.readMeta())).toBe('unknown');

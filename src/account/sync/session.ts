@@ -27,6 +27,12 @@ export interface AccountSession {
   dispose(): void;
   status(): SessionStatus;
   onChange(listener: () => void): () => void;
+  /**
+   * "Poista tilin tiedot" (T-054d): stops syncing, deletes the cloud data, then everything the account has in
+   * this browser. false = the cloud data could not be deleted (syncing resumes). The Auth user is deleted by
+   * the caller after this.
+   */
+  deleteAccountData(): Promise<boolean>;
   /** Runs a sync round now (the engine is started after the first sign-in has been settled). */
   syncNow(): Promise<void>;
 }
@@ -172,6 +178,18 @@ export function createAccountSession(options: {
       return () => {
         listeners.delete(listener);
       };
+    },
+    async deleteAccountData() {
+      engine.stop();
+      await engine.whenIdle();
+      try {
+        await cloud.deleteAll();
+        account.sync.eraseAccount();
+        return true;
+      } catch {
+        engine.start();
+        return false;
+      }
     },
     syncNow: () => engine.syncNow(),
   };

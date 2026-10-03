@@ -397,7 +397,7 @@ Päätöksessä on viisi osaa.
 
 **D-017, käyttäjän hyväksyntä 2026-10-03:**
 - Ratkaisu B hyväksytty.
-- Firestoren sijainti: `europe-north1`.
+- Firestoren sijainti: aluksi `europe-north1`; **käyttäjän lopullinen valinta 2026-10-03: tuotanto `eur3`, testi `europe-north1`** (kirjattu myös PRIVACY.md:hen).
 - Poisto-oikeus toteutetaan "Poista tilin tiedot" -painikkeena, joka poistaa pilvidatan vahvistuksen jälkeen.
 - Uloskirjautuminen ei poista tilin tietoja selaimesta. Uloskirjautuessa käyttäjälle kerrotaan, että tiedot jäävät tähän selaimeen. Digiturva arvioi jaetun koneen riskin ja antaa tarvittaessa ohjeen.
 

@@ -28,6 +28,8 @@ export interface SyncEngine {
   stop(): void;
   /** Runs a round (or joins the running one) and resolves when it is done. Never rejects. */
   syncNow(): Promise<void>;
+  /** Resolves when no round is running (used before the account data is deleted). */
+  whenIdle(): Promise<void>;
   status(): SyncStatus;
   onChange(listener: () => void): () => void;
 }
@@ -232,7 +234,9 @@ export function createSyncEngine(options: {
     stop() {
       for (const stop of stops) stop();
       stops = [];
+      again = false;
     },
+    whenIdle: () => running ?? Promise.resolve(),
     syncNow,
     status: () => status,
     onChange(listener) {

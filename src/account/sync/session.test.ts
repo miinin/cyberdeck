@@ -140,3 +140,45 @@ describe('first sign-in', () => {
     second.dispose();
   });
 });
+
+describe('deleting the account data', () => {
+  it('deletes the cloud data and everything the account has in the browser, but not the signed-out data', async () => {
+    const b = browser();
+    await b.account.decks.create(CONTENT);
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    expect(cloud.paths()).toContain('meta');
+    await b.anonymous.decks.create({ ...CONTENT, name: 'Kirjautumaton' });
+
+    expect(await session.deleteAccountData()).toBe(true);
+    expect(cloud.paths()).toEqual([]);
+    expect((await b.account.decks.list()).value).toEqual([]);
+    expect(b.account.sync.loadBase()).toBeNull();
+    expect((await b.anonymous.decks.list()).value.map((deck) => deck.name)).toEqual(['Kirjautumaton']);
+    session.dispose();
+  });
+
+  it('keeps the browser data and resumes syncing when the cloud data cannot be deleted', async () => {
+    const b = browser();
+    await b.account.decks.create(CONTENT);
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    cloud.failNext('offline');
+    expect(await session.deleteAccountData()).toBe(false);
+    expect((await b.account.decks.list()).value).toHaveLength(1);
+    expect(cloud.paths()).toContain('meta');
+    session.dispose();
+  });
+
+  it('never syncs again after the data was deleted (no re-upload)', async () => {
+    const b = browser();
+    await b.account.decks.create(CONTENT);
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    await session.deleteAccountData();
+    window.dispatchEvent(new Event('focus'));
+    await settle();
+    expect(cloud.paths()).toEqual([]);
+    session.dispose();
+  });
+});

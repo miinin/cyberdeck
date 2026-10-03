@@ -12,12 +12,15 @@ export function AccountMenu({
   auth,
   session = null,
   onSignedOut,
+  onAccountDeleted,
 }: {
   auth: AuthClient;
   /** The sync session of the signed-in account (T-054c). */
   session?: AccountSession | null;
   /** Called after the user signed out with the menu (the app shows the notice). */
   onSignedOut?: () => void;
+  /** Called after the account data and the account were deleted (T-054d). */
+  onAccountDeleted?: () => void;
 }) {
   const state = useSyncExternalStore(auth.onChange, auth.state);
 
@@ -26,7 +29,7 @@ export function AccountMenu({
 
   // Separate components, so signing in or out resets the dialog and menu state by unmounting.
   if (state.status === 'signed-in' && state.user !== null) {
-    return <SignedInMenu auth={auth} email={state.user.email} session={session} onSignedOut={onSignedOut} />;
+    return <SignedInMenu auth={auth} email={state.user.email} session={session} onSignedOut={onSignedOut} onAccountDeleted={onAccountDeleted} />;
   }
   return <SignInButton auth={auth} state={state} />;
 }
@@ -63,11 +66,13 @@ function SignedInMenu({
   email,
   session,
   onSignedOut,
+  onAccountDeleted,
 }: {
   auth: AuthClient;
   email: string | null;
   session: AccountSession | null;
   onSignedOut?: () => void;
+  onAccountDeleted?: () => void;
 }) {
   const status = useSyncExternalStore(session?.onChange ?? NO_SESSION, () => session?.status() ?? null);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
@@ -76,6 +81,29 @@ function SignedInMenu({
   async function signOut() {
     await auth.signOut();
     if (auth.state().status === 'signed-out') onSignedOut?.();
+  }
+  const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm' | 'working' | 'reauth'>('idle');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  async function deleteEverything() {
+    if (session === null) return;
+    setDeleteStep('working');
+    setDeleteError(null);
+    if (!(await session.deleteAccountData())) {
+      setDeleteStep('confirm');
+      setDeleteError(texts.accountDeleteFailedCloud);
+      return;
+    }
+    const result = await auth.deleteAccount();
+    if (result === 'deleted') {
+      onAccountDeleted?.();
+    } else if (result === 'reauth') {
+      setDeleteStep('reauth');
+    } else {
+      session.start(); // the data is gone but the account is not: sync keeps working
+      setDeleteStep('confirm');
+      setDeleteError(texts.accountDeleteFailedAccount);
+    }
   }
   // Unsynced changes (or a failed last round) are warned about once before signing out.
   const unsynced = status !== null && (status.sync.pending || status.sync.state !== 'idle');
@@ -114,6 +142,47 @@ function SignedInMenu({
           <button type="button" className="button-secondary" onClick={() => void session.syncNow()}>
             {texts.accountSyncNow}
           </button>
+        )}
+        {session !== null && deleteStep === 'idle' && (
+          <button type="button" className="button-secondary" onClick={() => setDeleteStep('confirm')}>
+            {texts.accountDelete}
+          </button>
+        )}
+        {deleteStep !== 'idle' && (
+          <div role="alert">
+            {deleteStep === 'reauth' ? (
+              <p>{texts.accountDeleteReauth}</p>
+            ) : (
+              <>
+                <p>
+                  <strong>{texts.accountDeleteTitle}</strong>
+                </p>
+                <p>{texts.accountDeleteBody}</p>
+                {deleteError !== null && <p className="account-error">{deleteError}</p>}
+                <div className="row-actions">
+                  <button
+                    type="button"
+                    className="button-secondary"
+                    disabled={deleteStep === 'working'}
+                    onClick={() => {
+                      setDeleteStep('idle');
+                      setDeleteError(null);
+                    }}
+                  >
+                    {texts.accountCancel}
+                  </button>
+                  <button
+                    type="button"
+                    className="button-primary"
+                    disabled={deleteStep === 'working'}
+                    onClick={() => void deleteEverything()}
+                  >
+                    {deleteStep === 'working' ? texts.accountDeleting : texts.accountDeleteConfirm}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         )}
         {confirmingSignOut ? (
           <div role="alert">

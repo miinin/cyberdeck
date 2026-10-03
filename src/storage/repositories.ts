@@ -30,6 +30,7 @@ import {
   DECK_PICK_VIEW_KEY,
   ACCOUNT_LAST_UID_KEY,
   ACCOUNT_REDIRECT_PENDING_KEY,
+  ACCOUNT_DELETE_PENDING_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
 import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS } from './migrations';
@@ -439,6 +440,8 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     saveLastUid: (uid: string | null) => writeHint(ACCOUNT_LAST_UID_KEY, uid !== null && isUid(uid) ? uid : null),
     loadRedirectPending: () => readHint(ACCOUNT_REDIRECT_PENDING_KEY) === '1',
     saveRedirectPending: (pending: boolean) => writeHint(ACCOUNT_REDIRECT_PENDING_KEY, pending ? '1' : null),
+    loadDeletePending: () => readHint(ACCOUNT_DELETE_PENDING_KEY) === '1',
+    saveDeletePending: (pending: boolean) => writeHint(ACCOUNT_DELETE_PENDING_KEY, pending ? '1' : null),
   };
 
   const serialize = (data: LocalData) => JSON.stringify([data.decks, data.collection.entries]);
@@ -497,6 +500,17 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       }
       callAll(uiListeners);
       callAll(changeListeners);
+    },
+    eraseAccount() {
+      if (prefix === null) return;
+      try {
+        for (const key of store.keys()) {
+          if (key.startsWith(prefix)) store.removeItem(key);
+        }
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      callAll(uiListeners);
     },
     onChange(listener) {
       changeListeners.add(listener);

@@ -13,7 +13,7 @@ import {
 } from './cloudCodec';
 import { CloudError } from './cloudError';
 import type { CloudErrorKind } from './cloudError';
-import type { AccountUser, AuthClient, AuthErrorKind, CloudMeta, CloudStore } from './types';
+import type { AccountUser, AuthClient, AuthErrorKind, CloudMeta, CloudStore, DeleteAccountResult } from './types';
 
 export const FAKE_USER: AccountUser = { uid: 'fakeUid123', email: 'testi@example.com' };
 
@@ -22,6 +22,10 @@ export type FakeAuth = AuthClient & {
   readonly signInCalls: number;
   /** The next signIn fails with this kind instead of signing in (null = cancelled by the user). */
   failNextSignIn(kind: AuthErrorKind | null): void;
+  /** deleteAccount calls so far. */
+  readonly deleteCalls: number;
+  /** The next deleteAccount returns this instead of deleting the account. */
+  setNextDeleteResult(result: DeleteAccountResult): void;
 };
 
 export function createFakeAuth(
@@ -30,6 +34,8 @@ export function createFakeAuth(
   const { available = true, user = null, signInAs = FAKE_USER } = options;
   const state = createAuthState(user === null ? SIGNED_OUT : { status: 'signed-in', user, error: null });
   let signInCalls = 0;
+  let deleteCalls = 0;
+  let nextDeleteResult: DeleteAccountResult = 'deleted';
   let nextFailure: { kind: AuthErrorKind | null } | null = null;
 
   return {
@@ -55,8 +61,24 @@ export function createFakeAuth(
     async signOut() {
       state.set(SIGNED_OUT);
     },
+    async deleteAccount() {
+      deleteCalls += 1;
+      if (nextDeleteResult !== 'deleted') {
+        const result = nextDeleteResult;
+        nextDeleteResult = 'deleted';
+        return result;
+      }
+      state.set(SIGNED_OUT);
+      return 'deleted';
+    },
     failNextSignIn(kind) {
       nextFailure = { kind };
+    },
+    get deleteCalls() {
+      return deleteCalls;
+    },
+    setNextDeleteResult(result) {
+      nextDeleteResult = result;
     },
   };
 }
@@ -119,6 +141,10 @@ export function createMemoryCloud(
         .slice(0, MAX_DECKS + 1)
         .map((path) => ({ id: path.slice('decks/'.length), data: read(path) }));
       return buildSnapshot(meta, deckDocs, read('collection/main'));
+    },
+    async deleteAll() {
+      failIfAsked();
+      docs.clear();
     },
     async commit(requested, expectedRev) {
       failIfAsked();

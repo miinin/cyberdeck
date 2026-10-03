@@ -144,3 +144,72 @@ describe('account data in the app', () => {
     expect((await repositories.decks.list()).value).toHaveLength(1);
   });
 });
+
+describe('deleting the account data in the app', () => {
+  async function openDeleteDialog(user: ReturnType<typeof userEvent.setup>) {
+    await openMenu(user);
+    await user.click(await screen.findByRole('button', { name: 'Poista tilin tiedot' }));
+  }
+
+  it('deletes the cloud data, the browser data and the account after a confirmation', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories();
+    const account = repositories.forAccount(FAKE_USER.uid);
+    await account.decks.create(CONTENT);
+    const cloud = createMemoryCloud({ uid: FAKE_USER.uid });
+    const auth = await renderApp({ repositories, cloud });
+    await vi.waitFor(() => expect(cloud.paths()).toContain('meta'));
+
+    await openDeleteDialog(user);
+    expect(screen.getByRole('alert')).toHaveTextContent('Poistoa ei voi perua');
+    await user.click(screen.getByRole('button', { name: 'Poista tiedot ja tili' }));
+
+    expect(await screen.findByText(/Tilin tiedot ja tili on poistettu/)).toBeInTheDocument();
+    expect(auth.deleteCalls).toBe(1);
+    expect(auth.state().status).toBe('signed-out');
+    expect(cloud.paths()).toEqual([]);
+    expect((await account.decks.list()).value).toEqual([]);
+  });
+
+  it('deletes nothing when the user cancels', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories();
+    await repositories.forAccount(FAKE_USER.uid).decks.create(CONTENT);
+    const cloud = createMemoryCloud({ uid: FAKE_USER.uid });
+    const auth = await renderApp({ repositories, cloud });
+    await vi.waitFor(() => expect(cloud.paths()).toContain('meta'));
+
+    await openDeleteDialog(user);
+    await user.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Peruuta' }));
+    expect(auth.deleteCalls).toBe(0);
+    expect(cloud.paths()).toContain('meta');
+  });
+
+  it('tells that the page goes to Google when a new login is needed', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories();
+    const cloud = createMemoryCloud({ uid: FAKE_USER.uid });
+    const auth = await renderApp({ repositories, cloud });
+    auth.setNextDeleteResult('reauth');
+    await openDeleteDialog(user);
+    await user.click(screen.getByRole('button', { name: 'Poista tiedot ja tili' }));
+    expect(await screen.findByText(/Siirrytään Googleen vahvistamaan kirjautuminen/)).toBeInTheDocument();
+  });
+
+  it('keeps the data and says so when the cloud data cannot be deleted', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories();
+    const account = repositories.forAccount(FAKE_USER.uid);
+    await account.decks.create(CONTENT);
+    const cloud = createMemoryCloud({ uid: FAKE_USER.uid });
+    const auth = await renderApp({ repositories, cloud });
+    await vi.waitFor(() => expect(cloud.paths()).toContain('meta'));
+
+    await openDeleteDialog(user);
+    cloud.failNext('offline');
+    await user.click(screen.getByRole('button', { name: 'Poista tiedot ja tili' }));
+    expect(await screen.findByText(/Tietojen poisto ei onnistunut/)).toBeInTheDocument();
+    expect(auth.deleteCalls).toBe(0);
+    expect((await account.decks.list()).value).toHaveLength(1);
+  });
+});

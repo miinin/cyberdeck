@@ -74,6 +74,17 @@ export const texts = {
   accountSignedOutNotice:
     'Kirjauduit ulos. Tilisi tiedot jäävät tähän selaimeen. Jos käytät jaettua konetta, poista ne ennen kuin lähdet: kirjaudu sisään ja valitse "Poista tilin tiedot".',
   accountSignedOutDismiss: 'Sulje ilmoitus',
+  // Deleting the account data (T-054d, D-017 K-P5).
+  accountDelete: 'Poista tilin tiedot',
+  accountDeleteTitle: 'Poistetaanko tilin tiedot?',
+  accountDeleteBody:
+    'Pakat ja kokoelma poistetaan tililtä ja tästä selaimesta, ja Google-tilillä kirjautuminen poistetaan tästä palvelusta. Poistoa ei voi perua. Selaimen kirjautumattoman tilan tiedot eivät poistu.',
+  accountDeleteConfirm: 'Poista tiedot ja tili',
+  accountDeleting: 'Poistetaan…',
+  accountDeleteReauth: 'Siirrytään Googleen vahvistamaan kirjautuminen. Poisto valmistuu, kun palaat sivulle.',
+  accountDeleteFailedCloud: 'Tietojen poisto ei onnistunut. Tarkista yhteys ja yritä uudelleen.',
+  accountDeleteFailedAccount: 'Tiedot poistettiin, mutta tilin poisto ei onnistunut. Yritä uudelleen.',
+  accountDeletedNotice: 'Tilin tiedot ja tili on poistettu.',
   // First sign-in with data on both sides (T-054c).
   accountChooseTitle: 'Tässä selaimessa ja tilillä on tietoja',
   accountChooseBody:

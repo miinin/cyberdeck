@@ -88,6 +88,23 @@ export function createFirestoreCloudStore(options: {
         );
       }),
 
+    deleteAll: () =>
+      guard(async (s) => {
+        const { fs, db } = s;
+        // Decks in batches of 400 (a transaction takes 500 writes), then the collection and the meta document.
+        for (let round = 0; round < 10; round += 1) {
+          const decks = await fs.getDocs(fs.query(fs.collection(db, CLOUD_ROOT, uid, 'decks'), fs.limit(400)));
+          if (decks.docs.length === 0) break;
+          await fs.runTransaction(db, async (tx) => {
+            for (const doc of decks.docs) tx.delete(deckRef(s, doc.id));
+          });
+        }
+        await fs.runTransaction(db, async (tx) => {
+          tx.delete(collectionRef(s));
+          tx.delete(metaRef(s));
+        });
+      }),
+
     async commit(requested, expectedRev) {
       // Encode only the validated values (SR-23 kohta 6).
       const change = checkChange(requested);

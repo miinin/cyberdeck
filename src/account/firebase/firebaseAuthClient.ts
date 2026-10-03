@@ -5,7 +5,7 @@
  */
 import { isUid } from '../../domain/uid';
 import { createAuthState, SIGNED_OUT } from '../authState';
-import type { AccountHints, AccountUser, AuthClient, AuthErrorKind } from '../types';
+import type { AccountHints, AccountUser, AuthClient, AuthErrorKind, DeleteAccountResult } from '../types';
 import { FIREBASE_ENV } from './config';
 import type { FirebaseEnv } from './config';
 import type { AuthMode } from './sites';
@@ -60,6 +60,7 @@ export function createFirebaseAuthClient(options: {
 
   function fail(error: unknown, current: AccountUser | null) {
     hints.saveRedirectPending(false);
+    hints.saveDeletePending(false);
     state.set({ status: current === null ? 'signed-out' : 'signed-in', user: current, error: authErrorKind(error) });
   }
 
@@ -114,6 +115,11 @@ export function createFirebaseAuthClient(options: {
         }
       }
       await auth.authStateReady();
+      if (hints.loadDeletePending()) {
+        // Back from the re-login that "Poista tilin tiedot" asked for: the cloud data is already gone.
+        hints.saveDeletePending(false);
+        if (redirected && auth.currentUser !== null) await sdk.deleteUser(auth.currentUser);
+      }
       showUser(toAccountUser(auth.currentUser));
     } catch (error) {
       // Only a failed sign-in is shown. A failed silent restore (e.g. offline at startup) keeps the
@@ -150,6 +156,33 @@ export function createFirebaseAuthClient(options: {
         }
       } catch (error) {
         fail(error, before);
+      }
+    },
+    async deleteAccount(): Promise<DeleteAccountResult> {
+      try {
+        if (session === null) return 'failed';
+        const { sdk, auth } = await session;
+        const user = auth.currentUser;
+        if (user === null) return 'failed';
+        try {
+          await sdk.deleteUser(user);
+        } catch (error) {
+          const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : '';
+          if (code !== 'auth/requires-recent-login') return 'failed';
+          // The deletion finishes in restore() after the user has signed in again.
+          const provider = new sdk.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          hints.saveRedirectPending(true);
+          hints.saveDeletePending(true);
+          await sdk.reauthenticateWithRedirect(user, provider);
+          return 'reauth';
+        }
+        showUser(null);
+        return 'deleted';
+      } catch {
+        hints.saveRedirectPending(false);
+        hints.saveDeletePending(false);
+        return 'failed';
       }
     },
     // No 'loading' state: the account menu stays as it is until the sign-out is done.
