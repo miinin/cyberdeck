@@ -145,7 +145,11 @@ export function createAccountSession(options: {
 
   return {
     start() {
-      if (removeRetry !== null) return;
+      if (removeRetry !== null) {
+        // Already started: only resume the engine (it is stopped after a failed account deletion, SEC-044).
+        if (phase === 'running' && !disposed) engine.start();
+        return;
+      }
       disposed = false;
       const retry = () => {
         if (phase === 'starting') void plan();
