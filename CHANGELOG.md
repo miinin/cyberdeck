@@ -4,6 +4,8 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+- Kortit-sivun ruudukon korttiruudut ovat kevyemmät ja samassa tyylissä kuin pakkaeditori. Nimen vieressä on Cost-jalokivi, ja sen alla on yksi tiivis rivi, jossa ovat tyyppimerkki, Power ja RAM pieninä merkkeinä sekä Rarity. Pakoissa-tieto ja kokoelman määrä tai −/+ ovat ruudun alareunassa. Pakat-sivun korttien toiminnot ovat siistinä ruudukkona: Avaa omalla rivillään, sitten Nimeä uudelleen ja Kopioi, Vie .json ja Vie .txt, ja viimeisenä Poista.
+
 - Pakkaeditorin yläosa on tiivistetty yhdeksi riviksi. Ylhäällä on pieni linkki Takaisin pakkoihin, ja sen alla pakan nimi otsikkona, jota voi muokata suoraan. Tallennustila näkyy pienenä merkkinä (✓ Tallennettu), ja Vie .json- ja Vie .txt-painikkeet ovat oikealla. Puhelimessa merkki ja vientipainikkeet rivittyvät nimen alle. Tuo pakkalista -näkymän paluulinkki on samanlainen.
 
 - Pakat-sivu on uudistettu. Pakat näkyvät kortteina koko leveydellä: ylhäällä Legendien kuvat bannerina, sitten pakan nimi, värit, pääpakan edistymispalkki (m/40–50), Laillinen tai rikkeiden määrä, montako korttia kokoelmasta puuttuu ja muokkausaika. Toiminnot (Avaa, Nimeä uudelleen, Kopioi, Poista, Vie .json, Vie .txt) ovat kortin alaosassa. Sivun yläosassa ja tyhjän sivun aloituslaatikossa ovat painikkeet Uusi pakka, Tuo pakkalista ja Hae Netdeckistä, joka avaa tuonnin suoraan linkkikenttään.

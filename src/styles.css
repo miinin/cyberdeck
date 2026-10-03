@@ -1184,10 +1184,47 @@ body:has(dialog[open]) {
   overflow-wrap: anywhere;
 }
 
+/* Cost gem beside the name, as in the deck editor (T-050). */
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.card-cost {
+  flex: none;
+  margin: 0;
+}
+
+.card-cost dd {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+/* Missing cost: a dash in the same 1.75 rem slot as the gem. */
+.card-cost .card-stat {
+  display: grid;
+  place-items: center;
+  min-inline-size: 1.75rem;
+  min-block-size: 1.75rem;
+}
+
+.card-head .card-name {
+  min-width: 0;
+  padding-top: 0.125rem;
+}
+
+/* Type badge, Power and RAM chips and rarity on one compact row. */
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
 .card-type {
   margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
 }
 
 .card-type .card-color {
@@ -1195,22 +1232,19 @@ body:has(dialog[open]) {
   white-space: nowrap;
 }
 
+/* A flex group, not display: contents, so the list keeps its semantics. */
 .card-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
   margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
 }
 
 .card-stat {
   display: flex;
+  align-items: baseline;
   gap: var(--space-1);
-}
-
-.card-stat dt::after {
-  content: ':';
 }
 
 .card-stat dd {
@@ -1220,15 +1254,52 @@ body:has(dialog[open]) {
   font-variant-numeric: tabular-nums;
 }
 
-.card-collection {
+.stat-chip {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  line-height: 1.6;
+}
+
+.stat-chip dt {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-chip dd {
+  font-weight: var(--font-weight-bold);
+}
+
+.card-rarity dd {
+  color: var(--color-text-muted);
+  font-family: inherit;
+}
+
+/* Bottom edge: deck count on the left, collection count or stepper on the right. */
+.card-foot {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   margin-top: auto;
   padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.card-foot .card-decks {
+  margin: 0;
+}
+
+.card-collection {
+  display: flex;
+  margin-left: auto;
 }
 
 .card-collection .count-control {
-  justify-content: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   min-width: 0;
 }
@@ -3580,9 +3651,17 @@ button.legality:focus-visible {
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
+/* Actions as an even grid (T-050): Avaa on its own row, then pairs, Poista last across the card. */
 .deck-row > .row-actions {
-  gap: var(--space-1);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
   margin-block-start: 0;
+}
+
+.deck-row > .row-actions > .button-primary,
+.deck-row > .row-actions > :last-child {
+  grid-column: 1 / -1;
 }
 
 /* Six actions on a card: compact, but still at least 2.75rem high. */

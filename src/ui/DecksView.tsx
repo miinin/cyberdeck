@@ -403,6 +403,8 @@ export function DecksView({
                         >
                           {deckTexts.copy}
                         </button>
+                        {/* Export before delete, so the destructive action is last (T-050). */}
+                        <ExportButtons deck={deck} cardsByKey={cardsByKey} />
                         <button
                           type="button"
                           className="button-secondary"
@@ -414,7 +416,6 @@ export function DecksView({
                         >
                           {deckTexts.remove}
                         </button>
-                        <ExportButtons deck={deck} cardsByKey={cardsByKey} />
                       </div>
                     )}
                   </li>
