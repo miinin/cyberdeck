@@ -54,8 +54,7 @@ describe('theme toggle', () => {
 
     expect(screen.getByRole('banner')).toContainElement(button);
     expect(button).toHaveAttribute('type', 'button');
-    // Since T-013 the main navigation links and since T-054a the account button come before the toggle.
-    await user.tab();
+    // Since T-013 the main navigation links come before the toggle; since T-055 the account button comes after it.
     await user.tab();
     await user.tab();
     await user.tab();
