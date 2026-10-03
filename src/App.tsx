@@ -63,8 +63,8 @@ export function App({
     (listener) => session?.onChange(listener) ?? (() => {}),
     () => session?.status().phase ?? null,
   );
-  // The persistent storage button lives in the header but its state in the catalog view.
-  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
+  // T-055: the persistent browser storage button is no longer shown (cloud sync replaces it).
+  const headerSlot: HTMLElement | null = null;
   const { route, navigate } = useHashRoute();
 
   return (
@@ -80,14 +80,13 @@ export function App({
               {deckTexts.navDecks}
             </a>
           </nav>
-          <span className="header-actions" ref={setHeaderSlot} />
+          <ThemeToggle preferences={openRepositories.preferences} />
           <AccountMenu
             auth={accountServices.auth}
             session={session}
             onSignedOut={() => setNotice('signed-out')}
             onAccountDeleted={() => setNotice('deleted')}
           />
-          <ThemeToggle preferences={openRepositories.preferences} />
         </div>
       </header>
       {notice !== null && uid === null && (
