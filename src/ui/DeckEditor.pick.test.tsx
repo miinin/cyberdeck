@@ -85,6 +85,26 @@ describe('Deck editor result picker', () => {
     expect(rowOf('Big')).toHaveTextContent('Ylittää rajan');
   });
 
+  it('shows no block marks on the main deck rows of an empty deck (T-052)', async () => {
+    await openEditor([]);
+    for (const name of ['Unit 0', 'Unit 13', 'Big']) expect(rowOf(name)).not.toHaveTextContent('Ylittää rajan');
+    expect(within(table()).queryByText('Ylittää rajan')).not.toBeInTheDocument();
+  });
+
+  it('filters by Cost, Power and RAM and shows the choices as removable chips (T-052)', async () => {
+    await openEditor([]);
+    const ramGroup = screen.getByRole('group', { name: 'RAM' });
+    expect(within(ramGroup).getAllByRole('checkbox').map((box) => box.getAttribute('value'))).toEqual(['1', '2', '4+']);
+    fireEvent.click(within(ramGroup).getByRole('checkbox', { name: '4+' }));
+    expect(within(table()).getAllByRole('rowheader').map((th) => th.querySelector('.pick-name')?.textContent)).toEqual([
+      'Big',
+    ]);
+    const chip = screen.getByRole('button', { name: 'Poista suodatin: RAM 4+' });
+    fireEvent.click(chip);
+    expect(within(ramGroup).getByRole('checkbox', { name: '4+' })).not.toBeChecked();
+    expect(rowOf('Unit 3')).toBeInTheDocument();
+  });
+
   it('gives a same-name Legend the same reason as its mark, also with three Legends (UX-045)', async () => {
     await openEditor([['l1', 1], ['l2', 1], ['l3', 1]]);
     const row = rowOf('L1');
@@ -142,6 +162,20 @@ describe('Deck editor result picker', () => {
     const image = document.querySelector('.card-hover-preview');
     expect(image).not.toBeNull();
     expect(image).toHaveAttribute('aria-hidden', 'true');
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(document.querySelector('.card-hover-preview')).toBeNull();
+  });
+
+  it('Kortit table: the same preview on a mouse hover (T-052)', async () => {
+    window.location.hash = '#/';
+    const repositories = createMemoryRepositories();
+    render(<App cards={[...testCards, withImage]} repositories={repositories} />);
+    fireEvent.click(await screen.findByRole('radio', { name: 'Taulukko' }));
+    vi.useFakeTimers();
+    const row = screen.getByText('Streetkid', { selector: '.card-subname' }).closest('tr') as HTMLElement;
+    fireEvent.pointerEnter(row, { pointerType: 'mouse' });
+    act(() => vi.advanceTimersByTime(PREVIEW_DELAY_MS));
+    expect(document.querySelector('.card-hover-preview')).not.toBeNull();
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(document.querySelector('.card-hover-preview')).toBeNull();
   });

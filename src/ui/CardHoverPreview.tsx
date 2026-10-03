@@ -11,7 +11,7 @@ export const PREVIEW_DELAY_MS = 250;
 /** Space between the trigger (or the pointer) and the image, in px. */
 const GAP = 12;
 
-interface Shown {
+export interface Shown {
   card: Card;
   /** Where the trigger was when the image was asked for. */
   rect: DOMRect;
@@ -21,21 +21,28 @@ interface Shown {
 
 export interface HoverPreviewProps {
   onPointerEnter?: (event: PointerEvent<HTMLElement>) => void;
+  onPointerMove?: (event: PointerEvent<HTMLElement>) => void;
   onPointerLeave?: () => void;
 }
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 
+/** A trigger wider than this (a full-width result row) gets the image next to the pointer, not at its end. */
+const BESIDE_MAX_WIDTH = 640;
+
 /**
- * Left and top of the preview: beside the trigger where there is room (right first), otherwise next to
- * the pointer above or below the trigger, so the trigger itself is never covered (WCAG 1.4.13).
+ * Left and top of the preview: beside a narrow trigger (a deck row) where there is room, right first.
+ * For a wide row the image floats next to the pointer, above or below the row (where there is more
+ * room), so the row itself is never covered and the eye does not travel far (WCAG 1.4.13, T-052).
  */
-function place({ rect, x }: Shown, width: number, height: number): { left: number; top: number } {
+export function place({ rect, x }: Shown, width: number, height: number): { left: number; top: number } {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const centred = clamp(rect.top + rect.height / 2 - height / 2, GAP, Math.max(GAP, vh - height - GAP));
-  if (rect.right + GAP + width <= vw) return { left: rect.right + GAP, top: centred };
-  if (rect.left - GAP - width >= 0) return { left: rect.left - GAP - width, top: centred };
+  if (rect.width <= BESIDE_MAX_WIDTH) {
+    if (rect.right + GAP + width <= vw) return { left: rect.right + GAP, top: centred };
+    if (rect.left - GAP - width >= 0) return { left: rect.left - GAP - width, top: centred };
+  }
   const left = x + 2 * GAP + width <= vw ? x + 2 * GAP : clamp(x - 2 * GAP - width, GAP, Math.max(GAP, vw - width - GAP));
   const roomAbove = rect.top - GAP;
   const roomBelow = vh - rect.bottom - GAP;
@@ -52,7 +59,7 @@ function CardHoverPreview({ shown }: { shown: Shown | null }) {
   useLayoutEffect(() => {
     const element = ref.current;
     if (element === null || shown === null) return;
-    // 288 px = 18rem, the CSS width, in case layout is not measured yet.
+    // 288 px = 18rem, the smallest CSS width, in case layout is not measured yet.
     const width = element.offsetWidth || 288;
     const { left, top } = place(shown, width, width * CARD_IMAGE_ASPECT);
     element.style.setProperty('left', `${Math.round(left)}px`);
@@ -83,6 +90,8 @@ export function useCardHoverPreview() {
   const canHover = useMediaQuery(HOVER_QUERY, true);
   const [shown, setShown] = useState<Shown | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** Latest pointer x over the trigger: the image opens next to where the pointer rests, not where it entered. */
+  const pointerX = useRef(0);
 
   const hide = useCallback(() => {
     clearTimeout(timer.current);
@@ -111,9 +120,15 @@ export function useCardHoverPreview() {
         onPointerEnter: (event) => {
           if (event.pointerType !== 'mouse') return;
           const trigger = event.currentTarget;
-          const x = event.clientX;
+          pointerX.current = event.clientX;
           clearTimeout(timer.current);
-          timer.current = setTimeout(() => setShown({ card, rect: trigger.getBoundingClientRect(), x }), PREVIEW_DELAY_MS);
+          timer.current = setTimeout(
+            () => setShown({ card, rect: trigger.getBoundingClientRect(), x: pointerX.current }),
+            PREVIEW_DELAY_MS,
+          );
+        },
+        onPointerMove: (event) => {
+          if (event.pointerType === 'mouse') pointerX.current = event.clientX;
         },
         onPointerLeave: hide,
       };

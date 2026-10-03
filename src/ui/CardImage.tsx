@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Card } from '../domain/card';
-import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
+import { CARD_IMAGE_SIZES, CARD_IMAGE_WIDTH, cardImageHeight, cardImageSrcSet } from '../domain/cardImage';
 import { getCardImage } from '../data/cardImages';
 import { CardName } from './CardName';
 import { texts } from './texts';
@@ -28,6 +28,8 @@ export function CardImage({ card, onOpen }: { card: Card; onOpen: (card: Card, o
       <img
         className="card-image"
         src={image.medium}
+        srcSet={cardImageSrcSet(image)}
+        sizes={CARD_IMAGE_SIZES}
         width={CARD_IMAGE_WIDTH.md}
         height={cardImageHeight('md')}
         alt=""

@@ -1461,6 +1461,8 @@ body:has(dialog[open]) {
 
 /* Table view (T-040): scrolls sideways inside its own region on narrow screens, not the whole page. */
 .table-scroll {
+  /* Containing block for the visually hidden texts in the cells, so they scroll with the table and never widen the page (T-052). */
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--color-border);
 }
@@ -2051,10 +2053,80 @@ h3,
   font-size: var(--font-size-sm);
 }
 
-/* Colour filter chips: the swatch and the colour name, so hue is not the only cue (UX-007). */
+/*
+ * Colour filter chips: the swatch and the colour name, so hue is not the only cue (UX-007). The swatch
+ * is centred in the chip on its own line box, so it never pokes out of the border (T-052).
+ */
+.option-color > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
 .option-color .color-swatch {
-  inline-size: 1.125rem;
-  block-size: 1.125rem;
+  flex: none;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  vertical-align: middle;
+}
+
+/*
+ * Cost, Power and RAM (T-052): compact number keys. The native checkbox stays for keyboard and screen
+ * readers but is drawn by the key itself: a selected key is filled with the accent and set in bold.
+ */
+.options-number {
+  gap: var(--space-1);
+}
+
+.option-number {
+  position: relative;
+  justify-content: center;
+  gap: 0;
+  min-inline-size: 2.25rem;
+  min-block-size: 2rem;
+  padding: 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.option-number:hover {
+  text-decoration: none;
+}
+
+.option-number input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+  background: none;
+  opacity: 0;
+}
+
+.option-number input:focus-visible {
+  outline: none;
+}
+
+.option-number:has(input:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.option-number:has(input:checked) {
+  border-color: var(--color-accent-edge);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (forced-colors: active) {
+  .option-number:has(input:checked) {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
 }
 
 /* Deck editor: toast, result view selector and image grid (T-045). */
@@ -2380,15 +2452,15 @@ h3,
 
 /* Image size: the smallest grid card still fits the count control. */
 .catalog-results[data-image-size='small'] .card-grid {
-  --card-min: 11rem;
+  --card-min: 14rem;
 }
 
-.catalog-results[data-image-size='large'] .card-grid {
+.catalog-results[data-image-size='medium'] .card-grid {
   --card-min: 18rem;
 }
 
-.catalog-results .table-scroll {
-  max-width: 100rem;
+.catalog-results[data-image-size='large'] .card-grid {
+  --card-min: 25rem;
 }
 
 @media (min-width: 64rem) {
@@ -2711,9 +2783,9 @@ h3,
   }
 }
 
-/* Image grid: Pieni 9rem, Keski 13rem, Iso 17rem. */
+/* Image grid (T-052): Pieni 13rem, Normaali 17rem, Iso 25rem. */
 .pick-images {
-  --card-min: 13rem;
+  --card-min: 17rem;
   display: grid;
   /* At least two cards side by side, also on a phone. */
   grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), calc(50% - var(--space-3) / 2)), 1fr));
@@ -2724,11 +2796,13 @@ h3,
 }
 
 .editor-search[data-image-size='small'] .pick-images {
-  --card-min: 9rem;
+  --card-min: 13rem;
 }
 
+/* Iso: one card per row on a phone, so it is bigger than Normaali there too. */
 .editor-search[data-image-size='large'] .pick-images {
-  --card-min: 17rem;
+  --card-min: 25rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), 100%), 1fr));
 }
 
 .pick-image {
@@ -2768,7 +2842,8 @@ h3,
 .card-hover-preview {
   position: fixed;
   z-index: 50;
-  inline-size: 18rem;
+  /* 18rem on ordinary screens, up to 24rem on very wide ones (T-052). */
+  inline-size: clamp(18rem, 14vw, 24rem);
   block-size: auto;
   aspect-ratio: 733 / 1024;
   border: 1px solid var(--color-border-strong);
@@ -2812,9 +2887,26 @@ h3,
   }
 }
 
-/* The name column never stretches into a wide gap (UX-048): the extra room goes to the deck column. */
-.pick-table {
-  max-inline-size: 72rem;
+/*
+ * The picker table fills its column (T-052, no empty strip beside it). In a wide picker the fixed
+ * columns grow a little and the thumbnail gets bigger, so the extra room is not all one gap after the name.
+ */
+@container picker (min-width: 80rem) {
+  .pick-table .col-type {
+    inline-size: 13rem;
+  }
+
+  .pick-table .col-number {
+    inline-size: 6.5rem;
+  }
+
+  .pick-table .col-rarity {
+    inline-size: 10rem;
+  }
+
+  .pick-table .col-deck {
+    inline-size: 10rem;
+  }
 }
 
 /*

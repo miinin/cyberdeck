@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
-import type { CardFilterCriteria } from '../domain/cardSearch';
+import type { CardFilterCriteria, NumberFilterGroup } from '../domain/cardSearch';
+import { NUMBER_GROUPS } from './ActiveFilters';
 import { CardColor } from './CardColor';
 import { texts } from './texts';
 import { useMediaQuery } from './useMediaQuery';
@@ -15,6 +16,8 @@ export interface CardFiltersProps {
   typeOptions: readonly string[];
   colorOptions: readonly string[];
   rarityOptions: readonly string[];
+  /** Cost, Power and RAM options ("3", "9+"), see numberFilterOptions (T-052). */
+  numberOptions: Readonly<Record<NumberFilterGroup, readonly string[]>>;
   searchInputRef: Ref<HTMLInputElement>;
   /** "Kokoelma" radio group value; undefined leaves the group out (collection not ready, UX.md 6.6). */
   collectionFilter?: CollectionFilter;
@@ -26,6 +29,7 @@ export interface CardFiltersProps {
   onToggleType: (type: string) => void;
   onToggleColor: (color: string) => void;
   onToggleRarity: (rarity: string) => void;
+  onToggleNumber: (group: NumberFilterGroup, value: string) => void;
   /** Enter in the search field: announce the result now (UX.md 5.6). */
   onSearchSubmit: () => void;
   /**
@@ -38,7 +42,15 @@ export interface CardFiltersProps {
 /** How many choices are selected; "Kaikki" in "Kokoelma" is not a choice (T-050a). */
 export function selectedFilterCount(criteria: CardFilterCriteria, collectionFilter: CollectionFilter | undefined) {
   const collection = collectionFilter !== undefined && collectionFilter !== 'all' ? 1 : 0;
-  return criteria.types.length + criteria.colors.length + criteria.rarities.length + collection;
+  return (
+    criteria.types.length +
+    criteria.colors.length +
+    criteria.rarities.length +
+    criteria.costs.length +
+    criteria.powers.length +
+    criteria.rams.length +
+    collection
+  );
 }
 
 const COLLECTION_OPTIONS: readonly (readonly [CollectionFilter, string])[] = [
@@ -53,6 +65,7 @@ export function CardFilters({
   typeOptions,
   colorOptions,
   rarityOptions,
+  numberOptions,
   searchInputRef,
   collectionFilter,
   collectionAllRef,
@@ -61,6 +74,7 @@ export function CardFilters({
   onToggleType,
   onToggleColor,
   onToggleRarity,
+  onToggleNumber,
   onSearchSubmit,
   collapsibleBelow,
 }: CardFiltersProps) {
@@ -216,6 +230,28 @@ export function CardFilters({
               ))}
             </div>
           </fieldset>
+
+          {NUMBER_GROUPS.map(([group, legend]) =>
+            numberOptions[group].length === 0 ? null : (
+              <fieldset key={group} aria-describedby="filter-hint" className="number-filter">
+                <legend lang="en">{legend}</legend>
+                <div className="options options-number">
+                  {numberOptions[group].map((value) => (
+                    <label key={value} className="option option-number">
+                      <input
+                        type="checkbox"
+                        name={group}
+                        value={value}
+                        checked={criteria[group].includes(value)}
+                        onChange={() => onToggleNumber(group, value)}
+                      />
+                      <span>{value}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ),
+          )}
         </div>
       </div>
     </form>
