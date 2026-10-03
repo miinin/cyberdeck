@@ -806,6 +806,17 @@ export async function importImages(sourceDir: string, deps): Promise<{ exitCode:
 - `cardKey()` ↔ tallennetut avaimet ↔ kuvatiedostojen nimet. `cardKey`n muutos vaatii migraation (D-008 kohta 4) ja kuvien uudelleennimeämisen.
 - `CARD_IMAGE_WIDTH` ↔ `convertImage`n leveydet (sama vakio `src/domain/cardImage.ts`:stä; skriptit eivät importtaa `src/data/cardImages.ts`:ää, koska siinä on Viten `import.meta.glob`).
 
+## 14. Kirjautuminen ja pilvitallennus (T-054, D-017, Ehdotettu)
+
+Rakenne on "paikallinen ensin": localStorage pysyy ainoana paikallisena lähteenä, ja kirjautuneena tilin kopio on avaimissa `cyberdeck:u:{uid}:…`. Uusi kerros `src/account/` (ei Reactia) sisältää seuraavat osat:
+- `types.ts`: AuthClient ja CloudStore.
+- `firebase/`: ainoa paikka, joka tuo `firebase/app`, `firebase/auth` ja `firebase/firestore/lite` (dynaamisesti).
+- `memory.ts`: valetoteutukset testeille.
+- `sync/merge.ts`: puhdas kolmitiemerge.
+- `sync/syncEngine.ts`: synkronoinnin ohjaus.
+
+Firestoren polut ovat `{users|test_users}/{uid}` (meta, rev), `decks/{deckId}` ja `collection/main`, ja niissä on sama envelope kuin localStoragessa. Kirjautuminen tehdään uudelleenohjauksella sivuston oman domainin `/__/auth/`-käsittelijän kautta. Yksityiskohdat, CSP ja säännöt: D-017 ja `docs/tasks/T-054-kirjautuminen-ja-pilvitallennus.md`.
+
 ## Toteutuksen yksityiskohdat
 
 _Koodari täydentää T-001:n toteutuksen jälkeen (poikkeamat suunnitelmasta perusteluineen)._
