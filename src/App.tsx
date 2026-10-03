@@ -7,6 +7,7 @@ import { openBrowserRepositories } from './storage';
 import type { Repositories } from './storage';
 import { CatalogView } from './ui/CatalogView';
 import { DeckEditor } from './ui/DeckEditor';
+import { SharedDeckView } from './ui/SharedDeckView';
 import { DecksView } from './ui/DecksView';
 import { deckTexts } from './ui/deckTexts';
 import { useHashRoute } from './ui/useHashRoute';
@@ -110,11 +111,7 @@ export function App({
           <CatalogView cards={cards} repositories={openRepositories} headerSlot={headerSlot} />
         )}
         {route.name === 'decks' && (
-          <DecksView
-            cards={cards}
-            repositories={openRepositories}
-            onOpen={(id) => navigate({ name: 'deck', id })}
-          />
+          <DecksView cards={cards} repositories={openRepositories} onOpen={(id) => navigate({ name: 'deck', id })} />
         )}
         {route.name === 'deck' && (
           <DeckEditor
@@ -123,6 +120,14 @@ export function App({
             cards={cards}
             repositories={openRepositories}
             onBack={() => navigate({ name: 'decks' })}
+          />
+        )}
+        {route.name === 'share' && (
+          <SharedDeckView
+            data={route.data}
+            cards={cards}
+            repositories={openRepositories}
+            onOpen={(id) => navigate({ name: 'deck', id })}
           />
         )}
       </main>

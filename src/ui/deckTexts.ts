@@ -233,6 +233,18 @@ export const deckTexts = {
   exportJson: 'Vie .json',
   exportTxt: 'Vie .txt',
 
+  // Share link (T-056)
+  shareButton: 'Jaa linkki',
+  shareCopied: 'Linkki kopioitu',
+  shareCopyFailed: 'Kopiointi ei onnistunut. Kopioi linkki tästä:',
+  shareLinkLabel: 'Pakan linkki',
+  shareHeading: 'Jaettu pakka',
+  shareIntro: 'Tämä pakka tuli linkistä. Mitään ei tallenneta, ennen kuin painat Tallenna omaksi pakaksi.',
+  shareSaveButton: 'Tallenna omaksi pakaksi',
+  shareInvalidHeading: 'Linkki ei toimi',
+  shareInvalid: 'Pakan linkki on rikkinäinen tai liian pitkä. Pyydä lähettäjää jakamaan pakka uudelleen.',
+  shareToDecks: 'Siirry Pakat-sivulle',
+
   // Import (T-014)
   importButton: 'Tuo pakkalista',
   importHeading: 'Tuo pakkalista',
