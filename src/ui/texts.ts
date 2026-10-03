@@ -83,11 +83,11 @@ export const texts = {
   filtersHeading: 'Suodattimet',
   filtersToggle: (selected: number) => (selected === 0 ? 'Suodattimet' : `Suodattimet (${selected})`),
   resultsHeading: 'Tulokset',
-  activeFilters: 'Aktiiviset',
+  activeFilters: 'Valitut suodattimet',
   removeFilter: (value: string) => `Poista suodatin: ${value}`,
   imageSizeLegend: 'Kuvakoko',
   imageSizeSmall: 'Pieni',
-  imageSizeMedium: 'Keski',
+  imageSizeMedium: 'Normaali',
   imageSizeLarge: 'Iso',
 
   // Collection: UX.md luku 6 (T-012; PM accepted A1–A7 on 2026-10-01).

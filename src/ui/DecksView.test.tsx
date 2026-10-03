@@ -124,10 +124,10 @@ describe('Pakat list', () => {
     await screen.findByText(/ei ole vielä pakkoja/);
     expect(screen.getByRole('button', { name: 'Uusi pakka' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tuo pakkalista' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Hae Netdeckistä' }));
+    await user.click(screen.getByRole('button', { name: 'Hae Netdeck.gg:stä' }));
     expect(screen.getByLabelText('Netdeck-linkki')).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Takaisin pakkoihin' }));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Hae Netdeckistä' })).toHaveFocus());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Hae Netdeck.gg:stä' })).toHaveFocus());
   });
 });
 

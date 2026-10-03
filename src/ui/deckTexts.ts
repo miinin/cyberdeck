@@ -24,7 +24,7 @@ export const deckTexts = {
   // Deck cards and empty state (T-051)
   listEmptyTitle: 'Ei vielä pakkoja',
   listEmptyHint: 'Rakenna pakka kortti kerrallaan, liitä valmis pakkalista tai hae julkinen pakka Netdeck.gg:stä.',
-  fetchNetdeck: 'Hae Netdeckistä',
+  fetchNetdeck: 'Hae Netdeck.gg:stä',
   deckColors: 'Värit',
   decksLabel: 'Omat pakat',
   open: 'Avaa',
@@ -124,7 +124,7 @@ export const deckTexts = {
   resultsCaption: 'Hakutulokset',
   colInDeck: 'Pakassa',
   /** A broken limit still lets the card be added, so the mark must not sound like a refusal (UX-045). */
-  blockedLimit: 'Yli rajan',
+  blockedLimit: 'Ylittää rajan',
   blockedLegend: 'Sama Legend',
   sameLegendReason: (name: string) => `Pakassa on jo Legend ${name}.`,
   changeAnnounce: (name: string, count: number, main: number) => `${name}: ${count} pakassa. Pääpakka ${main} korttia.`,
@@ -135,7 +135,7 @@ export const deckTexts = {
   legendsProgress: (legends: number) => `Legendit ${legends}/${LEGEND_COUNT}`,
   legalShort: 'Laillinen',
   issuesCount: (count: number) => (count === 1 ? '1 ongelma' : `${count} ongelmaa`),
-  legendSlotEmpty: 'Legend-paikka vapaana',
+  legendSlotEmpty: 'Vapaa Legend-paikka',
   deckViewLegend: 'Pakkanäkymä',
   deckViewList: 'Lista',
   deckViewStacks: 'Pinot',

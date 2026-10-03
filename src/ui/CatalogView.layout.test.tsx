@@ -126,7 +126,7 @@ describe('CatalogView layout (T-050a)', () => {
     const user = userEvent.setup();
     renderView();
     const sizes = screen.getByRole('group', { name: 'Kuvakoko' });
-    expect(within(sizes).getByRole('radio', { name: 'Keski' })).toBeChecked();
+    expect(within(sizes).getByRole('radio', { name: 'Normaali' })).toBeChecked();
     await user.click(within(sizes).getByRole('radio', { name: 'Iso' }));
     expect(screen.getByRole('region', { name: 'Tulokset' })).toHaveAttribute('data-image-size', 'large');
 

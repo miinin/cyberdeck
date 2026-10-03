@@ -51,7 +51,7 @@ export function DeckImport({
   decks: readonly Deck[];
   onOpen: (id: string) => void;
   onClose: () => void;
-  /** Opened from "Hae Netdeckistä": focus starts in the link field (T-051). */
+  /** Opened from "Hae Netdeck.gg:stä": focus starts in the link field (T-051). */
   startAtLink?: boolean;
 }) {
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);

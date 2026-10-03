@@ -82,7 +82,7 @@ describe('Deck editor result picker', () => {
     expect(row).toHaveTextContent('Sama Legend');
     const add = within(row).getByRole('button', { name: 'Lisää pakkaan: L1' });
     expect(add).toHaveAccessibleDescription('Pakassa on jo Legend L1.');
-    expect(rowOf('Big')).toHaveTextContent('Yli rajan');
+    expect(rowOf('Big')).toHaveTextContent('Ylittää rajan');
   });
 
   it('gives a same-name Legend the same reason as its mark, also with three Legends (UX-045)', async () => {
@@ -163,7 +163,7 @@ describe('Deck editor result picker', () => {
   it('Kuvat: image size, Shift+click and right click on the card remove, and the preview only at Pieni', async () => {
     await openEditor([['v-streetkid', 2]]);
     fireEvent.click(screen.getByRole('radio', { name: 'Kuvat' }));
-    expect(screen.getByRole('radio', { name: 'Keski' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Normaali' })).toBeChecked();
     const list = screen.getByRole('list', { name: 'Lisää kortteja' });
     const image = within(list).getAllByRole('button', { name: 'Lisää pakkaan: V — Streetkid' })[0] as HTMLElement;
     const item = image.closest('li') as HTMLElement;

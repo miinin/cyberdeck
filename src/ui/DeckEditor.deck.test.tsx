@@ -56,12 +56,12 @@ describe('Deck column', () => {
     const repositories = openEditor([['l1', 1]]);
     await screen.findByRole('heading', { level: 2, name: 'Legendit (1/3)' });
     const region = deckRegion();
-    expect(within(region).getAllByText('Legend-paikka vapaana')).toHaveLength(2);
+    expect(within(region).getAllByText('Vapaa Legend-paikka')).toHaveLength(2);
     await user.click(within(region).getByRole('button', { name: 'Suurenna kuva: L1' }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
     await user.keyboard('{Escape}');
     await user.click(within(region).getByRole('button', { name: 'Poista pakasta: L1' }));
-    expect(within(region).getAllByText('Legend-paikka vapaana')).toHaveLength(3);
+    expect(within(region).getAllByText('Vapaa Legend-paikka')).toHaveLength(3);
     await waitFor(async () => expect(await savedCards(repositories)).toEqual([]));
   });
 
