@@ -109,7 +109,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 ### 10.1 Yhteenveto
 - Kirjautuminen on **vapaaehtoinen** ja vain Google-tilillä. Ilman kirjautumista mikään luvuissa 1–6 ei muutu, eikä selain lataa Firebasen koodia eikä ota yhteyttä Googleen.
 - Kirjautuneen käyttäjän pakat ja kokoelma tallentuvat Firestoreen (Google, EU: tuotanto `eur3`, testi `europe-north1`) ja selaimeen tilikohtaisesti. Googlen tilitiedot (nimi, sähköposti) ovat Firebase Authenticationissa, ei Firestoressa.
-- Rekisterinpitäjä: [nimi ja sähköposti lisätään] (K-P7). Kirjautumista ei avata muille ennen kuin tämä teksti on lisätty.
+- Rekisterinpitäjä: Miika Miinin, miikamiinin@gmail.com (K-P7). Kirjautumista ei avata muille ennen kuin tämä teksti on lisätty.
 - Firestoreen ei tallenneta sähköpostia, nimeä eikä kuvaa, vaan vain Googlen antama tunniste (uid) polussa sekä pakat ja kokoelma.
 - **Ikäraja 16 vuotta** (D-016). Ikää ei voi tarkistaa teknisesti, vaan siitä kerrotaan kirjautumisdialogissa.
 - **Rekisterinpitäjä** on käyttäjä Firebase-projektin `cyberdeck-tcg` omistajana (D-016). Google (Firebase) toimii käsittelijänä Firebasen ehtojen mukaan.
@@ -169,5 +169,5 @@ Sovellus ei aseta evästeitä. Firebase Auth käyttää IndexedDB:tä (rivi 16).
 |---|---|---|---|
 | K-P5 | Poistaako "Poista tilin tiedot" myös Firebase Auth -käyttäjän (sähköposti, nimi ja kuva Googlen Authissa)? | Kyllä (`deleteUser`, tarvittaessa uudelleenkirjautuminen). Muuten selosteeseen ohje poistopyynnöstä. | Ratkaistu 2026-10-03: kyllä (D-017) |
 | K-P6 | Poistetaanko käyttämättömät tilit automaattisesti (esim. 24 kk)? | Ei automaattista poistoa MVP:ssä (Spark ei tarjoa ajastettuja funktioita). Selosteessa: "säilytetään, kunnes poistat tiedot". | Selostetta |
-| K-P7 | Rekisterinpitäjän nimi ja yhteystieto selosteeseen (esim. OAuth-näkymän tukisähköposti)? | Käyttäjä päättää. Ei kirjata repoon ennen päätöstä. | Selostetta |
+| K-P7 | Rekisterinpitäjän nimi ja yhteystieto selosteeseen (esim. OAuth-näkymän tukisähköposti)? | Käyttäjä päättää. Ei kirjata repoon ennen päätöstä. | Ratkaistu 2026-10-03: Miika Miinin, miikamiinin@gmail.com |
 | K-P8 | Hyväksyykö käyttäjä jäännösriskin R-18 (testisivuston koodi pääsee testisivustolle kirjautuneen käyttäjän tuotantodataan, koska projekti on yhteinen)? | Hyväksytään, kunhan testisivustolle kirjautuvat vain kehittäjä ja testaajat. Pysyvä korjaus: erillinen testiprojekti (IDEAS). | Ratkaistu 2026-10-03: erillinen testiprojekti (D-017) |

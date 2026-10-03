@@ -49,7 +49,7 @@ export const texts = {
     'Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa.',
   accountPrivacyGoogle:
     'Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa, ei pakkojesi ja kokoelmasi mukana.',
-  accountPrivacyController: 'Rekisterinpitäjä: [nimi ja sähköposti lisätään].',
+  accountPrivacyController: 'Rekisterinpitäjä: Miika Miinin, miikamiinin@gmail.com.',
   accountContinue: 'Jatka Googleen',
   accountCancel: 'Peruuta',
   accountClose: 'Sulje',
