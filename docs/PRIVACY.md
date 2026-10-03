@@ -165,7 +165,7 @@ Sovellus ei aseta evästeitä. Firebase Auth käyttää IndexedDB:tä (rivi 16).
 ### 10.9 Avoimet kysymykset käyttäjälle (PM:n kautta)
 | ID | Kysymys | Digiturvan ehdotus | Blokkaako? |
 |---|---|---|---|
-| K-P5 | Poistaako "Poista tilin tiedot" myös Firebase Auth -käyttäjän (sähköposti, nimi ja kuva Googlen Authissa)? | Kyllä (`deleteUser`, tarvittaessa uudelleenkirjautuminen). Muuten selosteeseen ohje poistopyynnöstä. | T-054d:tä |
+| K-P5 | Poistaako "Poista tilin tiedot" myös Firebase Auth -käyttäjän (sähköposti, nimi ja kuva Googlen Authissa)? | Kyllä (`deleteUser`, tarvittaessa uudelleenkirjautuminen). Muuten selosteeseen ohje poistopyynnöstä. | Ratkaistu 2026-10-03: kyllä (D-017) |
 | K-P6 | Poistetaanko käyttämättömät tilit automaattisesti (esim. 24 kk)? | Ei automaattista poistoa MVP:ssä (Spark ei tarjoa ajastettuja funktioita). Selosteessa: "säilytetään, kunnes poistat tiedot". | Selostetta |
 | K-P7 | Rekisterinpitäjän nimi ja yhteystieto selosteeseen (esim. OAuth-näkymän tukisähköposti)? | Käyttäjä päättää. Ei kirjata repoon ennen päätöstä. | Selostetta |
-| K-P8 | Hyväksyykö käyttäjä jäännösriskin R-18 (testisivuston koodi pääsee testisivustolle kirjautuneen käyttäjän tuotantodataan, koska projekti on yhteinen)? | Hyväksytään, kunhan testisivustolle kirjautuvat vain kehittäjä ja testaajat. Pysyvä korjaus: erillinen testiprojekti (IDEAS). | Kirjautumisen avaamista muille |
+| K-P8 | Hyväksyykö käyttäjä jäännösriskin R-18 (testisivuston koodi pääsee testisivustolle kirjautuneen käyttäjän tuotantodataan, koska projekti on yhteinen)? | Hyväksytään, kunhan testisivustolle kirjautuvat vain kehittäjä ja testaajat. Pysyvä korjaus: erillinen testiprojekti (IDEAS). | Ratkaistu 2026-10-03: erillinen testiprojekti (D-017) |

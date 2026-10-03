@@ -400,3 +400,8 @@ Päätöksessä on viisi osaa.
 - Firestoren sijainti: `europe-north1`.
 - Poisto-oikeus toteutetaan "Poista tilin tiedot" -painikkeena, joka poistaa pilvidatan vahvistuksen jälkeen.
 - Uloskirjautuminen ei poista tilin tietoja selaimesta. Uloskirjautuessa käyttäjälle kerrotaan, että tiedot jäävät tähän selaimeen. Digiturva arvioi jaetun koneen riskin ja antaa tarvittaessa ohjeen.
+
+**D-017, käyttäjän lisäpäätökset 2026-10-03 (Digiturvan SEC-011:n jälkeen):**
+- **K-P8 / R-18: erillinen Firebase-testiprojekti nyt.** Testisivuston kirjautuminen ja tietokanta eivät käytä tuotantoprojektia. Arkkitehti päivittää D-017:n (hosting, workflow, config per ympäristö, konsolitehtävät).
+- **K-P5:** "Poista tilin tiedot" poistaa myös Firebase Auth -käyttäjän (`deleteUser`, tarvittaessa uudelleenkirjautuminen).
+- **K-P7:** selosteeseen rekisterinpitäjän nimi ja Gmail-osoite. Käyttäjä antaa tarkan tekstin, ja siihen asti käytetään paikkamerkkiä. Kirjautumista ei avata muille ennen kuin teksti on lisätty.
