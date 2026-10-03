@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRepositories } from '../storage';
-import { legalCards, renderRoute, storedDecks } from './deckTestUtils';
+import { legalCards, renderRoute, storedCollection, storedDecks } from './deckTestUtils';
 
 const renderDecks = (repositories = createMemoryRepositories()) => renderRoute('#/pakat', repositories);
 
@@ -103,6 +103,31 @@ describe('Pakat list', () => {
     vi.spyOn(repositories.decks, 'create').mockRejectedValueOnce(new Error('boom'));
     await user.click(await screen.findByRole('button', { name: 'Uusi pakka' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Jokin meni pieleen');
+  });
+
+  it('shows on a deck card what the collection lacks (T-051)', async () => {
+    renderDecks(
+      createMemoryRepositories({
+        initial: {
+          ...storedDecks([{ id: 'b', name: 'Kesken', cards: [['l1', 1], ['u0', 4]] }]),
+          ...storedCollection([['u0', 1]]),
+        },
+      }),
+    );
+    const [card] = await screen.findAllByRole('listitem');
+    await waitFor(() => expect(card).toHaveTextContent('Kokoelmasta puuttuu 4 korttia.'));
+  });
+
+  it('offers new, import and Netdeck in the empty state; Netdeck starts in the link field (T-051)', async () => {
+    const user = userEvent.setup();
+    renderDecks();
+    await screen.findByText(/ei ole vielä pakkoja/);
+    expect(screen.getByRole('button', { name: 'Uusi pakka' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tuo pakkalista' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Hae Netdeck.gg:stä' }));
+    expect(screen.getByLabelText('Netdeck-linkki')).toHaveFocus();
+    await user.click(screen.getByRole('button', { name: 'Takaisin pakkoihin' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Hae Netdeck.gg:stä' })).toHaveFocus());
   });
 });
 

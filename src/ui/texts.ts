@@ -79,6 +79,16 @@ export const texts = {
   noResultsLive: 'Hakua vastaavia kortteja ei löytynyt.',
   noResultsBody: 'Hakua vastaavia kortteja ei löytynyt. Tarkista hakusana tai poista valintoja suodattimista.',
   clearFilters: 'Tyhjennä haku ja suodattimet',
+  // T-050a: filter side panel, active filter chips and the image size.
+  filtersHeading: 'Suodattimet',
+  filtersToggle: (selected: number) => (selected === 0 ? 'Suodattimet' : `Suodattimet (${selected})`),
+  resultsHeading: 'Tulokset',
+  activeFilters: 'Valitut suodattimet',
+  removeFilter: (value: string) => `Poista suodatin: ${value}`,
+  imageSizeLegend: 'Kuvakoko',
+  imageSizeSmall: 'Pieni',
+  imageSizeMedium: 'Normaali',
+  imageSizeLarge: 'Iso',
 
   // Collection: UX.md luku 6 (T-012; PM accepted A1–A7 on 2026-10-01).
   columnOwned: 'Omistan',

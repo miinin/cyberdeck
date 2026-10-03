@@ -12,7 +12,7 @@ import { CountControl } from './CountControl';
 import { texts } from './texts';
 
 /** A missing value shows a dash and a hidden spoken equivalent, as in the grid. */
-function Value({ value, missing }: { value: number | string | null; missing: string }): ReactNode {
+export function Value({ value, missing }: { value: number | string | null; missing: string }): ReactNode {
   if (value !== null) return value;
   return (
     <>

@@ -5,8 +5,18 @@ import type { Deck } from '../domain/deck';
 import { toCountMap } from '../domain/collection';
 import { checkDeckName } from '../domain/deckEdit';
 import { buildImportReport } from '../domain/deckReport';
-import type { ImportReport } from '../domain/deckReport';
-import { toCardsByKey } from '../domain/deckRules';
+import type { ImportReport, ReportRow } from '../domain/deckReport';
+import {
+  colorDistribution,
+  costCurve,
+  deckTotals,
+  groupDeck,
+  LEGEND_COUNT,
+  MAX_MAIN_DECK,
+  MIN_MAIN_DECK,
+  ramLimits,
+  toCardsByKey,
+} from '../domain/deckRules';
 import { parseDeckJson, MAX_JSON_IMPORT_BYTES } from '../domain/deckJson';
 import { MAX_IMPORT_BYTES, parseDeckText } from '../domain/deckText';
 import type { ParsedDeckText } from '../domain/deckText';
@@ -14,6 +24,10 @@ import { netdeckToParsedDeck, parseNetdeckUrl } from '../domain/netdeckDeck';
 import { fetchNetdeckDeck, NetdeckFetchError } from '../netdeck/fetchNetdeckDeck';
 import { StorageError } from '../storage';
 import type { Repositories, StorageErrorKind } from '../storage';
+import { typeColorClass } from './CardColor';
+import { DeckCardImage } from './DeckList';
+import { CostGem } from './DeckPickTable';
+import { DeckStats } from './DeckStats';
 import { deckTexts } from './deckTexts';
 
 type InputError = keyof typeof deckTexts.importErrors;
@@ -30,12 +44,15 @@ export function DeckImport({
   decks,
   onOpen,
   onClose,
+  startAtLink = false,
 }: {
   cards: readonly Card[];
   repositories: Repositories;
   decks: readonly Deck[];
   onOpen: (id: string) => void;
   onClose: () => void;
+  /** Opened from "Hae Netdeck.gg:stä": focus starts in the link field (T-051). */
+  startAtLink?: boolean;
 }) {
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const [text, setText] = useState('');
@@ -52,10 +69,14 @@ export function DeckImport({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const reportRef = useRef<HTMLHeadingElement>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const linkRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    headingRef.current?.focus();
+    if (startAtLink) linkRef.current?.focus();
+    else headingRef.current?.focus();
     return () => linkAbort.current?.abort();
+    // Only on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const edit = (next: string) => {
@@ -147,7 +168,7 @@ export function DeckImport({
 
   const handleSave = async (event: FormEvent) => {
     event.preventDefault();
-    if (report === null) return;
+    if (report === null || report.rows.length === 0) return;
     const name = checkDeckName(nameText);
     if (!name.ok) {
       setNameError(name.error === 'empty' ? deckTexts.nameEmpty : deckTexts.nameTooLong);
@@ -162,10 +183,47 @@ export function DeckImport({
     }
   };
 
+  /** What the report shows in the deck column's style (T-051): groups, counts, curve and colours. */
+  const view = useMemo(() => {
+    if (report === null) return null;
+    const grouped = groupDeck(report.content, cardsByKey);
+    const totals = deckTotals(report.content, cardsByKey);
+    const rows = new Map(report.rows.map((row) => [row.card.key, row]));
+    const limits = ramLimits(report.content, cardsByKey);
+    return {
+      grouped,
+      main: totals.main,
+      legends: totals.legends,
+      mainState: totals.main < MIN_MAIN_DECK ? 'under' : totals.main > MAX_MAIN_DECK ? 'over' : 'ok',
+      curve: costCurve(report.content, cardsByKey),
+      colors: colorDistribution(report.content, cardsByKey),
+      ramLimitsText:
+        limits.size === 0
+          ? deckTexts.ramLimitsNone
+          : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`,
+      // Every grouped card comes from a report row (the import merges duplicate lines).
+      rowOf: (key: string) => rows.get(key) as ReportRow,
+    };
+  }, [report, cardsByKey]);
+
+  /** "omistat 1/3 · puuttuu 2" and the decks that already use the card. */
+  const ownership = (row: ReportRow) => (
+    <span className="import-row-meta">
+      {collectionKnown && (
+        <span className={row.missing > 0 ? 'import-missing' : undefined}>
+          {deckTexts.owned(row.owned, row.needed)}
+          {row.missing > 0 && ` · ${deckTexts.missingCount(row.missing)}`}
+        </span>
+      )}
+      {row.inDecks.length > 0 && <span className="hint"> · {deckTexts.reportAlsoIn(row.inDecks)}</span>}
+    </span>
+  );
+
   return (
     <>
-      <p>
-        <button type="button" className="button-secondary" onClick={onClose}>
+      <p className="editor-crumb">
+        <button type="button" className="link-button" onClick={onClose}>
+          <span aria-hidden="true">← </span>
           {deckTexts.importBack}
         </button>
       </p>
@@ -174,173 +232,284 @@ export function DeckImport({
       </h1>
       <p>{deckTexts.importIntro}</p>
 
-      <form className="deck-import-form" onSubmit={(event) => void handleFetch(event)} noValidate>
-        <h2>{deckTexts.linkHeading}</h2>
-        <label htmlFor="import-link">{deckTexts.linkLabel}</label>
-        <input
-          id="import-link"
-          type="url"
-          autoComplete="off"
-          value={linkText}
-          aria-invalid={linkError !== null ? 'true' : undefined}
-          aria-describedby={linkError !== null ? 'import-link-hint import-link-error' : 'import-link-hint'}
-          onChange={(event) => {
-            setLinkText(event.target.value);
-            setLinkError(null);
-          }}
-        />
-        <p id="import-link-hint" className="hint">
-          {deckTexts.linkHint}
-        </p>
-        {linkError !== null && (
-          <p id="import-link-error" className="field-error" role="alert">
-            {deckTexts.linkErrors[linkError]}
+      <div className="import-sources">
+        <form className="deck-import-form import-source-panel" onSubmit={(event) => void handleFetch(event)} noValidate>
+          <h2>{deckTexts.linkHeading}</h2>
+          <label htmlFor="import-link">{deckTexts.linkLabel}</label>
+          <input
+            ref={linkRef}
+            id="import-link"
+            type="url"
+            autoComplete="off"
+            value={linkText}
+            aria-invalid={linkError !== null ? 'true' : undefined}
+            aria-describedby={linkError !== null ? 'import-link-hint import-link-error' : 'import-link-hint'}
+            onChange={(event) => {
+              setLinkText(event.target.value);
+              setLinkError(null);
+            }}
+          />
+          <p id="import-link-hint" className="hint">
+            {deckTexts.linkHint}
           </p>
-        )}
-        <div className="row-actions">
-          <button type="submit" className="button-primary" disabled={linkLoading}>
-            {linkLoading ? deckTexts.linkLoading : deckTexts.linkButton}
-          </button>
-        </div>
-      </form>
+          {linkError !== null && (
+            <p id="import-link-error" className="field-error" role="alert">
+              {deckTexts.linkErrors[linkError]}
+            </p>
+          )}
+          <div className="row-actions">
+            <button type="submit" className="button-primary" disabled={linkLoading}>
+              {linkLoading ? deckTexts.linkLoading : deckTexts.linkButton}
+            </button>
+          </div>
+        </form>
 
-      <form className="deck-import-form" onSubmit={(event) => void handleCheck(event)} noValidate>
-        <label htmlFor="import-text">{deckTexts.importTextLabel}</label>
-        <textarea
-          ref={textRef}
-          id="import-text"
-          rows={10}
-          spellCheck={false}
-          value={text}
-          aria-invalid={inputError !== null ? 'true' : undefined}
-          aria-describedby={inputError !== null ? 'import-error' : undefined}
-          onChange={(event) => edit(event.target.value)}
-        />
-        <label htmlFor="import-file">{deckTexts.importFileLabel}</label>
-        <input id="import-file" type="file" accept=".txt,.json,text/plain,application/json" onChange={(event) => void handleFile(event)} />
-        {inputError !== null && (
-          <p id="import-error" className="field-error" role="alert">
-            {deckTexts.importErrors[inputError]}
-          </p>
-        )}
-        <div className="row-actions">
-          <button type="submit" className="button-primary">
-            {deckTexts.importCheck}
-          </button>
-        </div>
-      </form>
+        <form className="deck-import-form import-source-panel" onSubmit={(event) => void handleCheck(event)} noValidate>
+          <h2>{deckTexts.textHeading}</h2>
+          <label htmlFor="import-text">{deckTexts.importTextLabel}</label>
+          <textarea
+            ref={textRef}
+            id="import-text"
+            rows={10}
+            spellCheck={false}
+            value={text}
+            aria-invalid={inputError !== null ? 'true' : undefined}
+            aria-describedby={inputError !== null ? 'import-error' : undefined}
+            onChange={(event) => edit(event.target.value)}
+          />
+          <label htmlFor="import-file">{deckTexts.importFileLabel}</label>
+          <input
+            id="import-file"
+            type="file"
+            accept=".txt,.json,text/plain,application/json"
+            onChange={(event) => void handleFile(event)}
+          />
+          {inputError !== null && (
+            <p id="import-error" className="field-error" role="alert">
+              {deckTexts.importErrors[inputError]}
+            </p>
+          )}
+          <div className="row-actions">
+            <button type="submit" className="button-primary">
+              {deckTexts.importCheck}
+            </button>
+          </div>
+        </form>
+      </div>
 
-      {report !== null && (
+      {report !== null && view !== null && (
         <section className="import-report" aria-labelledby="report-heading">
           <h2 id="report-heading" ref={reportRef} tabIndex={-1}>
             {deckTexts.reportHeading}
           </h2>
-          {report.source !== null && <p>{deckTexts.reportSource(report.source.name, report.source.author)}</p>}
-          {!collectionKnown && <p className="notice notice-warning">{deckTexts.collectionNotReady}</p>}
-          {collectionKnown && <p>{deckTexts.missingFromCollection(report.missingTotal)}</p>}
-
-          <h3>{deckTexts.reportCards}</h3>
-          {report.rows.length === 0 ? (
-            <p>{deckTexts.reportNone}</p>
-          ) : (
-            <ul className="import-rows">
-              {report.rows.map((row) => (
-                <li key={row.card.key}>
-                  <span>{deckTexts.reportRow(row.needed, row.card.displayName)}</span>{' '}
-                  {collectionKnown && (
-                    <span className={row.missing > 0 ? 'import-missing' : undefined}>
-                      {deckTexts.owned(row.owned, row.needed)}
-                      {row.missing > 0 && ` · ${deckTexts.missingBadge}`}
-                    </span>
-                  )}
-                  {row.inDecks.length > 0 && <span className="hint"> · {deckTexts.reportAlsoIn(row.inDecks)}</span>}
-                </li>
-              ))}
-            </ul>
+          {report.source !== null && (
+            <p className="import-source">{deckTexts.reportSource(report.source.name, report.source.author)}</p>
           )}
 
-          {collectionKnown && report.missingRows.length > 0 && (
-            <>
-              <h3>{deckTexts.reportMissingHeading}</h3>
-              <ul>
-                {report.missingRows.map((row) => (
-                  <li key={row.card.key}>{deckTexts.reportMissingRow(row.card.displayName, row.missing)}</li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {report.sideboardRows.length > 0 && (
-            <>
-              <h3>{deckTexts.reportSideboardHeading}</h3>
-              <p className="hint">{deckTexts.reportSideboardHint}</p>
-              <ul>
-                {report.sideboardRows.map((row) => (
-                  <li key={row.card.key}>
-                    {deckTexts.reportRow(row.needed, row.card.displayName)}
-                    {collectionKnown && ` · ${deckTexts.owned(row.owned, row.needed)}`}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {report.unrecognized.length > 0 && (
-            <>
-              <h3>{deckTexts.reportUnrecognizedHeading(report.unrecognized.length)}</h3>
-              <p className="hint">{deckTexts.reportUnrecognizedHint}</p>
-              <ul>
-                {report.unrecognized.map((line, index) => (
-                  <li key={index}>{line}</li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          <h3>{deckTexts.reportLegalityHeading}</h3>
-          {report.issues.length === 0 ? (
-            <p>{deckTexts.allGood}</p>
-          ) : (
-            <ul className="issue-list">
-              {report.issues.map((issue) => (
-                <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
-                  {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
-                  {issue.message}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <form className="deck-name-field" onSubmit={(event) => void handleSave(event)} noValidate>
-            <h3>{deckTexts.reportSaveHeading}</h3>
-            <label htmlFor="import-name">{deckTexts.nameLabel}</label>
-            <input
-              id="import-name"
-              type="text"
-              value={nameText}
-              aria-invalid={nameError !== null ? 'true' : undefined}
-              aria-describedby={nameError !== null ? 'import-name-error' : undefined}
-              onChange={(event) => {
-                setNameText(event.target.value);
-                setNameError(null);
-              }}
-            />
-            {nameError !== null && (
-              <p id="import-name-error" className="field-error">
-                {nameError}
-              </p>
-            )}
-            {saveFailure !== null && (
-              <p className="field-error" role="alert">
-                {deckTexts.actionFailed(saveFailure)}
-              </p>
-            )}
-            <div className="row-actions">
-              <button type="submit" className="button-primary" disabled={report.rows.length === 0}>
-                {deckTexts.reportSaveButton}
-              </button>
+          <div className="import-layout">
+            <div className="deck-head import-head">
+              <div className="deck-head-row">
+                <p className="deck-head-main">{deckTexts.mainProgress(view.main)}</p>
+                {report.issues.length === 0 ? (
+                  <span className="legality is-legal">
+                    <span aria-hidden="true">✓</span> {deckTexts.legalShort}
+                  </span>
+                ) : (
+                  <span className="legality is-issues">
+                    <span aria-hidden="true">⚠</span> {deckTexts.issuesCount(report.issues.length)}
+                  </span>
+                )}
+              </div>
+              <progress
+                className={`deck-progress is-${view.mainState}`}
+                max={MAX_MAIN_DECK}
+                value={Math.min(view.main, MAX_MAIN_DECK)}
+                aria-hidden="true"
+              />
+              <p className="deck-head-sub">{deckTexts.legendsProgress(view.legends)}</p>
+              {report.rows.length === 0 ? (
+                <p className="notice notice-warning">{deckTexts.reportNothingRecognized}</p>
+              ) : collectionKnown ? (
+                <p className={report.missingTotal > 0 ? 'import-missing-total' : 'import-owned-total'}>
+                  {deckTexts.missingFromCollection(report.missingTotal)}
+                </p>
+              ) : (
+                <p className="notice notice-warning">{deckTexts.collectionNotReady}</p>
+              )}
             </div>
-          </form>
+
+            <form className="deck-name-field import-save" onSubmit={(event) => void handleSave(event)} noValidate>
+              <h3>{deckTexts.reportSaveHeading}</h3>
+              <label htmlFor="import-name">{deckTexts.nameLabel}</label>
+              <input
+                id="import-name"
+                type="text"
+                value={nameText}
+                aria-invalid={nameError !== null ? 'true' : undefined}
+                aria-describedby={nameError !== null ? 'import-name-error' : undefined}
+                onChange={(event) => {
+                  setNameText(event.target.value);
+                  setNameError(null);
+                }}
+              />
+              {nameError !== null && (
+                <p id="import-name-error" className="field-error">
+                  {nameError}
+                </p>
+              )}
+              {saveFailure !== null && (
+                <p className="field-error" role="alert">
+                  {deckTexts.actionFailed(saveFailure)}
+                </p>
+              )}
+              <div className="row-actions">
+                <button type="submit" className="button-primary import-save-button" disabled={report.rows.length === 0}>
+                  {deckTexts.reportSaveButton}
+                </button>
+              </div>
+            </form>
+
+            <div className="import-rules">
+              <h3>{deckTexts.reportLegalityHeading}</h3>
+              {report.issues.length === 0 ? (
+                <p>{deckTexts.allGood}</p>
+              ) : (
+                <ul className="issue-list">
+                  {report.issues.map((issue) => (
+                    <li
+                      key={issue.type + issue.cards.join(',')}
+                      className={issue.severity === 'warning' ? 'is-warning' : undefined}
+                    >
+                      {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
+                      {issue.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="import-cards">
+              {report.unrecognized.length > 0 && (
+                <div className="notice notice-warning import-unrecognized">
+                  <h3>{deckTexts.reportUnrecognizedHeading(report.unrecognized.length)}</h3>
+                  <p>{deckTexts.reportUnrecognizedHint}</p>
+                  <ul className="import-lines">
+                    {report.unrecognized.map((line, index) => (
+                      <li key={index}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <h3>{deckTexts.reportCards}</h3>
+              {report.rows.length === 0 ? (
+                <p>{deckTexts.reportNone}</p>
+              ) : (
+                <>
+                  <div className="deck-section">
+                    <h4 className="deck-section-title">
+                      {deckTexts.legendsHeading} ({view.legends}/{LEGEND_COUNT})
+                    </h4>
+                    {view.grouped.legends.length === 0 ? (
+                      <p className="hint">{deckTexts.legendsEmpty}</p>
+                    ) : (
+                      <ul className="legend-slots">
+                        {view.grouped.legends.map(({ card }) => {
+                          const row = view.rowOf(card.key);
+                          return (
+                            <li key={card.key} className={'legend-slot' + (row.missing > 0 ? ' is-missing' : '')}>
+                              <span className="legend-slot-image import-legend-image" aria-hidden="true">
+                                <DeckCardImage card={card} className="legend-slot-img" />
+                              </span>
+                              <span className="legend-slot-name import-row-name">
+                                {deckTexts.reportRow(row.needed, card.displayName)}
+                              </span>
+                              {ownership(row)}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="deck-section">
+                    <h4 className="deck-section-title">
+                      {deckTexts.mainHeading} ({view.main})
+                    </h4>
+                    {view.grouped.groups.map((group) => (
+                      <div key={group.type} className="deck-group">
+                        <h5 className="deck-group-title" lang="en">
+                          {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
+                        </h5>
+                        <ul className="deck-tiles">
+                          {group.rows.map(({ card }) => {
+                            const row = view.rowOf(card.key);
+                            return (
+                              <li
+                                key={card.key}
+                                className={
+                                  `deck-tile import-tile ${typeColorClass(card.color)}` +
+                                  (row.missing > 0 ? ' is-missing' : '')
+                                }
+                              >
+                                <span className="deck-tile-art" aria-hidden="true">
+                                  <DeckCardImage card={card} className="deck-tile-img" />
+                                </span>
+                                <span className="deck-tile-gem">
+                                  <CostGem card={card} />
+                                </span>
+                                <span className="import-row-name">
+                                  {deckTexts.reportRow(row.needed, card.displayName)}
+                                </span>
+                                {ownership(row)}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {collectionKnown && report.missingRows.length > 0 && (
+                <div className="deck-section">
+                  <h3>{deckTexts.reportMissingHeading}</h3>
+                  <ul className="import-lines">
+                    {report.missingRows.map((row) => (
+                      <li key={row.card.key}>{deckTexts.reportMissingRow(row.card.displayName, row.missing)}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {report.sideboardRows.length > 0 && (
+                <div className="deck-section">
+                  <h3>{deckTexts.reportSideboardHeading}</h3>
+                  <p className="hint">{deckTexts.reportSideboardHint}</p>
+                  <ul className="import-lines">
+                    {report.sideboardRows.map((row) => (
+                      <li key={row.card.key}>
+                        {deckTexts.reportRow(row.needed, row.card.displayName)}
+                        {collectionKnown && ` · ${deckTexts.owned(row.owned, row.needed)}`}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="import-stats">
+              <DeckStats
+                curve={view.curve}
+                colors={view.colors}
+                groups={view.grouped.groups}
+                mainCount={view.main}
+                ramLimitsText={view.ramLimitsText}
+                missingText=""
+              />
+            </div>
+          </div>
         </section>
       )}
     </>

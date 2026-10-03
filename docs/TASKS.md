@@ -48,9 +48,11 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-041 | [velka] Pakkaeditorin rivit tiiviimmiksi (nyt noin 130 px per kortti) ja DeckEditor.tsx:n pilkkominen | 1 | Should | Koodari | Done (rivit T-045:ssä; DeckEditorin pilkkominen jäljellä) | UX |
 | T-042 | [velka] Pakkaeditori kahdessa välilehdessä: viimeinen tallennus voittaa (storage-tapahtuma tai versiotarkistus) | 2 | Could | Koodari | Backlog | – |
 | T-043 | [velka] Pakan nimikenttiin maxLength=100 (SEC-007 Low) | 2 | Could | Koodari | Backlog | – |
-| T-044 | Tuontiraportin ulkoasu ja Netdeck-linkkikentän tyyli: tiivis taulukko tai kuvat pelkän listan sijaan, toimintojen korostus | 2 | Should | Koodari | Backlog | UX |
+| T-044 | Tuontiraportin ulkoasu ja Netdeck-linkkikentän tyyli: tiivis taulukko tai kuvat pelkän listan sijaan, toimintojen korostus | 2 | Should | Koodari | Yhdistetty T-051:een | UX |
 | T-045 | Hiominen: tyyppimerkin kulma, värisuodatin palloina, Legend-nimen esto, yhtenäiset rivit, Power, kuvanäkymä pakkaeditoriin (sisältää T-041:n rivien tiivistyksen) | 1 | Must | Koodari | Done | PM esikatselu |
 | T-046 | Pakan haku Netdeck-linkistä ja vertailu kokoelmaan (D-015) | 1 | Must | Koodari | Done | Digiturva SEC-009 |
 | T-047 | [velka] Netdeck-vastauksen runko luetaan paloittain 512 kt:n rajaan asti (SEC-023), tunnistamattoman card.id:n siivous (SEC-024) | 2 | Should | Koodari | Backlog | Digiturva |
 | T-048 | Taulukkonäkymän lajittelu sarakkeittain | 1 | Should | Koodari | Done | PM esikatselu |
 | T-049 | Pakkaeditorin asettelu ja pakkalistan ulkoasu (leveä asettelu, tiivis lista, kustannuskäyrä) | 1 | Must | Koodari | Done | PM kuvakaappaukset |
+| T-050 | UX-uudistus: koko leveys, korttipoimija, pakkasarake (a–c), UX-007 | 1 | Must | Koodari | Done (PR #22) | UX-007, BREAK-003, kielentarkastus |
+| T-051 | Pakat-sivu ja tuontiraportti T-050:n tyyliin (sis. T-044) | 1 | Should | Koodari | Done (PR #22) | PM kuvakaappaukset, BREAK-003 |

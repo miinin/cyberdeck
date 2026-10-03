@@ -8,8 +8,21 @@ export interface DecksState {
   notices: readonly LoadNotice[];
 }
 
+const savesInFlight = new Set<Promise<unknown>>();
+
+/** The editor registers its last writes here so the deck list never reads older data than they leave (B-017). */
+export function trackDeckSave(save: Promise<unknown>): void {
+  const done = save.then(
+    () => undefined,
+    () => undefined,
+  );
+  savesInFlight.add(done);
+  void done.then(() => savesInFlight.delete(done));
+}
+
 async function fetchDecks(repository: DeckRepository): Promise<DecksState> {
   try {
+    if (savesInFlight.size > 0) await Promise.all([...savesInFlight]);
     const { value, notices } = await repository.list();
     return { phase: 'ready', decks: value, notices };
   } catch {

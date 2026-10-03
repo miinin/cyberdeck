@@ -12,7 +12,9 @@ function openEditor(cardsInDeck: [string, number][], extra: Record<string, strin
   );
 }
 
-const searchList = () => screen.getByRole('list', { name: 'Lisää kortteja' });
+// Rivit view: one card per table row (T-050b). Kuvat view: a list of images.
+const searchList = () => screen.getByRole('table', { name: 'Hakutulokset' });
+const imageList = () => screen.getByRole('list', { name: 'Lisää kortteja' });
 const savedCards = async (repositories: ReturnType<typeof openEditor>) =>
   (await repositories.decks.get('a'))?.sections.flatMap((section) => section.cards);
 
@@ -20,7 +22,9 @@ describe('Deck editor', () => {
   it('shows the deck grouped, with the summary and the rule violations in plain Finnish', async () => {
     openEditor([['l1', 1], ['u0', 4], ['u1', 2]]);
     expect(await screen.findByRole('heading', { level: 1, name: 'Oma pakka' })).toBeInTheDocument();
-    expect(screen.getByText('Legendit 1/3 · Pääpakka 6/40–50')).toBeInTheDocument();
+    // Sticky deck head (T-050c): the progress bar carries the main deck count, Legends are under it.
+    expect(screen.getByRole('progressbar', { name: 'Pääpakka 6/40–50' })).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: /pakan kortit/ })).getByText('Legendit 1/3')).toBeInTheDocument();
     expect(screen.getByText(/RAM-rajat: Red 2/)).toBeInTheDocument();
     expect(screen.getByText('Legendejä on 1, pitää olla tasan 3.')).toBeInTheDocument();
     expect(screen.getByText('Pääpakassa on 6 korttia, vähintään 40.')).toBeInTheDocument();
@@ -64,7 +68,7 @@ describe('Deck editor', () => {
     openEditor([['l1', 1], ['l2', 1], ['l3', 1]]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     const list = searchList();
-    const bigRow = within(list).getByText('Big').closest('li') as HTMLElement;
+    const bigRow = within(list).getByText('Big').closest('tr') as HTMLElement;
     expect(bigRow).toHaveClass('is-dimmed');
     expect(bigRow).toHaveTextContent('RAM 9 ylittää Red-värin rajan 6. Voit silti lisätä kortin.');
     const add = within(bigRow).getByRole('button', { name: 'Lisää pakkaan: Big' });
@@ -72,7 +76,7 @@ describe('Deck editor', () => {
     await user.click(add);
     expect(screen.getByText(/ylittää: Big/)).toBeInTheDocument();
     // Legends are full, so another Legend is dimmed too (all three are in the deck already).
-    expect(within(list).getByText('L1').closest('li')).toHaveClass('is-dimmed');
+    expect(within(list).getByText('L1').closest('tr')).toHaveClass('is-dimmed');
   });
 
   it('compares with the collection: owned counts, a missing marker and the number of missing cards', async () => {
@@ -143,26 +147,47 @@ describe('Deck editor', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Pakat' })).toBeInTheDocument();
   });
 
+  it('the deck list shows the latest edit right after leaving, and copying keeps it (B-017)', async () => {
+    const user = userEvent.setup();
+    const repositories = openEditor([['u3', 1]]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await user.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: Unit 3' }));
+    await user.click(screen.getByRole('button', { name: 'Takaisin pakkoihin' }));
+    await screen.findByRole('heading', { level: 1, name: 'Pakat' });
+    expect(await screen.findByText(/Oma pakka/)).toBeInTheDocument();
+    await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'u3', count: 2 }]));
+    expect(screen.getByText(/Pääpakka 2\/40–50/)).toBeInTheDocument();
+  });
+
+  it('gives a long unbroken deck name the wrapping heading class (B-018)', async () => {
+    const long = 'W'.repeat(100);
+    renderRoute('#/pakat/a', createMemoryRepositories({ initial: storedDecks([{ id: 'a', name: long, cards: [] }]) }));
+    const heading = await screen.findByRole('heading', { level: 1, name: long });
+    expect(heading).toHaveClass('editor-name');
+  });
+
   it('filters the search list with the catalog filters', async () => {
     const user = userEvent.setup();
     openEditor([]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     await user.type(screen.getByRole('searchbox'), 'Big');
-    expect(within(searchList()).getAllByRole('listitem')).toHaveLength(1);
+    // Header row plus one result row.
+    expect(within(searchList()).getAllByRole('row')).toHaveLength(2);
   });
 
   it('refuses a second Legend with the same name, says so in a status message and lets it be closed', async () => {
     const user = userEvent.setup();
     const repositories = openEditor([['l1', 1]]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
-    const row = within(searchList()).getByText('L1').closest('li') as HTMLElement;
+    const row = within(searchList()).getByText('L1').closest('tr') as HTMLElement;
     expect(row).toHaveClass('is-dimmed');
     // The hint must not invite adding a card that is refused (T-045 PM fix).
     expect(row).not.toHaveTextContent('Voit silti lisätä kortin.');
     await user.click(within(row).getByRole('button', { name: 'Lisää pakkaan: L1' }));
     const message = screen.getByText('Pakassa on jo Legend nimeltä L1.');
     expect(message.closest('[role="status"]')).not.toBeNull();
-    expect(screen.getByText('Legendit 1/3 · Pääpakka 0/40–50')).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: /pakan kortit/ })).getByText('Legendit 1/3')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'Pääpakka 0/40–50' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Sulje ilmoitus' }));
     expect(screen.queryByText('Pakassa on jo Legend nimeltä L1.')).not.toBeInTheDocument();
     await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'l1', count: 1 }]));
@@ -182,7 +207,7 @@ describe('Deck editor', () => {
   it('shows Power and Rarity on the result rows', async () => {
     openEditor([]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
-    const row = within(searchList()).getByText('Unit 3').closest('li') as HTMLElement;
+    const row = within(searchList()).getByText('Unit 3').closest('tr') as HTMLElement;
     expect(row).toHaveTextContent('Unit · Red · Cost 1 · Power 1 · RAM 1 · Common');
   });
 
@@ -192,10 +217,10 @@ describe('Deck editor', () => {
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     await user.click(screen.getByRole('radio', { name: 'Kuvat' }));
     expect(await repositories.preferences.loadDeckPickView()).toBe('images');
-    const imageButton = within(searchList()).getAllByRole('button', { name: 'Lisää pakkaan: Unit 3' })[0] as HTMLElement;
+    const imageButton = within(imageList()).getAllByRole('button', { name: 'Lisää pakkaan: Unit 3' })[0] as HTMLElement;
     await user.click(imageButton);
     await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'u3', count: 1 }]));
-    expect(within(searchList()).getByText('Pakassa 1', { selector: '.visually-hidden' })).toBeInTheDocument();
+    expect(within(imageList()).getByText('Pakassa 1', { selector: '.visually-hidden' })).toBeInTheDocument();
   });
 
   it('opens in the saved image view', async () => {
@@ -204,7 +229,7 @@ describe('Deck editor', () => {
     renderRoute('#/pakat/a', repositories);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     await waitFor(() => expect(screen.getByRole('radio', { name: 'Kuvat' })).toBeChecked());
-    expect(searchList()).toHaveClass('pick-images');
+    expect(imageList()).toHaveClass('pick-images');
   });
 
   it('tells when the deck does not exist', async () => {
