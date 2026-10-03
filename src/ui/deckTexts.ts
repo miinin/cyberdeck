@@ -87,6 +87,8 @@ export const deckTexts = {
         return 'Pakat on tallennettu uudemmalla sovellusversiolla, joten niitä ei voi muuttaa tällä versiolla. Lataa sivu uudelleen.';
       case 'not-found':
         return 'Pakkaa ei löytynyt. Se on voitu poistaa toisessa välilehdessä.';
+      case 'conflict':
+        return 'Pakkaa on muutettu toisaalla.';
       default:
         return 'Jokin meni pieleen, ja muutos ei tallentunut. Yritä uudelleen.';
     }
@@ -220,6 +222,12 @@ export const deckTexts = {
   saveDirty: 'Muutokset tallennetaan hetken kuluttua…',
   saveFailed: (kind: StorageErrorKind | 'unknown') => `Ei tallennettu. ${deckTexts.actionFailed(kind)}`,
   saveRetry: 'Yritä tallentaa uudelleen',
+  // Conflict: the deck changed in another tab or by a sync while there are unsaved changes (T-042, T-054d).
+  conflictMessage:
+    'Pakkaa on muutettu toisessa välilehdessä tai toisella laitteella, ja sinulla on tallentamattomia muutoksia. Mitä haluat tehdä?',
+  conflictLoadLatest: 'Lataa uusin',
+  conflictKeepMine: 'Pidä omat muutokset',
+  reloadedLatest: 'Pakka päivitettiin toisaalta tehdyillä muutoksilla.',
 
   // Export (T-015)
   exportJson: 'Vie .json',

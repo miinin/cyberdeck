@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-03 (PM, T-052 ja T-053 julkaistu)
+# STATUS · päivitetty 2026-10-03 (PM, T-054 kesken: a ja b valmiit haarassa, c ja d seuraavaksi)
 
 ## Yhdellä lauseella
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (want-lista, rarity) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | – | Ei keskeneräisiä tehtäviä. |
+| T-054 | PM | a0, a, b valmiit haarassa `t-054-kirjautuminen-ja-pilvitallennus` (pushattu, ei PR:ää) | **Käyttäjä loi tietokannat uudelleen 2026-10-03: tuotanto `eur3` (EU-monialue), testi `europe-north1`.** Kirjaa D-017:ään ja PRIVACY.md:hen, ja korjaa kirjautumisdialogin sijaintiteksti (SEC-038: ei "Suomessa", vaan esim. "EU:ssa"). Muut käyttäjän konsolitehtävät (kortin loppu "PM:n infrakirjaus" ja D-017 Muutos K-P8), sitten T-054c (synkronointi) ja T-054d. PR testiin vasta, kun GitHub-salaisuus on olemassa, tietokannat ovat europe-north1:ssä ja säännöt on deployattu (SEC-014:n todennuslista). |
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
@@ -79,7 +79,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 
 ## Julkaisuputki
 - GitHub: https://github.com/miinin/cyberdeck
-- Testisivusto: https://cyberdeck-tcg-test.web.app (test-haara)
+- Testisivusto: https://cyberdeck-tcg-dev.web.app (test-haara)
 - Tuotanto: https://cyberdeck-tcg.web.app (main-haara, vain /julkaise)
 - Kulku: t-XXX-haara → PR testiin (esikatselu-URL) → test → /julkaise → main (D-001, D-003)
 - Workflowt ajavat `npm ci && npm run build` ja julkaisevat `dist/`-kansion.

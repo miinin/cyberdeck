@@ -30,6 +30,14 @@ export function decodeEnvelope<T>(raw: string | null, spec: EnvelopeSpec<T>): De
   } catch {
     return { kind: 'corrupt' };
   }
+  return decodeEnvelopeValue(envelope, spec);
+}
+
+/**
+ * decodeEnvelope for an already parsed value, e.g. a Firestore document (D-017 kohta 3, SR-23).
+ * Reads only `schemaVersion` and `data` and never copies the input.
+ */
+export function decodeEnvelopeValue<T>(envelope: unknown, spec: EnvelopeSpec<T>): Decoded<T> {
   if (!isRecord(envelope)) return { kind: 'corrupt' };
 
   const version = envelope.schemaVersion;

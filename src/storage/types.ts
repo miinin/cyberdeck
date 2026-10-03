@@ -30,8 +30,11 @@ export interface DeckRepository {
   get(id: DeckId): Promise<Deck | null>;
   /** New id and timestamps; never uses an id from the caller (SR-18). */
   create(content: DeckContent): Promise<Deck>;
-  /** Updates updatedAt. Unknown id → StorageError('not-found'). */
-  update(id: DeckId, content: DeckContent): Promise<Deck>;
+  /**
+   * Updates updatedAt. Unknown id → StorageError('not-found'). With `expectedUpdatedAt`, a stored deck that has
+   * a different updatedAt → StorageError('conflict') and nothing is written (T-042, T-054d).
+   */
+  update(id: DeckId, content: DeckContent, options?: { expectedUpdatedAt?: string }): Promise<Deck>;
   /** Unknown id is not an error. */
   remove(id: DeckId): Promise<void>;
   subscribe(listener: () => void): () => void;
@@ -58,6 +61,53 @@ export interface PreferencesRepository {
   /** Saved deck editor result view, or 'list' when nothing valid is saved. Never rejects because of storage problems. */
   loadDeckPickView(): Promise<DeckPickView>;
   saveDeckPickView(view: DeckPickView): Promise<DeckPickView>;
+  /** Account hint (T-054a): uid of the last signed-in account, or null when none or invalid. Never throws. */
+  loadLastUid(): string | null;
+  /** Saves a valid uid, or removes the hint for null or an invalid uid. Never throws (a hint only). */
+  saveLastUid(uid: string | null): void;
+  /** true when a sign-in redirect was started and its result has not been read yet. Never throws. */
+  loadRedirectPending(): boolean;
+  saveRedirectPending(pending: boolean): void;
+  /** Set while the account deletion waits for a re-login redirect (T-054d). */
+  loadDeletePending(): boolean;
+  saveDeletePending(pending: boolean): void;
+}
+
+/** Decks and collection together: what the sync engine reads and replaces (T-054c). */
+export interface LocalData {
+  decks: Deck[];
+  collection: Collection;
+}
+
+/** The state both sides had at the last successful sync: the base of the three-way merge (D-017 kohta 6). */
+export interface SyncBase {
+  rev: number;
+  decks: readonly { id: DeckId; updatedAt: string }[];
+  collection: Collection;
+}
+
+/** Local data access for the sync engine and the first sign-in. Never throws except `apply`. */
+export interface SyncStorage {
+  /** null = a stored aggregate is unreadable or has a newer schema: nothing may be synced or overwritten. */
+  read(): LocalData | null;
+  /**
+   * Replaces the stored data with `next` if it still equals `expected` (false = it changed meanwhile, nothing
+   * written). Unreadable or older data is backed up first. Notifies the UI. Throws StorageError.
+   */
+  apply(expected: LocalData, next: LocalData): boolean;
+  loadBase(): SyncBase | null;
+  saveBase(base: SyncBase | null): void;
+  /** Copies the raw decks and collection to backup keys (SR-11). */
+  backupAll(): void;
+  /** Removes the decks and collection keys (after a successful transfer). */
+  clear(): void;
+  /**
+   * Removes everything the account has in this browser: decks, collection, sync base and backups. Only for
+   * account repositories; the signed-out data is never erased this way. Throws StorageError.
+   */
+  eraseAccount(): void;
+  /** Called after any local write, in this tab (all writes) and in other tabs (storage event). */
+  onChange(listener: () => void): () => void;
 }
 
 export interface Repositories {
@@ -66,4 +116,8 @@ export interface Repositories {
   preferences: PreferencesRepository;
   /** false = browser storage is not in use and data lives only in memory (the UI shows a notice, SR-13). */
   persistent: boolean;
+  /** Local data access for syncing (T-054c). */
+  sync: SyncStorage;
+  /** Repositories of one account's data in the same store (keys `cyberdeck:u:{uid}:*`), same preferences. */
+  forAccount(uid: string): Repositories;
 }

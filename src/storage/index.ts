@@ -1,7 +1,12 @@
 /*
  * Public API of the storage layer. The UI imports only from here (ARCHITECTURE.md 4 and 12, SR-12).
  */
+import type { Collection } from '../domain/collection';
+import { parseCollection } from '../domain/validate';
+import type { EnvelopeSpec } from './envelope';
+import { COLLECTION_SCHEMA_VERSION } from './keys';
 import { createMemoryStore, openBrowserStore, subscribeToBrowserStorage } from './keyValueStore';
+import { COLLECTION_MIGRATIONS } from './migrations';
 import { createRepositories } from './repositories';
 import type { Repositories } from './types';
 
@@ -15,10 +20,25 @@ export type {
   Theme,
   CatalogViewMode,
   DeckPickView,
+  LocalData,
+  SyncBase,
+  SyncStorage,
 } from './types';
 export { StorageError } from './errors';
 export type { StorageErrorKind } from './errors';
 export { isStoragePersisted, requestPersistentStorage } from './keyValueStore';
+export { decodeEnvelopeValue } from './envelope';
+export type { Decoded, EnvelopeSpec, Migration } from './envelope';
+
+/**
+ * The collection's envelope schema, shared by localStorage and the cloud copy (D-017 kohta 3): the same
+ * version, migrations and validation.
+ */
+export const COLLECTION_ENVELOPE_SPEC: EnvelopeSpec<Collection> = {
+  currentVersion: COLLECTION_SCHEMA_VERSION,
+  migrations: COLLECTION_MIGRATIONS,
+  parse: parseCollection,
+};
 
 /** localStorage when it works, otherwise an in-memory store with `persistent: false` (SR-13). */
 export function openBrowserRepositories(): Repositories {
