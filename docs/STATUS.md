@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-05 (PM, T-058 sideboard julkaistu)
+# STATUS · päivitetty 2026-10-05 (PM, T-072 painokset devissä, odottaa käyttäjän testiä)
 
 ## Yhdellä lauseella
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (rarity, want-lista ja vaihtolinkki PR:inä, D-018) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | PM | – | Ei keskeneräisiä. Seuraavaksi MVP-1:n loppukatselmointi (UX, Sisällöntuottaja: Have/Want ja englanti, Testikäyttäjä, Dokumentoija). Analyysi-ideat IDEAS.md:ssä 2026-10-05. |
+| T-072 | PM | Review (dev) | Käyttäjä testaa devissä, sitten /julkaise. Käyttäjä etsii versioiden kuvat (docs/card-variant-images.md). Loppukatselmoinnit avoinna. |
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
