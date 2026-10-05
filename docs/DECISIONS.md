@@ -425,3 +425,50 @@ Päätöksessä on viisi osaa.
 - **Palvelutilin roolit (testiprojekti):** action-hosting-deployn ohje (docs/service-account.md, tarkistettu 2026-10-03) listaa Firebase Authentication Admin, Firebase Hosting Admin, Cloud Run Viewer ja API Keys Viewer. Vähimmät oikeudet: **Firebase Hosting Admin ja API Keys Viewer**. Cloud Run Viewer ei ole tarpeen (ei Cloud Run -rewritejä), eikä Authentication Admin (sitä käytetään vain esikatselujen domainien lisäämiseen, ja esikatseluissa kirjautuminen on pois). Jos deploy epäonnistuu oikeuksien takia, rooli lisätään ja kirjataan korttiin. Digiturva vahvistaa.
 - **Kustannus ja lukitus:** uusi projekti on Spark-tasolla eikä maksa mitään. Ei uutta lukitusta, koska Firebaseen on jo sitouduttu (D-016).
 - **Seuraukset:** testisivuston URL vaihtuu `CLAUDE.md`:hen, `README.md`:hen, `docs/STATUS.md`:hen ja `docs/SECURITY.md`:hen (PM tai Dokumentoija infratehtävässä; vanhat raportit jäävät ennalleen historiana). R-18 poistuu, kun infratehtävä on tehty. IDEAS.md:n "erillinen testiprojekti" merkitään toteutetuksi.
+
+## D-018 · Want-lista omana kokoelman muotoisena aggregaattinaan, kokoelman vaihtojako URL-linkkinä · 2026-10-05 · Päättäjä: Arkkitehti (ehdotus), PM ja käyttäjä hyväksyvät
+**Tila:** Ehdotettu. Tehtävä T-064 (osat T-064a, T-064b, T-061b, T-062, T-063). Digiturva katselmoi T-064a:n (tallennus, synkka, säännöt) ja T-062:n (URL-syöte).
+**Konteksti:** Käyttäjä haluaa want-listan (kortti + haluttu määrä), "lisää puuttuvat wantiin" -napin pakkaeditoriin (`MissingCard`, `src/domain/deckExport.ts`) ja kokoelman jakolinkin, josta vastaanottaja näkee vaihtovertailun omaan kokoelmaansa. Nyt kokoelma on `Collection { entries: {card, count}[] }` (localStorage `cyberdeck:collection`, envelope v1, Firestore `users/{uid}/collection/main`, kolmitiemerge `mergeCollection`). Pakan jako on base64url-tekstiä URL-hashissa (`#/jaa/<data>`, D-017 ei koske). Korttidatassa on nyt 151 korttia, avaimen keskipituus 22 merkkiä (MAX_CARD_KEY_LENGTH 100).
+
+**Vaihtoehdot, tietomalli:**
+- **A) Want omana aggregaattinaan, sama tyyppi kuin kokoelma (valittu).** `WantList = Collection` (entries `{card, count}`, count 1–999, enintään 5000 riviä). Uusi localStorage-avain `cyberdeck:wants` (tilikohtaisesti `cyberdeck:u:{uid}:wants`), envelope v1, Firestore `users/{uid}/collection/want`. + Ei migraatiota (uusi avain, vanha data koskematon). `parseCollection`, `withCount`, `mergeCollection`, `encodeCollectionDoc` ja repositoriototeutus käyvät sellaisenaan avaimella parametrisoituina. Sääntömuutos on yksi rivi (`docId in ['main', 'want']`). Vanha sovellusversio ei näe want-dokumenttia eikä riko sitä. − Yksi luku ja kirjoitus lisää täydessä synkassa; `LocalData`, `SyncBase`, `CloudSnapshot` ja `CloudChange` saavat yhden kentän lisää.
+- **B) Want kokoelman kenttänä** (`data: { entries, wants }`, skeema v2). + Yksi dokumentti, yksi avain. − Skeemamigraatio v1→v2 paikallisesti ja pilvessä; säännön `hasExactly(d.data, ['entries'])` muutos; vanhan version välilehdet ja laitteet näkevät v2:n ja lukitsevat synkan (SR-23), kunnes ne päivitetään; molempien listojen yhteinen 1 MiB:n raja. Isompi ja riskialttiimpi muutos. Hylätään.
+- (C) Want kokoelmarivin kenttänä `{card, count, want}`: sama migraatio kuin B:ssä ja lisäksi rivi, jonka count on 0, rikkoisi nykyisen invariantin "count 0 = riviä ei ole". Hylätään.
+
+**Vaihtoehdot, jakolinkki:**
+- **1) URL-koodattu kuten pakka (valittu).** `#/vaihto/<data>`, data = base64url(UTF-8-teksti), ks. formaatti alla. + Ei palvelinta, ei kirjautumista, ei henkilötietoja palvelimella, ei Firestore-sääntöjä eikä kiintiöitä, sama validointimalli kuin T-056:ssa. Nykyisellä korttimäärällä koko kokoelma ja want ≈ 4–8 kt → 6–11 k merkkiä. − Linkki on tilannekuva (ei päivity), ja kasvava korttimäärä voi myöhemmin vaatia pakkauksen (`CompressionStream('deflate-raw')`, ei uutta riippuvuutta; selaintuki tarkistetaan dokumentaatiosta silloin) tai lyhyemmät tunnisteet. Kirjataan IDEAS.md:hen.
+- **2) Julkinen Firestore-dokumentti** `shares/{shareId}`, linkissä vain tunniste. + Lyhyt linkki, voi päivittyä. − Vaatii kirjautumisen jakajalta, julkisen lukusäännön (luettelointi, arvaaminen, roskaposti), poisto- ja vanhenemislogiikan, PRIVACY.md-muutoksen (julkisesti luettavaa käyttäjädataa uid:hen sidottuna) ja Digiturvan uhkamallin. Spark-kiintiöt riittävät, ei maksua, mutta selvästi isompi pinta. Hylätään nyt, IDEAS.md:hen.
+
+**Päätös:** A + 1.
+
+**1. Want-tietomalli ja tallennus (T-064a)**
+- `src/domain/wants.ts`: `export type WantList = Collection; export const EMPTY_WANTS = EMPTY_COLLECTION;` sekä `addMissingToWants(wants, missing: readonly MissingCard[]): WantList` (T-061b). Rajat: `MAX_COLLECTION_COUNT` ja `MAX_COLLECTION_ENTRIES` (SR-11) samat.
+- Want-määrä tarkoittaa **montako kappaletta lisää haluan** (ei tavoitekokonaismäärää). Ei sidota kokoelmaan: kokoelman kasvu ei vähennä wantia automaattisesti (avoin tuotekysymys, ks. kortti).
+- `keys.ts`: `WANTS_KEY = 'cyberdeck:wants'`, `WANTS_SCHEMA_VERSION = 1`; `migrations.ts`: `WANTS_MIGRATIONS = []`. Varmuuskopiot aggregaatilla `wants` (`cyberdeck:backup:wants:<ISO>`), enintään 3.
+- `Repositories.wants: CollectionRepository` (sama rajapinta, sama toteutus avaimella parametrisoituna). `forAccount(uid)` → `cyberdeck:u:{uid}:wants`.
+
+**2. Synkka (T-064a)**
+- `LocalData.wants`, `SyncBase.wants` (tallennetussa pohjassa puuttuva `wants` = `EMPTY_COLLECTION`, ei pohjan versionnostoa), `CloudSnapshot.wants: CloudDoc<Collection>`, `CloudChange.wants?: Collection`.
+- `mergeCollection` sellaisenaan wantille. `fullSync` tarkistaa myös `wants.entries.length <= MAX_COLLECTION_ENTRIES`. `push` vertaa `sameCollection(local.wants, base.wants)`.
+- `firestoreCloudStore`: `readAll` lukee `collection/want`, `commit` kirjoittaa sen samaan transaktioon, **`deleteAll` poistaa sen** (tilin poisto, GDPR). `validateChange` laskee kirjoituksen ja kokorajan (900 000 t).
+- `copySignedOutData` yhdistää myös wantit.
+- `firestore.rules`: `match /collection/{docId}` -lohkossa `docId == 'main'` → `docId in ['main', 'want']` (get, create/update, delete). Muuta ei muuteta. Käyttäjä deployaa säännöt testiprojektiin ennen T-064a:n yhdistämistä testiin ja tuotantoon ennen julkaisua; muuten want-kirjoitus kaatuu ja synkka menee virhetilaan.
+
+**3. Vaihtojakolinkin formaatti (T-062)**
+- Reitti `#/vaihto/<data>`, `src/domain/tradeShare.ts`: `encodeTradeShare(have: Collection, want: WantList): string | null` (null = liian iso) ja `decodeTradeShare(data: string): { have: Collection; want: WantList; dropped: number } | null`.
+- Teksti ennen base64url:ää, rivit `\n`-erotettuina:
+  ```
+  cyberdeck-vaihto 1
+  h <määrä> <kortin avain>
+  w <määrä> <kortin avain>
+  ```
+  Avaimet ovat sovelluksen `CardKey`-avaimia, ei nimiä (lyhyempi, ei jäsennysmonitulkintaisuutta).
+- Rajat: data enintään `MAX_SHARE_DATA_LENGTH` (16 000 merkkiä) ja dekoodattuna enintään `MAX_IMPORT_BYTES`; rivejä enintään 2 × `MAX_COLLECTION_ENTRIES`; rivin muoto lineaarisella regexillä `^([hw]) ([1-9][0-9]{0,2}) ([a-z0-9-]{1,100})$` + `isCardKey`; tuntematon otsikko tai versio → koko linkki virheellinen; virheellinen rivi tai tuplasti esiintyvä avain samassa listassa → rivi hylätään ja lasketaan `dropped`-määrään. Avaimet `Map`iin (SR-11). Tuntemattomat kortit (ei korttidatassa) ohitetaan vertailussa ja näytetään määränä.
+- Jakaja: jos koodattu data ylittää 16 000 merkkiä, nappi näyttää virheen ("Kokoelma on liian suuri linkkiin") eikä tuota katkaistua linkkiä.
+
+**4. Vertailu ja vaihdettavuus (T-062, T-063)**
+- `src/domain/tradeCompare.ts`, puhdas funktio: `compareTrade(mine: Collection, myWants: WantList, theirs: Collection, theirWants: WantList, cardsByKey)` → `{ iCanGive: {card, count}[], theyCanGive: {card, count}[] }`, jossa `count = min(halu, tarjolla)`.
+- T-062: tarjolla = omistettu määrä. T-063: tarjolla = `max(0, omistettu − playsetSize(card))` (ylimäärä, `src/domain/card.ts`). Tuntematon kortti → ei tarjolla.
+
+**Kustannus ja lukitus:** ei uusia palveluita, ei maksua, ei uusia riippuvuuksia. Firestoressa yksi dokumentti lisää per käyttäjä (Spark riittää).
+**Seuraukset:** PRIVACY.md:n inventaarioon want-lista (SR-16), SECURITY.md:hen jakolinkin vaatimus (Digiturva), IDEAS.md:hen pakkaus ja Firestore-jako.
