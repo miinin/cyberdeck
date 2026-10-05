@@ -2,10 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Card } from '../domain/card';
 import { EMPTY_CRITERIA, filterCards } from '../domain/cardSearch';
 import { MAX_COLLECTION_COUNT } from '../domain/collection';
+import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
+import type { CardSort } from '../domain/cardSort';
 import { toCardsByKey } from '../domain/deckRules';
 import { tradeableOf } from '../domain/tradeCompare';
 import type { Repositories } from '../storage';
+import { CardImageDialog } from './CardImageDialog';
+import { CardList } from './CardList';
 import { CardName, cardNameText } from './CardName';
+import { ImageSizeSelect } from './ListToolbar';
+import type { ImageSize } from './ListToolbar';
+import { SortSelect } from './SortSelect';
 import { saveErrorLive } from './CollectionNotices';
 import { countIn } from './collectionStore';
 import { CountControl } from './CountControl';
@@ -27,6 +34,10 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   const { snapshot: wants, store: wantsStore } = useWants(repositories.wants);
   const [query, setQuery] = useState('');
   const [live, setLive] = useState('');
+  const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
+  const [imageSize, setImageSize] = useState<ImageSize>('medium');
+  const [openCard, setOpenCard] = useState<Card | null>(null);
+  const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const wantHeadingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -51,24 +62,43 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   }, [wantsStore, names]);
 
   const wantReady = wants.phase === 'ready';
-  const wantedCards = wantReady ? cards.filter((card) => countIn(wants, card.key) > 0) : [];
+  const wantedCards = useMemo(
+    () =>
+      wantReady
+        ? sortCards(
+            cards.filter((card) => countIn(wants, card.key) > 0),
+            sort.key,
+            sort.direction,
+          )
+        : [],
+    [wantReady, cards, wants, sort],
+  );
   const matches = useMemo(
     () => (query.trim() === '' ? [] : filterCards(cards, { ...EMPTY_CRITERIA, query })),
     [cards, query],
   );
   const have = useMemo(() => {
-    if (collection.phase !== 'ready') return [];
+    if (collection.phase !== 'ready') return { cards: [] as Card[], counts: new Map<string, number>() };
     const { counts } = tradeableOf(collection.saved, toCardsByKey(cards));
-    return cards.flatMap((card) => {
-      const tradeable = counts.get(card.key);
-      return tradeable === undefined ? [] : [{ card, tradeable }];
-    });
-  }, [collection.phase, collection.saved, cards]);
+    const tradeableCards = cards.filter((card) => counts.has(card.key));
+    return { cards: sortCards(tradeableCards, sort.key, sort.direction), counts };
+  }, [collection.phase, collection.saved, cards, sort]);
 
   const change = (card: Card, count: number) => {
     wantsStore.setCount(card.key, count);
     // The row leaves the list; keep focus on the page instead of letting it fall to <body>.
     if (count === 0) wantHeadingRef.current?.focus();
+  };
+  const openImage = (card: Card, opener: HTMLButtonElement) => {
+    imageOpenerRef.current = opener;
+    setOpenCard(card);
+  };
+  const closeImage = () => {
+    setOpenCard(null);
+    const opener = imageOpenerRef.current;
+    imageOpenerRef.current = null;
+    if (opener?.isConnected) opener.focus();
+    else wantHeadingRef.current?.focus();
   };
   const limit = (card: Card) => setLive(texts.maxReachedLive(cardNameText(card)));
 
@@ -86,24 +116,29 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
       </div>
       {collection.phase === 'ready' && wantReady && <ShareTradeButton have={collection.saved} want={wants.saved} />}
 
-      <section aria-labelledby="want-heading">
-        <h2 id="want-heading" ref={wantHeadingRef} tabIndex={-1}>
-          {texts.wantHeading}
-        </h2>
-        {wants.phase === 'loading' && <p>{texts.wantLoading}</p>}
-        {(wants.phase === 'unavailable' || wants.phase === 'locked') && <p role="alert">{texts.wantUnavailable}</p>}
-        {wantReady && (
-          <>
-            <p className="hint">{texts.wantIntro}</p>
-            {wantedCards.length === 0 ? (
-              <p>{texts.wantEmpty}</p>
-            ) : (
-              <ul className="have-want-list">
-                {wantedCards.map((card) => (
-                  <li key={card.key}>
-                    <span className="have-want-name">
-                      <CardName card={card} />
-                    </span>
+      <div className="have-want-results" data-image-size={imageSize}>
+        <div className="list-toolbar">
+          <ImageSizeSelect name="have-want-image-size" value={imageSize} onChange={setImageSize} />
+          <SortSelect sort={sort} onChange={setSort} />
+        </div>
+
+        <section aria-labelledby="want-heading">
+          <h2 id="want-heading" ref={wantHeadingRef} tabIndex={-1}>
+            {texts.wantHeading}
+          </h2>
+          {wants.phase === 'loading' && <p>{texts.wantLoading}</p>}
+          {(wants.phase === 'unavailable' || wants.phase === 'locked') && <p role="alert">{texts.wantUnavailable}</p>}
+          {wantReady && (
+            <>
+              <p className="hint">{texts.wantIntro}</p>
+              {wantedCards.length === 0 ? (
+                <p>{texts.wantEmpty}</p>
+              ) : (
+                <CardList
+                  cards={wantedCards}
+                  caption={texts.wantHeading}
+                  onOpenImage={openImage}
+                  renderFoot={(card) => (
                     <CountControl
                       card={card}
                       count={countIn(wants, card.key)}
@@ -113,84 +148,86 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
                       editable
                       kind="want"
                     />
-                  </li>
-                ))}
-              </ul>
-            )}
+                  )}
+                />
+              )}
 
-            <h3 id="want-search-heading">{texts.wantSearchHeading}</h3>
-            <p>
-              <label htmlFor="want-search">{texts.wantSearchLabel}</label>{' '}
-              <input
-                id="want-search"
-                type="search"
-                autoComplete="off"
-                maxLength={SEARCH_MAX_LENGTH}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </p>
-            {query.trim() === '' ? (
-              <p className="hint">{texts.wantSearchPrompt}</p>
-            ) : matches.length === 0 ? (
-              <p role="status">{texts.wantSearchNone}</p>
-            ) : (
-              <>
-                <ul className="have-want-list" aria-labelledby="want-search-heading">
-                  {matches.slice(0, MAX_RESULTS).map((card) => {
-                    const count = countIn(wants, card.key);
-                    return (
-                      <li key={card.key}>
-                        <span className="have-want-name">
-                          <CardName card={card} />
-                          {count > 0 && <span className="hint"> ({texts.wantInList(count)})</span>}
-                        </span>
-                        <button
-                          type="button"
-                          className="button-secondary"
-                          disabled={count >= MAX_COLLECTION_COUNT}
-                          aria-label={`${texts.wantAddLabel}${cardNameText(card)}`}
-                          onClick={() => change(card, count + 1)}
-                        >
-                          {texts.wantAdd}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-                {matches.length > MAX_RESULTS && <p className="hint">{texts.wantSearchMore(MAX_RESULTS)}</p>}
-              </>
-            )}
-          </>
-        )}
-      </section>
+              <h3 id="want-search-heading">{texts.wantSearchHeading}</h3>
+              <div className="field want-search">
+                <label htmlFor="want-search">{texts.wantSearchLabel}</label>
+                <input
+                  id="want-search"
+                  type="search"
+                  autoComplete="off"
+                  maxLength={SEARCH_MAX_LENGTH}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </div>
+              {query.trim() === '' ? (
+                <p className="hint">{texts.wantSearchPrompt}</p>
+              ) : matches.length === 0 ? (
+                <p role="status">{texts.wantSearchNone}</p>
+              ) : (
+                <>
+                  <ul className="have-want-list" aria-labelledby="want-search-heading">
+                    {matches.slice(0, MAX_RESULTS).map((card) => {
+                      const count = countIn(wants, card.key);
+                      return (
+                        <li key={card.key}>
+                          <span className="have-want-name">
+                            <CardName card={card} />
+                            {count > 0 && <span className="hint"> ({texts.wantInList(count)})</span>}
+                          </span>
+                          <button
+                            type="button"
+                            className="button-secondary"
+                            disabled={count >= MAX_COLLECTION_COUNT}
+                            aria-label={`${texts.wantAddLabel}${cardNameText(card)}`}
+                            onClick={() => change(card, count + 1)}
+                          >
+                            {texts.wantAdd}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {matches.length > MAX_RESULTS && <p className="hint">{texts.wantSearchMore(MAX_RESULTS)}</p>}
+                </>
+              )}
+            </>
+          )}
+        </section>
 
-      <section aria-labelledby="have-heading">
-        <h2 id="have-heading">{texts.haveHeading}</h2>
-        {collection.phase === 'loading' && <p>{texts.haveLoading}</p>}
-        {(collection.phase === 'unavailable' || collection.phase === 'locked') && (
-          <p role="alert">{texts.haveUnavailable}</p>
-        )}
-        {collection.phase === 'ready' && (
-          <>
-            <p className="hint">{texts.haveIntro}</p>
-            {have.length === 0 ? (
-              <p>{texts.haveEmpty}</p>
-            ) : (
-              <ul className="have-want-list">
-                {have.map(({ card, tradeable }) => (
-                  <li key={card.key}>
-                    <span className="have-want-name">
-                      <CardName card={card} />
-                    </span>
-                    <span>{texts.haveRow(tradeable)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-      </section>
+        <section aria-labelledby="have-heading">
+          <h2 id="have-heading">{texts.haveHeading}</h2>
+          {collection.phase === 'loading' && <p>{texts.haveLoading}</p>}
+          {(collection.phase === 'unavailable' || collection.phase === 'locked') && (
+            <p role="alert">{texts.haveUnavailable}</p>
+          )}
+          {collection.phase === 'ready' && (
+            <>
+              <p className="hint">{texts.haveIntro}</p>
+              {have.cards.length === 0 ? (
+                <p>{texts.haveEmpty}</p>
+              ) : (
+                <CardList
+                  cards={have.cards}
+                  caption={texts.haveHeading}
+                  onOpenImage={openImage}
+                  renderFoot={(card) => (
+                    <p className="have-want-owned">
+                      {texts.haveRow(have.counts.get(card.key) ?? 0)}
+                      <span className="hint"> · {texts.haveOwnedRow(countIn(collection, card.key))}</span>
+                    </p>
+                  )}
+                />
+              )}
+            </>
+          )}
+        </section>
+      </div>
+      <CardImageDialog card={openCard} onClose={closeImage} />
     </>
   );
 }

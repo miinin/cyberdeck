@@ -2595,15 +2595,18 @@ h3,
 }
 
 /* Image size: the smallest grid card still fits the count control. */
-.catalog-results[data-image-size='small'] .card-grid {
+.catalog-results[data-image-size='small'] .card-grid,
+.have-want-results[data-image-size='small'] .card-grid {
   --card-min: 14rem;
 }
 
-.catalog-results[data-image-size='medium'] .card-grid {
+.catalog-results[data-image-size='medium'] .card-grid,
+.have-want-results[data-image-size='medium'] .card-grid {
   --card-min: 18rem;
 }
 
-.catalog-results[data-image-size='large'] .card-grid {
+.catalog-results[data-image-size='large'] .card-grid,
+.have-want-results[data-image-size='large'] .card-grid {
   --card-min: 25rem;
 }
 
@@ -4491,13 +4494,15 @@ button.legality:focus-visible {
 }
 
 .sort-select select:hover {
-  border-color: var(--color-info);
+  border-color: var(--color-text);
 }
 
+/* Chrome treats a mouse-opened select as :focus-visible, so the cue is a quiet 2 px border in the text
+   colour instead of the blue ring (user feedback); it still shows keyboard focus in both themes. */
 .sort-select select:focus-visible {
-  border-color: var(--color-info);
-  outline: 2px solid var(--color-focus);
-  outline-offset: 1px;
+  border-color: var(--color-text);
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--color-text);
 }
 
 /* T-066: add-missing-to-wants button and its result. */
@@ -4524,4 +4529,30 @@ button.legality:focus-visible {
 
 .missing-result:empty {
   display: none;
+}
+
+/* T-067: owned/tradeable line under a Have card. */
+.have-want-results .have-want-owned {
+  margin: 0;
+}
+
+/* Language switcher (T-068): the buttons reuse the theme toggle look; only the group needs layout. */
+.language-switch {
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+}
+
+.language-switch .theme-toggle {
+  margin-inline-start: 0;
+  padding-inline: var(--space-3);
+}
+
+/* T-068: Have/Want search looks like the catalog search; the Have section gets air above it. */
+.want-search {
+  max-width: 24rem;
+}
+
+section[aria-labelledby='have-heading'] {
+  margin-block-start: var(--space-6);
 }

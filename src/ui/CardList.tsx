@@ -73,6 +73,7 @@ export function CardList({
   owned,
   decksOf,
   onOpenImage,
+  renderFoot,
 }: {
   cards: readonly Card[];
   caption?: string;
@@ -81,6 +82,8 @@ export function CardList({
   decksOf?: (card: Card) => readonly string[];
   /** Opens the enlarged image (T-027 UX); the button is where focus returns. */
   onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
+  /** Per-card control in place of the collection control (Have/Want, T-067). */
+  renderFoot?: (card: Card) => ReactNode;
 }) {
   return (
     <ul className="card-grid" aria-label={caption}>
@@ -128,6 +131,7 @@ export function CardList({
           </div>
           <div className="card-foot">
             {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
+            {renderFoot !== undefined && <div className="card-collection">{renderFoot(card)}</div>}
             {owned !== undefined && (
               <div className="card-collection">
                 <CountControl

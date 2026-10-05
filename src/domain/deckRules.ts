@@ -1,6 +1,7 @@
 import type { Card } from './card';
 import type { CardKey } from './cardKey';
 import type { DeckContent } from './deck';
+import { currentDeckMessages } from './deckMessages';
 
 /** Deck rules (T-013). Sources: cyberpunktcg.com/gameplay-guide and ripperdeck.gg/rules, see the task card. */
 export const LEGEND_COUNT = 3;
@@ -20,7 +21,7 @@ export interface DeckIssue {
   readonly type: DeckIssueType;
   /** Unknown cards are a warning (the deck may still be legal); everything else breaks a rule. */
   readonly severity: 'error' | 'warning';
-  /** Plain Finnish explanation for the player. Card names are shown as they are in the data. */
+  /** Plain-language explanation (Finnish or English by UI language) for the player. Card names are shown as they are in the data. */
   readonly message: string;
   /** Cards the issue is about (empty for count rules). */
   readonly cards: readonly CardKey[];
@@ -91,7 +92,7 @@ export function validateDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckIss
     issues.push({
       type: 'legend-count',
       severity: 'error',
-      message: `Legendejä on ${totals.legends}, pitää olla tasan ${LEGEND_COUNT}.`,
+      message: currentDeckMessages().legendCount(totals.legends, LEGEND_COUNT),
       cards: [],
     });
   }
@@ -111,18 +112,17 @@ export function validateDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckIss
       issues.push({
         type: 'legend-duplicate',
         severity: 'error',
-        message: `Legendien nimien pitää olla erilaiset, mutta ${name} on mukana ${entry.copies} kertaa.`,
+        message: currentDeckMessages().legendDuplicate(name, entry.copies),
         cards: entry.keys,
       });
     }
   }
 
   if (totals.main < MIN_MAIN_DECK || totals.main > MAX_MAIN_DECK) {
-    const limit = totals.main < MIN_MAIN_DECK ? `vähintään ${MIN_MAIN_DECK}` : `enintään ${MAX_MAIN_DECK}`;
     issues.push({
       type: 'main-size',
       severity: 'error',
-      message: `Pääpakassa on ${totals.main} korttia, ${limit}.`,
+      message: currentDeckMessages().mainSize(totals.main, MIN_MAIN_DECK, MAX_MAIN_DECK),
       cards: [],
     });
   }
@@ -133,7 +133,7 @@ export function validateDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckIss
     issues.push({
       type: 'copies',
       severity: 'error',
-      message: `${card.displayName}: ${count} kopiota, enintään ${MAX_COPIES}.`,
+      message: currentDeckMessages().copies(card.displayName, count, MAX_COPIES),
       cards: [key],
     });
   }
@@ -149,11 +149,10 @@ export function validateDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckIss
   }
   for (const [color, cards] of overRam) {
     const limit = limits.get(color) ?? 0;
-    const reason = limit === 0 ? `Legendeillä ei ole väriä ${color}` : `${color}-värin RAM-raja on ${limit}`;
     issues.push({
       type: 'ram',
       severity: 'error',
-      message: `${reason}, mutta ylittää: ${names(cards)}.`,
+      message: currentDeckMessages().ram(color, limit, names(cards)),
       cards: cards.map((card) => card.key),
     });
   }
@@ -162,7 +161,7 @@ export function validateDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckIss
     issues.push({
       type: 'unknown-card',
       severity: 'warning',
-      message: `Pakassa on ${totals.unknown.length} korttia, jota ei löydy korttitiedoista: ${totals.unknown.join(', ')}.`,
+      message: currentDeckMessages().unknownCards(totals.unknown.length, totals.unknown),
       cards: totals.unknown,
     });
   }
@@ -183,20 +182,20 @@ export function addBlocker(card: Card, deck: DeckContent, cardsByKey: CardsByKey
   const counts = deckCounts(deck);
   if (card.type === 'Legend') {
     const totals = deckTotals(deck, cardsByKey);
-    if (totals.legends >= LEGEND_COUNT) return `Pakassa on jo ${LEGEND_COUNT} Legendiä.`;
+    if (totals.legends >= LEGEND_COUNT) return currentDeckMessages().legendsFull(LEGEND_COUNT);
     for (const [key, count] of counts) {
       const other = cardsByKey.get(key);
       if (count > 0 && other?.type === 'Legend' && other.name === card.name) {
-        return `Pakassa on jo Legend ${card.name}.`;
+        return currentDeckMessages().legendInDeck(card.name);
       }
     }
     return null;
   }
-  if ((counts.get(card.key) ?? 0) >= MAX_COPIES) return `Pakassa on jo ${MAX_COPIES} kopiota.`;
+  if ((counts.get(card.key) ?? 0) >= MAX_COPIES) return currentDeckMessages().copiesFull(MAX_COPIES);
   // Without a Legend there are no RAM limits yet; the Legend count issue covers it (B-020, T-052).
   if (card.color !== null && card.ram !== null && deckTotals(deck, cardsByKey).legends > 0) {
     const limit = ramLimits(deck, cardsByKey).get(card.color) ?? 0;
-    if (card.ram > limit) return `RAM ${card.ram} ylittää ${card.color}-värin rajan ${limit}.`;
+    if (card.ram > limit) return currentDeckMessages().ramOver(card.ram, card.color, limit);
   }
   return null;
 }
