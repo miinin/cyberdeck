@@ -1,7 +1,11 @@
 import { useMemo, useRef, useState } from 'react';
+import { RaritySymbol } from './RaritySymbol';
 import type { DeckContent } from '../domain/deck';
 import type { MissingCard } from '../domain/deckExport';
+import { GroupOdds } from './GroupOdds';
 import { MissingCards } from './MissingCards';
+import type { CardKey } from '../domain/cardKey';
+import type { Substitute } from '../domain/substitutes';
 import type { WantsHandle } from './MissingCards';
 import { COST_CURVE_LAST } from '../domain/deckRules';
 import type { CardsByKey, ColorShare, DeckGroups } from '../domain/deckRules';
@@ -57,6 +61,7 @@ export function DeckStats({
   missingText,
   missingCards = [],
   wants,
+  substitutes,
   rng = Math.random,
 }: {
   deck: DeckContent;
@@ -71,6 +76,8 @@ export function DeckStats({
   missingCards?: readonly MissingCard[];
   /** The want list: adds an "add missing to wants" button to the missing list (T-061b). */
   wants?: WantsHandle;
+  /** Owned stand-ins for the missing cards (T-075). */
+  substitutes?: ReadonlyMap<CardKey, Substitute>;
   /** Random source of the test hand; tests pass a seeded one. */
   rng?: Rng;
 }) {
@@ -210,7 +217,7 @@ export function DeckStats({
                   deckTexts.raritiesShare(deckTexts.rarityUnknown, count)
                 ) : (
                   <>
-                    <span lang="en">{rarity}</span> {count}
+                    <RaritySymbol rarity={rarity} showName /> {count}
                   </>
                 )}
               </span>
@@ -220,7 +227,9 @@ export function DeckStats({
       )}
       <p>{ramLimitsText}</p>
       {missingText !== '' && <p>{missingText}</p>}
-      <MissingCards rows={missingCards} deckName={deck.name} wants={wants} />
+      <MissingCards rows={missingCards} deckName={deck.name} wants={wants} substitutes={substitutes} />
+
+      {mainCount > 0 && <GroupOdds deck={deck} cardsByKey={cardsByKey} />}
 
       {stats.odds.length > 0 && (
         <details className="stat-odds" onToggle={(event) => setOddsOpen(event.currentTarget.open)}>

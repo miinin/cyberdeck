@@ -1,4 +1,4 @@
-import { countOf, EMPTY_COLLECTION, toCountMap, withCount } from './collection';
+import { countOf, EMPTY_COLLECTION, minCountOf, setVersionCount, toCountMap, trySetCount, unknownVersionCount, withCount } from './collection';
 import type { Collection } from './collection';
 
 describe('withCount', () => {
@@ -65,5 +65,59 @@ describe('countOf and toCountMap', () => {
     expect(map.get('detonate')).toBe(3);
     expect(map.get('constructor')).toBeUndefined();
     expect(map.size).toBe(2);
+  });
+});
+
+describe('versions (D-020)', () => {
+  const A = 'welcometonightcityretail:005a';
+  const B = 'welcometonightcitybeta:005a';
+
+  it('raising a version raises the count, lowering it lowers the count, unknown copies stay', () => {
+    let c = withCount(EMPTY_COLLECTION, 'detonate', 2); // 2 unknown
+    c = setVersionCount(c, 'detonate', A, 1);
+    expect(c.entries).toEqual([{ card: 'detonate', count: 3, versions: { [A]: 1 } }]);
+    expect(unknownVersionCount(c, 'detonate')).toBe(2);
+    c = setVersionCount(c, 'detonate', B, 2);
+    expect(countOf(c, 'detonate')).toBe(5);
+    c = setVersionCount(c, 'detonate', A, 0);
+    expect(c.entries).toEqual([{ card: 'detonate', count: 4, versions: { [B]: 2 } }]);
+    c = setVersionCount(c, 'detonate', B, 0);
+    expect(c.entries).toEqual([{ card: 'detonate', count: 2 }]);
+  });
+
+  it('creates and removes a row through a version alone', () => {
+    const c = setVersionCount(EMPTY_COLLECTION, 'detonate', A, 1);
+    expect(c.entries).toEqual([{ card: 'detonate', count: 1, versions: { [A]: 1 } }]);
+    expect(setVersionCount(c, 'detonate', A, 0).entries).toEqual([]);
+  });
+
+  it('does not change the input and keeps versions when only the count changes', () => {
+    const c = setVersionCount(EMPTY_COLLECTION, 'detonate', A, 2);
+    expect(withCount(c, 'detonate', 5).entries).toEqual([{ card: 'detonate', count: 5, versions: { [A]: 2 } }]);
+    expect(c.entries).toEqual([{ card: 'detonate', count: 2, versions: { [A]: 2 } }]);
+  });
+
+  it('blocks a count below the sum of the versions and reports the minimum', () => {
+    const c = setVersionCount(withCount(EMPTY_COLLECTION, 'detonate', 3), 'detonate', A, 2);
+    expect(minCountOf(c, 'detonate')).toBe(2);
+    expect(trySetCount(c, 'detonate', 1)).toEqual({ ok: false, minimum: 2 });
+    expect(trySetCount(c, 'detonate', 0)).toEqual({ ok: false, minimum: 2 });
+    expect(() => withCount(c, 'detonate', 1)).toThrow(RangeError);
+    const ok = trySetCount(c, 'detonate', 2);
+    expect(ok.ok && countOf(ok.collection, 'detonate')).toBe(2);
+  });
+
+  it('rejects invalid keys, numbers and totals over 999', () => {
+    expect(() => setVersionCount(EMPTY_COLLECTION, 'detonate', 'nope', 1)).toThrow(RangeError);
+    expect(() => setVersionCount(EMPTY_COLLECTION, 'detonate', A, -1)).toThrow(RangeError);
+    expect(() => setVersionCount(EMPTY_COLLECTION, 'detonate', A, 1.5)).toThrow(RangeError);
+    const full = withCount(EMPTY_COLLECTION, 'detonate', 999);
+    expect(() => setVersionCount(full, 'detonate', A, 1)).toThrow(RangeError);
+  });
+
+  it('allows at most 32 printings per card', () => {
+    let c: Collection = EMPTY_COLLECTION;
+    for (let i = 0; i < 32; i += 1) c = setVersionCount(c, 'detonate', `s:${i}`, 1);
+    expect(() => setVersionCount(c, 'detonate', 's:99', 1)).toThrow(RangeError);
   });
 });

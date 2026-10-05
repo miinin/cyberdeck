@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Card } from '../domain/card';
 import type { Deck, DeckContent } from '../domain/deck';
-import { MAX_DECK_DISTINCT_CARDS } from '../domain/deck';
+import { MAX_DECK_DISTINCT_CARDS, SIDEBOARD_SIZE } from '../domain/deck';
 import { checkDeckName, distinctRows, withDeckCount, withSideboardCount } from '../domain/deckEdit';
 import {
   MAX_MAIN_DECK,
@@ -29,6 +29,7 @@ import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
   KNOWN_CARD_RARITIES,
+  officialRarity,
   KNOWN_CARD_TYPES,
   filterCards,
   filterOptions,
@@ -51,6 +52,7 @@ import { DeckPickTable } from './DeckPickTable';
 import { DeckStats } from './DeckStats';
 import { Sideboard } from './Sideboard';
 import type { MissingCard } from '../domain/deckExport';
+import { findSubstitutes } from '../domain/substitutes';
 import type { PickBlocker } from './DeckPickTable';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
@@ -291,6 +293,18 @@ export function DeckEditor({
     }
     return rows;
   }, [allCounts, cardsByKey, collection]);
+  const substitutes = useMemo(
+    () =>
+      collectionReady
+        ? findSubstitutes(
+            missingCards.map((row) => row.card),
+            cardsByKey.values(),
+            (key) => countIn(collection, key),
+            (key) => allCounts.get(key) ?? 0,
+          )
+        : undefined,
+    [collectionReady, missingCards, cardsByKey, collection, allCounts],
+  );
   const missingCopies = missingCards.reduce((sum, row) => sum + row.missing, 0);
 
   const setCount = (card: Card, count: number) => {
@@ -320,6 +334,8 @@ export function DeckEditor({
     }, CHANGE_ANNOUNCE_MS);
   };
 
+  const sideHeadingRef = useRef<HTMLHeadingElement>(null);
+
   const setSideCount = (card: Card, count: number) => {
     const base = contentRef.current;
     const side = sideboardCounts(base).get(card.key) ?? 0;
@@ -339,6 +355,16 @@ export function DeckEditor({
     schedule(withSideboardCount(base, card.key, count));
   };
 
+  /** Adds one copy straight to the sideboard from the search results (T-074). */
+  const addToSideboard = (card: Card) => {
+    const base = contentRef.current;
+    if (card.type !== 'Legend' && sideboardSize(base) >= SIDEBOARD_SIZE) {
+      setToast(deckTexts.sideboardFull(SIDEBOARD_SIZE));
+      return;
+    }
+    setSideCount(card, (sideboardCounts(base).get(card.key) ?? 0) + 1);
+  };
+
   /** Moves one copy; the total of the card stays the same, so no copy limit is touched. */
   const moveCopy = (card: Card, toSideboard: boolean) => {
     const base = contentRef.current;
@@ -351,6 +377,9 @@ export function DeckEditor({
     if ((toSideboard ? main : side) === 0) return;
     const delta = toSideboard ? 1 : -1;
     schedule(withSideboardCount(withDeckCount(base, card.key, main - delta), card.key, side + delta));
+    setChangeText(toSideboard ? deckTexts.movedToSideboard(card.displayName) : deckTexts.movedToMain(card.displayName));
+    // The row leaves the sideboard: keep focus on its heading instead of losing it (WCAG 2.4.3).
+    if (!toSideboard && side === 1) sideHeadingRef.current?.focus();
   };
 
   const openImage = (card: Card) => {
@@ -579,7 +608,7 @@ export function DeckEditor({
             criteria={criteria}
             typeOptions={filterOptions(KNOWN_CARD_TYPES, cards.map((card) => card.type), criteria.types)}
             colorOptions={filterOptions(KNOWN_CARD_COLORS, cards.map((card) => card.color), criteria.colors)}
-            rarityOptions={filterOptions(KNOWN_CARD_RARITIES, cards.map((card) => card.rarity), criteria.rarities)}
+            rarityOptions={filterOptions(KNOWN_CARD_RARITIES, cards.map((card) => (card.rarity === null ? null : officialRarity(card.rarity))), criteria.rarities)}
             numberOptions={numberFilterOptionsFor(cards, criteria)}
             searchInputRef={searchInputRef}
             collectionAllRef={collectionAllRef}
@@ -684,6 +713,14 @@ export function DeckEditor({
                         describedBy={blocker !== null ? hintId : undefined}
                         shortcuts
                       />
+                      <button
+                        type="button"
+                        className="link-button"
+                        aria-label={deckTexts.addToSideboard(card.displayName)}
+                        onClick={() => addToSideboard(card)}
+                      >
+                        +S
+                      </button>
                     </DeckPickImage>
                   );
                 })}
@@ -696,6 +733,7 @@ export function DeckEditor({
                 countOf={(card) => counts.get(card.key) ?? 0}
                 blockerOf={blockerOf}
                 onChange={setCount}
+                onAddToSideboard={addToSideboard}
                 onOpenImage={openImage}
                 clickAdds={clickAdds}
                 hoverProps={preview.bind}
@@ -782,12 +820,14 @@ export function DeckEditor({
             onOpenImage={openImage}
             hoverProps={preview.bind}
             onMoveToSideboard={(card) => moveCopy(card, true)}
+            onAddToSideboard={addToSideboard}
           />
           <Sideboard
             rows={sideRows}
             size={sideboardSize(content)}
             onChange={setSideCount}
             onMoveToMain={(card) => moveCopy(card, false)}
+            headingRef={sideHeadingRef}
             hoverProps={preview.bind}
           />
           {grouped.unknown.length > 0 && (
@@ -824,6 +864,7 @@ export function DeckEditor({
             }
             missingCards={collectionReady ? missingCards : undefined}
             wants={wants}
+            substitutes={substitutes}
             missingText={
               collectionReady
                 ? deckTexts.missingFromCollection(missingCopies)

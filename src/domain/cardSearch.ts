@@ -6,7 +6,26 @@ import type { Card } from './card';
 export const KNOWN_CARD_TYPES: readonly string[] = ['Legend', 'Unit', 'Gear', 'Program'];
 
 /** Known rarities in display order. Unknown rarities from the data are appended after these. */
-export const KNOWN_CARD_RARITIES: readonly string[] = ['Common', 'Uncommon', 'Rare', 'Epic', 'Secret', 'Nova Rare'];
+export const KNOWN_CARD_RARITIES: readonly string[] = [
+  'Common',
+  'Uncommon',
+  'Rare',
+  'Epic Rare',
+  'Secret Rare',
+  'Iconic Rare',
+  'Nova Rare',
+];
+
+/** The official name of a rarity (T-078): Netdeck's Epic, Secret and Iconic * become Epic Rare, Secret Rare, Iconic Rare. */
+export function officialRarity(raw: string): string;
+export function officialRarity(raw: string | null): string | null;
+export function officialRarity(raw: string | null): string | null {
+  if (raw === null) return null;
+  if (raw === 'Epic') return 'Epic Rare';
+  if (raw === 'Secret') return 'Secret Rare';
+  if (raw.startsWith('Iconic')) return 'Iconic Rare';
+  return raw;
+}
 
 /** Known card colors in display order. Unknown colors from the data are appended after these. */
 export const KNOWN_CARD_COLORS: readonly string[] = ['Red', 'Yellow', 'Green', 'Blue'];
@@ -136,6 +155,12 @@ export function isFilterActive(criteria: CardFilterCriteria): boolean {
   );
 }
 
+/** The card's own rarity or the rarity of any of its printings is selected (D-021). */
+function hasRarity(card: Card, rarities: ReadonlySet<string>): boolean {
+  if (card.rarity !== null && rarities.has(officialRarity(card.rarity))) return true;
+  return (card.printings ?? []).some((p) => p.rarity !== null && rarities.has(officialRarity(p.rarity)));
+}
+
 /**
  * Cards matching all of: every word of the search text (each a part of "name subname", in any
  * order, B-013), and in every group (type, color, rarity, Cost, Power, RAM) one of the selected values
@@ -151,7 +176,7 @@ export function filterCards(cards: readonly Card[], criteria: CardFilterCriteria
   return cards.filter((card) => {
     if (types.size > 0 && !types.has(card.type)) return false;
     if (colors.size > 0 && (card.color === null || !colors.has(card.color))) return false;
-    if (rarities.size > 0 && (card.rarity === null || !rarities.has(card.rarity))) return false;
+    if (rarities.size > 0 && !hasRarity(card, rarities)) return false;
     for (const [group, field] of NUMBER_FIELDS) {
       if (!matchesNumberFilter(card[field], criteria[group])) return false;
     }

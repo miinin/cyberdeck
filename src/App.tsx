@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { createAccountSession, createBrowserAccountServices } from './account';
 import type { AccountServices } from './account';
+import logoUrl from './assets/brand/cyberdeck-tcg-logo-header.webp';
 import { CARDS } from './data/cards';
 import type { Card } from './domain/card';
 import { openBrowserRepositories } from './storage';
@@ -75,9 +76,11 @@ export function App({
     <>
       <header className="site-header">
         <div className="container">
-          <span className="brand">{texts.appName}</span>
+          <a className="brand" href="#/">
+            <img src={logoUrl} alt="Cyberdeck TCG" width={400} height={99} />
+          </a>
           <nav className="main-nav" aria-label={deckTexts.navLabel}>
-            <a href="#/" aria-current={route.name === 'cards' ? 'page' : undefined}>
+            <a href="#/" aria-current={route.name === 'cards' || route.name === 'card' ? 'page' : undefined}>
               {deckTexts.navCards}
             </a>
             <a
@@ -90,6 +93,7 @@ export function App({
               {deckTexts.navHaveWant}
             </a>
           </nav>
+          <div className="header-tools">
           <ThemeToggle preferences={openRepositories.preferences} />
           <LanguageSwitch />
           <AccountMenu
@@ -98,6 +102,7 @@ export function App({
             onSignedOut={() => setNotice('signed-out')}
             onAccountDeleted={() => setNotice('deleted')}
           />
+          </div>
         </div>
       </header>
       {notice !== null && uid === null && (
@@ -117,8 +122,8 @@ export function App({
         />
       )}
       <main className="container" key={uid ?? 'local'}>
-        {route.name === 'cards' && (
-          <CatalogView cards={cards} repositories={openRepositories} headerSlot={headerSlot} />
+        {(route.name === 'cards' || route.name === 'card') && (
+          <CatalogView cards={cards} routeCardKey={route.name === 'card' ? route.key : null} repositories={openRepositories} headerSlot={headerSlot} />
         )}
         {route.name === 'decks' && (
           <DecksView cards={cards} repositories={openRepositories} onOpen={(id) => navigate({ name: 'deck', id })} />

@@ -28,7 +28,8 @@ export function accountKeyPrefix(uid: string): string {
 /** Followed by `<aggregate>:<ISO timestamp>`. Only keys with this prefix are ever pruned (SR-13). */
 export const BACKUP_PREFIX = 'cyberdeck:backup:';
 
-export const COLLECTION_SCHEMA_VERSION = 1;
+/** 2 = entries may carry a breakdown by printing (`versions`, D-020). */
+export const COLLECTION_SCHEMA_VERSION = 2;
 export const DECKS_SCHEMA_VERSION = 1;
 export const WANTS_SCHEMA_VERSION = 1;
 export const MAX_BACKUPS_PER_AGGREGATE = 3;

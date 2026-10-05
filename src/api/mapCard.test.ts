@@ -16,6 +16,67 @@ describe('mapCard', () => {
       ram: null,
       rarity: 'Rare',
       key: 'v-streetkid',
+      printings: [
+        {
+          key: 'welcometonightcityretail:005a',
+          setCode: 'welcometonightcityretail',
+          setName: 'Welcome to Night City — Retail',
+          number: '005a',
+          rarity: 'Rare',
+          language: 'en',
+          artist: 'Olgierd Ciszak',
+          imageKey: 'v-streetkid__welcome-to-night-city-005a',
+        },
+        {
+          key: 'welcometonightcitybeta:005a',
+          setCode: 'welcometonightcitybeta',
+          setName: 'Welcome to Night City — Beta',
+          number: 'β005a',
+          rarity: 'Rare',
+          language: 'en',
+          artist: 'Olgierd Ciszak',
+          imageKey: 'v-streetkid__welcome-to-night-city-005a',
+        },
+      ],
+    });
+  });
+
+  describe('printings', () => {
+    const base = { collector_number: '001', set: { code: 'abc', name: 'Set' } };
+    const printingsOf = (raw: unknown) => mapCard(rawCard(1, { printings: raw }))?.printings;
+
+    it('is empty when the source has no printings array', () => {
+      expect(printingsOf(undefined)).toEqual([]);
+      expect(printingsOf('x')).toEqual([]);
+    });
+
+    it('defaults the language to en and the optional fields to null', () => {
+      expect(printingsOf([base])).toEqual([
+        { key: 'abc:001', setCode: 'abc', setName: 'Set', number: '001', rarity: null, language: 'en', artist: null, imageKey: 'card-1__set-001' },
+      ]);
+    });
+
+    it('skips malformed printings and keeps the first of a repeated key', () => {
+      const list = [
+        base,
+        { ...base, artist: 'Other' },
+        { ...base, collector_number: 'bad number' },
+        { ...base, set: { code: 'a:b', name: 'Set' } },
+        { ...base, set: { code: 'abc' } },
+        { ...base, collector_number: '1234567890123' },
+        null,
+        'x',
+      ];
+      expect(printingsOf(list)?.map((printing) => printing.key)).toEqual(['abc:001']);
+      expect(printingsOf(list)?.[0]?.artist).toBeNull();
+    });
+
+    it('builds the image key from the set family', () => {
+      const set = (name: string) => printingsOf([{ ...base, collector_number: 'β012', set: { code: 'x', name } }])?.[0]?.imageKey;
+      expect(set('Embracing Power — Beta Starter Deck')).toBe('card-1__embracing-power-starter-deck-012');
+      expect(set('Welcome to Night City — Retail — FR')).toBe('card-1__welcome-to-night-city-012');
+      expect(set('Pre-Release Retail')).toBe('card-1__pre-release-012');
+      expect(set('Night City Showdown S1')).toBe('card-1__night-city-showdown-s1-012');
     });
   });
 
@@ -65,16 +126,16 @@ describe('mapCard', () => {
     expect(mapCard(raw)).toBeNull();
   });
 
-  it('does not copy image URLs, printings, rules text or unknown fields', () => {
+  it('does not copy image URLs, rules text or unknown fields', () => {
     const card = mapCard({ ...realShapeCard, extra: 'x' });
 
     expect(card).not.toBeNull();
     const keys = Object.keys(card ?? {});
     expect(keys).not.toContain('image_url');
-    expect(keys).not.toContain('printings');
     expect(keys).not.toContain('rules_text');
     expect(keys).not.toContain('extra');
     expect(JSON.stringify(card)).not.toContain('Signature');
+    expect(JSON.stringify(card)).not.toContain('image_url');
   });
 });
 

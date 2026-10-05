@@ -1,5 +1,7 @@
 import { exportFileName, missingToText } from '../domain/deckExport';
 import type { MissingCard } from '../domain/deckExport';
+import type { CardKey } from '../domain/cardKey';
+import type { Substitute } from '../domain/substitutes';
 import { AddMissingToWantsButton } from './AddMissingToWants';
 import { deckTexts } from './deckTexts';
 import { downloadTextFile } from './downloadFile';
@@ -15,10 +17,13 @@ export function MissingCards({
   rows,
   deckName,
   wants,
+  substitutes,
 }: {
   rows: readonly MissingCard[];
   deckName: string;
   wants?: WantsHandle;
+  /** Owned stand-ins by missing card key (T-075). */
+  substitutes?: ReadonlyMap<CardKey, Substitute>;
 }) {
   if (rows.length === 0) return null;
 
@@ -33,7 +38,18 @@ export function MissingCards({
         <summary>{deckTexts.missingListHeading}</summary>
         <ul>
           {rows.map(({ card, missing }) => (
-            <li key={card.key}>{deckTexts.missingRow(card.displayName, missing)}</li>
+            <li key={card.key}>
+              {deckTexts.missingRow(card.displayName, missing)}
+              {substitutes?.get(card.key) !== undefined && (
+                <span className="hint">
+                  {' '}
+                  {deckTexts.substituteRow(
+                    substitutes.get(card.key)?.card.displayName ?? '',
+                    substitutes.get(card.key)?.owned ?? 0,
+                  )}
+                </span>
+              )}
+            </li>
           ))}
         </ul>
         <button

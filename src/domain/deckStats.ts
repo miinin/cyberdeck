@@ -172,3 +172,64 @@ export function cheapOpeningProbability(deck: DeckContent, cardsByKey: CardsByKe
   );
   return atLeastOneProbability(mainDeckSize(deck, cardsByKey), cheap, OPENING_HAND);
 }
+
+/** Chance to see at least `atLeast` of `copies` cards in `drawn` cards from a deck of `deckSize` (T-075, hypergeometric). */
+export function atLeastKProbability(deckSize: number, copies: number, drawn: number, atLeast: number): number {
+  const n = Math.max(0, Math.trunc(deckSize));
+  const k = Math.min(Math.max(0, Math.trunc(copies)), n);
+  const d = Math.min(Math.max(0, Math.trunc(drawn)), n);
+  const need = Math.trunc(atLeast);
+  if (need <= 0) return 1;
+  if (k < need || d < need) return 0;
+  const lnFact = (x: number) => {
+    let sum = 0;
+    for (let i = 2; i <= x; i += 1) sum += Math.log(i);
+    return sum;
+  };
+  const lnChoose = (a: number, b: number) => lnFact(a) - lnFact(b) - lnFact(a - b);
+  let below = 0;
+  for (let j = 0; j < need; j += 1) {
+    if (j > d || d - j > n - k) continue;
+    below += Math.exp(lnChoose(k, j) + lnChoose(n - k, d - j) - lnChoose(n, d));
+  }
+  return Math.min(1, Math.max(0, 1 - below));
+}
+
+/** A group of main deck cards for the odds calculator (T-075). */
+export type CardGroup =
+  | { kind: 'type'; value: string }
+  | { kind: 'color'; value: string }
+  | { kind: 'maxCost'; value: number };
+
+export function inGroup(card: Card, group: CardGroup): boolean {
+  if (group.kind === 'type') return card.type === group.value;
+  if (group.kind === 'color') return card.color === group.value;
+  return card.cost !== null && card.cost <= group.value;
+}
+
+export const GROUP_TURNS = [1, 2, 3, 4, 5, 6] as const;
+
+export interface GroupOddsRow {
+  readonly turn: number;
+  readonly atLeast1: number;
+  readonly atLeast2: number;
+}
+
+/** Copies of the group in the main deck and the chance of 1+ and 2+ of them by each turn. */
+export function groupOdds(
+  deck: DeckContent,
+  cardsByKey: CardsByKey,
+  group: CardGroup,
+  turns: readonly number[] = GROUP_TURNS,
+): { copies: number; rows: GroupOddsRow[] } {
+  const size = mainDeckSize(deck, cardsByKey);
+  const copies = mainRows(deck, cardsByKey).reduce((sum, { card, count }) => sum + (inGroup(card, group) ? count : 0), 0);
+  return {
+    copies,
+    rows: turns.map((turn) => ({
+      turn,
+      atLeast1: atLeastKProbability(size, copies, cardsSeen(turn), 1),
+      atLeast2: atLeastKProbability(size, copies, cardsSeen(turn), 2),
+    })),
+  };
+}

@@ -381,6 +381,7 @@ function controlled(entries: { card: string; count: number }[] = []) {
   const listeners = new Set<() => void>();
   const collection: CollectionRepository = {
     load: () => base.collection.load(),
+    setVersionCount: (card, printing, count) => base.collection.setVersionCount(card, printing, count),
     setCount: (card, count) =>
       new Promise<Collection>((resolve, reject) => {
         pending.push({
@@ -809,5 +810,48 @@ describe('CatalogView collection: browser reminder and persistent storage', () =
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Pyydä pysyvää tallennusta' })).toBeNull();
     expect(persist).not.toHaveBeenCalled();
+  });
+});
+
+describe('CatalogView: set filter and version summary (T-074)', () => {
+  const printed = (c: Card, setName: string, key: string): Card => ({
+    ...c,
+    printings: [
+      { key, setCode: key.split(':')[0] ?? key, setName, number: '1', rarity: null, language: 'en', artist: null, imageKey: key },
+    ],
+  });
+  const list = [
+    printed(cards[1] as Card, 'Welcome to Night City — Beta', 'wb:1'),
+    printed(cards[2] as Card, 'Edgerunner Open S 1', 'eo:1'),
+    cards[0] as Card,
+  ];
+  const names = () => within(screen.getByRole('list')).getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
+
+  it('narrows the list to cards with a printing in the chosen set', async () => {
+    await renderView(createMemoryRepositories(), list);
+    fireEvent.change(screen.getByLabelText('Setti / versio'), { target: { value: 'edgerunner-open-s-1' } });
+    expect(names()).toEqual(['Viktor Vektor, You Might Feel a Little Pinch']);
+  });
+
+  it('shows recorded versions per set and "Omistetut" needs a version from the set', async () => {
+    const initial = {
+      [COLLECTION_KEY]: JSON.stringify({
+        schemaVersion: 1,
+        savedAt: '2026-10-01T10:00:00.000Z',
+        data: {
+          entries: [
+            { card: 'swordwise-huscle', count: 2, versions: { 'wb:1': 2 } },
+            { card: 'viktor-vektor-pinch', count: 1 },
+          ],
+        },
+      }),
+    };
+    const { container } = await renderView(createMemoryRepositories({ initial }), list);
+    expect(container.querySelector('#versions-summary')).toHaveTextContent('Kirjatut versiot: Welcome to Night City: 2');
+    fireEvent.click(screen.getByRole('radio', { name: 'Omistetut' }));
+    fireEvent.change(screen.getByLabelText('Setti / versio'), { target: { value: 'welcome-to-night-city' } });
+    expect(names()).toEqual(['Swordwise Huscle']);
+    fireEvent.change(screen.getByLabelText('Setti / versio'), { target: { value: 'edgerunner-open-s-1' } });
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
 });

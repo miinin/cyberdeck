@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { DeckContent } from '../domain/deck';
 import { encodeDeckShare } from '../domain/deckShare';
 import { deckToJson, deckToText, exportFileName } from '../domain/deckExport';
@@ -33,8 +33,14 @@ export function ShareIcon() {
 export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsByKey: CardsByKey }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
-  const exportAs = (format: ExportFormat) => {
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  /** Closes the panel and returns focus to the toggle, so it never falls to the page (WCAG 2.4.3). */
+  const close = () => {
     setOpen(false);
+    toggleRef.current?.focus();
+  };
+  const exportAs = (format: ExportFormat) => {
+    close();
     const text = format === 'json' ? deckToJson(deck, cardsByKey) : deckToText(deck, cardsByKey);
     const mime = format === 'json' ? 'application/json' : 'text/plain;charset=utf-8';
     downloadTextFile(exportFileName(deck.name, format), text, mime);
@@ -42,7 +48,7 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
   const [shared, setShared] = useState<'copied' | 'failed' | null>(null);
   const [link, setLink] = useState('');
   const share = async () => {
-    setOpen(false);
+    close();
     const url = `${window.location.origin}/#/jaa/${encodeDeckShare(deck, cardsByKey)}`;
     setLink(url);
     try {
@@ -58,11 +64,12 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
       onKeyDown={(e) => {
         if (e.key === 'Escape' && open) {
           e.stopPropagation();
-          setOpen(false);
+          close();
         }
       }}
     >
       <button
+        ref={toggleRef}
         type="button"
         className="button-secondary export-menu-toggle"
         aria-expanded={open}
@@ -99,13 +106,11 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
           {deckTexts.shareButton}
         </button>
       </div>
-      {shared === 'copied' && (
-        <span className="hint" role="status">
-          {deckTexts.shareCopied}
-        </span>
-      )}
+      <span className="hint" role="status">
+        {shared === 'copied' ? deckTexts.shareCopied : ''}
+      </span>
       {shared === 'failed' && (
-        <span role="status">
+        <span>
           <label>
             {deckTexts.shareCopyFailed}
             <input

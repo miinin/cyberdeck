@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { RaritySymbol } from './RaritySymbol';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
 import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
@@ -47,6 +48,7 @@ export function CardTable({
   owned,
   decksOf,
   onOpenImage,
+  artUrlOf,
   hoverProps,
   sort: controlledSort,
   onSortChange,
@@ -55,7 +57,9 @@ export function CardTable({
   caption?: string;
   owned?: OwnedColumn;
   decksOf?: (card: Card) => readonly string[];
-  onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
+  onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  /** A special art to show in place of a card's picture (D-021). */
+  artUrlOf?: (card: Card) => string | null;
   /** Mouse hover preview of the bigger image (T-052), as in the deck editor. */
   hoverProps?: (card: Card) => HoverPreviewProps;
   /** Controlled sort shared with the "Järjestys" selector (T-060); without it the table keeps its own. */
@@ -93,7 +97,7 @@ export function CardTable({
           {rows.map((card) => (
             <tr key={card.id} className={collectionState(card, owned)} {...hoverProps?.(card)}>
               <td className="cell-image">
-                <CardImage card={card} onOpen={onOpenImage} />
+                <CardImage card={card} onOpen={onOpenImage} artUrl={artUrlOf?.(card) ?? null} />
               </td>
               <th scope="row" className="cell-name">
                 <button
@@ -123,7 +127,7 @@ export function CardTable({
                 </span>
               </td>
               <td>
-                <Value value={card.rarity} missing={texts.noRarity} />
+                {card.rarity === null ? <Value value={null} missing={texts.noRarity} /> : <RaritySymbol rarity={card.rarity} />}
               </td>
               <td className="cell-number">
                 <Value value={card.cost} missing={texts.noCost} />
@@ -143,6 +147,7 @@ export function CardTable({
                     onChange={owned.onChange}
                     onLimit={owned.onLimit}
                     editable={owned.editable}
+                    min={owned.minOf?.(card)}
                   />
                 </td>
               )}

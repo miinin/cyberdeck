@@ -55,7 +55,7 @@ export function ThemeToggle({
   return (
     <button
       type="button"
-      className="theme-toggle"
+      className="header-icon theme-toggle"
       aria-pressed={theme === "light"}
       title={
         theme === "light"
@@ -70,8 +70,8 @@ export function ThemeToggle({
         <svg
           className="theme-toggle-icon"
           viewBox="0 0 24 24"
-          width="20"
-          height="20"
+          width="22"
+          height="22"
           aria-hidden="true"
           focusable="false"
         >
@@ -87,8 +87,8 @@ export function ThemeToggle({
         <svg
           className="theme-toggle-icon"
           viewBox="0 0 24 24"
-          width="20"
-          height="20"
+          width="22"
+          height="22"
           aria-hidden="true"
           focusable="false"
         >

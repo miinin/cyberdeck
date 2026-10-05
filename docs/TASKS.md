@@ -76,3 +76,12 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-069 | Järjestysvalitsimen hillitty fokustyyli | 1 | Must | PM | Done | – |
 | T-070 | Kortin klikkaus avaa tietonäkymän: kokoelma, want ja pakat | 1 | Must | PM | Done | – |
 | T-071 | Pienet korjaukset: liput, suodatinsirun kulma, Jaa Have/Want, Vie ja jaa -valikko, roskakori- ja kynäikonit, laskurin keskitys | 1 | Must | PM | Done | – |
+| T-072 | Korttien painokset kokoelmaan (D-020): versiot kortin tietonäkymässä, painosdata, kuvien tuonti | 1 | Must | PM | Review (dev) | Digiturva ✓ |
+| T-074 | Sideboard hakulistasta ja Pinoista, setti/versio-suodatin ja yhteenveto, UX-katselmoinnin korjaukset (M1–M5, M11) | 1 | Must | PM | Review (dev) | UX ✓ |
+| T-075 | Pakka-analyysi: korttiryhmän todennäköisyys vuoroittain, korvaajaehdotus puuttuville korteille | 1 | Should | PM | Review (dev) | – |
+| T-076 | Viralliset versiokuvat (82 kpl, Iconic ja Nova Rare) kortin tietonäkymään, kuva-avain kortti×harvinaisuus | 1 | Must | PM | Review (dev) | – |
+| T-077 | Versiot kuvituksina (D-021): galleria tietonäkymässä, haku näyttää osuvan kuvituksen, Kaikki kuvitukset -tila | 1 | Must | PM | Review (dev) | – |
+| T-078 | Viralliset harvinaisuudet (Epic Rare, Secret Rare, Iconic Rare…), kielivalitsin pelkkinä lippuina | 1 | Must | PM | Review (dev) | – |
+| T-079 | Viralliset harvinaisuussymbolit hover-selityksin, ylläpalkin kevyet ikonit (teema, liput, tili) | 1 | Must | PM | Review (dev) | – |
+| T-080 | Logo ylänurkkaan ja faviconiksi, ei sisäisiä vieritysalueita (suodatinpaneelit, dialogit) | 1 | Must | PM | Review (dev) | – |
+| T-081 | "N versiota", versioiden selausnuolet korttiruudussa, tietonäkymä mahtuu ruutuun ja tasatut laskurit, reitti #/kortti/<avain> | 1 | Must | PM | Review (dev) | – |

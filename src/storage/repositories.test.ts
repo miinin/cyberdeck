@@ -104,7 +104,7 @@ describe('collection', () => {
       { card: 'v-streetkid', count: 2 },
     ]);
     expect(JSON.parse(store.getItem(COLLECTION_KEY) ?? '')).toMatchObject({
-      schemaVersion: 1,
+      schemaVersion: 2,
       savedAt: '2026-10-01T12:00:01.000Z',
     });
   });
@@ -313,7 +313,7 @@ describe('broken data', () => {
   });
 
   it('keeps the intact part of partly broken data and reports repaired', async () => {
-    const raw = stored(1, {
+    const raw = stored(2, {
       entries: [{ card: 'detonate', count: 3 }, { card: 'constructor', count: 1 }, { card: 'v-streetkid', count: -1 }],
     });
     const { store, collection } = setup({ [COLLECTION_KEY]: raw });
@@ -383,10 +383,10 @@ describe('broken data', () => {
 
 describe('schema version', () => {
   it('shows newer data as empty, blocks writes and keeps the raw value unchanged', async () => {
-    const raw = stored(2, { entries: [{ card: 'detonate', count: 1 }], future: true });
+    const raw = stored(3, { entries: [{ card: 'detonate', count: 1 }], future: true });
     const { store, collection, decks } = setup({ [COLLECTION_KEY]: raw, [DECKS_KEY]: raw });
 
-    expect(await collection.load()).toEqual({ value: { entries: [] }, notices: [{ kind: 'newer-version', version: 2 }] });
+    expect(await collection.load()).toEqual({ value: { entries: [] }, notices: [{ kind: 'newer-version', version: 3 }] });
     await expectStorageError(collection.setCount('detonate', 2), 'newer-version');
     await expectStorageError(decks.create(content), 'newer-version');
     await expectStorageError(decks.remove('deck-1'), 'newer-version');
@@ -633,5 +633,39 @@ describe('preferences: account hints (T-054a, D-017 kohta 1)', () => {
     expect(() => preferences.saveLastUid('abc')).not.toThrow();
     expect(() => preferences.saveLastUid(null)).not.toThrow();
     expect(() => preferences.saveRedirectPending(true)).not.toThrow();
+  });
+});
+
+describe('collection versions (D-020)', () => {
+  const A = 'welcometonightcityretail:005a';
+
+  it('saves a version, moves the count with it and reads it back', async () => {
+    const { store, collection } = setup();
+    await collection.setCount('detonate', 2);
+    const saved = await collection.setVersionCount('detonate', A, 1);
+    expect(saved.entries).toEqual([{ card: 'detonate', count: 3, versions: { [A]: 1 } }]);
+    expect(JSON.parse(store.getItem(COLLECTION_KEY) ?? '')).toMatchObject({
+      schemaVersion: 2,
+      data: { entries: [{ card: 'detonate', count: 3, versions: { [A]: 1 } }] },
+    });
+    const reopened = setup({}, { store });
+    expect((await reopened.collection.load()).value.entries).toEqual(saved.entries);
+  });
+
+  it('rejects a count below the versions and invalid input', async () => {
+    const { collection } = setup();
+    await collection.setVersionCount('detonate', A, 2);
+    await expectStorageError(collection.setCount('detonate', 1), 'invalid-input');
+    await expectStorageError(collection.setVersionCount('detonate', 'nope', 1), 'invalid-input');
+    await expectStorageError(collection.setVersionCount('detonate', A, 1000), 'invalid-input');
+    expect(await collection.setCount('detonate', 5)).toEqual({ entries: [{ card: 'detonate', count: 5, versions: { [A]: 2 } }] });
+  });
+
+  it('migrates version 1 data unchanged', async () => {
+    const raw = stored(1, { entries: [{ card: 'detonate', count: 2 }] });
+    const { collection } = setup({ [COLLECTION_KEY]: raw });
+    expect(await collection.load()).toEqual({ value: { entries: [{ card: 'detonate', count: 2 }] },
+      notices: [{ kind: 'migrated', from: 1, to: 2 }],
+    });
   });
 });

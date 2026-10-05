@@ -1,3 +1,4 @@
+import type { Ref } from 'react';
 import type { Card } from '../domain/card';
 import type { DeckRow } from '../domain/deckRules';
 import { SIDEBOARD_SIZE } from '../domain/deck';
@@ -13,16 +14,19 @@ export function Sideboard({
   onChange,
   onMoveToMain,
   hoverProps,
+  headingRef,
 }: {
   rows: readonly DeckRow[];
   size: number;
   onChange: (card: Card, count: number) => void;
   onMoveToMain: (card: Card) => void;
   hoverProps: (card: Card) => HoverPreviewProps;
+  /** Focus target after the last row moved to the main deck (T-074). */
+  headingRef?: Ref<HTMLHeadingElement>;
 }) {
   return (
     <div className="deck-section">
-      <h2 className="deck-section-title">{deckTexts.sideboardHeading(size, SIDEBOARD_SIZE)}</h2>
+      <h2 className="deck-section-title" ref={headingRef} tabIndex={-1}>{deckTexts.sideboardHeading(size, SIDEBOARD_SIZE)}</h2>
       {rows.length === 0 ? (
         <p className="hint">{deckTexts.sideboardEmpty(SIDEBOARD_SIZE)}</p>
       ) : (
@@ -35,7 +39,15 @@ export function Sideboard({
               <span className="deck-tile-count" aria-hidden="true">
                 {deckTexts.copies(count)}
               </span>
-              <Stepper name={card.displayName} count={count} showCount={false} onChange={(next) => onChange(card, next)} />
+              <Stepper
+                name={card.displayName}
+                count={count}
+                showCount={false}
+                addLabel={deckTexts.addToSideboard(card.displayName)}
+                removeLabel={deckTexts.removeFromSideboard(card.displayName)}
+                countLabel={deckTexts.inSideboard(count)}
+                onChange={(next) => onChange(card, next)}
+              />
               <button type="button" className="button-secondary" onClick={() => onMoveToMain(card)}>
                 {deckTexts.moveToMain}
                 <span className="visually-hidden"> {card.displayName}</span>

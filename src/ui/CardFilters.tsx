@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RaritySymbol } from './RaritySymbol';
 import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
 import type { CardFilterCriteria, NumberFilterGroup } from '../domain/cardSearch';
 import { NUMBER_GROUPS } from './ActiveFilters';
@@ -24,6 +25,10 @@ export interface CardFiltersProps {
   /** Ref of the "Kaikki" radio, the focus target after "Näytä kaikki kortit". */
   collectionAllRef: Ref<HTMLInputElement>;
   onCollectionFilterChange: (next: CollectionFilter) => void;
+  /** Set families for the "Setti / versio" select (T-074); empty or undefined leaves the group out. */
+  setOptions?: readonly { family: string; label: string }[];
+  setFamily?: string | null;
+  onSetChange?: (family: string | null) => void;
   /** Search text changed. `composing` is true while an IME composition is in progress. */
   onQueryChange: (query: string, composing: boolean) => void;
   onToggleType: (type: string) => void;
@@ -70,6 +75,9 @@ export function CardFilters({
   collectionFilter,
   collectionAllRef,
   onCollectionFilterChange,
+  setOptions = [],
+  setFamily = null,
+  onSetChange,
   onQueryChange,
   onToggleType,
   onToggleColor,
@@ -170,6 +178,20 @@ export function CardFilters({
           </fieldset>
         )}
 
+        {setOptions.length > 0 && onSetChange !== undefined && (
+          <div className="field set-filter">
+            <label htmlFor="set-filter">{texts.setLegend}</label>
+            <select id="set-filter" value={setFamily ?? ''} onChange={(event) => onSetChange(event.target.value || null)}>
+              <option value="">{texts.setAll}</option>
+              {setOptions.map(({ family, label }) => (
+                <option key={family} value={family}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <p id="filter-hint" className="visually-hidden">
           {texts.filterHint}
         </p>
@@ -215,7 +237,7 @@ export function CardFilters({
 
           <fieldset aria-describedby="filter-hint">
             <legend>{texts.rarityLegend}</legend>
-            <div className="options options-even">
+            <div className="options options-even options-rarity">
               {rarityOptions.map((rarity) => (
                 <label key={rarity} className="option">
                   <input
@@ -225,7 +247,7 @@ export function CardFilters({
                     checked={criteria.rarities.includes(rarity)}
                     onChange={() => onToggleRarity(rarity)}
                   />{' '}
-                  <span lang="en">{rarity}</span>
+                  <RaritySymbol rarity={rarity} showName size={14} />
                 </label>
               ))}
             </div>

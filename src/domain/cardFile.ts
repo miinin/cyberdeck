@@ -1,5 +1,7 @@
 import type { Card } from './card';
 import { cardKey, isCardKey } from './cardKey';
+import { imageKeyOf, isPrintingKey, MAX_PRINTINGS_PER_CARD, printingKey } from './printing';
+import type { Printing } from './printing';
 
 /*
  * The bundled card data file src/data/cards.json (D-013 osa 1, ARCHITECTURE.md 13.3).
@@ -7,7 +9,7 @@ import { cardKey, isCardKey } from './cardKey';
  */
 
 export const CARD_FILE_FORMAT = 'cyberdeck.cards';
-export const CARD_FILE_VERSION = 1;
+export const CARD_FILE_VERSION = 2;
 /** Upper bound for every text field, so a broken source cannot bloat the bundle. */
 export const MAX_CARD_TEXT_LENGTH = 200;
 
@@ -18,7 +20,8 @@ export interface CardFile {
 }
 
 /** Card fields in model order. The file is written in this order, so the output is deterministic. */
-const CARD_FIELDS = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'rarity', 'key'] as const;
+const CARD_FIELDS = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'rarity', 'key', 'printings'] as const;
+const PRINTING_FIELDS = ['key', 'setCode', 'setName', 'number', 'rarity', 'language', 'artist', 'imageKey'] as const;
 const FILE_FIELDS = ['format', 'version', 'cards'] as const;
 
 /** Builds the file object with a fixed key order (format, version, cards; Card fields in model order). */
@@ -39,6 +42,16 @@ export function toCardFile(cards: readonly Card[]): CardFile {
       ram: card.ram,
       rarity: card.rarity,
       key: card.key,
+      printings: (card.printings ?? []).map((printing) => ({
+        key: printing.key,
+        setCode: printing.setCode,
+        setName: printing.setName,
+        number: printing.number,
+        rarity: printing.rarity,
+        language: printing.language,
+        artist: printing.artist,
+        imageKey: printing.imageKey,
+      })),
     })),
   };
 }
@@ -77,6 +90,44 @@ function requireNumberOrNull(value: unknown, field: string, where: string): numb
   return value;
 }
 
+function parsePrinting(value: unknown, slug: string, where: string): Printing {
+  if (!isPlainObject(value)) throw new Error(`${where}: not an object`);
+  requireExactKeys(value, PRINTING_FIELDS, where);
+  const setCode = requireText(value.setCode, 'setCode', where);
+  const setName = requireText(value.setName, 'setName', where);
+  const number = requireText(value.number, 'number', where);
+  const key = requireText(value.key, 'key', where);
+  if (!isPrintingKey(key) || key !== printingKey(setCode, number)) {
+    throw new Error(`${where}: "key" ${JSON.stringify(key)} does not match setCode and number`);
+  }
+  const imageKey = requireText(value.imageKey, 'imageKey', where);
+  if (imageKey !== imageKeyOf(slug, setName, number)) {
+    throw new Error(`${where}: "imageKey" ${JSON.stringify(imageKey)} does not match slug, setName and number`);
+  }
+  return {
+    key,
+    setCode,
+    setName,
+    number,
+    rarity: requireTextOrNull(value.rarity, 'rarity', where),
+    language: requireText(value.language, 'language', where),
+    artist: requireTextOrNull(value.artist, 'artist', where),
+    imageKey,
+  };
+}
+
+function parsePrintings(value: unknown, slug: string, where: string): Printing[] {
+  if (!Array.isArray(value)) throw new Error(`${where}: "printings" is not an array`);
+  if (value.length > MAX_PRINTINGS_PER_CARD) throw new Error(`${where}: too many printings`);
+  const seen = new Set<string>();
+  return value.map((item: unknown, index) => {
+    const printing = parsePrinting(item, slug, `${where}.printings[${index}]`);
+    if (seen.has(printing.key)) throw new Error(`${where}.printings[${index}]: duplicate key "${printing.key}"`);
+    seen.add(printing.key);
+    return printing;
+  });
+}
+
 function parseCard(value: unknown, index: number): Card {
   const where = `cards[${index}]`;
   if (!isPlainObject(value)) throw new Error(`${where}: not an object`);
@@ -92,9 +143,10 @@ function parseCard(value: unknown, index: number): Card {
     throw new Error(`${where}: "key" ${JSON.stringify(key)} does not match cardKey(name, subname)`);
   }
 
+  const slug = requireText(value.slug, 'slug', where);
   return {
     id: requireText(value.id, 'id', where),
-    slug: requireText(value.slug, 'slug', where),
+    slug,
     name,
     subname,
     displayName: requireText(value.displayName, 'displayName', where),
@@ -105,6 +157,7 @@ function parseCard(value: unknown, index: number): Card {
     ram,
     rarity: requireTextOrNull(value.rarity, 'rarity', where),
     key,
+    printings: parsePrintings(value.printings, slug, where),
   };
 }
 

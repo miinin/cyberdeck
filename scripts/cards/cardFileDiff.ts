@@ -10,7 +10,13 @@ export interface CardFileDiff {
   changed: { key: CardKey; fields: (keyof Card)[] }[];
 }
 
-const COMPARED_FIELDS: readonly (keyof Card)[] = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram'];
+const COMPARED_FIELDS: readonly (keyof Card)[] = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'printings'];
+
+/** Printings are compared by content, the other fields by value. */
+function differs(field: keyof Card, old: Card, next: Card): boolean {
+  if (field === 'printings') return JSON.stringify(old.printings ?? []) !== JSON.stringify(next.printings ?? []);
+  return old[field] !== next[field];
+}
 
 /** Compares two validated card lists by key (D-008: the key is the card's identity). */
 export function diffCardFiles(previous: readonly Card[], next: readonly Card[]): CardFileDiff {
@@ -24,7 +30,7 @@ export function diffCardFiles(previous: readonly Card[], next: readonly Card[]):
       diff.added.push(card.key);
       continue;
     }
-    const fields = COMPARED_FIELDS.filter((field) => old[field] !== card[field]);
+    const fields = COMPARED_FIELDS.filter((field) => differs(field, old, card));
     if (fields.length > 0) diff.changed.push({ key: card.key, fields });
   }
   diff.removed = previous.filter((card) => !after.has(card.key)).map((card) => card.key);

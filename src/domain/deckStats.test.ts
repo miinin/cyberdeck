@@ -160,3 +160,18 @@ describe('drawProbabilities', () => {
     expect(cheapOpeningProbability(deck([]), cardsByKey)).toBe(0);
   });
 });
+
+describe('atLeastKProbability and groupOdds (T-075)', () => {
+  it('matches the one-card formula for k = 1 and handles edges', async () => {
+    const { atLeastKProbability, atLeastOneProbability } = await import('./deckStats');
+    expect(atLeastKProbability(40, 5, 7, 1)).toBeCloseTo(atLeastOneProbability(40, 5, 7), 10);
+    expect(atLeastKProbability(40, 1, 7, 2)).toBe(0);
+    expect(atLeastKProbability(40, 5, 7, 0)).toBe(1);
+    expect(atLeastKProbability(10, 10, 5, 2)).toBeCloseTo(1, 10);
+  });
+  it('computes at least two with the hypergeometric sum', async () => {
+    const { atLeastKProbability } = await import('./deckStats');
+    // N=4, K=2, n=2: P(2) = 1/6
+    expect(atLeastKProbability(4, 2, 2, 2)).toBeCloseTo(1 / 6, 10);
+  });
+});

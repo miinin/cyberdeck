@@ -22,10 +22,21 @@ const cards: Card[] = [
 ];
 
 describe('App', () => {
+  it('opens the card details from #/kortti/<key> and ignores an unknown key (T-081)', async () => {
+    window.location.hash = '#/kortti/nope';
+    const first = render(<App cards={cards} repositories={createMemoryRepositories()} />);
+    expect(document.querySelector('dialog[open]')).toBeNull();
+    first.unmount();
+    window.location.hash = '#/kortti/v-streetkid';
+    render(<App cards={cards} repositories={createMemoryRepositories()} />);
+    expect(await screen.findByRole('heading', { level: 2, name: /Streetkid/ })).toBeInTheDocument();
+    window.location.hash = '';
+  });
+
   it('has the landmarks and footer notices', () => {
     render(<App cards={cards} repositories={createMemoryRepositories()} />);
 
-    expect(screen.getByRole('banner')).toHaveTextContent('Cyberdeck');
+    expect(within(screen.getByRole('banner')).getByRole('img', { name: 'Cyberdeck TCG' })).toBeInTheDocument();
     expect(screen.getByRole('main')).toBeInTheDocument();
     const footer = screen.getByRole('contentinfo');
     expect(footer).toHaveTextContent(
@@ -59,8 +70,9 @@ describe('App', () => {
   it('shows card images only from the bundled assets, never from an external URL', () => {
     const { container } = render(<App cards={cards} repositories={createMemoryRepositories()} />);
 
+    // The header logo is the second bundled image next to the card image.
     const images = [...container.querySelectorAll('img')];
-    expect(images).toHaveLength(1);
+    expect(images).toHaveLength(2);
     for (const image of images) expect(image.getAttribute('src')).not.toMatch(/^(https?:)?\/\//);
   });
 });
