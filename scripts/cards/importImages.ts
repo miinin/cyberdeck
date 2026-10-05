@@ -20,7 +20,7 @@ export const CARD_IMAGES_MAP_PATH = 'scripts/cards/card-images.map.json';
 export const VARIANT_IMAGES_DIR = 'public/cards/variants';
 export const VARIANT_MANIFEST_PATH = 'src/data/variantImages.json';
 const VARIANT_WIDTH = CARD_IMAGE_WIDTH.lg;
-const IMAGE_EXTENSION = /.(png|jpe?g|webp)$/i;
+const IMAGE_EXTENSION = /\.(png|jpe?g|webp)$/i;
 const IMAGE_KEY = /^[a-z0-9-]{1,100}__[a-z0-9-]{1,100}$/;
 export const MAX_SOURCE_BYTES = 25 * 1024 * 1024;
 const SIZES = Object.keys(CARD_IMAGE_WIDTH) as CardImageSize[];
@@ -138,7 +138,7 @@ export async function importImages(
   const variantFiles: { file: string; imageKey: string }[] = [];
   const cardFiles: string[] = [];
   for (const file of files) {
-    const stem = file.replace(/.[^.]+$/, '').toLowerCase();
+    const stem = file.replace(/\.[^.]+$/, '').toLowerCase();
     if (IMAGE_EXTENSION.test(file) && imageKeys.has(stem) && IMAGE_KEY.test(stem)) variantFiles.push({ file, imageKey: stem });
     else cardFiles.push(file);
   }
