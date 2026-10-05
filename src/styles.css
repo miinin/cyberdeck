@@ -4468,7 +4468,8 @@ button.legality:focus-visible {
   flex: 1 1 14rem;
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  /* A fixed column count: auto-fill made a stacked flex column keep its one-column height. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .options-even .option {
