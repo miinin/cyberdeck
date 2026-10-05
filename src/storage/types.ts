@@ -77,6 +77,8 @@ export interface PreferencesRepository {
 export interface LocalData {
   decks: Deck[];
   collection: Collection;
+  /** The want list (D-018), same shape as the collection. */
+  wants: Collection;
 }
 
 /** The state both sides had at the last successful sync: the base of the three-way merge (D-017 kohta 6). */
@@ -84,6 +86,7 @@ export interface SyncBase {
   rev: number;
   decks: readonly { id: DeckId; updatedAt: string }[];
   collection: Collection;
+  wants: Collection;
 }
 
 /** Local data access for the sync engine and the first sign-in. Never throws except `apply`. */
@@ -97,12 +100,12 @@ export interface SyncStorage {
   apply(expected: LocalData, next: LocalData): boolean;
   loadBase(): SyncBase | null;
   saveBase(base: SyncBase | null): void;
-  /** Copies the raw decks and collection to backup keys (SR-11). */
+  /** Copies the raw decks, collection and wants to backup keys (SR-11). */
   backupAll(): void;
-  /** Removes the decks and collection keys (after a successful transfer). */
+  /** Removes the decks, collection and wants keys (after a successful transfer). */
   clear(): void;
   /**
-   * Removes everything the account has in this browser: decks, collection, sync base and backups. Only for
+   * Removes everything the account has in this browser: decks, collection, wants, sync base and backups. Only for
    * account repositories; the signed-out data is never erased this way. Throws StorageError.
    */
   eraseAccount(): void;
@@ -112,6 +115,8 @@ export interface SyncStorage {
 
 export interface Repositories {
   collection: CollectionRepository;
+  /** The want list: the same interface and rules as the collection, under its own key (D-018). */
+  wants: CollectionRepository;
   decks: DeckRepository;
   preferences: PreferencesRepository;
   /** false = browser storage is not in use and data lives only in memory (the UI shows a notice, SR-13). */

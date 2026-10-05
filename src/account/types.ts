@@ -86,6 +86,8 @@ export interface CloudSnapshot {
   /** Decks that exist in the cloud but did not pass validation: the merge must keep the local copy. */
   invalidDeckIds: DeckId[];
   collection: CloudDoc<Collection>;
+  /** `users/{uid}/collection/want` (D-018), validated like the collection. */
+  wants: CloudDoc<Collection>;
   /** Invalid documents, rows and sections left out (shown as a warning, SR-23 kohta 3). */
   dropped: number;
   /** A document or the meta has a newer schema version: no writes (SR-23 kohta 4). */
@@ -100,6 +102,8 @@ export interface CloudChange {
   deleteDecks: readonly DeckId[];
   /** undefined = the collection is not written. */
   collection?: Collection;
+  /** undefined = the want list is not written. */
+  wants?: Collection;
 }
 
 export interface CloudStore {
@@ -110,6 +114,6 @@ export interface CloudStore {
    * Throws CloudError.
    */
   commit(change: CloudChange, expectedRev: number): Promise<number>;
-  /** Deletes every document under the account (decks, collection and meta). Throws CloudError. */
+  /** Deletes every document under the account (decks, collection, wants and meta). Throws CloudError. */
   deleteAll(): Promise<void>;
 }

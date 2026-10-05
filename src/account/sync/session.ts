@@ -5,11 +5,16 @@
  * made before it is touched (SR-11).
  */
 import { EMPTY_COLLECTION } from '../../domain/collection';
-import type { Repositories, SyncStorage } from '../../storage';
-import type { CloudStore } from '../types';
+import type { Collection } from '../../domain/collection';
+import type { LocalData, Repositories, SyncStorage } from '../../storage';
+import type { CloudDoc, CloudStore } from '../types';
 import { mergeCollection, mergeDecks } from './merge';
 import { createSyncEngine } from './syncEngine';
 import type { SyncStatus } from './syncEngine';
+
+function isEmptyDoc(doc: CloudDoc<Collection>) {
+  return doc.kind === 'missing' || (doc.kind === 'ok' && doc.value.entries.length === 0);
+}
 
 export type SessionPhase = 'starting' | 'choose' | 'running';
 export type FirstSignInChoice = 'merge' | 'account-only';
@@ -37,8 +42,8 @@ export interface AccountSession {
   syncNow(): Promise<void>;
 }
 
-function isEmptyData(data: { decks: readonly unknown[]; collection: { entries: readonly unknown[] } }) {
-  return data.decks.length === 0 && data.collection.entries.length === 0;
+function isEmptyData(data: LocalData) {
+  return data.decks.length === 0 && data.collection.entries.length === 0 && data.wants.entries.length === 0;
 }
 
 /**
@@ -53,7 +58,8 @@ export function copySignedOutData(anonymous: SyncStorage, account: SyncStorage):
   anonymous.backupAll();
   const decks = mergeDecks(from.decks, into.decks, []);
   const collection = mergeCollection(from.collection, into.collection, EMPTY_COLLECTION);
-  return account.apply(into, { decks: decks.decks, collection: collection.collection });
+  const wants = mergeCollection(from.wants, into.wants, EMPTY_COLLECTION);
+  return account.apply(into, { decks: decks.decks, collection: collection.collection, wants: wants.collection });
 }
 
 export function createAccountSession(options: {
@@ -126,8 +132,8 @@ export function createAccountSession(options: {
       const cloudEmpty =
         snapshot.decks.length === 0 &&
         snapshot.invalidDeckIds.length === 0 &&
-        (snapshot.collection.kind === 'missing' ||
-          (snapshot.collection.kind === 'ok' && snapshot.collection.value.entries.length === 0));
+        isEmptyDoc(snapshot.collection) &&
+        isEmptyDoc(snapshot.wants);
       if (cloudEmpty) {
         if (copySignedOutData(anonymous.sync, account.sync)) return await run(true);
         return await run(false);

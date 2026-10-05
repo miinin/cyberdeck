@@ -34,7 +34,7 @@ async function renderView(repositories: Repositories) {
 }
 
 const editSwitch = () => screen.getByRole('switch', { name: 'Muokkaa kokoelmaa' });
-const stepButtons = () => screen.queryAllByRole('button', { name: /^(Vähennä|Lisää)/ });
+const stepButtons = () => screen.queryAllByRole('button', { name: /^(Vähennä|Lisää) yksi kappale/ });
 
 describe('CatalogView: edit switch (T-040)', () => {
   it('is off by default when the collection has cards: counts show, buttons do not', async () => {

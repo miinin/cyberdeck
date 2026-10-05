@@ -1,5 +1,8 @@
 import { useMemo, useRef, useState } from 'react';
 import type { DeckContent } from '../domain/deck';
+import type { MissingCard } from '../domain/deckExport';
+import { MissingCards } from './MissingCards';
+import type { WantsHandle } from './MissingCards';
 import { COST_CURVE_LAST } from '../domain/deckRules';
 import type { CardsByKey, ColorShare, DeckGroups } from '../domain/deckRules';
 import {
@@ -52,6 +55,8 @@ export function DeckStats({
   mainCount,
   ramLimitsText,
   missingText,
+  missingCards = [],
+  wants,
   rng = Math.random,
 }: {
   deck: DeckContent;
@@ -62,6 +67,10 @@ export function DeckStats({
   mainCount: number;
   ramLimitsText: string;
   missingText: string;
+  /** Cards the collection lacks, listed under missingText (T-061). */
+  missingCards?: readonly MissingCard[];
+  /** The want list: adds an "add missing to wants" button to the missing list (T-061b). */
+  wants?: WantsHandle;
   /** Random source of the test hand; tests pass a seeded one. */
   rng?: Rng;
 }) {
@@ -211,6 +220,7 @@ export function DeckStats({
       )}
       <p>{ramLimitsText}</p>
       {missingText !== '' && <p>{missingText}</p>}
+      <MissingCards rows={missingCards} deckName={deck.name} wants={wants} />
 
       {stats.odds.length > 0 && (
         <details className="stat-odds" onToggle={(event) => setOddsOpen(event.currentTarget.open)}>

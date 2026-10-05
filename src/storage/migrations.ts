@@ -8,3 +8,4 @@ import type { Migration } from './envelope';
 
 export const COLLECTION_MIGRATIONS: readonly Migration[] = [];
 export const DECKS_MIGRATIONS: readonly Migration[] = [];
+export const WANTS_MIGRATIONS: readonly Migration[] = [];

@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { Card } from '../domain/card';
 import { createMemoryRepositories } from '../storage';
 import { CatalogView } from './CatalogView';
@@ -163,5 +164,23 @@ describe('CatalogView', () => {
     expect(container.querySelector('img')).toBeNull();
     expect(container.querySelector('b')).toBeNull();
     expect(container.querySelector('script')).toBeNull();
+  });
+});
+
+describe('CatalogView card order (T-060)', () => {
+  it('sorts the grid by the chosen key and direction', async () => {
+    const user = userEvent.setup();
+    const named = (i: number, name: string, cost: number) => card(i, { name, displayName: name, key: name.toLowerCase(), cost });
+    renderView([named(1, 'Bee', 5), named(2, 'Ant', 1), named(3, 'Cat', 3)]);
+    const headings = () =>
+      within(screen.getByRole('list', { name: 'Kaikki kortit' }))
+        .getAllByRole('heading', { level: 3 })
+        .map((h) => h.textContent);
+    expect(headings()).toEqual(['Bee', 'Ant', 'Cat']);
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Järjestys' }), 'Nimi (A–Ö)');
+    expect(headings()).toEqual(['Ant', 'Bee', 'Cat']);
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Järjestys' }), 'Cost');
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Suunta' }), 'Laskeva');
+    expect(headings()).toEqual(['Bee', 'Cat', 'Ant']);
   });
 });

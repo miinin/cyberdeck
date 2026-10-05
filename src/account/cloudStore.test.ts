@@ -28,6 +28,7 @@ function deck(id: string, name = 'Pakka'): Deck {
 }
 
 const COLLECTION: Collection = { entries: [{ card: 'detonate', count: 3 }] };
+const WANTS: Collection = { entries: [{ card: 'detonate', count: 2 }] };
 
 function deckDoc(data: unknown, schemaVersion: unknown = 1) {
   return { schemaVersion, savedAt: NOW.toISOString(), data };
@@ -166,6 +167,7 @@ describe.each([
       decks: [],
       invalidDeckIds: [],
       collection: { kind: 'missing' },
+      wants: { kind: 'missing' },
       dropped: 0,
       locked: false,
       limitExceeded: false,
@@ -276,6 +278,43 @@ describe.each([
     expect(await cloudErrorKind(h.store.commit(change({ putDecks: [deck('d1')] }), 4))).toBe('locked');
   });
 
+  it('writes the want list to its own document and leaves it alone when not given (D-018)', async () => {
+    await h.store.commit(change({ collection: COLLECTION, wants: WANTS }), 0);
+    let snapshot = await h.store.readAll();
+    expect(snapshot.wants).toEqual({ kind: 'ok', value: WANTS });
+    expect(snapshot.collection).toEqual({ kind: 'ok', value: COLLECTION });
+    expect(Object.keys(h.getRaw('collection/want') as object).sort()).toEqual(['data', 'savedAt', 'schemaVersion']);
+    expect(h.getRaw('collection/want')).toMatchObject({ schemaVersion: 1, data: { entries: WANTS.entries } });
+
+    await h.store.commit(change({ collection: { entries: [] } }), 1);
+    snapshot = await h.store.readAll();
+    expect(snapshot.wants).toEqual({ kind: 'ok', value: WANTS });
+  });
+
+  it('validates the want list like the collection and locks on a newer version (D-018)', async () => {
+    h.setRaw('collection/want', deckDoc({ entries: [{ card: 'detonate', count: 2 }, { card: 'detonate', count: 1 }, null] }));
+    let snapshot = await h.store.readAll();
+    expect(snapshot.wants).toEqual({ kind: 'ok', value: WANTS });
+    expect(snapshot.dropped).toBe(2);
+    expect(snapshot.collection).toEqual({ kind: 'missing' });
+
+    h.setRaw('collection/want', deckDoc({ entries: 'x' }));
+    snapshot = await h.store.readAll();
+    expect(snapshot.wants).toEqual({ kind: 'invalid' });
+    expect(snapshot.dropped).toBe(1);
+    expect(snapshot.locked).toBe(false);
+
+    h.setRaw('collection/want', { schemaVersion: 7, savedAt: '', data: {} });
+    snapshot = await h.store.readAll();
+    expect(snapshot).toMatchObject({ locked: true, wants: { kind: 'invalid' } });
+  });
+
+  it('refuses an invalid want list before sending anything', async () => {
+    const bad = { entries: [{ card: 'detonate', count: 1000 }] };
+    expect(await cloudErrorKind(h.store.commit(change({ wants: bad }), 0))).toBe('unknown');
+    expect(await h.store.readMeta()).toBeNull();
+  });
+
   it('validates the collection: invalid rows are dropped, a wrong shape is invalid', async () => {
     h.setRaw('collection/main', deckDoc({ entries: [{ card: 'detonate', count: 3 }, { card: 'detonate', count: 1 }, null] }));
     let snapshot = await h.store.readAll();
@@ -299,10 +338,15 @@ describe.each([
   });
 
   it('deletes everything under the account and nothing else', async () => {
-    await h.store.commit(change({ putDecks: [deck('d1'), deck('d2')], collection: COLLECTION }), 0);
+    await h.store.commit(change({ putDecks: [deck('d1'), deck('d2')], collection: COLLECTION, wants: WANTS }), 0);
     await h.store.deleteAll();
     expect(await h.store.readMeta()).toBeNull();
-    expect(await h.store.readAll()).toMatchObject({ meta: null, decks: [], collection: { kind: 'missing' } });
+    expect(await h.store.readAll()).toMatchObject({
+      meta: null,
+      decks: [],
+      collection: { kind: 'missing' },
+      wants: { kind: 'missing' },
+    });
     await h.store.deleteAll(); // already empty: fine
   });
 
@@ -327,6 +371,12 @@ describe('createMemoryCloud', () => {
     expect(cloud.paths()).toEqual([]);
   });
 
+  it('refuses a want document at or over the byte limit', async () => {
+    const cloud = createMemoryCloud({ maxCollectionBytes: 100 });
+    expect(await cloudErrorKind(cloud.commit(change({ wants: WANTS }), 0))).toBe('too-large');
+    expect(cloud.paths()).toEqual([]);
+  });
+
   it('counts document reads', async () => {
     const cloud = createMemoryCloud();
     await cloud.readMeta();
@@ -344,10 +394,11 @@ describe('createFirestoreCloudStore', () => {
   it('uses users/{uid} paths, a MAX_DECKS + 1 query and the server time in the meta', async () => {
     const fake = createFakeFirestore();
     const store = createFirestoreCloudStore({ uid: UID, load: async () => fake.modules, now: () => NOW });
-    await store.commit(change({ putDecks: [deck('d1')], collection: COLLECTION }), 0);
+    await store.commit(change({ putDecks: [deck('d1')], collection: COLLECTION, wants: WANTS }), 0);
     expect([...fake.docs.keys()].sort()).toEqual([
       `users/${UID}`,
       `users/${UID}/collection/main`,
+      `users/${UID}/collection/want`,
       `users/${UID}/decks/d1`,
     ]);
     expect(fake.docs.get(`users/${UID}`)).toEqual({ schemaVersion: 1, rev: 1, updatedAt: SERVER_TIME });

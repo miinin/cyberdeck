@@ -39,4 +39,20 @@ describe('firestore.rules', () => {
     expect(code).toContain("request.auth.token.firebase.sign_in_provider == 'google.com'");
     expect(code).toContain('request.auth.uid == uid');
   });
+
+  it('allows exactly the collection documents main and want, in get, write and delete (D-018)', () => {
+    const block = code.slice(code.indexOf('match /collection/{docId}'));
+    expect(block).toContain("allow get: if isOwner(uid) && docId in ['main', 'want'];");
+    expect(block).toMatch(
+      /allow create, update: if isOwner\(uid\)\s+&& docId in \['main', 'want'\]\s+&& isCollectionDoc\(request\.resource\.data\);/,
+    );
+    expect(block).toContain("allow delete: if isOwner(uid) && docId in ['main', 'want'];");
+    // No other document id is named anywhere in the collection block, and no wildcard sibling.
+    expect([...block.matchAll(/docId\s*(==|in)\s*([^;&)]+)/g)].map((m) => (m[2] ?? '').trim())).toEqual([
+      "['main', 'want']",
+      "['main', 'want']",
+      "['main', 'want']",
+    ]);
+    expect(code).not.toMatch(/docId\s*==/);
+  });
 });

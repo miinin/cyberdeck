@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deckToJson, deckToText, exportFileName } from './deckExport';
+import { deckToJson, deckToText, exportFileName, missingToText } from './deckExport';
 import { toCardsByKey } from './deckRules';
 import { parseDeckText } from './deckText';
 import type { DeckContent } from './deck';
@@ -94,5 +94,24 @@ describe('exportFileName', () => {
   it('cuts to 60 characters by code point', () => {
     const name = exportFileName('🔥'.repeat(80), 'txt');
     expect(Array.from(name.slice(0, -4))).toHaveLength(60);
+  });
+});
+
+function known(key: string) {
+  const card = byKey.get(key);
+  if (card === undefined) throw new Error(key);
+  return card;
+}
+
+describe('missingToText (T-061)', () => {
+  it('writes one importable line per missing card', () => {
+    const text = missingToText([
+      { card: known('v-streetkid'), missing: 1 },
+      { card: known('detonate'), missing: 2 },
+    ]);
+    expect(text).toBe('1 V - Streetkid\n2 Detonate\n');
+    const result = parseDeckText(text, CARDS);
+    if (!result.ok) throw new Error(result.error);
+    expect(result.deck.unrecognized).toEqual([]);
   });
 });

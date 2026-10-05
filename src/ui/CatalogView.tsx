@@ -3,6 +3,7 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf } from '../domain/collection';
+import type { MissingRow } from '../domain/wants';
 import { StorageError, isStoragePersisted, requestPersistentStorage } from '../storage';
 import type { CatalogViewMode, Repositories } from '../storage';
 import {
@@ -21,6 +22,10 @@ import { CardFilters } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
+import { AddMissingToWantsButton } from './AddMissingToWants';
+import { SortSelect } from './SortSelect';
+import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
+import type { CardSort } from '../domain/cardSort';
 import { CardTable } from './CardTable';
 import { ListToolbar } from './ListToolbar';
 import type { ImageSize } from './ListToolbar';
@@ -36,6 +41,7 @@ import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
 import { useCollection } from './useCollection';
+import { useWants } from './useWants';
 import { useDecks } from './useDecks';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
@@ -48,6 +54,10 @@ function describeResult(active: boolean, shown: number, all: number): Announceme
   return { key: `some:${shown}`, text: texts.filteredLive(shown, all) };
 }
 
+const COLLECTION_FILTER_LABELS = {
+  owned: texts.collectionOwned,
+  missing: texts.collectionMissing,
+} as const;
 const NO_KEYS: ReadonlySet<CardKey> = new Set();
 const NO_NAMES: readonly string[] = [];
 
@@ -85,6 +95,7 @@ export function CatalogView({
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
+  const wants = useWants(repositories.wants);
   // Which decks each card is in (T-013). Decks that cannot be read just leave the mention out.
   const { phase: decksPhase, decks } = useDecks(repositories.decks);
   const decksByCard = useMemo(() => {
@@ -112,6 +123,7 @@ export function CatalogView({
   const [view, setView] = useState<CatalogViewMode>('grid');
   // Grid image size (T-050a): session state, not saved.
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
+  const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [editMode, setEditMode] = useState<boolean | null>(null);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const userChose = useRef({ view: false, edit: false });
@@ -155,7 +167,7 @@ export function CatalogView({
     setCollectionFilter('all');
   }
   const collectionFilter: CollectionFilter = collection.phase === 'ready' ? collectionChoice : 'all';
-  const ownedOnly = collectionFilter === 'owned';
+  const listedOnly = collectionFilter === 'owned';
   const visibleCards = (next: CardFilterCriteria, nextFilter: CollectionFilter, nextKept: ReadonlySet<CardKey>) => {
     const matching = filterCards(allCards, next);
     if (nextFilter === 'all') return matching;
@@ -169,13 +181,24 @@ export function CatalogView({
     isFilterActive(next) || nextFilter !== 'all';
 
   const filtered = visibleCards(criteria, collectionFilter, kept);
+  // T-060: the grid follows the shared order; the table sorts the same way itself (header buttons).
+  const sortedForGrid = view === 'grid' ? sortCards(filtered, sort.key, sort.direction) : filtered;
   const filterActive = isActive(criteria, collectionFilter);
+  // T-066: shown cards short of a playset, for "add missing to wants".
+  const missingRows: MissingRow[] = [];
+  if (collection.phase === 'ready') {
+    for (const card of filtered) {
+      const missing = playsetSize(card) - countIn(collection, card.key);
+      if (missing > 0) missingRows.push({ card: card.key, missing });
+    }
+  }
 
   // The cards are there from the first render, so the live region starts with the loaded message.
   // It already tells the unfiltered result, so that result is not announced again right away.
   const allShown = describeResult(false, allCards.length, allCards.length);
   const announcer = useDelayedAnnouncement(allCards, allShown.key);
   const collectionAnnouncer = useCollectionAnnouncements(announcer, collectionStore, allCards, collection.saveError);
+
   const collectionNotices = loadNotices(collection, repositories.persistent);
   useLoadNoticeAnnouncement(
     announcer,
@@ -269,7 +292,7 @@ export function CatalogView({
   const listCaption = filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
   const noResults = filtered.length === 0;
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
-  const noOwnedCards = noResults && ownedOnly && !isFilterActive(criteria);
+  const noOwnedCards = noResults && listedOnly && !isFilterActive(criteria);
 
   const handleOpenImage = (card: Card, opener: HTMLButtonElement) => {
     preview.hide();
@@ -298,7 +321,7 @@ export function CatalogView({
       : [
           {
             id: 'collection',
-            label: collectionFilter === 'owned' ? texts.collectionOwned : texts.collectionMissing,
+            label: COLLECTION_FILTER_LABELS[collectionFilter],
             onRemove: () => updateFilters(criteria, 'all', 'later'),
           },
         ]),
@@ -412,6 +435,14 @@ export function CatalogView({
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
           />
+          <div className="sort-row">
+            <SortSelect sort={sort} onChange={setSort} />
+            {collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
+              <div className="missing-add">
+                <AddMissingToWantsButton rows={missingRows} wants={wants} />
+              </div>
+            )}
+          </div>
 
           <ActiveFilters
             filters={activeFilters}
@@ -443,9 +474,11 @@ export function CatalogView({
                 decksOf={decksOf}
                 onOpenImage={handleOpenImage}
                 hoverProps={preview.bind}
+                sort={sort}
+                onSortChange={setSort}
               />
             ) : (
-              <CardList cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+              <CardList cards={sortedForGrid} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
             ))}
         </section>
       </div>

@@ -33,6 +33,7 @@ export const deckTexts = {
   navLabel: 'Päävalikko',
   navCards: 'Kortit',
   navDecks: 'Pakat',
+  navHaveWant: 'Have/Want',
 
   listHeading: 'Pakat',
   listEmpty: 'Sinulla ei ole vielä pakkoja. Aloita luomalla ensimmäinen pakka.',
@@ -113,6 +114,13 @@ export const deckTexts = {
   issuesLive: (count: number) => (count === 0 ? 'Pakka on nyt laillinen.' : `Pakassa on ${issueCount(count)}.`),
   warningPrefix: 'Huomio: ',
   rulesNote: 'Tarkistettava: sääntö käyttää kortin yhtä väriä ja RAM-arvoa sellaisenaan.',
+  missingListHeading: 'Näytä puuttuvat kortit',
+  missingDownload: 'Lataa puuttuvat (.txt)',
+  addMissingToWants: 'Lisää puuttuvat wantiin',
+  addedToWants: (count: number) => (count === 1 ? 'Lisätty 1 kortti wantiin.' : `Lisätty ${count} korttia wantiin.`),
+  allAlreadyWanted: 'Kaikki jo wantissa.',
+  missingFileSuffix: 'puuttuvat',
+  missingRow: (name: string, count: number) => `${name} – puuttuu ${count}`,
   missingFromCollection: (count: number) =>
     count === 0 ? 'Kaikki pakan kortit ovat kokoelmassasi.' : `Kokoelmasta puuttuu ${cardCount(count)}.`,
   collectionNotReady: 'Kokoelmaa ei voi verrata, koska sitä ei voitu ladata.',

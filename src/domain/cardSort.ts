@@ -1,10 +1,19 @@
 import type { Card } from './card';
 import { KNOWN_CARD_RARITIES } from './cardSearch';
 
-export type SortKey = 'name' | 'type' | 'rarity' | 'cost' | 'power' | 'ram';
+/** 'number' is the catalog's own order (the data source lists cards in set order; T-060). */
+export type SortKey = 'number' | 'name' | 'type' | 'rarity' | 'cost' | 'power' | 'ram';
 export type SortDirection = 'asc' | 'desc';
+export interface CardSort {
+  key: SortKey;
+  direction: SortDirection;
+}
 
-function valueOf(card: Card, key: SortKey): string | number | null {
+/** Options of the "Järjestys" selector, in menu order (T-060). */
+export const SORT_KEYS: readonly SortKey[] = ['number', 'name', 'cost', 'power', 'ram', 'type', 'rarity'];
+export const DEFAULT_SORT: CardSort = { key: 'number', direction: 'asc' };
+
+function valueOf(card: Card, key: Exclude<SortKey, 'number'>): string | number | null {
   if (key === 'name') return card.displayName;
   if (key === 'rarity' && card.rarity !== null) {
     // Game order (Common → Nova Rare); an unknown rarity sorts after the known ones.
@@ -24,6 +33,7 @@ function compareValues(a: string | number, b: string | number): number {
  * the input order (stable) after a secondary comparison by name.
  */
 export function sortCards(cards: readonly Card[], key: SortKey, direction: SortDirection): Card[] {
+  if (key === 'number') return direction === 'asc' ? [...cards] : [...cards].reverse();
   const sign = direction === 'asc' ? 1 : -1;
   return [...cards].sort((x, y) => {
     const a = valueOf(x, key);

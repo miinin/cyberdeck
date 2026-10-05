@@ -42,6 +42,67 @@ describe('sync engine', () => {
     expect((await b.repos.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 3 }]);
   });
 
+  it('syncs the want list both ways, a push without reads and a merge per card (D-018)', async () => {
+    const a = device(cloud);
+    const b = device(cloud);
+    await a.repos.wants.setCount('detonate', 2);
+    await a.engine.syncNow();
+    expect(cloud.paths()).toEqual(['collection/want', 'meta']);
+    await b.engine.syncNow();
+    expect((await b.repos.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 2 }]);
+
+    // Only the want list changed on a: a push of that one document.
+    await a.repos.wants.setCount('detonate', 5);
+    await a.engine.syncNow();
+    expect(cloud.getRaw('collection/want')).toMatchObject({ data: { entries: [{ card: 'detonate', count: 5 }] } });
+    expect(cloud.paths()).not.toContain('collection/main');
+
+    // Both devices changed different cards: both end up with both.
+    await b.repos.wants.setCount('overclock', 1);
+    await b.engine.syncNow();
+    await a.engine.syncNow();
+    const expected = [
+      { card: 'detonate', count: 5 },
+      { card: 'overclock', count: 1 },
+    ];
+    expect((await a.repos.wants.load()).value.entries).toEqual(expected);
+    expect((await b.repos.wants.load()).value.entries).toEqual(expected);
+  });
+
+  it('does not touch the collection document when only the want list changes, and the reverse', async () => {
+    const a = device(cloud);
+    await a.repos.collection.setCount('detonate', 1);
+    await a.engine.syncNow();
+    const before = cloud.getRaw('collection/main');
+    await a.repos.wants.setCount('detonate', 1);
+    await a.engine.syncNow();
+    expect(cloud.getRaw('collection/main')).toEqual(before);
+    await a.repos.collection.setCount('detonate', 2);
+    await a.engine.syncNow();
+    expect(cloud.getRaw('collection/want')).toMatchObject({ data: { entries: [{ card: 'detonate', count: 1 }] } });
+  });
+
+  it('keeps the local want list and the cloud document when the cloud want list is invalid', async () => {
+    const a = device(cloud);
+    await a.repos.wants.setCount('detonate', 2);
+    await a.engine.syncNow();
+    cloud.setRaw('collection/want', { garbage: true });
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    await a.engine.syncNow();
+    expect((await a.repos.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 2 }]);
+    expect(cloud.getRaw('collection/want')).toEqual({ garbage: true });
+  });
+
+  it('locks when the cloud want list has a newer schema', async () => {
+    cloud.setRaw('collection/want', { schemaVersion: 9, savedAt: '', data: {} });
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 2, updatedAt: '2026-10-03T10:00:00.000Z' });
+    const a = device(cloud);
+    await a.repos.wants.setCount('detonate', 1);
+    await a.engine.syncNow();
+    expect(a.engine.status().state).toBe('locked');
+    expect(cloud.getRaw('collection/want')).toEqual({ schemaVersion: 9, savedAt: '', data: {} });
+  });
+
   it('reads only the meta document when nothing changed', async () => {
     const a = device(cloud);
     await a.repos.decks.create(CONTENT);

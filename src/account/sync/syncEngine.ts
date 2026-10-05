@@ -5,10 +5,11 @@
  * cloud and in-memory repositories and never the network.
  */
 import { EMPTY_COLLECTION, MAX_COLLECTION_ENTRIES } from '../../domain/collection';
+import type { Collection } from '../../domain/collection';
 import { MAX_DECKS } from '../../domain/deck';
 import type { LocalData, SyncBase, SyncStorage } from '../../storage';
 import { CloudError } from '../cloudError';
-import type { CloudChange, CloudStore } from '../types';
+import type { CloudChange, CloudDoc, CloudStore } from '../types';
 import { mergeCollection, mergeDecks, sameCollection } from './merge';
 
 export type SyncState = 'idle' | 'syncing' | 'offline' | 'error' | 'locked';
@@ -43,6 +44,7 @@ function baseOf(data: LocalData, rev: number): SyncBase {
     rev,
     decks: data.decks.map((deck) => ({ id: deck.id, updatedAt: deck.updatedAt })),
     collection: data.collection,
+    wants: data.wants,
   };
 }
 
@@ -51,8 +53,15 @@ function sameAsBase(data: LocalData, base: SyncBase): boolean {
   const stamps = new Map(base.decks.map((deck) => [deck.id, deck.updatedAt]));
   return (
     data.decks.every((deck) => stamps.get(deck.id) === deck.updatedAt) &&
-    sameCollection(data.collection, base.collection)
+    sameCollection(data.collection, base.collection) &&
+    sameCollection(data.wants, base.wants)
   );
+}
+
+/** A cloud collection-shaped document for the merge: missing is empty, invalid is null (never overwritten). */
+function cloudValue(doc: CloudDoc<Collection>): Collection | null {
+  if (doc.kind === 'ok') return doc.value;
+  return doc.kind === 'missing' ? EMPTY_COLLECTION : null;
 }
 
 /** Thrown inside a round to end it with a state. */
@@ -106,6 +115,7 @@ export function createSyncEngine(options: {
       putDecks: local.decks.filter((deck) => stamps.get(deck.id) !== deck.updatedAt),
       deleteDecks: base.decks.map((deck) => deck.id).filter((id) => !localIds.has(id)),
       collection: sameCollection(local.collection, base.collection) ? undefined : local.collection,
+      wants: sameCollection(local.wants, base.wants) ? undefined : local.wants,
     };
     const rev = await cloud.commit(change, base.rev);
     storage.saveBase(baseOf(local, rev));
@@ -118,18 +128,18 @@ export function createSyncEngine(options: {
     if (snapshot.limitExceeded) throw new Stop('error');
     const expectedRev = snapshot.meta?.rev ?? 0;
 
-    const cloudCollection = snapshot.collection;
     const decks = mergeDecks(local.decks, snapshot.decks, base?.decks ?? [], snapshot.invalidDeckIds);
     const collection = mergeCollection(
       local.collection,
-      cloudCollection.kind === 'ok'
-        ? cloudCollection.value
-        : cloudCollection.kind === 'missing'
-          ? EMPTY_COLLECTION
-          : null,
+      cloudValue(snapshot.collection),
       base?.collection ?? EMPTY_COLLECTION,
     );
-    if (decks.decks.length > MAX_DECKS || collection.collection.entries.length > MAX_COLLECTION_ENTRIES) {
+    const wants = mergeCollection(local.wants, cloudValue(snapshot.wants), base?.wants ?? EMPTY_COLLECTION);
+    if (
+      decks.decks.length > MAX_DECKS ||
+      collection.collection.entries.length > MAX_COLLECTION_ENTRIES ||
+      wants.collection.entries.length > MAX_COLLECTION_ENTRIES
+    ) {
       throw new Stop('error');
     }
 
@@ -137,11 +147,16 @@ export function createSyncEngine(options: {
       putDecks: decks.put,
       deleteDecks: decks.remove,
       collection: collection.writeCloud ? collection.collection : undefined,
+      wants: wants.writeCloud ? wants.collection : undefined,
     };
-    const empty = change.putDecks.length === 0 && change.deleteDecks.length === 0 && change.collection === undefined;
+    const empty =
+      change.putDecks.length === 0 &&
+      change.deleteDecks.length === 0 &&
+      change.collection === undefined &&
+      change.wants === undefined;
     const rev = empty ? expectedRev : await cloud.commit(change, expectedRev);
 
-    const merged: LocalData = { decks: decks.decks, collection: collection.collection };
+    const merged: LocalData = { decks: decks.decks, collection: collection.collection, wants: wants.collection };
     // The device data is replaced only if it is still what the merge started from.
     if (!storage.apply(local, merged)) return false;
     storage.saveBase(baseOf(merged, rev));

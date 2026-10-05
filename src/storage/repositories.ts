@@ -24,6 +24,8 @@ import {
   DECKS_KEY,
   DECKS_SCHEMA_VERSION,
   MAX_BACKUPS_PER_AGGREGATE,
+  WANTS_KEY,
+  WANTS_SCHEMA_VERSION,
   THEME_KEY,
   VIEW_KEY,
   EDIT_MODE_KEY,
@@ -33,7 +35,7 @@ import {
   ACCOUNT_DELETE_PENDING_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
-import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS } from './migrations';
+import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
 import type {
   CollectionRepository,
   DeckRepository,
@@ -64,12 +66,12 @@ export interface RepositoryOptions {
    */
   namespace?: string;
   /** Tests only; default []. */
-  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[] };
+  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[] };
 }
 
 /** One stored entity: its key, schema and how its value is wrapped in the envelope's data. */
 interface Aggregate<T> {
-  name: 'collection' | 'decks';
+  name: 'collection' | 'decks' | 'wants';
   key: string;
   spec: EnvelopeSpec<T>;
   empty: T;
@@ -104,10 +106,13 @@ function parseSyncBase(raw: string | null): SyncBase | null {
   try {
     const data: unknown = JSON.parse(raw);
     if (typeof data !== 'object' || data === null || !('v' in data) || data.v !== 1) return null;
-    const { rev, decks, collection } = data as Record<string, unknown>;
+    const { rev, decks, collection, wants } = data as Record<string, unknown>;
     if (typeof rev !== 'number' || !Number.isSafeInteger(rev) || rev < 0 || !Array.isArray(decks)) return null;
     const parsedCollection = parseCollection(collection);
     if (parsedCollection === null || parsedCollection.dropped > 0) return null;
+    // A base saved before the want list existed has no wants: that is an empty list, not a lost base (D-018).
+    const parsedWants = wants === undefined ? { value: EMPTY_COLLECTION, dropped: 0 } : parseCollection(wants);
+    if (parsedWants === null || parsedWants.dropped > 0) return null;
     const rows: { id: DeckId; updatedAt: string }[] = [];
     for (const row of decks as unknown[]) {
       if (typeof row !== 'object' || row === null) return null;
@@ -115,7 +120,7 @@ function parseSyncBase(raw: string | null): SyncBase | null {
       if (!isDeckId(id) || typeof updatedAt !== 'string') return null;
       rows.push({ id, updatedAt });
     }
-    return { rev, decks: rows, collection: parsedCollection.value };
+    return { rev, decks: rows, collection: parsedCollection.value, wants: parsedWants.value };
   } catch {
     return null;
   }
@@ -130,6 +135,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const prefix = options.namespace === undefined ? null : accountKeyPrefix(options.namespace);
   const collectionKey = prefix === null ? COLLECTION_KEY : `${prefix}collection`;
   const decksKey = prefix === null ? DECKS_KEY : `${prefix}decks`;
+  const wantsKey = prefix === null ? WANTS_KEY : `${prefix}wants`;
   const backupPrefix = prefix === null ? BACKUP_PREFIX : `${prefix}backup:`;
   const syncBaseKey = `${prefix ?? 'cyberdeck:'}sync-base`;
   /** Same-tab listeners: `ui` hear sync-driven writes, `changes` hear every write (the sync engine). */
@@ -145,6 +151,14 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     spec: specWith(COLLECTION_SCHEMA_VERSION, COLLECTION_MIGRATIONS, options.migrations?.collection, parseCollection),
     empty: EMPTY_COLLECTION,
     toData: (collection) => ({ entries: collection.entries }),
+  };
+
+  const wantsAggregate: Aggregate<Collection> = {
+    name: 'wants',
+    key: wantsKey,
+    spec: specWith(WANTS_SCHEMA_VERSION, WANTS_MIGRATIONS, options.migrations?.wants, parseCollection),
+    empty: EMPTY_COLLECTION,
+    toData: (wants) => ({ entries: wants.entries }),
   };
 
   const decksAggregate: Aggregate<Deck[]> = {
@@ -288,22 +302,28 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     return parsed.value;
   }
 
-  const collection: CollectionRepository = {
-    load: async () => load(collectionAggregate),
-    setCount: async (card: CardKey, count: number) => {
-      if (!isCardKey(card) || !Number.isInteger(count) || count < 0 || count > MAX_COLLECTION_COUNT) {
-        throw new StorageError('invalid-input', 'Invalid card key or count');
-      }
-      return mutate(collectionAggregate, (current) => {
-        if (count > 0 && countOf(current, card) === 0 && current.entries.length >= MAX_COLLECTION_ENTRIES) {
-          throw new StorageError('limit-reached', 'Collection is full');
+  /** The collection and the want list share one implementation: same rules, different key (D-018). */
+  function collectionRepository(aggregate: Aggregate<Collection>, key: string): CollectionRepository {
+    return {
+      load: async () => load(aggregate),
+      setCount: async (card: CardKey, count: number) => {
+        if (!isCardKey(card) || !Number.isInteger(count) || count < 0 || count > MAX_COLLECTION_COUNT) {
+          throw new StorageError('invalid-input', 'Invalid card key or count');
         }
-        const next = withCount(current, card, count);
-        return { next, result: next };
-      });
-    },
-    subscribe: (listener) => subscribe(collectionKey, listener),
-  };
+        return mutate(aggregate, (current) => {
+          if (count > 0 && countOf(current, card) === 0 && current.entries.length >= MAX_COLLECTION_ENTRIES) {
+            throw new StorageError('limit-reached', 'Collection is full');
+          }
+          const next = withCount(current, card, count);
+          return { next, result: next };
+        });
+      },
+      subscribe: (listener) => subscribe(key, listener),
+    };
+  }
+
+  const collection = collectionRepository(collectionAggregate, collectionKey);
+  const wants = collectionRepository(wantsAggregate, wantsKey);
 
   const decks: DeckRepository = {
     list: async () => load(decksAggregate),
@@ -444,16 +464,19 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     saveDeletePending: (pending: boolean) => writeHint(ACCOUNT_DELETE_PENDING_KEY, pending ? '1' : null),
   };
 
-  const serialize = (data: LocalData) => JSON.stringify([data.decks, data.collection.entries]);
+  const serialize = (data: LocalData) => JSON.stringify([data.decks, data.collection.entries, data.wants.entries]);
 
   function readLocal(): LocalData | null {
     const decksDecoded = decodeEnvelope(readRaw(decksKey), decksAggregate.spec);
     const collectionDecoded = decodeEnvelope(readRaw(collectionKey), collectionAggregate.spec);
     if (decksDecoded.kind === 'newer' || decksDecoded.kind === 'corrupt') return null;
     if (collectionDecoded.kind === 'newer' || collectionDecoded.kind === 'corrupt') return null;
+    const wantsDecoded = decodeEnvelope(readRaw(wantsKey), wantsAggregate.spec);
+    if (wantsDecoded.kind === 'newer' || wantsDecoded.kind === 'corrupt') return null;
     return {
       decks: decksDecoded.kind === 'ok' ? decksDecoded.value : [],
       collection: collectionDecoded.kind === 'ok' ? collectionDecoded.value : EMPTY_COLLECTION,
+      wants: wantsDecoded.kind === 'ok' ? wantsDecoded.value : EMPTY_COLLECTION,
     };
   }
 
@@ -471,6 +494,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       if (serialize(next) === serialize(current)) return true;
       mutate(decksAggregate, () => ({ next: [...next.decks], result: undefined }));
       mutate(collectionAggregate, () => ({ next: next.collection, result: undefined }));
+      mutate(wantsAggregate, () => ({ next: next.wants, result: undefined }));
       callAll(uiListeners);
       return true;
     },
@@ -486,7 +510,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     backupAll() {
       const at = now();
-      for (const aggregate of [decksAggregate, collectionAggregate]) {
+      for (const aggregate of [decksAggregate, collectionAggregate, wantsAggregate]) {
         const raw = readRaw(aggregate.key);
         if (raw !== null) backup(aggregate, raw, at);
       }
@@ -495,6 +519,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       try {
         store.removeItem(decksKey);
         store.removeItem(collectionKey);
+        store.removeItem(wantsKey);
       } catch (error) {
         throw toStorageError(error, 'write');
       }
@@ -514,7 +539,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     onChange(listener) {
       changeListeners.add(listener);
-      const unsubscribe = subscribeTo ? subscribeTo([decksKey, collectionKey], listener) : () => {};
+      const unsubscribe = subscribeTo ? subscribeTo([decksKey, collectionKey, wantsKey], listener) : () => {};
       return () => {
         changeListeners.delete(listener);
         unsubscribe();
@@ -524,6 +549,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
 
   return {
     collection,
+    wants,
     decks,
     preferences,
     persistent: options.persistent,

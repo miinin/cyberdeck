@@ -17,25 +17,28 @@ export interface CountControlProps {
   onLimit: (card: Card) => void;
   /** false = browsing: only the count and its state are shown, no buttons (T-040). */
   editable?: boolean;
+  /** 'want' = the want list (T-064b): its own spoken texts and no playset mark. Default: the collection. */
+  kind?: 'owned' | 'want';
 }
 
 /** The count with its spoken equivalents and the playset mark (✓). */
-function CountValue({ card, count }: { card: Card; count: number }) {
+function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'owned' | 'want' }) {
+  const want = kind === 'want';
   return (
     <span className="count">
       {count > 0 ? (
         <>
-          <span className="visually-hidden">{texts.countPrefix}</span>
+          <span className="visually-hidden">{want ? texts.wantPrefix : texts.countPrefix}</span>
           {count}
           <span className="visually-hidden">{copiesSuffix(count)}</span>
         </>
       ) : (
         <>
           <span aria-hidden="true">0</span>
-          <span className="visually-hidden">{texts.notOwned}</span>
+          <span className="visually-hidden">{want ? texts.notWanted : texts.notOwned}</span>
         </>
       )}
-      {count >= playsetSize(card) && (
+      {!want && count >= playsetSize(card) && (
         <>
           <span aria-hidden="true" className="playset-mark">
             {' ✓'}
@@ -51,7 +54,7 @@ function CountValue({ card, count }: { card: Card; count: number }) {
  * "[−] n [+]" for one card row (UX.md 6.4). "+" is always the last child and keeps its position
  * in the children list, so React keeps the same element (and focus) when "−" appears or goes.
  */
-export function CountControl({ card, count, mode, onChange, onLimit, editable = true }: CountControlProps) {
+export function CountControl({ card, count, mode, onChange, onLimit, editable = true, kind = 'owned' }: CountControlProps) {
   const plusRef = useRef<HTMLButtonElement>(null);
   const minusRef = useRef<HTMLButtonElement>(null);
   /** Which button of this row had focus last. */
@@ -81,10 +84,12 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
     );
   }
 
+  if (!editable && kind === 'want' && count === 0) return null;
+
   if (!editable) {
     return (
       <div className="count-control count-control--readonly">
-        <CountValue card={card} count={count} />
+        <CountValue card={card} count={count} kind={kind} />
       </div>
     );
   }
@@ -116,12 +121,12 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
         onClick={decrease}
       >
         <span className="visually-hidden">
-          {texts.decreaseOne}
+          {kind === 'want' ? texts.decreaseWant : texts.decreaseOne}
           <CardName card={card} />
         </span>
         <span aria-hidden="true">{texts.minusSymbol}</span>
       </button>
-      <CountValue card={card} count={count} />
+      <CountValue card={card} count={count} kind={kind} />
       <button
         ref={plusRef}
         type="button"
@@ -131,7 +136,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
         onClick={increase}
       >
         <span className="visually-hidden">
-          {texts.increaseOne}
+          {kind === 'want' ? texts.increaseWant : texts.increaseOne}
           <CardName card={card} />
         </span>
         <span aria-hidden="true">+</span>

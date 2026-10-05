@@ -26,6 +26,7 @@ describe('Deck editor: the deck changes elsewhere', () => {
     repositories.sync.apply(local, {
       decks: [{ ...deck, ...content('Muualla muutettu'), updatedAt: '2030-01-01T00:00:00.000Z' }],
       collection: local.collection,
+      wants: local.wants,
     });
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Muualla muutettu' })).toBeInTheDocument();

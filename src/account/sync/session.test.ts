@@ -83,6 +83,32 @@ describe('first sign-in', () => {
     session.dispose();
   });
 
+  it('moves a signed-out want list to an empty account too (D-018)', async () => {
+    const b = browser();
+    await b.anonymous.wants.setCount('detonate', 3);
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    await settle();
+    expect((await b.account.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 3 }]);
+    expect(cloud.paths()).toContain('collection/want');
+    expect((await b.anonymous.wants.load()).value.entries).toEqual([]);
+    session.dispose();
+  });
+
+  it('asks when the cloud has only a want list and the browser has data', async () => {
+    const other = browser();
+    await other.account.wants.setCount('detonate', 1);
+    const first = open(other, cloud);
+    await vi.waitFor(() => expect(first.status().sync.lastSyncedAt).not.toBeNull());
+    first.dispose();
+
+    const b = browser();
+    await b.anonymous.collection.setCount('detonate', 1);
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().phase).toBe('choose'));
+    session.dispose();
+  });
+
   it('asks when both sides have data and merges on request', async () => {
     const other = browser();
     await other.account.decks.create({ ...CONTENT, name: 'Tililla' });
@@ -145,14 +171,17 @@ describe('deleting the account data', () => {
   it('deletes the cloud data and everything the account has in the browser, but not the signed-out data', async () => {
     const b = browser();
     await b.account.decks.create(CONTENT);
+    await b.account.wants.setCount('detonate', 1);
     const session = open(b, cloud);
     await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
     expect(cloud.paths()).toContain('meta');
+    expect(cloud.paths()).toContain('collection/want');
     await b.anonymous.decks.create({ ...CONTENT, name: 'Kirjautumaton' });
 
     expect(await session.deleteAccountData()).toBe(true);
     expect(cloud.paths()).toEqual([]);
     expect((await b.account.decks.list()).value).toEqual([]);
+    expect((await b.account.wants.load()).value.entries).toEqual([]);
     expect(b.account.sync.loadBase()).toBeNull();
     expect((await b.anonymous.decks.list()).value.map((deck) => deck.name)).toEqual(['Kirjautumaton']);
     session.dispose();
