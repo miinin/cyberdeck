@@ -86,3 +86,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-080 | Logo ylänurkkaan ja faviconiksi, ei sisäisiä vieritysalueita (suodatinpaneelit, dialogit) | 1 | Must | PM | Review (dev) | – |
 | T-081 | "N versiota", versioiden selausnuolet korttiruudussa, tietonäkymä mahtuu ruutuun ja tasatut laskurit, reitti #/kortti/<avain> | 1 | Must | PM | Review (dev) | – |
 | T-082 | Versiokorjaukset (symboli seuraa versiota, kaikki versiot näkyvät, Rebecca), settikyltit, Kuvat/Lista, puuttuvien lisäys varmistuksella, uudet harvinaisuussymbolit, favicon-kulma, Myytävä-suodatin, harvinaisuudet 2 sarakkeessa | 1 | Must | PM | Done | – |
+| T-083 | Setit ja muut tuotteet erikseen, Beta/Retail-painos kokoelmassa, olemassa olevat kortit Betaksi (D-022), versionimi pois kuvan alta | 1 | Must | PM | Done | Digiturva ✓ |

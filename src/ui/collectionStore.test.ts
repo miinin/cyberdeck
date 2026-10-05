@@ -7,7 +7,7 @@ import type { CollectionEvent, CollectionStore } from './collectionStore';
 
 const COLLECTION_KEY = 'cyberdeck:collection';
 
-function stored(entries: { card: string; count: number }[], schemaVersion = 1): string {
+function stored(entries: { card: string; count: number }[], schemaVersion = 3): string {
   return JSON.stringify({ schemaVersion, savedAt: '2026-10-01T10:00:00.000Z', data: { entries } });
 }
 

@@ -3,6 +3,7 @@ import { RaritySymbol } from './RaritySymbol';
 import type { Card } from '../domain/card';
 import { officialRarity } from '../domain/cardSearch';
 import { artsOf, ownedPerArt } from '../domain/arts';
+import { editionPrinting } from '../domain/edition';
 import type { Art } from '../domain/arts';
 import type { PrintingKey } from '../domain/printing';
 import { setFamilyName } from '../domain/printing';
@@ -94,6 +95,18 @@ export function CardVersions({
   const base = baseImage === undefined ? (getCardImage(card.key)?.medium ?? null) : baseImage;
   const versions = Object.fromEntries((card.printings ?? []).map((p) => [p.key, versionCount(p.key)]));
   const owned = ownedPerArt({ card: card.key, count, versions }, card, arts);
+  // D-022: the base art of a Welcome to Night City card has a counter for Retail and one for Beta right on the tile.
+  const editionRows = [
+    { label: texts.editionRetail, printing: editionPrinting(card, 'retail') },
+    { label: texts.editionBeta, printing: editionPrinting(card, 'beta') },
+  ].flatMap((row) => (row.printing === null ? [] : [{ label: row.label, printing: row.printing }]));
+  const unknownCopies = count - Object.values(versions).reduce((sum, n) => sum + n, 0);
+
+  /** The printings in a tile's "Erittely": all but the two that have a counter of their own on the base tile. */
+  const breakdown = (art: Art) =>
+    art.rarity === null && editionRows.length > 0
+      ? art.printings.filter((p) => !editionRows.some((row) => row.printing.key === p.key))
+      : art.printings;
 
   // Browsing shows every version too (with the count as text); the counters are for editing only.
   const tiles = arts;
@@ -143,33 +156,61 @@ export function CardVersions({
                   </span>
                 ))}
               </span>
-              <div className="art-count">
-                {editable || n > 0 ? (
-                  <CountControl
-                    card={card}
-                    kind="version"
-                    label={name}
-                    count={n}
-                    mode="ready"
-                    editable={editable}
-                    onChange={(_card, next) => {
-                      // The total follows the art (D-020), so the total limit applies.
-                      if (next > n && count >= MAX_COLLECTION_COUNT) onLimit(card);
-                      else onArtChange?.(art, next);
-                    }}
-                    onLimit={onLimit}
-                  />
-                ) : (
-                  <span className="count">
-                    <span aria-hidden="true">{texts.missingValue}</span>
-                    <span className="visually-hidden">{texts.notOwned}</span>
-                  </span>
-                )}
-              </div>
+              {art.rarity === null && editionRows.length > 0 ? (
+                <div className="art-count art-count--editions">
+                  {editionRows.map(({ label, printing }) => {
+                    const m = versionCount(printing.key);
+                    return (
+                      <div key={printing.key} className="edition-row">
+                        <span className="edition-label">{label}</span>
+                        <CountControl
+                          card={card}
+                          kind="version"
+                          label={texts.artTileName(card.displayName, label)}
+                          count={m}
+                          mode="ready"
+                          editable={editable}
+                          onChange={(_card, next) => {
+                            if (next > m && count >= MAX_COLLECTION_COUNT) onLimit(card);
+                            else onChange(printing.key, next);
+                          }}
+                          onLimit={onLimit}
+                        />
+                      </div>
+                    );
+                  })}
+                  {unknownCopies > 0 && <p className="edition-unknown">{texts.editionUnknown(unknownCopies)}</p>}
+                </div>
+              ) : (
+                <div className="art-count">
+                  {editable || n > 0 ? (
+                    <CountControl
+                      card={card}
+                      kind="version"
+                      label={name}
+                      count={n}
+                      mode="ready"
+                      editable={editable}
+                      onChange={(_card, next) => {
+                        // The total follows the art (D-020), so the total limit applies.
+                        if (next > n && count >= MAX_COLLECTION_COUNT) onLimit(card);
+                        else onArtChange?.(art, next);
+                      }}
+                      onLimit={onLimit}
+                    />
+                  ) : (
+                    <span className="count">
+                      <span aria-hidden="true">{texts.missingValue}</span>
+                      <span className="visually-hidden">{texts.notOwned}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+              {breakdown(art).length > 0 && (
               <details className="art-breakdown">
                 <summary>{texts.artBreakdown}</summary>
                 <ul className="version-list">
-                  {art.printings
+                  {breakdown(art)
                     .map((printing) => {
                       const label = `${setFamilyName(printing.setName)} ${printingTag(printing) ?? ''} ${texts.versionNumber(printing.number)}`.replace(/\s+/g, ' ');
                       const m = versionCount(printing.key);
@@ -200,6 +241,7 @@ export function CardVersions({
                     })}
                 </ul>
               </details>
+              )}
             </li>
           );
         })}

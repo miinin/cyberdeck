@@ -316,7 +316,7 @@ describe.each([
   });
 
   it('validates the collection: invalid rows are dropped, a wrong shape is invalid', async () => {
-    h.setRaw('collection/main', deckDoc({ entries: [{ card: 'detonate', count: 3 }, { card: 'detonate', count: 1 }, null] }));
+    h.setRaw('collection/main', deckDoc({ entries: [{ card: 'detonate', count: 3 }, { card: 'detonate', count: 1 }, null] }, 3));
     let snapshot = await h.store.readAll();
     expect(snapshot.collection).toEqual({ kind: 'ok', value: COLLECTION });
     expect(snapshot.dropped).toBe(2);
@@ -325,6 +325,44 @@ describe.each([
     snapshot = await h.store.readAll();
     expect(snapshot.collection).toEqual({ kind: 'invalid' });
     expect(snapshot.dropped).toBe(1);
+  });
+
+  it('converts a version 2 collection to Beta on reading, leaves version 3 alone and locks on version 4 (D-022)', async () => {
+    const entries = [{ card: 'detonate', count: 3, versions: { 'welcometonightcityretail:031': 1 } }, { card: 'minotaur', count: 1 }];
+    h.setRaw('collection/main', deckDoc({ entries }, 2));
+    let snapshot = await h.store.readAll();
+    expect(snapshot.collection).toEqual({
+      kind: 'ok',
+      value: {
+        entries: [
+          { card: 'detonate', count: 3, versions: { 'welcometonightcityretail:031': 1, 'welcometonightcitybeta:031': 2 } },
+          { card: 'minotaur', count: 1 },
+        ],
+      },
+    });
+    expect(snapshot.locked).toBe(false);
+
+    h.setRaw('collection/main', deckDoc({ entries }, 3));
+    snapshot = await h.store.readAll();
+    expect(snapshot.collection).toEqual({
+      kind: 'ok',
+      value: { entries: [{ card: 'detonate', count: 3, versions: { 'welcometonightcityretail:031': 1 } }, { card: 'minotaur', count: 1 }] },
+    });
+
+    h.setRaw('collection/main', deckDoc({ entries }, 4));
+    snapshot = await h.store.readAll();
+    expect(snapshot).toMatchObject({ locked: true, collection: { kind: 'invalid' } });
+  });
+
+  it('does not convert the want list, whatever it holds (D-022)', async () => {
+    const entries = [{ card: 'detonate', count: 3 }];
+    h.setRaw('collection/want', deckDoc({ entries }, 1));
+    expect((await h.store.readAll()).wants).toEqual({ kind: 'ok', value: { entries } });
+  });
+
+  it('writes the collection as version 3', async () => {
+    await h.store.commit(change({ collection: COLLECTION }), 0);
+    expect(h.getRaw('collection/main')).toMatchObject({ schemaVersion: 3 });
   });
 
   it('reports more than MAX_DECKS decks instead of cutting them silently (SR-23 kohta 5)', async () => {

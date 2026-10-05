@@ -504,3 +504,13 @@ Päätöksessä on viisi osaa.
 4. **Haku:** harvinaisuus- ja settisuodatin osuvat mihin tahansa kortin painokseen. Kun suodatin osuu erikoiskuvitukseen, tuloskortti näytetään sen kuvalla.
 5. **"Kaikki kuvitukset" -valinta** Kortit-näkymän työkalurivillä (vastaa Scryfallin `unique:art`-tilaa) näyttää jokaisen kuvituksen omana ruutunaan. Oletuksena näkyy yksi ruutu korttia kohden, ja sen kulmassa on merkintä "N kuvitusta", kun kuvituksia on useampi. Näin esimerkiksi Johnny-haku näyttää oletuksena eri Johnny-kortit kerran ja kaikki kuvitukset yhdellä valinnalla.
 **Seuraukset:** Pakat, want ja vaihto pysyvät korttitasolla. Kuvitusavain on `<cardKey>__<rarity-slug>` (T-076), ja peruskuvituksen avain on `<cardKey>`.
+
+## D-022 · Setit ja muut tuotteet erikseen, Beta ja Retail kokoelmassa, olemassa olevat kortit Betaksi · 2026-10-06 · Päättäjä: käyttäjä, PM
+**Tila:** Hyväksytty. Tehtävä T-083. Tarkentaa D-020:tä ja D-021:tä.
+**Konteksti:** Käyttäjän mukaan varsinaiset setit ovat Welcome to Night City (Retail) ja Welcome to Night City (Beta). Starter- ja demopakat, promot, Box Toppers, Pre-Release ja turnauspalkinnot ovat sivutuotteita. Käyttäjä haluaa erottaa kokoelmassaan Beta- ja tavalliset kortit. Kaikki tähän mennessä kirjatut kortit ovat Betaa.
+**Päätös:**
+1. **Setti / Versio -suodatin:** kaksi ryhmää. "Setit" sisältää Welcome to Night City ja Welcome to Night City (Beta), joista FR kuuluu Retailiin. "Muut tuotteet" sisältää kaiken muun. Beta ja Retail ovat erillisiä suodatinarvoja.
+2. **Oletuspainos:** Kortit-näkymän muokkaustilassa valitaan oletuspainos, Beta tai Retail (oletuksena Beta). Valinta tallennetaan paikallisesti kuten muut näkymäasetukset. Peruskuvituksen + lisää valittuun painokseen, ja − vähentää ensin siitä, sitten muista.
+3. **Tietonäkymän perusversio:** perusversion ruudussa on WtNC-korteille suoraan erilliset laskurit Retail ja Beta. Muut painokset ovat Erittely-kohdassa.
+4. **Kertaluonteinen muunnos:** kokoelman schemaVersion nousee 2 → 3. Muunnoksessa jokaisen kortin versioimaton osuus (count − versioiden summa) kirjataan kortin Beta-painokselle (`welcometonightcitybeta:<numero>`, perusharvinaisuus), jos sellainen on. Muuten osuus jää versioimattomaksi. Muunnos ei muuta kokonaismääriä, ja se tehdään sekä paikalliselle että pilvestä luetulle datalle. Want-lista ei muutu. Vanha sovellusversio lukitsee synkan (newer), eikä se kirjoita erittelyä pois.
+**Seuraukset:** Pakat, want ja vaihto pysyvät korttitasolla. Digiturva katselmoi muunnoksen ennen tuotantoa.
