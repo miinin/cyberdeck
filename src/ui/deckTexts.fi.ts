@@ -111,6 +111,8 @@ export const deckTextsFi = {
   sideboardEmpty: (size: number) => `Sideboard on valinnainen. Jos käytät sitä, siinä on tasan ${size} korttia.`,
   moveToSideboard: (name: string) => `Siirrä sideboardiin: ${name}`,
   moveToMain: 'Siirrä pääpakkaan',
+  addToSideboard: (name: string) => `Lisää sideboardiin: ${name}`,
+  sideboardFull: (size: number) => `Sideboardissa on jo ${size} korttia.`,
   sideboardCopiesFull: (max: number) => `Pääpakassa ja sideboardissa on yhteensä jo ${max} kopiota.`,
   sideboardNoLegend: 'Legend-korttia ei voi laittaa sideboardiin.',
   sectionLabel: (title: string) => `${title}: pakan kortit`,

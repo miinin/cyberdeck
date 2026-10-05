@@ -107,6 +107,8 @@ export const deckTextsEn: typeof deckTextsFi = {
   sideboardEmpty: (size: number) => `The sideboard is optional. If you use it, it has exactly ${size} cards.`,
   moveToSideboard: (name: string) => `Move to sideboard: ${name}`,
   moveToMain: 'Move to main deck',
+  addToSideboard: (name: string) => `Add to sideboard: ${name}`,
+  sideboardFull: (size: number) => `The sideboard already has ${size} cards.`,
   sideboardCopiesFull: (max: number) => `The main deck and sideboard together already have ${max} copies.`,
   sideboardNoLegend: 'A Legend cannot be put in the sideboard.',
   sectionLabel: (title: string) => `${title}: cards in the deck`,

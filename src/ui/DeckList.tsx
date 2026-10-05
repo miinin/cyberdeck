@@ -1,32 +1,41 @@
-import { useState } from 'react';
-import type { Card } from '../domain/card';
-import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
-import { LEGEND_COUNT } from '../domain/deckRules';
-import type { DeckGroups, DeckRow } from '../domain/deckRules';
-import { getCardImage } from '../data/cardImages';
-import type { HoverPreviewProps } from './CardHoverPreview';
-import { CardName } from './CardName';
-import { typeColorClass } from './CardColor';
-import { CostGem, cardMeta } from './DeckPickTable';
-import { deckTexts } from './deckTexts';
-import { pickGestures } from './pickGestures';
-import { Stepper } from './Stepper';
-import { texts } from './texts';
+import { useState } from "react";
+import type { Card } from "../domain/card";
+import { CARD_IMAGE_WIDTH, cardImageHeight } from "../domain/cardImage";
+import { LEGEND_COUNT } from "../domain/deckRules";
+import type { DeckGroups, DeckRow } from "../domain/deckRules";
+import { getCardImage } from "../data/cardImages";
+import type { HoverPreviewProps } from "./CardHoverPreview";
+import { CardName } from "./CardName";
+import { typeColorClass } from "./CardColor";
+import { CostGem, cardMeta } from "./DeckPickTable";
+import { deckTexts } from "./deckTexts";
+import { pickGestures } from "./pickGestures";
+import { Stepper } from "./Stepper";
+import { texts } from "./texts";
 
-export type DeckView = 'list' | 'stacks';
+export type DeckView = "list" | "stacks";
 
 /** The card image, or the dashed placeholder when there is none or it fails to load. */
-export function DeckCardImage({ card, className }: { card: Card; className: string }) {
+export function DeckCardImage({
+  card,
+  className,
+}: {
+  card: Card;
+  className: string;
+}) {
   const image = getCardImage(card.key);
   const [failed, setFailed] = useState(false);
-  if (image === null || failed) return <span className={`${className} card-image--missing`} aria-hidden="true" />;
+  if (image === null || failed)
+    return (
+      <span className={`${className} card-image--missing`} aria-hidden="true" />
+    );
   return (
     <img
       className={className}
       src={image.medium}
       srcSet={`${image.medium} 1x, ${image.large} 2x`}
       width={CARD_IMAGE_WIDTH.md}
-      height={cardImageHeight('md')}
+      height={cardImageHeight("md")}
       alt=""
       loading="lazy"
       decoding="async"
@@ -50,6 +59,7 @@ export function DeckList({
   onOpenImage,
   hoverProps,
   onMoveToSideboard,
+  onAddToSideboard,
 }: {
   grouped: DeckGroups;
   view: DeckView;
@@ -63,6 +73,8 @@ export function DeckList({
   hoverProps: (card: Card) => HoverPreviewProps;
   /** Moves one copy to the sideboard (T-058). */
   onMoveToSideboard?: (card: Card) => void;
+  /** Stacks view: add a copy to the sideboard straight from the stack (T-074). */
+  onAddToSideboard?: (card: Card) => void;
 }) {
   const missingOf = (row: DeckRow) => {
     const have = ownedOf(row.card);
@@ -75,8 +87,14 @@ export function DeckList({
     const missing = missingOf(row);
     return (
       <>
-        {have !== null && <span className="visually-hidden">{deckTexts.owned(have, row.count)}</span>}
-        {missing > 0 && <span className={className}>{deckTexts.missingCount(missing)}</span>}
+        {have !== null && (
+          <span className="visually-hidden">
+            {deckTexts.owned(have, row.count)}
+          </span>
+        )}
+        {missing > 0 && (
+          <span className={className}>{deckTexts.missingCount(missing)}</span>
+        )}
       </>
     );
   };
@@ -86,11 +104,18 @@ export function DeckList({
   const renderTile = (row: DeckRow) => {
     const { card, count } = row;
     const missing = missingOf(row);
-    const { onContextMenu, onKeyDown } = pickGestures(count, (next) => onChange(card, next), false);
+    const { onContextMenu, onKeyDown } = pickGestures(
+      count,
+      (next) => onChange(card, next),
+      false,
+    );
     return (
       <li
         key={card.key}
-        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '')}
+        className={
+          `deck-tile ${typeColorClass(card.color)}` +
+          (missing > 0 ? " is-missing" : "")
+        }
         onContextMenu={onContextMenu}
         onKeyDown={onKeyDown}
         {...hoverProps(card)}
@@ -111,11 +136,16 @@ export function DeckList({
         >
           <CardName card={card} muteSubname />
         </button>
-        {ownership(row, 'deck-tile-missing')}
+        {ownership(row, "deck-tile-missing")}
         <span className="deck-tile-count" aria-hidden="true">
           {deckTexts.copies(count)}
         </span>
-        <Stepper name={card.displayName} count={count} showCount={false} onChange={(next) => onChange(card, next)} />
+        <Stepper
+          name={card.displayName}
+          count={count}
+          showCount={false}
+          onChange={(next) => onChange(card, next)}
+        />
         {onMoveToSideboard !== undefined && (
           <button
             type="button"
@@ -132,9 +162,17 @@ export function DeckList({
 
   const renderStackCard = (row: DeckRow) => {
     const { card, count } = row;
-    const { onContextMenu, onKeyDown } = pickGestures(count, (next) => onChange(card, next), false);
+    const { onContextMenu, onKeyDown } = pickGestures(
+      count,
+      (next) => onChange(card, next),
+      false,
+    );
     return (
-      <li key={card.key} className={'stack-card' + (missingOf(row) > 0 ? ' is-missing' : '')} {...hoverProps(card)}>
+      <li
+        key={card.key}
+        className={"stack-card" + (missingOf(row) > 0 ? " is-missing" : "")}
+        {...hoverProps(card)}
+      >
         <button
           type="button"
           className="stack-card-button"
@@ -152,6 +190,16 @@ export function DeckList({
             {deckTexts.copies(count)}
           </span>
         </button>
+        {onAddToSideboard !== undefined && (
+          <button
+            type="button"
+            className="link-button"
+            aria-label={deckTexts.addToSideboard(card.displayName)}
+            onClick={() => onAddToSideboard(card)}
+          >
+            +S
+          </button>
+        )}
       </li>
     );
   };
@@ -166,7 +214,9 @@ export function DeckList({
           {grouped.legends.map((row) => (
             <li
               key={row.card.key}
-              className={'legend-slot' + (missingOf(row) > 0 ? ' is-missing' : '')}
+              className={
+                "legend-slot" + (missingOf(row) > 0 ? " is-missing" : "")
+              }
               {...hoverProps(row.card)}
             >
               <button
@@ -196,12 +246,14 @@ export function DeckList({
                   <span aria-hidden="true">×</span>
                 </button>
               </div>
-              {ownership(row, 'legend-slot-missing')}
+              {ownership(row, "legend-slot-missing")}
             </li>
           ))}
           {Array.from({ length: emptySlots }, (_, i) => (
             <li key={`empty-${i}`} className="legend-slot is-empty">
-              <span className="legend-slot-empty">{deckTexts.legendSlotEmpty}</span>
+              <span className="legend-slot-empty">
+                {deckTexts.legendSlotEmpty}
+              </span>
             </li>
           ))}
         </ul>
@@ -213,12 +265,14 @@ export function DeckList({
             {deckTexts.mainHeading} ({mainCount})
           </h2>
           <fieldset className="view-select deck-view">
-            <legend className="visually-hidden">{deckTexts.deckViewLegend}</legend>
+            <legend className="visually-hidden">
+              {deckTexts.deckViewLegend}
+            </legend>
             <div className="options">
               {(
                 [
-                  ['list', deckTexts.deckViewList],
-                  ['stacks', deckTexts.deckViewStacks],
+                  ["list", deckTexts.deckViewList],
+                  ["stacks", deckTexts.deckViewStacks],
                 ] as const
               ).map(([value, label]) => (
                 <label key={value} className="option">
@@ -228,22 +282,27 @@ export function DeckList({
                     value={value}
                     checked={view === value}
                     onChange={() => onViewChange(value)}
-                  />{' '}
+                  />{" "}
                   {label}
                 </label>
               ))}
             </div>
           </fieldset>
         </div>
-        {grouped.groups.length === 0 && grouped.unknown.length === 0 && <p className="hint">{deckTexts.deckEmpty}</p>}
-        <div className={view === 'stacks' ? 'deck-stacks' : 'deck-groups'}>
+        {grouped.groups.length === 0 && grouped.unknown.length === 0 && (
+          <p className="hint">{deckTexts.deckEmpty}</p>
+        )}
+        <div className={view === "stacks" ? "deck-stacks" : "deck-groups"}>
           {grouped.groups.map((group) => (
             <div key={group.type} className="deck-group">
               <h3 className="deck-group-title" lang="en">
-                {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
+                {group.type} (
+                {group.rows.reduce((sum, row) => sum + row.count, 0)})
               </h3>
-              <ul className={view === 'stacks' ? 'stack-cards' : 'deck-tiles'}>
-                {group.rows.map(view === 'stacks' ? renderStackCard : renderTile)}
+              <ul className={view === "stacks" ? "stack-cards" : "deck-tiles"}>
+                {group.rows.map(
+                  view === "stacks" ? renderStackCard : renderTile,
+                )}
               </ul>
             </div>
           ))}

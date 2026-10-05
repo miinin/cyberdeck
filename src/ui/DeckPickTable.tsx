@@ -1,12 +1,12 @@
-import type { Card } from '../domain/card';
-import { CardColor, typeBadgeClass, typeColorClass } from './CardColor';
-import { CardImage } from './CardImage';
-import type { HoverPreviewProps } from './CardHoverPreview';
-import { Value } from './CardTable';
-import { deckTexts } from './deckTexts';
-import { pickGestures } from './pickGestures';
-import { Stepper } from './Stepper';
-import { texts } from './texts';
+import type { Card } from "../domain/card";
+import { CardColor, typeBadgeClass, typeColorClass } from "./CardColor";
+import { CardImage } from "./CardImage";
+import type { HoverPreviewProps } from "./CardHoverPreview";
+import { Value } from "./CardTable";
+import { deckTexts } from "./deckTexts";
+import { pickGestures } from "./pickGestures";
+import { Stepper } from "./Stepper";
+import { texts } from "./texts";
 
 /** Why adding breaks a rule: the full text for the description, a short mark for the cell. */
 export interface PickBlocker {
@@ -25,13 +25,17 @@ export function cardMeta(card: Card): string {
     card.rarity,
   ]
     .filter((part) => part !== null)
-    .join(' · ');
+    .join(" · ");
 }
 
 /** Cost as a round gem with the card colour on its edge (T-050b). */
 export function CostGem({ card }: { card: Card }) {
   if (card.cost === null) return <Value value={null} missing={texts.noCost} />;
-  return <span className={`cost-gem ${typeColorClass(card.color)}`}>{card.cost}</span>;
+  return (
+    <span className={`cost-gem ${typeColorClass(card.color)}`}>
+      {card.cost}
+    </span>
+  );
 }
 
 /**
@@ -43,6 +47,7 @@ export function DeckPickTable({
   countOf,
   blockerOf,
   onChange,
+  onAddToSideboard,
   onOpenImage,
   clickAdds,
   hoverProps,
@@ -51,6 +56,7 @@ export function DeckPickTable({
   countOf: (card: Card) => number;
   blockerOf: (card: Card) => PickBlocker | null;
   onChange: (card: Card, count: number) => void;
+  onAddToSideboard?: (card: Card) => void;
   onOpenImage: (card: Card) => void;
   clickAdds: boolean;
   hoverProps: (card: Card) => HoverPreviewProps;
@@ -95,7 +101,10 @@ export function DeckPickTable({
           return (
             <tr
               key={card.key}
-              className={(blocker !== null ? 'is-dimmed' : '') + (count > 0 ? ' is-in-deck' : '')}
+              className={
+                (blocker !== null ? "is-dimmed" : "") +
+                (count > 0 ? " is-in-deck" : "")
+              }
               {...pickGestures(count, change, clickAdds)}
               {...hoverProps(card)}
             >
@@ -120,7 +129,7 @@ export function DeckPickTable({
               <td className="col-type">
                 <span className={typeBadgeClass(card.color)} lang="en">
                   {card.type}
-                </span>{' '}
+                </span>{" "}
                 <span className="pick-color">
                   <CardColor color={card.color} />
                 </span>
@@ -142,9 +151,25 @@ export function DeckPickTable({
                   describedBy={blocker !== null ? hintId : undefined}
                   shortcuts
                 />
+                {onAddToSideboard !== undefined && (
+                  <button
+                    type="button"
+                    className="link-button"
+                    aria-label={deckTexts.addToSideboard(card.displayName)}
+                    onClick={() => {
+                      onAddToSideboard(card);
+                    }}
+                  >
+                    +S
+                  </button>
+                )}
                 {blocker !== null && (
                   <>
-                    <span className="pick-blocked" aria-hidden="true" title={blocker.reason}>
+                    <span
+                      className="pick-blocked"
+                      aria-hidden="true"
+                      title={blocker.reason}
+                    >
                       {blocker.short}
                     </span>
                     <span id={hintId} className="visually-hidden">
