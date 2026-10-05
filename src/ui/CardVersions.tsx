@@ -42,17 +42,38 @@ function printingTag(printing: Printing): string | null {
   return null;
 }
 
-/** "Welcome to Night City · Retail, Beta, FR": one line per set family, no repetition. */
-export function setLines(printings: readonly Printing[]): string[] {
+/** Words that become a lower case letter in a set abbreviation ("Welcome to Night City" -> "WtNC"). */
+const SMALL_WORDS = /^(to|of|the|a|an|and|in|on)$/i;
+/** Names longer than this are abbreviated. */
+const SHORT_SET_NAME = 14;
+
+/** "Welcome to Night City" -> "WtNC"; a short name stays as it is. */
+export function setAbbreviation(family: string): string {
+  if (family.length <= SHORT_SET_NAME) return family;
+  return family
+    .split(/[ ]+/)
+    .map((word) => (/[0-9]/.test(word) ? word.toUpperCase() : SMALL_WORDS.test(word) ? word.slice(0, 1).toLowerCase() : word.slice(0, 1).toUpperCase()))
+    .join('');
+}
+
+export interface SetChip {
+  family: string;
+  short: string;
+  /** Retail, Beta, FR; "#005" for the printings of a set without those (promos, tournaments). */
+  tags: string[];
+}
+
+/** One chip per set family with the printing types as tags, no repetition. */
+export function setChips(printings: readonly Printing[]): SetChip[] {
   const families = new Map<string, string[]>();
   for (const printing of printings) {
     const family = setFamilyName(printing.setName);
     const tags = families.get(family) ?? [];
-    const tag = printingTag(printing);
-    if (tag !== null && !tags.includes(tag)) tags.push(tag);
+    const tag = printingTag(printing) ?? `#${printing.number}`;
+    if (!tags.includes(tag)) tags.push(tag);
     families.set(family, tags);
   }
-  return [...families].map(([family, tags]) => (tags.length === 0 ? family : `${family} · ${tags.join(', ')}`));
+  return [...families].map(([family, tags]) => ({ family, short: setAbbreviation(family), tags }));
 }
 
 export function artName(art: Art): string {
@@ -74,7 +95,8 @@ export function CardVersions({
   const versions = Object.fromEntries((card.printings ?? []).map((p) => [p.key, versionCount(p.key)]));
   const owned = ownedPerArt({ card: card.key, count, versions }, card, arts);
 
-  const tiles = arts.filter((art) => editable || (owned.get(art.artId) ?? 0) > 0);
+  // Browsing shows every version too (with the count as text); the counters are for editing only.
+  const tiles = arts;
 
   return (
     <section aria-labelledby="card-detail-versions" className="card-versions">
@@ -102,32 +124,52 @@ export function CardVersions({
                 picture
               )}
               <span className="art-name">{art.rarity === null ? name : <RaritySymbol rarity={art.rarity} showName />}</span>
-              <span className="art-sets" title={setLines(art.printings).join('; ')}>
-                {setLines(art.printings).map((line) => (
-                  <span key={line} className="art-set">{line}</span>
+              <span className="art-sets">
+                {setChips(art.printings).map((chip) => (
+                  <span key={chip.family} className="art-set">
+                    <span className="set-chip set-chip--family" title={chip.family}>
+                      {chip.short === chip.family ? (
+                        chip.family
+                      ) : (
+                        <>
+                          <span aria-hidden="true">{chip.short}</span>
+                          <span className="visually-hidden">{chip.family}</span>
+                        </>
+                      )}
+                    </span>
+                    {chip.tags.map((tag) => (
+                      <span key={tag} className="set-chip">{tag}</span>
+                    ))}
+                  </span>
                 ))}
               </span>
               <div className="art-count">
-              <CountControl
-                card={card}
-                kind="version"
-                label={name}
-                count={n}
-                mode="ready"
-                editable={editable}
-                onChange={(_card, next) => {
-                  // The total follows the art (D-020), so the total limit applies.
-                  if (next > n && count >= MAX_COLLECTION_COUNT) onLimit(card);
-                  else onArtChange?.(art, next);
-                }}
-                onLimit={onLimit}
-              />
+                {editable || n > 0 ? (
+                  <CountControl
+                    card={card}
+                    kind="version"
+                    label={name}
+                    count={n}
+                    mode="ready"
+                    editable={editable}
+                    onChange={(_card, next) => {
+                      // The total follows the art (D-020), so the total limit applies.
+                      if (next > n && count >= MAX_COLLECTION_COUNT) onLimit(card);
+                      else onArtChange?.(art, next);
+                    }}
+                    onLimit={onLimit}
+                  />
+                ) : (
+                  <span className="count">
+                    <span aria-hidden="true">{texts.missingValue}</span>
+                    <span className="visually-hidden">{texts.notOwned}</span>
+                  </span>
+                )}
               </div>
               <details className="art-breakdown">
                 <summary>{texts.artBreakdown}</summary>
                 <ul className="version-list">
                   {art.printings
-                    .filter((printing) => editable || versionCount(printing.key) > 0)
                     .map((printing) => {
                       const label = `${setFamilyName(printing.setName)} ${printingTag(printing) ?? ''} ${texts.versionNumber(printing.number)}`.replace(/\s+/g, ' ');
                       const m = versionCount(printing.key);
@@ -138,19 +180,21 @@ export function CardVersions({
                             {printingTag(printing) !== null && <span className="version-lang">{printingTag(printing)}</span>}
                             <span className="version-number">{printing.number}</span>
                           </span>
-                          <CountControl
-                            card={card}
-                            kind="version"
-                            label={label}
-                            count={m}
-                            mode="ready"
-                            editable={editable}
-                            onChange={(_card, next) => {
-                              if (next > m && count >= MAX_COLLECTION_COUNT) onLimit(card);
-                              else onChange(printing.key, next);
-                            }}
-                            onLimit={onLimit}
-                          />
+                          {(editable || m > 0) && (
+                            <CountControl
+                              card={card}
+                              kind="version"
+                              label={label}
+                              count={m}
+                              mode="ready"
+                              editable={editable}
+                              onChange={(_card, next) => {
+                                if (next > m && count >= MAX_COLLECTION_COUNT) onLimit(card);
+                                else onChange(printing.key, next);
+                              }}
+                              onLimit={onLimit}
+                            />
+                          )}
                         </li>
                       );
                     })}

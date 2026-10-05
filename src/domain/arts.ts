@@ -54,7 +54,8 @@ export function artsOf(card: Card, hasArt: (cardKey: string, rarity: string) => 
     if (isSpecialRarity(rarity) && hasArt(card.key, rarity)) special.set(rarity, [...(special.get(rarity) ?? []), printing]);
     else base.push(printing);
   }
-  const arts: Art[] = [{ artId: card.key, label: 'base', rarity: null, printings: base, defaultPrinting: defaultOf(base) }];
+  // A card whose printings are all of special rarities (e.g. all Nova Rare) has no base art: an empty one would be a duplicate.
+  const arts: Art[] = base.length === 0 && special.size > 0 ? [] : [{ artId: card.key, label: 'base', rarity: null, printings: base, defaultPrinting: defaultOf(base) }];
   for (const rarity of SPECIAL_ART_RARITIES) {
     const list = special.get(rarity);
     if (list !== undefined) {
@@ -69,6 +70,22 @@ export function artForRarity(arts: readonly Art[], rarity: string | null): Art |
   return arts.find((art) => art.rarity !== null && art.rarity === rarity) ?? arts.find((art) => art.rarity === null);
 }
 
+/** The art that takes the copies without a version: the base art, or the first art when the card has no base art. */
+function catchAll(arts: readonly Art[]): Art | undefined {
+  return arts.find((art) => art.rarity === null) ?? arts[0];
+}
+
+/**
+ * The rarity an art shows (for the rarity symbol): a special art its own rarity; the base art the rarity of its
+ * printings (the card's own when it is among them, else the first), else the card's rarity.
+ */
+export function artRarity(card: Card, art: Art): string | null {
+  if (art.rarity !== null) return art.rarity;
+  const rarities = art.printings.map((p) => p.rarity).filter((r): r is string => r !== null);
+  if (card.rarity !== null && rarities.includes(card.rarity)) return card.rarity;
+  return rarities[0] ?? card.rarity;
+}
+
 /** Copies per art: a special art counts its printings' breakdown, the base art the rest (includes "version unknown"). */
 export function ownedPerArt(entry: CollectionEntry | undefined, card: Card, arts: readonly Art[] = artsOf(card)): Map<string, number> {
   const result = new Map<string, number>();
@@ -81,6 +98,9 @@ export function ownedPerArt(entry: CollectionEntry | undefined, card: Card, arts
     special += n;
   }
   for (const art of arts) if (art.rarity === null) result.set(art.artId, Math.max(0, (entry?.count ?? 0) - special));
+  // Without a base art the first art also takes the copies without a version.
+  const first = arts[0];
+  if (first !== undefined && first.rarity !== null) result.set(first.artId, (result.get(first.artId) ?? 0) + Math.max(0, (entry?.count ?? 0) - special));
   return result;
 }
 
@@ -101,7 +121,7 @@ export function setArtCount(collection: Collection, card: Card, artId: string, n
     const before = versionsOf(collection, card.key)[art.defaultPrinting.key] ?? 0;
     return setVersionCount(collection, card.key, art.defaultPrinting.key, before + delta);
   }
-  if (art.rarity === null) {
+  if (catchAll(arts) === art) {
     const unknown = countOf(next, card.key) - versionsTotal(versionsOf(next, card.key));
     const take = Math.min(-delta, unknown);
     if (take > 0) next = withCount(next, card.key, countOf(next, card.key) - take);

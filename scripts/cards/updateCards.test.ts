@@ -63,7 +63,7 @@ describe('updateCards', () => {
       color: null,
       cost: null,
       power: null,
-      ram: null, rarity: null,
+      ram: null, rarity: null, eddiable: null,
       key: 'v-streetkid',
       printings: [],
     });
@@ -193,7 +193,7 @@ describe('diffCardFiles', () => {
       color: null,
       cost: null,
       power: null,
-      ram: null, rarity: null,
+      ram: null, rarity: null, eddiable: null,
       key: 'a',
     };
     expect(diffCardFiles([card], [{ ...card }])).toEqual({ added: [], removed: [], changed: [] });

@@ -27,6 +27,11 @@ export function officialRarity(raw: string | null): string | null {
   return raw;
 }
 
+/** The short rarity name for filter keys: "Secret Rare" -> "Secret", "Rare" stays "Rare". */
+export function shortRarity(official: string): string {
+  return official === 'Rare' ? official : official.replace(/ Rare$/, '');
+}
+
 /** Known card colors in display order. Unknown colors from the data are appended after these. */
 export const KNOWN_CARD_COLORS: readonly string[] = ['Red', 'Yellow', 'Green', 'Blue'];
 
@@ -45,6 +50,8 @@ export interface CardFilterCriteria {
   powers: readonly string[];
   /** Selected RAM values as number filter options. Empty = all. */
   rams: readonly string[];
+  /** Only cards that can be sold for eddies (€$, Netdeck's is_eddiable). Default (off) = all. */
+  sellable?: boolean;
 }
 
 /** The criteria keys of the number filters (T-052). */
@@ -58,6 +65,7 @@ export const EMPTY_CRITERIA: CardFilterCriteria = {
   costs: [],
   powers: [],
   rams: [],
+  sellable: false,
 };
 
 /**
@@ -151,7 +159,7 @@ export function isFilterActive(criteria: CardFilterCriteria): boolean {
   return (
     normalizeForSearch(criteria.query) !== '' || criteria.types.length > 0 || criteria.colors.length > 0 ||
     criteria.rarities.length > 0 || criteria.costs.length > 0 || criteria.powers.length > 0 ||
-    criteria.rams.length > 0
+    criteria.rams.length > 0 || criteria.sellable === true
   );
 }
 
@@ -177,6 +185,7 @@ export function filterCards(cards: readonly Card[], criteria: CardFilterCriteria
     if (types.size > 0 && !types.has(card.type)) return false;
     if (colors.size > 0 && (card.color === null || !colors.has(card.color))) return false;
     if (rarities.size > 0 && !hasRarity(card, rarities)) return false;
+    if (criteria.sellable === true && card.eddiable !== true) return false;
     for (const [group, field] of NUMBER_FIELDS) {
       if (!matchesNumberFilter(card[field], criteria[group])) return false;
     }

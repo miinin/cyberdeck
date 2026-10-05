@@ -130,7 +130,7 @@ describe('CatalogView layout (T-050a)', () => {
     await user.click(within(sizes).getByRole('radio', { name: 'Iso' }));
     expect(screen.getByRole('region', { name: 'Tulokset' })).toHaveAttribute('data-image-size', 'large');
 
-    await user.click(screen.getByRole('radio', { name: 'Taulukko' }));
+    await user.click(screen.getByRole('radio', { name: 'Lista' }));
     expect(screen.queryByRole('group', { name: 'Kuvakoko' })).not.toBeInTheDocument();
   });
 });

@@ -25,6 +25,8 @@ export interface Card {
   ram: number | null;
   /** "Common", "Rare" and so on (first printing), or null when unknown. A plain string so a new rarity does not break the app. */
   rarity: string | null;
+  /** Netdeck's "is_eddiable": the card can be sold for eddies (€$). null = unknown. Always set in the bundled data; test cards may omit it. */
+  eddiable?: boolean | null;
   /** The app's own key, cardKey(name, subname). Collections and decks refer to cards only by this (D-008). */
   key: CardKey;
   /** All printings (versions) of the card, in source order (D-020). Always set in the bundled data; test cards may omit it. */

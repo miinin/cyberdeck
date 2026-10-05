@@ -14,6 +14,7 @@
       "power": 6,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "v-streetkid",
       "printings": [
         {
@@ -170,6 +171,7 @@
       "power": 6,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "royce-psycho-on-the-edge",
       "printings": [
         {
@@ -276,6 +278,7 @@
       "power": 9,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "adam-smasher-ender-of-legends",
       "printings": [
         {
@@ -362,6 +365,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "dexter-deshawn-off-the-grid",
       "printings": [
         {
@@ -468,6 +472,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Secret",
+      "eddiable": true,
       "key": "johnny-silverhand-rocking-renegade",
       "printings": [
         {
@@ -524,6 +529,7 @@
       "power": null,
       "ram": null,
       "rarity": "Nova Rare",
+      "eddiable": false,
       "key": "rebecca-having-a-moment",
       "printings": [
         {
@@ -560,6 +566,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "yorinobu-arasaka-embracing-destruction",
       "printings": [
         {
@@ -636,6 +643,7 @@
       "power": 0,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "japantown-jonin",
       "printings": [
         {
@@ -682,6 +690,7 @@
       "power": 4,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "ruthless-lowlife",
       "printings": [
         {
@@ -748,6 +757,7 @@
       "power": 3,
       "ram": 1,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "la-llorona-ghost-of-the-past",
       "printings": [
         {
@@ -794,6 +804,7 @@
       "power": 3,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "swordwise-huscle",
       "printings": [
         {
@@ -870,6 +881,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "valentino-guerrera",
       "printings": [
         {
@@ -916,6 +928,7 @@
       "power": 6,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "6th-street-recruits",
       "printings": [
         {
@@ -962,6 +975,7 @@
       "power": 5,
       "ram": 1,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "kerry-eurodyne-the-last-rockerboy",
       "printings": [
         {
@@ -1028,6 +1042,7 @@
       "power": 5,
       "ram": 1,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "meredith-stout-stone-cold-corpo",
       "printings": [
         {
@@ -1074,6 +1089,7 @@
       "power": 6,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "chrome-fang",
       "printings": [
         {
@@ -1140,6 +1156,7 @@
       "power": 4,
       "ram": 4,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "el-sombreron-la-venganza-lenta",
       "printings": [
         {
@@ -1186,6 +1203,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "royce-dont-call-me-simon",
       "printings": [
         {
@@ -1242,6 +1260,7 @@
       "power": 7,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "screw-lovelorn-fool",
       "printings": [
         {
@@ -1288,6 +1307,7 @@
       "power": 6,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": false,
       "key": "v-roamer-of-the-badlands",
       "printings": [
         {
@@ -1334,6 +1354,7 @@
       "power": 10,
       "ram": 3,
       "rarity": "Common",
+      "eddiable": false,
       "key": "animals-wrecker",
       "printings": [
         {
@@ -1380,6 +1401,7 @@
       "power": 8,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": false,
       "key": "johnny-silverhand-never-stop-fighting",
       "printings": [
         {
@@ -1436,6 +1458,7 @@
       "power": 9,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "minotaur",
       "printings": [
         {
@@ -1502,6 +1525,7 @@
       "power": 8,
       "ram": 4,
       "rarity": "Common",
+      "eddiable": false,
       "key": "octant",
       "printings": [
         {
@@ -1548,6 +1572,7 @@
       "power": 9,
       "ram": 3,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "yorinobu-arasaka-steel-dragon",
       "printings": [
         {
@@ -1594,6 +1619,7 @@
       "power": 2,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": true,
       "key": "mantis-blades",
       "printings": [
         {
@@ -1680,6 +1706,7 @@
       "power": 2,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "arasaka-emergency-radioport",
       "printings": [
         {
@@ -1746,6 +1773,7 @@
       "power": 2,
       "ram": 1,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "satori-sword-of-saburo",
       "printings": [
         {
@@ -1842,6 +1870,7 @@
       "power": 1,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "deadman-transmitter",
       "printings": [
         {
@@ -1888,6 +1917,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "all-is-lost",
       "printings": [
         {
@@ -1934,6 +1964,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "detonate",
       "printings": [
         {
@@ -1980,6 +2011,7 @@
       "power": null,
       "ram": 1,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "industrial-assembly",
       "printings": [
         {
@@ -2076,6 +2108,7 @@
       "power": null,
       "ram": 4,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "appetite-for-destruction",
       "printings": [
         {
@@ -2122,6 +2155,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "bonnie-and-clyde",
       "printings": [
         {
@@ -2168,6 +2202,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "over-the-edge",
       "printings": [
         {
@@ -2244,6 +2279,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "gunpoint-diplomacy",
       "printings": [
         {
@@ -2290,6 +2326,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "shattered-memories",
       "printings": [
         {
@@ -2356,6 +2393,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Common",
+      "eddiable": true,
       "key": "carnage-at-the-colosseum",
       "printings": [
         {
@@ -2402,6 +2440,7 @@
       "power": 7,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "rogue-amendiares-preem-solo",
       "printings": [
         {
@@ -2413,6 +2452,16 @@
           "language": "en",
           "artist": "Olgierd Ciszak",
           "imageKey": "rogue-amendiares-preem-solo__welcome-to-night-city-040"
+        },
+        {
+          "key": "welcometonightcityretail:149",
+          "setCode": "welcometonightcityretail",
+          "setName": "Welcome to Night City — Retail",
+          "number": "149",
+          "rarity": "Iconic Legend",
+          "language": "en",
+          "artist": "Pandart Studio",
+          "imageKey": "rogue-amendiares-preem-solo__welcome-to-night-city-149"
         },
         {
           "key": "welcometonightcitybeta:040",
@@ -2455,6 +2504,16 @@
           "imageKey": "rogue-amendiares-preem-solo__pre-release-005"
         },
         {
+          "key": "edgerunneropens1:039",
+          "setCode": "edgerunneropens1",
+          "setName": "Edgerunner Open S 1",
+          "number": "039",
+          "rarity": "Nova Rare",
+          "language": "en",
+          "artist": "Pandart Studio",
+          "imageKey": "rogue-amendiares-preem-solo__edgerunner-open-s-1-039"
+        },
+        {
           "key": "welcometonightcityretail-fr:040",
           "setCode": "welcometonightcityretail-fr",
           "setName": "Welcome to Night City — Retail — FR",
@@ -2463,6 +2522,16 @@
           "language": "fr",
           "artist": "Olgierd Ciszak",
           "imageKey": "rogue-amendiares-preem-solo__welcome-to-night-city-040"
+        },
+        {
+          "key": "welcometonightcityretail-fr:149",
+          "setCode": "welcometonightcityretail-fr",
+          "setName": "Welcome to Night City — Retail — FR",
+          "number": "149",
+          "rarity": "Iconic Legend",
+          "language": "fr",
+          "artist": "Pandart Studio",
+          "imageKey": "rogue-amendiares-preem-solo__welcome-to-night-city-149"
         }
       ]
     },
@@ -2478,6 +2547,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "dum-dum-maelstrom-triggerman",
       "printings": [
         {
@@ -2584,6 +2654,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "kerry-eurodyne-axe-attitude-audience",
       "printings": [
         {
@@ -2670,6 +2741,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "muamar-reyes-el-capitan",
       "printings": [
         {
@@ -2776,6 +2848,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "river-ward-detective-on-the-hunt",
       "printings": [
         {
@@ -2872,6 +2945,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "viktor-vektor-sit-down-and-relax",
       "printings": [
         {
@@ -2948,6 +3022,7 @@
       "power": 0,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "secondhand-bombus",
       "printings": [
         {
@@ -3044,6 +3119,7 @@
       "power": 0,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "sketchy-ripper",
       "printings": [
         {
@@ -3090,6 +3166,7 @@
       "power": 2,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "augmented-negotiators",
       "printings": [
         {
@@ -3136,6 +3213,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "dexter-deshawn-one-last-chance",
       "printings": [
         {
@@ -3182,6 +3260,7 @@
       "power": 3,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "maelstrom-goons",
       "printings": [
         {
@@ -3228,6 +3307,7 @@
       "power": 3,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "viktor-vektor-you-might-feel-a-little-pinch",
       "printings": [
         {
@@ -3274,6 +3354,7 @@
       "power": 3,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "gilded-maton",
       "printings": [
         {
@@ -3320,6 +3401,7 @@
       "power": 1,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "hanako-arasaka-in-a-gilded-cage",
       "printings": [
         {
@@ -3376,6 +3458,7 @@
       "power": 5,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "offduty-malfini",
       "printings": [
         {
@@ -3442,6 +3525,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "t-bug-amateur-philosopher",
       "printings": [
         {
@@ -3508,6 +3592,7 @@
       "power": 5,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "caliber-totentanzs-top-dog",
       "printings": [
         {
@@ -3554,6 +3639,7 @@
       "power": 7,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "maxtac-suppression-team",
       "printings": [
         {
@@ -3600,6 +3686,7 @@
       "power": 8,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "rockn-rockerboy",
       "printings": [
         {
@@ -3646,6 +3733,7 @@
       "power": 5,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": false,
       "key": "viktor-vektor-drop-your-illusions",
       "printings": [
         {
@@ -3692,6 +3780,7 @@
       "power": 8,
       "ram": 1,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "heywood-ripperdoc",
       "printings": [
         {
@@ -3758,6 +3847,7 @@
       "power": 8,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": false,
       "key": "jackie-welles-ride-or-die-choom",
       "printings": [
         {
@@ -3824,6 +3914,7 @@
       "power": 7,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "trauma-team-operatives",
       "printings": [
         {
@@ -3870,6 +3961,7 @@
       "power": 8,
       "ram": 3,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "alt-cunningham-mother-of-daemons",
       "printings": [
         {
@@ -3926,6 +4018,7 @@
       "power": 15,
       "ram": 6,
       "rarity": "Epic",
+      "eddiable": false,
       "key": "adam-smasher-metal-over-meat",
       "printings": [
         {
@@ -4022,6 +4115,7 @@
       "power": 1,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": true,
       "key": "kiroshi-optics",
       "printings": [
         {
@@ -4098,6 +4192,7 @@
       "power": 0,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "mandibular-upgrade",
       "printings": [
         {
@@ -4194,6 +4289,7 @@
       "power": 3,
       "ram": 4,
       "rarity": "Common",
+      "eddiable": true,
       "key": "adrenaline-converter",
       "printings": [
         {
@@ -4240,6 +4336,7 @@
       "power": 2,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "zetatech-faceplate",
       "printings": [
         {
@@ -4306,6 +4403,7 @@
       "power": 3,
       "ram": 3,
       "rarity": "Common",
+      "eddiable": true,
       "key": "gorilla-arms",
       "printings": [
         {
@@ -4362,6 +4460,7 @@
       "power": 3,
       "ram": 4,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "the-relic-experimental-biochip",
       "printings": [
         {
@@ -4438,6 +4537,7 @@
       "power": null,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": true,
       "key": "afterparty-at-lizzies",
       "printings": [
         {
@@ -4534,6 +4634,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Common",
+      "eddiable": true,
       "key": "safety-override",
       "printings": [
         {
@@ -4580,6 +4681,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "the-heist",
       "printings": [
         {
@@ -4626,6 +4728,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "cyberpsychosis",
       "printings": [
         {
@@ -4692,6 +4795,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Common",
+      "eddiable": true,
       "key": "live-with-the-aftermath",
       "printings": [
         {
@@ -4738,6 +4842,7 @@
       "power": null,
       "ram": 4,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "bootleg-black-sapphire-show",
       "printings": [
         {
@@ -4804,6 +4909,7 @@
       "power": 7,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "goro-takemura-hands-unclean",
       "printings": [
         {
@@ -4880,6 +4986,7 @@
       "power": 8,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "jackie-welles-mamas-favorite",
       "printings": [
         {
@@ -4976,6 +5083,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "goro-takemura-vengeful-bodyguard",
       "printings": [
         {
@@ -5082,6 +5190,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "hanako-arasaka-daughter-of-the-emperor",
       "printings": [
         {
@@ -5138,6 +5247,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "padre-man-of-the-cross",
       "printings": [
         {
@@ -5234,6 +5344,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "panam-palmer-nomad-cavalry",
       "printings": [
         {
@@ -5300,6 +5411,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "saburo-arasaka-stubborn-patriarch",
       "printings": [
         {
@@ -5376,6 +5488,7 @@
       "power": 2,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "corpo-security",
       "printings": [
         {
@@ -5472,6 +5585,7 @@
       "power": 0,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "tygers-whisper",
       "printings": [
         {
@@ -5518,6 +5632,7 @@
       "power": 4,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "emergency-atlus",
       "printings": [
         {
@@ -5594,6 +5709,7 @@
       "power": 2,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "field-operator",
       "printings": [
         {
@@ -5680,6 +5796,7 @@
       "power": 4,
       "ram": 3,
       "rarity": "Common",
+      "eddiable": false,
       "key": "maxtac-squadron",
       "printings": [
         {
@@ -5746,6 +5863,7 @@
       "power": 3,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "valentino-street-racer",
       "printings": [
         {
@@ -5792,6 +5910,7 @@
       "power": 4,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "goro-takemura-losing-his-way",
       "printings": [
         {
@@ -5838,6 +5957,7 @@
       "power": 0,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "maelstrom-zealots",
       "printings": [
         {
@@ -5884,6 +6004,7 @@
       "power": 1,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "pacifica-netrunner",
       "printings": [
         {
@@ -5930,6 +6051,7 @@
       "power": 6,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "pepe-najarro-working-doubles",
       "printings": [
         {
@@ -5976,6 +6098,7 @@
       "power": 8,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "maxtac-av",
       "printings": [
         {
@@ -6042,6 +6165,7 @@
       "power": 4,
       "ram": 4,
       "rarity": "Common",
+      "eddiable": false,
       "key": "riding-nomad",
       "printings": [
         {
@@ -6098,6 +6222,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "wraith-marauders",
       "printings": [
         {
@@ -6164,6 +6289,7 @@
       "power": 8,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "nadia-fighting-through-grief",
       "printings": [
         {
@@ -6210,6 +6336,7 @@
       "power": 6,
       "ram": 4,
       "rarity": "Secret",
+      "eddiable": false,
       "key": "panam-palmer-strength-through-family",
       "printings": [
         {
@@ -6266,6 +6393,7 @@
       "power": 8,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "maxtac-heavy",
       "printings": [
         {
@@ -6312,6 +6440,7 @@
       "power": 8,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "sandayu-oda-hanakos-guardian",
       "printings": [
         {
@@ -6368,6 +6497,7 @@
       "power": 14,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "saul-bright-stormrider",
       "printings": [
         {
@@ -6414,6 +6544,7 @@
       "power": 1,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "riot-shield",
       "printings": [
         {
@@ -6460,6 +6591,7 @@
       "power": 2,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "sandevistan",
       "printings": [
         {
@@ -6556,6 +6688,7 @@
       "power": 4,
       "ram": 4,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "overwatch-panams-gift",
       "printings": [
         {
@@ -6632,6 +6765,7 @@
       "power": 3,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "zetatech-berserk",
       "printings": [
         {
@@ -6678,6 +6812,7 @@
       "power": null,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": true,
       "key": "peace-offering",
       "printings": [
         {
@@ -6744,6 +6879,7 @@
       "power": null,
       "ram": 1,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "synapse-burnout",
       "printings": [
         {
@@ -6790,6 +6926,7 @@
       "power": null,
       "ram": 1,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "corporate-surveillance",
       "printings": [
         {
@@ -6866,6 +7003,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "fool-on-the-hill",
       "printings": [
         {
@@ -6912,6 +7050,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "take-control",
       "printings": [
         {
@@ -6958,6 +7097,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "memory-relapse",
       "printings": [
         {
@@ -7004,6 +7144,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "we-gotta-live-together",
       "printings": [
         {
@@ -7070,6 +7211,7 @@
       "power": null,
       "ram": 4,
       "rarity": "Common",
+      "eddiable": true,
       "key": "wild-in-the-streets",
       "printings": [
         {
@@ -7116,6 +7258,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "dont-fear-the-reaper",
       "printings": [
         {
@@ -7182,6 +7325,7 @@
       "power": 0,
       "ram": 2,
       "rarity": "Secret",
+      "eddiable": true,
       "key": "sasha-yakovleva-wont-let-you-down",
       "printings": [
         {
@@ -7238,6 +7382,7 @@
       "power": 8,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "v-corporate-exile",
       "printings": [
         {
@@ -7314,6 +7459,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "alt-cunningham-soulkiller-architect",
       "printings": [
         {
@@ -7420,6 +7566,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "evelyn-parker-beautiful-enigma",
       "printings": [
         {
@@ -7506,6 +7653,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "jackie-welles-pour-one-out-for-me",
       "printings": [
         {
@@ -7582,6 +7730,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "judy-alvarez-braindance-maestro",
       "printings": [
         {
@@ -7718,6 +7867,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "wakako-okada-peace-and-harmony",
       "printings": [
         {
@@ -7784,6 +7934,7 @@
       "power": 0,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "evelyn-parker-scheming-siren",
       "printings": [
         {
@@ -7860,6 +8011,7 @@
       "power": 2,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "jacked-in-voodoo-boy",
       "printings": [
         {
@@ -7906,6 +8058,7 @@
       "power": 0,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "delamain-rideshare-ai",
       "printings": [
         {
@@ -7952,6 +8105,7 @@
       "power": 0,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "misty-olszewski-mender-of-broken-spirits",
       "printings": [
         {
@@ -8008,6 +8162,7 @@
       "power": 2,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "mox-inciters",
       "printings": [
         {
@@ -8054,6 +8209,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "delamain-cab",
       "printings": [
         {
@@ -8150,6 +8306,7 @@
       "power": 3,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "hacked-corpo",
       "printings": [
         {
@@ -8196,6 +8353,7 @@
       "power": 6,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": false,
       "key": "psycho-squad",
       "printings": [
         {
@@ -8272,6 +8430,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "rita-wheeler-no-stupid-questions",
       "printings": [
         {
@@ -8318,6 +8477,7 @@
       "power": 5,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "westbrook-netrunner",
       "printings": [
         {
@@ -8364,6 +8524,7 @@
       "power": 2,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "lizzy-wizzy-delicate-weapon",
       "printings": [
         {
@@ -8410,6 +8571,7 @@
       "power": 3,
       "ram": 4,
       "rarity": "Uncommon",
+      "eddiable": false,
       "key": "maman-brigitte-spirit-of-death",
       "printings": [
         {
@@ -8486,6 +8648,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "modded-muramasa",
       "printings": [
         {
@@ -8532,6 +8695,7 @@
       "power": 7,
       "ram": 3,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "mt0d12-flathead",
       "printings": [
         {
@@ -8578,6 +8742,7 @@
       "power": 4,
       "ram": 2,
       "rarity": "Epic",
+      "eddiable": false,
       "key": "rogue-amendiares-queen-of-the-afterlife",
       "printings": [
         {
@@ -8634,6 +8799,7 @@
       "power": 6,
       "ram": 5,
       "rarity": "Secret",
+      "eddiable": false,
       "key": "judy-alvarez-nothing-to-doubt",
       "printings": [
         {
@@ -8690,6 +8856,7 @@
       "power": 8,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": false,
       "key": "modded-kusanagi",
       "printings": [
         {
@@ -8736,6 +8903,7 @@
       "power": 10,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": false,
       "key": "placide-voodoo-sentinel",
       "printings": [
         {
@@ -8782,6 +8950,7 @@
       "power": 1,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "tetratronic-rippler",
       "printings": [
         {
@@ -8848,6 +9017,7 @@
       "power": 2,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "dying-night-vs-pistol",
       "printings": [
         {
@@ -8944,6 +9114,7 @@
       "power": 2,
       "ram": 2,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "netwatch-netdriver",
       "printings": [
         {
@@ -9010,6 +9181,7 @@
       "power": null,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": true,
       "key": "floor-it",
       "printings": [
         {
@@ -9106,6 +9278,7 @@
       "power": null,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": true,
       "key": "trust-no-one",
       "printings": [
         {
@@ -9172,6 +9345,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "reboot-optics",
       "printings": [
         {
@@ -9248,6 +9422,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Common",
+      "eddiable": true,
       "key": "three-mouths-one-desire",
       "printings": [
         {
@@ -9294,6 +9469,7 @@
       "power": null,
       "ram": 1,
       "rarity": "Common",
+      "eddiable": true,
       "key": "chrome-reverie",
       "printings": [
         {
@@ -9340,6 +9516,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "nocturne-op55-n1",
       "printings": [
         {
@@ -9386,6 +9563,7 @@
       "power": null,
       "ram": 3,
       "rarity": "Rare",
+      "eddiable": true,
       "key": "pyramid-song",
       "printings": [
         {
@@ -9432,6 +9610,7 @@
       "power": null,
       "ram": 2,
       "rarity": "Common",
+      "eddiable": true,
       "key": "unlikely-bond",
       "printings": [
         {
@@ -9478,6 +9657,7 @@
       "power": null,
       "ram": 4,
       "rarity": "Uncommon",
+      "eddiable": true,
       "key": "les-elemens",
       "printings": [
         {
@@ -9524,6 +9704,7 @@
       "power": null,
       "ram": 4,
       "rarity": "Epic",
+      "eddiable": true,
       "key": "towerfall",
       "printings": [
         {
