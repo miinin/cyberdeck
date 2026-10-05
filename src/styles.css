@@ -4744,3 +4744,121 @@ section[aria-labelledby='have-heading'] {
 .version-base-art {
   margin-bottom: var(--space-2);
 }
+
+/* Art gallery (T-077, D-021) */
+.art-gallery {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+  gap: var(--space-2);
+}
+
+.card-dialog-details .art-gallery {
+  padding-left: 0;
+}
+
+.art-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-1);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: var(--surface-2, transparent);
+}
+
+.art-tile.is-selected {
+  border-color: var(--accent, currentColor);
+}
+
+.art-pick {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.art-thumb {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.art-name {
+  font-weight: 600;
+}
+
+.art-sets {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+.art-breakdown summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.art-breakdown .version-row {
+  flex-wrap: wrap;
+}
+
+.art-count-badge {
+  position: absolute;
+  inset-block-start: var(--space-1);
+  inset-inline-start: var(--space-1);
+  padding: 0 var(--space-1);
+  border-radius: 4px;
+  background: var(--surface, #000);
+  color: var(--text, #fff);
+  font-size: 0.75rem;
+  border: 1px solid currentColor;
+}
+
+.art-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.card-box--art {
+  position: relative;
+}
+
+/* T-077: the set filter looks like the other fields and has room above it; long rarity names span both columns. */
+.set-filter {
+  margin-block-start: var(--space-4);
+}
+
+.set-filter select {
+  min-height: var(--target-min);
+  max-width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.set-filter select:hover,
+.set-filter select:focus-visible {
+  border-color: var(--color-text);
+  outline: none;
+}
+
+.set-filter select:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--color-text);
+}
+
+.options-even .option-wide {
+  grid-column: 1 / -1;
+}

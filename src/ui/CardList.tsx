@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
+import type { Art } from '../domain/arts';
 import { CardColor, typeBadgeClass } from './CardColor';
 import { CardImage } from './CardImage';
 import { CostGem } from './DeckPickTable';
@@ -17,6 +18,9 @@ export interface OwnedColumn {
   onLimit: (card: Card) => void;
   /** The lowest count of a card: the sum of its versions (D-020). Default 0. */
   minOf?: (card: Card) => number;
+  /** Copies of one art of a card; with it and onArtChange the boxes of an art item count that art (D-021). */
+  artCountOf?: (card: Card, art: Art) => number;
+  onArtChange?: (card: Card, art: Art, count: number) => void;
   /** The "Muokkaa kokoelmaa" switch (T-040): false hides the − and + buttons. */
   editable: boolean;
 }
@@ -27,6 +31,17 @@ export function collectionState(card: Card, owned: OwnedColumn | undefined): str
   const count = owned.countOf(card);
   if (count >= playsetSize(card)) return 'is-owned is-playset';
   return count > 0 ? 'is-owned' : '';
+}
+
+/** One box of the grid (D-021): a card, or one art of a card in the "all arts" mode. */
+export interface CardListItem {
+  card: Card;
+  /** Set in the "all arts" mode: the box counts and names this art. */
+  art: Art | null;
+  /** Picture of a special art, or null for the card's own picture. */
+  imageUrl: string | null;
+  /** Arts of the card; more than one shows a corner mark in the one-box-per-card mode. */
+  artCount: number;
 }
 
 /** One game value (cost, power, RAM). A missing value shows a dash and a hidden spoken equivalent. */
@@ -71,6 +86,7 @@ function Stat({
  */
 export function CardList({
   cards,
+  items,
   caption = texts.tableCaption,
   owned,
   decksOf,
@@ -78,20 +94,28 @@ export function CardList({
   renderFoot,
 }: {
   cards: readonly Card[];
+  /** Boxes in place of one box per card (D-021). */
+  items?: readonly CardListItem[];
   caption?: string;
   owned?: OwnedColumn;
   /** Names of the decks a card is in (T-013); left out when decks could not be read. */
   decksOf?: (card: Card) => readonly string[];
   /** Opens the enlarged image (T-027 UX); the button is where focus returns. */
-  onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
+  onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
   /** Per-card control in place of the collection control (Have/Want, T-067). */
   renderFoot?: (card: Card) => ReactNode;
 }) {
   return (
     <ul className="card-grid" aria-label={caption}>
-      {cards.map((card) => (
-        <li key={card.id} className={'card-box ' + collectionState(card, owned)}>
-          <CardImage card={card} onOpen={onOpenImage} />
+      {(items ?? cards.map((card): CardListItem => ({ card, art: null, imageUrl: null, artCount: 1 }))).map(({ card, art, imageUrl, artCount }) => {
+        const artMode = art !== null && owned?.artCountOf !== undefined && owned.onArtChange !== undefined;
+        const artOwned = artMode ? (owned?.artCountOf?.(card, art) ?? 0) : 0;
+        const state = artMode ? (owned?.mode === 'ready' && artOwned > 0 ? 'is-owned' : '') : collectionState(card, owned);
+        return (
+        <li key={art === null ? card.id : art.artId} className={'card-box card-box--art ' + state}>
+          {art === null && artCount > 1 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
+          <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} />
+          {items !== undefined && art !== null && <p className="art-label">{art.rarity ?? texts.artBase}</p>}
           <div className="card-head">
             <dl className="card-cost">
               <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
@@ -138,18 +162,20 @@ export function CardList({
               <div className="card-collection">
                 <CountControl
                   card={card}
-                  count={owned.countOf(card)}
+                  count={artMode ? artOwned : owned.countOf(card)}
                   mode={owned.mode}
-                  onChange={owned.onChange}
+                  label={artMode && art !== null ? texts.artTileName(card.displayName, art.rarity ?? texts.artBase) : undefined}
+                  onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
                   onLimit={owned.onLimit}
                   editable={owned.editable}
-                  min={owned.minOf?.(card)}
+                  min={artMode ? 0 : owned.minOf?.(card)}
                 />
               </div>
             )}
           </div>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }

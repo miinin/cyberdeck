@@ -14,22 +14,31 @@ function Placeholder() {
  * List thumbnail (T-027 UX). The image itself is decorative (alt=""): the button's name says what it
  * does, "Suurenna kuva: <name>". Lazy loading keeps the 151-row list fast.
  */
-export function CardImage({ card, onOpen }: { card: Card; onOpen: (card: Card, opener: HTMLButtonElement) => void }) {
+export function CardImage({
+  card,
+  onOpen,
+  artUrl = null,
+}: {
+  card: Card;
+  onOpen: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  /** A special art to show in place of the card's own picture (D-021). */
+  artUrl?: string | null;
+}) {
   const image = getCardImage(card.key);
   const [failed, setFailed] = useState(false);
-  if (image === null || failed) return <Placeholder />;
+  if (artUrl === null && (image === null || failed)) return <Placeholder />;
   return (
     <button
       type="button"
       className="card-image-button"
       aria-haspopup="dialog"
-      onClick={(event) => onOpen(card, event.currentTarget)}
+      onClick={(event) => onOpen(card, event.currentTarget, artUrl)}
     >
       <img
         className="card-image"
-        src={image.medium}
-        srcSet={cardImageSrcSet(image)}
-        sizes={CARD_IMAGE_SIZES}
+        src={artUrl ?? image?.medium}
+        srcSet={artUrl === null && image !== null ? cardImageSrcSet(image) : undefined}
+        sizes={artUrl === null ? CARD_IMAGE_SIZES : undefined}
         width={CARD_IMAGE_WIDTH.md}
         height={cardImageHeight('md')}
         alt=""
