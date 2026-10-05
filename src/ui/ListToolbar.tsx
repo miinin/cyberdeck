@@ -1,4 +1,4 @@
-import type { CatalogViewMode } from '../storage';
+import type { CatalogViewMode, DefaultEdition } from '../storage';
 import { texts } from './texts';
 
 /** Grid image size (T-050a): session state only, never saved. */
@@ -46,6 +46,11 @@ const VIEW_OPTIONS: readonly (readonly [CatalogViewMode, string])[] = [
   ['table', texts.viewTable],
 ];
 
+const EDITION_OPTIONS: readonly (readonly [DefaultEdition, string])[] = [
+  ['beta', texts.editionBeta],
+  ['retail', texts.editionRetail],
+];
+
 /**
  * Above the list (T-040): the view selector and the "Muokkaa kokoelmaa" switch.
  * `editable` undefined leaves the switch out (the collection is not ready, so nothing can be edited).
@@ -60,6 +65,8 @@ export function ListToolbar({
   onImageSizeChange,
   allArts,
   onAllArtsChange,
+  edition,
+  onEditionChange,
 }: {
   view: CatalogViewMode;
   onViewChange: (next: CatalogViewMode) => void;
@@ -70,6 +77,9 @@ export function ListToolbar({
   /** The "all arts" switch (D-021); undefined leaves it out. Session state, never saved. */
   allArts?: boolean;
   onAllArtsChange?: (next: boolean) => void;
+  /** The default edition of the + and − (D-022); shown only while editing. Undefined leaves it out. */
+  edition?: DefaultEdition;
+  onEditionChange?: (next: DefaultEdition) => void;
 }) {
   return (
     <div className="list-toolbar">
@@ -97,6 +107,29 @@ export function ListToolbar({
         <label className="option all-arts">
           <input type="checkbox" checked={allArts} onChange={(event) => onAllArtsChange?.(event.target.checked)} /> {texts.artsAllLabel}
         </label>
+      )}
+      {editable === true && edition !== undefined && (
+        <fieldset className="view-select edition-select">
+          <legend>{texts.editionLegend}</legend>
+          <div className="options">
+            {EDITION_OPTIONS.map(([value, label]) => (
+              <label key={value} className="option">
+                <input
+                  type="radio"
+                  name="default-edition"
+                  value={value}
+                  checked={edition === value}
+                  aria-describedby="edition-hint"
+                  onChange={() => onEditionChange?.(value)}
+                />{' '}
+                {label}
+              </label>
+            ))}
+          </div>
+          <p id="edition-hint" className="visually-hidden">
+            {texts.editionHint}
+          </p>
+        </fieldset>
       )}
       {editable !== undefined && (
         <button

@@ -27,7 +27,7 @@ export interface CardFiltersProps {
   collectionAllRef: Ref<HTMLInputElement>;
   onCollectionFilterChange: (next: CollectionFilter) => void;
   /** Set families for the "Setti / versio" select (T-074); empty or undefined leaves the group out. */
-  setOptions?: readonly { family: string; label: string }[];
+  setOptions?: readonly { family: string; label: string; group: 'sets' | 'other' }[];
   setFamily?: string | null;
   onSetChange?: (family: string | null) => void;
   /** Search text changed. `composing` is true while an IME composition is in progress. */
@@ -188,11 +188,19 @@ export function CardFilters({
             <label htmlFor="set-filter">{texts.setLegend}</label>
             <select id="set-filter" value={setFamily ?? ''} onChange={(event) => onSetChange(event.target.value || null)}>
               <option value="">{texts.setAll}</option>
-              {setOptions.map(({ family, label }) => (
-                <option key={family} value={family}>
-                  {label}
-                </option>
-              ))}
+              {(['sets', 'other'] as const).map((group) => {
+                const options = setOptions.filter((option) => option.group === group);
+                if (options.length === 0) return null;
+                return (
+                  <optgroup key={group} label={group === 'sets' ? texts.setGroupSets : texts.setGroupOther}>
+                    {options.map(({ family, label }) => (
+                      <option key={family} value={family}>
+                        {label}
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
             </select>
           </div>
         )}

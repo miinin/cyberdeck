@@ -20,7 +20,7 @@ const cards: Card[] = [
   card('viktor-vektor-pinch', 'Viktor Vektor', 'You Might Feel a Little Pinch', 'Program', 'Yellow'),
 ];
 
-function stored(entries: { card: string; count: number }[], schemaVersion = 1): string {
+function stored(entries: { card: string; count: number }[], schemaVersion = 3): string {
   return JSON.stringify({ schemaVersion, savedAt: '2026-10-01T10:00:00.000Z', data: { entries } });
 }
 
@@ -836,7 +836,7 @@ describe('CatalogView: set filter and version summary (T-074)', () => {
   it('shows recorded versions per set and "Omistetut" needs a version from the set', async () => {
     const initial = {
       [COLLECTION_KEY]: JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 3,
         savedAt: '2026-10-01T10:00:00.000Z',
         data: {
           entries: [
@@ -847,9 +847,9 @@ describe('CatalogView: set filter and version summary (T-074)', () => {
       }),
     };
     const { container } = await renderView(createMemoryRepositories({ initial }), list);
-    expect(container.querySelector('#versions-summary')).toHaveTextContent('Kirjatut versiot: Welcome to Night City: 2');
+    expect(container.querySelector('#versions-summary')).toHaveTextContent('Kirjatut versiot: Welcome to Night City (Beta): 2');
     fireEvent.click(screen.getByRole('radio', { name: 'Omistetut' }));
-    fireEvent.change(screen.getByLabelText('Setti / versio'), { target: { value: 'welcome-to-night-city' } });
+    fireEvent.change(screen.getByLabelText('Setti / versio'), { target: { value: 'welcome-to-night-city-beta' } });
     expect(names()).toEqual(['Swordwise Huscle']);
     fireEvent.change(screen.getByLabelText('Setti / versio'), { target: { value: 'edgerunner-open-s-1' } });
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
