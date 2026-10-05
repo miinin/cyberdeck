@@ -18,7 +18,7 @@ const arts = artsOf(card);
 describe('CardList arts', () => {
   it('marks a card with several arts with a count and gives the special art picture', () => {
     render(<CardList cards={[card]} items={[{ card, art: null, imageUrl: '/nova.webp', artCount: 2 }]} onOpenImage={vi.fn()} />);
-    expect(screen.getByText(/2 kuvitusta|2 arts/)).toBeInTheDocument();
+    expect(screen.getByText(/2 versiota|2 versions/)).toBeInTheDocument();
     expect(document.querySelector('img.card-image')?.getAttribute('src')).toBe('/nova.webp');
   });
 
@@ -38,5 +38,26 @@ describe('CardList arts', () => {
     expect(within(boxes[1] as HTMLElement).getByText('Nova Rare')).toBeInTheDocument();
     await userEvent.click(within(boxes[1] as HTMLElement).getAllByRole('button').find((b) => b.classList.contains('step-plus')) as HTMLElement);
     expect(onArtChange).toHaveBeenCalledWith(card, arts[1], 2);
+  });
+
+  it('cycles the shown version with the arrows and opens it on click', async () => {
+    const onOpenImage = vi.fn();
+    render(
+      <CardList cards={[card]} items={[{ card, art: null, imageUrl: null, artCount: 2, versionUrls: [null, '/nova.webp'], startVersion: 0 }]} onOpenImage={onOpenImage} />,
+    );
+    expect(screen.getByText(/^1.2 /)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /Seuraava versio: V|Next version: V/ }));
+    expect(screen.getByText(/^2.2 /)).toBeInTheDocument();
+    expect(document.querySelector('img.card-image')?.getAttribute('src')).toBe('/nova.webp');
+    await userEvent.click(screen.getByRole('button', { name: /Seuraava versio: V|Next version: V/ }));
+    expect(screen.getByText(/^1.2 /)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /Edellinen versio: V|Previous version: V/ }));
+    await userEvent.click(document.querySelector('.card-image-button') as HTMLElement);
+    expect(onOpenImage).toHaveBeenCalledWith(card, expect.anything(), '/nova.webp');
+  });
+
+  it('shows no arrows for a single version', () => {
+    render(<CardList cards={[card]} items={[{ card, art: null, imageUrl: null, artCount: 1, versionUrls: [null] }]} onOpenImage={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: /versio|version/i })).toBeNull();
   });
 });

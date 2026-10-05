@@ -90,6 +90,7 @@ export function CatalogView({
   cards: allCards,
   repositories,
   headerSlot = null,
+  routeCardKey = null,
 }: {
   /** All cards, bundled with the app (D-013). A stable reference: it also owns the live announcements. */
   cards: readonly Card[];
@@ -97,6 +98,8 @@ export function CatalogView({
   repositories: Repositories;
   /** Header element for the persistent storage button (rendered by App). */
   headerSlot?: HTMLElement | null;
+  /** The card whose details the URL asks for (#/kortti/<key>, T-081); an unknown key opens nothing. */
+  routeCardKey?: string | null;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -127,7 +130,11 @@ export function CatalogView({
   /** Set by the button: the result paragraph takes focus once it is rendered. */
   const focusPersistenceResult = useRef(false);
   /** The card in the enlarged image dialog, and the thumbnail button that opened it (T-027 UX). */
-  const [openCard, setOpenCard] = useState<Card | null>(null);
+  const [pickedCard, setOpenCard] = useState<Card | null>(null);
+  // T-081: a direct link (#/kortti/<key>) opens the card's details until they are closed.
+  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
+  const routeCard = routeCardKey === null || routeCardKey === dismissedKey ? null : (allCards.find((c) => c.key === routeCardKey) ?? null);
+  const openCard = pickedCard ?? routeCard;
   /** A version's art shown in the dialog instead of the base image (T-076); reset whenever the dialog opens or closes. */
   const [shownArt, setShownArt] = useState<string | null>(null);
   // The "all arts" switch (D-021): session state, not saved.
@@ -370,7 +377,12 @@ export function CatalogView({
                 artCount: arts.length,
               }));
           })
-        : sortedForGrid.map((card) => ({ card, art: null, imageUrl: filterArtUrl(card), artCount: artsFor(card).length }));
+        : sortedForGrid.map((card): CardListItem => {
+            const arts = artsFor(card);
+            const imageUrl = filterArtUrl(card);
+            const versionUrls = arts.map((art) => (art.rarity === null ? null : variantImageUrl(card.key, art.rarity)));
+            return { card, art: null, imageUrl, artCount: arts.length, versionUrls, startVersion: Math.max(0, versionUrls.indexOf(imageUrl)) };
+          });
 
   const owned: OwnedColumn | undefined =
     collection.phase === 'unavailable'
@@ -415,7 +427,7 @@ export function CatalogView({
     openCard === null ? undefined : (
       <>
         {collection.phase === 'ready' && (
-          <section aria-labelledby="card-detail-collection">
+          <section aria-labelledby="card-detail-collection" className="detail-collection">
             <h3 id="card-detail-collection">{texts.detailCollection}</h3>
             <CountControl
               card={openCard}
@@ -492,6 +504,10 @@ export function CatalogView({
   };
 
   const handleCloseImage = () => {
+    if (routeCardKey !== null) {
+      setDismissedKey(routeCardKey);
+      if (window.location.hash !== '#/') window.location.hash = '#/';
+    }
     setOpenCard(null);
     setShownArt(null);
     // Back to the thumbnail; if its row is gone, the search field is the nearest stable place.

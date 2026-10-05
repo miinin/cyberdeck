@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { RaritySymbol } from './RaritySymbol';
 import { playsetSize } from '../domain/card';
@@ -44,6 +45,43 @@ export interface CardListItem {
   imageUrl: string | null;
   /** Arts of the card; more than one shows a corner mark in the one-box-per-card mode. */
   artCount: number;
+  /** One-box-per-card mode: the picture of each version (null = the card's own), for the ‹ › buttons. */
+  versionUrls?: readonly (string | null)[];
+  /** Index in versionUrls to start from (the art a filter matches). */
+  startVersion?: number;
+}
+
+/** The picture of a box. With several versions it has ‹ › buttons that cycle the shown version (tile state only). */
+function BoxPicture({
+  card,
+  imageUrl,
+  versionUrls,
+  startVersion = 0,
+  onOpenImage,
+}: {
+  card: Card;
+  imageUrl: string | null;
+  versionUrls?: readonly (string | null)[];
+  startVersion?: number;
+  onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+}) {
+  const [picked, setPicked] = useState<number | null>(null);
+  const n = versionUrls?.length ?? 0;
+  if (versionUrls === undefined || n < 2) return <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} />;
+  const index = (picked ?? startVersion) % n;
+  const step = (delta: number) => setPicked((index + delta + n) % n);
+  return (
+    <div className="card-picture">
+      <CardImage key={index} card={card} onOpen={onOpenImage} artUrl={versionUrls[index] ?? null} />
+      <span className="art-count-badge">{texts.versionPosition(index + 1, n)}</span>
+      <button type="button" className="version-step version-step--prev" aria-label={texts.versionPrev(card.displayName)} onClick={() => step(-1)}>
+        <span aria-hidden="true">‹</span>
+      </button>
+      <button type="button" className="version-step version-step--next" aria-label={texts.versionNext(card.displayName)} onClick={() => step(1)}>
+        <span aria-hidden="true">›</span>
+      </button>
+    </div>
+  );
 }
 
 /** One game value (cost, power, RAM). A missing value shows a dash and a hidden spoken equivalent. */
@@ -109,14 +147,14 @@ export function CardList({
 }) {
   return (
     <ul className="card-grid" aria-label={caption}>
-      {(items ?? cards.map((card): CardListItem => ({ card, art: null, imageUrl: null, artCount: 1 }))).map(({ card, art, imageUrl, artCount }) => {
+      {(items ?? cards.map((card): CardListItem => ({ card, art: null, imageUrl: null, artCount: 1 }))).map(({ card, art, imageUrl, artCount, versionUrls, startVersion }) => {
         const artMode = art !== null && owned?.artCountOf !== undefined && owned.onArtChange !== undefined;
         const artOwned = artMode ? (owned?.artCountOf?.(card, art) ?? 0) : 0;
         const state = artMode ? (owned?.mode === 'ready' && artOwned > 0 ? 'is-owned' : '') : collectionState(card, owned);
         return (
         <li key={art === null ? card.id : art.artId} className={'card-box card-box--art ' + state}>
-          {art === null && artCount > 1 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
-          <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} />
+          {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
+          <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} startVersion={startVersion} onOpenImage={onOpenImage} />
           {items !== undefined && art !== null && <p className="art-label">{art.rarity === null ? texts.artBase : <RaritySymbol rarity={art.rarity} showName />}</p>}
           <div className="card-head">
             <dl className="card-cost">
