@@ -12,16 +12,16 @@ describe('LanguageSwitch', () => {
   it('is a labelled group with FI pressed and a lang on each option', () => {
     render(<LanguageSwitch />);
     expect(screen.getByRole('group', { name: 'Kieli' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'FI' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'FI' })).toHaveAttribute('lang', 'fi');
-    expect(screen.getByRole('button', { name: 'EN' })).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('button', { name: 'EN' })).toHaveAttribute('lang', 'en');
+    expect(screen.getByRole('button', { name: 'Suomi' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Suomi' })).toHaveAttribute('lang', 'fi');
+    expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('lang', 'en');
   });
 
   it('saves the other language and reloads', async () => {
     const reload = vi.spyOn(languageActions, 'reload').mockImplementation(() => {});
     render(<LanguageSwitch />);
-    await userEvent.click(screen.getByRole('button', { name: 'EN' }));
+    await userEvent.click(screen.getByRole('button', { name: 'English' }));
     expect(readStoredLocale()).toBe('en');
     expect(reload).toHaveBeenCalledTimes(1);
   });
@@ -29,7 +29,7 @@ describe('LanguageSwitch', () => {
   it('does nothing when the active language is chosen', async () => {
     const reload = vi.spyOn(languageActions, 'reload').mockImplementation(() => {});
     render(<LanguageSwitch />);
-    await userEvent.click(screen.getByRole('button', { name: 'FI' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Suomi' }));
     expect(readStoredLocale()).toBeNull();
     expect(reload).not.toHaveBeenCalled();
   });
@@ -40,7 +40,7 @@ describe('LanguageSwitch', () => {
       throw new DOMException('blocked', 'SecurityError');
     });
     render(<LanguageSwitch />);
-    await userEvent.click(screen.getByRole('button', { name: 'EN' }));
+    await userEvent.click(screen.getByRole('button', { name: 'English' }));
     expect(reload).not.toHaveBeenCalled();
   });
 });

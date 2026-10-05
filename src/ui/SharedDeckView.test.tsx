@@ -71,7 +71,8 @@ describe('Share link button', () => {
         ]),
       }),
     );
-    await user.click(await screen.findByRole('button', { name: 'Jaa linkki: Oma' }));
+    await user.click(await screen.findByRole('button', { name: 'Vie ja jaa: Oma' }));
+    await user.click(screen.getByRole('button', { name: 'Jaa linkki: Oma' }));
     expect(await screen.findByText('Linkki kopioitu')).toBeInTheDocument();
     const url = writeText.mock.calls[0]?.[0] as string;
     expect(url).toBe(
@@ -93,6 +94,7 @@ describe('Share link button', () => {
     );
 
     writeText.mockRejectedValue(new Error('denied'));
+    await user.click(screen.getByRole('button', { name: 'Vie ja jaa: Oma' }));
     await user.click(screen.getByRole('button', { name: 'Jaa linkki: Oma' }));
     expect(await screen.findByLabelText('Pakan linkki')).toHaveValue(url);
   });
