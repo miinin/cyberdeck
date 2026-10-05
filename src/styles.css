@@ -1160,6 +1160,34 @@ main {
   overflow-wrap: anywhere;
 }
 
+.card-dialog.has-details {
+  width: min(48rem, 100vw - 2 * var(--space-3));
+}
+
+.card-dialog-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.card-dialog-details {
+  flex: 1 1 14rem;
+  min-width: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.card-dialog-details h3 {
+  margin: 0 0 var(--space-1);
+  font-size: 1rem;
+}
+
+.card-dialog-details ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
 .card-dialog-image {
   display: block;
   max-width: 100%;
