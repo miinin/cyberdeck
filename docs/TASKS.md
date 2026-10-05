@@ -83,3 +83,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-077 | Versiot kuvituksina (D-021): galleria tietonäkymässä, haku näyttää osuvan kuvituksen, Kaikki kuvitukset -tila | 1 | Must | PM | Review (dev) | – |
 | T-078 | Viralliset harvinaisuudet (Epic Rare, Secret Rare, Iconic Rare…), kielivalitsin pelkkinä lippuina | 1 | Must | PM | Review (dev) | – |
 | T-079 | Viralliset harvinaisuussymbolit hover-selityksin, ylläpalkin kevyet ikonit (teema, liput, tili) | 1 | Must | PM | Review (dev) | – |
+| T-080 | Logo ylänurkkaan ja faviconiksi, ei sisäisiä vieritysalueita (suodatinpaneelit, dialogit) | 1 | Must | PM | Review (dev) | – |
