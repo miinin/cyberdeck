@@ -280,6 +280,7 @@ export const texts = {
   haveLoading: 'Haetaan kokoelmaa…',
   haveUnavailable: 'Kokoelmaa ei voi tällä hetkellä lukea.',
   haveRow: (tradeable: number) => `vaihdettavissa ${tradeable}`,
+  haveOwnedRow: (owned: number) => `omistettu ${owned}`,
   // Trade link (T-062, T-063)
   tradeShareButton: 'Jaa kokoelma ja want',
   tradeShareNote: 'Linkin saaja näkee koko kokoelmasi ja want-listasi.',

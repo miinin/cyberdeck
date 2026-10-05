@@ -2595,15 +2595,18 @@ h3,
 }
 
 /* Image size: the smallest grid card still fits the count control. */
-.catalog-results[data-image-size='small'] .card-grid {
+.catalog-results[data-image-size='small'] .card-grid,
+.have-want-results[data-image-size='small'] .card-grid {
   --card-min: 14rem;
 }
 
-.catalog-results[data-image-size='medium'] .card-grid {
+.catalog-results[data-image-size='medium'] .card-grid,
+.have-want-results[data-image-size='medium'] .card-grid {
   --card-min: 18rem;
 }
 
-.catalog-results[data-image-size='large'] .card-grid {
+.catalog-results[data-image-size='large'] .card-grid,
+.have-want-results[data-image-size='large'] .card-grid {
   --card-min: 25rem;
 }
 
@@ -4524,4 +4527,9 @@ button.legality:focus-visible {
 
 .missing-result:empty {
   display: none;
+}
+
+/* T-067: owned/tradeable line under a Have card. */
+.have-want-results .have-want-owned {
+  margin: 0;
 }
