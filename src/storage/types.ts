@@ -51,6 +51,8 @@ export type Theme = 'dark' | 'light';
 export type CatalogViewMode = 'grid' | 'table';
 /** Deck editor search results as a text list or an image grid (T-045). */
 export type DeckPickView = 'list' | 'images';
+/** Which Welcome to Night City edition the card boxes' + adds to (D-022). */
+export type DefaultEdition = 'beta' | 'retail';
 
 /** User preferences that are not data (UX.md 8.7). Stored as raw strings, not in an envelope. */
 export interface PreferencesRepository {
@@ -67,6 +69,9 @@ export interface PreferencesRepository {
   /** Saved deck editor result view, or 'list' when nothing valid is saved. Never rejects because of storage problems. */
   loadDeckPickView(): Promise<DeckPickView>;
   saveDeckPickView(view: DeckPickView): Promise<DeckPickView>;
+  /** Saved default edition, or 'beta' when nothing valid is saved. Never rejects because of storage problems. */
+  loadDefaultEdition(): Promise<DefaultEdition>;
+  saveDefaultEdition(edition: DefaultEdition): Promise<DefaultEdition>;
   /** Account hint (T-054a): uid of the last signed-in account, or null when none or invalid. Never throws. */
   loadLastUid(): string | null;
   /** Saves a valid uid, or removes the hint for null or an invalid uid. Never throws (a hint only). */

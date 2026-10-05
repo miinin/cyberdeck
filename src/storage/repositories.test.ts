@@ -104,7 +104,7 @@ describe('collection', () => {
       { card: 'v-streetkid', count: 2 },
     ]);
     expect(JSON.parse(store.getItem(COLLECTION_KEY) ?? '')).toMatchObject({
-      schemaVersion: 2,
+      schemaVersion: 3,
       savedAt: '2026-10-01T12:00:01.000Z',
     });
   });
@@ -313,7 +313,7 @@ describe('broken data', () => {
   });
 
   it('keeps the intact part of partly broken data and reports repaired', async () => {
-    const raw = stored(2, {
+    const raw = stored(3, {
       entries: [{ card: 'detonate', count: 3 }, { card: 'constructor', count: 1 }, { card: 'v-streetkid', count: -1 }],
     });
     const { store, collection } = setup({ [COLLECTION_KEY]: raw });
@@ -383,10 +383,10 @@ describe('broken data', () => {
 
 describe('schema version', () => {
   it('shows newer data as empty, blocks writes and keeps the raw value unchanged', async () => {
-    const raw = stored(3, { entries: [{ card: 'detonate', count: 1 }], future: true });
+    const raw = stored(4, { entries: [{ card: 'detonate', count: 1 }], future: true });
     const { store, collection, decks } = setup({ [COLLECTION_KEY]: raw, [DECKS_KEY]: raw });
 
-    expect(await collection.load()).toEqual({ value: { entries: [] }, notices: [{ kind: 'newer-version', version: 3 }] });
+    expect(await collection.load()).toEqual({ value: { entries: [] }, notices: [{ kind: 'newer-version', version: 4 }] });
     await expectStorageError(collection.setCount('detonate', 2), 'newer-version');
     await expectStorageError(decks.create(content), 'newer-version');
     await expectStorageError(decks.remove('deck-1'), 'newer-version');
@@ -586,6 +586,19 @@ describe('preferences: deck editor result view (T-045)', () => {
   });
 });
 
+describe('preferences: default edition (D-022)', () => {
+  it('defaults to Beta, remembers Retail and ignores unknown values', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadDefaultEdition()).toBe('beta');
+    await preferences.saveDefaultEdition('retail');
+    const again = createRepositories({ store, persistent: true }).preferences;
+    expect(await again.loadDefaultEdition()).toBe('retail');
+    await expectStorageError(preferences.saveDefaultEdition('fr' as 'beta'), 'invalid-input');
+    const odd = setup({ 'cyberdeck:default-edition': 'both' });
+    expect(await odd.preferences.loadDefaultEdition()).toBe('beta');
+  });
+});
+
 describe('preferences: account hints (T-054a, D-017 kohta 1)', () => {
   it('saves, reads back and removes the last uid', () => {
     const { preferences, store } = setup();
@@ -645,7 +658,7 @@ describe('collection versions (D-020)', () => {
     const saved = await collection.setVersionCount('detonate', A, 1);
     expect(saved.entries).toEqual([{ card: 'detonate', count: 3, versions: { [A]: 1 } }]);
     expect(JSON.parse(store.getItem(COLLECTION_KEY) ?? '')).toMatchObject({
-      schemaVersion: 2,
+      schemaVersion: 3,
       data: { entries: [{ card: 'detonate', count: 3, versions: { [A]: 1 } }] },
     });
     const reopened = setup({}, { store });
@@ -661,11 +674,17 @@ describe('collection versions (D-020)', () => {
     expect(await collection.setCount('detonate', 5)).toEqual({ entries: [{ card: 'detonate', count: 5, versions: { [A]: 2 } }] });
   });
 
-  it('migrates version 1 data unchanged', async () => {
-    const raw = stored(1, { entries: [{ card: 'detonate', count: 2 }] });
+  it('migrates version 1 data: the unversioned copies become Beta (D-022), the count stays', async () => {
+    const raw = stored(1, { entries: [{ card: 'detonate', count: 2 }, { card: 'minotaur', count: 1 }] });
     const { collection } = setup({ [COLLECTION_KEY]: raw });
-    expect(await collection.load()).toEqual({ value: { entries: [{ card: 'detonate', count: 2 }] },
-      notices: [{ kind: 'migrated', from: 1, to: 2 }],
+    expect(await collection.load()).toEqual({
+      value: {
+        entries: [
+          { card: 'detonate', count: 2, versions: { 'welcometonightcitybeta:031': 2 } },
+          { card: 'minotaur', count: 1 },
+        ],
+      },
+      notices: [{ kind: 'migrated', from: 1, to: 3 }],
     });
   });
 });

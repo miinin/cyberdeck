@@ -40,12 +40,13 @@ import {
   VIEW_KEY,
   EDIT_MODE_KEY,
   DECK_PICK_VIEW_KEY,
+  DEFAULT_EDITION_KEY,
   ACCOUNT_LAST_UID_KEY,
   ACCOUNT_REDIRECT_PENDING_KEY,
   ACCOUNT_DELETE_PENDING_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
-import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
+import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS, migrateCollectionV2ToV3, WANTS_MIGRATIONS } from './migrations';
 import type {
   CollectionRepository,
   DeckRepository,
@@ -59,6 +60,7 @@ import type {
   Theme,
   CatalogViewMode,
   DeckPickView,
+  DefaultEdition,
 } from './types';
 
 export interface RepositoryOptions {
@@ -110,15 +112,19 @@ function specWith<T>(
   return { currentVersion: testMigrations.length + 1, migrations: testMigrations, parse };
 }
 
-/** Reads the stored sync base. Anything unexpected is no base: the next sync then merges both sides. */
+/**
+ * Reads the stored sync base. Anything unexpected is no base: the next sync then merges both sides. A base saved
+ * with `v: 1` holds the collection as of schema 2; it is converted like the collection itself (D-022), so the
+ * three-way merge compares like with like. `v: 2` bases are already converted. The want list is never converted.
+ */
 function parseSyncBase(raw: string | null): SyncBase | null {
   if (raw === null) return null;
   try {
     const data: unknown = JSON.parse(raw);
-    if (typeof data !== 'object' || data === null || !('v' in data) || data.v !== 1) return null;
+    if (typeof data !== 'object' || data === null || !('v' in data) || (data.v !== 1 && data.v !== 2)) return null;
     const { rev, decks, collection, wants } = data as Record<string, unknown>;
     if (typeof rev !== 'number' || !Number.isSafeInteger(rev) || rev < 0 || !Array.isArray(decks)) return null;
-    const parsedCollection = parseCollection(collection);
+    const parsedCollection = parseCollection(data.v === 1 ? migrateCollectionV2ToV3(collection) : collection);
     if (parsedCollection === null || parsedCollection.dropped > 0) return null;
     // A base saved before the want list existed has no wants: that is an empty list, not a lost base (D-018).
     const parsedWants = wants === undefined ? { value: EMPTY_COLLECTION, dropped: 0 } : parseCollection(wants);
@@ -483,6 +489,22 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       }
       return view;
     },
+    loadDefaultEdition: async () => {
+      try {
+        return store.getItem(DEFAULT_EDITION_KEY) === 'retail' ? 'retail' : 'beta';
+      } catch {
+        return 'beta';
+      }
+    },
+    saveDefaultEdition: async (edition: DefaultEdition) => {
+      if (edition !== 'beta' && edition !== 'retail') throw new StorageError('invalid-input', 'Unknown edition');
+      try {
+        store.setItem(DEFAULT_EDITION_KEY, edition);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return edition;
+    },
     // Account hints never throw: a failed write only means the SDK is not preloaded next time.
     loadLastUid: () => {
       const raw = readHint(ACCOUNT_LAST_UID_KEY);
@@ -537,7 +559,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       }
     },
     saveBase(base) {
-      writeHint(syncBaseKey, base === null ? null : JSON.stringify({ v: 1, ...base }));
+      writeHint(syncBaseKey, base === null ? null : JSON.stringify({ v: 2, ...base }));
     },
     backupAll() {
       const at = now();

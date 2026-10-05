@@ -12,6 +12,8 @@ export const THEME_KEY = 'cyberdeck:theme';
 export const VIEW_KEY = 'cyberdeck:view';
 export const EDIT_MODE_KEY = 'cyberdeck:edit-mode';
 export const DECK_PICK_VIEW_KEY = 'cyberdeck:deck-pick-view';
+/** Default edition of the card boxes' + and − (T-083, D-022): the raw string 'beta' or 'retail'. */
+export const DEFAULT_EDITION_KEY = 'cyberdeck:default-edition';
 /**
  * Account hints (T-054a, D-017 kohta 1, SR-29 kohta 1): the uid of the last signed-in account, so the
  * Firebase SDK loads at startup only for users who have signed in, and a flag set just before a sign-in
@@ -28,8 +30,8 @@ export function accountKeyPrefix(uid: string): string {
 /** Followed by `<aggregate>:<ISO timestamp>`. Only keys with this prefix are ever pruned (SR-13). */
 export const BACKUP_PREFIX = 'cyberdeck:backup:';
 
-/** 2 = entries may carry a breakdown by printing (`versions`, D-020). */
-export const COLLECTION_SCHEMA_VERSION = 2;
+/** 2 = entries may carry a breakdown by printing (`versions`, D-020). 3 = the unversioned copies were recorded as Beta (D-022). */
+export const COLLECTION_SCHEMA_VERSION = 3;
 export const DECKS_SCHEMA_VERSION = 1;
 export const WANTS_SCHEMA_VERSION = 1;
 export const MAX_BACKUPS_PER_AGGREGATE = 3;
