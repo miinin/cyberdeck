@@ -59,3 +59,11 @@ Riippuvuudet: T-064a → T-064b, T-061b → T-062 → T-063. T-062:n vertailu to
 
 ## Luovutus
 Arkkitehti 2026-10-05: ADR D-018 (Ehdotettu) ja tämä kortti. Ei koodia. Seuraava: käyttäjä vastaa avoimiin kysymyksiin ja hyväksyy D-018:n, sitten T-064a Koodarille ja Digiturvan katselmointi ennen yhdistämistä.
+
+## SEC-064a (Digiturva 2026-10-05, katselmointi 3e68c67, diff t-064-want-malli..HEAD)
+Tulos: **hyväksytty**, ei blokkaavia löydöksiä. Critical 0, High 0, Medium 0, Low 2 (1 korjattu), Info 1.
+- **L1 (korjattu):** PRIVACY.md:n rivit 4 ja 15 sekä luvun "Pilvidata"-poistorivi eivät maininneet want-listaa (`backup:wants`, `cyberdeck:u:{uid}:wants`, pilvipoisto). Korjattu commitissa `T-064a: Security review fixes`.
+- **L2 (avoin, T-064b):** `src/ui/texts.ts:49` kirjautumisen tietosuojateksti "Tilille tallennetaan vain pakkasi ja kokoelmasi…" ei mainitse want-listaa. Ei vielä harhaanjohtava, koska wantia ei voi muokata UI:sta ennen T-064b:tä. Korjaus: lisää "want-listasi" T-064b:ssä (Sisällöntuottaja/PM).
+- **I1:** Sääntötesti on merkkijonotesti (`src/firestoreRules.test.ts`), ei emulaattoritesti. Se varmistaa, että ainoa sallittu docId-lista on `['main','want']` kaikissa kolmessa säännössä ja ettei `docId ==` -muotoa ole, joten `collection/muu` hylätään. Riittää kortin kohtaan 1; emulaattoritesti IDEAS-tasoinen.
+
+Tarkistettu, ei löydöksiä: (1) firestore.rules: vain `main`/`want`, `isOwner` + `isCollectionDoc` koskee myös wantia, ei uusia polkuja. (2) `deleteAll` poistaa `collection/want` samassa transaktiossa (3 kirjoitusta), `eraseAccount` poistaa etuliitteellä myös `…:wants` ja sen varakopiot. (3) Paikallinen luku: oma envelope ja skeemaversio, `parseCollection` (SR-11), rikkinäinen → varakopio + tyhjä; `readLocal` palauttaa null (synkka seis) jos want on `newer`/`corrupt`; pilven `newer` lukitsee kirjoitukset, `invalid` ei koskaan ylikirjoitu. (4) `checkChange` validoi wantin ja kokorajan ennen lähetystä, transaktion kirjoituslaskuri sisältää wantin. (5) Vanha sync-base ilman `wants` → tyhjä, ei kaadu. (6) `addMissingToWants`: `isCardKey`, kokonaisluku, katto 999 ja 5000 riviä, `Map`. (7) Ei uusia riippuvuuksia, ei firebase.json-muutoksia, ei salaisuuksia diffissä. Kohdat 4–5 (jakolinkki) kuuluvat T-062:een.
