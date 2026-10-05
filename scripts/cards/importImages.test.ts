@@ -1,5 +1,5 @@
 import type { Card } from '../../src/domain/card';
-import { CARD_IMAGES_DIR, CARD_IMAGES_MAP_PATH, MAX_SOURCE_BYTES, importImages, outputPath } from './importImages';
+import { CARD_IMAGES_DIR, CARD_IMAGES_MAP_PATH, MAX_SOURCE_BYTES, VARIANT_MAP_PATH, importImages, outputPath } from './importImages';
 import type { ImportImagesDeps } from './importImages';
 
 function card(key: string, name: string): Card {
@@ -89,34 +89,37 @@ describe('importImages', () => {
   });
 });
 
-describe('importImages: variant images (D-020)', () => {
-  const withPrintings: Card[] = [
-    {
-      ...card('octant', 'Octant'),
-      printings: [
-        { key: 'a:001', setCode: 'a', setName: 'Night City Brawl S 1', number: '001', rarity: 'Nova Rare', language: 'en', artist: null, imageKey: 'octant__night-city-brawl-s-1-001' },
-      ],
-    },
-  ];
+describe('importImages: variant art (T-076)', () => {
+  const variantMap = JSON.stringify([{ source: 'public/cards/variants/Nova/octant.webp', artId: 'octant__nova-rare' }]);
 
-  it('converts a file named by an image key to public/cards/variants and writes the manifest', async () => {
-    const { deps, convert } = fakeDeps({
-      src: ['Octant__Night-City-Brawl-S-1-001.PNG', 'octant__night-city-brawl-s-1-002.webp', 'octant.webp'],
-      'public/cards/variants': ['octant__night-city-brawl-s-1-001.webp', 'stray.webp'],
-    });
-    deps.writeText = vi.fn(async () => {});
+  it('converts the files of the variant map and files named by an art id to src/assets/cards/variants', async () => {
+    const { deps, convert } = fakeDeps({ src: ['octant__iconic-legend.PNG', 'octant.webp'] });
+    deps.readText = async (path) => (path === VARIANT_MAP_PATH ? variantMap : null);
     convert.mockImplementation(async () => {});
-    const result = await importImages('src', withPrintings, deps);
+    const result = await importImages('src', cards, deps);
 
-    expect(convert).toHaveBeenCalledWith('src/Octant__Night-City-Brawl-S-1-001.PNG', [
-      { path: 'public/cards/variants/octant__night-city-brawl-s-1-001.webp', width: 720 },
-    ]);
-    expect(convert).toHaveBeenCalledWith('src/octant.webp', expect.any(Array));
-    expect(convert).toHaveBeenCalledTimes(2);
-    expect(result.report?.variantsConverted).toBe(1);
+    expect(convert).toHaveBeenCalledWith('public/cards/variants/Nova/octant.webp', [{ path: 'src/assets/cards/variants/octant__nova-rare.webp', width: 720 }]);
+    expect(convert).toHaveBeenCalledWith('src/octant__iconic-legend.PNG', [{ path: 'src/assets/cards/variants/octant__iconic-legend.webp', width: 720 }]);
+    expect(result.report?.variantsConverted).toBe(2);
     expect(result.report?.converted).toBe(1);
-    // The unknown variant name is not a variant image and is reported like any unmatched file.
-    expect(result.report?.unmatched).toEqual([{ file: 'octant__night-city-brawl-s-1-002.webp', reason: 'no-match' }]);
-    expect(deps.writeText).toHaveBeenCalledWith('src/data/variantImages.json', '[\n  "octant__night-city-brawl-s-1-001"\n]\n');
+  });
+
+  it('reports a missing source file instead of stopping', async () => {
+    const { deps } = fakeDeps({ src: ['octant.webp'] });
+    deps.readText = async (path) => (path === VARIANT_MAP_PATH ? variantMap : null);
+    deps.fileSize = async (path) => {
+      if (path.startsWith('public/')) throw new Error('ENOENT');
+      return 1000;
+    };
+    const result = await importImages('src', cards, deps);
+    expect(result.report?.rejected).toEqual([{ file: 'public/cards/variants/Nova/octant.webp', reason: 'not-image' }]);
+  });
+
+  it('rejects a malformed variant map and a path that leaves the repository', async () => {
+    for (const text of ['{}', JSON.stringify([{ source: '../x.png', artId: 'a__b' }]), JSON.stringify([{ source: 'x.png', artId: '../a' }])]) {
+      const { deps } = fakeDeps({ src: ['octant.webp'] });
+      deps.readText = async (path) => (path === VARIANT_MAP_PATH ? text : null);
+      expect((await importImages('src', cards, deps)).exitCode).toBe(1);
+    }
   });
 });

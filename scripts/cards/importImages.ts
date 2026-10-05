@@ -16,12 +16,13 @@ import type { ImageMatchReport } from './matchImages';
 export const CARD_IMAGES_DIR = 'src/assets/cards';
 /** Committed, so the fixes for odd file names survive the next import (the source folder is not in git). */
 export const CARD_IMAGES_MAP_PATH = 'scripts/cards/card-images.map.json';
-/** Own images of printings (D-020), served as they are; the app learns which exist from the manifest. */
-export const VARIANT_IMAGES_DIR = 'public/cards/variants';
-export const VARIANT_MANIFEST_PATH = 'src/data/variantImages.json';
+/** Official art of a card's rarity (T-076), one file per `<card key>__<rarity slug>`; committed like the card images. */
+export const VARIANT_IMAGES_DIR = 'src/assets/cards/variants';
+/** [{ source, artId, ... }]: the source path (from the repository root) of each variant picture. */
+export const VARIANT_MAP_PATH = 'scripts/cards/variant-art.map.json';
 const VARIANT_WIDTH = CARD_IMAGE_WIDTH.lg;
 const IMAGE_EXTENSION = /\.(png|jpe?g|webp)$/i;
-const IMAGE_KEY = /^[a-z0-9-]{1,100}__[a-z0-9-]{1,100}$/;
+const ART_ID = /^[a-z0-9-]{1,100}__[a-z0-9-]{1,100}$/;
 export const MAX_SOURCE_BYTES = 25 * 1024 * 1024;
 const SIZES = Object.keys(CARD_IMAGE_WIDTH) as CardImageSize[];
 
@@ -38,14 +39,12 @@ export interface ImportImagesDeps {
   readText: (path: string) => Promise<string | null>;
   /** Writes each output as WebP. Rejects when the source is not a PNG, JPEG or WebP image. */
   convert: (sourcePath: string, outputs: ImageOutput[]) => Promise<void>;
-  /** Writes a text file; without it the variant manifest is not updated. */
-  writeText?: (path: string, text: string) => Promise<void>;
   log: (line: string) => void;
 }
 
 export interface ImportImagesReport extends ImageMatchReport {
   converted: number;
-  /** Variant images (named by a printing's image key) converted to public/cards/variants. */
+  /** Variant pictures converted to src/assets/cards/variants. */
   variantsConverted: number;
   rejected: { file: string; reason: 'too-large' | 'not-image' }[];
   /** Images in the output folder whose key is not in the card data (reported, never deleted). */
@@ -54,9 +53,27 @@ export interface ImportImagesReport extends ImageMatchReport {
 
 export type ImportImagesResult = { exitCode: 0 | 1; report: ImportImagesReport | null };
 
-export function variantOutputPath(imageKey: string): string {
-  if (!IMAGE_KEY.test(imageKey)) throw new Error(`Invalid image key: ${imageKey}`);
-  return `${VARIANT_IMAGES_DIR}/${imageKey}.webp`;
+export function variantOutputPath(artId: string): string {
+  if (!ART_ID.test(artId)) throw new Error(`Invalid art id: ${artId}`);
+  return `${VARIANT_IMAGES_DIR}/${artId}.webp`;
+}
+
+/** The source/artId pairs of the variant map; null when the file is malformed. */
+function parseVariantMap(text: string | null): { source: string; artId: string }[] | null {
+  if (text === null) return [];
+  try {
+    const value: unknown = JSON.parse(text);
+    if (!Array.isArray(value)) return null;
+    const entries: { source: string; artId: string }[] = [];
+    for (const item of value as unknown[]) {
+      if (!isRecord(item) || typeof item.source !== 'string' || typeof item.artId !== 'string') return null;
+      if (!ART_ID.test(item.artId) || item.source.split(/[/\\]/).includes('..')) return null;
+      entries.push({ source: item.source, artId: item.artId });
+    }
+    return entries;
+  } catch {
+    return null;
+  }
 }
 
 /** Output paths come only from a validated card key, never from the source file name (path traversal). */
@@ -104,19 +121,6 @@ function logReport(report: ImportImagesReport, log: (line: string) => void): voi
   for (const key of report.orphans) log(`  ${key}`);
 }
 
-/** Lists the variant images that exist (and belong to a printing), sorted, so the app requests only those. */
-async function writeVariantManifest(imageKeys: ReadonlySet<string>, deps: ImportImagesDeps): Promise<void> {
-  if (deps.writeText === undefined) return;
-  const present = (await deps.listFiles(VARIANT_IMAGES_DIR)) ?? [];
-  const keys = present
-    .filter((file) => file.endsWith('.webp'))
-    .map((file) => file.slice(0, -'.webp'.length))
-    .filter((key) => imageKeys.has(key))
-    .sort();
-  await deps.writeText(VARIANT_MANIFEST_PATH, `${JSON.stringify(keys, null, 2)}
-`);
-}
-
 export async function importImages(
   sourceDir: string,
   cards: readonly Card[],
@@ -133,13 +137,18 @@ export async function importImages(
     return { exitCode: 1, report: null };
   }
 
-  // Files named exactly by a printing's image key are variant images (D-020); the rest are card images.
-  const imageKeys = new Set(cards.flatMap((card) => (card.printings ?? []).map((printing) => printing.imageKey)));
-  const variantFiles: { file: string; imageKey: string }[] = [];
+  const variantMap = parseVariantMap(await deps.readText(VARIANT_MAP_PATH));
+  if (variantMap === null) {
+    deps.log(`Invalid map file ${VARIANT_MAP_PATH}: expected [{ "source": "<path>", "artId": "<card key>__<rarity slug>" }]`);
+    return { exitCode: 1, report: null };
+  }
+
+  // Variant pictures: the files of the variant map, plus files in the source folder named exactly by an art id.
+  const variantFiles: { path: string; artId: string }[] = variantMap.map(({ source, artId }) => ({ path: source, artId }));
   const cardFiles: string[] = [];
   for (const file of files) {
     const stem = file.replace(/\.[^.]+$/, '').toLowerCase();
-    if (IMAGE_EXTENSION.test(file) && imageKeys.has(stem) && IMAGE_KEY.test(stem)) variantFiles.push({ file, imageKey: stem });
+    if (IMAGE_EXTENSION.test(file) && ART_ID.test(stem)) variantFiles.push({ path: `${sourceDir}/${file}`, artId: stem });
     else cardFiles.push(file);
   }
 
@@ -168,20 +177,19 @@ export async function importImages(
   }
 
   let variantsConverted = 0;
-  for (const { file, imageKey } of variantFiles) {
-    const source = `${sourceDir}/${file}`;
-    if ((await deps.fileSize(source)) > MAX_SOURCE_BYTES) {
-      rejected.push({ file, reason: 'too-large' });
-      continue;
-    }
+  for (const { path: source, artId } of variantFiles) {
     try {
-      await deps.convert(source, [{ path: variantOutputPath(imageKey), width: VARIANT_WIDTH }]);
+      if ((await deps.fileSize(source)) > MAX_SOURCE_BYTES) {
+        rejected.push({ file: source, reason: 'too-large' });
+        continue;
+      }
+      await deps.convert(source, [{ path: variantOutputPath(artId), width: VARIANT_WIDTH }]);
       variantsConverted += 1;
     } catch {
-      rejected.push({ file, reason: 'not-image' });
+      // A missing or unreadable file is reported like a file that is not an image.
+      rejected.push({ file: source, reason: 'not-image' });
     }
   }
-  await writeVariantManifest(imageKeys, deps);
 
   const keys = new Set(cards.map((card) => card.key));
   const existing = (await deps.listFiles(`${CARD_IMAGES_DIR}/md`)) ?? [];

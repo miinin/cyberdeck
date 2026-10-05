@@ -1,0 +1,494 @@
+[
+ {
+  "source": "public/cards/variants/Iconic legend/adam.webp",
+  "artId": "adam-smasher-ender-of-legends__iconic-legend",
+  "card": "Adam Smasher — Ender of Legends",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/alt.webp",
+  "artId": "alt-cunningham-soulkiller-architect__iconic-legend",
+  "card": "Alt Cunningham — Soulkiller Architect",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/dexter.webp",
+  "artId": "dexter-deshawn-off-the-grid__iconic-legend",
+  "card": "Dexter DeShawn — Off the Grid",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/dum.webp",
+  "artId": "dum-dum-maelstrom-triggerman__iconic-legend",
+  "card": "Dum Dum — Maelstrom Triggerman",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/evelyn.webp",
+  "artId": "evelyn-parker-beautiful-enigma__iconic-legend",
+  "card": "Evelyn Parker — Beautiful Enigma",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/goro.webp",
+  "artId": "goro-takemura-vengeful-bodyguard__iconic-legend",
+  "card": "Goro Takemura — Vengeful Bodyguard",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/hanako.webp",
+  "artId": "hanako-arasaka-daughter-of-the-emperor__iconic-legend",
+  "card": "Hanako Arasaka — Daughter of the Emperor",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/jackie.webp",
+  "artId": "jackie-welles-mamas-favorite__iconic-legend",
+  "card": "Jackie Welles — Mama's Favorite",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/judy.webp",
+  "artId": "judy-alvarez-braindance-maestro__iconic-legend",
+  "card": "Judy Álvarez — Braindance Maestro",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/kerry.webp",
+  "artId": "kerry-eurodyne-axe-attitude-audience__iconic-legend",
+  "card": "Kerry Eurodyne — Axe, Attitude, Audience",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/muamar.webp",
+  "artId": "muamar-reyes-el-capitan__iconic-legend",
+  "card": "Muamar Reyes — El Capitán",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/padre.webp",
+  "artId": "padre-man-of-the-cross__iconic-legend",
+  "card": "Padre — Man of the Cross",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/panam.webp",
+  "artId": "panam-palmer-nomad-cavalry__iconic-legend",
+  "card": "Panam Palmer — Nomad Cavalry",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/river.webp",
+  "artId": "river-ward-detective-on-the-hunt__iconic-legend",
+  "card": "River Ward — Detective on the Hunt",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/rogue.webp",
+  "artId": "rogue-amendiares-preem-solo__iconic-legend",
+  "card": "Rogue Amendiares — Preem Solo",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/royce.webp",
+  "artId": "royce-psycho-on-the-edge__iconic-legend",
+  "card": "Royce — Psycho on the Edge",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/v.webp",
+  "artId": "v-streetkid__iconic-legend",
+  "card": "V — Streetkid",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic legend/wakako.webp",
+  "artId": "wakako-okada-peace-and-harmony__iconic-legend",
+  "card": "Wakako Okada — Peace and Harmony",
+  "rarity": "Iconic Legend"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/adam.webp",
+  "artId": "adam-smasher-metal-over-meat__iconic-other",
+  "card": "Adam Smasher — Metal Over Meat",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/alt.webp",
+  "artId": "alt-cunningham-mother-of-daemons__iconic-other",
+  "card": "Alt Cunningham — Mother of Daemons",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/hanako.webp",
+  "artId": "hanako-arasaka-in-a-gilded-cage__iconic-other",
+  "card": "Hanako Arasaka — In a Gilded Cage",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/johnny.webp",
+  "artId": "johnny-silverhand-never-stop-fighting__iconic-other",
+  "card": "Johnny Silverhand — Never Stop Fighting",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/overwatch.webp",
+  "artId": "overwatch-panams-gift__iconic-other",
+  "card": "Overwatch — Panam's Gift",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/rogue.webp",
+  "artId": "rogue-amendiares-queen-of-the-afterlife__iconic-other",
+  "card": "Rogue Amendiares — Queen of the Afterlife",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/sanday.webp",
+  "artId": "sandayu-oda-hanakos-guardian__iconic-other",
+  "card": "Sandayu Oda — Hanako's Guardian",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/the relic.webp",
+  "artId": "the-relic-experimental-biochip__iconic-other",
+  "card": "The Relic — Experimental Biochip",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic other/towerfall.webp",
+  "artId": "towerfall__iconic-other",
+  "card": "Towerfall",
+  "rarity": "Iconic Other"
+ },
+ {
+  "source": "public/cards/variants/Iconic secret/johnny.webp",
+  "artId": "johnny-silverhand-rocking-renegade__iconic-secret",
+  "card": "Johnny Silverhand — Rocking Renegade",
+  "rarity": "Iconic Secret"
+ },
+ {
+  "source": "public/cards/variants/Iconic secret/judy.webp",
+  "artId": "judy-alvarez-nothing-to-doubt__iconic-secret",
+  "card": "Judy Álvarez — Nothing to Doubt",
+  "rarity": "Iconic Secret"
+ },
+ {
+  "source": "public/cards/variants/Iconic secret/panam.webp",
+  "artId": "panam-palmer-strength-through-family__iconic-secret",
+  "card": "Panam Palmer — Strength Through Family",
+  "rarity": "Iconic Secret"
+ },
+ {
+  "source": "public/cards/variants/Iconic secret/sasha.webp",
+  "artId": "sasha-yakovleva-wont-let-you-down__iconic-secret",
+  "card": "Sasha Yakovleva — Won't Let You Down",
+  "rarity": "Iconic Secret"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/(dont fear).webp",
+  "artId": "dont-fear-the-reaper__nova-rare",
+  "card": "(Don't Fear) The Reaper",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/adam.webp",
+  "artId": "adam-smasher-ender-of-legends__nova-rare",
+  "card": "Adam Smasher — Ender of Legends",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/afterparty.webp",
+  "artId": "afterparty-at-lizzies__nova-rare",
+  "card": "Afterparty at Lizzie's",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/alt.webp",
+  "artId": "alt-cunningham-soulkiller-architect__nova-rare",
+  "card": "Alt Cunningham — Soulkiller Architect",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/bootleg.webp",
+  "artId": "bootleg-black-sapphire-show__nova-rare",
+  "card": "Bootleg Black Sapphire Show",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/corpo.webp",
+  "artId": "corpo-security__nova-rare",
+  "card": "Corpo Security",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/cyberpsychosis.webp",
+  "artId": "cyberpsychosis__nova-rare",
+  "card": "Cyberpsychosis",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/delamain.webp",
+  "artId": "delamain-cab__nova-rare",
+  "card": "Delamain Cab",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/dexter.webp",
+  "artId": "dexter-deshawn-off-the-grid__nova-rare",
+  "card": "Dexter DeShawn — Off the Grid",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/dum.webp",
+  "artId": "dum-dum-maelstrom-triggerman__nova-rare",
+  "card": "Dum Dum — Maelstrom Triggerman",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/dying.webp",
+  "artId": "dying-night-vs-pistol__nova-rare",
+  "card": "Dying Night — V's Pistol",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/evelyn.webp",
+  "artId": "evelyn-parker-beautiful-enigma__nova-rare",
+  "card": "Evelyn Parker — Beautiful Enigma",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/field.webp",
+  "artId": "field-operator__nova-rare",
+  "card": "Field Operator",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/floor.webp",
+  "artId": "floor-it__nova-rare",
+  "card": "Floor It",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/goro 2.webp",
+  "artId": "goro-takemura-vengeful-bodyguard__nova-rare",
+  "card": "Goro Takemura — Vengeful Bodyguard",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/goro.webp",
+  "artId": "goro-takemura-hands-unclean__nova-rare",
+  "card": "Goro Takemura — Hands Unclean",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/imgi_22_render-mqfjmon1.webp",
+  "artId": "adam-smasher-metal-over-meat__nova-rare",
+  "card": "Adam Smasher — Metal Over Meat",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/imgi_23_render-mrw50y7c.webp",
+  "artId": "mandibular-upgrade__nova-rare",
+  "card": "Mandibular Upgrade",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/imgi_24_render-mrjqbebl.webp",
+  "artId": "gorilla-arms__nova-rare",
+  "card": "Gorilla Arms",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/industrial.webp",
+  "artId": "industrial-assembly__nova-rare",
+  "card": "Industrial Assembly",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/jackie 2.webp",
+  "artId": "jackie-welles-mamas-favorite__nova-rare",
+  "card": "Jackie Welles — Mama's Favorite",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/jackie 3.webp",
+  "artId": "jackie-welles-pour-one-out-for-me__nova-rare",
+  "card": "Jackie Welles — Pour One Out For Me",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/jackie.webp",
+  "artId": "jackie-welles-ride-or-die-choom__nova-rare",
+  "card": "Jackie Welles — Ride or Die Choom",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/judy 2.webp",
+  "artId": "judy-alvarez-braindance-maestro__nova-rare",
+  "card": "Judy Álvarez — Braindance Maestro",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/kerry 2.webp",
+  "artId": "kerry-eurodyne-axe-attitude-audience__nova-rare",
+  "card": "Kerry Eurodyne — Axe, Attitude, Audience",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/kerry.webp",
+  "artId": "kerry-eurodyne-the-last-rockerboy__nova-rare",
+  "card": "Kerry Eurodyne — The Last Rockerboy",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/maman.webp",
+  "artId": "maman-brigitte-spirit-of-death__nova-rare",
+  "card": "Maman Brigitte — Spirit of Death",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/mantis blades.webp",
+  "artId": "mantis-blades__nova-rare",
+  "card": "Mantis Blades",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/maxtac.webp",
+  "artId": "maxtac-squadron__nova-rare",
+  "card": "MaxTac Squadron",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/minotaur.webp",
+  "artId": "minotaur__nova-rare",
+  "card": "Minotaur",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/misty.webp",
+  "artId": "misty-olszewski-mender-of-broken-spirits__nova-rare",
+  "card": "Misty Olszewski — Mender of Broken Spirits",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/muanmar.webp",
+  "artId": "muamar-reyes-el-capitan__nova-rare",
+  "card": "Muamar Reyes — El Capitán",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/netwatch.webp",
+  "artId": "netwatch-netdriver__nova-rare",
+  "card": "NetWatch Netdriver",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/padre.webp",
+  "artId": "padre-man-of-the-cross__nova-rare",
+  "card": "Padre — Man of the Cross",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/peace.webp",
+  "artId": "peace-offering__nova-rare",
+  "card": "Peace Offering",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/rebecca.webp",
+  "artId": "rebecca-having-a-moment__nova-rare",
+  "card": "Rebecca — Having a Moment",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/riding.webp",
+  "artId": "riding-nomad__nova-rare",
+  "card": "Riding Nomad",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/river.webp",
+  "artId": "river-ward-detective-on-the-hunt__nova-rare",
+  "card": "River Ward — Detective on the Hunt",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/royce 2.webp",
+  "artId": "royce-dont-call-me-simon__nova-rare",
+  "card": "Royce — Don't Call Me Simon",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/royce.webp",
+  "artId": "royce-psycho-on-the-edge__nova-rare",
+  "card": "Royce — Psycho on the Edge",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/saburo.webp",
+  "artId": "saburo-arasaka-stubborn-patriarch__nova-rare",
+  "card": "Saburo Arasaka — Stubborn Patriarch",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/sandevistan.webp",
+  "artId": "sandevistan__nova-rare",
+  "card": "Sandevistan",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/satori.webp",
+  "artId": "satori-sword-of-saburo__nova-rare",
+  "card": "Satori — Sword of Saburo",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/secondhand.webp",
+  "artId": "secondhand-bombus__nova-rare",
+  "card": "Secondhand Bombus",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/trust.webp",
+  "artId": "trust-no-one__nova-rare",
+  "card": "Trust No One",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/v 2.webp",
+  "artId": "v-corporate-exile__nova-rare",
+  "card": "V — Corporate Exile",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/v.webp",
+  "artId": "v-streetkid__nova-rare",
+  "card": "V — Streetkid",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/viktor.webp",
+  "artId": "viktor-vektor-sit-down-and-relax__nova-rare",
+  "card": "Viktor Vektor — Sit Down and Relax",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/we gotta.webp",
+  "artId": "we-gotta-live-together__nova-rare",
+  "card": "We Gotta Live Together",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/wraith.webp",
+  "artId": "wraith-marauders__nova-rare",
+  "card": "Wraith Marauders",
+  "rarity": "Nova Rare"
+ },
+ {
+  "source": "public/cards/variants/Nova rare/yorinobu.webp",
+  "artId": "yorinobu-arasaka-embracing-destruction__nova-rare",
+  "card": "Yorinobu Arasaka — Embracing Destruction",
+  "rarity": "Nova Rare"
+ }
+]

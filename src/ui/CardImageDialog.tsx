@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
-import type { CardKey } from '../domain/cardKey';
 import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
 import { getCardImage } from '../data/cardImages';
 import { CardName, cardNameText } from './CardName';
@@ -15,14 +14,17 @@ export function CardImageDialog({
   card,
   onClose,
   details,
+  artUrl = null,
 }: {
   card: Card | null;
   onClose: () => void;
   /** Optional detail panel (T-070): collection, want and decks, shown beside the image. */
   details?: ReactNode;
+  /** A version's art shown instead of the card's base image. */
+  artUrl?: string | null;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [failedKey, setFailedKey] = useState<CardKey | null>(null);
+  const [failedKey, setFailedKey] = useState<string | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -32,7 +34,8 @@ export function CardImageDialog({
   }, [card]);
 
   const close = () => dialogRef.current?.close();
-  const image = card === null ? null : getCardImage(card.key);
+  const base = card === null ? null : getCardImage(card.key);
+  const imageSrc = artUrl ?? base?.large ?? null;
 
   return (
     <dialog
@@ -56,16 +59,16 @@ export function CardImageDialog({
             </button>
           </div>
           <div className="card-dialog-content">
-          {image !== null && failedKey !== card.key ? (
+          {imageSrc !== null && failedKey !== imageSrc ? (
             <img
               className="card-dialog-image"
-              src={image.large}
+              src={imageSrc}
               width={CARD_IMAGE_WIDTH.lg}
               height={cardImageHeight('lg')}
               alt={cardNameText(card)}
               lang="en"
               loading="eager"
-              onError={() => setFailedKey(card.key)}
+              onError={() => setFailedKey(imageSrc)}
             />
           ) : (
             <p role="alert">{texts.imageLoadError}</p>

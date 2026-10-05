@@ -121,6 +121,8 @@ export function CatalogView({
   const focusPersistenceResult = useRef(false);
   /** The card in the enlarged image dialog, and the thumbnail button that opened it (T-027 UX). */
   const [openCard, setOpenCard] = useState<Card | null>(null);
+  /** A version's art shown in the dialog instead of the base image (T-076); reset whenever the dialog opens or closes. */
+  const [shownArt, setShownArt] = useState<string | null>(null);
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
   // Bigger image beside a table row on mouse hover (T-052); the grid already shows the images.
   const preview = useCardHoverPreview();
@@ -364,6 +366,8 @@ export function CatalogView({
             editable={editable}
             onChange={(printing, count) => collectionStore.setVersionCount(openCard.key, printing, count)}
             onLimit={collectionAnnouncer.announceLimit}
+            shownArt={shownArt}
+            onShowArt={setShownArt}
           />
         )}
         {wants.snapshot.phase === 'ready' && (
@@ -406,10 +410,12 @@ export function CatalogView({
     preview.hide();
     imageOpenerRef.current = opener;
     setOpenCard(card);
+    setShownArt(null);
   };
 
   const handleCloseImage = () => {
     setOpenCard(null);
+    setShownArt(null);
     // Back to the thumbnail; if its row is gone, the search field is the nearest stable place.
     const opener = imageOpenerRef.current;
     imageOpenerRef.current = null;
@@ -609,7 +615,7 @@ export function CatalogView({
       </div>
 
       {view === 'table' && preview.preview}
-      <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} />
+      <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} artUrl={shownArt} />
     </>
   );
 }

@@ -36,7 +36,7 @@ function setup(props: Partial<Parameters<typeof CardVersions>[0]> = {}) {
       editable
       onChange={onChange}
       onLimit={onLimit}
-      imageUrl={(key) => (key === retail.imageKey ? '/cards/variants/x.webp' : null)}
+      imageUrl={(_key, rarity) => (rarity === 'Rare' ? '/cards/variants/x.webp' : null)}
       {...props}
     />,
   );
@@ -58,11 +58,26 @@ describe('CardVersions', () => {
     expect(within(at(groups, 2)).getByText('FR')).toBeInTheDocument();
   });
 
-  it('shows the unknown copies and a thumbnail only for printings with an image', () => {
+  it('shows the unknown copies and a thumbnail only for printings whose rarity has art', () => {
     setup();
     expect(screen.getByText(/ei tiedossa: 1|unknown: 1/)).toBeInTheDocument();
-    expect(document.querySelectorAll('img.version-thumb')).toHaveLength(1);
+    expect(document.querySelectorAll('img.version-thumb')).toHaveLength(3);
     expect(document.querySelector('img.version-thumb')?.getAttribute('src')).toBe('/cards/variants/x.webp');
+  });
+
+  it('shows the art of a version on request', async () => {
+    const onShowArt = vi.fn();
+    setup({ onShowArt });
+    await userEvent.click(screen.getByRole('button', { name: /Näytä kuva: Welcome to Night City — Retail nro 005a|Show image: Welcome to Night City — Retail no. 005a/ }));
+    expect(onShowArt).toHaveBeenCalledWith('/cards/variants/x.webp');
+    expect(screen.queryByRole('button', { name: /Peruskuva|Base image/ })).toBeNull();
+  });
+
+  it('offers the base image while an art is shown', async () => {
+    const onShowArt = vi.fn();
+    setup({ onShowArt, shownArt: '/cards/variants/x.webp' });
+    await userEvent.click(screen.getByRole('button', { name: /Peruskuva|Base image/ }));
+    expect(onShowArt).toHaveBeenCalledWith(null);
   });
 
   it('changes one printing with its own buttons', async () => {

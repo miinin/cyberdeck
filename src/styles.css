@@ -4722,3 +4722,25 @@ section[aria-labelledby='have-heading'] {
 .version-unknown {
   margin: var(--space-2) 0 0;
 }
+
+.version-thumb-button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+
+.version-thumb-button[aria-pressed='true'] {
+  border-color: var(--accent, currentColor);
+}
+
+.version-base-art {
+  margin-bottom: var(--space-2);
+}
