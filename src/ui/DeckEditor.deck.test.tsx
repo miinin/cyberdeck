@@ -102,6 +102,15 @@ describe('Deck column', () => {
     expect(within(stats).getByText('RAM-rajat: Red 2')).toBeInTheDocument();
     expect(within(stats).getByText('Kokoelmasta puuttuu 5 korttia.')).toBeInTheDocument();
   });
+
+  it('lists the missing cards with their counts (T-061)', async () => {
+    openEditor([['l1', 1], ['u0', 3], ['u1', 1]], storedCollection([]));
+    const stats = await screen.findByRole('region', { name: 'Tilastot' });
+    expect(within(stats).getByText('Näytä puuttuvat kortit')).toBeInTheDocument();
+    const list = stats.querySelector('.missing-cards') as HTMLElement;
+    expect(within(list).getAllByRole('listitem', { hidden: true }).map((item) => item.textContent?.split(' puuttuu ')[1])).toEqual(['1', '3', '1']);
+    expect(within(stats).getByRole('button', { name: 'Lataa puuttuvat (.txt)', hidden: true })).toBeInTheDocument();
+  });
 });
 
 describe('Mobile deck bar', () => {

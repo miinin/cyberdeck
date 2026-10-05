@@ -11,6 +11,7 @@ rules_version = '2';
 //   users/{uid}                  meta { schemaVersion, rev, updatedAt }
 //   users/{uid}/decks/{deckId}   { schemaVersion, savedAt, data: { name, sections, createdAt, updatedAt } }
 //   users/{uid}/collection/main  { schemaVersion, savedAt, data: { entries } }
+//   users/{uid}/collection/want  same shape: the want list (T-064a, D-018)
 //
 // The rules are a ceiling against abuse, not a full validation of the data model: list items cannot be
 // checked here, so the client validates everything it reads (SR-23). String limits have some slack
@@ -96,11 +97,11 @@ service cloud.firestore {
       }
 
       match /collection/{docId} {
-        allow get: if isOwner(uid) && docId == 'main';
+        allow get: if isOwner(uid) && docId in ['main', 'want'];
         allow create, update: if isOwner(uid)
-          && docId == 'main'
+          && docId in ['main', 'want']
           && isCollectionDoc(request.resource.data);
-        allow delete: if isOwner(uid) && docId == 'main';
+        allow delete: if isOwner(uid) && docId in ['main', 'want'];
       }
     }
 

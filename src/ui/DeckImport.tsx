@@ -28,6 +28,8 @@ import { typeColorClass } from './CardColor';
 import { DeckCardImage } from './DeckList';
 import { CostGem } from './DeckPickTable';
 import { DeckStats } from './DeckStats';
+import { MissingCards } from './MissingCards';
+import { useWants } from './useWants';
 import { deckTexts } from './deckTexts';
 
 type InputError = keyof typeof deckTexts.importErrors;
@@ -57,6 +59,7 @@ export function DeckImport({
   /** Shared deck link (T-056): the list is checked on open and the source forms are hidden. */
   sharedText?: string;
 }) {
+  const wants = useWants(repositories.wants);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const [text, setText] = useState('');
   const [inputError, setInputError] = useState<InputError | null>(null);
@@ -346,9 +349,12 @@ export function DeckImport({
               {report.rows.length === 0 ? (
                 <p className="notice notice-warning">{deckTexts.reportNothingRecognized}</p>
               ) : collectionKnown ? (
-                <p className={report.missingTotal > 0 ? 'import-missing-total' : 'import-owned-total'}>
-                  {deckTexts.missingFromCollection(report.missingTotal)}
-                </p>
+                <>
+                  <p className={report.missingTotal > 0 ? 'import-missing-total' : 'import-owned-total'}>
+                    {deckTexts.missingFromCollection(report.missingTotal)}
+                  </p>
+                  <MissingCards rows={report.missingRows} deckName={report.content.name} wants={wants} />
+                </>
               ) : (
                 <p className="notice notice-warning">{deckTexts.collectionNotReady}</p>
               )}

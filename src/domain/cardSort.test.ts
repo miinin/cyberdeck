@@ -13,6 +13,12 @@ const names = (cards: readonly Card[]) => cards.map((x) => x.name);
 describe('sortCards', () => {
   const list = [c('B', { power: 3 }), c('A', { power: 1 }), c('N'), c('C', { power: 3 })];
 
+  it('keeps or reverses the catalog order for number (T-060)', () => {
+    expect(names(sortCards(list, 'number', 'asc'))).toEqual(['B', 'A', 'N', 'C']);
+    expect(names(sortCards(list, 'number', 'desc'))).toEqual(['C', 'N', 'A', 'B']);
+    expect(names(list)).toEqual(['B', 'A', 'N', 'C']);
+  });
+
   it('sorts ascending with missing values last', () => {
     expect(names(sortCards(list, 'power', 'asc'))).toEqual(['A', 'B', 'C', 'N']);
   });

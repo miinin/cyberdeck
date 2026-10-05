@@ -8,6 +8,8 @@ import type { Repositories } from './storage';
 import { CatalogView } from './ui/CatalogView';
 import { DeckEditor } from './ui/DeckEditor';
 import { SharedDeckView } from './ui/SharedDeckView';
+import { HaveWantView } from './ui/HaveWantView';
+import { SharedTradeView } from './ui/SharedTradeView';
 import { DecksView } from './ui/DecksView';
 import { deckTexts } from './ui/deckTexts';
 import { useHashRoute } from './ui/useHashRoute';
@@ -77,8 +79,14 @@ export function App({
             <a href="#/" aria-current={route.name === 'cards' ? 'page' : undefined}>
               {deckTexts.navCards}
             </a>
-            <a href="#/pakat" aria-current={route.name !== 'cards' ? 'page' : undefined}>
+            <a
+              href="#/pakat"
+              aria-current={route.name === 'decks' || route.name === 'deck' || route.name === 'share' ? 'page' : undefined}
+            >
               {deckTexts.navDecks}
+            </a>
+            <a href="#/vaihto" aria-current={route.name === 'havewant' || route.name === 'trade' ? 'page' : undefined}>
+              {deckTexts.navHaveWant}
             </a>
           </nav>
           <ThemeToggle preferences={openRepositories.preferences} />
@@ -129,6 +137,12 @@ export function App({
             repositories={openRepositories}
             onOpen={(id) => navigate({ name: 'deck', id })}
           />
+        )}
+        {route.name === 'havewant' && (
+          <HaveWantView cards={cards} repositories={openRepositories} />
+        )}
+        {route.name === 'trade' && (
+          <SharedTradeView data={route.data} cards={cards} repositories={openRepositories} />
         )}
       </main>
       <footer className="site-footer">

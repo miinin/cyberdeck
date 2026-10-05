@@ -3,12 +3,18 @@ import { isDeckId } from '../domain/validate';
 
 /** Views of the app. The route lives in the URL hash, so Back and Forward work and no router is needed. */
 export type Route =
-  { name: 'cards' } | { name: 'decks' } | { name: 'deck'; id: string } | { name: 'share'; data: string };
+  { name: 'cards' } | { name: 'decks' } | { name: 'deck'; id: string } | { name: 'share'; data: string }
+  | { name: 'trade'; data: string } | { name: 'havewant' };
 
 export function parseHash(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/');
   // Shared deck link (T-056): the data is validated by decodeDeckShare, not here.
   if (parts[0] === 'jaa') return { name: 'share', data: parts.length === 2 ? (parts[1] ?? '') : '' };
+  // "#/vaihto" is the Have/Want section (T-065); "#/vaihto/<data>" is a shared trade link.
+  if (parts[0] === 'vaihto') {
+    if (parts.length === 1 || (parts.length === 2 && parts[1] === '')) return { name: 'havewant' };
+    return { name: 'trade', data: parts.length === 2 ? (parts[1] ?? '') : '' };
+  }
   if (parts[0] !== 'pakat') return { name: 'cards' };
   const id = parts[1];
   if (parts.length === 2 && id !== undefined && isDeckId(id)) return { name: 'deck', id };
@@ -18,6 +24,8 @@ export function parseHash(hash: string): Route {
 export function routeHash(route: Route): string {
   if (route.name === 'cards') return '#/';
   if (route.name === 'share') return `#/jaa/${route.data}`;
+  if (route.name === 'havewant') return '#/vaihto';
+  if (route.name === 'trade') return `#/vaihto/${route.data}`;
   return route.name === 'decks' ? '#/pakat' : `#/pakat/${route.id}`;
 }
 

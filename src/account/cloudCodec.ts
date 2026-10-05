@@ -7,7 +7,7 @@ import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
 import type { Deck, DeckId } from '../domain/deck';
 import { isDeckId, isRecord, parseCollection, parseDeck } from '../domain/validate';
-import { COLLECTION_ENVELOPE_SPEC, decodeEnvelopeValue } from '../storage';
+import { COLLECTION_ENVELOPE_SPEC, decodeEnvelopeValue, WANTS_ENVELOPE_SPEC } from '../storage';
 import type { EnvelopeSpec } from '../storage';
 import { CloudError } from './cloudError';
 import type { CloudChange, CloudDoc, CloudMeta, CloudSnapshot } from './types';
@@ -53,12 +53,13 @@ export function decodeMeta(raw: unknown): CloudMeta {
 
 /**
  * `deckDocs` are the documents of `users/{uid}/decks` (at most MAX_DECKS + 1 are read), `collection` is
- * `users/{uid}/collection/main` (undefined = missing).
+ * `users/{uid}/collection/main` and `wants` is `users/{uid}/collection/want` (undefined = missing).
  */
 export function buildSnapshot(
   meta: CloudMeta | null,
   deckDocs: readonly { id: string; data: unknown }[],
   collection: unknown,
+  wants: unknown,
 ): CloudSnapshot {
   let dropped = 0;
   let locked = meta?.newer ?? false;
@@ -82,24 +83,27 @@ export function buildSnapshot(
     }
   }
 
-  let collectionDoc: CloudDoc<Collection> = { kind: 'missing' };
-  if (collection !== undefined) {
-    const decoded = decodeEnvelopeValue(collection, COLLECTION_ENVELOPE_SPEC);
+  /** Collection-shaped documents: a newer version locks, an invalid one stays 'invalid' (never a deletion). */
+  function decodeCollectionDoc(raw: unknown, spec: EnvelopeSpec<Collection>): CloudDoc<Collection> {
+    if (raw === undefined) return { kind: 'missing' };
+    const decoded = decodeEnvelopeValue(raw, spec);
     if (decoded.kind === 'ok') {
-      collectionDoc = { kind: 'ok', value: decoded.value };
       dropped += decoded.dropped;
-    } else {
-      if (decoded.kind === 'newer') locked = true;
-      else dropped += 1;
-      collectionDoc = { kind: 'invalid' };
+      return { kind: 'ok', value: decoded.value };
     }
+    if (decoded.kind === 'newer') locked = true;
+    else dropped += 1;
+    return { kind: 'invalid' };
   }
+  const collectionDoc = decodeCollectionDoc(collection, COLLECTION_ENVELOPE_SPEC);
+  const wantsDoc = decodeCollectionDoc(wants, WANTS_ENVELOPE_SPEC);
 
   return {
     meta,
     decks,
     invalidDeckIds,
     collection: collectionDoc,
+    wants: wantsDoc,
     dropped,
     locked,
     limitExceeded: deckDocs.length > MAX_DECKS,
@@ -123,12 +127,17 @@ export function encodeDeckDoc(deck: Deck, savedAt: string) {
   };
 }
 
-export function encodeCollectionDoc(collection: Collection, savedAt: string) {
+export function encodeCollectionDoc(collection: Collection, savedAt: string, spec = COLLECTION_ENVELOPE_SPEC) {
   return {
-    schemaVersion: COLLECTION_ENVELOPE_SPEC.currentVersion,
+    schemaVersion: spec.currentVersion,
     savedAt,
     data: { entries: collection.entries.map((entry) => ({ card: entry.card, count: entry.count })) },
   };
+}
+
+/** The want list document: the collection's shape with the want schema version (D-018). */
+export function encodeWantsDoc(wants: Collection, savedAt: string) {
+  return encodeCollectionDoc(wants, savedAt, WANTS_ENVELOPE_SPEC);
 }
 
 /** UTF-8 size of the JSON encoding, a close upper estimate of Firestore's document size. */
@@ -138,12 +147,12 @@ export function encodedSize(value: unknown): number {
 
 /**
  * Checks a change before anything is sent (SR-23 kohta 6): valid decks and ids, at most one transaction of
- * writes, and a collection document below MAX_COLLECTION_BYTES. Returns the change rebuilt from the parsed
+ * writes, and a collection and a want document each below MAX_COLLECTION_BYTES. Returns the change rebuilt from the parsed
  * values only, so the caller encodes exactly what was validated (cleaned names, normalised timestamps).
  * Throws CloudError.
  */
 export function checkChange(change: CloudChange, maxCollectionBytes = MAX_COLLECTION_BYTES): CloudChange {
-  const writes = change.putDecks.length + change.deleteDecks.length + (change.collection === undefined ? 0 : 1) + 1;
+  const writes = change.putDecks.length + change.deleteDecks.length + (change.collection === undefined ? 0 : 1) + (change.wants === undefined ? 0 : 1) + 1;
   if (writes > MAX_TRANSACTION_WRITES) throw new CloudError('too-large');
 
   const putDecks = change.putDecks.map((deck) => {
@@ -160,6 +169,14 @@ export function checkChange(change: CloudChange, maxCollectionBytes = MAX_COLLEC
     const doc = encodeCollectionDoc(parsed.value, new Date(0).toISOString());
     if (encodedSize(doc) >= maxCollectionBytes) throw new CloudError('too-large');
     checked.collection = parsed.value;
+  }
+  if (change.wants !== undefined) {
+    const parsed = parseCollection(change.wants);
+    if (parsed === null || parsed.dropped > 0) throw new CloudError('unknown');
+    if (encodedSize(encodeWantsDoc(parsed.value, new Date(0).toISOString())) >= maxCollectionBytes) {
+      throw new CloudError('too-large');
+    }
+    checked.wants = parsed.value;
   }
   return checked;
 }

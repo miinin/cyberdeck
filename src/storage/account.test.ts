@@ -16,7 +16,12 @@ describe('account repositories (namespace)', () => {
     const account = repos.forAccount('user123');
     await account.decks.create(CONTENT);
     await account.collection.setCount('detonate', 2);
-    expect(store.keys().sort()).toEqual(['cyberdeck:u:user123:collection', 'cyberdeck:u:user123:decks']);
+    await account.wants.setCount('detonate', 1);
+    expect(store.keys().sort()).toEqual([
+      'cyberdeck:u:user123:collection',
+      'cyberdeck:u:user123:decks',
+      'cyberdeck:u:user123:wants',
+    ]);
     expect((await repos.decks.list()).value).toEqual([]);
 
     await repos.decks.create({ ...CONTENT, name: 'Kirjautumaton' });
@@ -47,16 +52,16 @@ describe('sync storage', () => {
   it('apply replaces the data only if it is still what the caller read', async () => {
     const { repos } = open();
     const sync = repos.forAccount('user123').sync;
-    const empty = { decks: [], collection: { entries: [] } };
+    const empty = { decks: [], collection: { entries: [] }, wants: { entries: [] } };
     expect(sync.read()).toEqual(empty);
     const account = repos.forAccount('user123');
     await account.decks.create(CONTENT);
 
-    expect(sync.apply(empty, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] } })).toBe(false);
+    expect(sync.apply(empty, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] } })).toBe(false);
     expect((await account.collection.load()).value.entries).toEqual([]);
 
     const current = sync.read() ?? empty;
-    expect(sync.apply(current, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] } })).toBe(true);
+    expect(sync.apply(current, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] } })).toBe(true);
     expect((await account.decks.list()).value).toEqual([]);
     expect((await account.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 1 }]);
   });
@@ -66,7 +71,7 @@ describe('sync storage', () => {
     const account = repos.forAccount('user123');
     const listener = vi.fn();
     account.decks.subscribe(listener);
-    account.sync.apply({ decks: [], collection: { entries: [] } }, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] } });
+    account.sync.apply({ decks: [], collection: { entries: [] }, wants: { entries: [] } }, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] } });
     expect(listener).toHaveBeenCalled();
   });
 
@@ -90,11 +95,42 @@ describe('sync storage', () => {
     expect(store.getItem('cyberdeck:u:user123:decks')).toBe('{broken');
   });
 
+  it('reads a base saved before the want list existed as an empty want list', () => {
+    const { store, repos } = open();
+    const sync = repos.forAccount('user123').sync;
+    store.setItem('cyberdeck:u:user123:sync-base', '{"v":1,"rev":2,"decks":[],"collection":{"entries":[]}}');
+    expect(sync.loadBase()).toEqual({ rev: 2, decks: [], collection: { entries: [] }, wants: { entries: [] } });
+    store.setItem('cyberdeck:u:user123:sync-base', '{"v":1,"rev":2,"decks":[],"collection":{"entries":[]},"wants":"x"}');
+    expect(sync.loadBase()).toBeNull();
+  });
+
+  it('reads nothing for sync when the stored want list is unreadable or newer', () => {
+    const { store, repos } = open();
+    const sync = repos.forAccount('user123').sync;
+    store.setItem('cyberdeck:u:user123:wants', '{broken');
+    expect(sync.read()).toBeNull();
+    store.setItem('cyberdeck:u:user123:wants', JSON.stringify({ schemaVersion: 9, savedAt: '', data: {} }));
+    expect(sync.read()).toBeNull();
+  });
+
+  it('apply replaces the want list with the rest and sees a change of it as a change', async () => {
+    const { repos } = open();
+    const account = repos.forAccount('user123');
+    const before = account.sync.read();
+    if (before === null) throw new Error('test setup');
+    await account.wants.setCount('detonate', 2);
+    expect(account.sync.apply(before, before)).toBe(false);
+    const current = account.sync.read();
+    if (current === null) throw new Error('test setup');
+    expect(account.sync.apply(current, { ...current, wants: { entries: [{ card: 'detonate', count: 7 }] } })).toBe(true);
+    expect((await account.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 7 }]);
+  });
+
   it('stores the base and treats a damaged base as none', () => {
     const { store, repos } = open();
     const sync = repos.forAccount('user123').sync;
     expect(sync.loadBase()).toBeNull();
-    const base = { rev: 3, decks: [{ id: 'abc', updatedAt: '2026-10-03T10:00:00.000Z' }], collection: { entries: [] } };
+    const base = { rev: 3, decks: [{ id: 'abc', updatedAt: '2026-10-03T10:00:00.000Z' }], collection: { entries: [] }, wants: { entries: [] } };
     sync.saveBase(base);
     expect(sync.loadBase()).toEqual(base);
     store.setItem('cyberdeck:u:user123:sync-base', '{"v":1,"rev":"x"}');
@@ -107,14 +143,17 @@ describe('sync storage', () => {
     const { store, repos } = open();
     await repos.decks.create(CONTENT);
     await repos.collection.setCount('detonate', 1);
+    await repos.wants.setCount('detonate', 1);
     repos.sync.backupAll();
     const keys = store.keys();
     expect(keys.filter((key) => key.startsWith('cyberdeck:backup:decks:'))).toHaveLength(1);
     expect(keys.filter((key) => key.startsWith('cyberdeck:backup:collection:'))).toHaveLength(1);
+    expect(keys.filter((key) => key.startsWith('cyberdeck:backup:wants:'))).toHaveLength(1);
     repos.sync.clear();
     expect(store.getItem('cyberdeck:decks')).toBeNull();
     expect(store.getItem('cyberdeck:collection')).toBeNull();
-    expect(store.keys().filter((key) => key.startsWith('cyberdeck:backup:'))).toHaveLength(2);
+    expect(store.getItem('cyberdeck:wants')).toBeNull();
+    expect(store.keys().filter((key) => key.startsWith('cyberdeck:backup:'))).toHaveLength(3);
   });
 });
 
@@ -124,8 +163,9 @@ describe('erasing the account data', () => {
     const account = repos.forAccount('user123');
     await account.decks.create(CONTENT);
     await account.collection.setCount('detonate', 1);
+    await account.wants.setCount('detonate', 1);
     account.sync.backupAll();
-    account.sync.saveBase({ rev: 1, decks: [], collection: { entries: [] } });
+    account.sync.saveBase({ rev: 1, decks: [], collection: { entries: [] }, wants: { entries: [] } });
     await repos.forAccount('other456').decks.create(CONTENT);
     await repos.decks.create(CONTENT);
     await repos.preferences.saveTheme('light');

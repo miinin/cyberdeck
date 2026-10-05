@@ -11,6 +11,7 @@ import {
   EDIT_MODE_KEY,
   THEME_KEY,
   VIEW_KEY,
+  WANTS_KEY,
 } from './keys';
 import { createMemoryStore } from './keyValueStore';
 import type { KeyValueStore } from './keyValueStore';
@@ -52,7 +53,7 @@ function stored(version: number, data: unknown): string {
   return encodeEnvelope(data, version, new Date(START));
 }
 
-function backupKeys(store: KeyValueStore, name: 'collection' | 'decks'): string[] {
+function backupKeys(store: KeyValueStore, name: 'collection' | 'decks' | 'wants'): string[] {
   return store
     .keys()
     .filter((key) => key.startsWith(`${BACKUP_PREFIX}${name}:`))
@@ -134,6 +135,72 @@ describe('collection', () => {
 
     await expectStorageError(collection.setCount('detonate', 1), 'limit-reached');
     expect(await collection.setCount('card-1', 4)).toMatchObject({ entries: expect.arrayContaining([{ card: 'card-1', count: 4 }]) });
+  });
+});
+
+describe('wants (D-018)', () => {
+  it('stores the want list under its own key, apart from the collection', async () => {
+    const { store, collection, wants } = setup();
+    await collection.setCount('detonate', 1);
+    expect(await wants.setCount('detonate', 4)).toEqual({ entries: [{ card: 'detonate', count: 4 }] });
+    expect(JSON.parse(store.getItem(WANTS_KEY) ?? '')).toMatchObject({
+      schemaVersion: 1,
+      data: { entries: [{ card: 'detonate', count: 4 }] },
+    });
+    expect((await collection.load()).value.entries).toEqual([{ card: 'detonate', count: 1 }]);
+
+    const reopened = setup({}, { store });
+    expect((await reopened.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 4 }]);
+    expect(await wants.setCount('detonate', 0)).toEqual({ entries: [] });
+  });
+
+  it.each([
+    ['invalid key', 'Detonate', 1],
+    ['reserved key', '__proto__', 1],
+    ['negative count', 'detonate', -1],
+    ['too large count', 'detonate', 1000],
+  ])('rejects %s with invalid-input and writes nothing', async (_label, card, count) => {
+    const { store, wants } = setup();
+    await expectStorageError(wants.setCount(card, count), 'invalid-input');
+    expect(store.keys()).toEqual([]);
+  });
+
+  it('rejects a new card when the list is full', async () => {
+    const entries = Array.from({ length: 5000 }, (_, index) => ({ card: `card-${index}`, count: 1 }));
+    const { wants } = setup({ [WANTS_KEY]: stored(1, { entries }) });
+    await expectStorageError(wants.setCount('detonate', 1), 'limit-reached');
+    expect(await wants.setCount('card-1', 4)).toMatchObject({ entries: expect.arrayContaining([{ card: 'card-1', count: 4 }]) });
+  });
+
+  it('backs up unreadable data under the wants name and starts from empty', async () => {
+    const { store, wants } = setup({ [WANTS_KEY]: '{broken' });
+    const loaded = await wants.load();
+    expect(loaded.value.entries).toEqual([]);
+    expect(loaded.notices).toMatchObject([{ kind: 'reset' }]);
+    expect(backupKeys(store, 'wants')).toHaveLength(1);
+  });
+
+  it('keeps the valid rows of a partly broken list and reports repaired', async () => {
+    const raw = stored(1, { entries: [{ card: 'detonate', count: 2 }, { card: 'x', count: 0 }, 'junk'] });
+    const { wants } = setup({ [WANTS_KEY]: raw });
+    const loaded = await wants.load();
+    expect(loaded.value.entries).toEqual([{ card: 'detonate', count: 2 }]);
+    expect(loaded.notices).toEqual([{ kind: 'repaired', dropped: 2 }]);
+  });
+
+  it('shows newer data as empty and blocks writes', async () => {
+    const raw = stored(2, { entries: [{ card: 'detonate', count: 1 }] });
+    const { store, wants } = setup({ [WANTS_KEY]: raw });
+    expect((await wants.load()).notices).toEqual([{ kind: 'newer-version', version: 2 }]);
+    await expectStorageError(wants.setCount('detonate', 2), 'newer-version');
+    expect(store.getItem(WANTS_KEY)).toBe(raw);
+  });
+
+  it('notifies subscribers of its own key only', () => {
+    const subscribe = vi.fn(() => () => {});
+    const { wants } = setup({}, { subscribe });
+    wants.subscribe(() => {});
+    expect(subscribe).toHaveBeenCalledWith([WANTS_KEY], expect.any(Function));
   });
 });
 

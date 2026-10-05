@@ -45,6 +45,7 @@ import { DeckList } from './DeckList';
 import type { DeckView } from './DeckList';
 import { DeckPickTable } from './DeckPickTable';
 import { DeckStats } from './DeckStats';
+import type { MissingCard } from '../domain/deckExport';
 import type { PickBlocker } from './DeckPickTable';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
@@ -54,6 +55,7 @@ import type { ImageSize } from './ListToolbar';
 import { Stepper } from './Stepper';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
+import { useWants } from './useWants';
 import { trackDeckSave } from './useDecks';
 import { EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
 
@@ -85,6 +87,7 @@ export function DeckEditor({
   const repository = repositories.decks;
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const { snapshot: collection } = useCollection(repositories.collection);
+  const wants = useWants(repositories.wants);
 
   const [phase, setPhase] = useState<'loading' | 'ready' | 'not-found' | 'unavailable'>('loading');
   const [content, setContent] = useState<DeckContent>({ name: '', sections: [] });
@@ -263,13 +266,16 @@ export function DeckEditor({
   const grouped = useMemo(() => groupDeck(content, cardsByKey), [content, cardsByKey]);
 
   const collectionReady = collection.phase === 'ready';
-  const missingCopies = useMemo(() => {
-    let missing = 0;
+  const missingCards = useMemo(() => {
+    const rows: MissingCard[] = [];
     for (const [key, count] of counts) {
-      if (cardsByKey.has(key)) missing += Math.max(0, count - countIn(collection, key));
+      const card = cardsByKey.get(key);
+      const missing = count - countIn(collection, key);
+      if (card !== undefined && missing > 0) rows.push({ card, missing });
     }
-    return missing;
+    return rows;
   }, [counts, cardsByKey, collection]);
+  const missingCopies = missingCards.reduce((sum, row) => sum + row.missing, 0);
 
   const setCount = (card: Card, count: number) => {
     const base = contentRef.current;
@@ -759,6 +765,8 @@ export function DeckEditor({
                 ? deckTexts.ramLimitsNone
                 : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`
             }
+            missingCards={collectionReady ? missingCards : undefined}
+            wants={wants}
             missingText={
               collectionReady
                 ? deckTexts.missingFromCollection(missingCopies)

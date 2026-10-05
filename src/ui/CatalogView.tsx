@@ -21,6 +21,9 @@ import { CardFilters } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
+import { SortSelect } from './SortSelect';
+import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
+import type { CardSort } from '../domain/cardSort';
 import { CardTable } from './CardTable';
 import { ListToolbar } from './ListToolbar';
 import type { ImageSize } from './ListToolbar';
@@ -48,6 +51,10 @@ function describeResult(active: boolean, shown: number, all: number): Announceme
   return { key: `some:${shown}`, text: texts.filteredLive(shown, all) };
 }
 
+const COLLECTION_FILTER_LABELS = {
+  owned: texts.collectionOwned,
+  missing: texts.collectionMissing,
+} as const;
 const NO_KEYS: ReadonlySet<CardKey> = new Set();
 const NO_NAMES: readonly string[] = [];
 
@@ -112,6 +119,7 @@ export function CatalogView({
   const [view, setView] = useState<CatalogViewMode>('grid');
   // Grid image size (T-050a): session state, not saved.
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
+  const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [editMode, setEditMode] = useState<boolean | null>(null);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const userChose = useRef({ view: false, edit: false });
@@ -155,7 +163,7 @@ export function CatalogView({
     setCollectionFilter('all');
   }
   const collectionFilter: CollectionFilter = collection.phase === 'ready' ? collectionChoice : 'all';
-  const ownedOnly = collectionFilter === 'owned';
+  const listedOnly = collectionFilter === 'owned';
   const visibleCards = (next: CardFilterCriteria, nextFilter: CollectionFilter, nextKept: ReadonlySet<CardKey>) => {
     const matching = filterCards(allCards, next);
     if (nextFilter === 'all') return matching;
@@ -169,6 +177,8 @@ export function CatalogView({
     isFilterActive(next) || nextFilter !== 'all';
 
   const filtered = visibleCards(criteria, collectionFilter, kept);
+  // T-060: the grid follows the shared order; the table sorts the same way itself (header buttons).
+  const sortedForGrid = view === 'grid' ? sortCards(filtered, sort.key, sort.direction) : filtered;
   const filterActive = isActive(criteria, collectionFilter);
 
   // The cards are there from the first render, so the live region starts with the loaded message.
@@ -176,6 +186,7 @@ export function CatalogView({
   const allShown = describeResult(false, allCards.length, allCards.length);
   const announcer = useDelayedAnnouncement(allCards, allShown.key);
   const collectionAnnouncer = useCollectionAnnouncements(announcer, collectionStore, allCards, collection.saveError);
+
   const collectionNotices = loadNotices(collection, repositories.persistent);
   useLoadNoticeAnnouncement(
     announcer,
@@ -269,7 +280,7 @@ export function CatalogView({
   const listCaption = filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
   const noResults = filtered.length === 0;
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
-  const noOwnedCards = noResults && ownedOnly && !isFilterActive(criteria);
+  const noOwnedCards = noResults && listedOnly && !isFilterActive(criteria);
 
   const handleOpenImage = (card: Card, opener: HTMLButtonElement) => {
     preview.hide();
@@ -298,7 +309,7 @@ export function CatalogView({
       : [
           {
             id: 'collection',
-            label: collectionFilter === 'owned' ? texts.collectionOwned : texts.collectionMissing,
+            label: COLLECTION_FILTER_LABELS[collectionFilter],
             onRemove: () => updateFilters(criteria, 'all', 'later'),
           },
         ]),
@@ -412,6 +423,7 @@ export function CatalogView({
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
           />
+          <SortSelect sort={sort} onChange={setSort} />
 
           <ActiveFilters
             filters={activeFilters}
@@ -443,9 +455,11 @@ export function CatalogView({
                 decksOf={decksOf}
                 onOpenImage={handleOpenImage}
                 hoverProps={preview.bind}
+                sort={sort}
+                onSortChange={setSort}
               />
             ) : (
-              <CardList cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+              <CardList cards={sortedForGrid} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
             ))}
         </section>
       </div>
