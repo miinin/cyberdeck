@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { playsetSize } from '../domain/card';
+import { officialRarity } from '../domain/cardSearch';
 import type { Card } from '../domain/card';
 import type { Art } from '../domain/arts';
 import { CardColor, typeBadgeClass } from './CardColor';
@@ -115,7 +116,7 @@ export function CardList({
         <li key={art === null ? card.id : art.artId} className={'card-box card-box--art ' + state}>
           {art === null && artCount > 1 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
           <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} />
-          {items !== undefined && art !== null && <p className="art-label">{art.rarity ?? texts.artBase}</p>}
+          {items !== undefined && art !== null && <p className="art-label">{art.rarity === null ? texts.artBase : officialRarity(art.rarity)}</p>}
           <div className="card-head">
             <dl className="card-cost">
               <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
@@ -148,7 +149,7 @@ export function CardList({
               <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip" />
               <Stat
                 label={texts.columnRarity}
-                value={card.rarity}
+                value={card.rarity === null ? null : officialRarity(card.rarity)}
                 missing={texts.noRarity}
                 className="card-rarity"
                 hideLabel
@@ -164,7 +165,7 @@ export function CardList({
                   card={card}
                   count={artMode ? artOwned : owned.countOf(card)}
                   mode={owned.mode}
-                  label={artMode && art !== null ? texts.artTileName(card.displayName, art.rarity ?? texts.artBase) : undefined}
+                  label={artMode && art !== null ? texts.artTileName(card.displayName, art.rarity === null ? texts.artBase : officialRarity(art.rarity)) : undefined}
                   onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
                   onLimit={owned.onLimit}
                   editable={owned.editable}

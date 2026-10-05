@@ -12,6 +12,7 @@ import {
   numberFilterOptions,
   numberFilterOptionsFor,
   numberOption,
+  officialRarity,
   toggleValue,
 } from './cardSearch';
 import type { CardFilterCriteria } from './cardSearch';
@@ -251,7 +252,7 @@ describe('filterCards: rarity', () => {
   const cardsByRarity = [withRarity('a', 'Common'), withRarity('b', 'Rare'), withRarity('c', null), withRarity('d', 'Epic')];
 
   it('keeps cards of any selected rarity (OR) and drops cards without one', () => {
-    const result = filterCards(cardsByRarity, { ...EMPTY_CRITERIA, rarities: ['Rare', 'Epic'] });
+    const result = filterCards(cardsByRarity, { ...EMPTY_CRITERIA, rarities: ['Rare', 'Epic Rare'] });
     expect(result.map((c) => c.slug)).toEqual(['b', 'd']);
   });
 
@@ -333,5 +334,14 @@ describe('filterCards rarity over printings (D-021)', () => {
     const criteria = { ...EMPTY_CRITERIA, rarities: ['Nova Rare'] };
     expect(filterCards([base], criteria)).toHaveLength(1);
     expect(filterCards([{ ...base, printings: [] }], criteria)).toHaveLength(0);
+  });
+});
+
+describe('officialRarity (T-078)', () => {
+  it('maps Netdeck rarities to the official names', () => {
+    expect(['Epic', 'Secret', 'Iconic Legend', 'Iconic Other', 'Iconic Secret', 'Rare', 'Nova Rare'].map((r) => officialRarity(r))).toEqual([
+      'Epic Rare', 'Secret Rare', 'Iconic Rare', 'Iconic Rare', 'Iconic Rare', 'Rare', 'Nova Rare',
+    ]);
+    expect(officialRarity(null)).toBeNull();
   });
 });

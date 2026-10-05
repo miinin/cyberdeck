@@ -53,7 +53,7 @@ describe('CardVersions gallery', () => {
     expect(tiles).toHaveLength(2);
     expect(within(at(tiles, 0)).getByText('Perus')).toBeInTheDocument();
     expect(within(at(tiles, 0)).getByText('Welcome to Night City · Retail, Beta, FR')).toBeInTheDocument();
-    expect(within(at(tiles, 1)).getByText('Iconic Legend')).toBeInTheDocument();
+    expect(within(at(tiles, 1)).getByText('Iconic Rare')).toBeInTheDocument();
     expect(document.querySelectorAll('img.art-thumb')).toHaveLength(2);
   });
 
@@ -68,7 +68,7 @@ describe('CardVersions gallery', () => {
     setup({ onShowArt });
     const base = screen.getByRole('button', { name: /Näytä kuvitus: Perus|Show art: Base/ });
     expect(base).toHaveAttribute('aria-pressed', 'true');
-    await userEvent.click(screen.getByRole('button', { name: /Näytä kuvitus: Iconic Legend|Show art: Iconic Legend/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Näytä kuvitus: Iconic Rare|Show art: Iconic Rare/ }));
     expect(onShowArt).toHaveBeenCalledWith('/cards/variants/legend.webp');
     await userEvent.click(base);
     expect(onShowArt).toHaveBeenCalledWith(null);
@@ -76,7 +76,7 @@ describe('CardVersions gallery', () => {
 
   it('marks the shown special art as pressed', () => {
     setup({ onShowArt: vi.fn(), shownArt: '/cards/variants/legend.webp' });
-    expect(screen.getByRole('button', { name: /Näytä kuvitus: Iconic Legend|Show art: Iconic Legend/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Näytä kuvitus: Iconic Rare|Show art: Iconic Rare/ })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: /Näytä kuvitus: Perus|Show art: Base/ })).toHaveAttribute('aria-pressed', 'false');
   });
 
