@@ -10,6 +10,9 @@ export interface DeckMessages {
   legendInDeck(name: string): string;
   copiesFull(max: number): string;
   ramOver(ram: number, color: string, limit: number): string;
+  /** Name of a new deck and the export file name of a deck without a name. */
+  defaultDeckName: string;
+  defaultExportFileName: string;
 }
 
 export const deckMessagesFi: DeckMessages = {
@@ -25,6 +28,8 @@ export const deckMessagesFi: DeckMessages = {
   legendInDeck: (name) => `Pakassa on jo Legend ${name}.`,
   copiesFull: (max) => `Pakassa on jo ${max} kopiota.`,
   ramOver: (ram, color, limit) => `RAM ${ram} ylittää ${color}-värin rajan ${limit}.`,
+  defaultDeckName: 'Uusi pakka',
+  defaultExportFileName: 'pakka',
 };
 
 export const deckMessagesEn: DeckMessages = {
@@ -41,6 +46,8 @@ export const deckMessagesEn: DeckMessages = {
   legendInDeck: (name) => `The deck already has the Legend ${name}.`,
   copiesFull: (max) => `The deck already has ${max} copies.`,
   ramOver: (ram, color, limit) => `RAM ${ram} exceeds the ${color} limit of ${limit}.`,
+  defaultDeckName: 'New deck',
+  defaultExportFileName: 'deck',
 };
 
 let active: DeckMessages = deckMessagesFi;

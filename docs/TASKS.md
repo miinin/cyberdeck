@@ -70,4 +70,6 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-063 | Jakonäkymässä tradeable, kun määrä ylittää pelisarjan | 1 | Should | PM | Done | – |
 | T-064 | Want-listan tietomalli (tallennus, synkka, Firestore-säännöt) ja kokoelman jakolinkin ADR – käyttäjä päätti 2026-10-05: suunnitellaan ensin | 1 | Must | Arkkitehti | Done | Digiturva ✓ |
 | T-065 | Have/Want omaksi osioksi, Kortit-näkymään yksi laskuri | 1 | Must | PM | Done | – |
-| T-066 | Puuttuvien massalisäys wantiin (Kortit, Pakat, editori), select- ja suodatinpainikkeiden viimeistely | 1 | Must | PM | Review | – |
+| T-066 | Puuttuvien massalisäys wantiin (Kortit, Pakat, editori), select- ja suodatinpainikkeiden viimeistely | 1 | Must | PM | Done | – |
+| T-067 | Have/Want kuvaruudukkona, järjestys ja kuvakoko | 1 | Must | PM | Done | – |
+| T-068 | Englanninkielinen käyttöliittymä, FI/EN-valitsin (D-019) | 1 | Must | PM | Review | – |
