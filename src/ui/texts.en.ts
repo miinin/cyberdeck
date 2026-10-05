@@ -105,6 +105,8 @@ export const textsEn: typeof textsFi = {
   versionFrench: 'FR',
   versionFrenchSpoken: 'French',
   versionNumber: (n: string) => `no. ${n}`,
+  versionShowArt: (name: string) => `Show image: ${name}`,
+  versionBaseArt: 'Base image',
   detailTradeable: (n: number) => `Tradeable: ${n}`,
   detailDecks: 'In decks',
   detailNoDecks: 'The card is not in any deck.',

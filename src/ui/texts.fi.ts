@@ -120,6 +120,8 @@ export const textsFi = {
   versionFrench: 'FR',
   versionFrenchSpoken: 'ranskankielinen',
   versionNumber: (n: string) => `nro ${n}`,
+  versionShowArt: (name: string) => `Näytä kuva: ${name}`,
+  versionBaseArt: 'Peruskuva',
   detailTradeable: (n: number) => `Vaihdettavissa: ${n}`,
   detailDecks: 'Pakoissa',
   detailNoDecks: 'Kortti ei ole missään pakassa.',

@@ -15,8 +15,12 @@ export interface CardVersionsProps {
   editable: boolean;
   onChange: (printing: PrintingKey, count: number) => void;
   onLimit: (card: Card) => void;
-  /** Own image of a printing, or null. Default: the bundled variant images. */
-  imageUrl?: (imageKey: string) => string | null;
+  /** Art of a printing's rarity, or null. Default: the bundled variant images. */
+  imageUrl?: (cardKey: string, rarity: string | null) => string | null;
+  /** The art now shown in the enlarged image, or null for the base image. */
+  shownArt?: string | null;
+  /** Shows the art in the enlarged image; null returns to the base image. Without it the thumbnails are plain pictures. */
+  onShowArt?: (url: string | null) => void;
 }
 
 interface SetGroup {
@@ -39,7 +43,7 @@ function groupBySet(printings: readonly Printing[]): SetGroup[] {
  * The "Versiot" section of the card details (D-020): the printings grouped by set, each with its own counter,
  * and the copies whose version is not known. Names and numbers are React text, never HTML.
  */
-export function CardVersions({ card, count, versionCount, editable, onChange, onLimit, imageUrl = variantImageUrl }: CardVersionsProps) {
+export function CardVersions({ card, count, versionCount, editable, onChange, onLimit, imageUrl = variantImageUrl, shownArt = null, onShowArt }: CardVersionsProps) {
   const printings = card.printings ?? [];
   if (printings.length === 0) return null;
   const known = printings.reduce((sum, printing) => sum + versionCount(printing.key), 0);
@@ -48,6 +52,11 @@ export function CardVersions({ card, count, versionCount, editable, onChange, on
   return (
     <section aria-labelledby="card-detail-versions" className="card-versions">
       <h3 id="card-detail-versions">{texts.versionsHeading}</h3>
+      {shownArt !== null && onShowArt !== undefined && (
+        <button type="button" className="button-secondary version-base-art" onClick={() => onShowArt(null)}>
+          {texts.versionBaseArt}
+        </button>
+      )}
       {groupBySet(printings).map((group) => (
         <div key={group.setCode} role="group" aria-label={group.setName} className="version-set">
           <h4>{group.setName}</h4>
@@ -55,12 +64,17 @@ export function CardVersions({ card, count, versionCount, editable, onChange, on
             {group.printings
               .filter((printing) => editable || versionCount(printing.key) > 0)
               .map((printing) => {
-              const url = imageUrl(printing.imageKey);
+              const url = imageUrl(card.key, printing.rarity);
               const name = `${group.setName} ${texts.versionNumber(printing.number)}`;
               const n = versionCount(printing.key);
               return (
                 <li key={printing.key} className="version-row">
-                  {url !== null && <img className="version-thumb" src={url} alt="" loading="lazy" width={36} height={50} />}
+                  {url !== null && onShowArt === undefined && <img className="version-thumb" src={url} alt="" loading="lazy" width={36} height={50} />}
+                  {url !== null && onShowArt !== undefined && (
+                    <button type="button" className="version-thumb-button" aria-label={texts.versionShowArt(name)} aria-pressed={shownArt === url} onClick={() => onShowArt(url)}>
+                      <img className="version-thumb" src={url} alt="" loading="lazy" width={36} height={50} />
+                    </button>
+                  )}
                   <span className="version-info">
                     <span className="version-number">{printing.number}</span>
                     {printing.rarity !== null && <span className="version-rarity">{printing.rarity}</span>}
