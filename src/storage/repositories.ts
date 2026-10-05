@@ -6,9 +6,19 @@
  */
 import { isCardKey } from '../domain/cardKey';
 import type { CardKey } from '../domain/cardKey';
-import { countOf, EMPTY_COLLECTION, MAX_COLLECTION_COUNT, MAX_COLLECTION_ENTRIES, withCount } from '../domain/collection';
+import {
+  countOf,
+  EMPTY_COLLECTION,
+  MAX_COLLECTION_COUNT,
+  MAX_COLLECTION_ENTRIES,
+  minCountOf,
+  setVersionCount,
+  withCount,
+} from '../domain/collection';
+import { isPrintingKey } from '../domain/printing';
 import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
+import type { PrintingKey } from '../domain/printing';
 import type { Deck, DeckContent, DeckId } from '../domain/deck';
 import { isUid } from '../domain/uid';
 import { isDeckId, parseCollection, parseDeckContent, parseDeckList } from '../domain/validate';
@@ -314,7 +324,28 @@ export function createRepositories(options: RepositoryOptions): Repositories {
           if (count > 0 && countOf(current, card) === 0 && current.entries.length >= MAX_COLLECTION_ENTRIES) {
             throw new StorageError('limit-reached', 'Collection is full');
           }
+          if (count < minCountOf(current, card)) {
+            throw new StorageError('invalid-input', 'Count is below the total of the versions');
+          }
           const next = withCount(current, card, count);
+          return { next, result: next };
+        });
+      },
+      setVersionCount: async (card: CardKey, printing: PrintingKey, count: number) => {
+        if (!isCardKey(card) || !isPrintingKey(printing) || !Number.isInteger(count) || count < 0 || count > MAX_COLLECTION_COUNT) {
+          throw new StorageError('invalid-input', 'Invalid card key, printing key or count');
+        }
+        return mutate(aggregate, (current) => {
+          if (count > 0 && countOf(current, card) === 0 && current.entries.length >= MAX_COLLECTION_ENTRIES) {
+            throw new StorageError('limit-reached', 'Collection is full');
+          }
+          let next;
+          try {
+            next = setVersionCount(current, card, printing, count);
+          } catch (error) {
+            if (error instanceof RangeError) throw new StorageError('invalid-input', error.message);
+            throw error;
+          }
           return { next, result: next };
         });
       },

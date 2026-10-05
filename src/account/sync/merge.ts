@@ -4,7 +4,7 @@
  * document was invalid: the caller passes those ids separately and the local copy stays (SR-23 kohta 3).
  */
 import { compareCardKeys } from '../../domain/collection';
-import type { Collection, CollectionEntry } from '../../domain/collection';
+import type { Collection, CollectionEntry, Versions } from '../../domain/collection';
 import type { Deck, DeckId } from '../../domain/deck';
 
 export interface DeckMerge {
@@ -77,8 +77,30 @@ function toMap(collection: Collection): Map<string, number> {
   return new Map(collection.entries.map((entry) => [entry.card, entry.count]));
 }
 
+function versionMap(collection: Collection): Map<string, Versions> {
+  return new Map(collection.entries.map((entry) => [entry.card, entry.versions ?? {}]));
+}
+
+/** Per printing, the same rule as for counts; then the sum is cut down to `count` (D-020: the sum never exceeds the count). */
+function mergeVersions(mine: Versions, theirs: Versions, base: Versions, count: number): Versions | undefined {
+  const keys = [...new Set([...Object.keys(mine), ...Object.keys(theirs), ...Object.keys(base)])].sort();
+  const result: Record<string, number> = {};
+  let room = count;
+  for (const key of keys) {
+    const m = mine[key] ?? 0;
+    const b = base[key] ?? 0;
+    const n = Math.min(m !== b ? m : (theirs[key] ?? 0), room);
+    if (n > 0) {
+      result[key] = n;
+      room -= n;
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 /**
- * Per card: only one side changed → that side; both changed → the local count. A cloud collection that is
+ * Per card: only one side changed → that side; both changed → the local count. The breakdown by printing is
+ * merged per printing the same way and limited to the count. A cloud collection that is
  * invalid (`cloud` null) is never overwritten: the result is the local collection and nothing is written.
  */
 export function mergeCollection(local: Collection, cloud: Collection | null, base: Collection): CollectionMerge {
@@ -86,6 +108,9 @@ export function mergeCollection(local: Collection, cloud: Collection | null, bas
   const mine = toMap(local);
   const theirs = toMap(cloud);
   const before = toMap(base);
+  const mineVersions = versionMap(local);
+  const theirVersions = versionMap(cloud);
+  const baseVersions = versionMap(base);
   const cards = new Set([...mine.keys(), ...theirs.keys(), ...before.keys()]);
   const entries: CollectionEntry[] = [];
   for (const card of cards) {
@@ -93,16 +118,27 @@ export function mergeCollection(local: Collection, cloud: Collection | null, bas
     const t = theirs.get(card) ?? 0;
     const b = before.get(card) ?? 0;
     const count = m !== b ? m : t;
-    if (count > 0) entries.push({ card, count });
+    if (count <= 0) continue;
+    const versions = mergeVersions(mineVersions.get(card) ?? {}, theirVersions.get(card) ?? {}, baseVersions.get(card) ?? {}, count);
+    entries.push(versions === undefined ? { card, count } : { card, count, versions });
   }
   entries.sort((a, b) => compareCardKeys(a.card, b.card));
   const merged: Collection = { entries };
   return { collection: merged, writeCloud: !sameCollection(merged, cloud) };
 }
 
+function sameVersions(a: Versions | undefined, b: Versions | undefined): boolean {
+  const left = Object.entries(a ?? {});
+  const right = b ?? {};
+  return left.length === Object.keys(right).length && left.every(([key, n]) => right[key] === n);
+}
+
 export function sameCollection(a: Collection, b: Collection): boolean {
   return (
     a.entries.length === b.entries.length &&
-    a.entries.every((entry, index) => entry.card === b.entries[index]?.card && entry.count === b.entries[index]?.count)
+    a.entries.every((entry, index) => {
+      const other = b.entries[index];
+      return entry.card === other?.card && entry.count === other.count && sameVersions(entry.versions, other.versions);
+    })
   );
 }

@@ -131,7 +131,13 @@ export function encodeCollectionDoc(collection: Collection, savedAt: string, spe
   return {
     schemaVersion: spec.currentVersion,
     savedAt,
-    data: { entries: collection.entries.map((entry) => ({ card: entry.card, count: entry.count })) },
+    data: {
+      entries: collection.entries.map((entry) =>
+        entry.versions === undefined
+          ? { card: entry.card, count: entry.count }
+          : { card: entry.card, count: entry.count, versions: { ...entry.versions } },
+      ),
+    },
   };
 }
 

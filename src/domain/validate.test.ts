@@ -353,3 +353,37 @@ describe('parseDeckList', () => {
     expect(result?.dropped).toBe(1);
   });
 });
+
+describe('parseCollection versions (D-020)', () => {
+  const A = 'welcometonightcityretail:005a';
+  const parse = (versions: unknown, count = 3) => parseCollection({ entries: [{ card: 'detonate', count, versions }] });
+
+  it('keeps a valid breakdown and accepts old rows without one', () => {
+    expect(parse({ [A]: 2 })?.value.entries).toEqual([{ card: 'detonate', count: 3, versions: { [A]: 2 } }]);
+    expect(parseCollection({ entries: [{ card: 'detonate', count: 3 }] })?.value.entries).toEqual([{ card: 'detonate', count: 3 }]);
+    expect(parse(undefined)?.dropped).toBe(0);
+  });
+
+  it('drops invalid keys and counts one by one', () => {
+    const parsed = parse({ [A]: 1, 'bad key': 1, 'x:1': 0, 'y:1': 1.5, 'z:1': '1' });
+    expect(parsed?.value.entries).toEqual([{ card: 'detonate', count: 3, versions: { [A]: 1 } }]);
+    expect(parsed?.dropped).toBe(4);
+  });
+
+  it('drops the whole breakdown when the sum is above the count or it has the wrong shape', () => {
+    for (const bad of [{ [A]: 4 }, [1], 'x', null, 5]) {
+      const parsed = parse(bad);
+      expect(parsed?.value.entries).toEqual([{ card: 'detonate', count: 3 }]);
+      expect(parsed?.dropped).toBe(1);
+    }
+  });
+
+  it('drops a breakdown of more than 32 printings and ignores prototype keys', () => {
+    const many = Object.fromEntries(Array.from({ length: 33 }, (_, i) => [`s:${i}`, 1]));
+    expect(parse(many, 100)?.value.entries).toEqual([{ card: 'detonate', count: 100 }]);
+    const proto = JSON.parse('{"__proto__":1,"constructor":1}') as unknown;
+    const parsed = parse(proto);
+    expect(parsed?.value.entries).toEqual([{ card: 'detonate', count: 3 }]);
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+});

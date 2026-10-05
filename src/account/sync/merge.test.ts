@@ -1,6 +1,6 @@
 import type { Collection } from '../../domain/collection';
 import type { Deck } from '../../domain/deck';
-import { mergeCollection, mergeDecks } from './merge';
+import { mergeCollection, mergeDecks, sameCollection } from './merge';
 
 function deck(id: string, updatedAt: string, name = id, createdAt = '2026-10-01T00:00:00.000Z'): Deck {
   return { id, name, sections: [{ name: '', cards: [{ card: 'detonate', count: 1 }] }], createdAt, updatedAt };
@@ -110,5 +110,43 @@ describe('mergeCollection', () => {
 
   it('never writes over an invalid cloud collection', () => {
     expect(mergeCollection(col(['a', 1]), null, col())).toEqual({ collection: col(['a', 1]), writeCloud: false });
+  });
+});
+
+describe('mergeCollection versions (D-020)', () => {
+  const A = 'set:001';
+  const B = 'set:002';
+  const withVersions = (card: string, count: number, versions: Record<string, number>): Collection => ({
+    entries: [{ card, count, versions }],
+  });
+
+  it('takes the cloud breakdown when only the cloud changed it', () => {
+    const result = mergeCollection(col(['a', 3]), withVersions('a', 3, { [A]: 2 }), col(['a', 3]));
+    expect(result.collection).toEqual(withVersions('a', 3, { [A]: 2 }));
+    expect(result.writeCloud).toBe(false);
+  });
+
+  it('merges per printing: the local change wins for its printing, the cloud change for the other', () => {
+    const result = mergeCollection(
+      withVersions('a', 4, { [A]: 2, [B]: 1 }),
+      withVersions('a', 4, { [A]: 1, [B]: 3 }),
+      withVersions('a', 4, { [A]: 1, [B]: 1 }),
+    );
+    // A: local changed (2). B: only the cloud changed (3). Count: only... local and cloud both 4 = base.
+    expect(result.collection).toEqual(withVersions('a', 4, { [A]: 2, [B]: 2 }));
+    expect(result.writeCloud).toBe(true);
+  });
+
+  it('cuts the sum down to the count', () => {
+    const result = mergeCollection(col(['a', 1]), withVersions('a', 3, { [A]: 3 }), col(['a', 3]));
+    expect(result.collection).toEqual(withVersions('a', 1, { [A]: 1 }));
+  });
+
+  it('treats a changed breakdown as a change when writing to the cloud', () => {
+    const local = withVersions('a', 2, { [A]: 1 });
+    const result = mergeCollection(local, col(['a', 2]), col(['a', 2]));
+    expect(result.collection).toEqual(local);
+    expect(result.writeCloud).toBe(true);
+    expect(sameCollection(local, col(['a', 2]))).toBe(false);
   });
 });

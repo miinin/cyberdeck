@@ -6,7 +6,9 @@
 import { isCardKey, RESERVED_OBJECT_KEYS } from './cardKey';
 import type { CardKey } from './cardKey';
 import { compareCardKeys, MAX_COLLECTION_COUNT, MAX_COLLECTION_ENTRIES } from './collection';
-import type { Collection, CollectionEntry } from './collection';
+import type { Collection, CollectionEntry, Versions } from './collection';
+import { isPrintingKey, MAX_VERSIONS_PER_CARD } from './printing';
+import type { PrintingKey } from './printing';
 import {
   MAX_DECK_CARD_COUNT,
   MAX_DECK_DISTINCT_CARDS,
@@ -61,7 +63,32 @@ function parseTimestamp(value: unknown): string {
   return Number.isFinite(time) ? new Date(time).toISOString() : EPOCH_TIMESTAMP;
 }
 
-/** `{ entries: [{ card, count }] }`. Returns null when the root shape is wrong. */
+/**
+ * The breakdown by printing of an entry with `count` copies (D-020). Counts the entries left out; when the
+ * breakdown as a whole is not valid (not an object, more than 32 printings, sum above count) it is dropped
+ * and the count stays.
+ */
+function parseVersions(raw: unknown, count: number): { value: Versions | undefined; dropped: number } {
+  if (raw === undefined) return { value: undefined, dropped: 0 };
+  if (!isRecord(raw)) return { value: undefined, dropped: 1 };
+  const pairs = Object.entries(raw);
+  if (pairs.length > MAX_VERSIONS_PER_CARD) return { value: undefined, dropped: 1 };
+  const versions: Record<PrintingKey, number> = {};
+  let dropped = 0;
+  let total = 0;
+  for (const [key, n] of pairs) {
+    if (!isPrintingKey(key) || !isCount(n, 1, MAX_COLLECTION_COUNT)) {
+      dropped += 1;
+      continue;
+    }
+    versions[key] = n;
+    total += n;
+  }
+  if (total > count) return { value: undefined, dropped: 1 };
+  return { value: Object.keys(versions).length > 0 ? versions : undefined, dropped };
+}
+
+/** `{ entries: [{ card, count, versions? }] }`. Returns null when the root shape is wrong. */
 export function parseCollection(raw: unknown): Parsed<Collection> | null {
   if (!isRecord(raw) || !Array.isArray(raw.entries)) return null;
   const input: unknown[] = raw.entries;
@@ -80,7 +107,13 @@ export function parseCollection(raw: unknown): Parsed<Collection> | null {
       continue;
     }
     seen.add(item.card);
-    entries.push({ card: item.card, count: item.count });
+    const versions = parseVersions(item.versions, item.count);
+    dropped += versions.dropped;
+    entries.push(
+      versions.value === undefined
+        ? { card: item.card, count: item.count }
+        : { card: item.card, count: item.count, versions: versions.value },
+    );
   }
 
   entries.sort((a, b) => compareCardKeys(a.card, b.card));

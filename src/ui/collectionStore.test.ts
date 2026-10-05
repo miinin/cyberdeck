@@ -29,6 +29,7 @@ function controlledRepository(initial?: Record<string, string>) {
   const listeners = new Set<() => void>();
   const repository: CollectionRepository = {
     load: () => base.load(),
+    setVersionCount: (card, printing, count) => base.setVersionCount(card, printing, count),
     setCount: (card, count) =>
       new Promise<Collection>((resolve, reject) => {
         pending.push({
@@ -113,6 +114,7 @@ describe('createCollectionStore: loading', () => {
     const repository: CollectionRepository = {
       load: async () => ({ value: { entries: [] }, notices }),
       setCount: async () => ({ entries: [] }),
+      setVersionCount: async () => ({ entries: [] }),
       subscribe: () => () => {},
     };
     const { store } = await started(repository);
@@ -130,7 +132,7 @@ describe('createCollectionStore: loading', () => {
       .fn<CollectionRepository['load']>()
       .mockRejectedValueOnce(new StorageError('unavailable', 'blocked'))
       .mockResolvedValueOnce({ value: { entries: [{ card: 'v-streetkid', count: 1 }] }, notices: [] });
-    const { store } = await started({ load, setCount: vi.fn(), subscribe: () => () => {} });
+    const { store } = await started({ load, setCount: vi.fn(), setVersionCount: vi.fn(), subscribe: () => () => {} });
     expect(store.getSnapshot().phase).toBe('unavailable');
     expect(console.error).toHaveBeenCalledTimes(1);
 
@@ -147,7 +149,7 @@ describe('createCollectionStore: loading', () => {
       .fn<CollectionRepository['load']>()
       .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
       .mockResolvedValueOnce({ value: { entries: [{ card: 'b', count: 2 }] }, notices: [] });
-    const store = createCollectionStore({ load, setCount: vi.fn(), subscribe: () => () => {} });
+    const store = createCollectionStore({ load, setCount: vi.fn(), setVersionCount: vi.fn(), subscribe: () => () => {} });
     store.start();
     store.dispose();
     store.start();

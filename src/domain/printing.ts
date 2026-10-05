@@ -13,10 +13,8 @@ export const MAX_PRINTINGS_PER_CARD = 100;
 export const MAX_VERSIONS_PER_CARD = 32;
 
 export function isPrintingKey(value: unknown): value is PrintingKey {
-  return typeof value === 'string' && PRINTING_KEY_PATTERN.test(value) && !RESERVED.has(value);
+  return typeof value === 'string' && PRINTING_KEY_PATTERN.test(value);
 }
-
-const RESERVED = new Set(['__proto__:0', 'constructor:0']);
 
 /** The collector number with the beta sign (β) removed. */
 export function stripBeta(number: string): string {
