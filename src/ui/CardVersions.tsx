@@ -102,11 +102,12 @@ export function CardVersions({
                 picture
               )}
               <span className="art-name">{art.rarity === null ? name : <RaritySymbol rarity={art.rarity} showName />}</span>
-              <span className="art-sets">
+              <span className="art-sets" title={setLines(art.printings).join('; ')}>
                 {setLines(art.printings).map((line) => (
                   <span key={line} className="art-set">{line}</span>
                 ))}
               </span>
+              <div className="art-count">
               <CountControl
                 card={card}
                 kind="version"
@@ -121,6 +122,7 @@ export function CardVersions({
                 }}
                 onLimit={onLimit}
               />
+              </div>
               <details className="art-breakdown">
                 <summary>{texts.artBreakdown}</summary>
                 <ul className="version-list">

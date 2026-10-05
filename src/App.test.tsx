@@ -22,6 +22,17 @@ const cards: Card[] = [
 ];
 
 describe('App', () => {
+  it('opens the card details from #/kortti/<key> and ignores an unknown key (T-081)', async () => {
+    window.location.hash = '#/kortti/nope';
+    const first = render(<App cards={cards} repositories={createMemoryRepositories()} />);
+    expect(document.querySelector('dialog[open]')).toBeNull();
+    first.unmount();
+    window.location.hash = '#/kortti/v-streetkid';
+    render(<App cards={cards} repositories={createMemoryRepositories()} />);
+    expect(await screen.findByRole('heading', { level: 2, name: /Streetkid/ })).toBeInTheDocument();
+    window.location.hash = '';
+  });
+
   it('has the landmarks and footer notices', () => {
     render(<App cards={cards} repositories={createMemoryRepositories()} />);
 

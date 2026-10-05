@@ -4974,3 +4974,169 @@ section[aria-labelledby='have-heading'] {
 .options-even.options-rarity {
   grid-template-columns: minmax(0, 1fr);
 }
+
+/* T-081: version arrows on the card box picture. Always visible on touch; on a mouse they show on hover and focus. */
+.card-picture {
+  position: relative;
+}
+
+.version-step {
+  position: absolute;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.version-step--prev {
+  inset-inline-start: var(--space-1);
+}
+
+.version-step--next {
+  inset-inline-end: var(--space-1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .version-step {
+    opacity: 0;
+  }
+
+  .card-picture:hover .version-step,
+  .card-picture:focus-within .version-step {
+    opacity: 1;
+  }
+}
+
+.card-picture .art-count-badge {
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+/* T-081: the card details fit the viewport height; the image never exceeds it. */
+.card-dialog-image {
+  width: auto;
+  max-width: 100%;
+  max-height: 60dvh;
+  object-fit: contain;
+}
+
+.card-dialog:not(.has-details) .card-dialog-image {
+  max-height: calc(100dvh - 9rem);
+}
+
+.art-thumb {
+  height: 7rem;
+  object-fit: contain;
+}
+
+.art-sets {
+  height: calc(2 * 1.3em);
+  line-height: 1.3;
+  overflow: hidden;
+}
+
+.art-count {
+  margin-block-start: auto;
+}
+
+.art-gallery {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr));
+  align-items: stretch;
+}
+
+.card-dialog-details .detail-collection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.card-dialog-details .detail-collection h3 {
+  flex: 1 0 100%;
+}
+
+.card-dialog-details .detail-collection p {
+  margin: 0;
+}
+
+@media (min-width: 64rem) {
+  .card-dialog.has-details .card-dialog-body {
+    box-sizing: border-box;
+    width: min(100rem, 100%);
+    min-height: calc(100dvh - 2 * var(--space-3));
+    padding: var(--space-3);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: var(--space-4);
+  }
+
+  .card-dialog.has-details .card-dialog-header {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: var(--space-2);
+  }
+
+  .card-dialog.has-details .card-dialog-content {
+    display: contents;
+  }
+
+  .card-dialog.has-details .card-dialog-image {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    height: calc(100dvh - 4 * var(--space-3) - 2px);
+    max-height: none;
+  }
+
+  .card-dialog.has-details .card-dialog-details {
+    grid-column: 2;
+    grid-row: 2;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2) var(--space-4);
+    align-content: start;
+  }
+
+  .card-dialog.has-details .card-dialog-details > .detail-collection,
+  .card-dialog.has-details .card-dialog-details > .card-versions {
+    grid-column: 1 / -1;
+  }
+
+  .card-dialog-details .art-thumb {
+    height: 6rem;
+  }
+
+  .card-dialog-details .art-tile {
+    position: relative;
+  }
+
+  .card-dialog-details .art-pick {
+    min-height: 0;
+  }
+
+  .card-dialog-details .art-breakdown summary {
+    min-height: 32px;
+  }
+
+  /* The breakdown opens over the neighbours' space, so no tile changes size or moves. */
+  .card-dialog-details .art-breakdown[open] .version-list {
+    position: absolute;
+    inset-inline: 0;
+    z-index: 2;
+    padding: var(--space-1);
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-bg);
+    min-width: 12rem;
+  }
+}

@@ -66,9 +66,9 @@ describe('CardVersions gallery', () => {
   it('selects an art with aria-pressed and shows its picture', async () => {
     const onShowArt = vi.fn();
     setup({ onShowArt });
-    const base = screen.getByRole('button', { name: /Näytä kuvitus: Perus|Show art: Base/ });
+    const base = screen.getByRole('button', { name: /Näytä versio: Perus|Show version: Base/ });
     expect(base).toHaveAttribute('aria-pressed', 'true');
-    await userEvent.click(screen.getByRole('button', { name: /Näytä kuvitus: Iconic Rare|Show art: Iconic Rare/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Näytä versio: Iconic Rare|Show version: Iconic Rare/ }));
     expect(onShowArt).toHaveBeenCalledWith('/cards/variants/legend.webp');
     await userEvent.click(base);
     expect(onShowArt).toHaveBeenCalledWith(null);
@@ -76,8 +76,8 @@ describe('CardVersions gallery', () => {
 
   it('marks the shown special art as pressed', () => {
     setup({ onShowArt: vi.fn(), shownArt: '/cards/variants/legend.webp' });
-    expect(screen.getByRole('button', { name: /Näytä kuvitus: Iconic Rare|Show art: Iconic Rare/ })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: /Näytä kuvitus: Perus|Show art: Base/ })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: /Näytä versio: Iconic Rare|Show version: Iconic Rare/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Näytä versio: Perus|Show version: Base/ })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('changes an art with its counter', async () => {
