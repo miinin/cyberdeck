@@ -52,6 +52,7 @@ export const deckTextsFi = {
   rename: 'Nimeä uudelleen',
   copy: 'Kopioi',
   remove: 'Poista',
+  removeDeck: 'Poista pakka',
   /** Accessible names: the button text plus the deck name. */
   forDeck: (action: string, name: string) => `${action}: ${name}`,
   counts: (legends: number, main: number) =>
@@ -249,6 +250,7 @@ export const deckTextsFi = {
   reloadedLatest: 'Pakka päivitettiin toisaalta tehdyillä muutoksilla.',
 
   // Export (T-015)
+  exportAndShare: 'Vie ja jaa',
   exportJson: 'Vie .json',
   exportTxt: 'Vie .txt',
 

@@ -82,7 +82,7 @@ describe('Pakat list', () => {
     const repositories = renderDecks(
       createMemoryRepositories({ initial: storedDecks([{ id: 'a', name: 'Oma', cards: [] }]) }),
     );
-    const opener = await screen.findByRole('button', { name: 'Poista: Oma' });
+    const opener = await screen.findByRole('button', { name: 'Poista pakka: Oma' });
     await user.click(opener);
     const dialog = screen.getByRole('dialog', { name: 'Poistetaanko pakka?' });
     await user.click(within(dialog).getByRole('button', { name: 'Peruuta' }));

@@ -68,6 +68,7 @@ export const deckTextsEn: typeof deckTextsFi = {
   rename: 'Rename',
   copy: 'Copy',
   remove: 'Delete',
+  removeDeck: 'Delete deck',
   forDeck: (action: string, name: string) => `${action}: ${name}`,
   counts: (legends: number, main: number) =>
     `Legends ${legends}/${LEGEND_COUNT} · Main deck ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
@@ -237,6 +238,7 @@ export const deckTextsEn: typeof deckTextsFi = {
   conflictKeepMine: 'Keep my changes',
   reloadedLatest: 'The deck was updated with changes made elsewhere.',
 
+  exportAndShare: 'Export and share',
   exportJson: 'Export .json',
   exportTxt: 'Export .txt',
 

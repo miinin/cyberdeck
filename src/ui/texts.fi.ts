@@ -292,9 +292,9 @@ export const textsFi = {
   haveRow: (tradeable: number) => `vaihdettavissa ${tradeable}`,
   haveOwnedRow: (owned: number) => `omistettu ${owned}`,
   // Trade link (T-062, T-063)
-  tradeShareButton: 'Jaa kokoelma ja want',
+  tradeShareButton: 'Jaa Have/Want',
   tradeShareNote: 'Linkin saaja näkee koko kokoelmasi ja want-listasi.',
-  tradeShareCopied: 'Vaihtolinkki kopioitu',
+  tradeShareCopied: 'Linkki kopioitu leikepöydälle',
   tradeShareCopyFailed: 'Kopiointi ei onnistunut. Kopioi linkki tästä:',
   tradeShareLinkLabel: 'Vaihtolinkki',
   tradeShareTooBig: 'Kokoelma on liian suuri linkkiin',
