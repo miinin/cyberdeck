@@ -177,7 +177,7 @@ export function CardFilters({
         <div className="fieldsets">
           <fieldset aria-describedby="filter-hint">
             <legend>{texts.typeLegend}</legend>
-            <div className="options">
+            <div className="options options-even">
               {typeOptions.map((type) => (
                 <label key={type} className="option">
                   <input
@@ -195,7 +195,7 @@ export function CardFilters({
 
           <fieldset aria-describedby="filter-hint">
             <legend>{texts.colorLegend}</legend>
-            <div className="options">
+            <div className="options options-even">
               {colorOptions.map((color) => (
                 <label key={color} className="option option-color">
                   <input
@@ -215,7 +215,7 @@ export function CardFilters({
 
           <fieldset aria-describedby="filter-hint">
             <legend>{texts.rarityLegend}</legend>
-            <div className="options">
+            <div className="options options-even">
               {rarityOptions.map((rarity) => (
                 <label key={rarity} className="option">
                   <input

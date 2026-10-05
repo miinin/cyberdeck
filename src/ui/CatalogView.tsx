@@ -3,6 +3,7 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf } from '../domain/collection';
+import type { MissingRow } from '../domain/wants';
 import { StorageError, isStoragePersisted, requestPersistentStorage } from '../storage';
 import type { CatalogViewMode, Repositories } from '../storage';
 import {
@@ -21,6 +22,7 @@ import { CardFilters } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
+import { AddMissingToWantsButton } from './AddMissingToWants';
 import { SortSelect } from './SortSelect';
 import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
 import type { CardSort } from '../domain/cardSort';
@@ -39,6 +41,7 @@ import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
 import { useCollection } from './useCollection';
+import { useWants } from './useWants';
 import { useDecks } from './useDecks';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
@@ -92,6 +95,7 @@ export function CatalogView({
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
+  const wants = useWants(repositories.wants);
   // Which decks each card is in (T-013). Decks that cannot be read just leave the mention out.
   const { phase: decksPhase, decks } = useDecks(repositories.decks);
   const decksByCard = useMemo(() => {
@@ -180,6 +184,14 @@ export function CatalogView({
   // T-060: the grid follows the shared order; the table sorts the same way itself (header buttons).
   const sortedForGrid = view === 'grid' ? sortCards(filtered, sort.key, sort.direction) : filtered;
   const filterActive = isActive(criteria, collectionFilter);
+  // T-066: shown cards short of a playset, for "add missing to wants".
+  const missingRows: MissingRow[] = [];
+  if (collection.phase === 'ready') {
+    for (const card of filtered) {
+      const missing = playsetSize(card) - countIn(collection, card.key);
+      if (missing > 0) missingRows.push({ card: card.key, missing });
+    }
+  }
 
   // The cards are there from the first render, so the live region starts with the loaded message.
   // It already tells the unfiltered result, so that result is not announced again right away.
@@ -423,7 +435,14 @@ export function CatalogView({
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
           />
-          <SortSelect sort={sort} onChange={setSort} />
+          <div className="sort-row">
+            <SortSelect sort={sort} onChange={setSort} />
+            {collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
+              <div className="missing-add">
+                <AddMissingToWantsButton rows={missingRows} wants={wants} />
+              </div>
+            )}
+          </div>
 
           <ActiveFilters
             filters={activeFilters}

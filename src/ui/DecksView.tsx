@@ -16,9 +16,11 @@ import {
   validateDeck,
 } from '../domain/deckRules';
 import type { CardsByKey, ColorShare, DeckGroups } from '../domain/deckRules';
+import type { MissingRow } from '../domain/wants';
 import { StorageError } from '../storage';
 import type { LoadNotice, Repositories, StorageErrorKind } from '../storage';
 import { CardColor } from './CardColor';
+import { AddMissingToWantsButton } from './AddMissingToWants';
 import { countIn } from './collectionStore';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 import { DeckCardImage } from './DeckList';
@@ -27,6 +29,8 @@ import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
 import { useCollection } from './useCollection';
 import { useDecks } from './useDecks';
+import { useWants } from './useWants';
+import type { WantsHandle } from './useWants';
 
 const dateFormat = new Intl.DateTimeFormat('fi-FI', { dateStyle: 'short', timeStyle: 'short' });
 
@@ -61,17 +65,20 @@ function DeckCardSummary({
   deck,
   cardsByKey,
   ownedOf,
+  wants,
 }: {
   deck: Deck;
   cardsByKey: CardsByKey;
   /** Copies in the collection, or null when the collection cannot be compared. */
   ownedOf: (key: string) => number | null;
+  wants: WantsHandle;
 }) {
   const totals = deckTotals(deck, cardsByKey);
   const errors = errorsOf(validateDeck(deck, cardsByKey)).length;
   const grouped = groupDeck(deck, cardsByKey);
   const colors = deckColors(grouped, colorDistribution(deck, cardsByKey));
   const mainState = totals.main < MIN_MAIN_DECK ? 'under' : totals.main > MAX_MAIN_DECK ? 'over' : 'ok';
+  const missingRows: MissingRow[] = [];
   let missing: number | null = 0;
   let copies = 0;
   for (const [key, count] of deckCounts(deck)) {
@@ -79,7 +86,10 @@ function DeckCardSummary({
     copies += count;
     const have = ownedOf(key);
     if (have === null) missing = null;
-    else if (missing !== null) missing += Math.max(0, count - have);
+    else if (missing !== null && count > have) {
+      missing += count - have;
+      missingRows.push({ card: key, missing: count - have });
+    }
   }
   const emptySlots = Math.max(0, LEGEND_COUNT - grouped.legends.length);
   return (
@@ -125,6 +135,15 @@ function DeckCardSummary({
             <p className={missing > 0 ? 'deck-card-missing' : 'deck-card-owned'}>
               {deckTexts.missingFromCollection(missing)}
             </p>
+          )}
+          {missingRows.length > 0 && (
+            <div className="missing-add">
+              <AddMissingToWantsButton
+                rows={missingRows}
+                wants={wants}
+                name={deckTexts.forDeck(deckTexts.addMissingToWants, deck.name)}
+              />
+            </div>
           )}
         </div>
         <p className="deck-updated">
@@ -209,6 +228,7 @@ export function DecksView({
   /** Open import page, and which field it starts in. */
   const [importing, setImporting] = useState<'text' | 'link' | null>(null);
   const { snapshot: collection } = useCollection(repositories.collection);
+  const wants = useWants(repositories.wants);
   const ownedOf = (key: string) => (collection.phase === 'ready' ? countIn(collection, key) : null);
   const [live, setLive] = useState('');
   /** Element to focus after the next render (a data attribute of a row button, or the heading). */
@@ -366,7 +386,7 @@ export function DecksView({
               <ul className="deck-list" aria-label={deckTexts.decksLabel}>
                 {decks.map((deck) => (
                   <li key={deck.id} className="deck-row">
-                    <DeckCardSummary deck={deck} cardsByKey={cardsByKey} ownedOf={ownedOf} />
+                    <DeckCardSummary deck={deck} cardsByKey={cardsByKey} ownedOf={ownedOf} wants={wants} />
                     {renamingId === deck.id ? (
                       <RenameForm
                         deck={deck}
