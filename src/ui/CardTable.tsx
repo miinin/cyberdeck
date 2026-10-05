@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
-import { sortCards } from '../domain/cardSort';
-import type { SortDirection, SortKey } from '../domain/cardSort';
+import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
+import type { CardSort, SortKey } from '../domain/cardSort';
 import { CardColor, typeBadgeClass } from './CardColor';
 import type { HoverPreviewProps } from './CardHoverPreview';
 import { CardImage } from './CardImage';
@@ -23,11 +23,10 @@ export function Value({ value, missing }: { value: number | string | null; missi
   );
 }
 
-type SortState = { key: SortKey; direction: SortDirection } | null;
-
+type SortState = CardSort;
 /** One sortable column header: a button inside the th, with aria-sort on the active th only. */
 function SortHeader({ label, column, sort, onSort, numeric = false }: { label: string; column: SortKey; sort: SortState; onSort: (column: SortKey) => void; numeric?: boolean }) {
-  const active = sort !== null && sort.key === column ? sort.direction : null;
+  const active = sort.key === column ? sort.direction : null;
   return (
     <th scope="col" className={numeric ? 'cell-number' : undefined} aria-sort={active === null ? undefined : active === 'asc' ? 'ascending' : 'descending'}>
       <button type="button" className="sort-button" onClick={() => onSort(column)}>
@@ -49,6 +48,8 @@ export function CardTable({
   decksOf,
   onOpenImage,
   hoverProps,
+  sort: controlledSort,
+  onSortChange,
 }: {
   cards: readonly Card[];
   caption?: string;
@@ -57,15 +58,19 @@ export function CardTable({
   onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
   /** Mouse hover preview of the bigger image (T-052), as in the deck editor. */
   hoverProps?: (card: Card) => HoverPreviewProps;
+  /** Controlled sort shared with the "Järjestys" selector (T-060); without it the table keeps its own. */
+  sort?: CardSort;
+  onSortChange?: (next: CardSort) => void;
 }) {
-  // Sort state lives here and is not stored. Cycle: ascending, descending, original order.
-  const [sort, setSort] = useState<SortState>(null);
-  const rows = useMemo(() => (sort === null ? cards : sortCards(cards, sort.key, sort.direction)), [cards, sort]);
-  const onSort = (key: SortKey) =>
-    setSort((current) => {
-      if (current === null || current.key !== key) return { key, direction: 'asc' };
-      return current.direction === 'asc' ? { key, direction: 'desc' } : null;
-    });
+  // Sort state is never stored. Header cycle: ascending, descending, original order.
+  const [ownSort, setOwnSort] = useState<SortState>(DEFAULT_SORT);
+  const sort = controlledSort ?? ownSort;
+  const setSort = onSortChange ?? setOwnSort;
+  const rows = useMemo(() => sortCards(cards, sort.key, sort.direction), [cards, sort]);
+  const onSort = (key: SortKey) => {
+    if (sort.key !== key) setSort({ key, direction: 'asc' });
+    else setSort(sort.direction === 'asc' ? { key, direction: 'desc' } : DEFAULT_SORT);
+  };
   return (
     <div className="table-scroll" role="region" aria-label={texts.tableRegionLabel(caption)} tabIndex={0}>
       <table className="card-table">

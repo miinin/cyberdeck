@@ -111,6 +111,12 @@ export const texts = {
   playsetFull: 'Pelisarja täynnä',
   imageLoadError: 'Kuvaa ei voitu ladata.',
   columnName: 'Nimi',
+  // T-060: card order selector (session state only).
+  sortLabel: 'Järjestys',
+  sortOptions: { number: 'Numero', name: 'Nimi (A–Ö)', cost: 'Cost', power: 'Power', ram: 'RAM', type: 'Tyyppi', rarity: 'Rarity' },
+  sortDirectionLabel: 'Suunta',
+  sortAscending: 'Nouseva',
+  sortDescending: 'Laskeva',
   columnTypeAndColor: 'Tyyppi ja väri',
   columnCost: 'Cost',
   missingValue: '–',

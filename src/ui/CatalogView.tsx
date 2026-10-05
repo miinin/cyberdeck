@@ -21,6 +21,9 @@ import { CardFilters } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
+import { SortSelect } from './SortSelect';
+import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
+import type { CardSort } from '../domain/cardSort';
 import { CardTable } from './CardTable';
 import { ListToolbar } from './ListToolbar';
 import type { ImageSize } from './ListToolbar';
@@ -112,6 +115,7 @@ export function CatalogView({
   const [view, setView] = useState<CatalogViewMode>('grid');
   // Grid image size (T-050a): session state, not saved.
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
+  const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [editMode, setEditMode] = useState<boolean | null>(null);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const userChose = useRef({ view: false, edit: false });
@@ -169,6 +173,8 @@ export function CatalogView({
     isFilterActive(next) || nextFilter !== 'all';
 
   const filtered = visibleCards(criteria, collectionFilter, kept);
+  // T-060: the grid follows the shared order; the table sorts the same way itself (header buttons).
+  const sortedForGrid = view === 'grid' ? sortCards(filtered, sort.key, sort.direction) : filtered;
   const filterActive = isActive(criteria, collectionFilter);
 
   // The cards are there from the first render, so the live region starts with the loaded message.
@@ -412,6 +418,7 @@ export function CatalogView({
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
           />
+          <SortSelect sort={sort} onChange={setSort} />
 
           <ActiveFilters
             filters={activeFilters}
@@ -443,9 +450,11 @@ export function CatalogView({
                 decksOf={decksOf}
                 onOpenImage={handleOpenImage}
                 hoverProps={preview.bind}
+                sort={sort}
+                onSortChange={setSort}
               />
             ) : (
-              <CardList cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+              <CardList cards={sortedForGrid} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
             ))}
         </section>
       </div>
