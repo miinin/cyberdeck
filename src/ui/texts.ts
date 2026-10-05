@@ -256,6 +256,38 @@ export const texts = {
   collectionFullBody:
     `Kokoelmaan mahtuu enintään ${numberFormat.format(MAX_COLLECTION_ENTRIES)} eri korttia, joten uutta korttia ei voi lisätä. Voit poistaa kortteja, joita et enää tarvitse.`,
 
+  // Trade link (T-062, T-063)
+  tradeShareButton: 'Jaa kokoelma ja want',
+  tradeShareNote: 'Linkin saaja näkee koko kokoelmasi ja want-listasi.',
+  tradeShareCopied: 'Vaihtolinkki kopioitu',
+  tradeShareCopyFailed: 'Kopiointi ei onnistunut. Kopioi linkki tästä:',
+  tradeShareLinkLabel: 'Vaihtolinkki',
+  tradeShareTooBig: 'Kokoelma on liian suuri linkkiin',
+  tradeInvalidHeading: 'Linkki ei toimi',
+  tradeInvalid: 'Vaihtolinkki on rikkinäinen tai liian pitkä. Pyydä lähettäjää jakamaan se uudelleen.',
+  tradeToCards: 'Siirry Kortit-sivulle',
+  tradeHeading: 'Vaihtolinkki',
+  tradeIntro: 'Tämä on toisen pelaajan kokoelma ja want-lista linkin luontihetkellä. Mitään ei tallenneta.',
+  tradeDropped: (count: number) => `${count} riviä linkistä oli virheellisiä ja jätettiin pois.`,
+  tradeUnknown: (count: number) =>
+    `${count} korttia ei löydy sovelluksen korttitiedoista, joten niitä ei näytetä eikä vertailla.`,
+  tradeCompareHeading: 'Vertailu omaan kokoelmaasi',
+  tradeCompareUnavailable:
+    'Oma kokoelmasi tai want-listasi ei ole käytettävissä, joten vertailua ei voi näyttää. Näet silti jakajan listat.',
+  tradeCompareLoading: 'Ladataan omaa kokoelmaasi.',
+  tradeCompareExplain:
+    'Vaihdettavissa ovat vain kappaleet, jotka ylittävät täyden pelisetin (3 kappaletta, Legend-korteista 1).',
+  tradeIGiveHeading: 'Sinulla on, he haluavat',
+  tradeTheyGiveHeading: 'Heillä on, sinä haluat',
+  tradeNothing: 'Ei osumia.',
+  tradeTheirHaveHeading: 'Jakajan kokoelma',
+  tradeTheirWantHeading: 'Jakajan want',
+  tradeEmptyList: 'Lista on tyhjä.',
+  tradeHaveRow: (owned: number, tradeable: number) =>
+    `${copies(owned)}, vaihdettavissa: ${tradeable > 0 ? copies(tradeable) : 'ei yhtään'}`,
+  tradeWantRow: (count: number) => `haluaa ${copies(count)}`,
+  tradeCompareRow: (count: number) => copies(count),
+
   footerUnofficial:
     'Cyberdeck on epävirallinen Cyberpunk TCG -fanityökalu. WeirdCo, Netdeck.gg ja CD PROJEKT RED eivät ole hyväksyneet tai tukeneet sitä.',
   footerSource: 'Korttitiedot: Netdeck.gg',

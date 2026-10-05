@@ -8,6 +8,7 @@ import type { Repositories } from './storage';
 import { CatalogView } from './ui/CatalogView';
 import { DeckEditor } from './ui/DeckEditor';
 import { SharedDeckView } from './ui/SharedDeckView';
+import { SharedTradeView } from './ui/SharedTradeView';
 import { DecksView } from './ui/DecksView';
 import { deckTexts } from './ui/deckTexts';
 import { useHashRoute } from './ui/useHashRoute';
@@ -129,6 +130,9 @@ export function App({
             repositories={openRepositories}
             onOpen={(id) => navigate({ name: 'deck', id })}
           />
+        )}
+        {route.name === 'trade' && (
+          <SharedTradeView data={route.data} cards={cards} repositories={openRepositories} />
         )}
       </main>
       <footer className="site-footer">

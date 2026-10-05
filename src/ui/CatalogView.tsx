@@ -33,6 +33,7 @@ import { CollectionNotices, loadNotices, saveErrorLive } from './CollectionNotic
 import { cardNameText } from './CardName';
 import { countIn } from './collectionStore';
 import type { CollectionSnapshot } from './collectionStore';
+import { ShareTradeButton } from './ShareTradeButton';
 import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
@@ -400,6 +401,10 @@ export function CatalogView({
           slot={headerSlot}
           onRequest={handleRequestPersistence}
         />
+      )}
+
+      {collection.phase === 'ready' && wants.phase === 'ready' && (
+        <ShareTradeButton have={collection.saved} want={wants.saved} />
       )}
 
       <div className="catalog-layout">
