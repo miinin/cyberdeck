@@ -4545,3 +4545,12 @@ button.legality:focus-visible {
   margin-inline-start: 0;
   padding-inline: var(--space-3);
 }
+
+/* T-068: Have/Want search looks like the catalog search; the Have section gets air above it. */
+.want-search {
+  max-width: 24rem;
+}
+
+section[aria-labelledby='have-heading'] {
+  margin-block-start: var(--space-6);
+}

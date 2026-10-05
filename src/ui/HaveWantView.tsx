@@ -153,8 +153,8 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
               )}
 
               <h3 id="want-search-heading">{texts.wantSearchHeading}</h3>
-              <p>
-                <label htmlFor="want-search">{texts.wantSearchLabel}</label>{' '}
+              <div className="field want-search">
+                <label htmlFor="want-search">{texts.wantSearchLabel}</label>
                 <input
                   id="want-search"
                   type="search"
@@ -163,7 +163,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                 />
-              </p>
+              </div>
               {query.trim() === '' ? (
                 <p className="hint">{texts.wantSearchPrompt}</p>
               ) : matches.length === 0 ? (
