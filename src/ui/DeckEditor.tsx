@@ -51,6 +51,7 @@ import { DeckPickTable } from './DeckPickTable';
 import { DeckStats } from './DeckStats';
 import { Sideboard } from './Sideboard';
 import type { MissingCard } from '../domain/deckExport';
+import { findSubstitutes } from '../domain/substitutes';
 import type { PickBlocker } from './DeckPickTable';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
@@ -291,6 +292,18 @@ export function DeckEditor({
     }
     return rows;
   }, [allCounts, cardsByKey, collection]);
+  const substitutes = useMemo(
+    () =>
+      collectionReady
+        ? findSubstitutes(
+            missingCards.map((row) => row.card),
+            cardsByKey.values(),
+            (key) => countIn(collection, key),
+            (key) => allCounts.get(key) ?? 0,
+          )
+        : undefined,
+    [collectionReady, missingCards, cardsByKey, collection, allCounts],
+  );
   const missingCopies = missingCards.reduce((sum, row) => sum + row.missing, 0);
 
   const setCount = (card: Card, count: number) => {
@@ -850,6 +863,7 @@ export function DeckEditor({
             }
             missingCards={collectionReady ? missingCards : undefined}
             wants={wants}
+            substitutes={substitutes}
             missingText={
               collectionReady
                 ? deckTexts.missingFromCollection(missingCopies)
