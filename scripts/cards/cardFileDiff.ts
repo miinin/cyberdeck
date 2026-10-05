@@ -10,7 +10,7 @@ export interface CardFileDiff {
   changed: { key: CardKey; fields: (keyof Card)[] }[];
 }
 
-const COMPARED_FIELDS: readonly (keyof Card)[] = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'printings'];
+const COMPARED_FIELDS: readonly (keyof Card)[] = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'eddiable', 'printings'];
 
 /** Printings are compared by content, the other fields by value. */
 function differs(field: keyof Card, old: Card, next: Card): boolean {

@@ -94,6 +94,7 @@ export function mapCard(raw: unknown): Card | null {
     power: finiteNumber(fields.power),
     ram: finiteNumber(fields.ram),
     rarity: nonEmptyString(fields.rarity),
+    eddiable: typeof fields.is_eddiable === 'boolean' ? fields.is_eddiable : null,
     key,
     printings: mapPrintings(fields.printings, slug),
   };

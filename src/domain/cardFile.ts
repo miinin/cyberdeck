@@ -20,7 +20,7 @@ export interface CardFile {
 }
 
 /** Card fields in model order. The file is written in this order, so the output is deterministic. */
-const CARD_FIELDS = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'rarity', 'key', 'printings'] as const;
+const CARD_FIELDS = ['id', 'slug', 'name', 'subname', 'displayName', 'type', 'color', 'cost', 'power', 'ram', 'rarity', 'eddiable', 'key', 'printings'] as const;
 const PRINTING_FIELDS = ['key', 'setCode', 'setName', 'number', 'rarity', 'language', 'artist', 'imageKey'] as const;
 const FILE_FIELDS = ['format', 'version', 'cards'] as const;
 
@@ -41,6 +41,7 @@ export function toCardFile(cards: readonly Card[]): CardFile {
       power: card.power,
       ram: card.ram,
       rarity: card.rarity,
+      eddiable: card.eddiable ?? null,
       key: card.key,
       printings: (card.printings ?? []).map((printing) => ({
         key: printing.key,
@@ -87,6 +88,11 @@ function requireNumberOrNull(value: unknown, field: string, where: string): numb
   if (value !== null && (typeof value !== 'number' || !Number.isFinite(value))) {
     throw new Error(`${where}: "${field}" must be a finite number or null`);
   }
+  return value;
+}
+
+function requireBooleanOrNull(value: unknown, field: string, where: string): boolean | null {
+  if (value !== null && typeof value !== 'boolean') throw new Error(`${where}: "${field}" must be a boolean or null`);
   return value;
 }
 
@@ -156,6 +162,7 @@ function parseCard(value: unknown, index: number): Card {
     power,
     ram,
     rarity: requireTextOrNull(value.rarity, 'rarity', where),
+    eddiable: requireBooleanOrNull(value.eddiable, 'eddiable', where),
     key,
     printings: parsePrintings(value.printings, slug, where),
   };

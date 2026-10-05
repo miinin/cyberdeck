@@ -4,7 +4,7 @@ import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf, minCountOf } from '../domain/collection';
 import type { CollectionEntry } from '../domain/collection';
-import { artsOf, entryChanges, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
+import { artRarity, artsOf, entryChanges, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
 import type { Art } from '../domain/arts';
 import { setFamily } from '../domain/printing';
 import { variantImageUrl } from '../data/variantImages';
@@ -358,6 +358,9 @@ export function CatalogView({
     return rarity === null ? null : variantImageUrl(card.key, rarity);
   };
 
+  /** The rarity a table row shows: the special rarity a filter matches, else the card's own. */
+  const rarityOf = (card: Card): string | null => matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt) ?? card.rarity;
+
   // One box per card, or in the "all arts" mode one per art (D-021).
   const gridItems: CardListItem[] | undefined =
     view !== 'grid'
@@ -381,7 +384,9 @@ export function CatalogView({
             const arts = artsFor(card);
             const imageUrl = filterArtUrl(card);
             const versionUrls = arts.map((art) => (art.rarity === null ? null : variantImageUrl(card.key, art.rarity)));
-            return { card, art: null, imageUrl, artCount: arts.length, versionUrls, startVersion: Math.max(0, versionUrls.indexOf(imageUrl)) };
+            const versionRarities = arts.map((art) => artRarity(card, art));
+            const lone = arts.length === 1 && arts[0] !== undefined ? artRarity(card, arts[0]) : undefined;
+            return { card, art: null, imageUrl, artCount: arts.length, versionUrls, versionRarities, startVersion: Math.max(0, versionUrls.indexOf(imageUrl)), rarity: lone };
           });
 
   const owned: OwnedColumn | undefined =
@@ -637,6 +642,7 @@ export function CatalogView({
             onToggleColor={(color) =>
               updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
             }
+            onToggleSellable={() => updateCriteria({ ...criteria, sellable: criteria.sellable !== true }, 'later')}
             onToggleRarity={(rarity) =>
               updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later')
             }
@@ -666,9 +672,9 @@ export function CatalogView({
           />
           <div className="sort-row">
             <SortSelect sort={sort} onChange={setSort} />
-            {collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
-              <div className="missing-add">
-                <AddMissingToWantsButton rows={missingRows} wants={wants} />
+            {editable && collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
+              <div className="missing-add missing-add--quiet">
+                <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />
               </div>
             )}
           </div>
@@ -703,6 +709,7 @@ export function CatalogView({
                 decksOf={decksOf}
                 onOpenImage={handleOpenImage}
                 artUrlOf={filterArtUrl}
+                rarityOf={rarityOf}
                 hoverProps={preview.bind}
                 sort={sort}
                 onSortChange={setSort}

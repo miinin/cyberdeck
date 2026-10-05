@@ -12,7 +12,7 @@ const streetkid: Card = {
   color: 'Red',
   cost: null,
   power: null,
-  ram: null, rarity: null,
+  ram: null, rarity: null, eddiable: null,
   key: 'v-streetkid',
   printings: [
     {
@@ -38,7 +38,7 @@ const solo: Card = {
   color: null,
   cost: 0,
   power: null,
-  ram: null, rarity: null,
+  ram: null, rarity: null, eddiable: null,
   key: 'solo',
   printings: [],
 };
@@ -56,7 +56,7 @@ describe('toCardFile', () => {
       key: solo.key,
       cost: solo.cost,
       power: null,
-      ram: null, rarity: null,
+      ram: null, rarity: null, eddiable: null,
       color: solo.color,
       type: solo.type,
       displayName: solo.displayName,
@@ -80,6 +80,7 @@ describe('toCardFile', () => {
       'power',
       'ram',
       'rarity',
+      'eddiable',
       'key',
       'printings',
     ]);
@@ -105,7 +106,7 @@ describe('parseCardFile', () => {
       color: null,
       cost: 0,
       power: null,
-      ram: null, rarity: null,
+      ram: null, rarity: null, eddiable: null,
     });
   });
 
@@ -212,5 +213,13 @@ describe('parseCardFile', () => {
     expect(file.format).toBe(CARD_FILE_FORMAT);
     expect(file.version).toBe(CARD_FILE_VERSION);
     expect(parseCardFile(JSON.parse(JSON.stringify(file)))).toEqual([streetkid, solo]);
+  });
+});
+
+describe('parseCardFile: eddiable', () => {
+  it('accepts a boolean or null and rejects anything else', () => {
+    expect(parseCardFile(fileWith({ eddiable: true }))[0]?.eddiable).toBe(true);
+    expect(parseCardFile(fileWith({ eddiable: false }))[0]?.eddiable).toBe(false);
+    expect(() => parseCardFile(fileWith({ eddiable: 'yes' }))).toThrow(/eddiable/);
   });
 });

@@ -78,10 +78,10 @@ describe('CatalogView: view selector and table (T-040)', () => {
     const user = userEvent.setup();
     const repositories = withOwned([{ card: 'alpha', count: 3 }]);
     await renderView(repositories);
-    expect(screen.getByRole('radio', { name: 'Ruudukko' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Kuvat' })).toBeChecked();
     expect(screen.queryByRole('table')).toBeNull();
 
-    await user.click(screen.getByRole('radio', { name: 'Taulukko' }));
+    await user.click(screen.getByRole('radio', { name: 'Lista' }));
     expect(screen.getByRole('table', { name: 'Kaikki kortit' })).toBeInTheDocument();
     expect(await repositories.preferences.loadView()).toBe('table');
   });
@@ -90,7 +90,7 @@ describe('CatalogView: view selector and table (T-040)', () => {
     const repositories = withOwned([]);
     await repositories.preferences.saveView('table');
     await renderView(repositories);
-    expect(screen.getByRole('radio', { name: 'Taulukko' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Lista' })).toBeChecked();
     expect(screen.getByRole('table')).toBeInTheDocument();
   });
 

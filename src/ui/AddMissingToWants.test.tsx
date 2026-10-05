@@ -37,14 +37,38 @@ async function renderCatalog(initial: Record<string, string>) {
   return repositories;
 }
 
+/** Turns on "Muokkaa kokoelmaa" (the button is a tool of editing mode), presses the button and confirms in the dialog. */
+async function addFromList(user: ReturnType<typeof userEvent.setup>) {
+  const edit = await screen.findByRole('switch', { name: 'Muokkaa kokoelmaa' });
+  if (edit.getAttribute('aria-checked') !== 'true') await user.click(edit);
+  await user.click(await screen.findByRole('button', { name: 'Lisää puuttuvat wantiin' }));
+  const dialog = await screen.findByRole('dialog', { name: /Lisätäänkö/ });
+  await user.click(within(dialog).getByRole('button', { name: 'Lisää' }));
+}
+
 describe('Add missing to wants in the card list (T-066)', () => {
+  it('is only offered while editing the collection, and asks first what will happen', async () => {
+    const user = userEvent.setup();
+    const repositories = await renderCatalog(storedCollection([['l1', 1], ['u0', 1]]));
+    const edit = await screen.findByRole('switch', { name: 'Muokkaa kokoelmaa' });
+    if (edit.getAttribute('aria-checked') === 'true') await user.click(edit);
+    expect(screen.queryByRole('button', { name: 'Lisää puuttuvat wantiin' })).toBeNull();
+    await user.click(edit);
+    await user.click(await screen.findByRole('button', { name: 'Lisää puuttuvat wantiin' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Lisätäänkö 3 korttia want-listalle?' });
+    expect(dialog).toHaveTextContent('Lisätään want-listalle 3 korttia (yhteensä 8 kappaletta)');
+    expect(dialog).toHaveTextContent('Olemassa olevat want-määrät eivät pienene.');
+    await user.click(within(dialog).getByRole('button', { name: 'Peruuta' }));
+    expect(await wantEntries(repositories)).toEqual([]);
+  });
+
   it('adds every shown card short of a playset up to the playset and tells the count', async () => {
     const user = userEvent.setup();
     const repositories = await renderCatalog({
       ...storedCollection([['l1', 1], ['u0', 1], ['u2', 3]]),
       ...storedWants([['u1', 5]]),
     });
-    await user.click(await screen.findByRole('button', { name: 'Lisää puuttuvat wantiin' }));
+    await addFromList(user);
     expect(await screen.findByText('Lisätty 1 kortti wantiin.')).toHaveAttribute('aria-live', 'polite');
     // l1 and u2 are complete, u1 keeps its larger want (max rule), only u0 changes (3 - 1).
     await waitFor(async () =>
@@ -53,7 +77,7 @@ describe('Add missing to wants in the card list (T-066)', () => {
         { card: 'u1', count: 5 },
       ]),
     );
-    await user.click(screen.getByRole('button', { name: 'Lisää puuttuvat wantiin' }));
+    await addFromList(user);
     expect(await screen.findByText('Kaikki jo wantissa.')).toBeInTheDocument();
   });
 
@@ -61,7 +85,7 @@ describe('Add missing to wants in the card list (T-066)', () => {
     const user = userEvent.setup();
     const repositories = await renderCatalog(storedCollection([]));
     await user.click(screen.getByRole('checkbox', { name: /Blue/ }));
-    await user.click(await screen.findByRole('button', { name: 'Lisää puuttuvat wantiin' }));
+    await addFromList(user);
     expect(await screen.findByText('Lisätty 1 kortti wantiin.')).toBeInTheDocument();
     await waitFor(async () => expect(await wantEntries(repositories)).toEqual([{ card: 'u1', count: 3 }]));
   });

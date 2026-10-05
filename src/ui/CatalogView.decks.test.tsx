@@ -34,7 +34,7 @@ describe('Catalog: decks of a card', () => {
     const user = userEvent.setup();
     renderRoute('#/', twoDecks());
     await screen.findByText('Pakoissa: 2');
-    await user.click(screen.getByRole('radio', { name: 'Taulukko' }));
+    await user.click(screen.getByRole('radio', { name: 'Lista' }));
     const row = within(await screen.findByRole('table')).getByRole('rowheader', { name: /Unit 0/ }).closest('tr') as HTMLElement;
     expect(row).toHaveTextContent('Pakoissa: 2');
   });

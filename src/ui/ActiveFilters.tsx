@@ -46,6 +46,9 @@ export function criteriaFilters(
       lang: 'en',
       onRemove: remove('rarities', rarity),
     })),
+    ...(criteria.sellable === true
+      ? [{ id: 'sellable', label: texts.sellableChip, onRemove: () => onChange({ ...criteria, sellable: false }) }]
+      : []),
     ...NUMBER_GROUPS.flatMap(([group, legend]) =>
       criteria[group].map((value) => ({
         id: `${group}:${value}`,

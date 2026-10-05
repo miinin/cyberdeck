@@ -84,7 +84,7 @@ describe('setArtCount', () => {
   });
 });
 
-import { entryChanges, matchedSpecialRarity } from './arts';
+import { artRarity, entryChanges, matchedSpecialRarity } from './arts';
 
 describe('matchedSpecialRarity', () => {
   it('is null without a filter', () => {
@@ -107,5 +107,49 @@ describe('entryChanges', () => {
     expect(entryChanges({ card: 'v', count: 1 }, { card: 'v', count: 2, versions: { a: 1 } })).toEqual({ versions: [['a', 1]], count: null });
     expect(entryChanges({ card: 'v', count: 1 }, { card: 'v', count: 2 })).toEqual({ versions: [], count: 2 });
     expect(entryChanges({ card: 'v', count: 1 }, undefined)).toEqual({ versions: [], count: 0 });
+  });
+});
+
+describe('a card whose printings are all special (Rebecca, all Nova Rare)', () => {
+  const nova1 = p('s', 'Set 1 Promos', '005', 'Nova Rare');
+  const nova2 = p('s', 'Set 1 Promos', '007', 'Nova Rare');
+  const only: Card = { ...card, key: 'v', rarity: 'Nova Rare', printings: [nova1, nova2] };
+
+  it('has no empty base art, only the Nova art', () => {
+    const arts = artsOf(only);
+    expect(arts.map((a) => a.artId)).toEqual(['v__nova-rare']);
+    expect(arts[0]?.printings).toHaveLength(2);
+  });
+  it('falls back to a base art when there is no picture for the special rarity', () => {
+    const arts = artsOf(only, () => false);
+    expect(arts.map((a) => a.artId)).toEqual(['v']);
+    expect(arts[0]?.printings).toHaveLength(2);
+  });
+  it('counts the copies without a version in the only art', () => {
+    const owned = ownedPerArt(key(5, { [nova1.key]: 2 }), only);
+    expect(owned.get('v__nova-rare')).toBe(5);
+  });
+  it('raises on the default printing and lowers the copies without a version first', () => {
+    const raised = setArtCount(col(key(2)), only, 'v__nova-rare', 3);
+    expect(raised.entries[0]).toEqual({ card: 'v', count: 3, versions: { [nova1.key]: 1 } });
+    const lowered = setArtCount(col(key(4, { [nova1.key]: 1 })), only, 'v__nova-rare', 2);
+    expect(lowered.entries[0]).toEqual({ card: 'v', count: 2, versions: { [nova1.key]: 1 } });
+  });
+});
+
+describe('artRarity', () => {
+  const secret = p('r', 'Night City — Retail', '003', 'Secret');
+  const iconic = p('b', 'Night City — Beta', '168', 'Iconic Secret');
+  const johnny: Card = { ...card, key: 'j', rarity: 'Secret', printings: [secret, iconic] };
+
+  it('is the special rarity for a special art and the printings rarity for the base art', () => {
+    const [base, special] = artsOf(johnny);
+    expect(base && artRarity(johnny, base)).toBe('Secret');
+    expect(special && artRarity(johnny, special)).toBe('Iconic Secret');
+  });
+  it('falls back to the card rarity when the base art has no printing rarity', () => {
+    const bare = { ...johnny, printings: [p('r', 'Night City — Retail', '003', null)] };
+    const [base] = artsOf(bare);
+    expect(base && artRarity(bare, base)).toBe('Secret');
   });
 });
