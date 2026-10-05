@@ -427,7 +427,7 @@ Päätöksessä on viisi osaa.
 - **Seuraukset:** testisivuston URL vaihtuu `CLAUDE.md`:hen, `README.md`:hen, `docs/STATUS.md`:hen ja `docs/SECURITY.md`:hen (PM tai Dokumentoija infratehtävässä; vanhat raportit jäävät ennalleen historiana). R-18 poistuu, kun infratehtävä on tehty. IDEAS.md:n "erillinen testiprojekti" merkitään toteutetuksi.
 
 ## D-018 · Want-lista omana kokoelman muotoisena aggregaattinaan, kokoelman vaihtojako URL-linkkinä · 2026-10-05 · Päättäjä: Arkkitehti (ehdotus), PM ja käyttäjä hyväksyvät
-**Tila:** Ehdotettu. Tehtävä T-064 (osat T-064a, T-064b, T-061b, T-062, T-063). Digiturva katselmoi T-064a:n (tallennus, synkka, säännöt) ja T-062:n (URL-syöte).
+**Tila:** Hyväksytty (käyttäjä 2026-10-05): jaetaan koko kokoelma, puuttuvat lisätään wantiin suurimman määrän mukaan (max), want ei vähene automaattisesti. Tehtävä T-064 (osat T-064a, T-064b, T-061b, T-062, T-063). Digiturva katselmoi T-064a:n (tallennus, synkka, säännöt) ja T-062:n (URL-syöte).
 **Konteksti:** Käyttäjä haluaa want-listan (kortti + haluttu määrä), "lisää puuttuvat wantiin" -napin pakkaeditoriin (`MissingCard`, `src/domain/deckExport.ts`) ja kokoelman jakolinkin, josta vastaanottaja näkee vaihtovertailun omaan kokoelmaansa. Nyt kokoelma on `Collection { entries: {card, count}[] }` (localStorage `cyberdeck:collection`, envelope v1, Firestore `users/{uid}/collection/main`, kolmitiemerge `mergeCollection`). Pakan jako on base64url-tekstiä URL-hashissa (`#/jaa/<data>`, D-017 ei koske). Korttidatassa on nyt 151 korttia, avaimen keskipituus 22 merkkiä (MAX_CARD_KEY_LENGTH 100).
 
 **Vaihtoehdot, tietomalli:**
