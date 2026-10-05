@@ -1,5 +1,6 @@
 import type { Card } from './card';
 import type { CardKey } from './cardKey';
+import { SIDEBOARD_SECTION_NAME } from './deck';
 import type { Deck, DeckContent } from './deck';
 import { validateDeck } from './deckRules';
 import type { CardsByKey, DeckIssue } from './deckRules';
@@ -47,7 +48,12 @@ export function buildImportReport(
   const rows = parsed.rows.map(toRow);
   const content: DeckContent = {
     name: parsed.name ?? DEFAULT_IMPORT_NAME,
-    sections: [{ name: '', cards: parsed.rows.map(({ card, count }) => ({ card: card.key, count })) }],
+    sections: [
+      { name: '', cards: parsed.rows.map(({ card, count }) => ({ card: card.key, count })) },
+      ...(parsed.sideboard !== undefined && parsed.sideboard.length > 0
+        ? [{ name: SIDEBOARD_SECTION_NAME, cards: parsed.sideboard.map(({ card, count }) => ({ card: card.key, count })) }]
+        : []),
+    ],
   };
   const missingRows = rows.filter((row) => row.missing > 0);
   return {

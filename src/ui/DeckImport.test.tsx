@@ -173,7 +173,7 @@ describe('Deck import from a Netdeck link (T-046)', () => {
     const { user, repositories } = await fetchLink(URL, fetchMock);
     const report = await screen.findByRole('region', { name: 'Tarkistuksen tulos' });
     expect(within(report).getByText('Netdeck: Linkkipakka, tekijä Tekijä')).toBeInTheDocument();
-    expect(within(report).getByText('Sideboard (ei mukana pakassa)')).toBeInTheDocument();
+    expect(within(report).getByText('Sideboard')).toBeInTheDocument();
     expect(within(report).getByText(/2 × Unit 1/)).toBeInTheDocument();
     expect(within(report).getByText('1 unknown-id')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(`https://api.netdeck.gg/api/cyberpunk/decks/${UUID}`, expect.anything());
@@ -185,7 +185,10 @@ describe('Deck import from a Netdeck link (T-046)', () => {
       expect(saved).toHaveLength(1);
       const keys = (saved[0]?.sections ?? []).flatMap((section) => section.cards.map((row) => row.card));
       expect(keys).toContain('u0');
-      expect(keys).not.toContain('u1');
+      // The Netdeck sideboard is saved as the deck's sideboard section (T-058), apart from the main deck.
+      const main = (saved[0]?.sections ?? []).filter((s) => s.name !== 'Sideboard').flatMap((s) => s.cards.map((r) => r.card));
+      expect(main).not.toContain('u1');
+      expect(keys).toContain('u1');
     });
   });
 

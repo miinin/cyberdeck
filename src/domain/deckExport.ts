@@ -1,4 +1,5 @@
 import type { Card } from './card';
+import { deckCounts, sideboardCounts } from './deckRules';
 import type { CardsByKey } from './deckRules';
 import type { DeckContent } from './deck';
 import { UNSAFE_CHARACTERS } from './validate';
@@ -62,10 +63,7 @@ function listName(card: Card): string {
 
 /** The deck as a reference format list: `# Name`, a Legends block and a Main deck block. */
 export function deckToText(deck: DeckContent, cardsByKey: CardsByKey): string {
-  const totals = new Map<string, number>();
-  for (const section of deck.sections) {
-    for (const { card, count } of section.cards) totals.set(card, (totals.get(card) ?? 0) + count);
-  }
+  const totals = deckCounts(deck);
   const legends: string[] = [];
   const main: string[] = [];
   let legendCount = 0;
@@ -81,9 +79,16 @@ export function deckToText(deck: DeckContent, cardsByKey: CardsByKey): string {
       mainCount += count;
     }
   }
+  const side = sideboardCounts(deck);
+  const sideLines = [...side].map(([key, count]) => {
+    const card = cardsByKey.get(key);
+    return `${count} ${singleLine(card === undefined ? key : listName(card))}`;
+  });
+  const sideCount = [...side.values()].reduce((sum, count) => sum + count, 0);
   const lines = [`# ${singleLine(deck.name)}`];
   if (legends.length > 0) lines.push(`// Legends (${legendCount})`, ...legends);
   if (main.length > 0) lines.push(`// Main deck (${mainCount})`, ...main);
+  if (sideLines.length > 0) lines.push(`// Sideboard (${sideCount})`, ...sideLines);
   return `${lines.join('\n')}\n`;
 }
 

@@ -4,6 +4,9 @@ export interface DeckMessages {
   legendDuplicate(name: string, copies: number): string;
   mainSize(size: number, min: number, max: number): string;
   copies(name: string, count: number, max: number): string;
+  sideboardSize(count: number, size: number): string;
+  sideboardCopies(name: string, count: number, max: number): string;
+  sideboardLegend(name: string): string;
   ram(color: string, limit: number, names: string): string;
   unknownCards(count: number, keys: readonly string[]): string;
   legendsFull(required: number): string;
@@ -21,6 +24,9 @@ export const deckMessagesFi: DeckMessages = {
   mainSize: (size, min, max) =>
     `Pääpakassa on ${size} korttia, ${size < min ? `vähintään ${min}` : `enintään ${max}`}.`,
   copies: (name, count, max) => `${name}: ${count} kopiota, enintään ${max}.`,
+  sideboardSize: (count, size) => `Sideboardissa on ${count} korttia, mutta sen pitää olla tyhjä tai tasan ${size} korttia.`,
+  sideboardCopies: (name, count, max) => `${name}: ${count} kopiota pääpakassa ja sideboardissa yhteensä, enintään ${max}.`,
+  sideboardLegend: (name) => `${name}: Legend-korttia ei voi pitää sideboardissa.`,
   ram: (color, limit, names) =>
     `${limit === 0 ? `Legendeillä ei ole väriä ${color}` : `${color}-värin RAM-raja on ${limit}`}, mutta ylittää: ${names}.`,
   unknownCards: (count, keys) => `Pakassa on ${count} korttia, jota ei löydy korttitiedoista: ${keys.join(', ')}.`,
@@ -38,6 +44,9 @@ export const deckMessagesEn: DeckMessages = {
   mainSize: (size, min, max) =>
     `The main deck has ${size} cards, ${size < min ? `at least ${min} are needed` : `at most ${max} are allowed`}.`,
   copies: (name, count, max) => `${name}: ${count} copies, at most ${max}.`,
+  sideboardSize: (count, size) => `The sideboard has ${count} cards, but it must be empty or exactly ${size} cards.`,
+  sideboardCopies: (name, count, max) => `${name}: ${count} copies in the main deck and sideboard together, at most ${max}.`,
+  sideboardLegend: (name) => `${name}: a Legend cannot be in the sideboard.`,
   ram: (color, limit, names) =>
     `${limit === 0 ? `Your Legends have no ${color} color` : `The ${color} RAM limit is ${limit}`}, but these exceed it: ${names}.`,
   unknownCards: (count, keys) =>

@@ -6,6 +6,7 @@ import type { Deck, DeckContent } from '../domain/deck';
 import { checkDeckName, copyContent, copyDeckName, emptyDeckContent, uniqueDeckName } from '../domain/deckEdit';
 import {
   colorDistribution,
+  allDeckCounts,
   deckCounts,
   deckTotals,
   errorsOf,
@@ -82,9 +83,10 @@ function DeckCardSummary({
   const missingRows: MissingRow[] = [];
   let missing: number | null = 0;
   let copies = 0;
-  for (const [key, count] of deckCounts(deck)) {
+  const mainCounts = deckCounts(deck);
+  for (const [key, count] of allDeckCounts(deck)) {
     if (!cardsByKey.has(key)) continue;
-    copies += count;
+    copies += mainCounts.get(key) ?? 0;
     const have = ownedOf(key);
     if (have === null) missing = null;
     else if (missing !== null && count > have) {
