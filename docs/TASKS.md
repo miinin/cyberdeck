@@ -62,7 +62,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-055 | Yläpalkin järjestys (tili oikeaan ylänurkkaan) ja pysyvän selaintallennuksen napin poisto | 1 | Should | PM | Done | – |
 | T-056 | Pakan jakaminen linkillä (#/jaa/<data>) | 1 | Should | Koodari | Done | Digiturva (syöte URLista) |
 | T-057 | "Ylittää rajan" -merkintä vasta, kun raja on ylitetty | 1 | Must | PM | Done | – |
-| T-058 | Sideboard pakkaan (tietomalli, Firestore-säännöt, editori, jako ja vienti) | 1 | Should | Koodari | Backlog | Digiturva (säännöt) |
+| T-058 | Sideboard pakkaan (tietomalli, Firestore-säännöt, editori, jako ja vienti) | 1 | Should | Koodari | Done | – (ei sääntömuutosta) |
 | T-059 | RAM-suodattimeen 4 ja 5+ (4+ pois) | 1 | Must | PM | Done | – |
 | T-060 | Korttien järjestysvalitsin (numero, nimi, cost, power, RAM, tyyppi, rarity; nouseva/laskeva) | 1 | Must | PM | Done | – |
 | T-061 | Pakasta puuttuvat kortit listana ja .txt-latauksena (editori ja tuonti); want-liitos T-061b (PR #42) | 1 | Must | PM | Done | – |
@@ -72,4 +72,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-065 | Have/Want omaksi osioksi, Kortit-näkymään yksi laskuri | 1 | Must | PM | Done | – |
 | T-066 | Puuttuvien massalisäys wantiin (Kortit, Pakat, editori), select- ja suodatinpainikkeiden viimeistely | 1 | Must | PM | Done | – |
 | T-067 | Have/Want kuvaruudukkona, järjestys ja kuvakoko | 1 | Must | PM | Done | – |
-| T-068 | Englanninkielinen käyttöliittymä, FI/EN-valitsin (D-019) | 1 | Must | PM | Review | – |
+| T-068 | Englanninkielinen käyttöliittymä, FI/EN-valitsin (D-019) | 1 | Must | PM | Done | – |
+| T-069 | Järjestysvalitsimen hillitty fokustyyli | 1 | Must | PM | Done | – |
