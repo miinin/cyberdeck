@@ -770,7 +770,7 @@ main {
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface-raised);
   font-size: var(--font-size-sm);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   cursor: pointer;
 }
 
@@ -4589,9 +4589,45 @@ button.legality:focus-visible {
   gap: var(--space-1);
 }
 
-.language-switch .theme-toggle {
-  margin-inline-start: 0;
-  padding-inline: var(--space-3);
+/* T-078: bare flags; the flag itself is the button, its top right corner cut like the other buttons. */
+.language-switch {
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.language-switch .flag-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.language-switch .flag-button:hover,
+.language-switch .flag-button[aria-pressed='true'] {
+  opacity: 1;
+}
+
+.language-switch .flag-button[aria-pressed='true'] {
+  border-bottom-color: var(--color-accent);
+}
+
+.language-switch .flag-button:focus-visible {
+  outline: 2px solid var(--color-header-text);
+  outline-offset: 2px;
+}
+
+.language-switch .flag-button svg {
+  display: block;
+  inline-size: 28px;
+  block-size: 20px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
 }
 
 /* T-068: Have/Want search looks like the catalog search; the Have section gets air above it. */
@@ -4859,6 +4895,9 @@ section[aria-labelledby='have-heading'] {
   box-shadow: inset 0 0 0 1px var(--color-text);
 }
 
-.options-even .option-wide {
-  grid-column: 1 / -1;
+/* T-078: two-word rarity names ("Secret Rare") stay on one line in the two-column filter grid. */
+.options-even .option {
+  gap: var(--space-1);
+  padding-inline: var(--space-1);
+  white-space: nowrap;
 }

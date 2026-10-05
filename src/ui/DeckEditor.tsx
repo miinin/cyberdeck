@@ -29,6 +29,7 @@ import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
   KNOWN_CARD_RARITIES,
+  officialRarity,
   KNOWN_CARD_TYPES,
   filterCards,
   filterOptions,
@@ -607,7 +608,7 @@ export function DeckEditor({
             criteria={criteria}
             typeOptions={filterOptions(KNOWN_CARD_TYPES, cards.map((card) => card.type), criteria.types)}
             colorOptions={filterOptions(KNOWN_CARD_COLORS, cards.map((card) => card.color), criteria.colors)}
-            rarityOptions={filterOptions(KNOWN_CARD_RARITIES, cards.map((card) => card.rarity), criteria.rarities)}
+            rarityOptions={filterOptions(KNOWN_CARD_RARITIES, cards.map((card) => (card.rarity === null ? null : officialRarity(card.rarity))), criteria.rarities)}
             numberOptions={numberFilterOptionsFor(cards, criteria)}
             searchInputRef={searchInputRef}
             collectionAllRef={collectionAllRef}

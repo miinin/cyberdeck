@@ -81,3 +81,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-075 | Pakka-analyysi: korttiryhmän todennäköisyys vuoroittain, korvaajaehdotus puuttuville korteille | 1 | Should | PM | Review (dev) | – |
 | T-076 | Viralliset versiokuvat (82 kpl, Iconic ja Nova Rare) kortin tietonäkymään, kuva-avain kortti×harvinaisuus | 1 | Must | PM | Review (dev) | – |
 | T-077 | Versiot kuvituksina (D-021): galleria tietonäkymässä, haku näyttää osuvan kuvituksen, Kaikki kuvitukset -tila | 1 | Must | PM | Review (dev) | – |
+| T-078 | Viralliset harvinaisuudet (Epic Rare, Secret Rare, Iconic Rare…), kielivalitsin pelkkinä lippuina | 1 | Must | PM | Review (dev) | – |

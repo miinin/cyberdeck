@@ -16,6 +16,7 @@ import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
   KNOWN_CARD_RARITIES,
+  officialRarity,
   KNOWN_CARD_TYPES,
   filterCards,
   filterOptions,
@@ -213,7 +214,7 @@ export function CatalogView({
   const artMatchesFilter = (art: Art) =>
     art.printings.some(
       (p) =>
-        (criteria.rarities.length === 0 || (p.rarity !== null && criteria.rarities.includes(p.rarity))) &&
+        (criteria.rarities.length === 0 || (p.rarity !== null && criteria.rarities.includes(officialRarity(p.rarity)))) &&
         (setChoice === null || setFamily(p.setName) === setChoice),
     );
   // T-066: shown cards short of a playset, for "add missing to wants".
@@ -603,7 +604,9 @@ export function CatalogView({
             )}
             rarityOptions={filterOptions(
               KNOWN_CARD_RARITIES,
-              allCards.flatMap((card) => [card.rarity, ...(card.printings ?? []).map((p) => p.rarity)]),
+              allCards
+                .flatMap((card) => [card.rarity, ...(card.printings ?? []).map((p) => p.rarity)])
+                .map((r) => (r === null ? null : officialRarity(r))),
               criteria.rarities,
             )}
             numberOptions={numberFilterOptionsFor(allCards, criteria)}

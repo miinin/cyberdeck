@@ -1,5 +1,6 @@
 import { MAX_COLLECTION_COUNT } from '../domain/collection';
 import type { Card } from '../domain/card';
+import { officialRarity } from '../domain/cardSearch';
 import { artsOf, ownedPerArt } from '../domain/arts';
 import type { Art } from '../domain/arts';
 import type { PrintingKey } from '../domain/printing';
@@ -54,7 +55,7 @@ export function setLines(printings: readonly Printing[]): string[] {
 }
 
 export function artName(art: Art): string {
-  return art.rarity === null ? texts.artBase : art.rarity;
+  return art.rarity === null ? texts.artBase : officialRarity(art.rarity);
 }
 
 /**

@@ -2,6 +2,7 @@ import type { Card } from './card';
 import type { Collection, CollectionEntry } from './collection';
 import { versionsOf, withCount, setVersionCount, countOf, versionsTotal } from './collection';
 import { setFamily } from './printing';
+import { officialRarity } from './cardSearch';
 import type { Printing } from './printing';
 
 /*
@@ -132,7 +133,7 @@ export function matchedSpecialRarity(
 ): string | null {
   if (rarities.length === 0 && family === null) return null;
   const matches = (card.printings ?? []).filter(
-    (p) => (rarities.length === 0 || (p.rarity !== null && rarities.includes(p.rarity))) && (family === null || setFamily(p.setName) === family),
+    (p) => (rarities.length === 0 || (p.rarity !== null && rarities.includes(officialRarity(p.rarity)))) && (family === null || setFamily(p.setName) === family),
   );
   if (matches.length === 0) return null;
   const first = matches[0]?.rarity ?? null;

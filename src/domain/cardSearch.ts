@@ -6,7 +6,26 @@ import type { Card } from './card';
 export const KNOWN_CARD_TYPES: readonly string[] = ['Legend', 'Unit', 'Gear', 'Program'];
 
 /** Known rarities in display order. Unknown rarities from the data are appended after these. */
-export const KNOWN_CARD_RARITIES: readonly string[] = ['Common', 'Uncommon', 'Rare', 'Epic', 'Secret', 'Nova Rare'];
+export const KNOWN_CARD_RARITIES: readonly string[] = [
+  'Common',
+  'Uncommon',
+  'Rare',
+  'Epic Rare',
+  'Secret Rare',
+  'Iconic Rare',
+  'Nova Rare',
+];
+
+/** The official name of a rarity (T-078): Netdeck's Epic, Secret and Iconic * become Epic Rare, Secret Rare, Iconic Rare. */
+export function officialRarity(raw: string): string;
+export function officialRarity(raw: string | null): string | null;
+export function officialRarity(raw: string | null): string | null {
+  if (raw === null) return null;
+  if (raw === 'Epic') return 'Epic Rare';
+  if (raw === 'Secret') return 'Secret Rare';
+  if (raw.startsWith('Iconic')) return 'Iconic Rare';
+  return raw;
+}
 
 /** Known card colors in display order. Unknown colors from the data are appended after these. */
 export const KNOWN_CARD_COLORS: readonly string[] = ['Red', 'Yellow', 'Green', 'Blue'];
@@ -138,8 +157,8 @@ export function isFilterActive(criteria: CardFilterCriteria): boolean {
 
 /** The card's own rarity or the rarity of any of its printings is selected (D-021). */
 function hasRarity(card: Card, rarities: ReadonlySet<string>): boolean {
-  if (card.rarity !== null && rarities.has(card.rarity)) return true;
-  return (card.printings ?? []).some((p) => p.rarity !== null && rarities.has(p.rarity));
+  if (card.rarity !== null && rarities.has(officialRarity(card.rarity))) return true;
+  return (card.printings ?? []).some((p) => p.rarity !== null && rarities.has(officialRarity(p.rarity)));
 }
 
 /**

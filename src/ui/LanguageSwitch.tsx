@@ -4,8 +4,8 @@ import { texts } from './texts';
 
 const FLAG_PROPS = {
   viewBox: '0 0 20 14',
-  width: 20,
-  height: 14,
+  width: 28,
+  height: 20,
   'aria-hidden': true,
   focusable: 'false',
 } as const;
@@ -56,7 +56,7 @@ export function LanguageSwitch() {
         <button
           key={option}
           type="button"
-          className="theme-toggle"
+          className="flag-button"
           lang={option}
           aria-label={FLAG_NAMES[option]}
           aria-pressed={option === locale}

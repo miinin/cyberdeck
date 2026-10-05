@@ -1,5 +1,5 @@
 import type { Card } from './card';
-import { KNOWN_CARD_RARITIES } from './cardSearch';
+import { KNOWN_CARD_RARITIES, officialRarity } from './cardSearch';
 
 /** 'number' is the catalog's own order (the data source lists cards in set order; T-060). */
 export type SortKey = 'number' | 'name' | 'type' | 'rarity' | 'cost' | 'power' | 'ram';
@@ -17,7 +17,7 @@ function valueOf(card: Card, key: Exclude<SortKey, 'number'>): string | number |
   if (key === 'name') return card.displayName;
   if (key === 'rarity' && card.rarity !== null) {
     // Game order (Common → Nova Rare); an unknown rarity sorts after the known ones.
-    const index = KNOWN_CARD_RARITIES.indexOf(card.rarity);
+    const index = KNOWN_CARD_RARITIES.indexOf(officialRarity(card.rarity));
     return index === -1 ? KNOWN_CARD_RARITIES.length : index;
   }
   return card[key];
