@@ -14,3 +14,11 @@
 ## Riskit
 - Pilvidokumenttia ei varmuuskopioida muunnoksessa (v2 pysyy pilvessä kunnes jokin muuttuu ja kirjoitetaan v3:na).
 - Kortti, jolla on vain Beta-painos mutta oletuksena Retail (tai päin vastoin), käyttää olemassa olevaa toista painosta.
+
+## SEC-083 (Digiturva, 2026-10-06)
+**Tulos: hyväksytty, ei blokkaavia löydöksiä (0 Critical, 0 High, 0 Medium, 1 Low, 2 Info). Ei koodimuutoksia.**
+Tarkistettu `git diff test..HEAD -- src`; riippuvuudet, firebase.json, säännöt ja workflowt eivät muuttuneet (npm audit ei tarpeen).
+- **L1 Rikkinäinen erittely korvautuu hiljaa.** `betaMigration.ts` `readVersions`: jos v2-erittely on yli countin tai yli 32 avainta, muunnos kirjoittaa `{beta: count}` ja `dropped`-ilmoitus jää näyttämättä. Toisto: v2-rivi `{count:2, versions:{a:1,b:5}}`. Vaikutus pieni: parseCollection hylkäisi erittelyn joka tapauksessa, count säilyy ja alkuperäinen raw varmuuskopioidaan (mutate/needsBackup). Ehdotus (valinnainen): palauta rivi muuttamatta, kun erittely on virheellinen.
+- **I1 Paluu vanhaan versioon lukitsee.** Tuotannon rollback T-083:a edeltävään koodiin jättää v3-datan käyttäjät `newer`/locked-tilaan (ei datan menetystä, mutta vain eteenpäin-korjaus toimii).
+- **I2 Pilven v2-dokumenttia ei varmuuskopioida** ennen v3-kirjoitusta (kortin riski). Hyväksyttävä: muunnos on häviötön, ja paikallinen v2 varmuuskopioidaan.
+Kunnossa: count ei muutu, summa ≤ count, 32-raja, idempotenssi (ketju ajetaan vain v<3, ja funktio itse on idempotentti), want-lista ei muunnu (oma spec), deterministinen muunnos paikalliselle, pilvelle ja synkkapohjalle v1 (konvergoi), vanha client: `newer` → mutate heittää, pilvi `locked` ja rev-konflikti estää ylikirjoituksen, rikkinäinen syöte palautetaan parserille (corrupt/invalid, ei poistoa), varmuuskopio ennen ensimmäistä kirjoitusta (myös sync.apply kulkee mutaten kautta), prototype pollution (avaimet `PRINTING_KEY_PATTERN`, vaatii `:`; Map-haku), `cyberdeck:default-edition` validoidaan luettaessa ja kirjoitettaessa. Testit storage/account/betaMigration: 346/346 läpi.
