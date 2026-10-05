@@ -13,7 +13,11 @@ async function icon(size, file) {
   const inner = Math.round(size * 0.94);
   const fitted = await sharp(letter).resize({ width: inner, height: inner, fit: 'inside' }).toBuffer();
   await sharp({ create: { width: size, height: size, channels: 4, background: black } })
-    .composite([{ input: fitted, gravity: 'centre' }])
+    .composite([
+      { input: fitted, gravity: 'centre' },
+      // The app's cut corner (top left): a transparent triangle, about a fifth of the side.
+      { input: Buffer.from(`<svg width="${size}" height="${size}"><path d="M0 0H${Math.round(size * 0.22)}L0 ${Math.round(size * 0.22)}Z"/></svg>`), blend: 'dest-out' },
+    ])
     .png()
     .toFile(file);
 }

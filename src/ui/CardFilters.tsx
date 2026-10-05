@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { RaritySymbol } from './RaritySymbol';
+import { RaritySymbol, rarityTitle } from './RaritySymbol';
+import { officialRarity, shortRarity } from '../domain/cardSearch';
 import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
 import type { CardFilterCriteria, NumberFilterGroup } from '../domain/cardSearch';
 import { NUMBER_GROUPS } from './ActiveFilters';
@@ -35,6 +36,8 @@ export interface CardFiltersProps {
   onToggleColor: (color: string) => void;
   onToggleRarity: (rarity: string) => void;
   onToggleNumber: (group: NumberFilterGroup, value: string) => void;
+  /** Toggles the "only sellable (€$)" filter; without it the group is left out. */
+  onToggleSellable?: () => void;
   /** Enter in the search field: announce the result now (UX.md 5.6). */
   onSearchSubmit: () => void;
   /**
@@ -54,6 +57,7 @@ export function selectedFilterCount(criteria: CardFilterCriteria, collectionFilt
     criteria.costs.length +
     criteria.powers.length +
     criteria.rams.length +
+    (criteria.sellable === true ? 1 : 0) +
     collection
   );
 }
@@ -83,6 +87,7 @@ export function CardFilters({
   onToggleColor,
   onToggleRarity,
   onToggleNumber,
+  onToggleSellable,
   onSearchSubmit,
   collapsibleBelow,
 }: CardFiltersProps) {
@@ -239,7 +244,7 @@ export function CardFilters({
             <legend>{texts.rarityLegend}</legend>
             <div className="options options-even options-rarity">
               {rarityOptions.map((rarity) => (
-                <label key={rarity} className="option">
+                <label key={rarity} className="option" title={rarityTitle(officialRarity(rarity))}>
                   <input
                     type="checkbox"
                     name="rarity"
@@ -247,11 +252,26 @@ export function CardFilters({
                     checked={criteria.rarities.includes(rarity)}
                     onChange={() => onToggleRarity(rarity)}
                   />{' '}
-                  <RaritySymbol rarity={rarity} showName size={14} />
+                  <RaritySymbol rarity={rarity} size={12} />
+                  <span aria-hidden="true" lang="en" className="option-rarity-name">
+                    {shortRarity(officialRarity(rarity))}
+                  </span>
                 </label>
               ))}
             </div>
           </fieldset>
+
+          {onToggleSellable !== undefined && (
+            <fieldset aria-describedby="filter-hint">
+              <legend>{texts.sellableLegend}</legend>
+              <div className="options">
+                <label className="option">
+                  <input type="checkbox" name="sellable" checked={criteria.sellable === true} onChange={onToggleSellable} />{' '}
+                  <span>{texts.sellableOnly}</span>
+                </label>
+              </div>
+            </fieldset>
+          )}
 
           {NUMBER_GROUPS.map(([group, legend]) =>
             numberOptions[group].length === 0 ? null : (

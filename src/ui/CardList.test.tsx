@@ -35,7 +35,7 @@ describe('CardList arts', () => {
     );
     const boxes = screen.getAllByRole('listitem');
     expect(boxes).toHaveLength(2);
-    expect(within(boxes[1] as HTMLElement).getByText('Nova Rare')).toBeInTheDocument();
+    expect(within(boxes[1] as HTMLElement).getAllByText('Nova Rare').length).toBeGreaterThan(0);
     await userEvent.click(within(boxes[1] as HTMLElement).getAllByRole('button').find((b) => b.classList.contains('step-plus')) as HTMLElement);
     expect(onArtChange).toHaveBeenCalledWith(card, arts[1], 2);
   });
@@ -54,6 +54,34 @@ describe('CardList arts', () => {
     await userEvent.click(screen.getByRole('button', { name: /Edellinen versio: V|Previous version: V/ }));
     await userEvent.click(document.querySelector('.card-image-button') as HTMLElement);
     expect(onOpenImage).toHaveBeenCalledWith(card, expect.anything(), '/nova.webp');
+  });
+
+  it('shows the rarity symbol of the shown version, and follows the arrows', async () => {
+    const rarityOfBox = () => document.querySelector('.card-rarity .rarity-symbol')?.textContent;
+    render(
+      <CardList
+        cards={[card]}
+        items={[{ card, art: null, imageUrl: null, artCount: 2, versionUrls: [null, '/nova.webp'], versionRarities: ['Rare', 'Nova Rare'], startVersion: 0 }]}
+        onOpenImage={vi.fn()}
+      />,
+    );
+    expect(rarityOfBox()).toBe('Rare');
+    await userEvent.click(screen.getByRole('button', { name: /Seuraava versio: V|Next version: V/ }));
+    expect(rarityOfBox()).toBe('Nova Rare');
+  });
+
+  it('starts from the version a filter matches and labels an art box with its own rarity', () => {
+    const { unmount } = render(
+      <CardList
+        cards={[card]}
+        items={[{ card, art: null, imageUrl: '/nova.webp', artCount: 2, versionUrls: [null, '/nova.webp'], versionRarities: ['Rare', 'Nova Rare'], startVersion: 1 }]}
+        onOpenImage={vi.fn()}
+      />,
+    );
+    expect(document.querySelector('.card-rarity .rarity-symbol')?.textContent).toBe('Nova Rare');
+    unmount();
+    render(<CardList cards={[card]} items={[{ card, art: arts[1] ?? null, imageUrl: '/nova.webp', artCount: 2 }]} onOpenImage={vi.fn()} />);
+    expect(document.querySelector('.card-rarity .rarity-symbol')?.textContent).toBe('Nova Rare');
   });
 
   it('shows no arrows for a single version', () => {

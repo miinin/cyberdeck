@@ -13,6 +13,7 @@ import {
   numberFilterOptionsFor,
   numberOption,
   officialRarity,
+  shortRarity,
   toggleValue,
 } from './cardSearch';
 import type { CardFilterCriteria } from './cardSearch';
@@ -343,5 +344,25 @@ describe('officialRarity (T-078)', () => {
       'Epic Rare', 'Secret Rare', 'Iconic Rare', 'Iconic Rare', 'Iconic Rare', 'Rare', 'Nova Rare',
     ]);
     expect(officialRarity(null)).toBeNull();
+  });
+});
+
+describe('sellable filter and short rarity names', () => {
+  const yes = { ...card('a', 'A', null, 'Unit', null), eddiable: true };
+  const no = { ...card('b', 'B', null, 'Unit', null), eddiable: false };
+  const unknown = card('c', 'C', null, 'Unit', null);
+
+  it('keeps only cards marked sellable', () => {
+    expect(filterCards([yes, no, unknown], { ...EMPTY_CRITERIA, sellable: true }).map((c) => c.slug)).toEqual(['a']);
+    expect(filterCards([yes, no, unknown], EMPTY_CRITERIA)).toHaveLength(3);
+  });
+  it('counts as an active filter', () => {
+    expect(isFilterActive({ ...EMPTY_CRITERIA, sellable: true })).toBe(true);
+    expect(isFilterActive(EMPTY_CRITERIA)).toBe(false);
+  });
+  it('shortens the official rarity names', () => {
+    expect(['Common', 'Uncommon', 'Rare', 'Epic Rare', 'Secret Rare', 'Iconic Rare', 'Nova Rare'].map(shortRarity)).toEqual([
+      'Common', 'Uncommon', 'Rare', 'Epic', 'Secret', 'Iconic', 'Nova',
+    ]);
   });
 });

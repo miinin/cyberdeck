@@ -4557,6 +4557,24 @@ button.legality:focus-visible {
   margin-block-end: var(--space-2);
 }
 
+/* A quiet text button: the list's own editing tool, not a main action (T-082). */
+.missing-add--quiet {
+  margin-block-end: 0;
+}
+
+.missing-link {
+  min-height: 2rem;
+  padding-inline: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.missing-link:hover {
+  color: var(--color-text);
+}
+
 .missing-result:empty {
   display: none;
 }
@@ -4817,8 +4835,41 @@ section[aria-labelledby='have-heading'] {
 .art-sets {
   display: flex;
   flex-direction: column;
-  font-size: 0.8125rem;
+  gap: var(--space-1);
+  font-size: 0.75rem;
   overflow-wrap: anywhere;
+}
+
+.art-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* Set and printing chips (T-082): a cut corner like the other chips; the 1 px edge is a layer under the fill. */
+.set-chip {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  padding: 0 0.45em;
+  background: var(--color-border-strong);
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  clip-path: polygon(0 0, calc(100% - 0.4em) 0, 100% 0.4em, 100% 100%, 0 100%);
+}
+
+.set-chip::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--color-surface-raised);
+  clip-path: polygon(0 0, calc(100% - 0.35em) 0, 100% 0.35em, 100% 100%, 0 100%);
+}
+
+.set-chip--family {
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 .art-breakdown summary {
@@ -4970,9 +5021,16 @@ section[aria-labelledby='have-heading'] {
   white-space: nowrap;
 }
 
-/* T-079: rarity keys carry a symbol and a two-word name, so they take one column; tiles show the symbol alone. */
-.options-even.options-rarity {
-  grid-template-columns: minmax(0, 1fr);
+/* T-082: rarity keys are two columns again; the visible name is short ("Secret"), the official one is in the title and the spoken text. */
+.options-rarity .option {
+  gap: 3px;
+  padding-inline: 3px;
+}
+
+.option-rarity-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* T-081: version arrows on the card box picture. Always visible on touch; on a mouse they show on hover and focus. */
@@ -5039,12 +5097,6 @@ section[aria-labelledby='have-heading'] {
 .art-thumb {
   height: 7rem;
   object-fit: contain;
-}
-
-.art-sets {
-  height: calc(2 * 1.3em);
-  line-height: 1.3;
-  overflow: hidden;
 }
 
 .art-count {

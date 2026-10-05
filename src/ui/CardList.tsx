@@ -5,6 +5,7 @@ import { playsetSize } from '../domain/card';
 import { officialRarity } from '../domain/cardSearch';
 import type { Card } from '../domain/card';
 import type { Art } from '../domain/arts';
+import { artRarity } from '../domain/arts';
 import { CardColor, typeBadgeClass } from './CardColor';
 import { CardImage } from './CardImage';
 import { CostGem } from './DeckPickTable';
@@ -47,8 +48,12 @@ export interface CardListItem {
   artCount: number;
   /** One-box-per-card mode: the picture of each version (null = the card's own), for the ‹ › buttons. */
   versionUrls?: readonly (string | null)[];
+  /** Rarity of each version in versionUrls (the rarity symbol follows the shown version). */
+  versionRarities?: readonly (string | null)[];
   /** Index in versionUrls to start from (the art a filter matches). */
   startVersion?: number;
+  /** Rarity of the shown picture when there are no ‹ › buttons. Default: the art's rarity, else the card's. */
+  rarity?: string | null;
 }
 
 /** The picture of a box. With several versions it has ‹ › buttons that cycle the shown version (tile state only). */
@@ -56,20 +61,20 @@ function BoxPicture({
   card,
   imageUrl,
   versionUrls,
-  startVersion = 0,
+  index,
+  onStep,
   onOpenImage,
 }: {
   card: Card;
   imageUrl: string | null;
   versionUrls?: readonly (string | null)[];
-  startVersion?: number;
+  index: number;
+  onStep: (delta: number) => void;
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
 }) {
-  const [picked, setPicked] = useState<number | null>(null);
   const n = versionUrls?.length ?? 0;
   if (versionUrls === undefined || n < 2) return <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} />;
-  const index = (picked ?? startVersion) % n;
-  const step = (delta: number) => setPicked((index + delta + n) % n);
+  const step = onStep;
   return (
     <div className="card-picture">
       <CardImage key={index} card={card} onOpen={onOpenImage} artUrl={versionUrls[index] ?? null} />
@@ -147,77 +152,112 @@ export function CardList({
 }) {
   return (
     <ul className="card-grid" aria-label={caption}>
-      {(items ?? cards.map((card): CardListItem => ({ card, art: null, imageUrl: null, artCount: 1 }))).map(({ card, art, imageUrl, artCount, versionUrls, startVersion }) => {
-        const artMode = art !== null && owned?.artCountOf !== undefined && owned.onArtChange !== undefined;
-        const artOwned = artMode ? (owned?.artCountOf?.(card, art) ?? 0) : 0;
-        const state = artMode ? (owned?.mode === 'ready' && artOwned > 0 ? 'is-owned' : '') : collectionState(card, owned);
-        return (
-        <li key={art === null ? card.id : art.artId} className={'card-box card-box--art ' + state}>
-          {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
-          <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} startVersion={startVersion} onOpenImage={onOpenImage} />
-          {items !== undefined && art !== null && <p className="art-label">{art.rarity === null ? texts.artBase : <RaritySymbol rarity={art.rarity} showName />}</p>}
-          <div className="card-head">
-            <dl className="card-cost">
-              <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
-                {card.cost === null ? undefined : <CostGem card={card} />}
-              </Stat>
-            </dl>
-            <h3 className="card-name">
-              <span lang="en">{card.name}</span>
-              {card.subname !== null && (
-                <>
-                  <span className="visually-hidden">, </span>
-                  <span className="card-subname" lang="en">
-                    {card.subname}
-                  </span>
-                </>
-              )}
-            </h3>
-          </div>
-          <div className="card-meta">
-            <p className="card-type">
-              <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
-                {card.type}
-              </span>
-              <span className="visually-hidden">
-                , <CardColor color={card.color} />
-              </span>
-            </p>
-            <dl className="card-stats">
-              <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} className="stat-chip" />
-              <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip" />
-              <Stat
-                label={texts.columnRarity}
-                value={null}
-                missing={texts.noRarity}
-                className="card-rarity"
-                hideLabel
-              >
-                {card.rarity === null ? undefined : <RaritySymbol rarity={card.rarity} size={18} />}
-              </Stat>
-            </dl>
-          </div>
-          <div className="card-foot">
-            {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
-            {renderFoot !== undefined && <div className="card-collection">{renderFoot(card)}</div>}
-            {owned !== undefined && (
-              <div className="card-collection">
-                <CountControl
-                  card={card}
-                  count={artMode ? artOwned : owned.countOf(card)}
-                  mode={owned.mode}
-                  label={artMode && art !== null ? texts.artTileName(card.displayName, art.rarity === null ? texts.artBase : officialRarity(art.rarity)) : undefined}
-                  onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
-                  onLimit={owned.onLimit}
-                  editable={owned.editable}
-                  min={artMode ? 0 : owned.minOf?.(card)}
-                />
-              </div>
-            )}
-          </div>
-        </li>
-        );
-      })}
+      {(items ?? cards.map((card): CardListItem => ({ card, art: null, imageUrl: null, artCount: 1 }))).map((item) => (
+        <CardBox
+          key={item.art === null ? item.card.id : item.art.artId}
+          item={item}
+          showArtLabel={items !== undefined}
+          owned={owned}
+          decksOf={decksOf}
+          onOpenImage={onOpenImage}
+          renderFoot={renderFoot}
+        />
+      ))}
     </ul>
+  );
+}
+
+/** One box. Holds which version the ‹ › buttons show, so the rarity symbol can follow it. */
+function CardBox({
+  item,
+  showArtLabel,
+  owned,
+  decksOf,
+  onOpenImage,
+  renderFoot,
+}: {
+  item: CardListItem;
+  showArtLabel: boolean;
+  owned?: OwnedColumn;
+  decksOf?: (card: Card) => readonly string[];
+  onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  renderFoot?: (card: Card) => ReactNode;
+}) {
+  const { card, art, imageUrl, artCount, versionUrls, versionRarities, startVersion = 0 } = item;
+  const [picked, setPicked] = useState<number | null>(null);
+  const n = versionUrls?.length ?? 0;
+  const index = n < 2 ? 0 : (picked ?? startVersion) % n;
+  const step = (delta: number) => setPicked((index + delta + n) % n);
+  const shownRarity = n >= 2 && versionRarities !== undefined
+    ? (versionRarities[index] ?? card.rarity)
+    : item.rarity !== undefined ? item.rarity : art !== null ? artRarity(card, art) : card.rarity;
+  const artMode = art !== null && owned?.artCountOf !== undefined && owned.onArtChange !== undefined;
+  const artOwned = artMode ? (owned?.artCountOf?.(card, art) ?? 0) : 0;
+  const state = artMode ? (owned?.mode === 'ready' && artOwned > 0 ? 'is-owned' : '') : collectionState(card, owned);
+  return (
+    <li className={'card-box card-box--art ' + state}>
+      {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
+      <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} />
+      {showArtLabel && art !== null && <p className="art-label">{art.rarity === null ? texts.artBase : <RaritySymbol rarity={art.rarity} showName />}</p>}
+      <div className="card-head">
+        <dl className="card-cost">
+          <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
+            {card.cost === null ? undefined : <CostGem card={card} />}
+          </Stat>
+        </dl>
+        <h3 className="card-name">
+          <span lang="en">{card.name}</span>
+          {card.subname !== null && (
+            <>
+              <span className="visually-hidden">, </span>
+              <span className="card-subname" lang="en">
+                {card.subname}
+              </span>
+            </>
+          )}
+        </h3>
+      </div>
+      <div className="card-meta">
+        <p className="card-type">
+          <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
+            {card.type}
+          </span>
+          <span className="visually-hidden">
+            , <CardColor color={card.color} />
+          </span>
+        </p>
+        <dl className="card-stats">
+          <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} className="stat-chip" />
+          <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip" />
+          <Stat
+            label={texts.columnRarity}
+            value={null}
+            missing={texts.noRarity}
+            className="card-rarity"
+            hideLabel
+          >
+            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={18} />}
+          </Stat>
+        </dl>
+      </div>
+      <div className="card-foot">
+        {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
+        {renderFoot !== undefined && <div className="card-collection">{renderFoot(card)}</div>}
+        {owned !== undefined && (
+          <div className="card-collection">
+            <CountControl
+              card={card}
+              count={artMode ? artOwned : owned.countOf(card)}
+              mode={owned.mode}
+              label={artMode && art !== null ? texts.artTileName(card.displayName, art.rarity === null ? texts.artBase : officialRarity(art.rarity)) : undefined}
+              onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
+              onLimit={owned.onLimit}
+              editable={owned.editable}
+              min={artMode ? 0 : owned.minOf?.(card)}
+            />
+          </div>
+        )}
+      </div>
+    </li>
   );
 }

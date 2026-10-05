@@ -130,9 +130,13 @@ export const deckTextsEn: typeof deckTextsFi = {
   rulesNote: 'To be checked: the rule uses a card’s single color and RAM value as they are.',
   missingListHeading: 'Show missing cards',
   missingDownload: 'Download missing (.txt)',
-  addMissingToWants: 'Add missing to wants',
+  addMissingToWants: 'Add missing to want list',
   addedToWants: (count: number) => (count === 1 ? 'Added 1 card to wants.' : `Added ${count} cards to wants.`),
   allAlreadyWanted: 'All already in wants.',
+  addMissingTitle: (cards: number) => (cards === 1 ? 'Add 1 card to your want list?' : `Add ${cards} cards to your want list?`),
+  addMissingBody: (cards: number, copies: number) =>
+    `This adds ${cards === 1 ? '1 card' : `${cards} cards`} (${copies === 1 ? '1 copy' : `${copies} copies`} in total) to your want list: every card shown here that you own fewer than a playset of. Existing want counts will not go down.`,
+  addMissingConfirm: 'Add',
   missingFileSuffix: 'missing',
   missingRow: (name: string, count: number) => `${name} – missing ${count}`,
   missingFromCollection: (count: number) =>

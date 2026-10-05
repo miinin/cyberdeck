@@ -171,7 +171,7 @@ describe('Deck editor result picker', () => {
     window.location.hash = '#/';
     const repositories = createMemoryRepositories();
     render(<App cards={[...testCards, withImage]} repositories={repositories} />);
-    fireEvent.click(await screen.findByRole('radio', { name: 'Taulukko' }));
+    fireEvent.click(await screen.findByRole('radio', { name: 'Lista' }));
     vi.useFakeTimers();
     const row = screen.getByText('Streetkid', { selector: '.card-subname' }).closest('tr') as HTMLElement;
     fireEvent.pointerEnter(row, { pointerType: 'mouse' });

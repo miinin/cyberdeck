@@ -2,7 +2,9 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Card } from '../domain/card';
 import type { Printing } from '../domain/printing';
-import { CardVersions } from './CardVersions';
+import { CARDS } from '../data/cards';
+import { variantImageUrl } from '../data/variantImages';
+import { CardVersions, setAbbreviation, setChips } from './CardVersions';
 
 function printing(setCode: string, setName: string, number: string, language = 'en', rarity: string | null = 'Rare'): Printing {
   return { key: `${setCode}:${number.replace('β', '')}`, setCode, setName, number, rarity, language, artist: null, imageKey: `v__${setCode}-${number}` };
@@ -52,7 +54,10 @@ describe('CardVersions gallery', () => {
     const tiles = screen.getAllByRole('listitem').filter((li) => li.classList.contains('art-tile'));
     expect(tiles).toHaveLength(2);
     expect(within(at(tiles, 0)).getByText('Perus')).toBeInTheDocument();
-    expect(within(at(tiles, 0)).getByText('Welcome to Night City · Retail, Beta, FR')).toBeInTheDocument();
+    const sets = at(Array.from(at(tiles, 0).querySelectorAll('.art-sets .art-set')), 0);
+    expect(sets.querySelector('.set-chip--family')).toHaveAttribute('title', 'Welcome to Night City');
+    expect(within(sets as HTMLElement).getByText('WtNC')).toBeInTheDocument();
+    expect(Array.from(sets.querySelectorAll('.set-chip:not(.set-chip--family)')).map((chip) => chip.textContent)).toEqual(['Retail', 'Beta', 'FR']);
     expect(within(at(tiles, 1)).getByText('Iconic Rare')).toBeInTheDocument();
     expect(document.querySelectorAll('img.art-thumb')).toHaveLength(2);
   });
@@ -103,10 +108,13 @@ describe('CardVersions gallery', () => {
     expect(onArtChange).not.toHaveBeenCalled();
   });
 
-  it('browsing shows only owned arts and no buttons', () => {
+  it('browsing shows every art, the owned count as text, a dash for none, and no buttons', () => {
     setup({ editable: false });
     expect(screen.queryAllByRole('button')).toHaveLength(0);
-    expect(document.querySelectorAll('li.art-tile')).toHaveLength(1);
+    const tiles = Array.from(document.querySelectorAll<HTMLElement>('li.art-tile'));
+    expect(tiles).toHaveLength(2);
+    expect(at(tiles, 0).querySelector('.art-count')?.textContent).toContain('3');
+    expect(at(tiles, 1).querySelector('.art-count')?.textContent).toContain('–');
   });
 
   it('renders nothing for a card without printings', () => {
@@ -114,5 +122,63 @@ describe('CardVersions gallery', () => {
       <CardVersions card={{ ...card, printings: [] }} count={0} versionCount={() => 0} editable onChange={vi.fn()} onLimit={vi.fn()} />,
     );
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe('set chips', () => {
+  it('abbreviates long set names and keeps short ones', () => {
+    expect(setAbbreviation('Welcome to Night City')).toBe('WtNC');
+    expect(setAbbreviation('Embracing Power Starter Deck')).toBe('EPSD');
+    expect(setAbbreviation('Night City Showdown S1')).toBe('NCSS1');
+    expect(setAbbreviation('Set 1 Promos')).toBe('Set 1 Promos');
+  });
+
+  it('gives promo and tournament printings their number as a tag', () => {
+    const promo = printing('promo', 'Set 1 Promos', '005', 'en', 'Nova Rare');
+    expect(setChips([promo, printing('promo', 'Set 1 Promos', '007', 'en', 'Nova Rare'), promo])).toEqual([
+      { family: 'Set 1 Promos', short: 'Set 1 Promos', tags: ['#005', '#007'] },
+    ]);
+  });
+});
+
+describe('CardVersions with the bundled cards', () => {
+  const byKey = (key: string): Card => {
+    const found = CARDS.find((c) => c.key === key);
+    if (found === undefined) throw new Error(key);
+    return found;
+  };
+  const renderReal = (key: string, extra: Partial<Parameters<typeof CardVersions>[0]> = {}) => {
+    const real = byKey(key);
+    const onShowArt = vi.fn();
+    render(
+      <CardVersions card={real} count={0} versionCount={() => 0} editable={false} onChange={vi.fn()} onLimit={vi.fn()} baseImage="/base.webp" onShowArt={onShowArt} {...extra} />,
+    );
+    return { onShowArt, tiles: Array.from(document.querySelectorAll<HTMLElement>('li.art-tile')) };
+  };
+
+  it('shows Base and Iconic Rare for Johnny Rocking Renegade with nothing owned, and selects the picture', async () => {
+    const { tiles, onShowArt } = renderReal('johnny-silverhand-rocking-renegade');
+    expect(tiles).toHaveLength(2);
+    expect(within(at(tiles, 0)).getByText('Perus')).toBeInTheDocument();
+    expect(within(at(tiles, 1)).getByText('Iconic Rare')).toBeInTheDocument();
+    const iconic = variantImageUrl('johnny-silverhand-rocking-renegade', 'Iconic Secret');
+    expect(iconic).not.toBeNull();
+    expect(at(tiles, 0).querySelector('img')).toHaveAttribute('src', '/base.webp');
+    expect(at(tiles, 1).querySelector('img')).toHaveAttribute('src', iconic);
+    const pick = within(at(tiles, 1)).getByRole('button', { name: /Iconic Rare/ });
+    expect(pick).toHaveAttribute('aria-pressed', 'false');
+    await userEvent.click(pick);
+    expect(onShowArt).toHaveBeenCalledWith(iconic);
+  });
+
+  it.each(['adam-smasher-metal-over-meat', 'v-streetkid'])('shows three versions for %s', (key) => {
+    expect(renderReal(key).tiles).toHaveLength(3);
+  });
+
+  it('shows Rebecca Having a Moment as one Nova Rare version, not an empty Base plus Nova', () => {
+    const { tiles } = renderReal('rebecca-having-a-moment');
+    expect(tiles).toHaveLength(1);
+    expect(within(at(tiles, 0)).getByText('Nova Rare')).toBeInTheDocument();
+    expect(within(at(tiles, 0)).queryByText('Perus')).toBeNull();
   });
 });

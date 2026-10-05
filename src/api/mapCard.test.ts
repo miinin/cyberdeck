@@ -15,6 +15,7 @@ describe('mapCard', () => {
       power: null,
       ram: null,
       rarity: 'Rare',
+      eddiable: null,
       key: 'v-streetkid',
       printings: [
         {
@@ -154,5 +155,14 @@ describe('mapCard: rarity', () => {
     expect(mapCard(rawCard(1, { rarity: 'Rare' }))).toMatchObject({ rarity: 'Rare' });
     expect(mapCard(rawCard(1, { rarity: '  ' }))).toMatchObject({ rarity: null });
     expect(mapCard(rawCard(1, { rarity: 5 }))).toMatchObject({ rarity: null });
+  });
+});
+
+describe('mapCard: eddiable', () => {
+  it('copies is_eddiable only when it is a boolean', () => {
+    expect(mapCard(rawCard(1, { is_eddiable: true }))).toMatchObject({ eddiable: true });
+    expect(mapCard(rawCard(1, { is_eddiable: false }))).toMatchObject({ eddiable: false });
+    expect(mapCard(rawCard(1, { is_eddiable: 'true' }))).toMatchObject({ eddiable: null });
+    expect(mapCard(rawCard(1, {}))).toMatchObject({ eddiable: null });
   });
 });

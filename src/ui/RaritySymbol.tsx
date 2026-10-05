@@ -1,39 +1,71 @@
+import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { officialRarity } from '../domain/cardSearch';
 import { texts } from './texts';
 
-/** The seven official rarity symbols (T-079), drawn after the rarity system picture. */
-const WIDE = '0 0 32 24';
+/**
+ * The seven official rarity symbols (T-079, redrawn in T-082 from the official rarity system picture).
+ * Chevron arms are parallel bands with flat cut ends; the shapes keep the picture's proportions.
+ */
+type Point = readonly [number, number];
+const poly = (points: readonly Point[]) => 'M' + points.map(([x, y]) => `${x} ${y}`).join('L') + 'Z';
+const flipY = (points: readonly Point[]) => points.map(([x, y]) => [x, 24 - y] as const);
+const flipX = (points: readonly Point[], width: number) => points.map(([x, y]) => [width - x, y] as const);
+const shiftX = (points: readonly Point[], dx: number) => points.map(([x, y]) => [x + dx, y] as const);
 
-const up = (y: number) => `M4 ${y}l8-8.5 8 8.5h-4l-4-4.5-4 4.5z`;
-const down = (y: number) => `M4 ${y}l8 8.5 8-8.5h-4l-4 4.5-4-4.5z`;
+const COMMON: Point[] = [[2.5, 7], [7, 7], [12, 12], [17, 7], [21.5, 7], [12, 16.5]];
+const RARE_TOP: Point[] = [[12, 1.5], [21.5, 11], [17, 11], [12, 6], [7, 11], [2.5, 11]];
+const EPIC_TOP: Point[] = [[12, 2.5], [20.5, 11], [16.2, 11], [12, 6.8], [7.8, 11], [3.5, 11]];
+const EPIC_GEM: Point[] = [[12, 9], [15, 12], [12, 15], [9, 12]];
+const EPIC = [EPIC_TOP, flipY(EPIC_TOP), EPIC_GEM];
+const WING: Point[] = [[2, 12], [7.2, 3.6], [7.2, 8.2], [4.8, 12], [7.2, 15.8], [7.2, 20.4]];
+const ICONIC_TOP: Point[] = [[12, 0.8], [13.6, 2.8], [13.6, 5.6], [17.4, 10.8], [14.6, 10.8], [12, 7.24], [9.4, 10.8], [6.6, 10.8], [10.4, 5.6], [10.4, 2.8]];
+const ICONIC_BAR: Point[] = [[1.6, 10.8], [7.2, 3.1], [7.2, 7], [4.4, 10.8]];
+const ICONIC_GEM: Point[] = [[12, 9.2], [14.8, 12], [12, 14.8], [9.2, 12]];
 
-/** Nova: a square frame of slanted warning stripes around a small square. */
-const NOVA_STRIPES = [
-  ...[2, 8, 14].flatMap((x) => [`M${x + 2} 2h4l-2 4h-4z`, `M${x + 2} 18h4l-2 4h-4z`]),
-  ...[8, 14].flatMap((y) => [`M4 ${y}h4l-2 4H2z`, `M20 ${y}h4l-2 4h-4z`]),
-  'M10 10h4v4h-4z',
-].join('');
+/** Nova: 45° warning stripes clipped to a square frame, around a small square. */
+const NOVA_RING = 'M1 1H23V23H1ZM6 6V18H18V6Z';
+// Five bands x + y = c, symmetric about the centre (c = 24): corner triangles plus two wide pieces per side.
+const NOVA_STRIPES = [0, 1, 2, 3, 4]
+  .map((k) => 4.25 + k * 9.875)
+  .map((c) => poly([[c - 2.8 + 2, -2], [c + 2.8 + 2, -2], [-2, c + 2.8 + 2], [-2, c - 2.8 + 2]]))
+  .join('');
+const NOVA_CORE = 'M9.2 9.2h5.6v5.6h-5.6Z';
 
-const SYMBOLS: Record<string, { viewBox: string; width: number; path: string; evenodd?: boolean }> = {
-  Common: { viewBox: '0 0 24 24', width: 24, path: down(7.5) },
-  Uncommon: { viewBox: '0 0 24 24', width: 24, path: up(16.5) },
-  Rare: { viewBox: '0 0 24 24', width: 24, path: up(10) + down(14) },
-  'Epic Rare': { viewBox: '0 0 24 24', width: 24, path: up(9.5) + down(14.5) + 'M12 9.5l2.5 2.5-2.5 2.5-2.5-2.5z' },
+const paths = (...shapes: (readonly Point[])[]) => shapes.map(poly).join('');
+
+interface SymbolShape {
+  viewBox: string;
+  width: number;
+  path: string;
+  /** Stripes drawn through this evenodd clip (Nova). */
+  clip?: { ring: string; stripes: string };
+}
+
+const SYMBOLS: Record<string, SymbolShape> = {
+  Common: { viewBox: '0 0 24 24', width: 24, path: paths(COMMON) },
+  Uncommon: { viewBox: '0 0 24 24', width: 24, path: paths(flipY(COMMON)) },
+  Rare: { viewBox: '0 0 24 24', width: 24, path: paths(RARE_TOP, flipY(RARE_TOP)) },
+  'Epic Rare': { viewBox: '0 0 24 24', width: 24, path: paths(...EPIC) },
   'Secret Rare': {
-    viewBox: WIDE,
+    viewBox: '0 0 32 24',
     width: 32,
-    evenodd: true,
-    path: 'M10 3L1 12l9 9h4L5 12l9-9zM22 3l9 9-9 9h-4l9-9-9-9zM16 6l6 6-6 6-6-6zM16 9l3 3-3 3-3-3z',
+    path: paths(...EPIC.map((shape) => shiftX(shape, 4)), WING, flipX(WING, 32)),
   },
   'Iconic Rare': {
     viewBox: '0 0 24 24',
     width: 24,
-    evenodd: true,
-    path:
-      'M12 .5l3 4H9zM12 23.5l3-4H9zM3 6h4v2H5v8h2v2H3zM21 6h-4v2h2v8h-2v2h4zM12 8l4 4-4 4-4-4zM12 10.5l1.5 1.5-1.5 1.5-1.5-1.5z',
+    path: paths(
+      ICONIC_TOP,
+      flipY(ICONIC_TOP),
+      ICONIC_GEM,
+      ICONIC_BAR,
+      flipX(ICONIC_BAR, 24),
+      flipY(ICONIC_BAR),
+      flipY(flipX(ICONIC_BAR, 24)),
+    ),
   },
-  'Nova Rare': { viewBox: '0 0 24 24', width: 24, path: NOVA_STRIPES },
+  'Nova Rare': { viewBox: '0 0 24 24', width: 24, path: NOVA_CORE, clip: { ring: NOVA_RING, stripes: NOVA_STRIPES } },
 };
 
 export const RARITY_KEYS = Object.keys(SYMBOLS);
@@ -58,6 +90,7 @@ export function RaritySymbol({
   showName?: boolean;
   size?: number;
 }): ReactNode {
+  const clipId = useId();
   const name = officialRarity(rarity);
   const symbol = SYMBOLS[name];
   if (symbol === undefined) return <span lang="en">{name}</span>;
@@ -71,7 +104,15 @@ export function RaritySymbol({
         aria-hidden="true"
         focusable="false"
       >
-        <path d={symbol.path} fillRule={symbol.evenodd ? 'evenodd' : undefined} />
+        {symbol.clip !== undefined && (
+          <>
+            <clipPath id={clipId}>
+              <path d={symbol.clip.ring} clipRule="evenodd" />
+            </clipPath>
+            <path d={symbol.clip.stripes} clipPath={`url(#${clipId})`} />
+          </>
+        )}
+        <path d={symbol.path} />
       </svg>
       <span lang="en" className={showName ? 'rarity-name' : 'visually-hidden'}>
         {name}

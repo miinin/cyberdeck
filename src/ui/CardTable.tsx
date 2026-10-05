@@ -24,6 +24,10 @@ export function Value({ value, missing }: { value: number | string | null; missi
   );
 }
 
+function RarityCell({ rarity }: { rarity: string | null }): ReactNode {
+  return rarity === null ? <Value value={null} missing={texts.noRarity} /> : <RaritySymbol rarity={rarity} />;
+}
+
 type SortState = CardSort;
 /** One sortable column header: a button inside the th, with aria-sort on the active th only. */
 function SortHeader({ label, column, sort, onSort, numeric = false }: { label: string; column: SortKey; sort: SortState; onSort: (column: SortKey) => void; numeric?: boolean }) {
@@ -49,6 +53,7 @@ export function CardTable({
   decksOf,
   onOpenImage,
   artUrlOf,
+  rarityOf,
   hoverProps,
   sort: controlledSort,
   onSortChange,
@@ -60,6 +65,8 @@ export function CardTable({
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
   /** A special art to show in place of a card's picture (D-021). */
   artUrlOf?: (card: Card) => string | null;
+  /** The rarity a row shows; default: the card's own. */
+  rarityOf?: (card: Card) => string | null;
   /** Mouse hover preview of the bigger image (T-052), as in the deck editor. */
   hoverProps?: (card: Card) => HoverPreviewProps;
   /** Controlled sort shared with the "Järjestys" selector (T-060); without it the table keeps its own. */
@@ -127,7 +134,7 @@ export function CardTable({
                 </span>
               </td>
               <td>
-                {card.rarity === null ? <Value value={null} missing={texts.noRarity} /> : <RaritySymbol rarity={card.rarity} />}
+                <RarityCell rarity={rarityOf?.(card) ?? card.rarity} />
               </td>
               <td className="cell-number">
                 <Value value={card.cost} missing={texts.noCost} />

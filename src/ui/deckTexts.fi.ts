@@ -137,6 +137,10 @@ export const deckTextsFi = {
   addMissingToWants: 'Lisää puuttuvat wantiin',
   addedToWants: (count: number) => (count === 1 ? 'Lisätty 1 kortti wantiin.' : `Lisätty ${count} korttia wantiin.`),
   allAlreadyWanted: 'Kaikki jo wantissa.',
+  addMissingTitle: (cards: number) => (cards === 1 ? 'Lisätäänkö 1 kortti want-listalle?' : `Lisätäänkö ${cards} korttia want-listalle?`),
+  addMissingBody: (cards: number, copies: number) =>
+    `Lisätään want-listalle ${cards === 1 ? '1 kortti' : `${cards} korttia`} (yhteensä ${copies === 1 ? '1 kappale' : `${copies} kappaletta`}): kaikki näkyvät kortit, joista sinulla on vähemmän kuin pelisarja. Olemassa olevat want-määrät eivät pienene.`,
+  addMissingConfirm: 'Lisää',
   missingFileSuffix: 'puuttuvat',
   missingRow: (name: string, count: number) => `${name} – puuttuu ${count}`,
   missingFromCollection: (count: number) =>
