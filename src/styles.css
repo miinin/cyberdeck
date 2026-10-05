@@ -197,6 +197,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* The scrollbar's room is always kept, so the page does not jump sideways when it appears or a dialog locks it (T-084). */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -1410,6 +1412,15 @@ body:has(dialog[open]) {
   font-size: var(--font-size-sm);
 }
 
+/* Type row and count line up across a grid row: the free space goes above them, whatever the name's length (T-084). */
+.card-box > .card-meta {
+  margin-top: auto;
+}
+
+.card-box > .card-meta ~ .card-foot {
+  margin-top: 0;
+}
+
 .card-type {
   margin: 0;
 }
@@ -2563,6 +2574,8 @@ h3,
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  /* Room for one chip row even with no filters, so the cards do not jump when a filter is added (T-084). */
+  min-height: 2rem;
   margin-block-end: var(--space-4);
 }
 

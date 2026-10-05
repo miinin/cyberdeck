@@ -88,7 +88,8 @@ export function ActiveFilters({
     else chipRefs.current[Math.min(index, filters.length - 1)]?.focus();
   }, [filters, searchInputRef]);
 
-  if (filters.length === 0 && !showClear) return null;
+  // Empty, the row still keeps its height (T-084): the cards below do not move when a filter comes or goes.
+  if (filters.length === 0 && !showClear) return <div className="active-filters" />;
 
   return (
     <div className="active-filters">
