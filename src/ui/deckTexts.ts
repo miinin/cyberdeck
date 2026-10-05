@@ -113,6 +113,10 @@ export const deckTexts = {
   issuesLive: (count: number) => (count === 0 ? 'Pakka on nyt laillinen.' : `Pakassa on ${issueCount(count)}.`),
   warningPrefix: 'Huomio: ',
   rulesNote: 'Tarkistettava: sääntö käyttää kortin yhtä väriä ja RAM-arvoa sellaisenaan.',
+  missingListHeading: 'Näytä puuttuvat kortit',
+  missingDownload: 'Lataa puuttuvat (.txt)',
+  missingFileSuffix: 'puuttuvat',
+  missingRow: (name: string, count: number) => `${name} – puuttuu ${count}`,
   missingFromCollection: (count: number) =>
     count === 0 ? 'Kaikki pakan kortit ovat kokoelmassasi.' : `Kokoelmasta puuttuu ${cardCount(count)}.`,
   collectionNotReady: 'Kokoelmaa ei voi verrata, koska sitä ei voitu ladata.',
