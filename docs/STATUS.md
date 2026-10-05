@@ -1,7 +1,7 @@
-# STATUS · päivitetty 2026-10-05 (PM, T-060 ja T-061 PR:inä)
+# STATUS · päivitetty 2026-10-05 (PM, T-060–T-064 PR:inä)
 
 ## Yhdellä lauseella
-MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (rarity; want-listaa ei vielä ole, T-064) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
+MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (rarity, want-lista ja vaihtolinkki PR:inä, D-018) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
 
 ## MVP-taso
 Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-015, T-021, T-025–T-027, T-033–T-040, T-045, T-046). Seuraavaksi MVP-1:n loppukatselmoinnit. MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-060, T-061 | PM | Review | PR #39 ja T-061:n PR esikatselussa, PM yhdistää testiin. Sitten T-064 (Arkkitehti: want-tietomalli). Lisäksi: tekstien UX- ja sisältökatselmointi (T-054:n työversiot), vanhan cyberdeck-tcg-test-sivuston sulku (valinnainen). |
+| T-060–T-064 | PM | Review | PR:t #39 → #40 → #41 → #42 → #43 tässä järjestyksessä. Ennen #41:n yhdistämistä käyttäjä deployaa firestore.rules testiprojektiin. UX- ja tekstikatselmointi want- ja vaihtonäkymille avoinna. |
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)

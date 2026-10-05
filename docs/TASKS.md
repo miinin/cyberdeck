@@ -65,7 +65,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-058 | Sideboard pakkaan (tietomalli, Firestore-säännöt, editori, jako ja vienti) | 1 | Should | Koodari | Backlog | Digiturva (säännöt) |
 | T-059 | RAM-suodattimeen 4 ja 5+ (4+ pois) | 1 | Must | PM | Done | – |
 | T-060 | Korttien järjestysvalitsin (numero, nimi, cost, power, RAM, tyyppi, rarity; nouseva/laskeva) | 1 | Must | PM | Review | – |
-| T-061 | Pakasta puuttuvat kortit listana ja .txt-latauksena (editori ja tuonti); want-liitos T-064:n jälkeen | 1 | Must | PM | Review | – |
-| T-062 | (T-064:n jälkeen) Kokoelman jako linkkinä: have, want ja vertailu toisen käyttäjän kanssa | 1 | Should | PM | Backlog | Digiturva |
-| T-063 | (T-064:n jälkeen) Jakonäkymässä tradeable, kun määrä ylittää pelisarjan | 1 | Should | PM | Backlog | – |
-| T-064 | Want-listan tietomalli (tallennus, synkka, Firestore-säännöt) ja kokoelman jakolinkin ADR – käyttäjä päätti 2026-10-05: suunnitellaan ensin | 1 | Must | Arkkitehti | Backlog | Digiturva |
+| T-061 | Pakasta puuttuvat kortit listana ja .txt-latauksena (editori ja tuonti); want-liitos T-061b (PR #42) | 1 | Must | PM | Review | – |
+| T-062 | Kokoelman jako linkkinä: have, want ja vertailu toisen käyttäjän kanssa | 1 | Should | PM | Review | Digiturva ✓ |
+| T-063 | Jakonäkymässä tradeable, kun määrä ylittää pelisarjan | 1 | Should | PM | Review | – |
+| T-064 | Want-listan tietomalli (tallennus, synkka, Firestore-säännöt) ja kokoelman jakolinkin ADR – käyttäjä päätti 2026-10-05: suunnitellaan ensin | 1 | Must | Arkkitehti | Review | Digiturva ✓ |
