@@ -88,3 +88,35 @@ describe('importImages', () => {
     expect(() => outputPath('md', '../../evil')).toThrow();
   });
 });
+
+describe('importImages: variant images (D-020)', () => {
+  const withPrintings: Card[] = [
+    {
+      ...card('octant', 'Octant'),
+      printings: [
+        { key: 'a:001', setCode: 'a', setName: 'Night City Brawl S 1', number: '001', rarity: 'Nova Rare', language: 'en', artist: null, imageKey: 'octant__night-city-brawl-s-1-001' },
+      ],
+    },
+  ];
+
+  it('converts a file named by an image key to public/cards/variants and writes the manifest', async () => {
+    const { deps, convert } = fakeDeps({
+      src: ['Octant__Night-City-Brawl-S-1-001.PNG', 'octant__night-city-brawl-s-1-002.webp', 'octant.webp'],
+      'public/cards/variants': ['octant__night-city-brawl-s-1-001.webp', 'stray.webp'],
+    });
+    deps.writeText = vi.fn(async () => {});
+    convert.mockImplementation(async () => {});
+    const result = await importImages('src', withPrintings, deps);
+
+    expect(convert).toHaveBeenCalledWith('src/Octant__Night-City-Brawl-S-1-001.PNG', [
+      { path: 'public/cards/variants/octant__night-city-brawl-s-1-001.webp', width: 720 },
+    ]);
+    expect(convert).toHaveBeenCalledWith('src/octant.webp', expect.any(Array));
+    expect(convert).toHaveBeenCalledTimes(2);
+    expect(result.report?.variantsConverted).toBe(1);
+    expect(result.report?.converted).toBe(1);
+    // The unknown variant name is not a variant image and is reported like any unmatched file.
+    expect(result.report?.unmatched).toEqual([{ file: 'octant__night-city-brawl-s-1-002.webp', reason: 'no-match' }]);
+    expect(deps.writeText).toHaveBeenCalledWith('src/data/variantImages.json', '[\n  "octant__night-city-brawl-s-1-001"\n]\n');
+  });
+});

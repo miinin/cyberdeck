@@ -1,7 +1,7 @@
 // Entry point for `npm run cards:images -- <folder>` (D-013 osa 4, ARCHITECTURE.md 13.8). Like
 // cards-update.mjs, Vite's module runner loads the TypeScript code; file access and sharp live here.
 // Run from the repository root (npm run does this).
-import { readdir, readFile, stat } from 'node:fs/promises';
+import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { runnerImport } from 'vite';
 import { convertImage } from './cards/convertImage.mjs';
 
@@ -33,6 +33,7 @@ const result = await module.importImages(sourceDir.replace(/[\\/]+$/, ''), data.
       throw error;
     }
   },
+  writeText: (path, text) => writeFile(path, text, 'utf8'),
   convert: convertImage,
   log: (line) => console.log(line),
 });

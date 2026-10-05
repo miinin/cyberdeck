@@ -18,6 +18,12 @@ const card: Card = {
   cost: null, power: null, ram: null, rarity: null, key: 'v', printings: [retail, iconic, beta, french],
 };
 
+function at<T>(list: readonly T[], index: number): T {
+  const item = list[index];
+  if (item === undefined) throw new Error(`No item ${index}`);
+  return item;
+}
+
 function setup(props: Partial<Parameters<typeof CardVersions>[0]> = {}) {
   const onChange = vi.fn();
   const onLimit = vi.fn();
@@ -46,10 +52,10 @@ describe('CardVersions', () => {
       'Welcome to Night City — Beta',
       'Welcome to Night City — Retail — FR',
     ]);
-    expect(within(groups[0]!).getAllByRole('listitem')).toHaveLength(2);
-    expect(within(groups[0]!).getByText('Iconic Legend')).toBeInTheDocument();
-    expect(within(groups[1]!).getByText('β005a')).toBeInTheDocument();
-    expect(within(groups[2]!).getByText('FR')).toBeInTheDocument();
+    expect(within(at(groups, 0)).getAllByRole('listitem')).toHaveLength(2);
+    expect(within(at(groups, 0)).getByText('Iconic Legend')).toBeInTheDocument();
+    expect(within(at(groups, 1)).getByText('β005a')).toBeInTheDocument();
+    expect(within(at(groups, 2)).getByText('FR')).toBeInTheDocument();
   });
 
   it('shows the unknown copies and a thumbnail only for printings with an image', () => {
@@ -61,17 +67,17 @@ describe('CardVersions', () => {
 
   it('changes one printing with its own buttons', async () => {
     const { onChange } = setup();
-    const row = screen.getAllByRole('listitem')[0]!;
-    await userEvent.click(within(row).getAllByRole('button')[1]!);
+    const row = at(screen.getAllByRole('listitem'), 0);
+    await userEvent.click(at(within(row).getAllByRole('button'), 1));
     expect(onChange).toHaveBeenCalledWith(retail.key, 3);
-    await userEvent.click(within(row).getAllByRole('button')[0]!);
+    await userEvent.click(at(within(row).getAllByRole('button'), 0));
     expect(onChange).toHaveBeenCalledWith(retail.key, 1);
   });
 
   it('announces the limit instead of changing when the total is 999', async () => {
     const { onChange, onLimit } = setup({ count: 999 });
-    const row = screen.getAllByRole('listitem')[0]!;
-    await userEvent.click(within(row).getAllByRole('button')[1]!);
+    const row = at(screen.getAllByRole('listitem'), 0);
+    await userEvent.click(at(within(row).getAllByRole('button'), 1));
     expect(onLimit).toHaveBeenCalledWith(card);
     expect(onChange).not.toHaveBeenCalled();
   });
