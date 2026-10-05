@@ -32,3 +32,5 @@ export const COLLECTION_SCHEMA_VERSION = 1;
 export const DECKS_SCHEMA_VERSION = 1;
 export const WANTS_SCHEMA_VERSION = 1;
 export const MAX_BACKUPS_PER_AGGREGATE = 3;
+/** UI language, the raw string 'fi' or 'en' (T-068, D-019). Read synchronously at startup (src/locale.ts); not personal data, never synced. */
+export const LOCALE_KEY = 'cyberdeck:locale';

@@ -4533,3 +4533,15 @@ button.legality:focus-visible {
 .have-want-results .have-want-owned {
   margin: 0;
 }
+
+/* Language switcher (T-068): the buttons reuse the theme toggle look; only the group needs layout. */
+.language-switch {
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+}
+
+.language-switch .theme-toggle {
+  margin-inline-start: 0;
+  padding-inline: var(--space-3);
+}

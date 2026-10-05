@@ -1,0 +1,300 @@
+import { LEGEND_COUNT, MAX_MAIN_DECK, MIN_MAIN_DECK } from '../domain/deckRules';
+import { MAX_DECK_NAME_LENGTH } from '../domain/deck';
+import type { StorageErrorKind } from '../storage';
+import type { deckTextsFi } from './deckTexts.fi';
+import { cardCountEn as cardCount } from './texts.en';
+
+// English texts of deck building (T-068, D-019). Same type as the Finnish object. Game terms
+// (Legend, RAM, Cost) stay as they are.
+
+/** "1 issue", "2 issues" */
+function issueCount(count: number): string {
+  return `${count} ${count === 1 ? 'issue' : 'issues'}`;
+}
+
+const decimalFormat = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+/** "3.2" (T-053). */
+function formatDecimal(value: number): string {
+  return decimalFormat.format(value);
+}
+
+/** "39%" as a whole number. A chance that is not certain never rounds to "100%" and a chance above zero never to "0%". */
+function formatPercent(probability: number): string {
+  const pct = Math.round(probability * 100);
+  if (pct === 0 && probability > 0) return '< 1%';
+  if (pct === 100 && probability < 1) return '> 99%';
+  return `${pct}%`;
+}
+
+function actionFailed(kind: StorageErrorKind | 'unknown'): string {
+  switch (kind) {
+    case 'quota':
+      return 'The browser storage is full, so the change was not saved. Free up space by clearing browser data from other sites and try again.';
+    case 'unavailable':
+      return 'The browser blocked saving, so the change was not saved. Try again. If the problem continues, check the browser’s privacy settings.';
+    case 'limit-reached':
+      return 'You already have so many decks that a new one does not fit. Delete a deck you no longer need.';
+    case 'newer-version':
+      return 'The decks were saved by a newer version of the app, so this version cannot change them. Reload the page.';
+    case 'not-found':
+      return 'The deck was not found. It may have been deleted in another tab.';
+    case 'conflict':
+      return 'The deck has been changed elsewhere.';
+    default:
+      return 'Something went wrong, and the change was not saved. Try again.';
+  }
+}
+
+export const deckTextsEn: typeof deckTextsFi = {
+  formatDecimal,
+  formatPercent,
+  navLabel: 'Main menu',
+  navCards: 'Cards',
+  navDecks: 'Decks',
+  navHaveWant: 'Have/Want',
+
+  listHeading: 'Decks',
+  listEmpty: 'You have no decks yet. Start by creating your first deck.',
+  listLoading: 'Loading decks…',
+  listUnavailable: 'The decks could not be loaded. Reload the page. If the problem continues, check the browser’s privacy settings.',
+  newDeck: 'New deck',
+  listEmptyTitle: 'No decks yet',
+  listEmptyHint: 'Build a deck one card at a time, paste a ready deck list or fetch a public deck from Netdeck.gg.',
+  fetchNetdeck: 'Fetch from Netdeck.gg',
+  deckColors: 'Colors',
+  decksLabel: 'Your decks',
+  open: 'Open',
+  rename: 'Rename',
+  copy: 'Copy',
+  remove: 'Delete',
+  forDeck: (action: string, name: string) => `${action}: ${name}`,
+  counts: (legends: number, main: number) =>
+    `Legends ${legends}/${LEGEND_COUNT} · Main deck ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
+  legal: 'Legal ✓',
+  legalSpoken: 'Legal',
+  unfinished: (issues: number) => `Unfinished · ${issueCount(issues)}`,
+  updated: 'Updated',
+
+  nameLabel: 'Deck name',
+  nameHint: `At most ${MAX_DECK_NAME_LENGTH} characters.`,
+  nameEmpty: 'Give the deck a name.',
+  nameTooLong: `The name is too long. At most ${MAX_DECK_NAME_LENGTH} characters.`,
+  saveName: 'Save name',
+  cancel: 'Cancel',
+
+  deleteTitle: 'Delete the deck?',
+  deleteBody: (name: string) => `The deck "${name}" will be deleted. The cards stay in your collection, but the deck cannot be restored.`,
+  deleteConfirm: 'Delete deck',
+  deletedLive: (name: string) => `Deck "${name}" deleted.`,
+  createdLive: (name: string) => `Deck "${name}" created.`,
+  copiedLive: (name: string) => `Copy "${name}" created.`,
+  renamedLive: (name: string) => `The deck is now named "${name}".`,
+
+  decksRepairedNotice: 'Some of the saved decks were corrupted and were left out of the list.',
+  decksResetNotice: 'The saved decks could not be read. They were copied to a backup, and the list was started empty.',
+
+  errorDismiss: 'Dismiss notice',
+  actionFailed,
+
+  backToList: 'Back to decks',
+  editorLoading: 'Loading the deck…',
+  editorNotFound: 'The deck was not found. It may have been deleted.',
+  legendsHeading: 'Legends',
+  mainHeading: 'Main deck',
+  sectionLabel: (title: string) => `${title}: cards in the deck`,
+  unknownHeading: 'Unknown cards',
+  removeUnknown: (key: string, count: number) => `Remove from deck: ${key} (${count})`,
+  deckEmpty: 'The deck is empty. Add cards from the search list.',
+  legendsEmpty: 'No Legends. Add three different Legends.',
+  ramLimitsLabel: 'RAM limits',
+  ramLimit: (color: string, limit: number) => `${color} ${limit}`,
+  ramLimitsNone: 'No RAM limits until the deck has a Legend.',
+  issuesHeading: 'Issues',
+  allGood: 'The deck is legal.',
+  issuesLive: (count: number) => (count === 0 ? 'The deck is now legal.' : `The deck has ${issueCount(count)}.`),
+  warningPrefix: 'Note: ',
+  rulesNote: 'To be checked: the rule uses a card’s single color and RAM value as they are.',
+  missingListHeading: 'Show missing cards',
+  missingDownload: 'Download missing (.txt)',
+  addMissingToWants: 'Add missing to wants',
+  addedToWants: (count: number) => (count === 1 ? 'Added 1 card to wants.' : `Added ${count} cards to wants.`),
+  allAlreadyWanted: 'All already in wants.',
+  missingFileSuffix: 'missing',
+  missingRow: (name: string, count: number) => `${name} – missing ${count}`,
+  missingFromCollection: (count: number) =>
+    count === 0 ? 'All cards of the deck are in your collection.' : `Your collection is missing ${cardCount(count)}.`,
+  collectionNotReady: 'The collection cannot be compared because it could not be loaded.',
+  owned: (have: number, need: number) => `you own ${have}/${need}`,
+  missingBadge: 'missing',
+  missingCount: (count: number) => `missing ${count}`,
+  inDeckBadge: (count: number) => `${count} in deck`,
+  curveHeading: 'Cost curve',
+  curveCaption: 'Main deck cards by Cost',
+  curveCost: 'Cost',
+  curveCopies: 'Cards',
+  curveBucket: (cost: number, last: number) => (cost >= last ? `${last}+` : String(cost)),
+  addToDeck: 'Add to deck',
+  addCard: (name: string) => `Add to deck: ${name}`,
+  removeCard: (name: string) => `Remove from deck: ${name}`,
+  inDeck: (count: number) => `In deck ${count}`,
+  searchHeading: 'Add cards',
+  searchResults: (shown: number, all: number) => `${shown} / ${all} cards`,
+  noSearchResults: 'No cards match your search.',
+  dimmedHint: (reason: string) => `${reason} You can still add the card.`,
+  sameLegend: (name: string) => `The deck already has a Legend named ${name}.`,
+  toastClose: 'Dismiss notice',
+  pickViewLegend: 'View',
+  pickViewList: 'Rows',
+  pickViewImages: 'Images',
+  pickHint: 'Click a card to add it. Right-click or Shift+click removes it. On the keyboard, + and −.',
+  resultsCaption: 'Search results',
+  colInDeck: 'In deck',
+  blockedLimit: 'Over the limit',
+  blockedLegend: 'Same Legend',
+  sameLegendReason: (name: string) => `The deck already has the Legend ${name}.`,
+  changeAnnounce: (name: string, count: number, main: number) => `${name}: ${count} in deck. Main deck ${main} cards.`,
+  changeAnnounceLegend: (name: string, count: number, legends: number) =>
+    `${name}: ${count} in deck. Legends ${legends}/${LEGEND_COUNT}.`,
+  mainProgress: (main: number) => `Main deck ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
+  legendsProgress: (legends: number) => `Legends ${legends}/${LEGEND_COUNT}`,
+  legalShort: 'Legal',
+  issuesCount: (count: number) => issueCount(count),
+  legendSlotEmpty: 'Free Legend slot',
+  deckViewLegend: 'Deck view',
+  deckViewList: 'List',
+  deckViewStacks: 'Stacks',
+  copies: (count: number) => `×${count}`,
+  stackCard: (name: string, count: number) => `Enlarge image: ${name}, ${count} in deck`,
+  statsHeading: 'Statistics',
+  colorsLabel: 'Colors',
+  typesLabel: 'Types',
+  colorShare: (color: string, count: number, pct: number) => `${color} ${count} (${pct}%)`,
+  typeShare: (type: string, count: number) => `${type} ${count}`,
+  avgCost: 'Average cost',
+  avgPower: 'Average Power',
+  mainCards: 'Cards',
+  noValue: 'no data',
+  powerHeading: 'Power distribution (Units)',
+  powerCaption: 'Main deck Units by Power',
+  powerValue: 'Power',
+  ramDistLabel: 'RAM',
+  ramShare: (ram: number, count: number) => `${ram} × ${count}`,
+  raritiesLabel: 'Rarities',
+  rarityUnknown: 'No data',
+  raritiesShare: (rarity: string, count: number) => `${rarity} ${count}`,
+  cheapOpening: (cost: number) => `At least one Cost ≤ ${cost} card in the opening hand`,
+  oddsHeading: 'Draw odds',
+  oddsCaption: 'Chance to draw at least one copy',
+  oddsCard: 'Card',
+  oddsCopies: 'Qty',
+  oddsOpening: 'Opening hand',
+  oddsTurn: (turn: number) => `Turn ${turn}`,
+  oddsNote: (hand: number, draws: number) =>
+    `Assumes a ${hand}-card opening hand, no mulligan, ${draws} ${draws === 1 ? 'draw' : 'draws'} per turn (including the first player’s first turn).`,
+  testHandOpen: 'Draw a test hand',
+  testHandEmpty: 'Add cards to the deck to draw a test hand.',
+  testHandTitle: 'Test hand',
+  testHandDraw: 'Draw a card',
+  testHandMulligan: 'Mulligan',
+  testHandMulliganUsed: 'Mulligan used',
+  testHandNew: 'New hand',
+  testHandInHand: (count: number) => `In hand ${count}`,
+  testHandInLibrary: (count: number) => `In deck ${count}`,
+  testHandLibraryEmpty: 'The deck is empty',
+  testHandMulliganState: (used: boolean) => `Mulligan: ${used ? 'used' : 'not used'}`,
+  testHandSmallDeck: (hand: number) => `The deck has fewer than ${hand} cards.`,
+  testHandList: (count: number) => `Hand, ${cardCount(count)}`,
+  testHandNewest: '(newest)',
+  testHandLegends: 'Legend order',
+  testHandNoLegends: 'No Legends.',
+  testHandLegendsHint: 'If you start, the first two are used.',
+  testHandNote: (hand: number, draws: number) =>
+    `Assumes a ${hand}-card opening hand, one mulligan (the whole hand goes back and you draw ${hand} new cards), ${draws} ${draws === 1 ? 'draw' : 'draws'} per turn. Legends are separate from the deck.`,
+  testHandAnnounceNew: (names: readonly string[]) => `New hand: ${names.join(', ')}.`,
+  testHandAnnounceDraw: (name: string, count: number) => `You drew: ${name}. Hand: ${cardCount(count)}.`,
+  testHandAnnounceMulligan: (names: readonly string[]) => `Mulligan done. New hand: ${names.join(', ')}.`,
+  mobileBarMain: (main: number) => `Deck ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
+  showDeck: 'Show deck',
+  goToDeck: 'Go to deck',
+  backToSearch: 'Back to search',
+  distinctLimit: 'A deck holds at most 500 distinct cards, so a new card cannot be added.',
+
+  saveSaved: 'Saved',
+  saveSaving: 'Saving…',
+  saveDirty: 'Changes will be saved shortly…',
+  saveFailed: (kind: StorageErrorKind | 'unknown') => `Not saved. ${actionFailed(kind)}`,
+  saveRetry: 'Try saving again',
+  conflictMessage:
+    'The deck was changed in another tab or on another device, and you have unsaved changes. What do you want to do?',
+  conflictLoadLatest: 'Load the latest',
+  conflictKeepMine: 'Keep my changes',
+  reloadedLatest: 'The deck was updated with changes made elsewhere.',
+
+  exportJson: 'Export .json',
+  exportTxt: 'Export .txt',
+
+  shareButton: 'Share link',
+  shareCopied: 'Link copied',
+  shareCopyFailed: 'Copying failed. Copy the link from here:',
+  shareLinkLabel: 'Deck link',
+  shareHeading: 'Shared deck',
+  shareIntro: 'This deck came from a link. Nothing is saved until you press Save as my deck.',
+  shareSaveButton: 'Save as my deck',
+  shareInvalidHeading: 'This link does not work',
+  shareInvalid: 'The deck link is broken or too long. Ask the sender to share the deck again.',
+  shareToDecks: 'Go to the Decks page',
+
+  importButton: 'Import deck list',
+  importHeading: 'Import a deck list',
+  importIntro: 'Paste a deck list into the text box or choose a .txt or .json file. Lines look like "3 Card name - Subname".',
+  importTextLabel: 'Deck list',
+  importFileLabel: 'Or choose a .txt or .json file',
+  importCheck: 'Check the list',
+  importBack: 'Back to decks',
+  importErrors: {
+    empty: 'The list is empty. Paste a deck list or choose a file.',
+    'too-long': 'The list is too long. At most 64 KB, 300 lines and 300 characters per line.',
+    'too-many-lines': 'The list has too many lines. At most 64 KB, 300 lines and 300 characters per line.',
+    'line-too-long': 'The list has a line that is too long. At most 64 KB, 300 lines and 300 characters per line.',
+    'file-too-big': 'The file is too big. At most 64 KB.',
+    'json-too-long': 'The file is too big. At most 256 KB.',
+    'not-json': 'The file could not be read. Check that it is a .json file exported from cyberdeck.',
+    'not-deck': 'The file is not a cyberdeck deck.',
+    'file-unreadable': 'The file could not be read. Try pasting its contents into the text box.',
+  },
+  linkHeading: 'Fetch a deck from a Netdeck link',
+  textHeading: 'Paste a deck list or file',
+  linkLabel: 'Netdeck link',
+  linkHint: 'For example https://netdeck.gg/decks/cyberpunk/… Fetching sends a request to Netdeck.gg.',
+  linkButton: 'Fetch deck',
+  linkLoading: 'Fetching the deck…',
+  linkErrors: {
+    'bad-url': 'The link is not valid. Paste a deck address that starts with https://netdeck.gg/.',
+    network: 'The deck could not be fetched. Check your connection and try again.',
+    timeout: 'The request took too long. Try again.',
+    'not-found': 'The deck was not found. Check the link. The deck must be public.',
+    'invalid-response': 'Netdeck’s response could not be read. Try pasting the deck list as text.',
+    'too-large': 'Netdeck’s response is too large. Try pasting the deck list as text.',
+  },
+  reportSource: (name: string, author: string | null) =>
+    author === null ? `Netdeck: ${name}` : `Netdeck: ${name}, by ${author}`,
+  reportSideboardHeading: 'Sideboard (not in the deck)',
+  reportSideboardHint: 'These cards are not saved to the deck.',
+  reportHeading: 'Check result',
+  reportCards: 'Recognized cards',
+  reportNone: 'No cards were recognized in the list.',
+  reportRow: (count: number, name: string) => `${count} × ${name}`,
+  reportMissingHeading: 'Cards missing from your collection',
+  reportMissingRow: (name: string, missing: number) => `${name}: ${missing} missing`,
+  reportAlsoIn: (names: readonly string[]) => `Also in decks: ${names.join(', ')}`,
+  reportUnrecognizedHeading: (count: number) => `Unrecognized lines (${count})`,
+  reportUnrecognizedHint: 'These lines are not saved to the deck.',
+  reportLegalityHeading: 'Rules',
+  reportSaveHeading: 'Save as a deck',
+  reportSaveButton: 'Save as a deck',
+  reportNothingRecognized: 'No cards were recognized, so the deck cannot be saved. Check the lines.',
+
+  inDecks: (count: number) => `In decks: ${count}`,
+  inDecksNames: (names: readonly string[]) => `In decks: ${names.join(', ')}`,
+};

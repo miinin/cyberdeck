@@ -14,6 +14,7 @@ import { DecksView } from './ui/DecksView';
 import { deckTexts } from './ui/deckTexts';
 import { useHashRoute } from './ui/useHashRoute';
 import { texts } from './ui/texts';
+import { LanguageSwitch } from './ui/LanguageSwitch';
 import { ThemeToggle } from './ui/ThemeToggle';
 import { AccountMenu } from './ui/AccountMenu';
 import { FirstSignInDialog } from './ui/FirstSignInDialog';
@@ -90,6 +91,7 @@ export function App({
             </a>
           </nav>
           <ThemeToggle preferences={openRepositories.preferences} />
+          <LanguageSwitch />
           <AccountMenu
             auth={accountServices.auth}
             session={session}

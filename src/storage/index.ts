@@ -28,6 +28,8 @@ export { StorageError } from './errors';
 export type { StorageErrorKind } from './errors';
 export { isStoragePersisted, requestPersistentStorage } from './keyValueStore';
 export { decodeEnvelopeValue } from './envelope';
+export { LOCALES, readStoredLocale, saveStoredLocale } from './locale';
+export type { Locale } from './locale';
 export type { Decoded, EnvelopeSpec, Migration } from './envelope';
 
 /**
