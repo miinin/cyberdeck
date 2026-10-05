@@ -7,3 +7,6 @@ import { useCollection } from './useCollection';
  * it (count 0 removes the row). `repository` must be a stable reference.
  */
 export const useWants: (repository: CollectionRepository) => ReturnType<typeof useCollection> = useCollection;
+
+/** The want list as `useWants` returns it (T-064b). */
+export type WantsHandle = ReturnType<typeof useWants>;

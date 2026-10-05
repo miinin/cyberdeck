@@ -1431,9 +1431,6 @@ body:has(dialog[open]) {
   margin: 0;
 }
 
-.missing-cards .missing-result:empty {
-  display: none;
-}
 
 .card-collection {
   display: flex;
@@ -4464,4 +4461,66 @@ button.legality:focus-visible {
 .have-want-name {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* T-066: type, colour and rarity keys are equally wide inside a group, also at 320 px. */
+.options-even {
+  flex: 1 1 14rem;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+}
+
+.options-even .option {
+  max-width: none;
+  min-width: 0;
+}
+
+/* T-066: the order selects look like the other fields: a thin border, a modest focus ring. */
+.sort-select select {
+  min-height: var(--target-min);
+  max-width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.sort-select select:hover {
+  border-color: var(--color-info);
+}
+
+.sort-select select:focus-visible {
+  border-color: var(--color-info);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+/* T-066: add-missing-to-wants button and its result. */
+.sort-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-block-end: var(--space-2);
+}
+
+.sort-row .sort-select,
+.sort-row .missing-add {
+  margin-block-end: 0;
+}
+
+.missing-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-end: var(--space-2);
+}
+
+.missing-result:empty {
+  display: none;
 }
