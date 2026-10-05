@@ -4,9 +4,9 @@
 import type { Collection } from '../domain/collection';
 import { parseCollection } from '../domain/validate';
 import type { EnvelopeSpec } from './envelope';
-import { COLLECTION_SCHEMA_VERSION } from './keys';
+import { COLLECTION_SCHEMA_VERSION, WANTS_SCHEMA_VERSION } from './keys';
 import { createMemoryStore, openBrowserStore, subscribeToBrowserStorage } from './keyValueStore';
-import { COLLECTION_MIGRATIONS } from './migrations';
+import { COLLECTION_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
 import { createRepositories } from './repositories';
 import type { Repositories } from './types';
 
@@ -37,6 +37,13 @@ export type { Decoded, EnvelopeSpec, Migration } from './envelope';
 export const COLLECTION_ENVELOPE_SPEC: EnvelopeSpec<Collection> = {
   currentVersion: COLLECTION_SCHEMA_VERSION,
   migrations: COLLECTION_MIGRATIONS,
+  parse: parseCollection,
+};
+
+/** The want list's envelope schema, shared by localStorage and the cloud copy (D-018): own version and migrations. */
+export const WANTS_ENVELOPE_SPEC: EnvelopeSpec<Collection> = {
+  currentVersion: WANTS_SCHEMA_VERSION,
+  migrations: WANTS_MIGRATIONS,
   parse: parseCollection,
 };
 

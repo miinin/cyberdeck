@@ -8,6 +8,7 @@ import {
   decodeMeta,
   encodeCollectionDoc,
   encodeDeckDoc,
+  encodeWantsDoc,
   MAX_COLLECTION_BYTES,
   META_SCHEMA_VERSION,
 } from './cloudCodec';
@@ -83,8 +84,8 @@ export function createFakeAuth(
   };
 }
 
-/** Paths below `users/{uid}`: `meta` (the user document), `decks/{deckId}` and `collection/main`. */
-export type MemoryCloudPath = 'meta' | 'collection/main' | `decks/${string}`;
+/** Paths below `users/{uid}`: `meta` (the user document), `decks/{deckId}` and `collection/main` and `collection/want`. */
+export type MemoryCloudPath = 'meta' | 'collection/main' | 'collection/want' | `decks/${string}`;
 
 export type MemoryCloud = CloudStore & {
   /** Puts a raw document, e.g. an invalid one written by another client. undefined deletes it. */
@@ -140,7 +141,7 @@ export function createMemoryCloud(
         .sort()
         .slice(0, MAX_DECKS + 1)
         .map((path) => ({ id: path.slice('decks/'.length), data: read(path) }));
-      return buildSnapshot(meta, deckDocs, read('collection/main'));
+      return buildSnapshot(meta, deckDocs, read('collection/main'), read('collection/want'));
     },
     async deleteAll() {
       failIfAsked();
@@ -158,6 +159,7 @@ export function createMemoryCloud(
       for (const deck of change.putDecks) docs.set(`decks/${deck.id}`, encodeDeckDoc(deck, savedAt));
       for (const id of change.deleteDecks) docs.delete(`decks/${id}`);
       if (change.collection !== undefined) docs.set('collection/main', encodeCollectionDoc(change.collection, savedAt));
+      if (change.wants !== undefined) docs.set('collection/want', encodeWantsDoc(change.wants, savedAt));
       docs.set('meta', { schemaVersion: META_SCHEMA_VERSION, rev: rev + 1, updatedAt: savedAt });
       return rev + 1;
     },

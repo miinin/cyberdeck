@@ -1,6 +1,6 @@
 /*
  * Firestore Lite behind the CloudStore contract (D-017 kohdat 3, 5 ja 8, SR-22, SR-23). Paths
- * `users/{uid}`, `users/{uid}/decks/{deckId}` and `users/{uid}/collection/main` (D-017 Muutos K-P8).
+ * `users/{uid}`, `users/{uid}/decks/{deckId}` and `users/{uid}/collection/main` and `collection/want` (D-018, D-017 Muutos K-P8).
  * Validation and encoding are shared with the memory store (cloudCodec.ts). Errors become CloudError
  * kinds; nothing is logged (SR-27).
  */
@@ -13,6 +13,7 @@ import {
   decodeMeta,
   encodeCollectionDoc,
   encodeDeckDoc,
+  encodeWantsDoc,
   META_SCHEMA_VERSION,
 } from '../cloudCodec';
 import { CloudError, toCloudError } from '../cloudError';
@@ -64,6 +65,7 @@ export function createFirestoreCloudStore(options: {
   const metaRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid);
   const deckRef = ({ fs, db }: Session, id: string) => fs.doc(db, CLOUD_ROOT, uid, 'decks', id);
   const collectionRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'collection', 'main');
+  const wantsRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'collection', 'want');
 
   return {
     readMeta: () =>
@@ -75,23 +77,25 @@ export function createFirestoreCloudStore(options: {
     readAll: () =>
       guard(async (s) => {
         const { fs, db } = s;
-        const [meta, decks, collection] = await Promise.all([
+        const [meta, decks, collection, wants] = await Promise.all([
           fs.getDoc(metaRef(s)),
           // SR-23 kohta 5: one more than allowed, so too many decks is noticed instead of cut silently.
           fs.getDocs(fs.query(fs.collection(db, CLOUD_ROOT, uid, 'decks'), fs.limit(MAX_DECKS + 1))),
           fs.getDoc(collectionRef(s)),
+          fs.getDoc(wantsRef(s)),
         ]);
         return buildSnapshot(
           meta.exists() ? decodeMeta(meta.data()) : null,
           decks.docs.map((doc) => ({ id: doc.id, data: doc.data() })),
           collection.exists() ? collection.data() : undefined,
+          wants.exists() ? wants.data() : undefined,
         );
       }),
 
     deleteAll: () =>
       guard(async (s) => {
         const { fs, db } = s;
-        // Decks in batches of 400 (a transaction takes 500 writes), then the collection and the meta document.
+        // Decks in batches of 400 (a transaction takes 500 writes), then the collection, the want list and the meta document.
         for (let round = 0; round < 10; round += 1) {
           const decks = await fs.getDocs(fs.query(fs.collection(db, CLOUD_ROOT, uid, 'decks'), fs.limit(400)));
           if (decks.docs.length === 0) break;
@@ -101,6 +105,7 @@ export function createFirestoreCloudStore(options: {
         }
         await fs.runTransaction(db, async (tx) => {
           tx.delete(collectionRef(s));
+          tx.delete(wantsRef(s));
           tx.delete(metaRef(s));
         });
       }),
@@ -121,6 +126,7 @@ export function createFirestoreCloudStore(options: {
           for (const deck of change.putDecks) tx.set(deckRef(s, deck.id), encodeDeckDoc(deck, savedAt));
           for (const id of change.deleteDecks) tx.delete(deckRef(s, id));
           if (change.collection !== undefined) tx.set(collectionRef(s), encodeCollectionDoc(change.collection, savedAt));
+          if (change.wants !== undefined) tx.set(wantsRef(s), encodeWantsDoc(change.wants, savedAt));
           // The rules accept exactly these keys, rev + 1 and the server time (SR-22).
           tx.set(metaRef(s), { schemaVersion: META_SCHEMA_VERSION, rev: rev + 1, updatedAt: s.fs.serverTimestamp() });
           return rev + 1;
