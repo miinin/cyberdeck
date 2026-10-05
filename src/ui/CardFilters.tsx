@@ -238,7 +238,7 @@ export function CardFilters({
             <legend>{texts.rarityLegend}</legend>
             <div className="options options-even">
               {rarityOptions.map((rarity) => (
-                <label key={rarity} className="option">
+                <label key={rarity} className={rarity.length > 10 ? 'option option-wide' : 'option'}>
                   <input
                     type="checkbox"
                     name="rarity"
