@@ -100,7 +100,7 @@ describe('Trade link route', () => {
     expect(screen.getByText(/1 korttia ei löydy/)).toBeInTheDocument();
   });
 
-  it.each(['%%%', 'AAAA', ''])('shows a plain error for invalid data "%s"', async (bad) => {
+  it.each(['%%%', 'AAAA'])('shows a plain error for invalid data "%s"', async (bad) => {
     open(bad);
     expect(await screen.findByRole('heading', { name: 'Linkki ei toimi' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Siirry Kortit-sivulle' })).toHaveAttribute('href', '#/');
@@ -115,7 +115,7 @@ describe('Share trade button', () => {
       value: { writeText },
       configurable: true,
     });
-    window.location.hash = '#/';
+    window.location.hash = '#/vaihto';
     render(
       <App
         cards={cards}
@@ -144,7 +144,7 @@ describe('Share trade button', () => {
       value: { writeText: vi.fn().mockRejectedValue(new Error('no')) },
       configurable: true,
     });
-    window.location.hash = '#/';
+    window.location.hash = '#/vaihto';
     render(<App cards={cards} repositories={createMemoryRepositories()} />);
     await user.click(await screen.findByRole('button', { name: 'Jaa kokoelma ja want' }));
     const field = await screen.findByLabelText('Vaihtolinkki');

@@ -164,14 +164,10 @@ export const texts = {
   countPrefix: 'Kokoelmassa ',
   notOwned: 'Ei kokoelmassa',
   // Want list (T-064b)
-  columnWant: 'Want',
   increaseWant: 'Lisää wantiin yksi kappale: ',
   decreaseWant: 'Vähennä wantista yksi kappale: ',
   wantPrefix: 'Wantissa ',
   notWanted: 'Ei wantissa',
-  collectionWanted: 'Want',
-  wantedOnlyEmptyBody:
-    'Want-listalla ei ole vielä kortteja. Valitse Kokoelma-ryhmästä "Kaikki" ja lisää kortteja wantiin listasta.',
   wantLive: (name: string, count: number) =>
     count === 0 ? `${name}: poistettu wantista.` : `${name}: ${copies(count)} wantissa.`,
   countLoading: 'ladataan',
@@ -262,6 +258,28 @@ export const texts = {
   collectionFullBody:
     `Kokoelmaan mahtuu enintään ${numberFormat.format(MAX_COLLECTION_ENTRIES)} eri korttia, joten uutta korttia ei voi lisätä. Voit poistaa kortteja, joita et enää tarvitse.`,
 
+  // Have/Want section (T-065)
+  haveWantHeading: 'Have/Want',
+  haveWantIntro: 'Kokoa tähän kortit, joita haluat, ja katso, mitä sinulla on vaihdettavaksi. Jaa lista vaihtolinkkinä.',
+  wantHeading: 'Want',
+  wantIntro: 'Kortit, joita haluat. Muuta määrää plus- ja miinuspainikkeilla.',
+  wantEmpty: 'Want-listalla ei ole vielä kortteja. Hae kortti nimellä alta ja lisää se.',
+  wantLoading: 'Haetaan want-listaa…',
+  wantUnavailable: 'Want-listaa ei voi tällä hetkellä käyttää. Lataa sivu uudelleen.',
+  wantSearchHeading: 'Lisää kortteja wantiin',
+  wantSearchLabel: 'Hae kortin nimellä',
+  wantSearchPrompt: 'Kirjoita kortin nimi, niin ehdotukset näkyvät tässä.',
+  wantSearchNone: 'Hakua vastaavia kortteja ei löytynyt.',
+  wantSearchMore: (shown: number) => `Näytetään ${shown} ensimmäistä. Tarkenna hakua.`,
+  wantAdd: 'Lisää wantiin',
+  wantAddLabel: 'Lisää wantiin: ',
+  wantInList: (count: number) => `wantissa ${count}`,
+  haveHeading: 'Have',
+  haveIntro: 'Kortit, joita sinulla on yli täyden pelisetin. Ne ovat vaihdettavissa. Määrää muutat Kortit-sivulla.',
+  haveEmpty: 'Sinulla ei ole vielä vaihdettavia kortteja. Vaihdettavissa ovat kappaleet, jotka ylittävät täyden pelisetin (3 kappaletta, Legend-korteista 1).',
+  haveLoading: 'Haetaan kokoelmaa…',
+  haveUnavailable: 'Kokoelmaa ei voi tällä hetkellä lukea.',
+  haveRow: (tradeable: number) => `vaihdettavissa ${tradeable}`,
   // Trade link (T-062, T-063)
   tradeShareButton: 'Jaa kokoelma ja want',
   tradeShareNote: 'Linkin saaja näkee koko kokoelmasi ja want-listasi.',

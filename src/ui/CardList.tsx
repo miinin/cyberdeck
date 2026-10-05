@@ -71,15 +71,12 @@ export function CardList({
   cards,
   caption = texts.tableCaption,
   owned,
-  wanted,
   decksOf,
   onOpenImage,
 }: {
   cards: readonly Card[];
   caption?: string;
   owned?: OwnedColumn;
-  /** The want list column (T-064b); left out when the want list is not ready. */
-  wanted?: OwnedColumn;
   /** Names of the decks a card is in (T-013); left out when decks could not be read. */
   decksOf?: (card: Card) => readonly string[];
   /** Opens the enlarged image (T-027 UX); the button is where focus returns. */
@@ -140,19 +137,6 @@ export function CardList({
                   onChange={owned.onChange}
                   onLimit={owned.onLimit}
                   editable={owned.editable}
-                />
-              </div>
-            )}
-            {wanted !== undefined && (
-              <div className="card-want">
-                <CountControl
-                  card={card}
-                  count={wanted.countOf(card)}
-                  mode={wanted.mode}
-                  onChange={wanted.onChange}
-                  onLimit={wanted.onLimit}
-                  editable={wanted.editable}
-                  kind="want"
                 />
               </div>
             )}

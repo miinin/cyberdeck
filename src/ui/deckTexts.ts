@@ -33,6 +33,7 @@ export const deckTexts = {
   navLabel: 'Päävalikko',
   navCards: 'Kortit',
   navDecks: 'Pakat',
+  navHaveWant: 'Have/Want',
 
   listHeading: 'Pakat',
   listEmpty: 'Sinulla ei ole vielä pakkoja. Aloita luomalla ensimmäinen pakka.',
