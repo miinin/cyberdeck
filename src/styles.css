@@ -320,23 +320,22 @@ h1:focus:not(:focus-visible) {
   padding-block: var(--space-3);
 }
 
-/* Decorative chamfered mark before the name: not a logo, no text. */
-.site-header .container::before {
-  content: '';
-  flex: none;
-  width: 1.125rem;
-  height: 1.125rem;
-  background: var(--color-brand-yellow);
-  clip-path: var(--shape-brand);
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
 }
 
-.brand {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-brand);
+.brand img {
+  display: block;
+  height: 2.25rem;
+  width: auto;
+}
+
+@media (max-width: 39.99rem) {
+  .brand img {
+    height: 1.75rem;
+  }
 }
 
 main {
@@ -2024,26 +2023,6 @@ body:has(dialog[open]) {
   }
 }
 
-/* Sticky only when the window is tall enough; nothing gets stuck when zoomed (WCAG 1.4.10). */
-@media (min-width: 64rem) and (min-height: 40rem) {
-  .editor-side {
-    position: sticky;
-    top: var(--space-3);
-    max-height: calc(100vh - 2 * var(--space-3));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
-
-@media (min-width: 100rem) and (min-height: 40rem) {
-  .editor-filters {
-    position: sticky;
-    top: var(--space-3);
-    max-height: calc(100vh - 2 * var(--space-3));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
 
 .editor-filters,
 .editor-search,
@@ -2701,16 +2680,6 @@ h3,
   }
 }
 
-/* Sticky only when the window is tall enough; nothing gets stuck when zoomed (WCAG 1.4.10). */
-@media (min-width: 64rem) and (min-height: 40rem) {
-  .catalog-filters {
-    position: sticky;
-    top: var(--space-4);
-    max-height: calc(100vh - 2rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
 
 /* Deck editor filters as a side panel from 100rem, as on the Cards page from 64rem (T-050b). */
 @media (min-width: 100rem) {
