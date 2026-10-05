@@ -143,6 +143,7 @@ export function CardTable({
                     onChange={owned.onChange}
                     onLimit={owned.onLimit}
                     editable={owned.editable}
+                    min={owned.minOf?.(card)}
                   />
                 </td>
               )}

@@ -381,6 +381,7 @@ function controlled(entries: { card: string; count: number }[] = []) {
   const listeners = new Set<() => void>();
   const collection: CollectionRepository = {
     load: () => base.collection.load(),
+    setVersionCount: (card, printing, count) => base.collection.setVersionCount(card, printing, count),
     setCount: (card, count) =>
       new Promise<Collection>((resolve, reject) => {
         pending.push({

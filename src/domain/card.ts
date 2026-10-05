@@ -1,4 +1,5 @@
 import type { CardKey } from './cardKey';
+import type { Printing } from './printing';
 
 /** The app's own card model. Independent of Netdeck.gg field names. */
 export interface Card {
@@ -26,6 +27,8 @@ export interface Card {
   rarity: string | null;
   /** The app's own key, cardKey(name, subname). Collections and decks refer to cards only by this (D-008). */
   key: CardKey;
+  /** All printings (versions) of the card, in source order (D-020). Always set in the bundled data; test cards may omit it. */
+  printings?: Printing[];
 }
 
 /** Copies that make a full playset: 1 for Legend cards, 3 for every other type. */

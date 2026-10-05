@@ -14,6 +14,18 @@ const streetkid: Card = {
   power: null,
   ram: null, rarity: null,
   key: 'v-streetkid',
+  printings: [
+    {
+      key: 'welcometonightcitybeta:005a',
+      setCode: 'welcometonightcitybeta',
+      setName: 'Welcome to Night City — Beta',
+      number: 'β005a',
+      rarity: 'Rare',
+      language: 'en',
+      artist: null,
+      imageKey: 'v-streetkid__welcome-to-night-city-005a',
+    },
+  ],
 };
 
 const solo: Card = {
@@ -28,6 +40,7 @@ const solo: Card = {
   power: null,
   ram: null, rarity: null,
   key: 'solo',
+  printings: [],
 };
 
 /** A valid file as plain JSON data, with one card changed by `override`. */
@@ -51,6 +64,7 @@ describe('toCardFile', () => {
       name: solo.name,
       slug: solo.slug,
       id: solo.id,
+      printings: solo.printings,
     };
     const file = toCardFile([shuffled]);
     expect(Object.keys(file)).toEqual(['format', 'version', 'cards']);
@@ -67,6 +81,7 @@ describe('toCardFile', () => {
       'ram',
       'rarity',
       'key',
+      'printings',
     ]);
   });
 
@@ -104,8 +119,8 @@ describe('parseCardFile', () => {
 
   it('rejects a wrong format or version', () => {
     expect(() => parseCardFile(fileWith({}, { format: 'netdeck' }))).toThrow(/format/);
-    expect(() => parseCardFile(fileWith({}, { version: 2 }))).toThrow(/version/);
-    expect(() => parseCardFile(fileWith({}, { version: '1' }))).toThrow(/version/);
+    expect(() => parseCardFile(fileWith({}, { version: 1 }))).toThrow(/version/);
+    expect(() => parseCardFile(fileWith({}, { version: '2' }))).toThrow(/version/);
   });
 
   it('rejects an extra or missing root field', () => {
@@ -169,6 +184,17 @@ describe('parseCardFile', () => {
   it('rejects a key that does not match cardKey(name, subname)', () => {
     expect(() => parseCardFile(fileWith({ key: 'v-streetkid-2' }))).toThrow(/does not match cardKey/);
     expect(() => parseCardFile(fileWith({ subname: 'Corpo' }))).toThrow(/does not match cardKey/);
+  });
+
+  it('rejects invalid printings', () => {
+    const printing = { ...streetkid.printings?.[0] };
+    const bad = (override: Record<string, unknown>) => fileWith({ printings: [{ ...printing, ...override }] });
+    expect(() => parseCardFile(bad({ key: 'welcometonightcitybeta:005b' }))).toThrow(/does not match setCode and number/);
+    expect(() => parseCardFile(bad({ imageKey: 'x__y-1' }))).toThrow(/imageKey/);
+    expect(() => parseCardFile(bad({ imageUrl: 'https://example.invalid/x.webp' }))).toThrow(/unexpected field/);
+    expect(() => parseCardFile(bad({ language: '' }))).toThrow(/language/);
+    expect(() => parseCardFile(fileWith({ printings: [printing, printing] }))).toThrow(/duplicate key/);
+    expect(() => parseCardFile(fileWith({ printings: 'x' }))).toThrow(/not an array/);
   });
 
   it('rejects a duplicate key', () => {

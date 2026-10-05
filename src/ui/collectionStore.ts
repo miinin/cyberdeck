@@ -11,8 +11,9 @@
  * - A change from another tab reloads the collection only when no own save is running.
  */
 import type { CardKey } from '../domain/cardKey';
-import { EMPTY_COLLECTION, countOf } from '../domain/collection';
+import { EMPTY_COLLECTION, countOf, versionsOf } from '../domain/collection';
 import type { Collection } from '../domain/collection';
+import type { PrintingKey } from '../domain/printing';
 import { StorageError } from '../storage';
 import type { CollectionRepository, LoadNotice, StorageErrorKind } from '../storage';
 
@@ -38,6 +39,8 @@ export interface CollectionSnapshot {
   readonly saved: Collection;
   /** Counts not saved yet. Shown instead of the saved count. */
   readonly targets: ReadonlyMap<CardKey, number>;
+  /** Version counts not saved yet, by versionTargetKey(card, printing) (D-020). */
+  readonly versionTargets: ReadonlyMap<string, number>;
   readonly notices: readonly CollectionNotice[];
   /** Kind of the last failed save; null after a successful save or when dismissed. */
   readonly saveError: SaveErrorKind | null;
@@ -66,6 +69,8 @@ export interface CollectionStore {
   reload(): void;
   /** Shows `count` for `card` at once and saves it in turn. Ignored unless the phase is 'ready'. */
   setCount(card: CardKey, count: number): void;
+  /** Same for the copies of one printing; the total count moves with it (D-020). */
+  setVersionCount(card: CardKey, printing: PrintingKey, count: number): void;
   /** True while a save is running or waiting. */
   isSaving(): boolean;
   dismissNotice(kind: 'reset' | 'repaired'): void;
@@ -74,6 +79,15 @@ export interface CollectionStore {
 
 export function countIn(snapshot: CollectionSnapshot, card: CardKey): number {
   return snapshot.targets.get(card) ?? countOf(snapshot.saved, card);
+}
+
+export function versionTargetKey(card: CardKey, printing: PrintingKey): string {
+  return `${card}|${printing}`;
+}
+
+/** The copies of one printing on screen: the newest unsaved target, or the saved number. */
+export function versionCountIn(snapshot: CollectionSnapshot, card: CardKey, printing: PrintingKey): number {
+  return snapshot.versionTargets.get(versionTargetKey(card, printing)) ?? versionsOf(snapshot.saved, card)[printing] ?? 0;
 }
 
 function visibleNotices(notices: readonly LoadNotice[]): CollectionNotice[] {
@@ -85,6 +99,7 @@ export function createCollectionStore(repository: CollectionRepository): Collect
     phase: 'loading',
     saved: EMPTY_COLLECTION,
     targets: new Map(),
+    versionTargets: new Map(),
     notices: [],
     saveError: null,
     loadCount: 0,
@@ -93,6 +108,8 @@ export function createCollectionStore(repository: CollectionRepository): Collect
   const eventListeners = new Set<(event: CollectionEvent) => void>();
   /** Newest unsaved target per card. The running save is not in here. */
   const queue = new Map<CardKey, number>();
+  /** Newest unsaved version target per card and printing. */
+  const versionQueue = new Map<string, { card: CardKey; printing: PrintingKey; count: number }>();
   const dismissed = new Set<CollectionNotice['kind']>();
   let running = false;
   let externalPending = false;
@@ -118,7 +135,7 @@ export function createCollectionStore(repository: CollectionRepository): Collect
   function load() {
     generation += 1;
     const own = generation;
-    update({ phase: 'loading', targets: new Map(), saveError: null });
+    update({ phase: 'loading', targets: new Map(), versionTargets: new Map(), saveError: null });
     repository.load().then(
       ({ value, notices }) => {
         if (own !== generation) return;
@@ -168,10 +185,11 @@ export function createCollectionStore(repository: CollectionRepository): Collect
 
   function lock(notice: CollectionNotice) {
     queue.clear();
+    versionQueue.clear();
     const notices = snapshot.notices.some((current) => current.kind === 'newer-version')
       ? snapshot.notices
       : [notice, ...snapshot.notices];
-    update({ phase: 'locked', saved: EMPTY_COLLECTION, targets: new Map(), notices, saveError: null });
+    update({ phase: 'locked', saved: EMPTY_COLLECTION, targets: new Map(), versionTargets: new Map(), notices, saveError: null });
   }
 
   async function drain() {
@@ -179,28 +197,45 @@ export function createCollectionStore(repository: CollectionRepository): Collect
     running = true;
     const own = generation;
     let failed = false;
-    while (queue.size > 0) {
-      const [card, count] = queue.entries().next().value as [CardKey, number];
-      queue.delete(card);
-      const before = countOf(snapshot.saved, card);
+    while (queue.size > 0 || versionQueue.size > 0) {
+      let card: CardKey;
+      let versionKey: string | null = null;
       try {
-        const saved = await repository.setCount(card, count);
+        let saved: Collection;
+        let before: number;
+        if (queue.size > 0) {
+          const [nextCard, count] = queue.entries().next().value as [CardKey, number];
+          card = nextCard;
+          queue.delete(card);
+          before = countOf(snapshot.saved, card);
+          saved = await repository.setCount(card, count);
+        } else {
+          const [key, change] = versionQueue.entries().next().value as [string, { card: CardKey; printing: PrintingKey; count: number }];
+          versionQueue.delete(key);
+          versionKey = key;
+          card = change.card;
+          before = countOf(snapshot.saved, card);
+          saved = await repository.setVersionCount(card, change.printing, change.count);
+        }
         if (own !== generation) return;
         const targets = new Map(snapshot.targets);
-        if (!queue.has(card)) targets.delete(card);
-        update({ saved, targets, saveError: null });
+        if (versionKey === null && !queue.has(card)) targets.delete(card);
+        const versionTargets = new Map(snapshot.versionTargets);
+        if (versionKey !== null && !versionQueue.has(versionKey)) versionTargets.delete(versionKey);
+        update({ saved, targets, versionTargets, saveError: null });
         emit({ type: 'saved', card, from: before, to: countOf(saved, card) });
       } catch (error) {
         if (own !== generation) return;
         console.error('Saving the collection failed', error);
         failed = true;
         queue.clear();
+        versionQueue.clear();
         const kind: SaveErrorKind = error instanceof StorageError ? error.kind : 'unknown';
         if (kind === 'newer-version') {
           // The version is never shown to the user (UX.md 6.8), so it is not known or needed here.
           lock({ kind: 'newer-version', version: 0 });
         } else {
-          update({ targets: new Map(), saveError: kind });
+          update({ targets: new Map(), versionTargets: new Map(), saveError: kind });
         }
         emit({ type: 'save-failed', kind });
       }
@@ -232,6 +267,7 @@ export function createCollectionStore(repository: CollectionRepository): Collect
     dispose() {
       generation += 1;
       queue.clear();
+      versionQueue.clear();
       running = false;
       externalPending = false;
       unsubscribeRepository?.();
@@ -245,7 +281,15 @@ export function createCollectionStore(repository: CollectionRepository): Collect
       update({ targets: new Map(snapshot.targets).set(card, count) });
       void drain();
     },
-    isSaving: () => running || queue.size > 0,
+    setVersionCount(card, printing, count) {
+      if (snapshot.phase !== 'ready') return;
+      changeCount += 1;
+      const key = versionTargetKey(card, printing);
+      versionQueue.set(key, { card, printing, count });
+      update({ versionTargets: new Map(snapshot.versionTargets).set(key, count) });
+      void drain();
+    },
+    isSaving: () => running || queue.size > 0 || versionQueue.size > 0,
     dismissNotice(kind) {
       dismissed.add(kind);
       update({ notices: snapshot.notices.filter((notice) => notice.kind !== kind) });

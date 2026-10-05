@@ -76,3 +76,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-069 | Järjestysvalitsimen hillitty fokustyyli | 1 | Must | PM | Done | – |
 | T-070 | Kortin klikkaus avaa tietonäkymän: kokoelma, want ja pakat | 1 | Must | PM | Done | – |
 | T-071 | Pienet korjaukset: liput, suodatinsirun kulma, Jaa Have/Want, Vie ja jaa -valikko, roskakori- ja kynäikonit, laskurin keskitys | 1 | Must | PM | Done | – |
+| T-072 | Korttien painokset kokoelmaan (D-020): versiot kortin tietonäkymässä, painosdata, kuvien tuonti | 1 | Must | PM | Review (dev) | Digiturva ✓ |

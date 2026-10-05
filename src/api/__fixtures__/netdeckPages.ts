@@ -15,7 +15,23 @@ export const realShapeCard = {
   rules_text: 'When you {Call} this Legend, draw a card.',
   keywords: [],
   image_url: 'https://images.example.invalid/v-streetkid.webp?Signature=abc',
-  printings: [{ collector_number: '005a', set: { name: 'Alpha' } }],
+  printings: [
+    {
+      collector_number: '005a',
+      set: { code: 'welcometonightcityretail', name: 'Welcome to Night City — Retail' },
+      rarity: 'Rare',
+      language: 'en',
+      artist: 'Olgierd Ciszak',
+      image_url: 'https://images.example.invalid/v-streetkid-005a.webp?Signature=abc',
+    },
+    {
+      collector_number: 'β005a',
+      set: { code: 'welcometonightcitybeta', name: 'Welcome to Night City — Beta' },
+      rarity: 'Rare',
+      language: 'en',
+      artist: 'Olgierd Ciszak',
+    },
+  ],
 };
 
 export function rawCard(index: number, overrides: Record<string, unknown> = {}): Record<string, unknown> {

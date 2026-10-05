@@ -51,7 +51,7 @@ describe('updateCards', () => {
     const json = JSON.parse(text);
     expect(Object.keys(json)).toEqual(['format', 'version', 'cards']);
     expect(json.format).toBe('cyberdeck.cards');
-    expect(json.version).toBe(1);
+    expect(json.version).toBe(2);
     expect(json.cards.map((card: { key: string }) => card.key)).toEqual(['card-1', 'v-streetkid', 'card-3']);
     expect(json.cards[1]).toEqual({
       id: 'id-2',
@@ -65,6 +65,7 @@ describe('updateCards', () => {
       power: null,
       ram: null, rarity: null,
       key: 'v-streetkid',
+      printings: [],
     });
     expect(lines).toContain('Cards: 3');
     expect(lines).toContain(`Wrote ${CARDS_JSON_PATH}`);

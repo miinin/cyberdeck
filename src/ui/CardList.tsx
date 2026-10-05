@@ -15,6 +15,8 @@ export interface OwnedColumn {
   countOf: (card: Card) => number;
   onChange: (card: Card, count: number) => void;
   onLimit: (card: Card) => void;
+  /** The lowest count of a card: the sum of its versions (D-020). Default 0. */
+  minOf?: (card: Card) => number;
   /** The "Muokkaa kokoelmaa" switch (T-040): false hides the − and + buttons. */
   editable: boolean;
 }
@@ -141,6 +143,7 @@ export function CardList({
                   onChange={owned.onChange}
                   onLimit={owned.onLimit}
                   editable={owned.editable}
+                  min={owned.minOf?.(card)}
                 />
               </div>
             )}

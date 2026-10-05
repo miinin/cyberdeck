@@ -1,5 +1,6 @@
 import type { CardKey } from '../domain/cardKey';
 import type { Collection } from '../domain/collection';
+import type { PrintingKey } from '../domain/printing';
 import type { Deck, DeckContent, DeckId } from '../domain/deck';
 
 export type LoadNotice =
@@ -20,6 +21,11 @@ export interface CollectionRepository {
   load(): Promise<Loaded<Collection>>;
   /** Count 0 removes the card. Resolves with the saved collection. */
   setCount(card: CardKey, count: number): Promise<Collection>;
+  /**
+   * Sets the copies of one printing and moves the total count with it (D-020). Resolves with the saved collection.
+   * setCount below the sum of the versions rejects with StorageError('invalid-input').
+   */
+  setVersionCount(card: CardKey, printing: PrintingKey, count: number): Promise<Collection>;
   /** Called when the data changed outside this instance (another tab; MVP-2: onSnapshot). */
   subscribe(listener: () => void): () => void;
 }

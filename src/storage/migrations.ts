@@ -6,6 +6,7 @@
  */
 import type { Migration } from './envelope';
 
-export const COLLECTION_MIGRATIONS: readonly Migration[] = [];
+/** 1 -> 2 (D-020): the optional `versions` field was added; version 1 data is valid as it is. */
+export const COLLECTION_MIGRATIONS: readonly Migration[] = [(data) => data];
 export const DECKS_MIGRATIONS: readonly Migration[] = [];
 export const WANTS_MIGRATIONS: readonly Migration[] = [];

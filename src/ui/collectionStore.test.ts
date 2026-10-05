@@ -2,7 +2,7 @@ import { toCountMap } from '../domain/collection';
 import type { Collection } from '../domain/collection';
 import { StorageError, createMemoryRepositories } from '../storage';
 import type { CollectionRepository, Loaded } from '../storage';
-import { countIn, createCollectionStore } from './collectionStore';
+import { countIn, createCollectionStore, versionCountIn } from './collectionStore';
 import type { CollectionEvent, CollectionStore } from './collectionStore';
 
 const COLLECTION_KEY = 'cyberdeck:collection';
@@ -29,6 +29,7 @@ function controlledRepository(initial?: Record<string, string>) {
   const listeners = new Set<() => void>();
   const repository: CollectionRepository = {
     load: () => base.load(),
+    setVersionCount: (card, printing, count) => base.setVersionCount(card, printing, count),
     setCount: (card, count) =>
       new Promise<Collection>((resolve, reject) => {
         pending.push({
@@ -113,6 +114,7 @@ describe('createCollectionStore: loading', () => {
     const repository: CollectionRepository = {
       load: async () => ({ value: { entries: [] }, notices }),
       setCount: async () => ({ entries: [] }),
+      setVersionCount: async () => ({ entries: [] }),
       subscribe: () => () => {},
     };
     const { store } = await started(repository);
@@ -130,7 +132,7 @@ describe('createCollectionStore: loading', () => {
       .fn<CollectionRepository['load']>()
       .mockRejectedValueOnce(new StorageError('unavailable', 'blocked'))
       .mockResolvedValueOnce({ value: { entries: [{ card: 'v-streetkid', count: 1 }] }, notices: [] });
-    const { store } = await started({ load, setCount: vi.fn(), subscribe: () => () => {} });
+    const { store } = await started({ load, setCount: vi.fn(), setVersionCount: vi.fn(), subscribe: () => () => {} });
     expect(store.getSnapshot().phase).toBe('unavailable');
     expect(console.error).toHaveBeenCalledTimes(1);
 
@@ -147,7 +149,7 @@ describe('createCollectionStore: loading', () => {
       .fn<CollectionRepository['load']>()
       .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
       .mockResolvedValueOnce({ value: { entries: [{ card: 'b', count: 2 }] }, notices: [] });
-    const store = createCollectionStore({ load, setCount: vi.fn(), subscribe: () => () => {} });
+    const store = createCollectionStore({ load, setCount: vi.fn(), setVersionCount: vi.fn(), subscribe: () => () => {} });
     store.start();
     store.dispose();
     store.start();
@@ -358,5 +360,38 @@ describe('createCollectionStore: other tabs', () => {
     await flush();
     expect(events).toEqual([]);
     expect(counts(store)).toEqual({});
+  });
+});
+
+describe('createCollectionStore: versions (D-020)', () => {
+  const A = 'welcometonightcityretail:005a';
+
+  it('shows a version change at once and saves it with the total count', async () => {
+    const { collection } = createMemoryRepositories({
+      initial: { [COLLECTION_KEY]: stored([{ card: 'v-streetkid', count: 2 }]) },
+    });
+    const { store, events } = await started(collection);
+    store.setVersionCount('v-streetkid', A, 1);
+    expect(versionCountIn(store.getSnapshot(), 'v-streetkid', A)).toBe(1);
+    await flush();
+    const snapshot = store.getSnapshot();
+    expect(snapshot.versionTargets.size).toBe(0);
+    expect(versionCountIn(snapshot, 'v-streetkid', A)).toBe(1);
+    expect(countIn(snapshot, 'v-streetkid')).toBe(3);
+    expect(events).toContainEqual({ type: 'saved', card: 'v-streetkid', from: 2, to: 3 });
+  });
+
+  it('keeps only the newest of quick version changes and drops the waiting ones on failure', async () => {
+    const { collection } = createMemoryRepositories();
+    const { store } = await started(collection);
+    store.setVersionCount('detonate', A, 1);
+    store.setVersionCount('detonate', A, 2);
+    store.setVersionCount('detonate', A, 3);
+    await flush();
+    expect(countIn(store.getSnapshot(), 'detonate')).toBe(3);
+    store.setVersionCount('detonate', 'not a key', 1);
+    await flush();
+    expect(store.getSnapshot().saveError).toBe('invalid-input');
+    expect(store.getSnapshot().versionTargets.size).toBe(0);
   });
 });
