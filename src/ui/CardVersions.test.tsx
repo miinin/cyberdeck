@@ -26,6 +26,7 @@ function at<T>(list: readonly T[], index: number): T {
 
 function setup(props: Partial<Parameters<typeof CardVersions>[0]> = {}) {
   const onChange = vi.fn();
+  const onArtChange = vi.fn();
   const onLimit = vi.fn();
   const counts: Record<string, number> = { [retail.key]: 2, [beta.key]: 0 };
   render(
@@ -35,72 +36,77 @@ function setup(props: Partial<Parameters<typeof CardVersions>[0]> = {}) {
       versionCount={(key) => counts[key] ?? 0}
       editable
       onChange={onChange}
+      onArtChange={onArtChange}
       onLimit={onLimit}
-      imageUrl={(_key, rarity) => (rarity === 'Rare' ? '/cards/variants/x.webp' : null)}
+      baseImage="/base.webp"
+      imageUrl={(_key, rarity) => (rarity === 'Iconic Legend' ? '/cards/variants/legend.webp' : null)}
       {...props}
     />,
   );
-  return { onChange, onLimit };
+  return { onChange, onArtChange, onLimit };
 }
 
-describe('CardVersions', () => {
-  it('groups the printings by set with number, rarity and an FR mark', () => {
+describe('CardVersions gallery', () => {
+  it('has one tile per art with the sets in short and no repetition', () => {
     setup();
-    const groups = screen.getAllByRole('group');
-    expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual([
-      'Welcome to Night City — Retail',
-      'Welcome to Night City — Beta',
-      'Welcome to Night City — Retail — FR',
-    ]);
-    expect(within(at(groups, 0)).getAllByRole('listitem')).toHaveLength(2);
-    expect(within(at(groups, 0)).getByText('Iconic Legend')).toBeInTheDocument();
-    expect(within(at(groups, 1)).getByText('β005a')).toBeInTheDocument();
-    expect(within(at(groups, 2)).getByText('FR')).toBeInTheDocument();
+    const tiles = screen.getAllByRole('listitem').filter((li) => li.classList.contains('art-tile'));
+    expect(tiles).toHaveLength(2);
+    expect(within(at(tiles, 0)).getByText('Perus')).toBeInTheDocument();
+    expect(within(at(tiles, 0)).getByText('Welcome to Night City · Retail, Beta, FR')).toBeInTheDocument();
+    expect(within(at(tiles, 1)).getByText('Iconic Legend')).toBeInTheDocument();
+    expect(document.querySelectorAll('img.art-thumb')).toHaveLength(2);
   });
 
-  it('shows the unknown copies and a thumbnail only for printings whose rarity has art', () => {
+  it('counts the copies without a version in the base art', () => {
     setup();
-    expect(screen.getByText(/ei tiedossa: 1|unknown: 1/)).toBeInTheDocument();
-    expect(document.querySelectorAll('img.version-thumb')).toHaveLength(3);
-    expect(document.querySelector('img.version-thumb')?.getAttribute('src')).toBe('/cards/variants/x.webp');
+    const tiles = screen.getAllByRole('listitem').filter((li) => li.classList.contains('art-tile'));
+    expect(within(at(tiles, 0)).getAllByText('3').length).toBeGreaterThan(0);
   });
 
-  it('shows the art of a version on request', async () => {
+  it('selects an art with aria-pressed and shows its picture', async () => {
     const onShowArt = vi.fn();
     setup({ onShowArt });
-    await userEvent.click(screen.getByRole('button', { name: /Näytä kuva: Welcome to Night City — Retail nro 005a|Show image: Welcome to Night City — Retail no. 005a/ }));
-    expect(onShowArt).toHaveBeenCalledWith('/cards/variants/x.webp');
-    expect(screen.queryByRole('button', { name: /Peruskuva|Base image/ })).toBeNull();
-  });
-
-  it('offers the base image while an art is shown', async () => {
-    const onShowArt = vi.fn();
-    setup({ onShowArt, shownArt: '/cards/variants/x.webp' });
-    await userEvent.click(screen.getByRole('button', { name: /Peruskuva|Base image/ }));
+    const base = screen.getByRole('button', { name: /Näytä kuvitus: Perus|Show art: Base/ });
+    expect(base).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(screen.getByRole('button', { name: /Näytä kuvitus: Iconic Legend|Show art: Iconic Legend/ }));
+    expect(onShowArt).toHaveBeenCalledWith('/cards/variants/legend.webp');
+    await userEvent.click(base);
     expect(onShowArt).toHaveBeenCalledWith(null);
   });
 
-  it('changes one printing with its own buttons', async () => {
+  it('marks the shown special art as pressed', () => {
+    setup({ onShowArt: vi.fn(), shownArt: '/cards/variants/legend.webp' });
+    expect(screen.getByRole('button', { name: /Näytä kuvitus: Iconic Legend|Show art: Iconic Legend/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Näytä kuvitus: Perus|Show art: Base/ })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('changes an art with its counter', async () => {
+    const { onArtChange } = setup();
+    const tile = at(Array.from(document.querySelectorAll<HTMLElement>('li.art-tile')), 1);
+    await userEvent.click(at(within(tile).getAllByRole('button').filter((b) => b.classList.contains('step-plus')), 0));
+    expect(onArtChange).toHaveBeenCalledWith(expect.objectContaining({ rarity: 'Iconic Legend' }), 1);
+  });
+
+  it('changes one printing in the breakdown', async () => {
     const { onChange } = setup();
-    const row = at(screen.getAllByRole('listitem'), 0);
-    await userEvent.click(at(within(row).getAllByRole('button'), 1));
-    expect(onChange).toHaveBeenCalledWith(retail.key, 3);
-    await userEvent.click(at(within(row).getAllByRole('button'), 0));
-    expect(onChange).toHaveBeenCalledWith(retail.key, 1);
+    const details = at(Array.from(document.querySelectorAll<HTMLElement>('details.art-breakdown')), 0);
+    const plus = within(details).getAllByRole('button', { hidden: true }).filter((b) => b.classList.contains('step-plus'));
+    await userEvent.click(at(plus, 0), { pointerEventsCheck: 0 });
+    expect(onChange).toHaveBeenCalledWith(expect.any(String), expect.any(Number));
   });
 
   it('announces the limit instead of changing when the total is 999', async () => {
-    const { onChange, onLimit } = setup({ count: 999 });
-    const row = at(screen.getAllByRole('listitem'), 0);
-    await userEvent.click(at(within(row).getAllByRole('button'), 1));
+    const { onArtChange, onLimit } = setup({ count: 999 });
+    const tile = at(Array.from(document.querySelectorAll<HTMLElement>('li.art-tile')), 1);
+    await userEvent.click(at(within(tile).getAllByRole('button').filter((b) => b.classList.contains('step-plus')), 0));
     expect(onLimit).toHaveBeenCalledWith(card);
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onArtChange).not.toHaveBeenCalled();
   });
 
-  it('browsing shows only owned printings and no buttons', () => {
+  it('browsing shows only owned arts and no buttons', () => {
     setup({ editable: false });
     expect(screen.queryAllByRole('button')).toHaveLength(0);
-    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(document.querySelectorAll('li.art-tile')).toHaveLength(1);
   });
 
   it('renders nothing for a card without printings', () => {

@@ -47,6 +47,7 @@ export function CardTable({
   owned,
   decksOf,
   onOpenImage,
+  artUrlOf,
   hoverProps,
   sort: controlledSort,
   onSortChange,
@@ -55,7 +56,9 @@ export function CardTable({
   caption?: string;
   owned?: OwnedColumn;
   decksOf?: (card: Card) => readonly string[];
-  onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
+  onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  /** A special art to show in place of a card's picture (D-021). */
+  artUrlOf?: (card: Card) => string | null;
   /** Mouse hover preview of the bigger image (T-052), as in the deck editor. */
   hoverProps?: (card: Card) => HoverPreviewProps;
   /** Controlled sort shared with the "Järjestys" selector (T-060); without it the table keeps its own. */
@@ -93,7 +96,7 @@ export function CardTable({
           {rows.map((card) => (
             <tr key={card.id} className={collectionState(card, owned)} {...hoverProps?.(card)}>
               <td className="cell-image">
-                <CardImage card={card} onOpen={onOpenImage} />
+                <CardImage card={card} onOpen={onOpenImage} artUrl={artUrlOf?.(card) ?? null} />
               </td>
               <th scope="row" className="cell-name">
                 <button

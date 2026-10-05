@@ -1,6 +1,7 @@
 import type { Card } from './card';
 import type { Collection, CollectionEntry } from './collection';
 import { versionsOf, withCount, setVersionCount, countOf, versionsTotal } from './collection';
+import { setFamily } from './printing';
 import type { Printing } from './printing';
 
 /*
@@ -116,4 +117,37 @@ export function setArtCount(collection: Collection, card: Card, artId: string, n
     }
   }
   return next;
+}
+
+/**
+ * The special rarity whose art a search result should show (D-021 kohta 4): the printings matching the active
+ * rarity and set family filters are looked at; when every match is of one special rarity, that is it.
+ * Null without a filter, or when a match is an ordinary printing (then the base art is right).
+ */
+export function matchedSpecialRarity(
+  card: Card,
+  rarities: readonly string[],
+  family: string | null,
+  hasArt: (cardKey: string, rarity: string) => boolean = () => true,
+): string | null {
+  if (rarities.length === 0 && family === null) return null;
+  const matches = (card.printings ?? []).filter(
+    (p) => (rarities.length === 0 || (p.rarity !== null && rarities.includes(p.rarity))) && (family === null || setFamily(p.setName) === family),
+  );
+  if (matches.length === 0) return null;
+  const first = matches[0]?.rarity ?? null;
+  if (first === null || !isSpecialRarity(first) || !hasArt(card.key, first)) return null;
+  return matches.every((p) => p.rarity === first) ? first : null;
+}
+
+/** What a counter has to change in the store to turn `before` into `after` (version changes first; `count` only when no version moved). */
+export function entryChanges(before: CollectionEntry | undefined, after: CollectionEntry | undefined): { versions: [string, number][]; count: number | null } {
+  const was = before?.versions ?? {};
+  const now = after?.versions ?? {};
+  const versions: [string, number][] = [];
+  for (const key of new Set([...Object.keys(was), ...Object.keys(now)])) {
+    if ((was[key] ?? 0) !== (now[key] ?? 0)) versions.push([key, now[key] ?? 0]);
+  }
+  const count = after?.count ?? 0;
+  return { versions, count: versions.length === 0 && count !== (before?.count ?? 0) ? count : null };
 }

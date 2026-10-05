@@ -83,3 +83,29 @@ describe('setArtCount', () => {
     expect(() => setArtCount(col(key(1)), card, 'nope', 1)).toThrow(RangeError);
   });
 });
+
+import { entryChanges, matchedSpecialRarity } from './arts';
+
+describe('matchedSpecialRarity', () => {
+  it('is null without a filter', () => {
+    expect(matchedSpecialRarity(card, [], null)).toBeNull();
+  });
+  it('finds the special rarity of a rarity filter', () => {
+    expect(matchedSpecialRarity(card, ['Nova Rare'], null)).toBe('Nova Rare');
+  });
+  it('is null when an ordinary printing matches too', () => {
+    expect(matchedSpecialRarity(card, [], 'night-city')).toBeNull();
+  });
+  it('is null for an ordinary rarity or a rarity without a picture', () => {
+    expect(matchedSpecialRarity(card, ['Rare'], null)).toBeNull();
+    expect(matchedSpecialRarity(card, ['Nova Rare'], null, () => false)).toBeNull();
+  });
+});
+
+describe('entryChanges', () => {
+  it('reports version moves, and the count only without one', () => {
+    expect(entryChanges({ card: 'v', count: 1 }, { card: 'v', count: 2, versions: { a: 1 } })).toEqual({ versions: [['a', 1]], count: null });
+    expect(entryChanges({ card: 'v', count: 1 }, { card: 'v', count: 2 })).toEqual({ versions: [], count: 2 });
+    expect(entryChanges({ card: 'v', count: 1 }, undefined)).toEqual({ versions: [], count: 0 });
+  });
+});

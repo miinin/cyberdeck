@@ -326,3 +326,12 @@ describe('number filters: Cost, Power and RAM (T-052)', () => {
     expect(isFilterActive({ ...EMPTY_CRITERIA, rams: ['1'] })).toBe(true);
   });
 });
+
+describe('filterCards rarity over printings (D-021)', () => {
+  it('matches a card by the rarity of any printing', () => {
+    const base: Card = { ...card('a', 'A', null, 'Unit', null), rarity: 'Rare', printings: [{ key: 'a:1', setCode: 'a', setName: 'A', number: '1', rarity: 'Nova Rare', language: 'en', artist: null, imageKey: 'x' }] };
+    const criteria = { ...EMPTY_CRITERIA, rarities: ['Nova Rare'] };
+    expect(filterCards([base], criteria)).toHaveLength(1);
+    expect(filterCards([{ ...base, printings: [] }], criteria)).toHaveLength(0);
+  });
+});

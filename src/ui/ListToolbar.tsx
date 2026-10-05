@@ -58,6 +58,8 @@ export function ListToolbar({
   onEditChange,
   imageSize,
   onImageSizeChange,
+  allArts,
+  onAllArtsChange,
 }: {
   view: CatalogViewMode;
   onViewChange: (next: CatalogViewMode) => void;
@@ -65,6 +67,9 @@ export function ListToolbar({
   onEditChange: (next: boolean) => void;
   imageSize?: ImageSize;
   onImageSizeChange?: (next: ImageSize) => void;
+  /** The "all arts" switch (D-021); undefined leaves it out. Session state, never saved. */
+  allArts?: boolean;
+  onAllArtsChange?: (next: boolean) => void;
 }) {
   return (
     <div className="list-toolbar">
@@ -87,6 +92,11 @@ export function ListToolbar({
       </fieldset>
       {imageSize !== undefined && (
         <ImageSizeSelect name="image-size" value={imageSize} onChange={(next) => onImageSizeChange?.(next)} />
+      )}
+      {allArts !== undefined && (
+        <label className="option all-arts">
+          <input type="checkbox" checked={allArts} onChange={(event) => onAllArtsChange?.(event.target.checked)} /> {texts.artsAllLabel}
+        </label>
       )}
       {editable !== undefined && (
         <button

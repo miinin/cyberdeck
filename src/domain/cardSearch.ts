@@ -136,6 +136,12 @@ export function isFilterActive(criteria: CardFilterCriteria): boolean {
   );
 }
 
+/** The card's own rarity or the rarity of any of its printings is selected (D-021). */
+function hasRarity(card: Card, rarities: ReadonlySet<string>): boolean {
+  if (card.rarity !== null && rarities.has(card.rarity)) return true;
+  return (card.printings ?? []).some((p) => p.rarity !== null && rarities.has(p.rarity));
+}
+
 /**
  * Cards matching all of: every word of the search text (each a part of "name subname", in any
  * order, B-013), and in every group (type, color, rarity, Cost, Power, RAM) one of the selected values
@@ -151,7 +157,7 @@ export function filterCards(cards: readonly Card[], criteria: CardFilterCriteria
   return cards.filter((card) => {
     if (types.size > 0 && !types.has(card.type)) return false;
     if (colors.size > 0 && (card.color === null || !colors.has(card.color))) return false;
-    if (rarities.size > 0 && (card.rarity === null || !rarities.has(card.rarity))) return false;
+    if (rarities.size > 0 && !hasRarity(card, rarities)) return false;
     for (const [group, field] of NUMBER_FIELDS) {
       if (!matchesNumberFilter(card[field], criteria[group])) return false;
     }

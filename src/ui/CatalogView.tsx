@@ -3,6 +3,11 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf, minCountOf } from '../domain/collection';
+import type { CollectionEntry } from '../domain/collection';
+import { artsOf, entryChanges, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
+import type { Art } from '../domain/arts';
+import { setFamily } from '../domain/printing';
+import { variantImageUrl } from '../data/variantImages';
 import { hasSetPrinting, ownsSetVersion, setOptions, versionsBySet } from '../domain/setFilter';
 import type { MissingRow } from '../domain/wants';
 import { StorageError, isStoragePersisted, requestPersistentStorage } from '../storage';
@@ -23,6 +28,7 @@ import { CardFilters } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
+import type { CardListItem } from './CardList';
 import { AddMissingToWantsButton } from './AddMissingToWants';
 import { SortSelect } from './SortSelect';
 import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
@@ -123,6 +129,8 @@ export function CatalogView({
   const [openCard, setOpenCard] = useState<Card | null>(null);
   /** A version's art shown in the dialog instead of the base image (T-076); reset whenever the dialog opens or closes. */
   const [shownArt, setShownArt] = useState<string | null>(null);
+  // The "all arts" switch (D-021): session state, not saved.
+  const [allArts, setAllArts] = useState(false);
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
   // Bigger image beside a table row on mouse hover (T-052); the grid already shows the images.
   const preview = useCardHoverPreview();
@@ -202,6 +210,12 @@ export function CatalogView({
   // T-060: the grid follows the shared order; the table sorts the same way itself (header buttons).
   const sortedForGrid = view === 'grid' ? sortCards(filtered, sort.key, sort.direction) : filtered;
   const filterActive = isActive(criteria, collectionFilter);
+  const artMatchesFilter = (art: Art) =>
+    art.printings.some(
+      (p) =>
+        (criteria.rarities.length === 0 || (p.rarity !== null && criteria.rarities.includes(p.rarity))) &&
+        (setChoice === null || setFamily(p.setName) === setChoice),
+    );
   // T-066: shown cards short of a playset, for "add missing to wants".
   const missingRows: MissingRow[] = [];
   if (collection.phase === 'ready') {
@@ -300,6 +314,63 @@ export function CatalogView({
     searchInputRef.current?.focus();
   };
 
+  // Arts (D-021): a special rarity is an art only when its picture exists.
+  const hasArt = (key: string, rarity: string) => variantImageUrl(key, rarity) !== null;
+  const artsByCard = useMemo(() => new Map(allCards.map((card) => [card.key, artsOf(card, hasArt)])), [allCards]);
+  const artsFor = (card: Card) => artsByCard.get(card.key) ?? [];
+  /** The card's row as shown now, with unsaved changes. */
+  const entryOf = (card: Card): CollectionEntry | undefined => {
+    const count = countIn(collection, card.key);
+    if (count === 0) return undefined;
+    const versions: Record<string, number> = {};
+    for (const printing of card.printings ?? []) {
+      const n = versionCountIn(collection, card.key, printing.key);
+      if (n > 0) versions[printing.key] = n;
+    }
+    return Object.keys(versions).length > 0 ? { card: card.key, count, versions } : { card: card.key, count };
+  };
+  const handleArtChange = (card: Card, art: Art, next: number) => {
+    const before = entryOf(card);
+    if (next > (ownedPerArt(before, card, artsFor(card)).get(art.artId) ?? 0) && countIn(collection, card.key) >= 999) {
+      collectionAnnouncer.announceLimit(card);
+      return;
+    }
+    try {
+      const after = setArtCount({ entries: before === undefined ? [] : [before] }, card, art.artId, next, artsFor(card)).entries[0];
+      const changes = entryChanges(before, after);
+      for (const [printing, n] of changes.versions) collectionStore.setVersionCount(card.key, printing, n);
+      if (changes.count !== null) collectionStore.setCount(card.key, changes.count);
+    } catch {
+      collectionAnnouncer.announceLimit(card);
+    }
+  };
+  /** The picture of the special art a search result matches (rarity or set filter), or null (D-021). */
+  const filterArtUrl = (card: Card): string | null => {
+    const rarity = matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt);
+    return rarity === null ? null : variantImageUrl(card.key, rarity);
+  };
+
+  // One box per card, or in the "all arts" mode one per art (D-021).
+  const gridItems: CardListItem[] | undefined =
+    view !== 'grid'
+      ? undefined
+      : allArts
+        ? sortedForGrid.flatMap((card): CardListItem[] => {
+            const arts = artsFor(card);
+            if (arts.length === 0) return [{ card, art: null, imageUrl: null, artCount: 1 }];
+            const matching = arts.filter(artMatchesFilter);
+            const perArt = ownedPerArt(entryOf(card), card, arts);
+            return (matching.length > 0 ? matching : arts)
+              .filter((art) => !(listedOnly && !kept.has(card.key) && (perArt.get(art.artId) ?? 0) === 0))
+              .map((art) => ({
+                card,
+                art,
+                imageUrl: art.rarity === null ? null : variantImageUrl(card.key, art.rarity),
+                artCount: arts.length,
+              }));
+          })
+        : sortedForGrid.map((card) => ({ card, art: null, imageUrl: filterArtUrl(card), artCount: artsFor(card).length }));
+
   const owned: OwnedColumn | undefined =
     collection.phase === 'unavailable'
       ? undefined
@@ -312,6 +383,11 @@ export function CatalogView({
           },
           onLimit: collectionAnnouncer.announceLimit,
           minOf: (card) => minCountOf(collection.saved, card.key),
+          artCountOf: (card, art) => ownedPerArt(entryOf(card), card, artsFor(card)).get(art.artId) ?? 0,
+          onArtChange: (card, art, count) => {
+            if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
+            handleArtChange(card, art, count);
+          },
           editable,
         };
   const summary =
@@ -365,6 +441,7 @@ export function CatalogView({
             versionCount={(printing) => versionCountIn(collection, openCard.key, printing)}
             editable={editable}
             onChange={(printing, count) => collectionStore.setVersionCount(openCard.key, printing, count)}
+            onArtChange={(art, count) => handleArtChange(openCard, art, count)}
             onLimit={collectionAnnouncer.announceLimit}
             shownArt={shownArt}
             onShowArt={setShownArt}
@@ -406,11 +483,11 @@ export function CatalogView({
       </>
     );
 
-  const handleOpenImage = (card: Card, opener: HTMLButtonElement) => {
+  const handleOpenImage = (card: Card, opener: HTMLButtonElement, artUrl: string | null = null) => {
     preview.hide();
     imageOpenerRef.current = opener;
     setOpenCard(card);
-    setShownArt(null);
+    setShownArt(artUrl);
   };
 
   const handleCloseImage = () => {
@@ -526,7 +603,7 @@ export function CatalogView({
             )}
             rarityOptions={filterOptions(
               KNOWN_CARD_RARITIES,
-              allCards.map((card) => card.rarity),
+              allCards.flatMap((card) => [card.rarity, ...(card.printings ?? []).map((p) => p.rarity)]),
               criteria.rarities,
             )}
             numberOptions={numberFilterOptionsFor(allCards, criteria)}
@@ -565,6 +642,8 @@ export function CatalogView({
             onEditChange={handleEditChange}
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
+            allArts={view === 'grid' ? allArts : undefined}
+            onAllArtsChange={setAllArts}
           />
           <div className="sort-row">
             <SortSelect sort={sort} onChange={setSort} />
@@ -604,12 +683,13 @@ export function CatalogView({
                 owned={owned}
                 decksOf={decksOf}
                 onOpenImage={handleOpenImage}
+                artUrlOf={filterArtUrl}
                 hoverProps={preview.bind}
                 sort={sort}
                 onSortChange={setSort}
               />
             ) : (
-              <CardList cards={sortedForGrid} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+              <CardList cards={sortedForGrid} items={gridItems} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
             ))}
         </section>
       </div>
