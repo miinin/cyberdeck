@@ -36,14 +36,15 @@ export function AccountMenu({
 }
 
 /** Person icon; the text is the button's name and is visible from 40 rem up (like the theme toggle). */
-function AccountLabel({ text }: { text: string }) {
+function AccountLabel({ text, signedIn = false }: { text: string; signedIn?: boolean }) {
   return (
     <>
-      <svg className="account-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+      <svg className="account-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
         <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
         <path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5" fill="none" stroke="currentColor" strokeWidth="2" />
       </svg>
-      <span className="account-button-label">{text}</span>
+      {signedIn && <span className="account-dot" aria-hidden="true" />}
+      <span className="visually-hidden">{text}</span>
     </>
   );
 }
@@ -127,12 +128,12 @@ function SignedInMenu({
       <button
         ref={menuButtonRef}
         type="button"
-        className="account-button"
+        className="header-icon account-button" title={email ?? texts.accountMenu}
         aria-expanded={menuOpen}
         aria-controls="account-menu"
         onClick={() => setMenuOpen((open) => !open)}
       >
-        <AccountLabel text={texts.accountMenu} />
+        <AccountLabel text={texts.accountMenu} signedIn />
       </button>
       <div id="account-menu" className="account-menu" hidden={!menuOpen}>
         <p className="account-email">{texts.accountSignedInAs(email)}</p>
@@ -237,7 +238,7 @@ function SignInButton({ auth, state }: { auth: AuthClient; state: AuthState }) {
     <div className="account">
       <button
         type="button"
-        className="account-button"
+        className="header-icon account-button" title={loading ? texts.accountSigningIn : texts.accountSignIn}
         aria-haspopup="dialog"
         aria-disabled={loading || undefined}
         onClick={() => {

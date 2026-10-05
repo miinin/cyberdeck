@@ -4901,3 +4901,87 @@ section[aria-labelledby='have-heading'] {
   padding-inline: var(--space-1);
   white-space: nowrap;
 }
+
+/* T-079: header tools (theme, FI, EN, account) as bare icons on one row, like the flags. */
+.header-tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.header-tools .language-switch {
+  gap: var(--space-2);
+}
+
+.header-icon {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  color: var(--color-header-text);
+  cursor: pointer;
+  opacity: 0.75;
+  clip-path: none;
+}
+
+.header-icon::before {
+  content: none;
+}
+
+.header-icon:hover,
+.header-icon[aria-expanded='true'] {
+  opacity: 1;
+  color: var(--color-accent-2);
+  background: none;
+  text-decoration: none;
+}
+
+.header-icon:focus-visible {
+  outline: 2px solid var(--color-accent-2);
+  outline-offset: 2px;
+}
+
+.header-icon[aria-disabled='true'] {
+  cursor: progress;
+}
+
+/* Signed in: a small dot on the person icon. */
+.account-dot {
+  position: absolute;
+  inset-block-start: 5px;
+  inset-inline-end: 5px;
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* Rarity symbols (T-079): symbol first, then the name on one line. */
+.rarity-symbol {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.rarity-symbol svg {
+  flex: none;
+}
+
+.rarity-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-rarity dd,
+.options-even .option {
+  white-space: nowrap;
+}

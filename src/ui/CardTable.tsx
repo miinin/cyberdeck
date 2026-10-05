@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
+import { RaritySymbol } from './RaritySymbol';
 import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
-import { officialRarity } from '../domain/cardSearch';
 import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
 import type { CardSort, SortKey } from '../domain/cardSort';
 import { CardColor, typeBadgeClass } from './CardColor';
@@ -127,7 +127,7 @@ export function CardTable({
                 </span>
               </td>
               <td>
-                <Value value={card.rarity === null ? null : officialRarity(card.rarity)} missing={texts.noRarity} />
+                {card.rarity === null ? <Value value={null} missing={texts.noRarity} /> : <RaritySymbol rarity={card.rarity} />}
               </td>
               <td className="cell-number">
                 <Value value={card.cost} missing={texts.noCost} />

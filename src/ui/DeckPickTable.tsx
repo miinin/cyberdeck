@@ -1,5 +1,5 @@
 import type { Card } from '../domain/card';
-import { officialRarity } from '../domain/cardSearch';
+import { RaritySymbol } from './RaritySymbol';
 import { CardColor, typeBadgeClass, typeColorClass } from './CardColor';
 import { CardImage } from './CardImage';
 import type { HoverPreviewProps } from './CardHoverPreview';
@@ -135,7 +135,7 @@ export function DeckPickTable({
                 <Value value={card.ram} missing={texts.noRam} />
               </td>
               <td className="col-rarity" lang="en">
-                <Value value={card.rarity === null ? null : officialRarity(card.rarity)} missing={texts.noRarity} />
+                {card.rarity === null ? <Value value={null} missing={texts.noRarity} /> : <RaritySymbol rarity={card.rarity} />}
               </td>
               <td className="col-deck">
                 <Stepper

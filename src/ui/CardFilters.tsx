@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RaritySymbol } from './RaritySymbol';
 import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
 import type { CardFilterCriteria, NumberFilterGroup } from '../domain/cardSearch';
 import { NUMBER_GROUPS } from './ActiveFilters';
@@ -246,7 +247,7 @@ export function CardFilters({
                     checked={criteria.rarities.includes(rarity)}
                     onChange={() => onToggleRarity(rarity)}
                   />{' '}
-                  <span lang="en">{rarity}</span>
+                  <RaritySymbol rarity={rarity} showName size={14} />
                 </label>
               ))}
             </div>
