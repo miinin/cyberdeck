@@ -2,26 +2,32 @@ import { LOCALES, locale, saveLocale } from '../locale';
 import type { Locale } from '../locale';
 import { texts } from './texts';
 
-const FLAG_PROPS = { viewBox: '0 0 20 14', width: 20, height: 14, 'aria-hidden': true, focusable: 'false' } as const;
+const FLAG_PROPS = {
+  viewBox: '0 0 20 14',
+  width: 20,
+  height: 14,
+  'aria-hidden': true,
+  focusable: 'false',
+} as const;
 
 /** Inline flags (T-071): Finland and the United Kingdom. */
 function Flag({ option }: { option: Locale }) {
   if (option === 'fi') {
     return (
       <svg {...FLAG_PROPS}>
-        <rect width='20' height='14' fill='#fff' />
-        <rect x='5' width='3.5' height='14' fill='#003580' />
-        <rect y='5.25' width='20' height='3.5' fill='#003580' />
+        <rect width="20" height="14" fill="#fff" />
+        <rect x="5" width="3.5" height="14" fill="#003580" />
+        <rect y="5.25" width="20" height="3.5" fill="#003580" />
       </svg>
     );
   }
   return (
     <svg {...FLAG_PROPS}>
-      <rect width='20' height='14' fill='#012169' />
-      <path d='M0 0L20 14M20 0L0 14' stroke='#fff' strokeWidth='3' />
-      <path d='M0 0L20 14M20 0L0 14' stroke='#C8102E' strokeWidth='1' />
-      <path d='M10 0V14M0 7H20' stroke='#fff' strokeWidth='5' />
-      <path d='M10 0V14M0 7H20' stroke='#C8102E' strokeWidth='3' />
+      <rect width="20" height="14" fill="#012169" />
+      <path d="M0 0L20 14M20 0L0 14" stroke="#fff" strokeWidth="3" />
+      <path d="M0 0L20 14M20 0L0 14" stroke="#C8102E" strokeWidth="1" />
+      <path d="M10 0V14M0 7H20" stroke="#fff" strokeWidth="5" />
+      <path d="M10 0V14M0 7H20" stroke="#C8102E" strokeWidth="3" />
     </svg>
   );
 }

@@ -105,7 +105,7 @@ describe('Have/Want section (T-065)', () => {
 
   it('has the trade share button at the top', async () => {
     await renderView();
-    expect(screen.getByRole('button', { name: 'Jaa kokoelma ja want' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Jaa Have/Want' })).toBeInTheDocument();
   });
 
   it('announces the saved want count', async () => {

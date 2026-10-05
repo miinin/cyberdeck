@@ -1,6 +1,6 @@
 import { intlLocale } from '../locale';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import type { Card } from '../domain/card';
 import type { Deck, DeckContent } from '../domain/deck';
 import { checkDeckName, copyContent, copyDeckName, emptyDeckContent, uniqueDeckName } from '../domain/deckEdit';
@@ -34,7 +34,10 @@ import { useDecks } from './useDecks';
 import { useWants } from './useWants';
 import type { WantsHandle } from './useWants';
 
-const dateFormat = new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short', timeStyle: 'short' });
+const dateFormat = new Intl.DateTimeFormat(intlLocale, {
+  dateStyle: 'short',
+  timeStyle: 'short',
+});
 
 function errorKind(error: unknown): StorageErrorKind | 'unknown' {
   return error instanceof StorageError ? error.kind : 'unknown';
@@ -63,17 +66,53 @@ function deckColors(grouped: DeckGroups, main: readonly ColorShare[]): string[] 
  * One deck as a card (T-051): the Legends' art as a banner, colours, the main deck progress, legality,
  * what is missing from the collection and when it was changed.
  */
+const ICON_PROPS = {
+  viewBox: '0 0 24 24',
+  width: 20,
+  height: 20,
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': true,
+  focusable: 'false',
+} as const;
+
+function PencilIcon() {
+  return (
+    <svg {...ICON_PROPS}>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg {...ICON_PROPS}>
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  );
+}
+
 function DeckCardSummary({
   deck,
   cardsByKey,
   ownedOf,
   wants,
+  nameAction,
 }: {
   deck: Deck;
   cardsByKey: CardsByKey;
   /** Copies in the collection, or null when the collection cannot be compared. */
   ownedOf: (key: string) => number | null;
   wants: WantsHandle;
+  /** The rename button, shown after the deck name. */
+  nameAction: ReactNode;
 }) {
   const totals = deckTotals(deck, cardsByKey);
   const errors = errorsOf(validateDeck(deck, cardsByKey)).length;
@@ -106,7 +145,10 @@ function DeckCardSummary({
         ))}
       </div>
       <div className="deck-card-body">
-        <h2 className="deck-name">{deck.name}</h2>
+        <h2 className="deck-name">
+          {deck.name}
+          {nameAction}
+        </h2>
         {colors.length > 0 && (
           <p className="deck-card-colors">
             <span className="visually-hidden">{deckTexts.deckColors}: </span>
@@ -389,7 +431,26 @@ export function DecksView({
               <ul className="deck-list" aria-label={deckTexts.decksLabel}>
                 {decks.map((deck) => (
                   <li key={deck.id} className="deck-row">
-                    <DeckCardSummary deck={deck} cardsByKey={cardsByKey} ownedOf={ownedOf} wants={wants} />
+                    <DeckCardSummary
+                      deck={deck}
+                      cardsByKey={cardsByKey}
+                      ownedOf={ownedOf}
+                      wants={wants}
+                      nameAction={
+                        renamingId === deck.id ? null : (
+                          <button
+                            type="button"
+                            className="icon-button"
+                            data-focus-id={`rename-${deck.id}`}
+                            aria-label={deckTexts.forDeck(deckTexts.rename, deck.name)}
+                            title={deckTexts.forDeck(deckTexts.rename, deck.name)}
+                            onClick={() => setRenamingId(deck.id)}
+                          >
+                            <PencilIcon />
+                          </button>
+                        )
+                      }
+                    />
                     {renamingId === deck.id ? (
                       <RenameForm
                         deck={deck}
@@ -412,15 +473,6 @@ export function DecksView({
                         <button
                           type="button"
                           className="button-secondary"
-                          data-focus-id={`rename-${deck.id}`}
-                          aria-label={deckTexts.forDeck(deckTexts.rename, deck.name)}
-                          onClick={() => setRenamingId(deck.id)}
-                        >
-                          {deckTexts.rename}
-                        </button>
-                        <button
-                          type="button"
-                          className="button-secondary"
                           aria-label={deckTexts.forDeck(deckTexts.copy, deck.name)}
                           onClick={() => handleCopy(deck)}
                         >
@@ -430,14 +482,15 @@ export function DecksView({
                         <ExportButtons deck={deck} cardsByKey={cardsByKey} />
                         <button
                           type="button"
-                          className="button-secondary"
-                          aria-label={deckTexts.forDeck(deckTexts.remove, deck.name)}
+                          className="button-secondary icon-delete"
+                          aria-label={deckTexts.forDeck(deckTexts.removeDeck, deck.name)}
+                          title={deckTexts.forDeck(deckTexts.removeDeck, deck.name)}
                           onClick={(event) => {
                             deleteOpenerRef.current = event.currentTarget;
                             setDeleting(deck);
                           }}
                         >
-                          {deckTexts.remove}
+                          <TrashIcon />
                         </button>
                       </div>
                     )}

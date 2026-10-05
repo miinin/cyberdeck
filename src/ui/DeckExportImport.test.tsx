@@ -42,11 +42,26 @@ async function readBlob(blob: Blob): Promise<string> {
 afterEach(() => vi.restoreAllMocks());
 
 describe('Deck export', () => {
+  it('hides export and share behind one Vie ja jaa button', async () => {
+    const user = userEvent.setup();
+    renderRoute('#/pakat', createMemoryRepositories({ initial: DECKS }));
+    const toggle = await screen.findByRole('button', { name: `Vie ja jaa: ${NAME}` });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('button', { name: `Vie .json: ${NAME}` })).not.toBeInTheDocument();
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: `Vie .json: ${NAME}` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: `Jaa linkki: ${NAME}` })).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('downloads a .json file from the deck list with a safe file name', async () => {
     const { downloads, revoked } = captureDownloads();
     const user = userEvent.setup();
     renderRoute('#/pakat', createMemoryRepositories({ initial: DECKS }));
-    await user.click(await screen.findByRole('button', { name: `Vie .json: ${NAME}` }));
+    await user.click(await screen.findByRole('button', { name: `Vie ja jaa: ${NAME}` }));
+    await user.click(screen.getByRole('button', { name: `Vie .json: ${NAME}` }));
     expect(downloads).toHaveLength(1);
     expect(downloads[0]?.fileName).toBe('Tulta # 🔥 bxb.json');
     expect(downloads[0]?.blob.type).toBe('application/json');
@@ -60,7 +75,8 @@ describe('Deck export', () => {
     const { downloads } = captureDownloads();
     const user = userEvent.setup();
     renderRoute('#/pakat/a', createMemoryRepositories({ initial: DECKS }));
-    await user.click(await screen.findByRole('button', { name: `Vie .txt: ${NAME}` }));
+    await user.click(await screen.findByRole('button', { name: `Vie ja jaa: ${NAME}` }));
+    await user.click(screen.getByRole('button', { name: `Vie .txt: ${NAME}` }));
     expect(downloads[0]?.blob.type).toBe('text/plain;charset=utf-8');
     expect(await readBlob(downloads[0]?.blob as Blob)).toBe(`# ${NAME}\n// Legends (1)\n1 L1\n// Main deck (3)\n3 Unit 0\n`);
   });

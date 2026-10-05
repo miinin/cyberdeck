@@ -29,25 +29,18 @@ export function ShareTradeButton({ have, want }: { have: Collection; want: WantL
         {texts.tradeShareButton}
       </button>{' '}
       <span className="hint">{texts.tradeShareNote}</span>
-      {state === 'copied' && (
-        <span className="hint" role="status">
-          {' '}
-          {texts.tradeShareCopied}
-        </span>
-      )}
       {state === 'too-big' && <p role="alert">{texts.tradeShareTooBig}</p>}
-      {state === 'failed' && (
+      {(state === 'copied' || state === 'failed') && (
         <p role="status">
-          <label>
-            {texts.tradeShareCopyFailed}
-            <input
-              type="text"
-              readOnly
-              value={link}
-              aria-label={texts.tradeShareLinkLabel}
-              onFocus={(e) => e.target.select()}
-            />
-          </label>
+          {state === 'copied' ? texts.tradeShareCopied : texts.tradeShareCopyFailed}
+          <input
+            type="text"
+            readOnly
+            className="trade-share-link"
+            value={link}
+            aria-label={texts.tradeShareLinkLabel}
+            onFocus={(e) => e.target.select()}
+          />
         </p>
       )}
     </div>

@@ -2601,7 +2601,7 @@ h3,
 }
 
 .filter-chip::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 1px;
   z-index: -1;
@@ -4601,4 +4601,71 @@ button.legality:focus-visible {
 
 section[aria-labelledby='have-heading'] {
   margin-block-start: var(--space-6);
+}
+
+/* T-071: icon buttons on the deck card, the export menu and the trade share link. */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  margin-inline-start: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  color: var(--color-text);
+}
+
+.deck-row > .row-actions {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+}
+
+.deck-row > .row-actions > .button-primary {
+  grid-column: 1 / -1;
+}
+
+.deck-row > .row-actions > :last-child,
+.deck-row > .row-actions > .icon-delete {
+  grid-column: auto;
+}
+
+.export-menu {
+  position: relative;
+  min-width: 0;
+}
+
+.export-menu-toggle {
+  width: 100%;
+}
+
+.export-menu-panel {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 5;
+  display: grid;
+  gap: var(--space-2);
+  min-width: 12rem;
+  margin-block-start: var(--space-1);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+.export-menu-panel[hidden] {
+  display: none;
+}
+
+.trade-share-link {
+  display: block;
+  width: 100%;
+  max-width: 40rem;
+  margin-block-start: var(--space-2);
 }
