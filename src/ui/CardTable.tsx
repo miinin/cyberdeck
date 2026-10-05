@@ -46,6 +46,7 @@ export function CardTable({
   cards,
   caption = texts.tableCaption,
   owned,
+  wanted,
   decksOf,
   onOpenImage,
   hoverProps,
@@ -53,6 +54,8 @@ export function CardTable({
   cards: readonly Card[];
   caption?: string;
   owned?: OwnedColumn;
+  /** The want list column (T-064b); left out when the want list is not ready. */
+  wanted?: OwnedColumn;
   decksOf?: (card: Card) => readonly string[];
   onOpenImage: (card: Card, opener: HTMLButtonElement) => void;
   /** Mouse hover preview of the bigger image (T-052), as in the deck editor. */
@@ -82,6 +85,7 @@ export function CardTable({
             <SortHeader label={texts.columnPower} column="power" sort={sort} onSort={onSort} numeric />
             <SortHeader label={texts.columnRam} column="ram" sort={sort} onSort={onSort} numeric />
             {owned !== undefined && <th scope="col">{texts.columnCollection}</th>}
+            {wanted !== undefined && <th scope="col">{texts.columnWant}</th>}
           </tr>
         </thead>
         <tbody>
@@ -138,6 +142,19 @@ export function CardTable({
                     onChange={owned.onChange}
                     onLimit={owned.onLimit}
                     editable={owned.editable}
+                  />
+                </td>
+              )}
+              {wanted !== undefined && (
+                <td className="cell-collection">
+                  <CountControl
+                    card={card}
+                    count={wanted.countOf(card)}
+                    mode={wanted.mode}
+                    onChange={wanted.onChange}
+                    onLimit={wanted.onLimit}
+                    editable={wanted.editable}
+                    kind="want"
                   />
                 </td>
               )}

@@ -1431,6 +1431,21 @@ body:has(dialog[open]) {
   margin: 0;
 }
 
+.card-want {
+  display: flex;
+  margin-left: auto;
+}
+
+.card-want .count-control {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.missing-cards .missing-result:empty {
+  display: none;
+}
+
 .card-collection {
   display: flex;
   margin-left: auto;

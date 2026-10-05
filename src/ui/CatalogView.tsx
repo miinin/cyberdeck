@@ -29,13 +29,15 @@ import { useCardHoverPreview } from './CardHoverPreview';
 import type { ActiveFilter } from './ActiveFilters';
 import { WIDE_QUERY } from './useMediaQuery';
 import type { OwnedColumn } from './CardList';
-import { CollectionNotices, loadNotices } from './CollectionNotices';
+import { CollectionNotices, loadNotices, saveErrorLive } from './CollectionNotices';
+import { cardNameText } from './CardName';
 import { countIn } from './collectionStore';
 import type { CollectionSnapshot } from './collectionStore';
 import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
 import { useCollection } from './useCollection';
+import { useWants } from './useWants';
 import { useDecks } from './useDecks';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
@@ -48,6 +50,11 @@ function describeResult(active: boolean, shown: number, all: number): Announceme
   return { key: `some:${shown}`, text: texts.filteredLive(shown, all) };
 }
 
+const COLLECTION_FILTER_LABELS = {
+  owned: texts.collectionOwned,
+  missing: texts.collectionMissing,
+  wanted: texts.collectionWanted,
+} as const;
 const NO_KEYS: ReadonlySet<CardKey> = new Set();
 const NO_NAMES: readonly string[] = [];
 
@@ -85,6 +92,7 @@ export function CatalogView({
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
+  const { snapshot: wants, store: wantsStore } = useWants(repositories.wants);
   // Which decks each card is in (T-013). Decks that cannot be read just leave the mention out.
   const { phase: decksPhase, decks } = useDecks(repositories.decks);
   const decksByCard = useMemo(() => {
@@ -151,16 +159,20 @@ export function CatalogView({
   };
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
-  if (collectionChoice !== 'all' && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
+  if (
+    collectionChoice !== 'all' &&
+    (collection.phase === 'locked' || collection.phase === 'unavailable' || (collectionChoice === 'wanted' && (wants.phase === 'locked' || wants.phase === 'unavailable')))
+  ) {
     setCollectionFilter('all');
   }
   const collectionFilter: CollectionFilter = collection.phase === 'ready' ? collectionChoice : 'all';
-  const ownedOnly = collectionFilter === 'owned';
+  const listedOnly = collectionFilter === 'owned' || collectionFilter === 'wanted';
   const visibleCards = (next: CardFilterCriteria, nextFilter: CollectionFilter, nextKept: ReadonlySet<CardKey>) => {
     const matching = filterCards(allCards, next);
     if (nextFilter === 'all') return matching;
     return matching.filter((card) => {
       if (nextKept.has(card.key)) return true;
+      if (nextFilter === 'wanted') return countIn(wants, card.key) > 0;
       const count = countIn(collection, card.key);
       return nextFilter === 'owned' ? count > 0 : count < playsetSize(card);
     });
@@ -176,6 +188,30 @@ export function CatalogView({
   const allShown = describeResult(false, allCards.length, allCards.length);
   const announcer = useDelayedAnnouncement(allCards, allShown.key);
   const collectionAnnouncer = useCollectionAnnouncements(announcer, collectionStore, allCards, collection.saveError);
+
+  // Want list changes (T-064b): the last saved card is announced once the saves are done.
+  const announceRef = useRef(collectionAnnouncer.announce);
+  useEffect(() => {
+    announceRef.current = collectionAnnouncer.announce;
+  });
+  const lastWanted = useRef<{ card: CardKey; to: number } | null>(null);
+  const wantNames = useMemo(() => new Map(allCards.map((card) => [card.key, cardNameText(card)])), [allCards]);
+  useEffect(
+    () =>
+      wantsStore.onEvent((event) => {
+        if (event.type === 'saved') lastWanted.current = { card: event.card, to: event.to };
+        else if (event.type === 'save-failed') {
+          lastWanted.current = null;
+          announceRef.current(saveErrorLive(event.kind));
+        } else if (event.type === 'idle' && lastWanted.current !== null) {
+          const { card, to } = lastWanted.current;
+          lastWanted.current = null;
+          const name = wantNames.get(card);
+          if (name !== undefined) announceRef.current(texts.wantLive(name, to));
+        }
+      }),
+    [wantsStore, wantNames],
+  );
   const collectionNotices = loadNotices(collection, repositories.persistent);
   useLoadNoticeAnnouncement(
     announcer,
@@ -258,6 +294,19 @@ export function CatalogView({
           onLimit: collectionAnnouncer.announceLimit,
           editable,
         };
+  const wanted: OwnedColumn | undefined =
+    wants.phase === 'ready'
+      ? {
+          mode: 'ready',
+          countOf: (card) => countIn(wants, card.key),
+          onChange: (card, count) => {
+            if (collectionFilter === 'wanted') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
+            wantsStore.setCount(card.key, count);
+          },
+          onLimit: collectionAnnouncer.announceLimit,
+          editable,
+        }
+      : undefined;
   const summary =
     collection.phase === 'loading'
       ? texts.collectionLoading
@@ -269,7 +318,7 @@ export function CatalogView({
   const listCaption = filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
   const noResults = filtered.length === 0;
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
-  const noOwnedCards = noResults && ownedOnly && !isFilterActive(criteria);
+  const noOwnedCards = noResults && listedOnly && !isFilterActive(criteria);
 
   const handleOpenImage = (card: Card, opener: HTMLButtonElement) => {
     preview.hide();
@@ -298,7 +347,7 @@ export function CatalogView({
       : [
           {
             id: 'collection',
-            label: collectionFilter === 'owned' ? texts.collectionOwned : texts.collectionMissing,
+            label: COLLECTION_FILTER_LABELS[collectionFilter],
             onRemove: () => updateFilters(criteria, 'all', 'later'),
           },
         ]),
@@ -423,7 +472,7 @@ export function CatalogView({
 
           {noResults && (
             <div className="empty">
-              <p>{noOwnedCards ? texts.ownedOnlyEmptyBody : texts.noResultsBody}</p>
+              <p>{noOwnedCards ? (collectionFilter === 'wanted' ? texts.wantedOnlyEmptyBody : texts.ownedOnlyEmptyBody) : texts.noResultsBody}</p>
               <button
                 type="button"
                 className="button-primary"
@@ -440,12 +489,13 @@ export function CatalogView({
                 cards={filtered}
                 caption={listCaption}
                 owned={owned}
+                wanted={wanted}
                 decksOf={decksOf}
                 onOpenImage={handleOpenImage}
                 hoverProps={preview.bind}
               />
             ) : (
-              <CardList cards={filtered} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+              <CardList cards={filtered} caption={listCaption} owned={owned} wanted={wanted} decksOf={decksOf} onOpenImage={handleOpenImage} />
             ))}
         </section>
       </div>

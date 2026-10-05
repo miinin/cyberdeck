@@ -46,9 +46,9 @@ export const texts = {
   accountDialogTitle: 'Kirjaudu Google-tilillä',
   accountAgeLimit: 'Kirjautuminen on tarkoitettu 16 vuotta täyttäneille.',
   accountPrivacy:
-    'Tilille tallennetaan vain pakkasi ja kokoelmasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa.',
+    'Tilille tallennetaan vain pakkasi, kokoelmasi ja want-listasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa.',
   accountPrivacyGoogle:
-    'Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa, ei pakkojesi ja kokoelmasi mukana.',
+    'Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa, ei pakkojesi, kokoelmasi eikä want-listasi mukana.',
   accountPrivacyController: 'Rekisterinpitäjä: Miika Miinin, miikamiinin@gmail.com.',
   accountContinue: 'Jatka Googleen',
   accountCancel: 'Peruuta',
@@ -157,6 +157,17 @@ export const texts = {
   minusSymbol: '−',
   countPrefix: 'Kokoelmassa ',
   notOwned: 'Ei kokoelmassa',
+  // Want list (T-064b)
+  columnWant: 'Want',
+  increaseWant: 'Lisää wantiin yksi kappale: ',
+  decreaseWant: 'Vähennä wantista yksi kappale: ',
+  wantPrefix: 'Wantissa ',
+  notWanted: 'Ei wantissa',
+  collectionWanted: 'Want',
+  wantedOnlyEmptyBody:
+    'Want-listalla ei ole vielä kortteja. Valitse Kokoelma-ryhmästä "Kaikki" ja lisää kortteja wantiin listasta.',
+  wantLive: (name: string, count: number) =>
+    count === 0 ? `${name}: poistettu wantista.` : `${name}: ${copies(count)} wantissa.`,
   countLoading: 'ladataan',
   notEditable: 'ei muokattavissa',
 

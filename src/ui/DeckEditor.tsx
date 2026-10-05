@@ -55,6 +55,7 @@ import type { ImageSize } from './ListToolbar';
 import { Stepper } from './Stepper';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
+import { useWants } from './useWants';
 import { trackDeckSave } from './useDecks';
 import { EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
 
@@ -86,6 +87,7 @@ export function DeckEditor({
   const repository = repositories.decks;
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const { snapshot: collection } = useCollection(repositories.collection);
+  const wants = useWants(repositories.wants);
 
   const [phase, setPhase] = useState<'loading' | 'ready' | 'not-found' | 'unavailable'>('loading');
   const [content, setContent] = useState<DeckContent>({ name: '', sections: [] });
@@ -764,6 +766,7 @@ export function DeckEditor({
                 : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`
             }
             missingCards={collectionReady ? missingCards : undefined}
+            wants={wants}
             missingText={
               collectionReady
                 ? deckTexts.missingFromCollection(missingCopies)

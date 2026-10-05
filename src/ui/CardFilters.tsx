@@ -9,7 +9,7 @@ import { useMediaQuery } from './useMediaQuery';
 /** Longest accepted search text (PM 2026-10-01). No message is shown at the limit (UX.md 5.3). */
 export const SEARCH_MAX_LENGTH = 100;
 
-export type CollectionFilter = 'all' | 'owned' | 'missing';
+export type CollectionFilter = 'all' | 'owned' | 'missing' | 'wanted';
 
 export interface CardFiltersProps {
   criteria: CardFilterCriteria;
@@ -57,6 +57,7 @@ const COLLECTION_OPTIONS: readonly (readonly [CollectionFilter, string])[] = [
   ['all', texts.collectionAll],
   ['owned', texts.collectionOwned],
   ['missing', texts.collectionMissing],
+  ['wanted', texts.collectionWanted],
 ];
 
 /** Search and filter form (UX.md 5.4). Purely presentational: the parent owns the state. */

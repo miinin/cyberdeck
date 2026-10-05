@@ -115,6 +115,9 @@ export const deckTexts = {
   rulesNote: 'Tarkistettava: sääntö käyttää kortin yhtä väriä ja RAM-arvoa sellaisenaan.',
   missingListHeading: 'Näytä puuttuvat kortit',
   missingDownload: 'Lataa puuttuvat (.txt)',
+  addMissingToWants: 'Lisää puuttuvat wantiin',
+  addedToWants: (count: number) => (count === 1 ? 'Lisätty 1 kortti wantiin.' : `Lisätty ${count} korttia wantiin.`),
+  allAlreadyWanted: 'Kaikki jo wantissa.',
   missingFileSuffix: 'puuttuvat',
   missingRow: (name: string, count: number) => `${name} – puuttuu ${count}`,
   missingFromCollection: (count: number) =>
