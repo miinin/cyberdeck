@@ -1,5 +1,5 @@
 import type { CardKey } from './cardKey';
-import { MAX_DECK_CARD_COUNT, MAX_DECK_NAME_LENGTH } from './deck';
+import { MAX_DECK_CARD_COUNT, MAX_DECK_NAME_LENGTH, SIDEBOARD_SECTION_NAME } from './deck';
 import type { Deck, DeckContent, DeckSection } from './deck';
 import { cleanText } from './validate';
 import { currentDeckMessages } from './deckMessages';
@@ -56,13 +56,19 @@ export function distinctRows(deck: DeckContent): number {
  */
 export function withDeckCount(deck: DeckContent, card: CardKey, count: number): DeckContent {
   const next = Math.max(0, Math.min(MAX_DECK_CARD_COUNT, Math.trunc(count)));
-  const sections: DeckSection[] = deck.sections.length > 0 ? [...deck.sections] : [{ name: '', cards: [] }];
-  let home = sections.findIndex((section) => section.cards.some((row) => row.card === card));
-  if (home < 0) home = 0;
+  let sections: DeckSection[] = [...deck.sections];
+  // The sideboard is edited by withSideboardCount only (T-058).
+  let mainIndexes = sections.flatMap((section, i) => (section.name === SIDEBOARD_SECTION_NAME ? [] : [i]));
+  if (mainIndexes.length === 0) {
+    sections = [{ name: '', cards: [] }, ...sections];
+    mainIndexes = [0];
+  }
+  const home = mainIndexes.find((i) => sections[i]?.cards.some((row) => row.card === card)) ?? mainIndexes[0] ?? 0;
   return {
     name: deck.name,
     sections: sections.map((section, index) => {
       const others = section.cards.filter((row) => row.card !== card);
+      if (section.name === SIDEBOARD_SECTION_NAME) return section;
       if (index !== home || next === 0) return { name: section.name, cards: others };
       const existing = section.cards.findIndex((row) => row.card === card);
       if (existing < 0) return { name: section.name, cards: [...others, { card, count: next }] };
@@ -70,5 +76,23 @@ export function withDeckCount(deck: DeckContent, card: CardKey, count: number): 
       cards[existing] = { card, count: next };
       return { name: section.name, cards };
     }),
+  };
+}
+
+/**
+ * Sets the copies of a card in the sideboard section (0 removes it). The section is created when needed
+ * and dropped when it becomes empty (T-058).
+ */
+export function withSideboardCount(deck: DeckContent, card: CardKey, count: number): DeckContent {
+  const next = Math.max(0, Math.min(MAX_DECK_CARD_COUNT, Math.trunc(count)));
+  const others = deck.sections.filter((section) => section.name !== SIDEBOARD_SECTION_NAME);
+  const cards = deck.sections
+    .filter((section) => section.name === SIDEBOARD_SECTION_NAME)
+    .flatMap((section) => section.cards)
+    .filter((row) => row.card !== card);
+  const merged = next > 0 ? [...cards, { card, count: next }] : cards;
+  return {
+    name: deck.name,
+    sections: merged.length > 0 ? [...others, { name: SIDEBOARD_SECTION_NAME, cards: merged }] : others,
   };
 }

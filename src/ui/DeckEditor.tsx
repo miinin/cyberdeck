@@ -2,11 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Card } from '../domain/card';
 import type { Deck, DeckContent } from '../domain/deck';
 import { MAX_DECK_DISTINCT_CARDS } from '../domain/deck';
-import { checkDeckName, distinctRows, withDeckCount } from '../domain/deckEdit';
+import { checkDeckName, distinctRows, withDeckCount, withSideboardCount } from '../domain/deckEdit';
 import {
   MAX_MAIN_DECK,
   MIN_MAIN_DECK,
+  MAX_COPIES,
   addBlocker,
+  allDeckCounts,
+  sideboardCounts,
+  sideboardSize,
   colorDistribution,
   costCurve,
   deckCounts,
@@ -45,6 +49,7 @@ import { DeckList } from './DeckList';
 import type { DeckView } from './DeckList';
 import { DeckPickTable } from './DeckPickTable';
 import { DeckStats } from './DeckStats';
+import { Sideboard } from './Sideboard';
 import type { MissingCard } from '../domain/deckExport';
 import type { PickBlocker } from './DeckPickTable';
 import { countIn } from './collectionStore';
@@ -262,19 +267,30 @@ export function DeckEditor({
   const totals = useMemo(() => deckTotals(content, cardsByKey), [content, cardsByKey]);
   const limits = useMemo(() => ramLimits(content, cardsByKey), [content, cardsByKey]);
   const counts = useMemo(() => deckCounts(content), [content]);
+  const allCounts = useMemo(() => allDeckCounts(content), [content]);
+  const sideRows = useMemo(
+    () =>
+      [...sideboardCounts(content)]
+        .flatMap(([key, count]) => {
+          const card = cardsByKey.get(key);
+          return card === undefined ? [] : [{ card, count }];
+        })
+        .sort((a, b) => a.card.displayName.localeCompare(b.card.displayName, 'en')),
+    [content, cardsByKey],
+  );
   const curve = useMemo(() => costCurve(content, cardsByKey), [content, cardsByKey]);
   const grouped = useMemo(() => groupDeck(content, cardsByKey), [content, cardsByKey]);
 
   const collectionReady = collection.phase === 'ready';
   const missingCards = useMemo(() => {
     const rows: MissingCard[] = [];
-    for (const [key, count] of counts) {
+    for (const [key, count] of allCounts) {
       const card = cardsByKey.get(key);
       const missing = count - countIn(collection, key);
       if (card !== undefined && missing > 0) rows.push({ card, missing });
     }
     return rows;
-  }, [counts, cardsByKey, collection]);
+  }, [allCounts, cardsByKey, collection]);
   const missingCopies = missingCards.reduce((sum, row) => sum + row.missing, 0);
 
   const setCount = (card: Card, count: number) => {
@@ -302,6 +318,39 @@ export function DeckEditor({
           : deckTexts.changeAnnounce(name, copies, nextTotals.main),
       );
     }, CHANGE_ANNOUNCE_MS);
+  };
+
+  const setSideCount = (card: Card, count: number) => {
+    const base = contentRef.current;
+    const side = sideboardCounts(base).get(card.key) ?? 0;
+    if (card.type === 'Legend') {
+      setToast(deckTexts.sideboardNoLegend);
+      return;
+    }
+    if (count > side && (allDeckCounts(base).get(card.key) ?? 0) >= MAX_COPIES) {
+      setToast(deckTexts.sideboardCopiesFull(MAX_COPIES));
+      return;
+    }
+    if (side === 0 && count > 0 && distinctRows(base) >= MAX_DECK_DISTINCT_CARDS) {
+      setNotice(deckTexts.distinctLimit);
+      return;
+    }
+    setNotice(null);
+    schedule(withSideboardCount(base, card.key, count));
+  };
+
+  /** Moves one copy; the total of the card stays the same, so no copy limit is touched. */
+  const moveCopy = (card: Card, toSideboard: boolean) => {
+    const base = contentRef.current;
+    if (toSideboard && card.type === 'Legend') {
+      setToast(deckTexts.sideboardNoLegend);
+      return;
+    }
+    const main = deckCounts(base).get(card.key) ?? 0;
+    const side = sideboardCounts(base).get(card.key) ?? 0;
+    if ((toSideboard ? main : side) === 0) return;
+    const delta = toSideboard ? 1 : -1;
+    schedule(withSideboardCount(withDeckCount(base, card.key, main - delta), card.key, side + delta));
   };
 
   const openImage = (card: Card) => {
@@ -731,6 +780,14 @@ export function DeckEditor({
             ownedOf={(card) => (collectionReady ? countIn(collection, card.key) : null)}
             onChange={setCount}
             onOpenImage={openImage}
+            hoverProps={preview.bind}
+            onMoveToSideboard={(card) => moveCopy(card, true)}
+          />
+          <Sideboard
+            rows={sideRows}
+            size={sideboardSize(content)}
+            onChange={setSideCount}
+            onMoveToMain={(card) => moveCopy(card, false)}
             hoverProps={preview.bind}
           />
           {grouped.unknown.length > 0 && (
