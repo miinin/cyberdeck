@@ -28,7 +28,7 @@ describe('Add to sideboard from the picker', () => {
     fireEvent.click(add());
     expect(screen.getByRole('heading', { name: 'Sideboard (1/7)' })).toBeInTheDocument();
     expect(screen.getByText(/yhteensä jo 3 kopiota/)).toBeInTheDocument();
-  }), 20000);
+  }, 20000);
 
   it('refuses a Legend', async () => {
     await openEditor([]);
