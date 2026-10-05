@@ -320,23 +320,22 @@ h1:focus:not(:focus-visible) {
   padding-block: var(--space-3);
 }
 
-/* Decorative chamfered mark before the name: not a logo, no text. */
-.site-header .container::before {
-  content: '';
-  flex: none;
-  width: 1.125rem;
-  height: 1.125rem;
-  background: var(--color-brand-yellow);
-  clip-path: var(--shape-brand);
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
 }
 
-.brand {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-brand);
+.brand img {
+  display: block;
+  height: 2.75rem;
+  width: auto;
+}
+
+@media (max-width: 39.99rem) {
+  .brand img {
+    height: 2rem;
+  }
 }
 
 main {
@@ -1125,16 +1124,38 @@ main {
   text-align: center;
 }
 
-/* Enlarged image (T-027 UX). No padding on the dialog itself: a click on it is a click on the backdrop. */
-.card-dialog {
-  width: min(30rem, 100vw - 2 * var(--space-3));
+/* Modal dialogs (T-080): the <dialog> is a transparent, viewport-sized layer that scrolls (the page-level scroll);
+   the box inside has its natural height and no scrollbar of its own. A click on the layer outside the box is a backdrop click. */
+.card-dialog,
+.confirm-dialog,
+.test-hand-dialog {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   max-width: none;
-  max-height: calc(100dvh - 2 * var(--space-3));
-  padding: 0;
-  overflow: auto;
+  max-height: none;
+  margin: 0;
+  padding: var(--space-3) var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  overflow-y: auto;
+}
+
+.card-dialog[open],
+.confirm-dialog[open],
+.test-hand-dialog[open] {
+  display: grid;
+}
+
+/* Enlarged image (T-027 UX). */
+.card-dialog-body {
+  margin: auto;
+  width: min(30rem, 100%);
   border: 1px solid var(--color-border-strong);
   background: var(--color-bg);
-  color: var(--color-text);
 }
 
 .card-dialog::backdrop {
@@ -1160,8 +1181,8 @@ main {
   overflow-wrap: anywhere;
 }
 
-.card-dialog.has-details {
-  width: min(48rem, 100vw - 2 * var(--space-3));
+.card-dialog.has-details .card-dialog-body {
+  width: min(48rem, 100%);
 }
 
 .card-dialog-content {
@@ -1919,19 +1940,15 @@ body:has(dialog[open]) {
   font-weight: var(--font-weight-bold);
 }
 
-.confirm-dialog {
-  max-width: min(30rem, calc(100vw - 2 * var(--gutter)));
-  padding: 0;
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-
 .confirm-dialog::backdrop {
   background: rgba(0, 0, 0, 0.7);
 }
 
 .confirm-dialog-body {
+  margin: auto;
+  width: min(30rem, 100%);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -2024,26 +2041,6 @@ body:has(dialog[open]) {
   }
 }
 
-/* Sticky only when the window is tall enough; nothing gets stuck when zoomed (WCAG 1.4.10). */
-@media (min-width: 64rem) and (min-height: 40rem) {
-  .editor-side {
-    position: sticky;
-    top: var(--space-3);
-    max-height: calc(100vh - 2 * var(--space-3));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
-
-@media (min-width: 100rem) and (min-height: 40rem) {
-  .editor-filters {
-    position: sticky;
-    top: var(--space-3);
-    max-height: calc(100vh - 2 * var(--space-3));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
 
 .editor-filters,
 .editor-search,
@@ -2701,16 +2698,6 @@ h3,
   }
 }
 
-/* Sticky only when the window is tall enough; nothing gets stuck when zoomed (WCAG 1.4.10). */
-@media (min-width: 64rem) and (min-height: 40rem) {
-  .catalog-filters {
-    position: sticky;
-    top: var(--space-4);
-    max-height: calc(100vh - 2rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
 
 /* Deck editor filters as a side panel from 100rem, as on the Cards page from 64rem (T-050b). */
 @media (min-width: 100rem) {
@@ -3888,15 +3875,7 @@ button.legality:focus-visible {
 .test-hand-dialog {
   --hand-card: clamp(9rem, 10vw, 15rem);
   /* About 7 cards in a row from 1920 px up; wider on very large screens so the cards stay big. */
-  inline-size: min(100vw - 1rem, max(96rem, 70vw));
-  max-inline-size: none;
-  max-block-size: 100dvh;
-  padding: 0;
-  overflow: auto;
-  border: 1px solid var(--color-border-strong);
-  border-block-start: 3px solid var(--color-accent-edge);
-  background: var(--color-bg);
-  color: var(--color-text);
+  padding-block: 0;
 }
 
 .test-hand-dialog::backdrop {
@@ -3904,6 +3883,11 @@ button.legality:focus-visible {
 }
 
 .test-hand-body {
+  margin: auto;
+  inline-size: min(100%, max(96rem, 70vw));
+  border: 1px solid var(--color-border-strong);
+  border-block-start: 3px solid var(--color-accent-edge);
+  background: var(--color-bg);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);

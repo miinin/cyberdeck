@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { createAccountSession, createBrowserAccountServices } from './account';
 import type { AccountServices } from './account';
+import logoUrl from './assets/brand/cyberdeck-tcg-logo-header.webp';
 import { CARDS } from './data/cards';
 import type { Card } from './domain/card';
 import { openBrowserRepositories } from './storage';
@@ -75,7 +76,9 @@ export function App({
     <>
       <header className="site-header">
         <div className="container">
-          <span className="brand">{texts.appName}</span>
+          <a className="brand" href="#/">
+            <img src={logoUrl} alt="Cyberdeck TCG" width={400} height={99} />
+          </a>
           <nav className="main-nav" aria-label={deckTexts.navLabel}>
             <a href="#/" aria-current={route.name === 'cards' ? 'page' : undefined}>
               {deckTexts.navCards}
