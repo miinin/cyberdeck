@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-05 (PM, T-060–T-065 testissä, T-066 PR:nä, tuotantojulkaisu tulossa)
+# STATUS · päivitetty 2026-10-05 (PM, T-066 tuotannossa, T-067 testissä, T-068 PR:nä)
 
 ## Yhdellä lauseella
 MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (rarity, want-lista ja vaihtolinkki PR:inä, D-018) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
@@ -9,7 +9,7 @@ Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-066 | PM | Review | Esikatselu, sitten /julkaise. Ennen julkaisua firestore.rules tuotantoon (want-dokumentti). UX- ja tekstikatselmointi Have/Want-näkymälle avoinna. |
+| T-068 | PM | Review | Esikatselu, sitten testiin ja /julkaise käyttäjän pyynnöstä. UX- ja tekstikatselmointi (Have/Want, englanninkieliset tekstit) avoinna. |
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)

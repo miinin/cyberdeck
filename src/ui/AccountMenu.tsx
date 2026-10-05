@@ -1,3 +1,4 @@
+import { intlLocale } from '../locale';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { AccountSession, AuthClient, AuthState, SessionStatus } from '../account';
 import { texts } from './texts';
@@ -47,7 +48,7 @@ function AccountLabel({ text }: { text: string }) {
   );
 }
 
-const timeFormat = new Intl.DateTimeFormat('fi-FI', { hour: 'numeric', minute: '2-digit' });
+const timeFormat = new Intl.DateTimeFormat(intlLocale, { hour: 'numeric', minute: '2-digit' });
 
 const NO_SESSION = () => () => {};
 

@@ -472,3 +472,10 @@ Päätöksessä on viisi osaa.
 
 **Kustannus ja lukitus:** ei uusia palveluita, ei maksua, ei uusia riippuvuuksia. Firestoressa yksi dokumentti lisää per käyttäjä (Spark riittää).
 **Seuraukset:** PRIVACY.md:n inventaarioon want-lista (SR-16), SECURITY.md:hen jakolinkin vaatimus (Digiturva), IDEAS.md:hen pakkaus ja Firestore-jako.
+
+## D-019 · Englanninkielinen käyttöliittymä: kieli valitaan käynnistyksessä, vaihto lataa sivun uudelleen · 2026-10-05 · Päättäjä: PM, käyttäjä (oletuskieli ja valitsimen paikka)
+**Tila:** Hyväksytty. Tehtävä T-068.
+**Konteksti:** Käyttäjä haluaa koko sovelluksesta englanninkielisen version. Tekstit ovat keskitetysti tiedostoissa `texts.ts` ja `deckTexts.ts` (noin 640 riviä), ja 37 moduulia tuo ne staattisesti, osa jo moduulitasolla.
+**Vaihtoehdot:** A) Kieli ratkaistaan kerran käynnistyksessä. Tekstiolio valitaan sen mukaan, ja vaihto tallentaa valinnan ja lataa sivun uudelleen (hash-reitti säilyy). + Pieni muutos, ei React-contextia eikä uutta riippuvuutta, moduulitason vakiot toimivat. − Vaihto lataa sivun uudelleen. B) React-context ja `useTexts()` kaikkiin komponentteihin. + Vaihto ilman uudelleenlatausta. − Koskee kaikkia 37 moduulia ja moduulitason vakioita, suuri diff. C) i18n-kirjasto. − Uusi riippuvuus ilman tarvetta.
+**Päätös:** A. Ensimmäisellä käynnillä kieli määräytyy selaimen kielen mukaan (`fi*` → suomi, muuten englanti), ja valinta tallennetaan paikallisesti (ei henkilötieto, ei synkata). Valitsin FI/EN on yläpalkissa teemavalitsimen vieressä. `<html lang>` asetetaan kielen mukaan. Englanninkielisen tekstiolion tyyppi on sama kuin suomenkielisen, joten puuttuva käännös on käännösvirhe.
+**Seuraukset:** Uudet tekstit lisätään molempiin kieliin. Korttien nimet ja pelitermit pysyvät englanniksi (`lang="en"`-merkinnät ovat tarpeettomia englanninkielisessä versiossa mutta eivät haitallisia). Dokumentit pysyvät suomeksi.

@@ -1,0 +1,299 @@
+import type { AuthErrorKind } from '../account';
+import { MAX_COLLECTION_ENTRIES } from '../domain/collection';
+import type { textsFi } from './texts.fi';
+
+// English UI texts (T-068, D-019). The type is the Finnish object's type, so a missing key or a
+// different function signature is a compile error. Game terms and card names stay as they are.
+
+const numberFormat = new Intl.NumberFormat('en-GB');
+
+/** "1 card", "2 cards", "1,024 cards" */
+export function cardCountEn(count: number): string {
+  return `${numberFormat.format(count)} ${count === 1 ? 'card' : 'cards'}`;
+}
+
+/** " copy" / " copies" after a number. */
+function copiesSuffixEn(count: number): string {
+  return count === 1 ? ' copy' : ' copies';
+}
+
+/** "1 copy", "5 copies", "1,024 copies" */
+function copies(count: number): string {
+  return `${numberFormat.format(count)}${copiesSuffixEn(count)}`;
+}
+
+/** "1 distinct card", "3 distinct cards" */
+function distinctCards(count: number): string {
+  return `${numberFormat.format(count)} distinct ${count === 1 ? 'card' : 'cards'}`;
+}
+
+export const textsEn: typeof textsFi = {
+  cardCount: cardCountEn,
+  copiesSuffix: copiesSuffixEn,
+  appName: 'Cyberdeck',
+  themeToggleLabel: 'Light',
+  themeToggleSuffix: 'theme',
+  themeToggleTitleLight: 'Switch to the light theme',
+  themeToggleTitleDark: 'Switch to the dark theme',
+  languageLabel: 'Language',
+  accountSignIn: 'Sign in',
+  accountSigningIn: 'Signing in…',
+  accountMenu: 'Account',
+  accountDialogTitle: 'Sign in with Google',
+  accountAgeLimit: 'Signing in is for people aged 16 or over.',
+  accountPrivacy:
+    'Your account stores only your decks, collection and want list, plus an identifier from Google, not your name or email. The data is kept on Google servers in the EU, and you can delete it at any time.',
+  accountPrivacyGoogle:
+    'Your Google account details (name and email address) stay in Firebase Authentication, separate from your decks, collection and want list.',
+  accountPrivacyController: 'Data controller: Miika Miinin, miikamiinin@gmail.com.',
+  accountContinue: 'Continue to Google',
+  accountCancel: 'Cancel',
+  accountClose: 'Close',
+  accountUnavailableTitle: 'Signing in is not available',
+  accountUnavailableBody: 'Signing in works only at the app’s own address, not in a preview.',
+  accountSignedInAs: (email: string | null) =>
+    email === null ? 'Signed in with a Google account' : `Signed in as ${email}`,
+  accountSignOut: 'Sign out',
+  accountSyncSyncing: 'Saving to your account…',
+  accountSyncSaved: (time: string) => `Saved to your account at ${time}`,
+  accountSyncWaiting: 'Changes are saved to your account automatically.',
+  accountSyncOffline: 'No connection. Changes are saved on this device.',
+  accountSyncError: 'Saving to your account failed. Changes are saved on this device.',
+  accountSyncLocked: 'Your account has been updated to a newer version. Reload the page.',
+  accountSyncNow: 'Sync now',
+  accountSignOutWarnTitle: 'Not all changes have been saved to your account',
+  accountSignOutWarnBody:
+    'The changes are saved in this browser and will move to your account when you sign in with the same account again.',
+  accountSignOutAnyway: 'Sign out anyway',
+  accountSignedOutNotice:
+    'You signed out. Your account data stays in this browser. If you use a shared computer, delete it before you leave: sign in and choose "Delete account data".',
+  accountSignedOutDismiss: 'Dismiss notice',
+  accountDelete: 'Delete account data',
+  accountDeleteTitle: 'Delete your account data?',
+  accountDeleteBody:
+    'Your decks and collection are deleted from your account and from this browser, and Google sign-in is removed from this service. This cannot be undone. Data from signed-out use of this browser is not deleted.',
+  accountDeleteConfirm: 'Delete data and account',
+  accountDeleting: 'Deleting…',
+  accountDeleteReauth: 'Going to Google to confirm your sign-in. Deletion finishes when you return to this page.',
+  accountDeleteFailedCloud: 'Deleting the data failed. Check your connection and try again.',
+  accountDeleteFailedAccount: 'The data was deleted, but deleting the account failed. Try again.',
+  accountDeletedNotice: 'Your account data and account have been deleted.',
+  accountChooseTitle: 'There is data in this browser and in your account',
+  accountChooseBody:
+    'You can merge this browser’s decks and collection with your account data, or use only the account data. A backup of the browser data is made, and nothing is deleted until saving to your account has succeeded.',
+  accountChooseMerge: 'Merge',
+  accountChooseAccountOnly: 'Use only account data',
+  accountErrors: {
+    network: 'Signing in failed because there was no connection. Try again.',
+    'popup-blocked': 'The browser blocked the sign-in window. Allow pop-ups for this page and try again.',
+    unknown: 'Signing in failed. Try again.',
+  } satisfies Record<AuthErrorKind, string>,
+  heading: 'Cards',
+  loaded: (count: number) => `${cardCountEn(count)} loaded.`,
+
+  tableCaption: 'All cards',
+  tableCaptionFiltered: 'Cards matching your search',
+  columnImage: 'Image',
+  enlargeImage: 'Enlarge image: ',
+  closeDialog: 'Close',
+  closeSymbol: '×',
+  playsetFull: 'Playset complete',
+  imageLoadError: 'The image could not be loaded.',
+  columnName: 'Name',
+  sortLabel: 'Sort by',
+  sortOptions: { number: 'Number', name: 'Name (A–Z)', cost: 'Cost', power: 'Power', ram: 'RAM', type: 'Type', rarity: 'Rarity' },
+  sortDirectionLabel: 'Direction',
+  sortAscending: 'Ascending',
+  sortDescending: 'Descending',
+  columnTypeAndColor: 'Type and color',
+  columnCost: 'Cost',
+  missingValue: '–',
+  noCost: 'no cost',
+  columnPower: 'Power',
+  noPower: 'no power',
+  columnRam: 'RAM',
+  noRam: 'no RAM',
+  noColor: 'no color',
+
+  filterFormLabel: 'Search and filter cards',
+  searchLabel: 'Search by name',
+  searchHint: 'Card name or subname. Part of a word is enough.',
+  filterHint: 'Choose one or more. With no choice, all cards are shown.',
+  typeLegend: 'Type',
+  colorLegend: 'Color',
+  rarityLegend: 'Rarity',
+  columnRarity: 'Rarity',
+  noRarity: 'no rarity',
+  filteredStatus: (shown: number, all: number) => `${numberFormat.format(shown)} / ${numberFormat.format(all)} cards`,
+  filteredLive: (shown: number, all: number) =>
+    `Showing ${numberFormat.format(shown)} / ${numberFormat.format(all)} cards.`,
+  allShownLive: (all: number) =>
+    all === 1 ? `Showing ${cardCountEn(1)}.` : `Showing all ${numberFormat.format(all)} cards.`,
+  noResultsLive: 'No cards match your search.',
+  noResultsBody: 'No cards match your search. Check the search term or remove some filters.',
+  clearFilters: 'Clear search and filters',
+  filtersHeading: 'Filters',
+  filtersToggle: (selected: number) => (selected === 0 ? 'Filters' : `Filters (${selected})`),
+  resultsHeading: 'Results',
+  activeFilters: 'Selected filters',
+  removeFilter: (value: string) => `Remove filter: ${value}`,
+  imageSizeLegend: 'Image size',
+  imageSizeSmall: 'Small',
+  imageSizeMedium: 'Normal',
+  imageSizeLarge: 'Large',
+
+  columnOwned: 'Owned',
+  increaseOne: 'Add one copy: ',
+  decreaseOne: 'Remove one copy: ',
+  minusSymbol: '−',
+  countPrefix: 'In collection: ',
+  notOwned: 'Not in collection',
+  increaseWant: 'Add one copy to wants: ',
+  decreaseWant: 'Remove one copy from wants: ',
+  wantPrefix: 'In wants: ',
+  notWanted: 'Not in wants',
+  wantLive: (name: string, count: number) =>
+    count === 0 ? `${name}: removed from wants.` : `${name}: ${copies(count)} in wants.`,
+  countLoading: 'loading',
+  notEditable: 'not editable',
+
+  collectionLoading: 'Loading your collection…',
+  collectionEmpty: 'There are no cards in your collection yet.',
+  collectionSummary: (distinct: number, total: number) =>
+    `Your collection has ${distinctCards(distinct)}, ${copies(total)} in total.`,
+
+  addedLive: (name: string, count: number) => `${name} added to your collection: ${copies(count)}.`,
+  countLive: (name: string, count: number) => `${name}: ${copies(count)} in your collection.`,
+  removedLive: (name: string) => `${name} removed from your collection.`,
+  maxReachedLive: (name: string) => `Maximum of 999 reached: ${name}.`,
+  externalChangeLive: 'The collection was updated in another tab.',
+  countNotChanged: 'The card count did not change.',
+
+  editSwitchLabel: 'Edit collection',
+  viewLegend: 'View',
+  viewGrid: 'Grid',
+  viewTable: 'Table',
+  columnCollection: 'Collection',
+  columnType: 'Type',
+  tableRegionLabel: (caption: string) => `${caption}, table`,
+
+  collectionLegend: 'Collection',
+  collectionAll: 'All',
+  collectionOwned: 'Owned',
+  collectionMissing: 'Missing',
+  ownedOnlyEmptyBody:
+    'There are no cards in your collection yet. Choose "All" in the Collection group and mark the cards you own in the list.',
+  showAllCards: 'Show all cards',
+
+  browserOnly:
+    'Your collection is saved only in this browser on this device. It does not move to another device or browser.',
+  requestPersistent: 'Request persistent storage',
+  persistentHint:
+    'Persistent storage asks the browser to keep your collection even when the device runs low on space. Clearing the browser data still deletes the collection.',
+  persistentGranted: 'The browser promised to keep your collection. Clearing the browser data still deletes it.',
+  persistentDenied:
+    'The browser did not grant persistent storage. Your collection is still saved, but the browser may delete it if the device runs out of space. Do not clear the browser data.',
+  persistentAlready: 'The browser has promised to keep your collection. Clearing the browser data still deletes it.',
+
+  closeNotice: 'Close',
+  closeNoticeLabel: (title: string) => `Close notice: ${title}`,
+
+  collectionUnavailableTitle: 'The collection could not be read',
+  collectionUnavailableBody:
+    'The browser did not allow reading the saved data. The card list works, but you cannot mark owned cards right now. You can try again or check the browser’s privacy settings.',
+  collectionUnavailableLive: 'The collection could not be read.',
+  reloadCollection: 'Read the collection again',
+
+  notPersistentTitle: 'Data cannot be saved',
+  notPersistentBody:
+    'The browser does not allow this site to save data. You can mark cards, but the marks are lost when you close or reload the page. Check the browser’s privacy settings or open the page in a normal browsing window.',
+  notPersistentLive: 'Data cannot be saved.',
+
+  resetTitle: 'The old collection data could not be read',
+  resetBody:
+    'The saved collection data was corrupted, so the collection was started empty. A copy of the old data was kept in the browser, but the app cannot restore it yet.',
+  resetLive: 'The old collection data could not be read.',
+
+  resetNoBackupTitle: 'The old collection data could not be handled',
+  resetNoBackupBody:
+    'The saved collection data was corrupted and could not be copied. The old data has not been deleted, so new marks cannot be saved until the browser allows saving. Free up space by clearing browser data from other sites and reload the page.',
+  resetNoBackupLive: 'The old collection data could not be handled.',
+
+  repairedTitle: 'Some of the collection data was corrupted',
+  repairedBody: (dropped: number) =>
+    dropped === 1
+      ? 'One entry could not be read and was left out. The other entries are safe. Check your collection.'
+      : `${numberFormat.format(dropped)} entries could not be read and were left out. The other entries are safe. Check your collection.`,
+  repairedLive: 'Some of the collection data was corrupted.',
+
+  newerVersionTitle: 'The collection was saved by a newer version',
+  newerVersionBody:
+    'The data saved in the browser comes from a newer version of the app. The collection is not shown and cannot be edited, so that the data is not damaged. Reload the page. If this notice stays, close all tabs of this site and open it again. Do not clear the browser data, because the collection would be deleted.',
+  newerVersionLive: 'The collection was saved by a newer version.',
+
+  saveFailedTitle: 'The change could not be saved',
+  saveFailedQuotaBody:
+    'The browser storage is full, so the card count did not change. Free up space by clearing browser data from other sites and try again.',
+  saveFailedUnavailableBody:
+    'The browser blocked saving, so the card count did not change. Try again. If the problem continues, check the browser’s privacy settings.',
+  saveFailedOtherBody: 'Something went wrong, and the card count did not change. Try again.',
+  collectionFullTitle: 'The collection is full',
+  collectionFullBody: `The collection holds at most ${numberFormat.format(MAX_COLLECTION_ENTRIES)} distinct cards, so a new card cannot be added. You can remove cards you no longer need.`,
+
+  haveWantHeading: 'Have/Want',
+  haveWantIntro: 'Collect the cards you want here and see what you have to trade. Share the list as a trade link.',
+  wantHeading: 'Want',
+  wantIntro: 'Cards you want. Change the count with the plus and minus buttons.',
+  wantEmpty: 'Your want list has no cards yet. Search for a card by name below and add it.',
+  wantLoading: 'Loading your want list…',
+  wantUnavailable: 'The want list cannot be used right now. Reload the page.',
+  wantSearchHeading: 'Add cards to wants',
+  wantSearchLabel: 'Search by card name',
+  wantSearchPrompt: 'Type a card name and suggestions appear here.',
+  wantSearchNone: 'No cards match your search.',
+  wantSearchMore: (shown: number) => `Showing the first ${shown}. Narrow your search.`,
+  wantAdd: 'Add to wants',
+  wantAddLabel: 'Add to wants: ',
+  wantInList: (count: number) => `in wants: ${count}`,
+  haveHeading: 'Have',
+  haveIntro: 'Cards you own beyond a full playset. They are available for trade. Change counts on the Cards page.',
+  haveEmpty: 'You have no cards to trade yet. Copies beyond a full playset (3 copies, 1 for Legends) can be traded.',
+  haveLoading: 'Loading your collection…',
+  haveUnavailable: 'The collection cannot be read right now.',
+  haveRow: (tradeable: number) => `tradeable: ${tradeable}`,
+  haveOwnedRow: (owned: number) => `owned: ${owned}`,
+  tradeShareButton: 'Share collection and wants',
+  tradeShareNote: 'Whoever opens the link sees your whole collection and want list.',
+  tradeShareCopied: 'Trade link copied',
+  tradeShareCopyFailed: 'Copying failed. Copy the link from here:',
+  tradeShareLinkLabel: 'Trade link',
+  tradeShareTooBig: 'The collection is too big for a link',
+  tradeInvalidHeading: 'This link does not work',
+  tradeInvalid: 'The trade link is broken or too long. Ask the sender to share it again.',
+  tradeToCards: 'Go to the Cards page',
+  tradeHeading: 'Trade link',
+  tradeIntro: 'This is another player’s collection and want list when the link was made. Nothing is saved.',
+  tradeDropped: (count: number) =>
+    `${count === 1 ? '1 line' : `${count} lines`} in the link ${count === 1 ? 'was' : 'were'} invalid and left out.`,
+  tradeUnknown: (count: number) =>
+    `${count === 1 ? '1 card is' : `${count} cards are`} not in the app’s card data, so ${count === 1 ? 'it is' : 'they are'} not shown or compared.`,
+  tradeCompareHeading: 'Comparison with your collection',
+  tradeCompareUnavailable:
+    'Your collection or want list is not available, so the comparison cannot be shown. You can still see the sharer’s lists.',
+  tradeCompareLoading: 'Loading your collection.',
+  tradeCompareExplain: 'Only copies beyond a full playset (3 copies, 1 for Legends) can be traded.',
+  tradeIGiveHeading: 'You have, they want',
+  tradeTheyGiveHeading: 'They have, you want',
+  tradeNothing: 'No matches.',
+  tradeTheirHaveHeading: 'Their collection',
+  tradeTheirWantHeading: 'Their wants',
+  tradeEmptyList: 'The list is empty.',
+  tradeHaveRow: (owned: number, tradeable: number) =>
+    `${copies(owned)}, tradeable: ${tradeable > 0 ? copies(tradeable) : 'none'}`,
+  tradeWantRow: (count: number) => `wants ${copies(count)}`,
+  tradeCompareRow: (count: number) => copies(count),
+
+  footerUnofficial:
+    'Cyberdeck is an unofficial Cyberpunk TCG fan tool. It is not endorsed or supported by WeirdCo, Netdeck.gg or CD PROJEKT RED.',
+  footerSource: 'Card data: Netdeck.gg',
+};

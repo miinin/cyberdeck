@@ -1,3 +1,4 @@
+import { intlLocale } from '../locale';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { Card } from '../domain/card';
@@ -32,7 +33,7 @@ import { useDecks } from './useDecks';
 import { useWants } from './useWants';
 import type { WantsHandle } from './useWants';
 
-const dateFormat = new Intl.DateTimeFormat('fi-FI', { dateStyle: 'short', timeStyle: 'short' });
+const dateFormat = new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short', timeStyle: 'short' });
 
 function errorKind(error: unknown): StorageErrorKind | 'unknown' {
   return error instanceof StorageError ? error.kind : 'unknown';
@@ -41,9 +42,9 @@ function errorKind(error: unknown): StorageErrorKind | 'unknown' {
 function noticeText(notice: LoadNotice): string | null {
   switch (notice.kind) {
     case 'repaired':
-      return 'Osa tallennetuista pakoista oli vioittunut, ja ne jätettiin pois listasta.';
+      return deckTexts.decksRepairedNotice;
     case 'reset':
-      return 'Tallennettuja pakkoja ei voitu lukea. Ne on kopioitu varmuuskopioon, ja lista aloitettiin tyhjästä.';
+      return deckTexts.decksResetNotice;
     case 'newer-version':
       return deckTexts.actionFailed('newer-version');
     default:

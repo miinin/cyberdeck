@@ -4533,3 +4533,24 @@ button.legality:focus-visible {
 .have-want-results .have-want-owned {
   margin: 0;
 }
+
+/* Language switcher (T-068): the buttons reuse the theme toggle look; only the group needs layout. */
+.language-switch {
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+}
+
+.language-switch .theme-toggle {
+  margin-inline-start: 0;
+  padding-inline: var(--space-3);
+}
+
+/* T-068: Have/Want search looks like the catalog search; the Have section gets air above it. */
+.want-search {
+  max-width: 24rem;
+}
+
+section[aria-labelledby='have-heading'] {
+  margin-block-start: var(--space-6);
+}

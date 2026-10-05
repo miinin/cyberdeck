@@ -2,6 +2,7 @@ import type { Card } from './card';
 import type { CardsByKey } from './deckRules';
 import type { DeckContent } from './deck';
 import { UNSAFE_CHARACTERS } from './validate';
+import { currentDeckMessages } from './deckMessages';
 
 /**
  * Deck export (T-015, SR-19). Builds the file contents as strings: .json in the exchange format of
@@ -31,7 +32,7 @@ export function exportFileName(deckName: string, format: ExportFormat): string {
     // A name of only dots would be a relative path, and trailing dots are dropped by Windows.
     .replace(/^\.+|\.+$/g, '')
     .trim();
-  return `${cleaned === '' ? DEFAULT_EXPORT_FILE_NAME : cleaned}.${format}`;
+  return `${cleaned === '' ? currentDeckMessages().defaultExportFileName : cleaned}.${format}`;
 }
 
 /** The deck in the exchange format. Card names are written for readability only. */

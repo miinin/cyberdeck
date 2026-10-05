@@ -2,7 +2,9 @@ import type { CardKey } from './cardKey';
 import { MAX_DECK_CARD_COUNT, MAX_DECK_NAME_LENGTH } from './deck';
 import type { Deck, DeckContent, DeckSection } from './deck';
 import { cleanText } from './validate';
+import { currentDeckMessages } from './deckMessages';
 
+/** Finnish default; the UI language's name comes from currentDeckMessages() (T-068). */
 export const DEFAULT_DECK_NAME = 'Uusi pakka';
 
 /** A deck with the single unnamed main section (T-013 keeps Legends and the rest in it). */
@@ -11,7 +13,7 @@ export function emptyDeckContent(name: string): DeckContent {
 }
 
 /** "Uusi pakka", then "Uusi pakka 2", "Uusi pakka 3", … the first one not already used. */
-export function uniqueDeckName(existing: readonly string[], base: string = DEFAULT_DECK_NAME): string {
+export function uniqueDeckName(existing: readonly string[], base: string = currentDeckMessages().defaultDeckName): string {
   const used = new Set(existing);
   if (!used.has(base)) return base;
   for (let n = 2; ; n += 1) {

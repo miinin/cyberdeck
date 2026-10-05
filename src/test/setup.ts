@@ -1,6 +1,11 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 
+// The existing tests assert Finnish texts: the UI language is resolved when src/locale.ts is first
+// imported, which happens after this setup file runs (T-068). A Finnish browser leaves storage untouched.
+// Locale tests call resolveLocale() directly.
+Object.defineProperty(window.navigator, 'language', { value: 'fi-FI', configurable: true });
+
 // Tests must never load or call the real Firebase SDK (D-017 kohta 8, SR-27 kohta 4): the only module
 // that imports it throws instead. Account tests pass fake auth (src/account/memory.ts) or fake modules.
 vi.mock('../account/firebase/loadFirebase', () => ({
@@ -41,5 +46,4 @@ afterEach(() => {
   // The route lives in the URL hash (T-013).
   window.location.hash = '';
   // The theme lives on <html>, outside the rendered tree (T-025).
-  document.documentElement.removeAttribute('data-theme');
-});
+  document.documentElement.removeAttribute('data-theme');});
