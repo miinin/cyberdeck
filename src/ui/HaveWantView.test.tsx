@@ -123,3 +123,31 @@ describe('Have/Want section (T-065)', () => {
     }
   });
 });
+
+describe('Have/Want card grid (T-067)', () => {
+  it('shows the want and have cards as grids with a want counter and the owned count', async () => {
+    await renderView(
+      createMemoryRepositories({
+        initial: { ...stored('cyberdeck:wants', [['beta', 2]]), ...stored('cyberdeck:collection', [['alpha', 5]]) },
+      }),
+    );
+    const want = screen.getByRole('region', { name: 'Want' });
+    expect(within(want).getByRole('list', { name: 'Want' })).toHaveClass('card-grid');
+    expect(within(want).getByRole('button', { name: 'Lisää wantiin yksi kappale: Beta' })).toBeInTheDocument();
+    const have = screen.getByRole('region', { name: 'Have' });
+    expect(within(have).getByRole('list', { name: 'Have' })).toHaveClass('card-grid');
+    expect(within(have).getByText('omistettu 5', { exact: false })).toBeInTheDocument();
+  });
+
+  it('sorts both lists and changes the image size', async () => {
+    const user = userEvent.setup();
+    await renderView(createMemoryRepositories({ initial: stored('cyberdeck:wants', [['alpha', 1], ['beta', 1]]) }));
+    const want = screen.getByRole('region', { name: 'Want' });
+    const names = () => within(want).getAllByRole('heading', { level: 3 }).map((h) => h.textContent).filter((t) => t === 'Alpha' || t === 'Beta');
+    expect(names()).toEqual(['Alpha', 'Beta']);
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Suunta' }), 'desc');
+    expect(names()).toEqual(['Beta', 'Alpha']);
+    await user.click(screen.getByRole('radio', { name: 'Iso' }));
+    expect(document.querySelector('.have-want-results')).toHaveAttribute('data-image-size', 'large');
+  });
+});
