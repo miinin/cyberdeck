@@ -8,6 +8,10 @@ export const MAX_DECK_CARD_COUNT = 99; // count of one row, 1–99 (SR-11)
 export const MAX_DECK_DISTINCT_CARDS = 500; // rows in all sections together (SR-11)
 export const MAX_DECK_NAME_LENGTH = 100; // 1–100 after cleaning
 export const MAX_SECTIONS = 20;
+/** The section with this name is the sideboard (T-058). It is not part of the main deck rules or stats. */
+export const SIDEBOARD_SECTION_NAME = 'Sideboard';
+/** Tournament rule: a sideboard is optional, but when used it has exactly this many cards, no Legends. */
+export const SIDEBOARD_SIZE = 7;
 export const MAX_SECTION_NAME_LENGTH = 50; // 0–50; empty = unnamed main section
 
 export interface DeckCard {

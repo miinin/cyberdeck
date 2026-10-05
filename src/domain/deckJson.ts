@@ -1,6 +1,6 @@
 import type { Card } from './card';
 import type { CardKey } from './cardKey';
-import { MAX_DECK_CARD_COUNT } from './deck';
+import { MAX_DECK_CARD_COUNT, SIDEBOARD_SECTION_NAME } from './deck';
 import { DECK_FORMAT, DECK_FORMAT_VERSION } from './deckExport';
 import { MAX_UNRECOGNIZED_LENGTH } from './deckText';
 import type { ImportedRow, ParsedDeckText } from './deckText';
@@ -33,18 +33,27 @@ export function parseDeckJson(text: string, cards: readonly Card[]): ParseDeckJs
   if (content === null) return { ok: false, error: 'not-deck' };
 
   const byKey = new Map(cards.map((card) => [card.key, card]));
-  const totals = new Map<CardKey, number>();
-  for (const section of content.value.sections) {
-    for (const { card, count } of section.cards) {
-      totals.set(card, Math.min(MAX_DECK_CARD_COUNT, (totals.get(card) ?? 0) + count));
-    }
-  }
-  const rows: ImportedRow[] = [];
   const unrecognized: string[] = [];
-  for (const [key, count] of totals) {
-    const card = byKey.get(key);
-    if (card === undefined) unrecognized.push(Array.from(`${count} ${key}`).slice(0, MAX_UNRECOGNIZED_LENGTH).join(''));
-    else rows.push({ card, count });
-  }
-  return { ok: true, deck: { name: content.value.name, rows, unrecognized } };
+  const collect = (wantSideboard: boolean): ImportedRow[] => {
+    const totals = new Map<CardKey, number>();
+    for (const section of content.value.sections) {
+      if ((section.name === SIDEBOARD_SECTION_NAME) !== wantSideboard) continue;
+      for (const { card, count } of section.cards) {
+        totals.set(card, Math.min(MAX_DECK_CARD_COUNT, (totals.get(card) ?? 0) + count));
+      }
+    }
+    const rows: ImportedRow[] = [];
+    for (const [key, count] of totals) {
+      const card = byKey.get(key);
+      if (card === undefined) unrecognized.push(Array.from(`${count} ${key}`).slice(0, MAX_UNRECOGNIZED_LENGTH).join(''));
+      else rows.push({ card, count });
+    }
+    return rows;
+  };
+  const rows = collect(false);
+  const sideboard = collect(true);
+  return {
+    ok: true,
+    deck: { name: content.value.name, rows, unrecognized, ...(sideboard.length > 0 ? { sideboard } : {}) },
+  };
 }

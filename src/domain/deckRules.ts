@@ -1,5 +1,6 @@
 import type { Card } from './card';
 import type { CardKey } from './cardKey';
+import { SIDEBOARD_SECTION_NAME, SIDEBOARD_SIZE } from './deck';
 import type { DeckContent } from './deck';
 import { currentDeckMessages } from './deckMessages';
 
@@ -14,6 +15,9 @@ export type DeckIssueType =
   | 'legend-duplicate'
   | 'main-size'
   | 'copies'
+  | 'sideboard-size'
+  | 'sideboard-copies'
+  | 'sideboard-legend'
   | 'ram'
   | 'unknown-card';
 
@@ -33,13 +37,32 @@ export function toCardsByKey(cards: readonly Card[]): Map<CardKey, Card> {
   return new Map(cards.map((card) => [card.key, card]));
 }
 
-/** Copies of each card over all sections (a card may be in several sections). */
-export function deckCounts(deck: DeckContent): Map<CardKey, number> {
+function countSections(deck: DeckContent, wantSideboard: boolean | null): Map<CardKey, number> {
   const counts = new Map<CardKey, number>();
   for (const section of deck.sections) {
+    if (wantSideboard !== null && (section.name === SIDEBOARD_SECTION_NAME) !== wantSideboard) continue;
     for (const { card, count } of section.cards) counts.set(card, (counts.get(card) ?? 0) + count);
   }
   return counts;
+}
+
+/** Copies of each card over the main deck sections, without the sideboard (T-058). */
+export function deckCounts(deck: DeckContent): Map<CardKey, number> {
+  return countSections(deck, false);
+}
+
+/** Copies of each card in the sideboard (T-058). */
+export function sideboardCounts(deck: DeckContent): Map<CardKey, number> {
+  return countSections(deck, true);
+}
+
+/** Copies over the main deck and the sideboard together (collection comparison, copy limit). */
+export function allDeckCounts(deck: DeckContent): Map<CardKey, number> {
+  return countSections(deck, null);
+}
+
+export function sideboardSize(deck: DeckContent): number {
+  return [...sideboardCounts(deck).values()].reduce((sum, count) => sum + count, 0);
 }
 
 export interface DeckTotals {
@@ -136,6 +159,40 @@ export function validateDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckIss
       message: currentDeckMessages().copies(card.displayName, count, MAX_COPIES),
       cards: [key],
     });
+  }
+
+  const side = sideboardCounts(deck);
+  const sideSize = sideboardSize(deck);
+  if (sideSize > 0 && sideSize !== SIDEBOARD_SIZE) {
+    issues.push({
+      type: 'sideboard-size',
+      severity: 'error',
+      message: currentDeckMessages().sideboardSize(sideSize, SIDEBOARD_SIZE),
+      cards: [],
+    });
+  }
+  for (const [key, count] of side) {
+    const card = cardsByKey.get(key);
+    if (card === undefined) continue;
+    if (card.type === 'Legend') {
+      issues.push({
+        type: 'sideboard-legend',
+        severity: 'error',
+        message: currentDeckMessages().sideboardLegend(card.displayName),
+        cards: [key],
+      });
+      continue;
+    }
+    const mainCount = counts.get(key) ?? 0;
+    // Over the limit in the main deck alone is already reported by "copies".
+    if (mainCount <= MAX_COPIES && mainCount + count > MAX_COPIES) {
+      issues.push({
+        type: 'sideboard-copies',
+        severity: 'error',
+        message: currentDeckMessages().sideboardCopies(card.displayName, mainCount + count, MAX_COPIES),
+        cards: [key],
+      });
+    }
   }
 
   // Without a Legend there are no RAM limits to break; the Legend count issue already says so (B-020).

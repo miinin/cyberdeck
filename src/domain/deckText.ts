@@ -31,7 +31,7 @@ export interface ParsedDeckText {
   readonly rows: readonly ImportedRow[];
   /** Lines that were not understood, cut to 100 characters (shown as text only, SR-14). */
   readonly unrecognized: readonly string[];
-  /** Cards outside the deck (Netdeck sideboard, T-046). Reported but never saved. */
+  /** Sideboard cards (`// Sideboard` block, Netdeck sideboard T-046); saved as the sideboard section (T-058). */
   readonly sideboard?: readonly ImportedRow[];
   /** Where the list came from, when it was fetched from a link (T-046). */
   readonly source?: { readonly name: string; readonly author: string | null };
@@ -83,13 +83,20 @@ export function parseDeckText(text: string, cards: readonly Card[]): ParseDeckTe
 
   const find = createLookup(cards);
   const counts = new Map<CardKey, ImportedRow>();
+  const side = new Map<CardKey, ImportedRow>();
+  let inSideboard = false;
   const unrecognized: string[] = [];
   let rawName: string | null = null;
   let seenContent = false;
 
   for (const rawLine of lines) {
     const line = rawLine.replace(UNSAFE_CHARACTERS, '').trim();
-    if (line === '' || line.startsWith('//')) continue;
+    if (line === '') continue;
+    if (line.startsWith('//')) {
+      // A heading switches the zone: "// Sideboard" starts the sideboard, any other heading ends it (T-058).
+      inSideboard = /^\/\/\s*sideboard\b/i.test(line);
+      continue;
+    }
     seenContent = true;
     if (line.startsWith('# ') && rawName === null) {
       rawName = line.slice(2);
@@ -102,13 +109,16 @@ export function parseDeckText(text: string, cards: readonly Card[]): ParseDeckTe
       unrecognized.push(shortened(line));
       continue;
     }
-    const previous = counts.get(card.key);
-    const total = Math.min(MAX_DECK_CARD_COUNT, (previous?.count ?? 0) + count);
-    counts.set(card.key, { card, count: total });
+    const target = inSideboard ? side : counts;
+    const total = Math.min(MAX_DECK_CARD_COUNT, (target.get(card.key)?.count ?? 0) + count);
+    target.set(card.key, { card, count: total });
   }
 
   if (!seenContent) return { ok: false, error: 'empty' };
   const cleaned = rawName === null ? null : cleanText(rawName, 1, Number.MAX_SAFE_INTEGER);
   const name = cleaned === null ? null : Array.from(cleaned).slice(0, MAX_DECK_NAME_LENGTH).join('').trimEnd();
-  return { ok: true, deck: { name, rows: [...counts.values()], unrecognized } };
+  return {
+    ok: true,
+    deck: { name, rows: [...counts.values()], unrecognized, ...(side.size > 0 ? { sideboard: [...side.values()] } : {}) },
+  };
 }

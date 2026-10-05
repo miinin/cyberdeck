@@ -49,6 +49,7 @@ export function DeckList({
   onChange,
   onOpenImage,
   hoverProps,
+  onMoveToSideboard,
 }: {
   grouped: DeckGroups;
   view: DeckView;
@@ -60,6 +61,8 @@ export function DeckList({
   onChange: (card: Card, count: number) => void;
   onOpenImage: (card: Card) => void;
   hoverProps: (card: Card) => HoverPreviewProps;
+  /** Moves one copy to the sideboard (T-058). */
+  onMoveToSideboard?: (card: Card) => void;
 }) {
   const missingOf = (row: DeckRow) => {
     const have = ownedOf(row.card);
@@ -113,6 +116,16 @@ export function DeckList({
           {deckTexts.copies(count)}
         </span>
         <Stepper name={card.displayName} count={count} showCount={false} onChange={(next) => onChange(card, next)} />
+        {onMoveToSideboard !== undefined && (
+          <button
+            type="button"
+            className="link-button"
+            aria-label={deckTexts.moveToSideboard(card.displayName)}
+            onClick={() => onMoveToSideboard(card)}
+          >
+            →S
+          </button>
+        )}
       </li>
     );
   };

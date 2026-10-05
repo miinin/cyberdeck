@@ -15,7 +15,7 @@ const BASE64URL = /^[A-Za-z0-9_-]+$/;
 export function encodeDeckShare(deck: DeckContent, cardsByKey: CardsByKey): string {
   const text = deckToText(deck, cardsByKey)
     .split('\n')
-    .filter((line) => line !== '' && !line.startsWith('//'))
+    .filter((line) => line !== '' && (!line.startsWith('//') || line.startsWith('// Sideboard')))
     .join('\n');
   const bytes = new TextEncoder().encode(text);
   let binary = '';
