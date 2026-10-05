@@ -36,4 +36,14 @@ describe('Add to sideboard from the picker', () => {
     expect(screen.getByRole('heading', { name: 'Sideboard (0/7)' })).toBeInTheDocument();
     expect(screen.getByText('Legend-korttia ei voi laittaa sideboardiin.')).toBeInTheDocument();
   }, 20000);
+
+  it('labels the sideboard stepper as the sideboard and announces a move to the main deck', async () => {
+    await openEditor([['u3', 1]]);
+    fireEvent.click(within(table()).getByRole('button', { name: 'Lisää sideboardiin: Unit 3' }));
+    expect(screen.getByRole('button', { name: 'Poista sideboardista: Unit 3' })).toBeInTheDocument();
+    expect(screen.getByText('Sideboardissa 1')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Siirrä pääpakkaan/ }));
+    expect(screen.getByText('Unit 3 siirretty pääpakkaan.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sideboard (0/7)' })).toHaveFocus();
+  }, 20000);
 });

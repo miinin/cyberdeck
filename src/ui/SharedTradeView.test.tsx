@@ -131,7 +131,7 @@ describe('Share trade button', () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
     const url = String(writeText.mock.calls[0]?.[0]);
     expect(url).toMatch(/#\/vaihto\/[A-Za-z0-9_-]+$/);
-    expect(screen.getByText('Linkki kopioitu leikepöydälle')).toBeInTheDocument();
+    expect(screen.getByText('Linkki kopioitu leikepöydälle.')).toBeInTheDocument();
     expect(screen.getByLabelText('Vaihtolinkki')).toHaveValue(url);
     await act(async () => {
       window.location.hash = url.slice(url.indexOf('#'));

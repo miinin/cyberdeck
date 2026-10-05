@@ -320,6 +320,8 @@ export function DeckEditor({
     }, CHANGE_ANNOUNCE_MS);
   };
 
+  const sideHeadingRef = useRef<HTMLHeadingElement>(null);
+
   const setSideCount = (card: Card, count: number) => {
     const base = contentRef.current;
     const side = sideboardCounts(base).get(card.key) ?? 0;
@@ -361,6 +363,9 @@ export function DeckEditor({
     if ((toSideboard ? main : side) === 0) return;
     const delta = toSideboard ? 1 : -1;
     schedule(withSideboardCount(withDeckCount(base, card.key, main - delta), card.key, side + delta));
+    setChangeText(toSideboard ? deckTexts.movedToSideboard(card.displayName) : deckTexts.movedToMain(card.displayName));
+    // The row leaves the sideboard: keep focus on its heading instead of losing it (WCAG 2.4.3).
+    if (!toSideboard && side === 1) sideHeadingRef.current?.focus();
   };
 
   const openImage = (card: Card) => {
@@ -808,6 +813,7 @@ export function DeckEditor({
             size={sideboardSize(content)}
             onChange={setSideCount}
             onMoveToMain={(card) => moveCopy(card, false)}
+            headingRef={sideHeadingRef}
             hoverProps={preview.bind}
           />
           {grouped.unknown.length > 0 && (

@@ -29,10 +29,17 @@ export function ShareTradeButton({ have, want }: { have: Collection; want: WantL
         {texts.tradeShareButton}
       </button>{' '}
       <span className="hint">{texts.tradeShareNote}</span>
-      {state === 'too-big' && <p role="alert">{texts.tradeShareTooBig}</p>}
+      <p role="status">
+        {state === 'too-big'
+          ? texts.tradeShareTooBig
+          : state === 'copied'
+            ? texts.tradeShareCopied
+            : state === 'failed'
+              ? texts.tradeShareCopyFailed
+              : ''}
+      </p>
       {(state === 'copied' || state === 'failed') && (
-        <p role="status">
-          {state === 'copied' ? texts.tradeShareCopied : texts.tradeShareCopyFailed}
+        <p>
           <input
             type="text"
             readOnly
