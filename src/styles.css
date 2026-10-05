@@ -1462,11 +1462,12 @@ body:has(dialog[open]) {
 
 .card-collection {
   display: flex;
-  margin-left: auto;
+  justify-content: center;
+  margin-inline: auto;
 }
 
 .card-collection .count-control {
-  justify-content: flex-end;
+  justify-content: center;
   flex-wrap: wrap;
   min-width: 0;
 }
@@ -2583,19 +2584,36 @@ h3,
   gap: var(--space-2);
   min-height: 2rem;
   padding: 0 var(--space-2) 0 var(--space-3);
-  border: 1px solid var(--color-info);
+  border: 0;
   border-radius: 0;
-  background: var(--color-selected-surface);
+  /* Edge colour; ::before is the fill, so the cut corner keeps an edge like the buttons (T-071). */
+  background: var(--color-info);
   color: var(--color-text);
   font: inherit;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 0.4rem), calc(100% - 0.4rem) 100%, 0 100%);
+  position: relative;
+  isolation: isolate;
+  --cut: 0.5rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  clip-path: var(--shape-chamfer);
+}
+
+.filter-chip::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--color-selected-surface);
+  clip-path: var(--shape-chamfer-inner);
+}
+
+.filter-chip:hover::before {
+  background: var(--color-surface-hover);
 }
 
 .filter-chip:hover {
-  background: var(--color-surface-hover);
   text-decoration: underline;
 }
 
