@@ -35,6 +35,8 @@ import type { ActiveFilter } from './ActiveFilters';
 import { WIDE_QUERY } from './useMediaQuery';
 import type { OwnedColumn } from './CardList';
 import { CollectionNotices, loadNotices } from './CollectionNotices';
+import { CountControl } from './CountControl';
+import { tradeableCount } from '../domain/tradeCompare';
 import { countIn } from './collectionStore';
 import type { CollectionSnapshot } from './collectionStore';
 import { StorageReminder, persistenceResultText } from './StorageReminder';
@@ -58,8 +60,8 @@ const COLLECTION_FILTER_LABELS = {
   owned: texts.collectionOwned,
   missing: texts.collectionMissing,
 } as const;
+const NO_DECKS: readonly { id: string; name: string }[] = [];
 const NO_KEYS: ReadonlySet<CardKey> = new Set();
-const NO_NAMES: readonly string[] = [];
 
 /** Summary of the whole collection, counted only from cards in the loaded list (UX.md 6.5, A3). */
 function collectionSummary(snapshot: CollectionSnapshot, cards: readonly Card[]): string {
@@ -99,15 +101,17 @@ export function CatalogView({
   // Which decks each card is in (T-013). Decks that cannot be read just leave the mention out.
   const { phase: decksPhase, decks } = useDecks(repositories.decks);
   const decksByCard = useMemo(() => {
-    const byCard = new Map<CardKey, string[]>();
+    const byCard = new Map<CardKey, { id: string; name: string }[]>();
     for (const deck of decks) {
       for (const key of new Set(deck.sections.flatMap((section) => section.cards.map((row) => row.card)))) {
-        byCard.set(key, [...(byCard.get(key) ?? []), deck.name]);
+        byCard.set(key, [...(byCard.get(key) ?? []), { id: deck.id, name: deck.name }]);
       }
     }
     return byCard;
   }, [decks]);
-  const decksOf = decksPhase === 'ready' ? (card: Card) => decksByCard.get(card.key) ?? NO_NAMES : undefined;
+  const decksOf = decksPhase === 'ready'
+      ? (card: Card) => (decksByCard.get(card.key) ?? NO_DECKS).map((deck) => deck.name)
+      : undefined;
   const [persistence, setPersistence] = useState<PersistenceState>('idle');
   const persistenceResultRef = useRef<HTMLParagraphElement>(null);
   /** Set by the button: the result paragraph takes focus once it is rendered. */
@@ -293,6 +297,63 @@ export function CatalogView({
   const noResults = filtered.length === 0;
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
   const noOwnedCards = noResults && listedOnly && !isFilterActive(criteria);
+
+  // T-070: the card detail panel in the image dialog; counters only once their stores are ready.
+  const details =
+    openCard === null ? undefined : (
+      <>
+        {collection.phase === 'ready' && (
+          <section aria-labelledby="card-detail-collection">
+            <h3 id="card-detail-collection">{texts.detailCollection}</h3>
+            <CountControl
+              card={openCard}
+              count={countIn(collection, openCard.key)}
+              mode="ready"
+              onChange={(card, count) => collectionStore.setCount(card.key, count)}
+              onLimit={collectionAnnouncer.announceLimit}
+              editable={editable}
+            />
+            {countIn(collection, openCard.key) < playsetSize(openCard) && (
+              <p>{texts.detailPlaysetMissing(playsetSize(openCard) - countIn(collection, openCard.key))}</p>
+            )}
+            {countIn(collection, openCard.key) >= playsetSize(openCard) && <p>{texts.playsetFull}</p>}
+          </section>
+        )}
+        {wants.snapshot.phase === 'ready' && (
+          <section aria-labelledby="card-detail-want">
+            <h3 id="card-detail-want">{texts.detailWant}</h3>
+            <CountControl
+              card={openCard}
+              count={countIn(wants.snapshot, openCard.key)}
+              mode="ready"
+              onChange={(card, count) => wants.store.setCount(card.key, count)}
+              onLimit={() => undefined}
+              editable
+              kind="want"
+            />
+            {collection.phase === 'ready' && tradeableCount(countIn(collection, openCard.key), openCard) > 0 && (
+              <p>{texts.detailTradeable(tradeableCount(countIn(collection, openCard.key), openCard))}</p>
+            )}
+          </section>
+        )}
+        {decksPhase === 'ready' && (
+          <section aria-labelledby="card-detail-decks">
+            <h3 id="card-detail-decks">{texts.detailDecks}</h3>
+            {(decksByCard.get(openCard.key) ?? NO_DECKS).length === 0 ? (
+              <p>{texts.detailNoDecks}</p>
+            ) : (
+              <ul>
+                {(decksByCard.get(openCard.key) ?? NO_DECKS).map((deck) => (
+                  <li key={deck.id}>
+                    <a href={`#/pakat/${deck.id}`}>{deck.name}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+      </>
+    );
 
   const handleOpenImage = (card: Card, opener: HTMLButtonElement) => {
     preview.hide();
@@ -484,7 +545,7 @@ export function CatalogView({
       </div>
 
       {view === 'table' && preview.preview}
-      <CardImageDialog card={openCard} onClose={handleCloseImage} />
+      <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} />
     </>
   );
 }

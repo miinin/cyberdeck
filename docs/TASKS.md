@@ -74,3 +74,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-067 | Have/Want kuvaruudukkona, järjestys ja kuvakoko | 1 | Must | PM | Done | – |
 | T-068 | Englanninkielinen käyttöliittymä, FI/EN-valitsin (D-019) | 1 | Must | PM | Done | – |
 | T-069 | Järjestysvalitsimen hillitty fokustyyli | 1 | Must | PM | Done | – |
+| T-070 | Kortin klikkaus avaa tietonäkymän: kokoelma, want ja pakat | 1 | Must | PM | Done | – |

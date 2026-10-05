@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
@@ -10,7 +11,16 @@ import { texts } from './texts';
  * The enlarged card image in a native modal dialog (T-027 UX). Esc, the "×" button and a click on the
  * backdrop close it; every way ends in the dialog's close event, which calls `onClose`.
  */
-export function CardImageDialog({ card, onClose }: { card: Card | null; onClose: () => void }) {
+export function CardImageDialog({
+  card,
+  onClose,
+  details,
+}: {
+  card: Card | null;
+  onClose: () => void;
+  /** Optional detail panel (T-070): collection, want and decks, shown beside the image. */
+  details?: ReactNode;
+}) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [failedKey, setFailedKey] = useState<CardKey | null>(null);
 
@@ -27,7 +37,7 @@ export function CardImageDialog({ card, onClose }: { card: Card | null; onClose:
   return (
     <dialog
       ref={dialogRef}
-      className="card-dialog"
+      className={details === undefined ? 'card-dialog' : 'card-dialog has-details'}
       aria-labelledby="card-dialog-title"
       onClose={onClose}
       // The dialog has no padding, so a click on the dialog element itself is a click on the backdrop.
@@ -45,6 +55,7 @@ export function CardImageDialog({ card, onClose }: { card: Card | null; onClose:
               {texts.closeSymbol}
             </button>
           </div>
+          <div className="card-dialog-content">
           {image !== null && failedKey !== card.key ? (
             <img
               className="card-dialog-image"
@@ -59,6 +70,8 @@ export function CardImageDialog({ card, onClose }: { card: Card | null; onClose:
           ) : (
             <p role="alert">{texts.imageLoadError}</p>
           )}
+            {details !== undefined && <div className="card-dialog-details">{details}</div>}
+          </div>
         </div>
       )}
     </dialog>
