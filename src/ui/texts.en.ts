@@ -190,6 +190,10 @@ export const textsEn: typeof textsFi = {
   tableRegionLabel: (caption: string) => `${caption}, table`,
 
   collectionLegend: 'Collection',
+  setLegend: 'Set / version',
+  setAll: 'All sets',
+  setChip: (label: string) => `Set: ${label}`,
+  versionsSummary: (parts: string) => `Recorded versions: ${parts}`,
   collectionAll: 'All',
   collectionOwned: 'Owned',
   collectionMissing: 'Missing',

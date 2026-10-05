@@ -211,6 +211,10 @@ export const textsFi = {
   tableRegionLabel: (caption: string) => `${caption}, taulukko`,
 
   collectionLegend: 'Kokoelma',
+  setLegend: 'Setti / versio',
+  setAll: 'Kaikki setit',
+  setChip: (label: string) => `Setti: ${label}`,
+  versionsSummary: (parts: string) => `Kirjatut versiot: ${parts}`,
   collectionAll: 'Kaikki',
   collectionOwned: 'Omistetut',
   collectionMissing: 'Puuttuvat',

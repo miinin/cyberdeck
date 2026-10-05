@@ -47,14 +47,18 @@ function kebab(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-/** "Embracing Power — Retail Starter Deck" -> "embracing-power-starter-deck", "Pre-Release Beta" -> "pre-release". */
-export function setFamily(setName: string): string {
-  const name = setName
+/** Readable name of the set family: "Embracing Power — Retail Starter Deck" -> "Embracing Power Starter Deck". */
+export function setFamilyName(setName: string): string {
+  return setName
     .replace(/\s+—\s+FR$/, '')
     .replace(/\s+—\s+(Retail|Beta)\s+(Starter Deck)$/, ' $2')
     .replace(/\s+—\s+(Retail|Beta)$/, '')
     .replace(/\s+(Retail|Beta)$/, '');
-  return kebab(name);
+}
+
+/** "Embracing Power — Retail Starter Deck" -> "embracing-power-starter-deck", "Pre-Release Beta" -> "pre-release". */
+export function setFamily(setName: string): string {
+  return kebab(setFamilyName(setName));
 }
 
 export function imageKeyOf(cardSlug: string, setName: string, number: string): string {
