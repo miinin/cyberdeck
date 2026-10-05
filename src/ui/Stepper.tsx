@@ -7,6 +7,8 @@ export function Stepper({
   count,
   onChange,
   addLabel,
+  removeLabel,
+  countLabel,
   describedBy,
   showCount = true,
   shortcuts = false,
@@ -15,6 +17,9 @@ export function Stepper({
   count: number;
   onChange: (count: number) => void;
   addLabel?: string;
+  removeLabel?: string;
+  /** Spoken count, e.g. "Sideboardissa 2"; defaults to the deck wording. */
+  countLabel?: string;
   /** Id of a visible text that explains why adding breaks a rule. */
   describedBy?: string;
   /** False when the count is shown elsewhere (deck rows): only the spoken count stays. */
@@ -28,7 +33,7 @@ export function Stepper({
         type="button"
         className="step step-minus"
         aria-disabled={count === 0 ? 'true' : undefined}
-        aria-label={deckTexts.removeCard(name)}
+        aria-label={removeLabel ?? deckTexts.removeCard(name)}
         aria-keyshortcuts={shortcuts ? '-' : undefined}
         onClick={() => count > 0 && onChange(count - 1)}
       >
@@ -36,7 +41,7 @@ export function Stepper({
       </button>
       <span className={showCount ? 'deck-card-count' : 'deck-card-count-spoken'}>
         {showCount && <span aria-hidden="true">{count}</span>}
-        <span className="visually-hidden">{deckTexts.inDeck(count)}</span>
+        <span className="visually-hidden">{countLabel ?? deckTexts.inDeck(count)}</span>
       </span>
       <button
         type="button"

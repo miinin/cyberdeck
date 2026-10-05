@@ -3,6 +3,7 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf, minCountOf } from '../domain/collection';
+import { hasSetPrinting, ownsSetVersion, setOptions, versionsBySet } from '../domain/setFilter';
 import type { MissingRow } from '../domain/wants';
 import { StorageError, isStoragePersisted, requestPersistentStorage } from '../storage';
 import type { CatalogViewMode, Repositories } from '../storage';
@@ -96,6 +97,7 @@ export function CatalogView({
   const collectionAllRef = useRef<HTMLInputElement>(null);
   const [collectionChoice, setCollectionFilter] = useState<CollectionFilter>('all');
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
+  const [setChoice, setSetChoice] = useState<string | null>(null);
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
   const wants = useWants(repositories.wants);
@@ -173,17 +175,26 @@ export function CatalogView({
   }
   const collectionFilter: CollectionFilter = collection.phase === 'ready' ? collectionChoice : 'all';
   const listedOnly = collectionFilter === 'owned';
-  const visibleCards = (next: CardFilterCriteria, nextFilter: CollectionFilter, nextKept: ReadonlySet<CardKey>) => {
-    const matching = filterCards(allCards, next);
+  const visibleCards = (
+    next: CardFilterCriteria,
+    nextFilter: CollectionFilter,
+    nextKept: ReadonlySet<CardKey>,
+    family: string | null = setChoice,
+  ) => {
+    const matching = filterCards(allCards, next).filter((card) => family === null || hasSetPrinting(card, family));
     if (nextFilter === 'all') return matching;
     return matching.filter((card) => {
       if (nextKept.has(card.key)) return true;
       const count = countIn(collection, card.key);
-      return nextFilter === 'owned' ? count > 0 : count < playsetSize(card);
+      if (nextFilter === 'owned') {
+        // T-074: with a set chosen, "Omistetut" means a recorded version from that set.
+        return family === null || collection.phase !== 'ready' ? count > 0 : ownsSetVersion(card, family, collection.saved);
+      }
+      return count < playsetSize(card);
     });
   };
-  const isActive = (next: CardFilterCriteria, nextFilter: CollectionFilter) =>
-    isFilterActive(next) || nextFilter !== 'all';
+  const isActive = (next: CardFilterCriteria, nextFilter: CollectionFilter, family: string | null = setChoice) =>
+    isFilterActive(next) || nextFilter !== 'all' || family !== null;
 
   const filtered = visibleCards(criteria, collectionFilter, kept);
   // T-060: the grid follows the shared order; the table sorts the same way itself (header buttons).
@@ -267,7 +278,21 @@ export function CatalogView({
   const updateCriteria = (next: CardFilterCriteria, when: 'later' | 'now' | 'never') =>
     updateFilters(next, collectionFilter, when);
 
+  const handleSetChange = (family: string | null) => {
+    setSetChoice(family);
+    setKept(NO_KEYS);
+    announcer.announceNow(
+      describeResult(
+        isActive(criteria, collectionFilter, family),
+        visibleCards(criteria, collectionFilter, NO_KEYS, family).length,
+        allCards.length,
+      ),
+      true,
+    );
+  };
+
   const handleClearFilters = () => {
+    setSetChoice(null);
     updateFilters(EMPTY_CRITERIA, 'all', 'now', true);
     // The button disappears with the empty result; the search field is the natural next step (UX.md 5.7).
     searchInputRef.current?.focus();
@@ -293,6 +318,12 @@ export function CatalogView({
       : collection.phase === 'ready'
         ? collectionSummary(collection, allCards)
         : null;
+
+  const setList = useMemo(() => setOptions(allCards), [allCards]);
+  const setLabels = new Map(setList.map((option) => [option.family, option.label]));
+  const versionRows = collection.phase === 'ready' ? versionsBySet(allCards, collection.saved) : [];
+  const versionsText =
+    versionRows.length === 0 ? null : texts.versionsSummary(versionRows.map((r) => `${r.label}: ${r.count}`).join(' · '));
 
   const status = filterActive ? texts.filteredStatus(filtered.length, allCards.length) : cardCount(allCards.length);
   const listCaption = filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
@@ -402,6 +433,15 @@ export function CatalogView({
             onRemove: () => updateFilters(criteria, 'all', 'later'),
           },
         ]),
+    ...(setChoice === null
+      ? []
+      : [
+          {
+            id: 'set',
+            label: texts.setChip(setLabels.get(setChoice) ?? setChoice),
+            onRemove: () => handleSetChange(null),
+          },
+        ]),
     ...criteriaFilters(criteria, (next) => updateCriteria(next, 'later')),
   ];
 
@@ -415,6 +455,11 @@ export function CatalogView({
           <p id="card-status" className="status-line">
             {status}
           </p>
+          {versionsText !== null && (
+            <p id="versions-summary" className="status-line is-summary">
+              {versionsText}
+            </p>
+          )}
           {summary !== null && (
             <p id="collection-summary" className="status-line is-summary">
               {summary}
@@ -460,6 +505,9 @@ export function CatalogView({
           </h2>
           <CardFilters
             criteria={criteria}
+            setOptions={setList}
+            setFamily={setChoice}
+            onSetChange={handleSetChange}
             typeOptions={filterOptions(
               KNOWN_CARD_TYPES,
               allCards.map((card) => card.type),

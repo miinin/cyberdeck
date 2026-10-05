@@ -50,6 +50,7 @@ export function DeckList({
   onOpenImage,
   hoverProps,
   onMoveToSideboard,
+  onAddToSideboard,
 }: {
   grouped: DeckGroups;
   view: DeckView;
@@ -63,6 +64,8 @@ export function DeckList({
   hoverProps: (card: Card) => HoverPreviewProps;
   /** Moves one copy to the sideboard (T-058). */
   onMoveToSideboard?: (card: Card) => void;
+  /** Stacks view: add a copy to the sideboard straight from the stack (T-074). */
+  onAddToSideboard?: (card: Card) => void;
 }) {
   const missingOf = (row: DeckRow) => {
     const have = ownedOf(row.card);
@@ -152,6 +155,16 @@ export function DeckList({
             {deckTexts.copies(count)}
           </span>
         </button>
+        {onAddToSideboard !== undefined && (
+          <button
+            type="button"
+            className="link-button"
+            aria-label={deckTexts.addToSideboard(card.displayName)}
+            onClick={() => onAddToSideboard(card)}
+          >
+            +S
+          </button>
+        )}
       </li>
     );
   };

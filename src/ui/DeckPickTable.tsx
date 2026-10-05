@@ -43,6 +43,7 @@ export function DeckPickTable({
   countOf,
   blockerOf,
   onChange,
+  onAddToSideboard,
   onOpenImage,
   clickAdds,
   hoverProps,
@@ -51,6 +52,7 @@ export function DeckPickTable({
   countOf: (card: Card) => number;
   blockerOf: (card: Card) => PickBlocker | null;
   onChange: (card: Card, count: number) => void;
+  onAddToSideboard?: (card: Card) => void;
   onOpenImage: (card: Card) => void;
   clickAdds: boolean;
   hoverProps: (card: Card) => HoverPreviewProps;
@@ -142,6 +144,18 @@ export function DeckPickTable({
                   describedBy={blocker !== null ? hintId : undefined}
                   shortcuts
                 />
+                {onAddToSideboard !== undefined && (
+                  <button
+                    type="button"
+                    className="link-button"
+                    aria-label={deckTexts.addToSideboard(card.displayName)}
+                    onClick={() => {
+                    onAddToSideboard(card);
+                  }}
+                  >
+                    +S
+                  </button>
+                )}
                 {blocker !== null && (
                   <>
                     <span className="pick-blocked" aria-hidden="true" title={blocker.reason}>
