@@ -79,3 +79,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-072 | Korttien painokset kokoelmaan (D-020): versiot kortin tietonäkymässä, painosdata, kuvien tuonti | 1 | Must | PM | Review (dev) | Digiturva ✓ |
 | T-074 | Sideboard hakulistasta ja Pinoista, setti/versio-suodatin ja yhteenveto, UX-katselmoinnin korjaukset (M1–M5, M11) | 1 | Must | PM | Review (dev) | UX ✓ |
 | T-075 | Pakka-analyysi: korttiryhmän todennäköisyys vuoroittain, korvaajaehdotus puuttuville korteille | 1 | Should | PM | Review (dev) | – |
+| T-076 | Viralliset versiokuvat (82 kpl, Iconic ja Nova Rare) kortin tietonäkymään, kuva-avain kortti×harvinaisuus | 1 | Must | PM | Review (dev) | – |
