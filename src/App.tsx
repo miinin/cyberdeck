@@ -90,6 +90,7 @@ export function App({
               {deckTexts.navHaveWant}
             </a>
           </nav>
+          <div className="header-tools">
           <ThemeToggle preferences={openRepositories.preferences} />
           <LanguageSwitch />
           <AccountMenu
@@ -98,6 +99,7 @@ export function App({
             onSignedOut={() => setNotice('signed-out')}
             onAccountDeleted={() => setNotice('deleted')}
           />
+          </div>
         </div>
       </header>
       {notice !== null && uid === null && (

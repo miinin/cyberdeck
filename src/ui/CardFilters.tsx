@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RaritySymbol } from './RaritySymbol';
 import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
 import type { CardFilterCriteria, NumberFilterGroup } from '../domain/cardSearch';
 import { NUMBER_GROUPS } from './ActiveFilters';
@@ -236,7 +237,7 @@ export function CardFilters({
 
           <fieldset aria-describedby="filter-hint">
             <legend>{texts.rarityLegend}</legend>
-            <div className="options options-even">
+            <div className="options options-even options-rarity">
               {rarityOptions.map((rarity) => (
                 <label key={rarity} className="option">
                   <input
@@ -246,7 +247,7 @@ export function CardFilters({
                     checked={criteria.rarities.includes(rarity)}
                     onChange={() => onToggleRarity(rarity)}
                   />{' '}
-                  <span lang="en">{rarity}</span>
+                  <RaritySymbol rarity={rarity} showName size={14} />
                 </label>
               ))}
             </div>

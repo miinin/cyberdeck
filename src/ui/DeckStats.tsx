@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import { RaritySymbol } from './RaritySymbol';
 import type { DeckContent } from '../domain/deck';
 import type { MissingCard } from '../domain/deckExport';
 import { GroupOdds } from './GroupOdds';
@@ -216,7 +217,7 @@ export function DeckStats({
                   deckTexts.raritiesShare(deckTexts.rarityUnknown, count)
                 ) : (
                   <>
-                    <span lang="en">{rarity}</span> {count}
+                    <RaritySymbol rarity={rarity} showName /> {count}
                   </>
                 )}
               </span>

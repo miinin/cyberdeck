@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { RaritySymbol } from './RaritySymbol';
 import { playsetSize } from '../domain/card';
 import { officialRarity } from '../domain/cardSearch';
 import type { Card } from '../domain/card';
@@ -116,7 +117,7 @@ export function CardList({
         <li key={art === null ? card.id : art.artId} className={'card-box card-box--art ' + state}>
           {art === null && artCount > 1 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
           <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} />
-          {items !== undefined && art !== null && <p className="art-label">{art.rarity === null ? texts.artBase : officialRarity(art.rarity)}</p>}
+          {items !== undefined && art !== null && <p className="art-label">{art.rarity === null ? texts.artBase : <RaritySymbol rarity={art.rarity} showName />}</p>}
           <div className="card-head">
             <dl className="card-cost">
               <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
@@ -149,11 +150,13 @@ export function CardList({
               <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip" />
               <Stat
                 label={texts.columnRarity}
-                value={card.rarity === null ? null : officialRarity(card.rarity)}
+                value={null}
                 missing={texts.noRarity}
                 className="card-rarity"
                 hideLabel
-              />
+              >
+                {card.rarity === null ? undefined : <RaritySymbol rarity={card.rarity} size={18} />}
+              </Stat>
             </dl>
           </div>
           <div className="card-foot">

@@ -1,4 +1,5 @@
 import { MAX_COLLECTION_COUNT } from '../domain/collection';
+import { RaritySymbol } from './RaritySymbol';
 import type { Card } from '../domain/card';
 import { officialRarity } from '../domain/cardSearch';
 import { artsOf, ownedPerArt } from '../domain/arts';
@@ -100,7 +101,7 @@ export function CardVersions({
               ) : (
                 picture
               )}
-              <span className="art-name">{name}</span>
+              <span className="art-name">{art.rarity === null ? name : <RaritySymbol rarity={art.rarity} showName />}</span>
               <span className="art-sets">
                 {setLines(art.printings).map((line) => (
                   <span key={line} className="art-set">{line}</span>
