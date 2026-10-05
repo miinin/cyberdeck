@@ -85,3 +85,14 @@ export function deckToText(deck: DeckContent, cardsByKey: CardsByKey): string {
   if (main.length > 0) lines.push(`// Main deck (${mainCount})`, ...main);
   return `${lines.join('\n')}\n`;
 }
+
+/** One card the collection lacks for a deck (T-061). */
+export interface MissingCard {
+  card: Card;
+  missing: number;
+}
+
+/** Missing copies as a deck list ("2 Name - Subname" per line), so it can be imported later (T-061). */
+export function missingToText(rows: readonly MissingCard[]): string {
+  return rows.map(({ card, missing }) => `${missing} ${singleLine(listName(card))}`).join('\n') + '\n';
+}
