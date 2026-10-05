@@ -182,3 +182,68 @@ describe('CardVersions with the bundled cards', () => {
     expect(within(at(tiles, 0)).queryByText('Perus')).toBeNull();
   });
 });
+
+describe('CardVersions: Retail and Beta rows on the base tile (D-022)', () => {
+  const wRetail = printing('welcometonightcityretail', 'Welcome to Night City — Retail', '005a');
+  const wBeta = printing('welcometonightcitybeta', 'Welcome to Night City — Beta', 'β005a');
+  const wBetaB = printing('welcometonightcitybeta', 'Welcome to Night City — Beta', 'β005b');
+  const wFrench = printing('welcometonightcityretail-fr', 'Welcome to Night City — Retail — FR', '005a', 'fr');
+  const wCard: Card = { ...card, printings: [wRetail, wBeta, wBetaB, wFrench] };
+  const tile = () => at(screen.getAllByRole('listitem').filter((li) => li.classList.contains('art-tile')), 0);
+
+  function setupW(counts: Record<string, number>, total: number, props: Partial<Parameters<typeof CardVersions>[0]> = {}) {
+    const onChange = vi.fn();
+    render(
+      <CardVersions
+        card={wCard}
+        count={total}
+        versionCount={(key) => counts[key] ?? 0}
+        editable
+        onChange={onChange}
+        onLimit={vi.fn()}
+        baseImage="/base.webp"
+        imageUrl={() => null}
+        {...props}
+      />,
+    );
+    return { onChange };
+  }
+
+  it('shows a Retail and a Beta counter on the tile, the other printings in the breakdown', async () => {
+    const user = userEvent.setup();
+    const { onChange } = setupW({ [wRetail.key]: 1, [wBeta.key]: 2 }, 3);
+    const rows = Array.from(tile().querySelectorAll('.edition-row'));
+    expect(rows.map((r) => r.querySelector('.edition-label')?.textContent)).toEqual(['Retail', 'Beta']);
+    await user.click(within(at(rows, 1) as HTMLElement).getByRole('button', { name: /Lisää yksi kappale/ }));
+    expect(onChange).toHaveBeenCalledWith(wBeta.key, 3);
+    await user.click(within(at(rows, 0) as HTMLElement).getByRole('button', { name: /Vähennä yksi kappale/ }));
+    expect(onChange).toHaveBeenCalledWith(wRetail.key, 0);
+
+    const breakdown = tile().querySelector('.art-breakdown') as HTMLElement;
+    expect(breakdown.querySelectorAll('.version-row')).toHaveLength(2);
+    expect(breakdown.textContent).toContain('β005b');
+    expect(breakdown.textContent).toContain('FR');
+  });
+
+  it('browsing shows the amounts without buttons, and says how many copies have no edition', () => {
+    setupW({ [wRetail.key]: 1, [wBeta.key]: 1 }, 4, { editable: false });
+    expect(tile().querySelectorAll('.edition-row button')).toHaveLength(0);
+    expect(tile().querySelector('.edition-unknown')).toHaveTextContent('Painos tuntematon: 2');
+  });
+
+  it('keeps the old single counter for a card without a Welcome to Night City printing', () => {
+    render(
+      <CardVersions
+        card={card}
+        count={1}
+        versionCount={() => 0}
+        editable
+        onChange={vi.fn()}
+        onLimit={vi.fn()}
+        baseImage="/base.webp"
+        imageUrl={() => null}
+      />,
+    );
+    expect(document.querySelector('.edition-row')).toBeNull();
+  });
+});

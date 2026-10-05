@@ -61,6 +61,20 @@ export function setFamily(setName: string): string {
   return kebab(setFamilyName(setName));
 }
 
+/** The two Welcome to Night City editions a collection tells apart (D-022). */
+export const BETA_SET_CODE = 'welcometonightcitybeta';
+export const RETAIL_SET_CODE = 'welcometonightcityretail';
+const WTNC_FAMILY = 'welcome-to-night-city';
+
+/**
+ * The value of the "Set / Version" filter a printing belongs to (D-022): the set family, except that the Beta printings
+ * of Welcome to Night City are a set of their own, apart from Retail (and FR).
+ */
+export function setFilterId(printing: Pick<Printing, 'setName'>): string {
+  const family = setFamily(printing.setName);
+  return family === WTNC_FAMILY && /\bBeta\b/.test(printing.setName) ? `${family}-beta` : family;
+}
+
 export function imageKeyOf(cardSlug: string, setName: string, number: string): string {
   return `${kebab(cardSlug)}__${setFamily(setName)}-${kebab(stripBeta(number))}`;
 }

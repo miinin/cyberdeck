@@ -104,6 +104,25 @@ describe('sync storage', () => {
     expect(sync.loadBase()).toBeNull();
   });
 
+  it('converts a v1 base to Beta like the collection, leaves a v2 base and the wants alone (D-022)', () => {
+    const { store, repos } = open();
+    const sync = repos.forAccount('user123').sync;
+    const entries = [{ card: 'detonate', count: 2 }];
+    const baseKey = 'cyberdeck:u:user123:sync-base';
+    store.setItem(baseKey, JSON.stringify({ v: 1, rev: 2, decks: [], collection: { entries }, wants: { entries } }));
+    expect(sync.loadBase()).toEqual({
+      rev: 2,
+      decks: [],
+      collection: { entries: [{ card: 'detonate', count: 2, versions: { 'welcometonightcitybeta:031': 2 } }] },
+      wants: { entries },
+    });
+    store.setItem(baseKey, JSON.stringify({ v: 2, rev: 2, decks: [], collection: { entries }, wants: { entries } }));
+    expect(sync.loadBase()).toMatchObject({ collection: { entries } });
+    sync.saveBase({ rev: 3, decks: [], collection: { entries }, wants: { entries } });
+    expect(JSON.parse(store.getItem(baseKey) ?? '')).toMatchObject({ v: 2 });
+    expect(sync.loadBase()).toMatchObject({ rev: 3, collection: { entries } });
+  });
+
   it('reads nothing for sync when the stored want list is unreadable or newer', () => {
     const { store, repos } = open();
     const sync = repos.forAccount('user123').sync;

@@ -26,6 +26,48 @@ beforeEach(() => {
   ids = 0;
 });
 
+describe('sync engine: schema 2 -> 3 (D-022)', () => {
+  const BETA = 'welcometonightcitybeta:031';
+  const RETAIL = 'welcometonightcityretail:031';
+  const v2 = { schemaVersion: 2, savedAt: '2026-10-03T09:00:00.000Z', data: { entries: [{ card: 'detonate', count: 3 }] } };
+
+  it('converts local and cloud v2 data the same way, so nothing is lost and a later change from another device wins', async () => {
+    cloud.setRaw('collection/main', v2);
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 1, updatedAt: '2026-10-03T09:00:00.000Z' });
+    const base = JSON.stringify({ v: 1, rev: 1, decks: [], collection: v2.data, wants: { entries: [] } });
+    const initial = {
+      [`cyberdeck:u:${UID}:collection`]: JSON.stringify(v2),
+      [`cyberdeck:u:${UID}:sync-base`]: base,
+    };
+    const repos = createMemoryRepositories({ now, initial }).forAccount(UID);
+    const a = { repos, engine: createSyncEngine({ uid: UID, cloud, storage: repos.sync, now, locks: null }) };
+    await a.engine.syncNow();
+    expect((await a.repos.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 3, versions: { [BETA]: 3 } }]);
+    expect(a.engine.status().state).toBe('idle');
+
+    const b = device(cloud);
+    await b.engine.syncNow();
+    expect((await b.repos.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 3, versions: { [BETA]: 3 } }]);
+    await b.repos.collection.setVersionCount('detonate', RETAIL, 1);
+    await b.engine.syncNow();
+    expect(cloud.getRaw('collection/main')).toMatchObject({ schemaVersion: 3 });
+
+    await a.engine.syncNow();
+    expect((await a.repos.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 4, versions: { [BETA]: 3, [RETAIL]: 1 } }]);
+  });
+
+  it('locks a client that finds a version 4 collection in the cloud and leaves it untouched', async () => {
+    const newer = { schemaVersion: 4, savedAt: '', data: {} };
+    cloud.setRaw('collection/main', newer);
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 2, updatedAt: '2026-10-03T10:00:00.000Z' });
+    const a = device(cloud);
+    await a.repos.collection.setCount('detonate', 1);
+    await a.engine.syncNow();
+    expect(a.engine.status().state).toBe('locked');
+    expect(cloud.getRaw('collection/main')).toEqual(newer);
+  });
+});
+
 describe('sync engine', () => {
   it('uploads local data on the first sync and a second device pulls it', async () => {
     const a = device(cloud);

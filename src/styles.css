@@ -4895,11 +4895,6 @@ section[aria-labelledby='have-heading'] {
   border: 1px solid currentColor;
 }
 
-.art-label {
-  margin: 0;
-  font-weight: 600;
-}
-
 .card-box--art {
   position: relative;
 }
@@ -5191,4 +5186,34 @@ section[aria-labelledby='have-heading'] {
     background: var(--color-bg);
     min-width: 12rem;
   }
+}
+
+/* D-022: the base tile counts Retail and Beta on two rows; the other tiles keep their one counter at the bottom. */
+.art-count--editions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.edition-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.edition-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.edition-unknown {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.edition-select .options {
+  flex-wrap: wrap;
 }

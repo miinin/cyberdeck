@@ -88,4 +88,13 @@ describe('CardList arts', () => {
     render(<CardList cards={[card]} items={[{ card, art: null, imageUrl: null, artCount: 1, versionUrls: [null] }]} onOpenImage={vi.fn()} />);
     expect(screen.queryByRole('button', { name: /versio|version/i })).toBeNull();
   });
+
+  it('shows no version name under the picture but keeps it in the title for screen readers (D-022)', () => {
+    render(<CardList cards={[card]} items={arts.map((art) => ({ card, art, imageUrl: null, artCount: 2 }))} onOpenImage={vi.fn()} />);
+    expect(document.querySelector('.art-label')).toBeNull();
+    const titles = screen.getAllByRole('heading', { level: 3 });
+    expect(titles).toHaveLength(2);
+    expect(titles[0]?.querySelector('.visually-hidden')?.textContent).toBe(' – Perus');
+    expect(titles[1]?.querySelector('.visually-hidden')?.textContent).toBe(' – Nova Rare');
+  });
 });

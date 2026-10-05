@@ -198,7 +198,6 @@ function CardBox({
     <li className={'card-box card-box--art ' + state}>
       {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
       <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} />
-      {showArtLabel && art !== null && <p className="art-label">{art.rarity === null ? texts.artBase : <RaritySymbol rarity={art.rarity} showName />}</p>}
       <div className="card-head">
         <dl className="card-cost">
           <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
@@ -214,6 +213,10 @@ function CardBox({
                 {card.subname}
               </span>
             </>
+          )}
+          {/* The version is only a picture and a rarity symbol; screen readers get its name here. */}
+          {showArtLabel && art !== null && (
+            <span className="visually-hidden"> – {art.rarity === null ? texts.artBase : officialRarity(art.rarity)}</span>
           )}
         </h3>
       </div>

@@ -3,15 +3,16 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf, minCountOf } from '../domain/collection';
+import { protectedCount, setCopiesByEdition, targetPrinting } from '../domain/edition';
 import type { CollectionEntry } from '../domain/collection';
 import { artRarity, artsOf, entryChanges, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
 import type { Art } from '../domain/arts';
-import { setFamily } from '../domain/printing';
+import { setFilterId } from '../domain/printing';
 import { variantImageUrl } from '../data/variantImages';
 import { hasSetPrinting, ownsSetVersion, setOptions, versionsBySet } from '../domain/setFilter';
 import type { MissingRow } from '../domain/wants';
 import { StorageError, isStoragePersisted, requestPersistentStorage } from '../storage';
-import type { CatalogViewMode, Repositories } from '../storage';
+import type { CatalogViewMode, DefaultEdition, Repositories } from '../storage';
 import {
   EMPTY_CRITERIA,
   KNOWN_CARD_COLORS,
@@ -150,15 +151,22 @@ export function CatalogView({
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
   const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [editMode, setEditMode] = useState<boolean | null>(null);
+  // The edition the + adds to (D-022); saved like the other view settings.
+  const [edition, setEdition] = useState<DefaultEdition>('beta');
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
-  const userChose = useRef({ view: false, edit: false });
+  const userChose = useRef({ view: false, edit: false, edition: false });
   useEffect(() => {
     let active = true;
-    void Promise.all([repositories.preferences.loadView(), repositories.preferences.loadEditMode()]).then(
-      ([savedView, savedEdit]) => {
+    void Promise.all([
+      repositories.preferences.loadView(),
+      repositories.preferences.loadEditMode(),
+      repositories.preferences.loadDefaultEdition(),
+    ]).then(
+      ([savedView, savedEdit, savedEdition]) => {
         if (!active) return;
         if (!userChose.current.view) setView(savedView);
         if (!userChose.current.edit) setEditMode(savedEdit);
+        if (!userChose.current.edition) setEdition(savedEdition);
         setPreferencesLoaded(true);
       },
     );
@@ -180,6 +188,11 @@ export function CatalogView({
     userChose.current.view = true;
     setView(next);
     savePreference(repositories.preferences.saveView(next));
+  };
+  const handleEditionChange = (next: DefaultEdition) => {
+    userChose.current.edition = true;
+    setEdition(next);
+    savePreference(repositories.preferences.saveDefaultEdition(next));
   };
   const handleEditChange = (next: boolean) => {
     userChose.current.edit = true;
@@ -222,7 +235,7 @@ export function CatalogView({
     art.printings.some(
       (p) =>
         (criteria.rarities.length === 0 || (p.rarity !== null && criteria.rarities.includes(officialRarity(p.rarity)))) &&
-        (setChoice === null || setFamily(p.setName) === setChoice),
+        (setChoice === null || setFilterId(p) === setChoice),
     );
   // T-066: shown cards short of a playset, for "add missing to wants".
   const missingRows: MissingRow[] = [];
@@ -337,6 +350,32 @@ export function CatalogView({
     }
     return Object.keys(versions).length > 0 ? { card: card.key, count, versions } : { card: card.key, count };
   };
+  /** Saves the change from `before` to `after`: the version counters first (the total follows them), then a count that still differs. */
+  const writeEntry = (card: Card, before: CollectionEntry | undefined, after: CollectionEntry | undefined) => {
+    const changes = entryChanges(before, after);
+    let count = before?.count ?? 0;
+    for (const [printing, n] of changes.versions) {
+      count += n - (before?.versions?.[printing] ?? 0);
+      collectionStore.setVersionCount(card.key, printing, n);
+    }
+    const wanted = after?.count ?? 0;
+    if (count !== wanted) collectionStore.setCount(card.key, wanted);
+  };
+  /** The card box's counter (D-022): a card with a Welcome to Night City printing counts by edition. */
+  const handleCountChange = (card: Card, count: number) => {
+    if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
+    if (collection.phase !== 'ready' || targetPrinting(card, edition) === null) {
+      collectionStore.setCount(card.key, count);
+      return;
+    }
+    const before = entryOf(card);
+    try {
+      const after = setCopiesByEdition({ entries: before === undefined ? [] : [before] }, card, edition, count);
+      writeEntry(card, before, after.entries[0]);
+    } catch {
+      collectionAnnouncer.announceLimit(card);
+    }
+  };
   const handleArtChange = (card: Card, art: Art, next: number) => {
     const before = entryOf(card);
     if (next > (ownedPerArt(before, card, artsFor(card)).get(art.artId) ?? 0) && countIn(collection, card.key) >= 999) {
@@ -344,10 +383,13 @@ export function CatalogView({
       return;
     }
     try {
-      const after = setArtCount({ entries: before === undefined ? [] : [before] }, card, art.artId, next, artsFor(card)).entries[0];
-      const changes = entryChanges(before, after);
-      for (const [printing, n] of changes.versions) collectionStore.setVersionCount(card.key, printing, n);
-      if (changes.count !== null) collectionStore.setCount(card.key, changes.count);
+      const start = { entries: before === undefined ? [] : [before] };
+      // D-022: the base art of a Welcome to Night City card counts by edition, like the card box.
+      const edited =
+        art.rarity === null && targetPrinting(card, edition) !== null
+          ? setCopiesByEdition(start, card, edition, (before?.count ?? 0) + next - (ownedPerArt(before, card, artsFor(card)).get(art.artId) ?? 0))
+          : setArtCount(start, card, art.artId, next, artsFor(card));
+      writeEntry(card, before, edited.entries[0]);
     } catch {
       collectionAnnouncer.announceLimit(card);
     }
@@ -395,12 +437,10 @@ export function CatalogView({
       : {
           mode: collection.phase,
           countOf: (card) => countIn(collection, card.key),
-          onChange: (card, count) => {
-            if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
-            collectionStore.setCount(card.key, count);
-          },
+          onChange: handleCountChange,
           onLimit: collectionAnnouncer.announceLimit,
-          minOf: (card) => minCountOf(collection.saved, card.key),
+          minOf: (card) =>
+            targetPrinting(card, edition) === null ? minCountOf(collection.saved, card.key) : protectedCount(collection.saved, card),
           artCountOf: (card, art) => ownedPerArt(entryOf(card), card, artsFor(card)).get(art.artId) ?? 0,
           onArtChange: (card, art, count) => {
             if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
@@ -417,6 +457,7 @@ export function CatalogView({
 
   const setList = useMemo(() => setOptions(allCards), [allCards]);
   const setLabels = new Map(setList.map((option) => [option.family, option.label]));
+  const setGroups = new Map(setList.map((option) => [option.family, option.group]));
   const versionRows = collection.phase === 'ready' ? versionsBySet(allCards, collection.saved) : [];
   const versionsText =
     versionRows.length === 0 ? null : texts.versionsSummary(versionRows.map((r) => `${r.label}: ${r.count}`).join(' · '));
@@ -543,7 +584,7 @@ export function CatalogView({
       : [
           {
             id: 'set',
-            label: texts.setChip(setLabels.get(setChoice) ?? setChoice),
+            label: (setGroups.get(setChoice) === 'other' ? texts.productChip : texts.setChip)(setLabels.get(setChoice) ?? setChoice),
             onRemove: () => handleSetChange(null),
           },
         ]),
@@ -669,6 +710,8 @@ export function CatalogView({
             onImageSizeChange={setImageSize}
             allArts={view === 'grid' ? allArts : undefined}
             onAllArtsChange={setAllArts}
+            edition={edition}
+            onEditionChange={handleEditionChange}
           />
           <div className="sort-row">
             <SortSelect sort={sort} onChange={setSort} />
