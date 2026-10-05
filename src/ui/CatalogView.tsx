@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
-import { countOf } from '../domain/collection';
+import { countOf, minCountOf } from '../domain/collection';
 import type { MissingRow } from '../domain/wants';
 import { StorageError, isStoragePersisted, requestPersistentStorage } from '../storage';
 import type { CatalogViewMode, Repositories } from '../storage';
@@ -37,7 +37,8 @@ import type { OwnedColumn } from './CardList';
 import { CollectionNotices, loadNotices } from './CollectionNotices';
 import { CountControl } from './CountControl';
 import { tradeableCount } from '../domain/tradeCompare';
-import { countIn } from './collectionStore';
+import { countIn, versionCountIn } from './collectionStore';
+import { CardVersions } from './CardVersions';
 import type { CollectionSnapshot } from './collectionStore';
 import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
@@ -283,6 +284,7 @@ export function CatalogView({
             collectionStore.setCount(card.key, count);
           },
           onLimit: collectionAnnouncer.announceLimit,
+          minOf: (card) => minCountOf(collection.saved, card.key),
           editable,
         };
   const summary =
@@ -312,12 +314,26 @@ export function CatalogView({
               onChange={(card, count) => collectionStore.setCount(card.key, count)}
               onLimit={collectionAnnouncer.announceLimit}
               editable={editable}
+              min={minCountOf(collection.saved, openCard.key)}
             />
             {countIn(collection, openCard.key) < playsetSize(openCard) && (
               <p>{texts.detailPlaysetMissing(playsetSize(openCard) - countIn(collection, openCard.key))}</p>
             )}
             {countIn(collection, openCard.key) >= playsetSize(openCard) && <p>{texts.playsetFull}</p>}
+            {editable && countIn(collection, openCard.key) > 0 && countIn(collection, openCard.key) <= minCountOf(collection.saved, openCard.key) && (
+              <p>{texts.versionsLowerFirst}</p>
+            )}
           </section>
+        )}
+        {collection.phase === 'ready' && (
+          <CardVersions
+            card={openCard}
+            count={countIn(collection, openCard.key)}
+            versionCount={(printing) => versionCountIn(collection, openCard.key, printing)}
+            editable={editable}
+            onChange={(printing, count) => collectionStore.setVersionCount(openCard.key, printing, count)}
+            onLimit={collectionAnnouncer.announceLimit}
+          />
         )}
         {wants.snapshot.phase === 'ready' && (
           <section aria-labelledby="card-detail-want">

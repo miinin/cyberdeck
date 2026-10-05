@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import { MAX_COLLECTION_COUNT } from '../domain/collection';
@@ -18,11 +19,15 @@ export interface CountControlProps {
   /** false = browsing: only the count and its state are shown, no buttons (T-040). */
   editable?: boolean;
   /** 'want' = the want list (T-064b): its own spoken texts and no playset mark. Default: the collection. */
-  kind?: 'owned' | 'want';
+  kind?: 'owned' | 'want' | 'version';
+  /** The count cannot go below this (D-020: the sum of the versions). Default 0. */
+  min?: number;
+  /** Names the control for screen readers instead of the card name (a version row). */
+  label?: ReactNode;
 }
 
 /** The count with its spoken equivalents and the playset mark (✓). */
-function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'owned' | 'want' }) {
+function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'owned' | 'want' | 'version' }) {
   const want = kind === 'want';
   return (
     <span className="count">
@@ -38,7 +43,7 @@ function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'o
           <span className="visually-hidden">{want ? texts.notWanted : texts.notOwned}</span>
         </>
       )}
-      {!want && count >= playsetSize(card) && (
+      {kind === 'owned' && count >= playsetSize(card) && (
         <>
           <span aria-hidden="true" className="playset-mark">
             {' ✓'}
@@ -54,7 +59,7 @@ function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'o
  * "[−] n [+]" for one card row (UX.md 6.4). "+" is always the last child and keeps its position
  * in the children list, so React keeps the same element (and focus) when "−" appears or goes.
  */
-export function CountControl({ card, count, mode, onChange, onLimit, editable = true, kind = 'owned' }: CountControlProps) {
+export function CountControl({ card, count, mode, onChange, onLimit, editable = true, kind = 'owned', min = 0, label }: CountControlProps) {
   const plusRef = useRef<HTMLButtonElement>(null);
   const minusRef = useRef<HTMLButtonElement>(null);
   /** Which button of this row had focus last. */
@@ -62,11 +67,11 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
 
   // "−" became disabled while focused (another tab, or a rollback): keep focus in the row (UX.md 6.9).
   useLayoutEffect(() => {
-    if (count !== 0 || lastFocused.current !== 'minus') return;
+    if (count > min || lastFocused.current !== 'minus') return;
     lastFocused.current = null;
     const active = document.activeElement;
     if (active === null || active === document.body || active === minusRef.current) plusRef.current?.focus();
-  }, [count]);
+  }, [count, min]);
 
   if (mode === 'loading') {
     return (
@@ -97,7 +102,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
   const atMax = count >= MAX_COLLECTION_COUNT;
 
   const decrease = () => {
-    if (count === 1) {
+    if (count - 1 <= min) {
       // Move focus before "−" is removed (UX.md 6.4.2).
       lastFocused.current = 'plus';
       plusRef.current?.focus();
@@ -116,13 +121,13 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
         type="button"
         ref={minusRef}
         className="step step-minus"
-        disabled={count === 0}
+        disabled={count <= min}
         onFocus={() => (lastFocused.current = 'minus')}
         onClick={decrease}
       >
         <span className="visually-hidden">
           {kind === 'want' ? texts.decreaseWant : texts.decreaseOne}
-          <CardName card={card} />
+          {label ?? <CardName card={card} />}
         </span>
         <span aria-hidden="true">{texts.minusSymbol}</span>
       </button>
@@ -137,7 +142,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
       >
         <span className="visually-hidden">
           {kind === 'want' ? texts.increaseWant : texts.increaseOne}
-          <CardName card={card} />
+          {label ?? <CardName card={card} />}
         </span>
         <span aria-hidden="true">+</span>
       </button>
