@@ -237,7 +237,7 @@ export function CardFilters({
 
           <fieldset aria-describedby="filter-hint">
             <legend>{texts.rarityLegend}</legend>
-            <div className="options options-even">
+            <div className="options options-even options-rarity">
               {rarityOptions.map((rarity) => (
                 <label key={rarity} className="option">
                   <input

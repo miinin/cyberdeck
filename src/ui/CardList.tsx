@@ -155,7 +155,7 @@ export function CardList({
                 className="card-rarity"
                 hideLabel
               >
-                {card.rarity === null ? undefined : <RaritySymbol rarity={card.rarity} showName />}
+                {card.rarity === null ? undefined : <RaritySymbol rarity={card.rarity} size={18} />}
               </Stat>
             </dl>
           </div>

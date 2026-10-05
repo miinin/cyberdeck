@@ -4985,3 +4985,8 @@ section[aria-labelledby='have-heading'] {
 .options-even .option {
   white-space: nowrap;
 }
+
+/* T-079: rarity keys carry a symbol and a two-word name, so they take one column; tiles show the symbol alone. */
+.options-even.options-rarity {
+  grid-template-columns: minmax(0, 1fr);
+}
