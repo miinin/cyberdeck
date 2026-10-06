@@ -549,3 +549,8 @@ Päätöksessä on viisi osaa.
 4. Julkinen versio päivittyy automaattisesti omistajan tallentaessa pakan. Kun pakka muutetaan yksityiseksi, poistetaan tai tili poistetaan, julkinen kopio poistetaan.
 5. Tietomalliksi ehdotetaan `publicDecks/{deckId}`, ja kirjoitusoikeus on vain omistajalla. Firestore-sääntöjen muutos vaatii Digiturvan katselmoinnin ja käyttäjän tekemän sääntöjen deployn.
 **Seuraukset:** PRIVACY.md päivitetään. Moderointi (ilmiantaminen) on avoin kysymys, ja ensimmäinen versio tehdään ilman sitä.
+**D-025, käyttäjän päätökset SEC-098:n jälkeen (2026-10-06):**
+- **K-P9:** julkaisijan uid ei näy. Julkisen pakan tunniste on sha256(uid:deckId) (SR-30).
+- **K-P10:** ensimmäinen versio julkaistaan ilman ilmiantotoimintoa, ja riski on kirjattu.
+- **K-P11:** riski R-21 hyväksytään nyt. Kuka tahansa voi kirjautumatta kuluttaa lukukiintiön, mutta rajaukset SR-33 ja SR-34 pienentävät riskiä. App Check otetaan käyttöön myöhemmin, jos ongelmia ilmenee.
+- **K-P12:** hakukoneet eivät indeksoi julkisia pakkoja.
