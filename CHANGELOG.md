@@ -4,6 +4,28 @@ Käyttäjälle näkyvät muutokset versioittain.
 
 ## [Julkaisematon]
 
+## [0.2.0] · 2026-10-06
+
+Kokoelma, pakat ja kortin tietonäkymä uusittu; sovellus toimii myös puhelimella ja englanniksi.
+
+### Lisätty
+- Want-lista ja Have/Want omana osionaan: puuttuvat kortit voi lisätä wantiin massana (Kortit, Pakat, editori), Have/Want näkyy kuvaruudukkona järjestyksellä ja kuvakoolla, ja kokoelman voi jakaa linkillä (have, want ja vertailu toisen kanssa, myös Myytävä-merkintä, kun määrä ylittää pelisarjan).
+- Pakasta puuttuvat kortit listana ja .txt-latauksena, korttien järjestysvalitsin (numero, nimi, Cost, Power, RAM, tyyppi, Rarity) ja pakka-analyysi: korttiryhmän todennäköisyys vuoroittain ja korvaajaehdotus puuttuville korteille.
+- Englanninkielinen käyttöliittymä ja kielivalitsin (liput yläpalkissa).
+- Kortin tietonäkymä: kortin painaminen avaa kokoelman, wantin ja pakkojen tiedot. Versiot (painokset) ovat kokoelmassa omina kuvituksinaan (Beta/Retail, setit ja muut tuotteet erikseen), mukana 82 virallista versiokuvaa, viralliset harvinaisuudet symboleineen ja suora osoite #/kortti/<avain>.
+- Pakkaeditorissa sideboard hakulistasta ja Pinoista, setti/versio-suodatin ja yhteenveto; sideboard-rivit ovat samanlaisia kuin pääpakan, ja sääntöilmoitus kelluu sivun hyppimättä.
+- Pakan tilastot uusittu: yleiskuva renkain ja avainluvuin, Cost-käyrä tyypeittäin, värit donitsina ja RAM väreittäin, tyyppipalkki sekä nostotodennäköisyydet palkkeina.
+- Logo yläpalkissa ja faviconina sekä kevyet ikonit teemalle, kielelle ja tilille.
+
+### Muutettu
+- Puhelinnäkymä uusittu: kaksirivinen yläpalkki, suodatinpaneelin lopussa Näytä N korttia, tietonäkymä koko ruudun näkymänä (kuva ja laskurit rinnakkain, kuva koko ruudulle napautuksella) ja Lista-näkymä korttiriveinä ilman vaakavieritystä.
+- Ei nykimistä: vierityspalkin tila on varattu, eikä sivulla ole sisäisiä vieritysalueita.
+
+### Korjattu
+- Versioiden kuvat ja symbolit seuraavat valittua versiota, ja kaikki versiot näkyvät.
+
+### Aiemmat muutokset tässä versiossa
+
 - Pakan voi jakaa linkillä: Jaa linkki -painike pakkaeditorissa ja Pakat-sivun pakkakortissa kopioi linkin leikepöydälle. Linkki avaa pakan vain luku -näkymässä (kortit, tilastot, laillisuus ja kokoelmasta puuttuvat kortit), ja Tallenna omaksi pakaksi tekee siitä oman pakan. Rikkinäinen linkki näyttää selkeän virheen.
 
 - Kirjautuneena pakat ja kokoelma tallentuvat tilille ja pysyvät samoina kaikilla laitteilla. Tili-valikossa näkyy tallennuksen tila ("Tallennettu tilille klo ..." tai "Ei yhteyttä, muutokset tallessa tällä laitteella") ja Synkronoi nyt -painike. Ensimmäisessä kirjautumisessa selaimen tiedot siirtyvät tyhjälle tilille, ja jos sekä selaimessa että tilillä on tietoja, valittavana on Yhdistä, Käytä vain tilin tietoja tai Peruuta. Selaimen tiedoista tehdään varmuuskopio. Uloskirjautuessa tilin tiedot jäävät tähän selaimeen, ja siitä kerrotaan; jos muutoksia ei ole tallennettu tilille, kysytään varmistus. Tili-valikon Poista tilin tiedot poistaa pakat ja kokoelman tililtä ja selaimesta sekä itse tilin (tarvittaessa Google pyytää kirjautumaan uudelleen). Kirjautumisikkunassa kerrotaan, että tiedot säilytetään EU:ssa ja että Google-tili (nimi, sähköposti) on Firebase Authenticationissa.
