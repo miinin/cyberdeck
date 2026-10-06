@@ -53,33 +53,35 @@ const emptyDeck: DeckContent = {
 };
 
 describe('DeckStats (T-053)', () => {
-  it('shows the summary, distributions and the draw odds table', async () => {
+  it('shows the overview, the charts as text and the draw odds per moment (T-093)', () => {
     renderStats(fullDeck);
     const summary = screen.getByText('Keskihinta').closest('dl') as HTMLElement;
     expect(summary).toHaveTextContent('Keskihinta1,0');
-    expect(summary).toHaveTextContent('Kortteja42');
+    expect(summary).toHaveTextContent('Halpa aloitus100 %');
+    expect(screen.getByText('Pääpakassa 42 korttia, sallittu 40–50.')).toBeInTheDocument();
     expect(screen.getByText('Power-jakauma (Unitit)')).toBeInTheDocument();
     expect(screen.getByText('1 × 42')).toBeInTheDocument();
-    expect(screen.getByText(/aloituskädessä:/)).toHaveTextContent(
-      'Vähintään yksi Cost ≤ 2 -kortti aloituskädessä: 100 %',
-    );
-    expect(screen.queryByRole('table', { name: /Todennäköisyys/ })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText('Nostotodennäköisyydet', { selector: 'summary' }));
-    const table = await screen.findByRole('table', {
-      name: 'Todennäköisyys nostaa vähintään yksi kopio',
-    });
-    const firstRow = within(table).getAllByRole('row')[1] as HTMLElement;
+
+    // The Cost bars are buttons; one shows its cards under the chart.
+    const bar = screen.getByRole('button', { name: 'Cost 1: 42 korttia' });
+    expect(screen.getByText('Napauta pylvästä, niin näet sen kortit.')).toBeInTheDocument();
+    fireEvent.click(bar);
+    expect(bar).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Cost 1 · 42 korttia')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cost 0: 0 korttia' })).toBeDisabled();
+
     // 3 copies in 42 cards: 6, 7, 9 and 11 cards seen.
-    expect(
-      within(firstRow)
-        .getAllByRole('cell')
-        .map((cell) => cell.textContent),
-    ).toEqual(['3', '38 %', '43 %', '52 %', '61 %']);
+    const odds = () => Array.from(document.querySelectorAll('.odds-bar-pct'), (el) => el.textContent);
+    expect(odds()[0]).toBe('38 %');
+    fireEvent.click(screen.getByRole('radio', { name: 'Vuoro 1' }));
+    expect(odds()[0]).toBe('43 %');
+    fireEvent.click(screen.getByRole('radio', { name: 'Vuoro 5' }));
+    expect(odds()[0]).toBe('61 %');
   });
 
   it('shows dashes for an empty deck and disables the test hand', () => {
     renderStats(emptyDeck);
-    expect(screen.getAllByText('ei tietoa')).toHaveLength(2);
+    expect(screen.getAllByText('ei tietoa')).toHaveLength(3);
     const open = screen.getByRole('button', { name: 'Nosta testikäsi' });
     expect(open).toBeDisabled();
     expect(open).toHaveAccessibleDescription('Lisää pakkaan kortteja, niin voit nostaa testikäden.');

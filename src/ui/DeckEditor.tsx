@@ -674,8 +674,8 @@ export function DeckEditor({
             {toast !== null && (
               <p className="toast">
                 <span>{toast}</span>
-                <button type="button" className="button-secondary" onClick={() => setToast(null)}>
-                  {deckTexts.toastClose}
+                <button type="button" className="toast-close" aria-label={deckTexts.toastClose} onClick={() => setToast(null)}>
+                  ×
                 </button>
               </p>
             )}
@@ -714,14 +714,17 @@ export function DeckEditor({
                         describedBy={blocker !== null ? hintId : undefined}
                         shortcuts
                       />
-                      <button
-                        type="button"
-                        className="link-button"
-                        aria-label={deckTexts.addToSideboard(card.displayName)}
-                        onClick={() => addToSideboard(card)}
-                      >
-                        +S
-                      </button>
+                      {card.type !== 'Legend' && (
+                        <button
+                          type="button"
+                          className="tile-action"
+                          aria-label={deckTexts.addToSideboard(card.displayName)}
+                          title={deckTexts.addToSideboardTitle}
+                          onClick={() => addToSideboard(card)}
+                        >
+                          {deckTexts.addToSideboardShort}
+                        </button>
+                      )}
                     </DeckPickImage>
                   );
                 })}
@@ -828,6 +831,7 @@ export function DeckEditor({
             size={sideboardSize(content)}
             onChange={setSideCount}
             onMoveToMain={(card) => moveCopy(card, false)}
+            onOpenImage={openImage}
             headingRef={sideHeadingRef}
             hoverProps={preview.bind}
           />
