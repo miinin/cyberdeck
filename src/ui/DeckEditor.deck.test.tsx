@@ -97,9 +97,11 @@ describe('Deck column', () => {
   it('shows colours, types, RAM limits and missing cards under "Tilastot"', async () => {
     openEditor([['l1', 1], ['u0', 3], ['u1', 1]], storedCollection([]));
     const stats = await screen.findByRole('region', { name: 'Tilastot' });
-    expect(within(stats).getByText('Red 4 (100 %)')).toBeInTheDocument();
-    expect(within(stats).getByText('Unit 4')).toBeInTheDocument();
-    expect(within(stats).getByText('RAM-rajat: Red 2')).toBeInTheDocument();
+    // T-093: colours with their RAM, types as a bar with a legend.
+    const red = stats.querySelector('.color-ram-row') as HTMLElement;
+    expect(red).toHaveTextContent('Red 4 · 100 %');
+    expect(red).toHaveTextContent('Legendit antavat RAM 2');
+    expect(stats.querySelector('.type-bar-wrap .chart-legend')).toHaveTextContent('Unit 4 · 100 %');
     expect(within(stats).getByText('Kokoelmasta puuttuu 5 korttia.')).toBeInTheDocument();
   });
 

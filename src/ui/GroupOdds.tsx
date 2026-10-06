@@ -23,8 +23,8 @@ export function GroupOdds({ deck, cardsByKey }: { deck: DeckContent; cardsByKey:
   const id = useId();
   const { copies, rows } = groupOdds(deck, cardsByKey, parseGroup(choice));
   return (
-    <div className="stat-block group-odds">
-      <h3 className="cost-curve-title">{deckTexts.groupOddsHeading}</h3>
+    <div className="group-odds">
+      <h3 className="stats-card-title">{deckTexts.groupOddsHeading}</h3>
       <div className="field">
         <label htmlFor={id}>{deckTexts.groupOddsLabel}</label>
         <select id={id} value={choice} onChange={(event) => setChoice(event.target.value)}>
@@ -52,7 +52,7 @@ export function GroupOdds({ deck, cardsByKey }: { deck: DeckContent; cardsByKey:
         </select>
       </div>
       <p role="status">{deckTexts.groupOddsCopies(copies)}</p>
-      <table className="card-table odds-table">
+      <table className="odds-table group-odds-table">
         <caption className="visually-hidden">{deckTexts.groupOddsCaption}</caption>
         <thead>
           <tr>
@@ -69,12 +69,24 @@ export function GroupOdds({ deck, cardsByKey }: { deck: DeckContent; cardsByKey:
           {rows.map(({ turn, atLeast1, atLeast2 }) => (
             <tr key={turn}>
               <th scope="row">{deckTexts.oddsTurn(turn)}</th>
-              <td className="cell-number">{formatPercent(atLeast1)}</td>
-              <td className="cell-number">{formatPercent(atLeast2)}</td>
+              <OddsCell value={atLeast1} />
+              <OddsCell value={atLeast2} />
             </tr>
           ))}
         </tbody>
       </table>
     </div>
+  );
+}
+
+/** A percentage with a bar behind it (T-093); the bar is decoration, the number is the content. */
+function OddsCell({ value }: { value: number }) {
+  return (
+    <td className="odds-cell">
+      <span className="odds-bar" aria-hidden="true">
+        <span className="odds-bar-fill" style={{ inlineSize: `${value * 100}%` }} />
+      </span>
+      <span className="odds-cell-pct">{formatPercent(value)}</span>
+    </td>
   );
 }

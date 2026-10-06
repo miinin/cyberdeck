@@ -173,7 +173,7 @@ describe('Deck import from a Netdeck link (T-046)', () => {
     const { user, repositories } = await fetchLink(URL, fetchMock);
     const report = await screen.findByRole('region', { name: 'Tarkistuksen tulos' });
     expect(within(report).getByText('Netdeck: Linkkipakka, tekijä Tekijä')).toBeInTheDocument();
-    expect(within(report).getByText('Sideboard')).toBeInTheDocument();
+    expect(within(report).getByRole('heading', { level: 3, name: 'Sideboard' })).toBeInTheDocument();
     expect(within(report).getByText(/2 × Unit 1/)).toBeInTheDocument();
     expect(within(report).getByText('1 unknown-id')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(`https://api.netdeck.gg/api/cyberpunk/decks/${UUID}`, expect.anything());

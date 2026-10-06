@@ -25,7 +25,7 @@ describe('Deck editor', () => {
     // Sticky deck head (T-050c): the progress bar carries the main deck count, Legends are under it.
     expect(screen.getByRole('progressbar', { name: 'Pääpakka 6/40–50' })).toBeInTheDocument();
     expect(within(screen.getByRole('region', { name: /pakan kortit/ })).getByText('Legendit 1/3')).toBeInTheDocument();
-    expect(screen.getByText(/RAM-rajat: Red 2/)).toBeInTheDocument();
+    expect(screen.getByText(/Legendit antavat RAM 2/)).toBeInTheDocument();
     expect(screen.getByText('Legendejä on 1, pitää olla tasan 3.')).toBeInTheDocument();
     expect(screen.getByText('Pääpakassa on 6 korttia, vähintään 40.')).toBeInTheDocument();
     expect(screen.getByText('Unit 0: 4 kopiota, enintään 3.')).toBeInTheDocument();
@@ -81,19 +81,18 @@ describe('Deck editor', () => {
     openEditor([['u0', 3], ['u1', 1]], storedCollection([['u0', 1], ['u1', 5]]));
     expect(await screen.findByText('Kokoelmasta puuttuu 2 korttia.')).toBeInTheDocument();
     const deckSection = screen.getByRole('region', { name: /pakan kortit/ });
-    const missingRow = within(deckSection).getByText('Unit 0').closest('li') as HTMLElement;
+    const missingRow = within(deckSection).getByRole('button', { name: 'Suurenna kuva: Unit 0' }).closest('li') as HTMLElement;
     expect(missingRow).toHaveTextContent('omistat 1/3');
     expect(missingRow).toHaveTextContent('puuttuu 2');
-    const ownedRow = within(deckSection).getByText('Unit 1').closest('li') as HTMLElement;
+    const ownedRow = within(deckSection).getByRole('button', { name: 'Suurenna kuva: Unit 1' }).closest('li') as HTMLElement;
     expect(ownedRow).toHaveTextContent('omistat 5/1');
     expect(ownedRow).not.toHaveTextContent('puuttuu');
   });
 
-  it('shows the cost curve to screen readers as a table', async () => {
+  // T-093: each Cost bar is a button named with its count; it lists its cards.
+  it('names the cost curve bars for screen readers', async () => {
     openEditor([['l1', 1], ['u0', 3], ['u1', 2]]);
-    const table = await screen.findByRole('table', { name: 'Pääpakan kortit Costin mukaan' });
-    const costOne = within(table).getByRole('row', { name: /^1 / });
-    expect(costOne).toHaveTextContent('5');
+    expect(await screen.findByRole('button', { name: 'Cost 1: 5 korttia' })).toBeEnabled();
   });
 
   it('opens the card image from the name in the deck list', async () => {
