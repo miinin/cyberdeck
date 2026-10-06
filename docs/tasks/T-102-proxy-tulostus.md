@@ -70,10 +70,10 @@ Pelaaja valitsee kortit, jotka hän haluaa tulostaa. Sovellus asettelee ne A4-ar
    - **Tulostus:** jonosta tulostetaan arkit. Tulostuksen jälkeen käyttäjältä kysytään, tyhjennetäänkö jono.
 
 ## Luovutus
-- Koodi:  (layout, leikkausmerkit, jono, enintään 200 korttia), tallennus  (, sama muoto ja validointi kuin kokoelmalla, ei pilvisynkkaa), , , ,  (fi+en), reitti  ja nav-linkki, lähetysnapit Have/Wantissa (yksittäin ja kaikki) ja pakkaeditorissa (koko pakka, puuttuvat), tyylit (,  = 1 mm tulosteessa).
+- Koodi: `src/domain/proxySheet.ts` (layout, leikkausmerkit, jono, enintään 200 korttia), tallennus `cyberdeck:proxy` (`repositories.proxy`, sama muoto ja validointi kuin kokoelmalla, ei pilvisynkkaa), `ProxyView.tsx`, `ProxySheets.tsx`, `SendToProxy.tsx`, `proxyTexts*.ts` (fi+en), reitti `#/proxy` ja nav-linkki, lähetysnapit Have/Wantissa (yksittäin ja kaikki) ja pakkaeditorissa (koko pakka, puuttuvat), tyylit (`@page proxy`, `--u` = 1 mm tulosteessa).
 - Kuvitus valitaan jonossa kuvitus kerrallaan (sama art-malli kuin kokoelmassa: versions-erittely); ruudut per kuvitus.
 - Esikatselu käyttää samoja elementtejä kuin tuloste (skaalaus cqw:llä). Tulostus odottaa img.decode(), kysyy tyhjennyksen jälkeen.
 - Testit: 1416+ läpi, lint ja build läpi. Uusia testejä: storage/proxy, domain/proxySheet, ui/ProxyView. App.theme-testin Tab-määrä +1 (uusi nav-linkki).
-- Digiturva: uusi tallennusavain  (paikallinen, validoitu parseCollectionilla, varmuuskopio vioittuessa, poistuu tilin mukana). Ei uusia riippuvuuksia, ei muutoksia firebase.json:iin.
-- Käyttäjän tarkistettavaa: oikea tulostus (kalibrointiarkki), PROXY-merkin paikka/näkyvyys kuvissa,  vaatii Chrome 85+/Firefox 110+/Safari 17.4+ (muuten selaimen oletusmarginaalit).
+- Digiturva: uusi tallennusavain `cyberdeck:proxy` (paikallinen, validoitu parseCollectionilla, varmuuskopio vioittuessa, poistuu tilin mukana). Ei uusia riippuvuuksia, ei muutoksia firebase.json:iin.
+- Käyttäjän tarkistettavaa: oikea tulostus (kalibrointiarkki), PROXY-merkin paikka/näkyvyys kuvissa, `page: proxy` vaatii Chrome 85+/Firefox 110+/Safari 17.4+ (muuten selaimen oletusmarginaalit).
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2 (writeEntry/entryOf toistuvat CatalogView:ssä ja ProxyView:ssä, voi siirtää yhteiseen; ProxyView-testit eivät kata kuvitusvalintaa, vain domain).
