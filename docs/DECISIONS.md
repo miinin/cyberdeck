@@ -538,3 +538,14 @@ Päätöksessä on viisi osaa.
 2. **Suositus:** pienin myytävien määrä, jolla kortin voi myydä joka vuoro tavoitevuoroon asti vähintään 80 %:ssa peleistä. Tavoitevuoro on pakan keskihinta ylöspäin pyöristettynä, 2–6.
 3. **Legendit eivät ole mukana:** Legendien käyttöä Eddieinä ei lasketa. Suositus on siksi varovainen.
 **Seuraukset:** Oletukset näkyvät käyttäjälle tilastokortin huomautuksessa. Jos sääntöihin tulee tarkennuksia, muutos tehdään yhteen paikkaan (`src/domain/eddies.ts`).
+
+## D-025 · Julkiset pakat · 2026-10-06 · Päättäjä: käyttäjä
+**Tila:** Hyväksytty (tuotepäätökset). Tehtävä T-098. Tekniset yksityiskohdat vahvistetaan Digiturvan uhkamallissa ja Arkkitehdin katselmoinnissa ennen toteutusta.
+**Konteksti:** Käyttäjät haluavat jakaa pakkojaan muille Pakat-osiossa, eivät vain linkillä (D-0xx jakolinkki).
+**Päätös:**
+1. Pakka on oletuksena yksityinen. Omistaja voi muuttaa sen julkiseksi.
+2. Julkiset pakat näkyvät kaikille, myös kirjautumattomille. Julkaiseminen vaatii Google-kirjautumisen.
+3. Julkaisijana näkyy käyttäjän itse kirjoittama nimimerkki, jos käyttäjä haluaa nimensä näkyviin. Muuten pakka näkyy nimettömänä. Google-tilin nimeä ei käytetä.
+4. Julkinen versio päivittyy automaattisesti omistajan tallentaessa pakan. Kun pakka muutetaan yksityiseksi, poistetaan tai tili poistetaan, julkinen kopio poistetaan.
+5. Tietomalliksi ehdotetaan `publicDecks/{deckId}`, ja kirjoitusoikeus on vain omistajalla. Firestore-sääntöjen muutos vaatii Digiturvan katselmoinnin ja käyttäjän tekemän sääntöjen deployn.
+**Seuraukset:** PRIVACY.md päivitetään. Moderointi (ilmiantaminen) on avoin kysymys, ja ensimmäinen versio tehdään ilman sitä.
