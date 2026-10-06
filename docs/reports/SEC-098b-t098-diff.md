@@ -4,7 +4,9 @@
 
 ## Tulos
 - **Löydökset:** Critical 0, High 0, Medium 1, Low 2, Info 3.
-- **Veto (SEC-098):** SR-30–SR-35, SR-37 ja SR-40 (säännöt) on toteutettu hyväksyttävästi. **SR-36 vaatii vielä korjauksen SEC-098b-1.** Veto poistuu, kun SEC-098b-1 on korjattu testeineen ja käyttäjä on deployannut säännöt testiprojektiin ja tehnyt alla olevat käsitestit (SR-40, SEC-098-7). SEC-098b-2 ja SEC-098b-3 eivät blokkaa.
+- **Veto (SEC-098):** SR-30–SR-37 ja SR-40 (säännöt) on toteutettu hyväksyttävästi. *Alkuperäinen ehto: SR-36 vaati korjauksen SEC-098b-1.*
+- **Veto, päivitys 2026-10-06 (korjausten varmistus, commit 4b6b2a5):** **Koodiehto täyttyy:** SEC-098b-1, -2 ja -3 on korjattu ja varmistettu (ks. löydösten tilat). Koodi ei enää blokkaa Done-tilaa. **Deploy-ehto (SR-40) on yhä voimassa:** käyttäjän on deployattava `firestore.rules` testiprojektiin ennen testiin yhdistämistä ja tehtävä alla olevat käsitestit 1–7 (SEC-098-7). Tuotantoon säännöt deployataan ennen `/julkaise`:a. `firestore.rules` ei muuttunut SEC-098b:n jälkeen (`git diff fe5685c 4b6b2a5 -- firestore.rules` on tyhjä), joten sääntökatselmointi on yhä voimassa.
+- **Korjauskierroksen uudet havainnot:** Info 2 (SEC-098b-7, SEC-098b-8). Eivät blokkaa.
 - Riippuvuudet eivät muuttuneet (`package.json` ei diffissä), joten `npm audit` -ajoa ei tarvittu. Diffistä ei löytynyt salaisuuksia (haettu `AIza`, `secret`, `private_key`, `password` ja `token =`).
 
 ## Löydökset
@@ -19,7 +21,7 @@
 2. `send`-funktiossa tarkista `disposed` uudelleen `MIN_GAP_MS`-odotuksen jälkeen ja juuri ennen `store.publish`-kutsua (`if (disposed) { entry.input ??= input; return; }`).
 3. Tilin poistossa kutsu `await publisher?.drain()` ennen `session.deleteAccountData()`:a. Vaihtoehdot: `AccountMenu` saa julkaisijan `usePublicDecks()`:sta, tai `createAccountSession` saa option `beforeDeleteAccount?: () => Promise<void>`, jota `deleteAccountData` kutsuu ensimmäisenä ennen `removeMany`:ä.
 4. Testi `publicDecks.test.ts`:ään tai `session.test.ts`:ään: `schedule(input)` → `drain()` + `deleteAccountData()` → ajastimia eteenpäin 30 s → muistin `publicDecks` on tyhjä. Toinen testi: lähetys odottaa minimiväliä, `drain()` kutsutaan odotuksen aikana, eikä kopiota synny.
-**Tila:** Avoin
+**Tila:** Korjattu ja varmistettu (4b6b2a5). `drain()` asettaa `disposed`-tilan, pysäyttää ajastimet ja odottaa kaikki ketjut. `send` tarkistaa `disposed`-tilan minimivälin jälkeen ja vielä `isStillPublic`-kutsun jälkeen juuri ennen `store.publish`:ia. `createAccountSession` saa option `beforeDeleteAccount`, jota `deleteAccountData` kutsuu ensimmäisenä `try`-lohkossa ennen `removeMany`:ä. App välittää `publisher?.drain()`:n. Ketjut eivät hylkää (virhe otetaan kiinni `send`:ssä), joten `drain` ei kaada poistoa. Testit: `publicDecks.test.ts` (drain pysäyttää minimiväliä odottavan ja ajastetun lähetyksen, kopioita 0) ja `session.test.ts` (järjestys `before` → `removeMany`). Ajettu: `vitest run src/account src/ui/PublicDecks.test.tsx` 229/229 läpi.
 
 ### SEC-098b-2 · Toisella laitteella poistettu tai yksityiseksi muutettu pakka voi jäädä julkiseksi tai syntyä uudelleen (R-22) · Low
 **Sijainti:** `src/account/publicPublisher.ts:83–104` ja synkronointikerros (`src/account/sync/*`), joka ei kutsu `publicDecks.remove`:a · **Tehtävä:** T-098, SR-35
@@ -30,13 +32,13 @@
 1. Julkaisijalle optio `isStillPublic(deckId): Promise<boolean>`. App välittää sen, ja se lukee tilin repositoriosta `deck?.publish?.public === true`. `send` kutsuu sitä juuri ennen `store.publish`:ia ja hylkää syötteen, jos tulos on false. Tämä korjaa tapauksen b.
 2. Kun synkronointi poistaa pakan, jonka paikallinen `publish.public` oli true, tai vaihtaa sen arvoksi false, kutsutaan `publicDecks.remove(deckId)`. Kutsu on idempotentti, ja säännöt sallivat poiston olemattomasta dokumentista. Tämä korjaa tapauksen a.
 3. R-22 jää SECURITY.md:hen jäännösriskiksi, kunnes korjaus on tehty. Kirjaa jatkotehtävä TASKS.md:hen.
-**Tila:** Avoin (hyväksytty jäännösriski R-22, PM päättää jatkotehtävästä)
+**Tila:** Korjattu ja varmistettu (4b6b2a5), kapea jäännösriski jää. Tapaus b: App välittää julkaisijalle `isStillPublic`-tarkistuksen, joka lukee tilin repositoriosta `publish.public === true` juuri ennen lähetystä. Testi `does not send a deck that is no longer public`. Tapaus a: `src/account/publicWatch.ts` `watchPublicDecks` seuraa tilin pakkalistaa ja kutsuu `store.remove`:a pakalle, joka oli julkinen ja on nyt poistettu tai yksityinen (myös synkronoinnin tuomana). Kutsu on idempotentti ja virheet niellään. Testi `removes the public copy of a deck that sync deleted or made private` (a yksityiseksi, b poistettu, kopioita 0). **Jäännösriski (R-22, pienentynyt):** korjaus vaatii, että julkaissut laite avaa sovelluksen kirjautuneena ja näkee muutoksen synkronoinnin kautta. Jos se ei enää koskaan avaa sovellusta, tai jos poisto on ehtinyt paikalliseen dataan ennen ensimmäistä listausta, kopio voi jäädä orvoksi. PRIVACY 11.4 kertoo tästä (SEC-098b-3). SECURITY.md:n R-22:n kuvaus kannattaa päivittää vastaamaan pienentynyttä riskiä (PM).
 
 ### SEC-098b-3 · PRIVACY.md 11.4 ei kerro orvoista kopioista · Low
 **Sijainti:** `docs/PRIVACY.md` luku 11.4 · **Tehtävä:** T-098, SR-42
 **Havaittu:** Luvun 11.4 mukaan julkinen kopio poistetaan aina ennen yksityisiä tietoja. SEC-098b-2:n tapauksissa tämä ei pidä paikkaansa, ja SEC-098b-1:n tapauksessa ei ennen korjausta.
 **Korjausehdotus:** Lisää lukuun 11.4 lause: "Jos pakka poistetaan tai muutetaan yksityiseksi toisella laitteella ennen kuin synkronointi on ehtinyt, julkinen kopio voi jäädä näkyviin. Tällöin pyydä poistoa (11.7)." Kun SEC-098b-2 on korjattu, lause poistetaan.
-**Tila:** Avoin
+**Tila:** Korjattu ja varmistettu (4b6b2a5). Lause on lisätty sanatarkasti. Koska SEC-098b-2:sta jää kapea jäännösriski, lause pidetään selosteessa.
 
 ### SEC-098b-4 · Poikkeama liitteestä: ei arvoa `public-anonymous`, nimettömyys = `nickname == null` · Info (hyväksytty)
 **Arvio:** Turvallisuuden kannalta poikkeama vastaa liitettä tai on parempi. Säännöt sallivat vain `visibility in ['private','public']`, ja `nickname` on `null` tai 1–60 merkkiä. `buildPublicDeckInput` muuttaa tyhjän tai virheellisen nimimerkin `null`:ksi (`cleanNickname`), joten virhetilanteessa julkaisu on nimetön eikä nimimerkki vuoda. Julkisessa dokumentissa ei ole uid:tä, sähköpostia eikä Google-nimeä. Nimimerkki tallentuu yksityiseen pakkaan myös `private`-tilassa, mikä on sallittua (PRIVACY rivi 21). Ei korjattavaa.
@@ -49,6 +51,17 @@
 **Havaittu:** `cloud.deleteAll` poistaa ensin `publicDecks`-dokumentit transaktiossa. Jos uusi koodi ajetaan projektissa, jonka säännöt ovat vanhat, transaktio saa `permission-denied`-virheen, ja **koko tilin poisto epäonnistuu**. Myös julkaisu epäonnistuu, mutta palaa hallitusti yksityiseksi.
 **Korjausehdotus:** Noudata SR-40:tä: säännöt deployataan testiprojektiin ennen testiin yhdistämistä ja tuotantoon ennen `/julkaise`:a. Käsitesti 6 alla.
 
+### SEC-098b-7 · `watchPublicDecks`: rinnakkaiset listaukset voivat ratketa väärässä järjestyksessä · Info
+**Sijainti:** `src/account/publicWatch.ts:13–24` · **Tehtävä:** T-098
+**Havaittu:** `check` käynnistää jokaisesta muutoksesta oman `decks.list()`-kutsun, eikä vanhentuneita tuloksia hylätä. Jos vanhempi listaus (pakka yksityinen) ratkeaisi uudemman (pakka julkinen) jälkeen, `gone` sisältäisi juuri julkaistun pakan, ja sen kopio poistettaisiin. Seuraus on vikasuuntaan turvallinen: kopio poistuu eikä vuoda, mutta julkaisu katoaisi hiljaa. Muistissa ja IndexedDB:ssä saman yhteyden lukujen järjestys säilyy, joten tämä ei käytännössä toteudu.
+**Korjausehdotus (valinnainen):** Laskuri tai `latest`-tunniste, jolla vain viimeisimmän listauksen tulos käsitellään.
+**Tila:** Info, ei blokkaa.
+
+### SEC-098b-8 · Epäonnistuneen tilin poiston jälkeen julkaisija pysyy pois päältä · Info
+**Sijainti:** `src/App.tsx` (`beforeDeleteAccount: () => publisher?.drain()`), `src/account/publicPublisher.ts` (`drain`) · **Tehtävä:** T-098
+**Havaittu:** `drain` asettaa julkaisijan pysyvästi `disposed`-tilaan. Jos poisto epäonnistuu (esim. ei yhteyttä), julkisen pakan muokkausten ajastetut päivitykset eivät lähde ennen kuin tili tai sivu vaihtuu. Tämä on tietosuojan kannalta turvallinen suunta. Käytettävyys: julkinen kopio voi jäädä vanhaksi ilman ilmoitusta.
+**Korjausehdotus (valinnainen):** Luo julkaisija uudelleen, jos `deleteAccountData` palauttaa false, tai kerro tila käyttäjälle.
+**Tila:** Info, ei blokkaa.
 ## Tarkistetut alueet, ei löydöksiä
 - **`firestore.rules` publicDecks (SR-30, SR-31, SR-33, SR-34, SR-40):**
   - Omistajuus: `pubId == lower(hex(sha256(auth.uid + ':' + deckId)))` tarkistetaan luonnissa (uudesta `deckId`:stä), päivityksessä (vanhasta `deckId`:stä, joka ei muutu) ja poistossa. `deckId`-regex ei salli kaksoispistettä, joten syötteiden törmäystä `uid:deckId` ei synny.
