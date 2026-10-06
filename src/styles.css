@@ -3473,14 +3473,16 @@ button.legality:focus-visible {
   background: var(--color-surface-hover);
 }
 
-.deck-tile.is-missing {
+.deck-tile.is-missing,
+.deck-tile.is-problem {
   grid-template-areas:
     'gem name count step'
     'gem miss count step';
   padding-block: 2px;
 }
 
-.deck-tile.is-missing .deck-tile-name {
+.deck-tile.is-missing .deck-tile-name,
+.deck-tile.is-problem .deck-tile-name {
   line-height: 1.25;
 }
 
@@ -5654,7 +5656,8 @@ section[aria-labelledby='have-heading'] {
   grid-template-areas: 'gem name count step move';
 }
 
-.deck-tile.has-move.is-missing {
+.deck-tile.has-move.is-missing,
+.deck-tile.has-move.is-problem {
   grid-template-areas:
     'gem name count step move'
     'gem miss count step move';
@@ -6463,13 +6466,13 @@ section[aria-labelledby='have-heading'] {
  */
 .deck-stats {
   --seg-program: #1fe0ff;
-  --seg-gear: #ff4fd8;
+  --seg-gear: #9d7fd6; /* T-101: muted violet */
 }
 
 :root[data-theme='light'] .deck-stats {
   --seg-unit: #b38f00;
   --seg-program: #00728a;
-  --seg-gear: #b0008a;
+  --seg-gear: #6d4fb0; /* T-101 */
 }
 
 /* Eddies */
@@ -6788,4 +6791,107 @@ section[aria-labelledby='have-heading'] {
 .visibility-status {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+/* T-101: rows and sections that break a deck rule. */
+.deck-tile-notes {
+  grid-area: miss;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  min-width: 0;
+  text-shadow:
+    0 0 2px var(--color-surface),
+    0 0 4px var(--color-surface);
+}
+.problem-flag {
+  color: var(--color-danger);
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+.deck-headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  margin: 0 0 var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+}
+.deck-headline .deck-section-title,
+.deck-section > .deck-headline > h2.deck-section-title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.deck-section-head .deck-headline {
+  margin: 0;
+  border: 0;
+}
+.problem-flag--section {
+  font-size: var(--font-size-sm);
+}
+.deck-tile.is-problem {
+  border-inline-start-color: var(--color-danger);
+}
+.legend-slot.is-problem .legend-slot-image,
+.stack-card.is-problem .stack-card-button {
+  border-color: var(--color-danger);
+}
+.stack-card .problem-flag {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 0.125rem var(--space-1);
+  background: rgb(0 0 0 / 0.85);
+  color: #ff8a8a;
+}
+.legend-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-3);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-sm);
+}
+.stack-card-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: var(--space-1);
+}
+
+/* T-101: edition check before the first add of a session. */
+.edition-confirm-picture {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.edition-confirm-picture img {
+  display: block;
+  max-width: 100%;
+  max-height: 45vh;
+  height: auto;
+}
+.edition-confirm-mark {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 14%;
+  border: 3px solid var(--color-brand-yellow);
+  box-shadow: 0 0 0 2px var(--color-bg);
+  pointer-events: none;
+}
+.edition-confirm-figure {
+  margin: 0;
+}
+.edition-confirm-figure figcaption {
+  margin-top: var(--space-2);
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+.edition-confirm .row-actions {
+  flex-wrap: wrap;
 }

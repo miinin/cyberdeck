@@ -9,6 +9,8 @@ import { CardName } from './CardName';
 import { typeColorClass } from './CardColor';
 import { CostGem, cardMeta } from './DeckPickTable';
 import { deckTexts } from './deckTexts';
+import { ProblemFlag, SectionFlag } from './DeckProblems';
+import type { DeckProblems } from './DeckProblems';
 import { pickGestures } from './pickGestures';
 import { Stepper } from './Stepper';
 import { texts } from './texts';
@@ -51,6 +53,7 @@ export function DeckList({
   hoverProps,
   onMoveToSideboard,
   onAddToSideboard,
+  problems,
 }: {
   grouped: DeckGroups;
   view: DeckView;
@@ -66,7 +69,10 @@ export function DeckList({
   onMoveToSideboard?: (card: Card) => void;
   /** Stacks view: add a copy to the sideboard straight from the stack (T-074). */
   onAddToSideboard?: (card: Card) => void;
+  /** Rows and section counts that break a rule (T-101). */
+  problems?: DeckProblems;
 }) {
+  const problemsOf = (card: Card) => problems?.main.get(card.key);
   const missingOf = (row: DeckRow) => {
     const have = ownedOf(row.card);
     return have === null ? 0 : Math.max(0, row.count - have);
@@ -93,7 +99,9 @@ export function DeckList({
     return (
       <li
         key={card.key}
-        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '') + (onMoveToSideboard !== undefined && card.type !== 'Legend' ? ' has-move' : '')}
+        data-deck-row={card.key}
+        data-deck-part="main"
+        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '') + (problemsOf(card) !== undefined ? ' is-problem' : '') + (onMoveToSideboard !== undefined && card.type !== 'Legend' ? ' has-move' : '')}
         onContextMenu={onContextMenu}
         onKeyDown={onKeyDown}
         {...hoverProps(card)}
@@ -114,7 +122,12 @@ export function DeckList({
         >
           <CardName card={card} muteSubname />
         </button>
-        {ownership(row, 'deck-tile-missing')}
+        {(missing > 0 || problemsOf(card) !== undefined || ownedOf(card) !== null) && (
+          <span className="deck-tile-notes">
+            {ownership(row, 'deck-tile-missing')}
+            {problemsOf(card) !== undefined && <ProblemFlag problems={problemsOf(card) ?? []} />}
+          </span>
+        )}
         <span className="deck-tile-count" aria-hidden="true">
           {deckTexts.copies(count)}
         </span>
@@ -138,7 +151,13 @@ export function DeckList({
     const { card, count } = row;
     const { onContextMenu, onKeyDown } = pickGestures(count, (next) => onChange(card, next), false);
     return (
-      <li key={card.key} className={'stack-card' + (missingOf(row) > 0 ? ' is-missing' : '')} {...hoverProps(card)}>
+      <li
+        key={card.key}
+        data-deck-row={card.key}
+        data-deck-part="main"
+        className={'stack-card' + (missingOf(row) > 0 ? ' is-missing' : '') + (problemsOf(card) !== undefined ? ' is-problem' : '')}
+        {...hoverProps(card)}
+      >
         <button
           type="button"
           className="stack-card-button"
@@ -155,6 +174,7 @@ export function DeckList({
           <span className="stack-card-count" aria-hidden="true">
             {deckTexts.copies(count)}
           </span>
+          {problemsOf(card) !== undefined && <ProblemFlag problems={problemsOf(card) ?? []} />}
         </button>
         {onAddToSideboard !== undefined && card.type !== 'Legend' && (
           <button
@@ -174,14 +194,19 @@ export function DeckList({
   return (
     <>
       <div className="deck-section">
-        <h2 className="deck-section-title">
-          {deckTexts.legendsHeading} ({legendsCount}/{LEGEND_COUNT})
-        </h2>
+        <div className="deck-headline">
+          <h2 className="deck-section-title">
+            {deckTexts.legendsHeading} ({legendsCount}/{LEGEND_COUNT})
+          </h2>
+          <SectionFlag problem={problems?.legends ?? null} />
+        </div>
         <ul className="legend-slots">
           {grouped.legends.map((row) => (
             <li
               key={row.card.key}
-              className={'legend-slot' + (missingOf(row) > 0 ? ' is-missing' : '')}
+              data-deck-row={row.card.key}
+              data-deck-part="main"
+              className={'legend-slot' + (missingOf(row) > 0 ? ' is-missing' : '') + (problemsOf(row.card) !== undefined ? ' is-problem' : '')}
               {...hoverProps(row.card)}
             >
               <button
@@ -212,6 +237,7 @@ export function DeckList({
                 </button>
               </div>
               {ownership(row, 'legend-slot-missing')}
+              {problemsOf(row.card) !== undefined && <ProblemFlag problems={problemsOf(row.card) ?? []} />}
             </li>
           ))}
           {Array.from({ length: emptySlots }, (_, i) => (
@@ -220,13 +246,25 @@ export function DeckList({
             </li>
           ))}
         </ul>
+        {grouped.legends.length > 0 && (
+          <ul className="legend-names" aria-label={deckTexts.legendNamesLabel}>
+            {grouped.legends.map((row) => (
+              <li key={row.card.key}>
+                <CardName card={row.card} />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="deck-section">
         <div className="deck-section-head">
-          <h2 className="deck-section-title">
-            {deckTexts.mainHeading} ({mainCount})
-          </h2>
+          <div className="deck-headline">
+            <h2 className="deck-section-title">
+              {deckTexts.mainHeading} ({mainCount})
+            </h2>
+            <SectionFlag problem={problems?.mainSection ?? null} />
+          </div>
           <fieldset className="view-select deck-view">
             <legend className="visually-hidden">{deckTexts.deckViewLegend}</legend>
             <div className="options">
