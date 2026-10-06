@@ -541,7 +541,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
           </div>
         </section>
 
-        {/* Narrow window: the sheet is below the picker, this bar leads to it (like "NÃ¤ytÃ¤ pakka" in the deck editor). */}
+        {/* Narrow window: the sheet is below the picker, this bar leads to it (like "Näytä pakka" in the deck editor). */}
         <div className="deck-bar proxy-screen" hidden={panelInView}>
           <p className="deck-bar-text">
             <span key={bump} className={bump > 0 ? 'deck-bar-part proxy-flash' : 'deck-bar-part'}>
@@ -568,7 +568,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
           {pageCount > 1 && (
             <div className="proxy-pager proxy-screen" role="group" aria-label={proxyTexts.sheetPager}>
               <button type="button" className="button-secondary" disabled={pageIdx === 0} aria-label={proxyTexts.prevSheet} onClick={() => setPage(pageIdx - 1)}>
-                <span aria-hidden="true">â€¹</span>
+                <span aria-hidden="true">{'‹'}</span>
               </button>
               <span className="proxy-pager-label">{pageLabel}</span>
               <button
@@ -578,7 +578,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
                 aria-label={proxyTexts.nextSheet}
                 onClick={() => setPage(pageIdx + 1)}
               >
-                <span aria-hidden="true">â€º</span>
+                <span aria-hidden="true">{'›'}</span>
               </button>
             </div>
           )}
