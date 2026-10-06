@@ -87,7 +87,8 @@ describe('DeckStats (T-053)', () => {
       <DeckStats deck={fullDeck} cardsByKey={sellableCards} colors={colorDistribution(fullDeck, sellableCards)} groups={grouped.groups} mainCount={42} missingText="" rng={lcg(5)} />,
     );
     expect(screen.getByRole('heading', { name: 'Eddiet (€$)' })).toBeInTheDocument();
-    expect(screen.getByText(/^Pakassa on \d+ myytävää korttia, suositus noin \d+\.$/)).toBeInTheDocument();
+    expect(screen.getByText(/^Pakassa on \d+ myytävää korttia, suositus \d+(–\d+)? korttia \(\d+(–\d+)? %\)\.$/)).toBeInTheDocument();
+    expect(screen.getByText(/^Suositus \d+(–\d+)? \(\d+(–\d+)? %\) · /)).toBeInTheDocument();
     expect(screen.getByText(/^Vuoro 1: keskimäärin/)).toBeInTheDocument();
     expect(screen.getByText(/^Myynti joka vuoro vuoroon 2 asti:/)).toBeInTheDocument();
   });

@@ -119,6 +119,11 @@ export function DeckPickTable({
                   </span>
                 )}
                 <span className="pick-meta">{cardMeta(card)}</span>
+                {blocker !== null && (
+                  <span className="pick-blocked" aria-hidden="true" title={blocker.reason}>
+                    ⚠ {blocker.short}
+                  </span>
+                )}
               </th>
               <td className="col-type">
                 <span className={typeBadgeClass(card.color)} lang="en">
@@ -157,14 +162,9 @@ export function DeckPickTable({
                   </button>
                 )}
                 {blocker !== null && (
-                  <>
-                    <span className="pick-blocked" aria-hidden="true" title={blocker.reason}>
-                      {blocker.short}
-                    </span>
-                    <span id={hintId} className="visually-hidden">
-                      {blocker.reason}
-                    </span>
-                  </>
+                  <span id={hintId} className="visually-hidden">
+                    {blocker.reason}
+                  </span>
                 )}
               </td>
             </tr>

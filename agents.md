@@ -2,6 +2,7 @@
 
 > Versio 1.3 · 2026-10-01 (muutokset: katso "Muutokset tähän tiedostoon")
 > Tämä tiedosto määrittelee tiimin roolit, vastuut ja yhteispelin. **Jokainen agentti noudattaa `rules.md`:tä**, joka menee tämän tiedoston edelle ristiriitatilanteessa.
+> **Käytössä (D-026):** valmiita aliagentteja ovat vain Koodari ja Digiturva. Muiden roolien kuvaukset ja tarkistuslistat ovat PM:n lähdemateriaalia: PM tekee työn itse tai liittää tarvittavan kohdan tilannekohtaiseen tehtävänantoon.
 
 ---
 

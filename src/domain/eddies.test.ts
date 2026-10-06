@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Card } from './card';
 import { toCardsByKey } from './deckRules';
-import { EDDIE_TARGET_CHANCE, eddieCurve, eddieSummary, eddieTargetTurn, recommendedSellable } from './eddies';
+import { eddieCurve, eddieSummary, eddieTargetTurn, sellableTarget } from './eddies';
 
 describe('eddieCurve (T-096)', () => {
   it('gives nothing without sellable cards and one Eddie a turn with only sellable cards', () => {
@@ -35,12 +35,25 @@ describe('recommendation', () => {
     expect(eddieTargetTurn(8.5)).toBe(6);
   });
 
-  it('asks for more sellable cards for a pricier deck, and the number reaches the target chance', () => {
-    const cheap = recommendedSellable(40, 2) ?? 99;
-    const pricey = recommendedSellable(40, 5) ?? 99;
-    expect(pricey).toBeGreaterThan(cheap);
-    expect(eddieCurve(40, pricey, 5).onCurve[4]).toBeGreaterThanOrEqual(EDDIE_TARGET_CHANCE);
-    expect(eddieCurve(40, pricey - 1, 5).onCurve[4]).toBeLessThan(EDDIE_TARGET_CHANCE);
+  it('recommends 55-60 % of the deck at an average Cost of 3', () => {
+    expect(sellableTarget(42, 3)).toMatchObject({ min: 23, max: 25 });
+    expect(sellableTarget(40, 3)).toMatchObject({ min: 22, max: 24 });
+    const target = sellableTarget(40, 3);
+    expect(target?.shareLow).toBeCloseTo(0.55);
+    expect(target?.shareHigh).toBeCloseTo(0.6);
+  });
+
+  it('asks for more for a pricier deck and fewer for a cheaper one, centre kept within 45-70 %', () => {
+    expect(sellableTarget(40, 4)?.min ?? 0).toBeGreaterThan(sellableTarget(40, 3)?.min ?? 99);
+    expect(sellableTarget(40, 2)?.max ?? 99).toBeLessThan(sellableTarget(40, 3)?.max ?? 0);
+    expect(sellableTarget(100, 20)?.shareHigh).toBeCloseTo(0.725);
+    expect(sellableTarget(100, 20)?.shareLow).toBeCloseTo(0.675);
+    expect(sellableTarget(100, 0)?.shareLow).toBeCloseTo(0.425);
+  });
+
+  it('uses the normal band without a known Cost and gives nothing for an empty deck', () => {
+    expect(sellableTarget(40, null)).toEqual(sellableTarget(40, 3));
+    expect(sellableTarget(0, 3)).toBeNull();
   });
 });
 
@@ -67,5 +80,6 @@ describe('eddieSummary', () => {
     expect(summary.unknown).toBe(1);
     expect(summary.deckSize).toBe(9);
     expect(summary.targetTurn).toBe(3);
+    expect(summary.target).toMatchObject({ min: 5, max: 5 });
   });
 });

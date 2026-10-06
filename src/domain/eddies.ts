@@ -14,8 +14,6 @@ import { DRAWS_PER_TURN, OPENING_HAND, averageCost, mainDeckSize } from './deckS
 export const EDDIE_TURNS = 6;
 /** Simulated games per estimate. Fixed seed: the same deck always gives the same numbers. */
 export const EDDIE_RUNS = 4000;
-/** "On curve" is reached in this share of games or more. */
-export const EDDIE_TARGET_CHANCE = 0.8;
 
 export interface EddieCurve {
   /** Average Eddies at the end of turns 1 … EDDIE_TURNS. */
@@ -84,25 +82,35 @@ export function eddieTargetTurn(avgCost: number | null): number {
   return Math.min(EDDIE_TURNS, Math.max(2, Math.ceil(avgCost - 0.05)));
 }
 
-/** Fewest sellable cards that reach the target turn on curve in EDDIE_TARGET_CHANCE of games; null if none does. */
-const recommendations = new Map<string, number | null>();
+/** Target share of the main deck that is sellable (D-024, T-103): centre at an average Cost of 3, ± half the band. */
+export const SELLABLE_SHARE_AT_COST_3 = 0.575;
+export const SELLABLE_SHARE_PER_COST = 0.05;
+export const SELLABLE_SHARE_MIN = 0.45;
+export const SELLABLE_SHARE_MAX = 0.7;
+export const SELLABLE_BAND = 0.025;
 
-export function recommendedSellable(deckSize: number, targetTurn: number): number | null {
-  if (deckSize <= 0) return null;
-  const id = deckSize + ':' + targetTurn;
-  const known = recommendations.get(id);
-  if (known !== undefined) return known;
-  const found = searchSellable(deckSize, targetTurn);
-  recommendations.set(id, found);
-  return found;
+export interface SellableTarget {
+  /** Target share of the main deck, e.g. 0.55 … 0.60. */
+  readonly shareLow: number;
+  readonly shareHigh: number;
+  /** The same as copies of the deck, rounded: min … max. */
+  readonly min: number;
+  readonly max: number;
 }
 
-function searchSellable(deckSize: number, targetTurn: number): number | null {
-  for (let sellable = 0; sellable <= deckSize; sellable++) {
-    const chance = eddieCurve(deckSize, sellable, targetTurn).onCurve[targetTurn - 1] ?? 0;
-    if (chance >= EDDIE_TARGET_CHANCE) return sellable;
-  }
-  return null;
+/**
+ * Recommended sellable (€$) cards as a share of the main deck: 55–60 % at an average Cost of 3, more for a
+ * pricier deck, fewer for a cheaper one. null for an empty deck.
+ */
+export function sellableTarget(deckSize: number, avgCost: number | null): SellableTarget | null {
+  if (deckSize <= 0) return null;
+  const centre = Math.min(
+    SELLABLE_SHARE_MAX,
+    Math.max(SELLABLE_SHARE_MIN, SELLABLE_SHARE_AT_COST_3 + ((avgCost ?? 3) - 3) * SELLABLE_SHARE_PER_COST),
+  );
+  const shareLow = centre - SELLABLE_BAND;
+  const shareHigh = centre + SELLABLE_BAND;
+  return { shareLow, shareHigh, min: Math.round(deckSize * shareLow), max: Math.round(deckSize * shareHigh) };
 }
 
 export interface EddieSummary {
@@ -113,11 +121,12 @@ export interface EddieSummary {
   readonly unknown: number;
   readonly deckSize: number;
   readonly targetTurn: number;
-  readonly recommended: number | null;
+  /** Recommended range of sellable cards (D-024), null for an empty deck. */
+  readonly target: SellableTarget | null;
   readonly curve: EddieCurve;
 }
 
-/** Sellable cards of the main deck (Legends are not in it), the Eddie curve and the recommendation. */
+/** Sellable cards of the main deck (Legends are not in it), the Eddie curve and the recommended range. */
 export function eddieSummary(deck: DeckContent, cardsByKey: CardsByKey): EddieSummary {
   let sellable = 0;
   let unknown = 0;
@@ -133,14 +142,15 @@ export function eddieSummary(deck: DeckContent, cardsByKey: CardsByKey): EddieSu
     }
   }
   const deckSize = mainDeckSize(deck, cardsByKey);
-  const targetTurn = eddieTargetTurn(averageCost(deck, cardsByKey));
+  const avgCost = averageCost(deck, cardsByKey);
+  const targetTurn = eddieTargetTurn(avgCost);
   return {
     sellable,
     byType,
     unknown,
     deckSize,
     targetTurn,
-    recommended: recommendedSellable(deckSize, targetTurn),
+    target: sellableTarget(deckSize, avgCost),
     curve: eddieCurve(deckSize, sellable),
   };
 }

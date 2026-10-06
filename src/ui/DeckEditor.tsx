@@ -8,7 +8,7 @@ import {
   MAX_MAIN_DECK,
   MIN_MAIN_DECK,
   MAX_COPIES,
-  addBlocker,
+  addBlockerInfo,
   allDeckCounts,
   sideboardCounts,
   sideboardSize,
@@ -21,9 +21,6 @@ import {
   ramLimits,
   toCardsByKey,
   validateDeck,
-  deckCounts as countsOfDeck,
-  deckTotals as totalsOfDeck,
-  LEGEND_COUNT as LEGEND_LIMIT,
   MAX_COPIES as COPY_LIMIT,
 } from '../domain/deckRules';
 import {
@@ -60,6 +57,7 @@ import type { DeckView } from './DeckList';
 import { DeckPickTable } from './DeckPickTable';
 import { DeckStats } from './DeckStats';
 import { Sideboard } from './Sideboard';
+import { deckProblems } from './DeckProblems';
 import type { MissingCard } from '../domain/deckExport';
 import { findSubstitutes } from '../domain/substitutes';
 import type { PickBlocker } from './DeckPickTable';
@@ -374,6 +372,7 @@ export function DeckEditor({
 
   const issues = useMemo(() => validateDeck(content, cardsByKey), [content, cardsByKey]);
   const totals = useMemo(() => deckTotals(content, cardsByKey), [content, cardsByKey]);
+  const problems = useMemo(() => deckProblems(issues, totals.main), [issues, totals.main]);
   const limits = useMemo(() => ramLimits(content, cardsByKey), [content, cardsByKey]);
   const counts = useMemo(() => deckCounts(content), [content]);
   const allCounts = useMemo(() => allDeckCounts(content), [content]);
@@ -495,23 +494,22 @@ export function DeckEditor({
   };
 
   /**
-   * The short mark tells a same-name Legend (refused) from a broken limit (allowed, T-045). The reason
-   * always matches the mark: a same-name Legend wins over the Legend count (UX-045).
+   * A card whose next copy would make the deck illegal is dimmed with a visible reason (T-103). A same-name
+   * Legend is refused; every other block only warns and the card can still be added (T-045).
    */
   const blockerOf = (card: Card): PickBlocker | null => {
     if (hasSameNameLegend(card, content, cardsByKey)) {
       return { reason: deckTexts.sameLegendReason(card.name), short: deckTexts.blockedLegend };
     }
-    const blocker = addBlocker(card, content, cardsByKey);
-    if (blocker === null) return null;
-    // T-057: mark only when the deck is already over a limit, not when the next copy would be.
-    const count = countsOfDeck(content).get(card.key) ?? 0;
-    const over =
-      card.type === 'Legend'
-        ? count > 0 && totalsOfDeck(content, cardsByKey).legends > LEGEND_LIMIT
-        : count > COPY_LIMIT || (count > 0 && blocker.startsWith('RAM'));
-    if (!over) return null;
-    return { reason: deckTexts.dimmedHint(blocker), short: deckTexts.blockedLimit };
+    const info = addBlockerInfo(card, content, cardsByKey);
+    if (info === null) return null;
+    const short =
+      info.kind === 'ram-over'
+        ? deckTexts.blockedRam(info.ram ?? 0, info.color ?? '', info.limit ?? 0)
+        : info.kind === 'copies-full'
+          ? deckTexts.blockedCopies(COPY_LIMIT)
+          : deckTexts.blockedLegendsFull;
+    return { reason: deckTexts.dimmedHint(info.message), short };
   };
 
   const handleName = (text: string) => {
@@ -787,6 +785,7 @@ export function DeckEditor({
             searchInputRef={searchInputRef}
           />
           <p className="hint pick-hint">{deckTexts.pickHint}</p>
+          <p className="hint pick-hint pick-explain">{deckTexts.blockedExplain}</p>
           <div role="status" className="toast-slot">
             {toast !== null && (
               <p className="toast">
@@ -818,9 +817,14 @@ export function DeckEditor({
                       hoverProps={imageSize === 'small' ? preview.bind(card) : undefined}
                       hint={
                         blocker !== null && (
-                          <span id={hintId} className="visually-hidden">
-                            {blocker.reason}
-                          </span>
+                          <>
+                            <span className="pick-blocked" aria-hidden="true">
+                              ⚠ {blocker.short}
+                            </span>
+                            <span id={hintId} className="visually-hidden">
+                              {blocker.reason}
+                            </span>
+                          </>
                         )
                       }
                     >
@@ -942,10 +946,13 @@ export function DeckEditor({
             hoverProps={preview.bind}
             onMoveToSideboard={(card) => moveCopy(card, true)}
             onAddToSideboard={addToSideboard}
+            problems={problems}
           />
           <Sideboard
             rows={sideRows}
             size={sideboardSize(content)}
+            view={deckView}
+            problems={problems}
             onChange={setSideCount}
             onMoveToMain={(card) => moveCopy(card, false)}
             onOpenImage={openImage}

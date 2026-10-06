@@ -2,6 +2,7 @@ import type { Card } from './card';
 import type { CardKey } from './cardKey';
 import { SIDEBOARD_SECTION_NAME, SIDEBOARD_SIZE } from './deck';
 import type { DeckContent } from './deck';
+import { KNOWN_CARD_COLORS } from './cardSearch';
 import { currentDeckMessages } from './deckMessages';
 
 /** Deck rules (T-013). Sources: cyberpunktcg.com/gameplay-guide and ripperdeck.gg/rules, see the task card. */
@@ -231,30 +232,48 @@ export function errorsOf(issues: readonly DeckIssue[]): DeckIssue[] {
   return issues.filter((issue) => issue.severity === 'error');
 }
 
+export type AddBlockerKind = 'legends-full' | 'legend-in-deck' | 'copies-full' | 'ram-over';
+
+export interface AddBlockerInfo {
+  readonly kind: AddBlockerKind;
+  readonly message: string;
+  /** For 'ram-over': the card's RAM, its colour and the colour's RAM limit. */
+  readonly ram?: number;
+  readonly color?: string;
+  readonly limit?: number;
+}
+
 /**
  * Why adding one more copy of `card` would break a rule, or null when it would not. Adding is still
- * allowed so an unfinished deck can be built; this only explains the dimmed state (T-013).
+ * allowed so an unfinished deck can be built; this only explains the dimmed state (T-013, T-103).
  */
-export function addBlocker(card: Card, deck: DeckContent, cardsByKey: CardsByKey): string | null {
+export function addBlockerInfo(card: Card, deck: DeckContent, cardsByKey: CardsByKey): AddBlockerInfo | null {
   const counts = deckCounts(deck);
   if (card.type === 'Legend') {
     const totals = deckTotals(deck, cardsByKey);
-    if (totals.legends >= LEGEND_COUNT) return currentDeckMessages().legendsFull(LEGEND_COUNT);
+    if (totals.legends >= LEGEND_COUNT) return { kind: 'legends-full', message: currentDeckMessages().legendsFull(LEGEND_COUNT) };
     for (const [key, count] of counts) {
       const other = cardsByKey.get(key);
       if (count > 0 && other?.type === 'Legend' && other.name === card.name) {
-        return currentDeckMessages().legendInDeck(card.name);
+        return { kind: 'legend-in-deck', message: currentDeckMessages().legendInDeck(card.name) };
       }
     }
     return null;
   }
-  if ((counts.get(card.key) ?? 0) >= MAX_COPIES) return currentDeckMessages().copiesFull(MAX_COPIES);
+  if ((counts.get(card.key) ?? 0) >= MAX_COPIES) return { kind: 'copies-full', message: currentDeckMessages().copiesFull(MAX_COPIES) };
   // Without a Legend there are no RAM limits yet; the Legend count issue covers it (B-020, T-052).
   if (card.color !== null && card.ram !== null && deckTotals(deck, cardsByKey).legends > 0) {
     const limit = ramLimits(deck, cardsByKey).get(card.color) ?? 0;
-    if (card.ram > limit) return currentDeckMessages().ramOver(card.ram, card.color, limit);
+    if (card.ram > limit) {
+      return { kind: 'ram-over', message: currentDeckMessages().ramOver(card.ram, card.color, limit), ram: card.ram, color: card.color, limit };
+    }
   }
   return null;
+}
+
+/** The text of {@link addBlockerInfo}, or null. */
+export function addBlocker(card: Card, deck: DeckContent, cardsByKey: CardsByKey): string | null {
+  return addBlockerInfo(card, deck, cardsByKey)?.message ?? null;
 }
 
 export interface DeckRow {
@@ -266,11 +285,21 @@ export interface DeckGroups {
   readonly legends: readonly DeckRow[];
   /** Main deck by type (Unit, Gear, Program, then other types), each ordered by Cost, then name. */
   readonly groups: readonly { readonly type: string; readonly rows: readonly DeckRow[] }[];
+  /**
+   * The same main deck by colour, then type (T-103): Red, Yellow, Green, Blue (then other or no colour), and in each
+   * colour Unit, Gear, Program, other types. Rows are ordered by Cost, then name.
+   */
+  readonly colorGroups: readonly {
+    readonly color: string | null;
+    readonly type: string;
+    readonly rows: readonly DeckRow[];
+  }[];
   /** Keys not found in the card data, with their copies. */
   readonly unknown: readonly { readonly key: CardKey; readonly count: number }[];
 }
 
 const MAIN_TYPE_ORDER = ['Unit', 'Gear', 'Program'];
+const COLOR_ORDER: readonly string[] = KNOWN_CARD_COLORS;
 
 function byCostThenName(a: DeckRow, b: DeckRow): number {
   const cost = (a.card.cost ?? Number.MAX_SAFE_INTEGER) - (b.card.cost ?? Number.MAX_SAFE_INTEGER);
@@ -288,11 +317,38 @@ export function groupDeck(deck: DeckContent, cardsByKey: CardsByKey): DeckGroups
     else if (card.type === 'Legend') legends.push({ card, count });
     else byType.set(card.type, [...(byType.get(card.type) ?? []), { card, count }]);
   }
+  const byColorType = new Map<string, DeckRow[]>();
+  for (const [type, rows] of byType) {
+    for (const row of rows) {
+      const id = JSON.stringify([row.card.color, type]);
+      byColorType.set(id, [...(byColorType.get(id) ?? []), row]);
+    }
+  }
+  const colorRank = (color: string | null): number => {
+    const index = color === null ? -1 : COLOR_ORDER.indexOf(color);
+    return index === -1 ? COLOR_ORDER.length : index;
+  };
+  const typeRank = (type: string): number => {
+    const index = MAIN_TYPE_ORDER.indexOf(type);
+    return index === -1 ? MAIN_TYPE_ORDER.length : index;
+  };
+  const colorGroups = [...byColorType]
+    .map(([id, rows]) => {
+      const [color, type] = JSON.parse(id) as [string | null, string];
+      return { color, type, rows: [...rows].sort(byCostThenName) };
+    })
+    .sort(
+      (a, b) =>
+        colorRank(a.color) - colorRank(b.color) ||
+        (a.color ?? '').localeCompare(b.color ?? '', 'en') ||
+        typeRank(a.type) - typeRank(b.type) ||
+        a.type.localeCompare(b.type, 'en'),
+    );
   const otherTypes = [...byType.keys()].filter((type) => !MAIN_TYPE_ORDER.includes(type));
   const groups = [...MAIN_TYPE_ORDER, ...otherTypes]
     .filter((type) => byType.has(type))
     .map((type) => ({ type, rows: [...(byType.get(type) ?? [])].sort(byCostThenName) }));
-  return { legends: legends.sort(byCostThenName), groups, unknown };
+  return { legends: legends.sort(byCostThenName), groups, colorGroups, unknown };
 }
 
 /**
