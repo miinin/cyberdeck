@@ -89,10 +89,10 @@ export function ActiveFilters({
   }, [filters, searchInputRef]);
 
   // Empty, the row still keeps its height (T-084): the cards below do not move when a filter comes or goes.
-  if (filters.length === 0 && !showClear) return <div className="active-filters" />;
+  if (filters.length === 0 && !showClear) return <div id="active-filters" className="active-filters" />;
 
   return (
-    <div className="active-filters">
+    <div id="active-filters" className="active-filters">
       {filters.length > 0 && (
         <span className="active-filters-label" aria-hidden="true">
           {texts.activeFilters}
