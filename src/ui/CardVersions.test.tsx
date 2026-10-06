@@ -247,3 +247,29 @@ describe('CardVersions: Retail and Beta rows on the base tile (D-022)', () => {
     expect(document.querySelector('.edition-row')).toBeNull();
   });
 });
+
+// T-091: the actual sets first; other products only when the version is in no set, else behind "+N".
+describe('CardVersions set chips', () => {
+  const promo = printing('promo', 'Set 1 Promos', '005', 'en', 'Rare');
+  const starter = printing('starter', 'Starter Deck Arasaka', '005', 'en', 'Rare');
+  const sets = () => {
+    const element = document.querySelector<HTMLElement>('li.art-tile > .art-sets');
+    if (element === null) throw new Error('no set chips');
+    return within(element);
+  };
+
+  it('shows the set and hides the other products behind "+N muuta tuotetta"', () => {
+    render(<CardVersions card={{ ...card, printings: [retail, beta, promo, starter] }} count={0} versionCount={() => 0} editable={false} onChange={vi.fn()} onLimit={vi.fn()} />);
+    const summary = screen.getByText('+2 muuta tuotetta');
+    expect(summary.tagName).toBe('SUMMARY');
+    expect(summary.closest('details')).not.toHaveAttribute('open');
+    expect(sets().getByText('Welcome to Night City')).toBeInTheDocument();
+    expect(sets().getByText('Set 1 Promos').closest('details')).not.toBeNull();
+  });
+
+  it('shows the products directly when the version is in no set', () => {
+    render(<CardVersions card={{ ...card, printings: [promo] }} count={0} versionCount={() => 0} editable={false} onChange={vi.fn()} onLimit={vi.fn()} />);
+    expect(sets().getByText('Set 1 Promos').closest('details')).toBeNull();
+    expect(sets().queryByText(/muu/)).toBeNull();
+  });
+});

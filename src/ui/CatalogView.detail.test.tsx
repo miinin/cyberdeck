@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Card } from '../domain/card';
 import { createMemoryRepositories } from '../storage';
@@ -38,5 +38,28 @@ describe('Catalog: card detail dialog (T-070)', () => {
     expect(within(dialog).getByRole('heading', { level: 3, name: 'Want-listalla' })).toBeInTheDocument();
     expect(within(dialog).getByText('Pelisarja täynnä')).toBeInTheDocument();
     expect(within(dialog).getByRole('link', { name: 'Eka' })).toHaveAttribute('href', '#/pakat/a');
+  });
+});
+
+describe('Catalog: full-screen card image (T-091)', () => {
+  it('opens the whole card on the whole screen; Esc and a tap return to the details', async () => {
+    const user = userEvent.setup();
+    render(<CatalogView cards={[streetkid]} repositories={createMemoryRepositories()} />);
+    await user.click(await screen.findByRole('button', { name: /^Suurenna kuva: V/ }));
+    const dialog = await screen.findByRole('dialog', { name: /Streetkid/ });
+
+    const open = within(dialog).getByRole('button', { name: 'Näytä koko ruudulla' });
+    await user.click(open);
+    const close = within(dialog).getByRole('button', { name: 'Sulje koko ruudun kuva' });
+    expect(close).toHaveFocus();
+    await user.click(close);
+    expect(within(dialog).queryByRole('button', { name: 'Sulje koko ruudun kuva' })).not.toBeInTheDocument();
+    expect(open).toHaveFocus();
+
+    await user.click(open);
+    // Esc on a modal dialog is a cancel event (jsdom does not map the key itself).
+    fireEvent(dialog, new Event('cancel', { cancelable: true }));
+    expect(within(dialog).queryByRole('button', { name: 'Sulje koko ruudun kuva' })).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Streetkid/ })).toBeInTheDocument();
   });
 });
