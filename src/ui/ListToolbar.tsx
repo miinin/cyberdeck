@@ -21,7 +21,7 @@ export function ImageSizeSelect({
   onChange: (next: ImageSize) => void;
 }) {
   return (
-    <fieldset className="view-select">
+    <fieldset className="view-select image-size-select">
       <legend>{texts.imageSizeLegend}</legend>
       <div className="options">
         {IMAGE_SIZE_OPTIONS.map(([option, label]) => (
