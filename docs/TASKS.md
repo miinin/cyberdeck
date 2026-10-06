@@ -91,3 +91,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-085 | Gitleaks käyttöön: pre-commit-hook (`.githooks/`, `prepare`-skripti), `.gitleaks.toml`-poikkeukset, historian skannaus (D-023) | 1 | Must | PM | Done | PM testi: estää vuotavan commitin ✓ |
 | T-086 | Siivous ja hostingin kovennus (T-009:stä): TASKS-tilat ajan tasalle, `index.html` `Cache-Control: no-cache`, SPA-rewrite pois (puuttuva asset = 404, B-004), noscript | 1 | Should | PM | Done | Digiturva |
 | T-087 | Mobiili: yläpalkki kahdelle riville, suodatinpaneelin loppuun "Näytä N korttia" (sulkee paneelin ja vie tuloksiin), työkalurivin kytkin vasempaan reunaan | 1 | Should | PM | Done | PM mobiilikuvat ✓ |
+| T-088 | Mobiili 2: tietonäkymän versioruudut kuva vasemmalla ja laskurit samassa linjassa, Kuvakoko piiloon puhelimessa (ei vaikutusta), jakolinkin ohje painikkeen alle | 1 | Should | PM | Done | PM mobiilikuvat ✓ |
