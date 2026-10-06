@@ -10,13 +10,13 @@ Säännöt: `rules.md`, roolit: `agents.md`. **Niitä ei ladata automaattisesti 
 - Kysy käyttäjältä: tuotepäätökset, maksulliset palvelut, peruuttamattomat toimet, riskien hyväksyntä. Kun jokin käyttäytyy odottamattomasti, kysy äläkä arvaa.
 - Kielletty ilman lupaa: force push, `reset --hard`, `clean -f`, historian uudelleenkirjoitus, massapoistot.
 
-## Kevyt malli (D-014, voimassa 2026-10-02 alkaen)
+## Kevyt malli (D-014, D-026)
 - **Pääistunto on PM.** Pienen ja selkeän tehtävän (alle noin 150 riviä, ei uutta riippuvuutta, ei tietomallia) PM määrittelee lyhyesti korttiin ja antaa **yhdelle Koodarille**. Erillistä suunnitteluvaihetta ei ole.
-- **Yksi agentti kerrallaan.** Koodari, UX, Sisällöntuottaja, Testikäyttäjä ja Dokumentoija ajetaan Sonnetilla. Arkkitehti ja Digiturva ajetaan Opuksella, ja vain kun niitä tarvitaan.
-- **Katselmoinnit vain riskin mukaan:** Digiturva, kun muuttuvat riippuvuudet, firebase.json, workflowt, tiedostojen tai syötteen käsittely tai tallennus. Arkkitehti tietomallin tai uuden teknologian kohdalla. UX ja Testikäyttäjä MVP-tason lopussa yhdellä kertaa, tai uuden ison näkymän jälkeen. PM tarkistaa muut esikatselusta itse.
+- **Kaksi valmista agenttia:** `koodari` (Sonnet) toteuttaa ja `digiturva` (Opus) katselmoi turvallisuuden. Muun työn (rakennepäätös, UX, tekstit, rikkomistestaus, dokumentointi) PM tekee itse tai antaa tilannekohtaisella tehtävänannolla yleisagentille ja valitsee mallin työn mukaan: rutiini Sonnetilla, vaativa harkinta Opuksella. agents.md:n roolikuvaukset ja tarkistuslistat ovat tehtävänantojen lähdemateriaalia. Yksi agentti kerrallaan.
+- **Katselmoinnit vain riskin mukaan:** Digiturva, kun muuttuvat riippuvuudet, firebase.json, workflowt, tiedostojen tai syötteen käsittely tai tallennus. Rakennearvio tietomallin tai uuden teknologian kohdalla. UX-katselmointi ja rikkomistestaus MVP-tason lopussa yhdellä kertaa tai uuden ison näkymän jälkeen. PM tarkistaa muut esikatselusta itse.
 - **Kevyt kirjaus:** kortissa on määrittely ja yksi luovutus. Väli-checkpoint kirjataan vain, jos työ keskeytyy. STATUS.md ja TASKS.md päivitetään tehtävän lopussa.
 - **Lue vähän:** älä lue kokonaan `docs/UX.md`:tä (170 kt), `docs/ARCHITECTURE.md`:tä (85 kt), `rules.md`:tä tai `agents.md`:tä. Hae tarvittava kohta grepillä ja lue vain se.
-- **Lyhyet tehtävänannot ja vastaukset.** Aliagentti palauttaa enintään noin 15 riviä.
+- **Lyhyet tehtävänannot ja vastaukset.** Aliagentin paluuviesti kertoo vain tuloksen, avoimet kysymykset ja seuraavan askeleen, koska yksityiskohdat ovat kortissa.
 
 ## Git ja julkaisu (D-001, D-003)
 ```

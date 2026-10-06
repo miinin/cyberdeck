@@ -554,3 +554,12 @@ Päätöksessä on viisi osaa.
 - **K-P10:** ensimmäinen versio julkaistaan ilman ilmiantotoimintoa, ja riski on kirjattu.
 - **K-P11:** riski R-21 hyväksytään nyt. Kuka tahansa voi kirjautumatta kuluttaa lukukiintiön, mutta rajaukset SR-33 ja SR-34 pienentävät riskiä. App Check otetaan käyttöön myöhemmin, jos ongelmia ilmenee.
 - **K-P12:** hakukoneet eivät indeksoi julkisia pakkoja.
+
+## D-026 · Vain kaksi valmista agenttiroolia · 2026-10-06 · Päättäjä: käyttäjä
+**Tila:** Hyväksytty. Tehtävä T-100.
+**Konteksti:** Promptiauditoinnissa käyttäjätason agenttimäärittelyt olivat ristiriidassa itsensä kanssa: D-014:n ohitusteksti kumosi saman tiedoston aloitus- ja lopetusohjeet. Lisäksi `/tehtava` kuvasi yhä täyden suunnittelu- ja katselmointiketjun. Käyttäjä halusi vähentää ennalta määrättyjä rooleja ja antaa PM:n päättää tarpeen mukaan.
+**Päätös:**
+1. Valmiita aliagentteja ovat `koodari` (Sonnet), joka toteuttaa omassa haarassaan, ja `digiturva` (Opus), joka tekee turvakatselmoinnin kiinteällä tarkistuslistalla ja veto-oikeudella.
+2. Arkkitehti, UX Designer, Sisällöntuottaja, Testikäyttäjä ja Dokumentoija poistettiin agenttimäärittelyistä (`~/.claude/agents/`). PM tekee niiden työn itse tai antaa sen tilannekohtaisella tehtävänannolla yleisagentille. Malli valitaan työn mukaan.
+3. agents.md:n roolikuvaukset ja tarkistuslistat säilyvät tehtävänantojen lähdemateriaalina.
+**Seuraukset:** Katselmointien laajuus riippuu PM:n harkinnasta. Riskin mukaiset rajat ovat CLAUDE.md:ssä. Poistetut määrittelyt ovat varmuuskopiona kansiossa `~/.claude/backup/2026-10-06-prompt-audit/`.

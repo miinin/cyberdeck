@@ -102,3 +102,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-097 | Kortit-otsikon alta pois "Kirjatut versiot" -rivi, kokoelman koko pienenä himmeänä tekstinä | 1 | Should | PM | Done | – |
 | T-098 | Julkiset pakat (D-025): näkyvyys yksityinen/julkinen, oma nimimerkki, Julkiset pakat -välilehti, Firestore publicDecks | 1 | Must | PM → Koodari | Done | Digiturva SEC-098 + SEC-098b ✓, säännöt deployattu |
 | T-099 | [velka] R-22: toisella laitteella poistetun tai yksityiseksi muutetun pakan julkinen kopio poistuu vasta, kun julkaissut laite avaa sovelluksen (SEC-098b-2 jäännösriski) | 2 | Could | Koodari | Backlog | Digiturva |
+| T-100 | Agenttiroolien karsinta (D-026) ja promptiauditoinnin korjaukset | 1 | Should | PM | Done | – |
