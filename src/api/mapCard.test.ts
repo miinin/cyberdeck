@@ -146,7 +146,7 @@ describe('mapCard power and RAM', () => {
   });
 
   // B-009 (T-008): only whole numbers 0 … 99 are game values; the rest are shown as missing.
-  it.each([-5, 1.5, 1e308, 9999999999999999, 100])('maps the out-of-range value %s to null', (value) => {
+  it.each([-5, 1.5, 1e308, 1e16, 100])('maps the out-of-range value %s to null', (value) => {
     expect(mapCard(rawCard(1, { cost: value, power: value, ram: value }))).toMatchObject({ cost: null, power: null, ram: null });
   });
 
