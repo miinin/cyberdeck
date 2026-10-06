@@ -27,12 +27,15 @@ export interface OwnedColumn {
   onArtChange?: (card: Card, art: Art, count: number) => void;
   /** The "Muokkaa kokoelmaa" switch (T-040): false hides the − and + buttons. */
   editable: boolean;
+  /** 'proxy' = the print queue (T-102): its own spoken texts and no playset edge. Default: the collection. */
+  kind?: 'owned' | 'proxy';
 }
 
 /** Box state (UX.md 7.5): only when the collection is ready; a 1 px edge colour, never a size change. */
 export function collectionState(card: Card, owned: OwnedColumn | undefined): string {
   if (owned?.mode !== 'ready') return '';
   const count = owned.countOf(card);
+  if (owned.kind === 'proxy') return count > 0 ? 'is-owned' : '';
   if (count >= playsetSize(card)) return 'is-owned is-playset';
   return count > 0 ? 'is-owned' : '';
 }
@@ -64,6 +67,7 @@ function BoxPicture({
   index,
   onStep,
   onOpenImage,
+  imageLabel,
 }: {
   card: Card;
   imageUrl: string | null;
@@ -71,13 +75,14 @@ function BoxPicture({
   index: number;
   onStep: (delta: number) => void;
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  imageLabel?: string;
 }) {
   const n = versionUrls?.length ?? 0;
-  if (versionUrls === undefined || n < 2) return <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} />;
+  if (versionUrls === undefined || n < 2) return <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} actionLabel={imageLabel} />;
   const step = onStep;
   return (
     <div className="card-picture">
-      <CardImage key={index} card={card} onOpen={onOpenImage} artUrl={versionUrls[index] ?? null} />
+      <CardImage key={index} card={card} onOpen={onOpenImage} artUrl={versionUrls[index] ?? null} actionLabel={imageLabel} />
       <span className="art-count-badge">{texts.versionPosition(index + 1, n)}</span>
       <button type="button" className="version-step version-step--prev" aria-label={texts.versionPrev(card.displayName)} onClick={() => step(-1)}>
         <span aria-hidden="true">‹</span>
@@ -136,6 +141,7 @@ export function CardList({
   owned,
   decksOf,
   onOpenImage,
+  imageLabel,
   renderFoot,
 }: {
   cards: readonly Card[];
@@ -147,6 +153,8 @@ export function CardList({
   decksOf?: (card: Card) => readonly string[];
   /** Opens the enlarged image (T-027 UX); the button is where focus returns. */
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  /** Spoken text of the picture button when it does not enlarge (Proxy adds on click). */
+  imageLabel?: string;
   /** Per-card control in place of the collection control (Have/Want, T-067). */
   renderFoot?: (card: Card) => ReactNode;
 }) {
@@ -160,6 +168,7 @@ export function CardList({
           owned={owned}
           decksOf={decksOf}
           onOpenImage={onOpenImage}
+          imageLabel={imageLabel}
           renderFoot={renderFoot}
         />
       ))}
@@ -174,6 +183,7 @@ function CardBox({
   owned,
   decksOf,
   onOpenImage,
+  imageLabel,
   renderFoot,
 }: {
   item: CardListItem;
@@ -181,6 +191,7 @@ function CardBox({
   owned?: OwnedColumn;
   decksOf?: (card: Card) => readonly string[];
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  imageLabel?: string;
   renderFoot?: (card: Card) => ReactNode;
 }) {
   const { card, art, imageUrl, artCount, versionUrls, versionRarities, startVersion = 0 } = item;
@@ -197,7 +208,7 @@ function CardBox({
   return (
     <li className={'card-box card-box--art ' + state}>
       {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
-      <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} />
+      <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} imageLabel={imageLabel} />
       <div className="card-head">
         <dl className="card-cost">
           <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
@@ -256,6 +267,7 @@ function CardBox({
               onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
               onLimit={owned.onLimit}
               editable={owned.editable}
+              kind={owned.kind}
               min={artMode ? 0 : owned.minOf?.(card)}
             />
           </div>

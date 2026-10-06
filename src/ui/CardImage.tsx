@@ -18,11 +18,14 @@ export function CardImage({
   card,
   onOpen,
   artUrl = null,
+  actionLabel,
 }: {
   card: Card;
   onOpen: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
   /** A special art to show in place of the card's own picture (D-021). */
   artUrl?: string | null;
+  /** The click does something else than enlarge (Proxy: add to the sheet): its spoken text, no dialog hint. */
+  actionLabel?: string;
 }) {
   const image = getCardImage(card.key);
   const [failed, setFailed] = useState(false);
@@ -31,7 +34,7 @@ export function CardImage({
     <button
       type="button"
       className="card-image-button"
-      aria-haspopup="dialog"
+      aria-haspopup={actionLabel === undefined ? 'dialog' : undefined}
       onClick={(event) => onOpen(card, event.currentTarget, artUrl)}
     >
       <img
@@ -47,7 +50,7 @@ export function CardImage({
         onError={() => setFailed(true)}
       />
       <span className="visually-hidden">
-        {texts.enlargeImage}
+        {actionLabel ?? texts.enlargeImage}
         <CardName card={card} />
       </span>
     </button>

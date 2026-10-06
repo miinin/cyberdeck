@@ -10,6 +10,8 @@ import { CatalogView } from './ui/CatalogView';
 import { DeckEditor } from './ui/DeckEditor';
 import { SharedDeckView } from './ui/SharedDeckView';
 import { HaveWantView } from './ui/HaveWantView';
+import { ProxyView } from './ui/ProxyView';
+import { proxyTexts } from './ui/proxyTexts';
 import { SharedTradeView } from './ui/SharedTradeView';
 import { DecksView } from './ui/DecksView';
 import { PublicDeckView } from './ui/PublicDeckView';
@@ -124,6 +126,9 @@ export function App({
             <a href="#/vaihto" aria-current={route.name === 'havewant' || route.name === 'trade' ? 'page' : undefined}>
               {deckTexts.navHaveWant}
             </a>
+            <a href="#/proxy" aria-current={route.name === 'proxy' ? 'page' : undefined}>
+              {proxyTexts.navProxy}
+            </a>
           </nav>
           <div className="header-tools">
           <ThemeToggle preferences={openRepositories.preferences} />
@@ -194,6 +199,7 @@ export function App({
         {route.name === 'havewant' && (
           <HaveWantView cards={cards} repositories={openRepositories} />
         )}
+        {route.name === 'proxy' && <ProxyView cards={cards} repositories={openRepositories} />}
         {route.name === 'trade' && (
           <SharedTradeView data={route.data} cards={cards} repositories={openRepositories} />
         )}

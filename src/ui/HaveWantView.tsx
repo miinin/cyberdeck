@@ -21,6 +21,8 @@ import { SEARCH_MAX_LENGTH } from './CardFilters';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
 import { useWants } from './useWants';
+import { proxyTexts } from './proxyTexts';
+import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 
 /** At most this many search results are listed; a more exact search narrows them (the list stays short). */
 const MAX_RESULTS = 20;
@@ -32,6 +34,7 @@ const MAX_RESULTS = 20;
 export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; repositories: Repositories }) {
   const { snapshot: collection } = useCollection(repositories.collection);
   const { snapshot: wants, store: wantsStore } = useWants(repositories.wants);
+  const proxyQueue = useProxyQueue(repositories.proxy);
   const [query, setQuery] = useState('');
   const [live, setLive] = useState('');
   const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
@@ -131,6 +134,15 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
           {wantReady && (
             <>
               <p className="hint">{texts.wantIntro}</p>
+              {wantedCards.length > 0 && (
+                <div className="missing-add proxy-send">
+                  <SendToProxyButton
+                    rows={wantedCards.map((card) => ({ card: card.key, count: countIn(wants, card.key) }))}
+                    queue={proxyQueue}
+                    label={proxyTexts.sendAllWants}
+                  />
+                </div>
+              )}
               {wantedCards.length === 0 ? (
                 <p>{texts.wantEmpty}</p>
               ) : (
@@ -139,15 +151,24 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
                   caption={texts.wantHeading}
                   onOpenImage={openImage}
                   renderFoot={(card) => (
-                    <CountControl
-                      card={card}
-                      count={countIn(wants, card.key)}
-                      mode="ready"
-                      onChange={change}
-                      onLimit={limit}
-                      editable
-                      kind="want"
-                    />
+                    <>
+                      <CountControl
+                        card={card}
+                        count={countIn(wants, card.key)}
+                        mode="ready"
+                        onChange={change}
+                        onLimit={limit}
+                        editable
+                        kind="want"
+                      />
+                      <SendToProxyButton
+                        rows={[{ card: card.key, count: countIn(wants, card.key) }]}
+                        queue={proxyQueue}
+                        label={proxyTexts.sendWant}
+                        name={proxyTexts.sendWantName(cardNameText(card))}
+                        className="link-button"
+                      />
+                    </>
                   )}
                 />
               )}

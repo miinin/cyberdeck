@@ -30,3 +30,4 @@ export const COLLECTION_MIGRATIONS: readonly Migration[] = [(data) => data, migr
 export const DECKS_MIGRATIONS: readonly Migration[] = [];
 /** The want list is not converted: it stays at version 1 (D-022). */
 export const WANTS_MIGRATIONS: readonly Migration[] = [];
+export const PROXY_MIGRATIONS: readonly Migration[] = [];

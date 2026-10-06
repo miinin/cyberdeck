@@ -1,6 +1,6 @@
 # T-102 · Proxy-tulostus (suunnitelma)
 
-**Tila:** Suunnitelma. Toteutus odottaa käyttäjän päätöksiä (kohta "Päätettävät").
+**Tila:** Review (PR testiin, haara `t-102-proxy`). Käyttäjän päätökset on kirjattu (2026-10-06), ja ne ohittavat alla olevan käyttäjäpolun siltä osin kuin ne eroavat siitä.
 
 ## Tavoite
 Pelaaja valitsee kortit, jotka hän haluaa tulostaa. Sovellus asettelee ne A4-arkille oikeaan kokoon, ja pelaaja tulostaa ne selaimen tulostustoiminnolla. Tyypillinen käyttö on pakan testaaminen ennen kuin kaikki kortit on hankittu.
@@ -58,3 +58,22 @@ Pelaaja valitsee kortit, jotka hän haluaa tulostaa. Sovellus asettelee ne A4-ar
 2. **"PROXY"-merkintä:** tuleeko kortin päälle pieni merkintä, joka erottaa proxyn oikeasta kortista? Suositus: kyllä, oletuksena päällä.
 3. **Paperikoko:** riittääkö A4, vai tarvitaanko myös US Letter? Suositus: A4 ensin.
 4. **Lähteet:** mistä tulostettavat kortit valitaan ensimmäisessä versiossa? Suositus: pakkaeditori (kaikki tai puuttuvat) ja Kortit-näkymä.
+
+## Käyttäjän päätökset (2026-10-06)
+1. **Proxyt sallitaan** henkilökohtaiseen testikäyttöön. Näkymässä on huomautus "Vain henkilökohtaiseen testikäyttöön, ei myyntiin eikä turnauksiin".
+2. **PROXY-merkintä** tulee, mutta **pieni ja huomaamaton**: esimerkiksi pieni puoliläpinäkyvä teksti kortin reunassa, joka ei peitä kortin tekstejä.
+3. **Paperikoko:** pelkkä A4 riittää.
+4. **Lähteet: oma Proxy-osio yläpalkkiin.**
+   - **Lisääminen:** Proxy-osiossa kortteja lisätään samaan tapaan kuin Kortit-osiossa (haku, suodattimet, kuvat ja ±). Kortit menevät suoraan **tulostusjonoon** ("proxy-kone"), jossa ne odottavat tulostusta.
+   - **Lähettäminen muualta:** kortteja voi lähettää jonoon myös **Want-listalta** (yksittäin ja "kaikki want-kortit") ja **Pakoista** (koko pakka tai vain kokoelmasta puuttuvat).
+   - **Säilyminen:** jono säilyy sivulatauksen yli. Se tallennetaan paikallisesti tallennuskerroksen kautta, eli uusi tallennusavain, ja tämä vaatii Digiturvan katselmoinnin. Jono ei synkronoidu pilveen ensimmäisessä versiossa.
+   - **Tulostus:** jonosta tulostetaan arkit. Tulostuksen jälkeen käyttäjältä kysytään, tyhjennetäänkö jono.
+
+## Luovutus
+- Koodi: `src/domain/proxySheet.ts` (layout, leikkausmerkit, jono, enintään 200 korttia), tallennus `cyberdeck:proxy` (`repositories.proxy`, sama muoto ja validointi kuin kokoelmalla, ei pilvisynkkaa), `ProxyView.tsx`, `ProxySheets.tsx`, `SendToProxy.tsx`, `proxyTexts*.ts` (fi+en), reitti `#/proxy` ja nav-linkki, lähetysnapit Have/Wantissa (yksittäin ja kaikki) ja pakkaeditorissa (koko pakka, puuttuvat), tyylit (`@page proxy`, `--u` = 1 mm tulosteessa).
+- Kuvitus valitaan jonossa kuvitus kerrallaan (sama art-malli kuin kokoelmassa: versions-erittely); ruudut per kuvitus.
+- Esikatselu käyttää samoja elementtejä kuin tuloste (skaalaus cqw:llä). Tulostus odottaa img.decode(), kysyy tyhjennyksen jälkeen.
+- Testit: 1416+ läpi, lint ja build läpi. Uusia testejä: storage/proxy, domain/proxySheet, ui/ProxyView. App.theme-testin Tab-määrä +1 (uusi nav-linkki).
+- Digiturva: uusi tallennusavain `cyberdeck:proxy` (paikallinen, validoitu parseCollectionilla, varmuuskopio vioittuessa, poistuu tilin mukana). Ei uusia riippuvuuksia, ei muutoksia firebase.json:iin.
+- Käyttäjän tarkistettavaa: oikea tulostus (kalibrointiarkki), PROXY-merkin paikka/näkyvyys kuvissa, `page: proxy` vaatii Chrome 85+/Firefox 110+/Safari 17.4+ (muuten selaimen oletusmarginaalit).
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2 (writeEntry/entryOf toistuvat CatalogView:ssä ja ProxyView:ssä, voi siirtää yhteiseen; ProxyView-testit eivät kata kuvitusvalintaa, vain domain).
