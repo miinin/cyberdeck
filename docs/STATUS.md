@@ -1,15 +1,20 @@
-# STATUS · päivitetty 2026-10-05 (PM, T-072–T-075 devissä, odottaa käyttäjän testiä ennen /julkaise)
+# STATUS · päivitetty 2026-10-06 (PM, T-094)
 
 ## Yhdellä lauseella
-MVP-1 on pitkällä: korttidata ja kuvat sovelluksen mukana, ruudukko- ja taulukkonäkymä, kokoelma (rarity, want-lista ja vaihtolinkki PR:inä, D-018) ja pakanrakennus säännöillä (T-013) ovat testisivustolla. Tuotannossa on yhä 0.1.0, ja seuraava /julkaise vie kaiken tämän sinne.
+Kaikki T-093:een asti on tuotannossa (https://cyberdeck-tcg.web.app, versio 0.2.0): kokoelma, want-lista ja jakolinkit, korttien versiot kuvituksina, pakkaeditori ja tilastot, englanninkielinen käyttöliittymä sekä mobiilinäkymä.
 
 ## MVP-taso
-Työn alla: MVP-1 · Valmiina: kaikki MVP-1:n Must-tehtävät (T-004, T-010–T-015, T-021, T-025–T-027, T-033–T-040, T-045, T-046). Seuraavaksi MVP-1:n loppukatselmoinnit. MVP-1:n lopussa: UX-katselmointi ja saavutettavuusauditointi, Sisällöntuottaja (uudet tekstit), Testikäyttäjä ja Dokumentoija (D-014).
+Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna: Testikäyttäjän ja UX:n katselmointi mobiilista sekä MVP-1:n loppukatselmoinnit (D-014).
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-072–T-075 | PM | Review (dev) | Käyttäjä testaa devissä, sitten /julkaise. Käyttäjä etsii versioiden kuvat. UX-loppukatselmointi tehty (docs/reports/UX-MVP1-loppukatselmointi.md), Testikäyttäjä ja Dokumentoija avoinna. |
+| T-094 | Dokumentoija | Review | CHANGELOG 0.2.0 ja STATUS ajan tasalla, PR testiin |
+
+## Avoimet
+- TASKS.md:n Backlog-rivit (T-002–T-009 sekä velat T-030, T-031, T-041–T-043, T-047).
+- 79 puuttuvaa versiokuvaa: käyttäjä etsii ne.
+- Testikäyttäjän ja UX:n katselmointi mobiilista.
 
 ## Blokkerit
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
