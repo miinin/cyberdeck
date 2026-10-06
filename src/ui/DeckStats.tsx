@@ -39,7 +39,8 @@ import {
 } from '../domain/deckStats';
 import type { ChartType } from '../domain/deckStats';
 import type { Rng } from '../domain/testHand';
-import { ColorRam, CostChart, DrawOdds, Ring, TypeBar } from './DeckCharts';
+import { ColorRam, CostChart, DrawOdds, EddiesPanel, Ring, TypeBar } from './DeckCharts';
+import { eddieSummary } from '../domain/eddies';
 import type { Tone } from './DeckCharts';
 import { TestHandDialog } from './TestHandDialog';
 import { ValueCurve } from './ValueCurve';
@@ -111,6 +112,7 @@ export function DeckStats({
       legends: deckTotals(deck, cardsByKey).legends,
       sideboard: sideboardSize(deck),
       copies: [...allDeckCounts(deck).values()].reduce((sum, n) => sum + n, 0),
+      eddies: eddieSummary(deck, cardsByKey),
     }),
     [deck, cardsByKey],
   );
@@ -224,6 +226,13 @@ export function DeckStats({
         <div className="stats-card">
           <h3 className="stats-card-title">{deckTexts.curveHeading}</h3>
           <CostChart buckets={stats.buckets} average={stats.avgCost} last={COST_CURVE_LAST} />
+        </div>
+      )}
+
+      {mainCount > 0 && (
+        <div className="stats-card">
+          <h3 className="stats-card-title">{deckTexts.eddiesHeading}</h3>
+          <EddiesPanel summary={stats.eddies} />
         </div>
       )}
 
