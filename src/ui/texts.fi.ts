@@ -185,6 +185,7 @@ export const textsFi = {
   // T-050a: filter side panel, active filter chips and the image size.
   filtersHeading: 'Suodattimet',
   filtersToggle: (selected: number) => (selected === 0 ? 'Suodattimet' : `Suodattimet (${selected})`),
+  showResults: (n: number) => (n === 1 ? 'Näytä 1 kortti' : `Näytä ${n.toLocaleString('fi-FI')} korttia`),
   resultsHeading: 'Tulokset',
   activeFilters: 'Valitut suodattimet',
   removeFilter: (value: string) => `Poista suodatin: ${value}`,

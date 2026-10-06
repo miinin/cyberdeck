@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { RaritySymbol, rarityTitle } from './RaritySymbol';
 import { officialRarity, shortRarity } from '../domain/cardSearch';
 import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
@@ -45,6 +45,11 @@ export interface CardFiltersProps {
    * the "Suodattimet" button; the search field stays visible. Undefined: always shown, no button.
    */
   collapsibleBelow?: string;
+  /**
+   * Collapsed panel only (T-087): a "Näytä N korttia" button at its end closes it and scrolls to the element
+   * with this id, so on a phone the results are one tap away instead of a long scroll past the filters.
+   */
+  results?: { count: number; id: string };
 }
 
 /** How many choices are selected; "Kaikki" in "Kokoelma" is not a choice (T-050a). */
@@ -90,10 +95,19 @@ export function CardFilters({
   onToggleSellable,
   onSearchSubmit,
   collapsibleBelow,
+  results,
 }: CardFiltersProps) {
   // Without matchMedia (tests) the panel counts as wide: always open.
   const alwaysOpen = useMediaQuery(collapsibleBelow ?? 'all', true) || collapsibleBelow === undefined;
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  const showResults = () => {
+    setOpen(false);
+    // Focus goes back to the toggle (the panel closes under it); the view goes to the results.
+    toggleRef.current?.focus({ preventScroll: true });
+    if (results !== undefined) document.getElementById(results.id)?.scrollIntoView({ block: 'start' });
+  };
   const selected = selectedFilterCount(criteria, collectionFilter);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -151,6 +165,7 @@ export function CardFilters({
       {!alwaysOpen && (
         <button
           type="button"
+          ref={toggleRef}
           className="button-secondary filter-toggle"
           aria-expanded={open}
           aria-controls="filter-panel"
@@ -303,6 +318,11 @@ export function CardFilters({
             ),
           )}
         </div>
+        {!alwaysOpen && results !== undefined && (
+          <button type="button" className="button-primary filter-show-results" onClick={showResults}>
+            {texts.showResults(results.count)}
+          </button>
+        )}
       </div>
     </form>
   );
