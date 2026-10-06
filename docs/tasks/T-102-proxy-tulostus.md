@@ -1,6 +1,6 @@
 # T-102 · Proxy-tulostus (suunnitelma)
 
-**Tila:** Suunnitelma. Toteutus odottaa käyttäjän päätöksiä (kohta "Päätettävät").
+**Tila:** Ready. Käyttäjän päätökset on kirjattu (2026-10-06), ja ne ohittavat alla olevan käyttäjäpolun siltä osin kuin ne eroavat siitä.
 
 ## Tavoite
 Pelaaja valitsee kortit, jotka hän haluaa tulostaa. Sovellus asettelee ne A4-arkille oikeaan kokoon, ja pelaaja tulostaa ne selaimen tulostustoiminnolla. Tyypillinen käyttö on pakan testaaminen ennen kuin kaikki kortit on hankittu.
@@ -58,3 +58,13 @@ Pelaaja valitsee kortit, jotka hän haluaa tulostaa. Sovellus asettelee ne A4-ar
 2. **"PROXY"-merkintä:** tuleeko kortin päälle pieni merkintä, joka erottaa proxyn oikeasta kortista? Suositus: kyllä, oletuksena päällä.
 3. **Paperikoko:** riittääkö A4, vai tarvitaanko myös US Letter? Suositus: A4 ensin.
 4. **Lähteet:** mistä tulostettavat kortit valitaan ensimmäisessä versiossa? Suositus: pakkaeditori (kaikki tai puuttuvat) ja Kortit-näkymä.
+
+## Käyttäjän päätökset (2026-10-06)
+1. **Proxyt sallitaan** henkilökohtaiseen testikäyttöön. Näkymässä on huomautus "Vain henkilökohtaiseen testikäyttöön, ei myyntiin eikä turnauksiin".
+2. **PROXY-merkintä** tulee, mutta **pieni ja huomaamaton**: esimerkiksi pieni puoliläpinäkyvä teksti kortin reunassa, joka ei peitä kortin tekstejä.
+3. **Paperikoko:** pelkkä A4 riittää.
+4. **Lähteet: oma Proxy-osio yläpalkkiin.**
+   - **Lisääminen:** Proxy-osiossa kortteja lisätään samaan tapaan kuin Kortit-osiossa (haku, suodattimet, kuvat ja ±). Kortit menevät suoraan **tulostusjonoon** ("proxy-kone"), jossa ne odottavat tulostusta.
+   - **Lähettäminen muualta:** kortteja voi lähettää jonoon myös **Want-listalta** (yksittäin ja "kaikki want-kortit") ja **Pakoista** (koko pakka tai vain kokoelmasta puuttuvat).
+   - **Säilyminen:** jono säilyy sivulatauksen yli. Se tallennetaan paikallisesti tallennuskerroksen kautta, eli uusi tallennusavain, ja tämä vaatii Digiturvan katselmoinnin. Jono ei synkronoidu pilveen ensimmäisessä versiossa.
+   - **Tulostus:** jonosta tulostetaan arkit. Tulostuksen jälkeen käyttäjältä kysytään, tyhjennetäänkö jono.
