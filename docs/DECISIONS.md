@@ -538,3 +538,12 @@ Päätöksessä on viisi osaa.
 2. **Suositus:** pienin myytävien määrä, jolla kortin voi myydä joka vuoro tavoitevuoroon asti vähintään 80 %:ssa peleistä. Tavoitevuoro on pakan keskihinta ylöspäin pyöristettynä, 2–6.
 3. **Legendit eivät ole mukana:** Legendien käyttöä Eddieinä ei lasketa. Suositus on siksi varovainen.
 **Seuraukset:** Oletukset näkyvät käyttäjälle tilastokortin huomautuksessa. Jos sääntöihin tulee tarkennuksia, muutos tehdään yhteen paikkaan (`src/domain/eddies.ts`).
+
+## D-025 · Vain kaksi valmista agenttiroolia · 2026-10-06 · Päättäjä: käyttäjä
+**Tila:** Hyväksytty. Tehtävä T-098.
+**Konteksti:** Promptiauditoinnissa käyttäjätason agenttimäärittelyt olivat ristiriidassa itsensä kanssa: D-014:n ohitusteksti kumosi saman tiedoston aloitus- ja lopetusohjeet. Lisäksi `/tehtava` kuvasi yhä täyden suunnittelu- ja katselmointiketjun. Käyttäjä halusi vähentää ennalta määrättyjä rooleja ja antaa PM:n päättää tarpeen mukaan.
+**Päätös:**
+1. Valmiita aliagentteja ovat `koodari` (Sonnet), joka toteuttaa omassa haarassaan, ja `digiturva` (Opus), joka tekee turvakatselmoinnin kiinteällä tarkistuslistalla ja veto-oikeudella.
+2. Arkkitehti, UX Designer, Sisällöntuottaja, Testikäyttäjä ja Dokumentoija poistettiin agenttimäärittelyistä (`~/.claude/agents/`). PM tekee niiden työn itse tai antaa sen tilannekohtaisella tehtävänannolla yleisagentille. Malli valitaan työn mukaan.
+3. agents.md:n roolikuvaukset ja tarkistuslistat säilyvät tehtävänantojen lähdemateriaalina.
+**Seuraukset:** Katselmointien laajuus riippuu PM:n harkinnasta. Riskin mukaiset rajat ovat CLAUDE.md:ssä. Poistetut määrittelyt ovat varmuuskopiona kansiossa `~/.claude/backup/2026-10-06-prompt-audit/`.

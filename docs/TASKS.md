@@ -100,3 +100,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-094 | Dokumentaatio: CHANGELOG-versio ja STATUS.md ajan tasalle | 1 | Should | Dokumentoija | Done | – |
 | T-096 | Pakan tilastot: Program ja Gear omilla väreillä, Eddies-kortti (myytävät vs. suositus hintarakenteen mukaan, Eddiet vuoroittain, myynti joka vuoro -todennäköisyys) (D-024) | 1 | Must | PM | Done | PM kuvat ✓ |
 | T-097 | Kortit-otsikon alta pois "Kirjatut versiot" -rivi, kokoelman koko pienenä himmeänä tekstinä | 1 | Should | PM | Done | – |
+| T-098 | Agenttiroolien karsinta (D-025) ja promptiauditoinnin korjaukset | 1 | Should | PM | Done | – |
