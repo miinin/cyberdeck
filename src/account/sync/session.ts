@@ -7,7 +7,7 @@
 import { EMPTY_COLLECTION } from '../../domain/collection';
 import type { Collection } from '../../domain/collection';
 import type { LocalData, Repositories, SyncStorage } from '../../storage';
-import type { CloudDoc, CloudStore } from '../types';
+import type { CloudDoc, CloudStore, PublicDeckStore } from '../types';
 import { mergeCollection, mergeDecks } from './merge';
 import { createSyncEngine } from './syncEngine';
 import type { SyncStatus } from './syncEngine';
@@ -68,6 +68,10 @@ export function createAccountSession(options: {
   anonymous: Repositories;
   account: Repositories;
   cloud: CloudStore;
+  /** Deletes the public copies at account deletion (T-098, SR-36). */
+  publicDecks?: PublicDeckStore;
+  /** Runs first in account deletion: stops pending public updates (SEC-098b-1). */
+  beforeDeleteAccount?: () => Promise<void>;
   now?: () => Date;
   locks?: Parameters<typeof createSyncEngine>[0]['locks'];
   debounceMs?: number;
@@ -193,6 +197,13 @@ export function createAccountSession(options: {
       engine.stop();
       await engine.whenIdle();
       try {
+        await options.beforeDeleteAccount?.();
+        // SR-36: the public copies of every deck of this device go before anything private. The decks that only
+        // the cloud has are handled by cloud.deleteAll, also before it deletes their private documents.
+        if (options.publicDecks !== undefined) {
+          const local = await account.decks.list();
+          await options.publicDecks.removeMany(local.value.map((deck) => deck.id));
+        }
         await cloud.deleteAll();
         account.sync.eraseAccount();
         return true;

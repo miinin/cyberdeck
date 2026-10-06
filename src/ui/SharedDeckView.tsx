@@ -17,11 +17,23 @@ export function SharedDeckView({
   cards,
   repositories,
   onOpen,
+  name,
+  heading,
+  intro,
+  backHash = '#/pakat',
+  backLabel,
 }: {
   data: string;
   cards: readonly Card[];
   repositories: Repositories;
   onOpen: (id: string) => void;
+  /** Start name of the saved deck (a public deck's name, T-098). */
+  name?: string;
+  heading?: string;
+  intro?: string;
+  /** Where "back" goes and what it says; a public deck goes back to the public list. */
+  backHash?: string;
+  backLabel?: string;
 }) {
   const { decks, phase } = useDecks(repositories.decks);
   const errorRef = useRef<HTMLHeadingElement>(null);
@@ -39,7 +51,7 @@ export function SharedDeckView({
         </h1>
         <p role="alert">{deckTexts.shareInvalid}</p>
         <p>
-          <a href="#/pakat">{deckTexts.shareToDecks}</a>
+          <a href={backHash}>{backLabel ?? deckTexts.shareToDecks}</a>
         </p>
       </>
     );
@@ -52,9 +64,13 @@ export function SharedDeckView({
       repositories={repositories}
       decks={decks}
       sharedText={text}
+      sharedName={name}
+      sharedHeading={heading}
+      sharedIntro={intro}
+      closeLabel={backLabel}
       onOpen={onOpen}
       onClose={() => {
-        window.location.hash = '#/pakat';
+        window.location.hash = backHash;
       }}
     />
   );

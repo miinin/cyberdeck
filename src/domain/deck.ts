@@ -31,10 +31,24 @@ export interface DeckContent {
   readonly sections: readonly DeckSection[];
 }
 
+export const MAX_NICKNAME_LENGTH = 30; // 1–30 after cleaning (T-098, SR-31)
+
+/**
+ * Publishing settings of a deck (T-098, D-025). They live in the private deck, so the private copy is the
+ * source of truth (SR-35). `nickname` is what the owner typed; null = published as "Nimetön". It is kept
+ * while the deck is private, so the field does not need to be typed again.
+ */
+export interface DeckPublish {
+  readonly public: boolean;
+  readonly nickname: string | null;
+}
+
 export interface Deck extends DeckContent {
   readonly id: DeckId;
   /** ISO 8601 */
   readonly createdAt: string;
   /** ISO 8601 */
   readonly updatedAt: string;
+  /** Missing = private (decks saved before T-098). */
+  readonly publish?: DeckPublish;
 }

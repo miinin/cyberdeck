@@ -18,6 +18,7 @@ import {
   validateDeck,
 } from '../domain/deckRules';
 import type { CardsByKey, ColorShare, DeckGroups } from '../domain/deckRules';
+import { buildPublicDeckInput } from '../domain/publicDeck';
 import type { MissingRow } from '../domain/wants';
 import { StorageError } from '../storage';
 import type { LoadNotice, Repositories, StorageErrorKind } from '../storage';
@@ -29,6 +30,10 @@ import { DeckCardImage } from './DeckList';
 import { DeckImport } from './DeckImport';
 import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
+import { PublicDecksList } from './PublicDecksList';
+import { usePublicDecks } from './PublicDecksContext';
+import { forgetPublicDecks } from './publicDecksCache';
+import { routeHash } from './useHashRoute';
 import { useCollection } from './useCollection';
 import { useDecks } from './useDecks';
 import { useWants } from './useWants';
@@ -194,6 +199,7 @@ function DeckCardSummary({
         <p className="deck-updated">
           {deckTexts.updated} <time dateTime={deck.updatedAt}>{dateFormat.format(new Date(deck.updatedAt))}</time>
         </p>
+        {deck.publish?.public === true && <p className="deck-public-badge">{deckTexts.publicBadge}</p>}
       </div>
     </>
   );
@@ -257,13 +263,18 @@ function RenameForm({ deck, onSave, onCancel }: { deck: Deck; onSave: (name: str
 export function DecksView({
   cards,
   repositories,
+  tab = 'own',
   onOpen,
 }: {
   cards: readonly Card[];
   repositories: Repositories;
+  /** "own" = the user's decks, "public" = the public decks of everyone (T-098). */
+  tab?: 'own' | 'public';
   onOpen: (id: string) => void;
 }) {
   const repository = repositories.decks;
+  const { store: publicStore, publisher } = usePublicDecks();
+  const [removeFailed, setRemoveFailed] = useState(false);
   const { phase, decks, notices, reload } = useDecks(repository);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -330,7 +341,14 @@ export function DecksView({
       deckTexts.renamedLive(name),
       `rename-${deck.id}`,
     );
-    if (ok) setRenamingId(null);
+    if (ok) {
+      setRenamingId(null);
+      // A public deck shows its new name in the public list too (delayed like every public update, SR-34).
+      if (deck.publish?.public === true && publisher !== null) {
+        const built = buildPublicDeckInput(deck.id, { name, sections: deck.sections }, cardsByKey, deck.publish.nickname);
+        if (built.ok) publisher.schedule(built.input);
+      }
+    }
   };
 
   const handleCopy = (deck: Deck) => {
@@ -342,7 +360,24 @@ export function DecksView({
     const deck = deleting;
     if (deck === null) return;
     setDeleting(null);
-    void run(() => repository.remove(deck.id), deckTexts.deletedLive(deck.name), 'heading');
+    setRemoveFailed(false);
+    void run(
+      async () => {
+        // SR-35: the public copy goes first; if it cannot be deleted, the deck stays and so does the copy.
+        if (deck.publish?.public === true && publisher !== null) {
+          try {
+            await publisher.unpublish(deck.id);
+          } catch (error) {
+            setRemoveFailed(true);
+            throw error;
+          }
+          forgetPublicDecks(publicStore);
+        }
+        await repository.remove(deck.id);
+      },
+      deckTexts.deletedLive(deck.name),
+      'heading',
+    );
   };
 
   const handleCancelDelete = () => {
@@ -391,8 +426,17 @@ export function DecksView({
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {live}
       </div>
+      <nav className="deck-tabs" aria-label={deckTexts.decksTabsLabel}>
+        <a href={routeHash({ name: 'decks' })} aria-current={tab === 'own' ? 'page' : undefined}>
+          {deckTexts.tabOwn}
+        </a>
+        <a href={routeHash({ name: 'publicDecks' })} aria-current={tab === 'public' ? 'page' : undefined}>
+          {deckTexts.tabPublic}
+        </a>
+      </nav>
+      {tab === 'public' && <PublicDecksList onOpen={(id) => (window.location.hash = routeHash({ name: 'publicDeck', id }))} />}
 
-      {notices.map((notice) => {
+      {tab === 'own' && notices.map((notice) => {
         const text = noticeText(notice);
         return text === null ? null : (
           <div key={notice.kind} className="notice notice-warning">
@@ -400,23 +444,23 @@ export function DecksView({
           </div>
         );
       })}
-      {failure !== null && (
+      {tab === 'own' && failure !== null && (
         <div className="notice notice-danger" role="alert">
-          <p>{deckTexts.actionFailed(failure)}</p>
+          <p>{removeFailed ? deckTexts.visRemoveFailed : deckTexts.actionFailed(failure)}</p>
           <button type="button" className="button-secondary" onClick={() => setFailure(null)}>
             {deckTexts.errorDismiss}
           </button>
         </div>
       )}
 
-      {phase === 'loading' && <p className="status-line">{deckTexts.listLoading}</p>}
-      {phase === 'unavailable' && (
+      {tab === 'own' && phase === 'loading' && <p className="status-line">{deckTexts.listLoading}</p>}
+      {tab === 'own' && phase === 'unavailable' && (
         <div className="notice notice-danger" role="alert">
           <p>{deckTexts.listUnavailable}</p>
         </div>
       )}
 
-      {phase === 'ready' && (
+      {tab === 'own' && phase === 'ready' && (
         <>
           {decks.length === 0 ? (
             <div className="empty deck-empty">

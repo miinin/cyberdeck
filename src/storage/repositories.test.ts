@@ -236,6 +236,32 @@ describe('decks', () => {
     expect(await decks.get('deck-1')).toBeNull();
   });
 
+  it('sets the publishing settings, keeps them through edits and bumps updatedAt (T-098)', async () => {
+    const { decks } = setup();
+    const created = await decks.create(content);
+    expect(created.publish).toBeUndefined();
+
+    const published = await decks.setPublish('deck-1', { public: true, nickname: 'Nick' });
+    expect(published.publish).toEqual({ public: true, nickname: 'Nick' });
+    expect(published.updatedAt > created.updatedAt).toBe(true);
+    expect(published.sections).toEqual(created.sections);
+
+    // update() never changes the settings (the editor and rename write content only).
+    const edited = await decks.update('deck-1', { name: 'Uusi nimi', sections: [] });
+    expect(edited.publish).toEqual({ public: true, nickname: 'Nick' });
+    expect((await decks.get('deck-1'))?.publish).toEqual({ public: true, nickname: 'Nick' });
+
+    const priv = await decks.setPublish('deck-1', undefined);
+    expect(priv.publish).toBeUndefined();
+  });
+
+  it('rejects invalid publishing settings and an unknown deck', async () => {
+    const { decks } = setup();
+    await decks.create(content);
+    await expectStorageError(decks.setPublish('deck-1', { public: true, nickname: 'x'.repeat(31) }), 'invalid-input');
+    await expectStorageError(decks.setPublish('missing', { public: true, nickname: null }), 'not-found');
+  });
+
   it('never uses an id from the caller', async () => {
     const { decks } = setup();
     const withId = { ...content, id: 'chosen-by-file', createdAt: '2000-01-01T00:00:00.000Z' } as DeckContent;

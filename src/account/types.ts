@@ -4,6 +4,7 @@
  */
 import type { Collection } from '../domain/collection';
 import type { Deck, DeckId } from '../domain/deck';
+import type { PublicDeck, PublicDeckInput } from '../domain/publicDeck';
 
 /** The signed-in account. `email` is shown in the UI from memory only, never stored (D-017 kohta 1, SR-29). */
 export interface AccountUser {
@@ -57,6 +58,40 @@ export interface AccountServices {
   auth: AuthClient;
   /** The cloud copy of one account (Firestore in the app, memory in tests). The uid must be valid. */
   cloud(uid: string): CloudStore;
+  /**
+   * Public decks (T-098, D-025). `uid` = the signed-in account, needed to publish and remove; null = reading
+   * only (works signed out). The uid is never part of anything public (SR-30).
+   */
+  publicDecks(uid: string | null): PublicDeckStore;
+}
+
+/** Where the next page starts. Opaque to the caller: pass back what the previous page returned. */
+export type PublicDeckCursor = object;
+
+export interface PublicDeckPage {
+  /** Valid public decks, newest update first. */
+  items: PublicDeck[];
+  /** null = the last page. */
+  next: PublicDeckCursor | null;
+  /** Documents that did not pass validation and were left out (SR-37). */
+  dropped: number;
+}
+
+/**
+ * `publicDecks/{pubId}` (D-025, SEC-098). Reads work signed out; the writes need the signed-in account the
+ * store was created for. All methods throw CloudError.
+ */
+export interface PublicDeckStore {
+  /** One page of at most PUBLIC_PAGE_SIZE decks, ordered by updatedAt descending (SR-33). */
+  list(cursor: PublicDeckCursor | null): Promise<PublicDeckPage>;
+  /** null = no such public deck, or the document is not valid. */
+  get(pubId: string): Promise<PublicDeck | null>;
+  /** Creates or updates the public copy of `input.deckId`. */
+  publish(input: PublicDeckInput): Promise<void>;
+  /** Deletes the public copy of one deck. A missing copy is not an error. */
+  remove(deckId: DeckId): Promise<void>;
+  /** Deletes the public copies of the decks (account deletion, SR-36). A missing copy is not an error. */
+  removeMany(deckIds: readonly DeckId[]): Promise<void>;
 }
 
 /** Storage for the account hints; `PreferencesRepository` implements it (src/storage). */

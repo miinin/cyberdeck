@@ -5,11 +5,13 @@
  * kinds; nothing is logged (SR-27).
  */
 import { MAX_DECKS } from '../../domain/deck';
+import { publicDeckId } from '../../domain/publicDeck';
 import { isUid } from '../../domain/uid';
 import {
   buildSnapshot,
   checkChange,
   CLOUD_ROOT,
+  PUBLIC_COLLECTION,
   decodeMeta,
   encodeCollectionDoc,
   encodeDeckDoc,
@@ -99,6 +101,12 @@ export function createFirestoreCloudStore(options: {
         for (let round = 0; round < 10; round += 1) {
           const decks = await fs.getDocs(fs.query(fs.collection(db, CLOUD_ROOT, uid, 'decks'), fs.limit(400)));
           if (decks.docs.length === 0) break;
+          // SR-36: the public copies go first, so nothing public outlives the private data. Deleting a copy
+          // that does not exist is allowed by the rules and is a no-op.
+          const pubIds = await Promise.all(decks.docs.map((doc) => publicDeckId(uid, doc.id)));
+          await fs.runTransaction(db, async (tx) => {
+            for (const pubId of pubIds) tx.delete(fs.doc(db, PUBLIC_COLLECTION, pubId));
+          });
           await fs.runTransaction(db, async (tx) => {
             for (const doc of decks.docs) tx.delete(deckRef(s, doc.id));
           });

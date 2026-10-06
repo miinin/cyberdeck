@@ -1,6 +1,9 @@
 /* In-memory account services for tests (D-017 kohta 8). No network, no Firebase. */
 import { createAuthState, SIGNED_OUT } from './authState';
 import { MAX_DECKS } from '../domain/deck';
+import { PUBLIC_DECK_SCHEMA_VERSION, PUBLIC_PAGE_SIZE, parsePublicDeck, publicDeckId } from '../domain/publicDeck';
+import type { PublicDeck } from '../domain/publicDeck';
+import { isDeckId } from '../domain/validate';
 import { isUid } from '../domain/uid';
 import {
   buildSnapshot,
@@ -14,7 +17,15 @@ import {
 } from './cloudCodec';
 import { CloudError } from './cloudError';
 import type { CloudErrorKind } from './cloudError';
-import type { AccountUser, AuthClient, AuthErrorKind, CloudMeta, CloudStore, DeleteAccountResult } from './types';
+import type {
+  AccountUser,
+  AuthClient,
+  AuthErrorKind,
+  CloudMeta,
+  CloudStore,
+  DeleteAccountResult,
+  PublicDeckStore,
+} from './types';
 
 export const FAKE_USER: AccountUser = { uid: 'fakeUid123', email: 'testi@example.com' };
 
@@ -174,6 +185,117 @@ export function createMemoryCloud(
     },
     failNext(kind) {
       nextFailure = kind;
+    },
+  };
+}
+
+/** The public decks of every account in memory: one shared collection, like `publicDecks` in Firestore. */
+export type MemoryPublicDecks = {
+  /** A store for the signed-in account `uid`, or for reading only (null). */
+  forUser(uid: string | null): PublicDeckStore;
+  /** Stored documents by pubId (raw, as the rules would see them, with ISO times). */
+  readonly docs: Map<string, Record<string, unknown>>;
+  /** Raw writes, e.g. an invalid document from another client. */
+  setRaw(pubId: string, value: Record<string, unknown> | undefined): void;
+  /** Writes so far (publish, remove): the rate-limit tests count them. */
+  readonly writes: number;
+  /** Lists so far. */
+  readonly lists: number;
+  /** The next call fails with this kind instead. */
+  failNext(kind: CloudErrorKind): void;
+};
+
+/** In-memory PublicDeckStore with the Firestore store's contract. It does not emulate the security rules. */
+export function createMemoryPublicDecks(options: { now?: () => Date } = {}): MemoryPublicDecks {
+  const { now = () => new Date() } = options;
+  const docs = new Map<string, Record<string, unknown>>();
+  let writes = 0;
+  let lists = 0;
+  let nextFailure: CloudErrorKind | null = null;
+
+  function failIfAsked() {
+    if (nextFailure === null) return;
+    const kind = nextFailure;
+    nextFailure = null;
+    throw new CloudError(kind);
+  }
+
+  return {
+    docs,
+    setRaw(pubId, value) {
+      if (value === undefined) docs.delete(pubId);
+      else docs.set(pubId, structuredClone(value));
+    },
+    get writes() {
+      return writes;
+    },
+    get lists() {
+      return lists;
+    },
+    failNext(kind) {
+      nextFailure = kind;
+    },
+    forUser(uid) {
+      if (uid !== null && !isUid(uid)) throw new CloudError('unknown');
+      const pubIdOf = (deckId: string) => {
+        if (uid === null || !isDeckId(deckId)) throw new CloudError('denied');
+        return publicDeckId(uid, deckId);
+      };
+      return {
+        async list(cursor) {
+          failIfAsked();
+          lists += 1;
+          const sorted = [...docs.entries()].sort(([a, x], [b, y]) =>
+            String(y.updatedAt).localeCompare(String(x.updatedAt)) || a.localeCompare(b),
+          );
+          const start = typeof cursor === 'object' && cursor !== null && 'index' in cursor ? Number(cursor.index) : 0;
+          const page = sorted.slice(start, start + PUBLIC_PAGE_SIZE);
+          const items: PublicDeck[] = [];
+          let dropped = 0;
+          for (const [pubId, raw] of page) {
+            const parsed = parsePublicDeck(pubId, structuredClone(raw));
+            if (parsed === null) dropped += 1;
+            else items.push(parsed);
+          }
+          const end = start + page.length;
+          return { items, next: end < sorted.length ? { index: end } : null, dropped };
+        },
+        async get(pubId) {
+          failIfAsked();
+          const raw = docs.get(pubId);
+          return raw === undefined ? null : parsePublicDeck(pubId, structuredClone(raw));
+        },
+        async publish(input) {
+          failIfAsked();
+          const pubId = await pubIdOf(input.deckId);
+          const time = now().toISOString();
+          const existing = docs.get(pubId);
+          writes += 1;
+          docs.set(pubId, {
+            schemaVersion: PUBLIC_DECK_SCHEMA_VERSION,
+            deckId: input.deckId,
+            name: input.name,
+            legends: input.legends,
+            cardCount: input.cardCount,
+            deck: input.deck,
+            nickname: input.nickname,
+            publishedAt: existing?.publishedAt ?? time,
+            updatedAt: time,
+          });
+        },
+        async remove(deckId) {
+          failIfAsked();
+          const pubId = await pubIdOf(deckId);
+          writes += 1;
+          docs.delete(pubId);
+        },
+        async removeMany(deckIds) {
+          failIfAsked();
+          const pubIds = await Promise.all(deckIds.filter(isDeckId).map(pubIdOf));
+          writes += 1;
+          for (const pubId of pubIds) docs.delete(pubId);
+        },
+      };
     },
   };
 }

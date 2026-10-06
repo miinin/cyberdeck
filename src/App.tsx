@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { createAccountSession, createBrowserAccountServices } from './account';
+import { createAccountSession, createBrowserAccountServices, createPublicDeckPublisher, watchPublicDecks } from './account';
 import type { AccountServices } from './account';
 import logoUrl from './assets/brand/cyberdeck-tcg-logo-header.webp';
 import { CARDS } from './data/cards';
@@ -12,6 +12,9 @@ import { SharedDeckView } from './ui/SharedDeckView';
 import { HaveWantView } from './ui/HaveWantView';
 import { SharedTradeView } from './ui/SharedTradeView';
 import { DecksView } from './ui/DecksView';
+import { PublicDeckView } from './ui/PublicDeckView';
+import { PublicDecksContext } from './ui/PublicDecksContext';
+import type { PublicDecksApi } from './ui/PublicDecksContext';
 import { deckTexts } from './ui/deckTexts';
 import { useHashRoute } from './ui/useHashRoute';
 import { texts } from './ui/texts';
@@ -47,6 +50,25 @@ export function App({
     [signedOutRepositories, uid],
   );
   const [notice, setNotice] = useState<'signed-out' | 'deleted' | null>(null);
+  // Public decks (T-098): reading works signed out; the publisher exists only for a signed-in account.
+  const publicStore = useMemo(() => accountServices.publicDecks(uid), [accountServices, uid]);
+  const publisher = useMemo(
+    () =>
+      uid === null
+        ? null
+        : createPublicDeckPublisher({
+            store: publicStore,
+            isStillPublic: async (deckId) => (await openRepositories.decks.get(deckId))?.publish?.public === true,
+          }),
+    [uid, publicStore, openRepositories],
+  );
+  useEffect(() => () => publisher?.dispose(), [publisher]);
+  // A deck deleted or made private on another device loses its public copy (SEC-098b-2).
+  useEffect(() => (uid === null ? undefined : watchPublicDecks(openRepositories.decks, publicStore)), [uid, openRepositories, publicStore]);
+  const publicApi = useMemo<PublicDecksApi>(
+    () => ({ store: publicStore, publisher, signInAvailable: accountServices.auth.available }),
+    [publicStore, publisher, accountServices],
+  );
   // Creating the session starts nothing; the effect starts and (also in Strict Mode) stops it.
   const session = useMemo(
     () =>
@@ -57,8 +79,10 @@ export function App({
             anonymous: signedOutRepositories,
             account: openRepositories,
             cloud: accountServices.cloud(uid),
+            publicDecks: publicStore,
+            beforeDeleteAccount: () => publisher?.drain() ?? Promise.resolve(),
           }),
-    [uid, signedOutRepositories, openRepositories, accountServices],
+    [uid, signedOutRepositories, openRepositories, accountServices, publicStore, publisher],
   );
   useEffect(() => {
     session?.start();
@@ -73,7 +97,7 @@ export function App({
   const { route, navigate } = useHashRoute();
 
   return (
-    <>
+    <PublicDecksContext.Provider value={publicApi}>
       <header className="site-header">
         <div className="container">
           <a className="brand" href="#/">
@@ -85,7 +109,15 @@ export function App({
             </a>
             <a
               href="#/pakat"
-              aria-current={route.name === 'decks' || route.name === 'deck' || route.name === 'share' ? 'page' : undefined}
+              aria-current={
+                route.name === 'decks' ||
+                route.name === 'deck' ||
+                route.name === 'share' ||
+                route.name === 'publicDecks' ||
+                route.name === 'publicDeck'
+                  ? 'page'
+                  : undefined
+              }
             >
               {deckTexts.navDecks}
             </a>
@@ -125,8 +157,22 @@ export function App({
         {(route.name === 'cards' || route.name === 'card') && (
           <CatalogView cards={cards} routeCardKey={route.name === 'card' ? route.key : null} repositories={openRepositories} headerSlot={headerSlot} />
         )}
-        {route.name === 'decks' && (
-          <DecksView cards={cards} repositories={openRepositories} onOpen={(id) => navigate({ name: 'deck', id })} />
+        {(route.name === 'decks' || route.name === 'publicDecks') && (
+          <DecksView
+            cards={cards}
+            repositories={openRepositories}
+            tab={route.name === 'publicDecks' ? 'public' : 'own'}
+            onOpen={(id) => navigate({ name: 'deck', id })}
+          />
+        )}
+        {route.name === 'publicDeck' && (
+          <PublicDeckView
+            key={route.id}
+            pubId={route.id}
+            cards={cards}
+            repositories={openRepositories}
+            onOpen={(id) => navigate({ name: 'deck', id })}
+          />
         )}
         {route.name === 'deck' && (
           <DeckEditor
@@ -158,6 +204,6 @@ export function App({
           <p>{texts.footerSource}</p>
         </div>
       </footer>
-    </>
+    </PublicDecksContext.Provider>
   );
 }

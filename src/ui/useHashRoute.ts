@@ -1,10 +1,13 @@
 import { useCallback, useSyncExternalStore } from 'react';
+import { isPubId } from '../domain/publicDeck';
 import { isDeckId } from '../domain/validate';
 
 /** Views of the app. The route lives in the URL hash, so Back and Forward work and no router is needed. */
 export type Route =
   { name: 'cards' } | { name: 'card'; key: string } | { name: 'decks' } | { name: 'deck'; id: string } | { name: 'share'; data: string }
-  | { name: 'trade'; data: string } | { name: 'havewant' };
+  | { name: 'trade'; data: string } | { name: 'havewant' }
+  // Public decks (T-098): the list tab and one public deck by its pubId.
+  | { name: 'publicDecks' } | { name: 'publicDeck'; id: string };
 
 export function parseHash(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/');
@@ -24,6 +27,8 @@ export function parseHash(hash: string): Route {
     }
   }
   if (parts[0] !== 'pakat') return { name: 'cards' };
+  if (parts[1] === 'julkiset' && (parts.length === 2 || (parts.length === 3 && parts[2] === ''))) return { name: 'publicDecks' };
+  if (parts[1] === 'julkinen' && parts.length === 3 && isPubId(parts[2])) return { name: 'publicDeck', id: parts[2] };
   const id = parts[1];
   if (parts.length === 2 && id !== undefined && isDeckId(id)) return { name: 'deck', id };
   return { name: 'decks' };
@@ -34,6 +39,8 @@ export function routeHash(route: Route): string {
   if (route.name === 'card') return `#/kortti/${encodeURIComponent(route.key)}`;
   if (route.name === 'share') return `#/jaa/${route.data}`;
   if (route.name === 'havewant') return '#/vaihto';
+  if (route.name === 'publicDecks') return '#/pakat/julkiset';
+  if (route.name === 'publicDeck') return `#/pakat/julkinen/${route.id}`;
   if (route.name === 'trade') return `#/vaihto/${route.data}`;
   return route.name === 'decks' ? '#/pakat' : `#/pakat/${route.id}`;
 }
