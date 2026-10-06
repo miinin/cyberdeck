@@ -13,7 +13,7 @@ import { ProblemFlag, SectionFlag } from './DeckProblems';
 import type { DeckProblems } from './DeckProblems';
 import { pickGestures } from './pickGestures';
 import { Stepper } from './Stepper';
-import { texts } from './texts';
+import { colorNames, texts } from './texts';
 
 export type DeckView = 'list' | 'stacks';
 
@@ -147,7 +147,8 @@ export function DeckList({
     );
   };
 
-  const renderStackCard = (row: DeckRow) => {
+  /** `controls`: the stepper under the card, for the few cards shown side by side (Legends). */
+  const renderStackCard = (row: DeckRow, controls = false) => {
     const { card, count } = row;
     const { onContextMenu, onKeyDown } = pickGestures(count, (next) => onChange(card, next), false);
     return (
@@ -176,6 +177,11 @@ export function DeckList({
           </span>
           {problemsOf(card) !== undefined && <ProblemFlag problems={problemsOf(card) ?? []} />}
         </button>
+        {controls && (
+          <div className="stack-card-actions">
+            <Stepper name={card.displayName} count={count} showCount={false} onChange={(next) => onChange(card, next)} />
+          </div>
+        )}
         {onAddToSideboard !== undefined && card.type !== 'Legend' && (
           <button
             type="button"
@@ -200,57 +206,26 @@ export function DeckList({
           </h2>
           <SectionFlag problem={problems?.legends ?? null} />
         </div>
-        <ul className="legend-slots">
-          {grouped.legends.map((row) => (
-            <li
-              key={row.card.key}
-              data-deck-row={row.card.key}
-              data-deck-part="main"
-              className={'legend-slot' + (missingOf(row) > 0 ? ' is-missing' : '') + (problemsOf(row.card) !== undefined ? ' is-problem' : '')}
-              {...hoverProps(row.card)}
-            >
-              <button
-                type="button"
-                className="legend-slot-image"
-                aria-haspopup="dialog"
-                aria-label={`${texts.enlargeImage}${row.card.displayName}`}
-                onClick={() => onOpenImage(row.card)}
-              >
-                <DeckCardImage card={row.card} className="legend-slot-img" />
-                {row.count > 1 && (
-                  <span className="stack-card-count" aria-hidden="true">
-                    {deckTexts.copies(row.count)}
-                  </span>
-                )}
-              </button>
-              <div className="legend-slot-foot">
-                <span className="legend-slot-name" title={row.card.displayName}>
-                  <span lang="en">{row.card.name}</span>
-                </span>
-                <button
-                  type="button"
-                  className="legend-slot-remove"
-                  aria-label={deckTexts.removeCard(row.card.displayName)}
-                  onClick={() => onChange(row.card, row.count - 1)}
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
-              </div>
-              {ownership(row, 'legend-slot-missing')}
-              {problemsOf(row.card) !== undefined && <ProblemFlag problems={problemsOf(row.card) ?? []} />}
-            </li>
-          ))}
-          {Array.from({ length: emptySlots }, (_, i) => (
-            <li key={`empty-${i}`} className="legend-slot is-empty">
-              <span className="legend-slot-empty">{deckTexts.legendSlotEmpty}</span>
-            </li>
-          ))}
-        </ul>
-        {grouped.legends.length > 0 && (
-          <ul className="legend-names" aria-label={deckTexts.legendNamesLabel}>
-            {grouped.legends.map((row) => (
-              <li key={row.card.key}>
-                <CardName card={row.card} />
+        {view === 'stacks' ? (
+          // At most three cards, each with its own buttons: side by side like the sideboard.
+          <div className="deck-stacks deck-stacks--spread">
+            <div className="deck-group">
+              <ul className="stack-cards stack-cards--spread">
+                {grouped.legends.map((row) => renderStackCard(row, true))}
+                {Array.from({ length: emptySlots }, (_, i) => (
+                  <li key={`empty-${i}`} className="stack-card is-empty">
+                    <span className="stack-card-empty">{deckTexts.legendSlotEmpty}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <ul className="deck-tiles">
+            {grouped.legends.map(renderTile)}
+            {Array.from({ length: emptySlots }, (_, i) => (
+              <li key={`empty-${i}`} className="deck-tile is-empty">
+                <span className="deck-tile-empty">{deckTexts.legendSlotEmpty}</span>
               </li>
             ))}
           </ul>
@@ -289,18 +264,31 @@ export function DeckList({
           </fieldset>
         </div>
         {grouped.groups.length === 0 && grouped.unknown.length === 0 && <p className="hint">{deckTexts.deckEmpty}</p>}
-        <div className={view === 'stacks' ? 'deck-stacks' : 'deck-groups'}>
-          {grouped.groups.map((group) => (
-            <div key={group.type} className="deck-group">
-              <h3 className="deck-group-title" lang="en">
-                {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
-              </h3>
-              <ul className={view === 'stacks' ? 'stack-cards' : 'deck-tiles'}>
-                {group.rows.map(view === 'stacks' ? renderStackCard : renderTile)}
-              </ul>
-            </div>
-          ))}
-        </div>
+        {view === 'stacks' ? (
+          // T-103: stacks by colour and type, the colour on the heading's edge.
+          <div className="deck-stacks">
+            {grouped.colorGroups.map((group) => (
+              <div key={`${group.color ?? ''}|${group.type}`} className={`deck-group deck-group--color ${typeColorClass(group.color)}`}>
+                <h3 className="deck-group-title deck-group-title--color" lang="en">
+                  {group.color !== null ? `${colorNames.get(group.color) ?? group.color} · ` : ''}
+                  {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
+                </h3>
+                <ul className="stack-cards">{group.rows.map((row) => renderStackCard(row))}</ul>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="deck-groups">
+            {grouped.groups.map((group) => (
+              <div key={group.type} className="deck-group">
+                <h3 className="deck-group-title" lang="en">
+                  {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
+                </h3>
+                <ul className="deck-tiles">{group.rows.map(renderTile)}</ul>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

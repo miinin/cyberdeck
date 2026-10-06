@@ -538,6 +538,7 @@ Päätöksessä on viisi osaa.
 2. **Suositus:** pienin myytävien määrä, jolla kortin voi myydä joka vuoro tavoitevuoroon asti vähintään 80 %:ssa peleistä. Tavoitevuoro on pakan keskihinta ylöspäin pyöristettynä, 2–6.
 3. **Legendit eivät ole mukana:** Legendien käyttöä Eddieinä ei lasketa. Suositus on siksi varovainen.
 **Seuraukset:** Oletukset näkyvät käyttäjälle tilastokortin huomautuksessa. Jos sääntöihin tulee tarkennuksia, muutos tehdään yhteen paikkaan (`src/domain/eddies.ts`).
+**Muutos T-103: käyttäjän tavoite 55–60 %.** Suositus ei enää perustu simulaatioon (kohta 2 korvattu). Tavoite on prosenttiosuus pääpakasta: keskikohta = clamp(0,575 + (keskihinta − 3) × 0,05; 0,45; 0,70), tavoiteväli = keskikohta ± 0,025 (keskihinnalla 3: 55–60 %, kalliimmalla enemmän, halvemmalla vähemmän). Näytetään kappaleina ja prosentteina, esim. "Suositus 23–25 (55–60 %)", ja arviona liian vähän / yli suosituksen / sopiva määrä. Eddiet vuoroittain -simulaatio ja todennäköisyys myydä joka vuoro jäävät näkyviin informaationa. Funktio `sellableTarget` (`src/domain/eddies.ts`).
 
 ## D-025 · Julkiset pakat · 2026-10-06 · Päättäjä: käyttäjä
 **Tila:** Hyväksytty (tuotepäätökset). Tehtävä T-098. Tekniset yksityiskohdat vahvistetaan Digiturvan uhkamallissa ja Arkkitehdin katselmoinnissa ennen toteutusta.

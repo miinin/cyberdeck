@@ -63,13 +63,16 @@ describe('Deck editor', () => {
     expect(screen.getByText('Pakka on tyhjä. Lisää kortteja hakulistasta.')).toBeInTheDocument();
   });
 
-  it('marks a card only once it breaks a rule, explains why, and still lets it be added (T-057)', async () => {
+  it('dims a card whose next copy would break a rule, shows why, and still lets it be added (T-103)', async () => {
     const user = userEvent.setup();
     openEditor([['l1', 1], ['l2', 1], ['l3', 1]]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     const list = searchList();
     const bigRow = () => within(list).getByText('Big').closest('tr') as HTMLElement;
-    expect(bigRow()).not.toHaveClass('is-dimmed');
+    // Before adding: the mark is already there, as visible text.
+    expect(bigRow()).toHaveClass('is-dimmed');
+    expect(bigRow()).toHaveTextContent('⚠ RAM 9 > Red 6');
+    expect(screen.getByText('Haaleat kortit tekisivät pakasta laittoman – syy näkyy kortissa.')).toBeInTheDocument();
     await user.click(within(bigRow()).getByRole('button', { name: 'Lisää pakkaan: Big' }));
     expect(screen.getByText(/ylittää: Big/)).toBeInTheDocument();
     expect(bigRow()).toHaveClass('is-dimmed');
