@@ -93,7 +93,7 @@ export function DeckList({
     return (
       <li
         key={card.key}
-        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '')}
+        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '') + (onMoveToSideboard !== undefined && card.type !== 'Legend' ? ' has-move' : '')}
         onContextMenu={onContextMenu}
         onKeyDown={onKeyDown}
         {...hoverProps(card)}
@@ -119,14 +119,15 @@ export function DeckList({
           {deckTexts.copies(count)}
         </span>
         <Stepper name={card.displayName} count={count} showCount={false} onChange={(next) => onChange(card, next)} />
-        {onMoveToSideboard !== undefined && (
+        {onMoveToSideboard !== undefined && card.type !== 'Legend' && (
           <button
             type="button"
-            className="link-button"
+            className="tile-action deck-tile-move"
             aria-label={deckTexts.moveToSideboard(card.displayName)}
+            title={deckTexts.moveToSideboardTitle}
             onClick={() => onMoveToSideboard(card)}
           >
-            →S
+            {deckTexts.moveToSideboardShort}
           </button>
         )}
       </li>
@@ -155,14 +156,15 @@ export function DeckList({
             {deckTexts.copies(count)}
           </span>
         </button>
-        {onAddToSideboard !== undefined && (
+        {onAddToSideboard !== undefined && card.type !== 'Legend' && (
           <button
             type="button"
-            className="link-button"
+            className="tile-action"
             aria-label={deckTexts.addToSideboard(card.displayName)}
+            title={deckTexts.addToSideboardTitle}
             onClick={() => onAddToSideboard(card)}
           >
-            +S
+            {deckTexts.addToSideboardShort}
           </button>
         )}
       </li>

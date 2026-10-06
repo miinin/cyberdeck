@@ -145,16 +145,15 @@ export function DeckPickTable({
                   describedBy={blocker !== null ? hintId : undefined}
                   shortcuts
                 />
-                {onAddToSideboard !== undefined && (
+                {onAddToSideboard !== undefined && card.type !== 'Legend' && (
                   <button
                     type="button"
-                    className="link-button"
+                    className="tile-action"
                     aria-label={deckTexts.addToSideboard(card.displayName)}
-                    onClick={() => {
-                    onAddToSideboard(card);
-                  }}
+                    title={deckTexts.addToSideboardTitle}
+                    onClick={() => onAddToSideboard(card)}
                   >
-                    +S
+                    {deckTexts.addToSideboardShort}
                   </button>
                 )}
                 {blocker !== null && (
