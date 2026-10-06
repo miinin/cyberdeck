@@ -107,6 +107,8 @@ describe('fetchAllCards: paging', () => {
     const catalog = await fetchAllCards({ fetchFn });
 
     expect(catalog.cards.map((card) => card.id)).toEqual(['id-1', 'id-2', 'id-3']);
+    // B-003 (T-008): the dropped duplicate is counted, so the logged number matches what is missing.
+    expect(catalog.skipped).toBe(1);
   });
 
   it('skips invalid cards and counts them', async () => {

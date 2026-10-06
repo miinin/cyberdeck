@@ -12,7 +12,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-005 | [velka] ESLintin saavutettavuusliitännäinen, kun ESLint 10 -yhteensopiva versio on saatavilla | 2 | Could | Koodari | Backlog | UX |
 | T-006 | [velka] Keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen ja testityyppien erottaminen sovelluksen tsconfigista | 1 | Could | Koodari | Backlog | – |
 | T-007 | [velka] SR-1:n lint-säännön kiertotiet suljettava (SEC-002) ennen rules_text-muotoilua | 1 | Should | Koodari | Backlog | Digiturva |
-| T-008 | Virhe- ja osittaisen tilan parannukset: kortit säilyvät uusintayrityksessä (B-001), fokus tuplaklikkauksessa (B-016), skipped-laskenta (B-003), virheteksti lajin mukaan (B-006), hinnan järkevyystarkistus (B-009) | 1 | Should | Koodari | Backlog | UX, Sisällöntuottaja, Testikäyttäjä |
+| T-008 | Virhe- ja osittaisen tilan parannukset: kortit säilyvät uusintayrityksessä (B-001), fokus tuplaklikkauksessa (B-016), skipped-laskenta (B-003), virheteksti lajin mukaan (B-006), hinnan järkevyystarkistus (B-009) | 1 | Should | Koodari | Done (B-003, B-009 korjattu; B-001, B-006, B-016 vanhentuneet D-012:n myötä) | UX, Sisällöntuottaja, Testikäyttäjä |
 | T-009 | Hostingin kovennus: noscript, välimuistiotsakkeet (myös `index.html` `Cache-Control: no-cache`, SEC-011) ja puuttuvien assettien 404 (B-004), Firebase-API-avaimen rajaus (B-010) ennen datatallennusta | 1 | Should | Koodari | Osittain (T-086: noscript, index.html no-cache, 404; API-avaimen rajaus jäljellä) | Digiturva (SR-9) |
 | T-010 | Haku ja suodatus korttilistaan (nimi, tyyppi, väri) | 1 | Must | Koodari | Done | UX, Sisällöntuottaja, Testikäyttäjä |
 | T-011 | Tietomalli ja paikallinen tallennuskerros (kokoelma, pakat), valmius Firebaseen ja painoksiin (D-007) | 1 | Must | Arkkitehti → Koodari | Done | Arkkitehti, Digiturva |
@@ -27,7 +27,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-020 | [velka] Painallussarjan osittain onnistunut tallennus kerrotaan ruudunlukijalle virheen lisäksi (T-012:n koodikatselmoinnin suositus) | 2 | Could | Koodari | Backlog | UX |
 | T-021 | Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme, käytettävyys ensin (D-010) | 1 | Must | UX → Koodari | Done | UX (Digiturva vain firebase.jsonin tai riippuvuuksien muuttuessa) |
 | T-022 | [velka] Hakukentän tyhjennyspainikkeen (selaimen oma ×) koko ja teemoitus (UX-010) | 2 | Could | Koodari | Backlog | UX |
-| T-023 | Leveä asettelu suurella tekstillä: 640 px + teksti 200 % vierittyy vaakasuunnassa 224 px (UX-008:n jatko, esim. container query) | 2 | Should | Koodari | Backlog | UX |
+| T-023 | Leveä asettelu suurella tekstillä: 640 px + teksti 200 % vierittyy vaakasuunnassa 224 px (UX-008:n jatko, esim. container query) | 2 | Should | Koodari | Done (T-023: puhelimen listarivi rivittyy, pakkaeditorin + SB rivittyy kapealla; 640 px + teksti 200 % ei vaakavieritystä missään näkymässä) | UX |
 | T-024 | [velka] Satunnaisesti aikakatkaistuva testi "formats large counts the Finnish way" (1 024 riviä) koko sarjan kuormassa | 1 | Should | Koodari | Done (T-004) | – |
 | T-025 | Teemavalitsin: tumma oletuksena, käyttäjä voi vaihtaa (D-012) | 1 | Must | UX → Koodari | Done | UX, Digiturva (kevyt) |
 | T-026 | Korttidata sovelluksen mukana, ei hakua joka käynnillä (D-012, korvaa T-003:n) | 1 | Must | Arkkitehti → Koodari | Done | Digiturva, UX tarvittaessa |
@@ -51,7 +51,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-044 | Tuontiraportin ulkoasu ja Netdeck-linkkikentän tyyli: tiivis taulukko tai kuvat pelkän listan sijaan, toimintojen korostus | 2 | Should | Koodari | Yhdistetty T-051:een | UX |
 | T-045 | Hiominen: tyyppimerkin kulma, värisuodatin palloina, Legend-nimen esto, yhtenäiset rivit, Power, kuvanäkymä pakkaeditoriin (sisältää T-041:n rivien tiivistyksen) | 1 | Must | Koodari | Done | PM esikatselu |
 | T-046 | Pakan haku Netdeck-linkistä ja vertailu kokoelmaan (D-015) | 1 | Must | Koodari | Done | Digiturva SEC-009 |
-| T-047 | [velka] Netdeck-vastauksen runko luetaan paloittain 512 kt:n rajaan asti (SEC-023), tunnistamattoman card.id:n siivous (SEC-024) | 2 | Should | Koodari | Backlog | Digiturva |
+| T-047 | [velka] Netdeck-vastauksen runko luetaan paloittain 512 kt:n rajaan asti (SEC-023), tunnistamattoman card.id:n siivous (SEC-024) | 2 | Should | Koodari | Done | Digiturva |
 | T-048 | Taulukkonäkymän lajittelu sarakkeittain | 1 | Should | Koodari | Done | PM esikatselu |
 | T-049 | Pakkaeditorin asettelu ja pakkalistan ulkoasu (leveä asettelu, tiivis lista, kustannuskäyrä) | 1 | Must | Koodari | Done | PM kuvakaappaukset |
 | T-050 | UX-uudistus: koko leveys, korttipoimija, pakkasarake (a–c), UX-007 | 1 | Must | Koodari | Done (PR #22) | UX-007, BREAK-003, kielentarkastus |
@@ -97,3 +97,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-091 | Mobiili 4: tietonäkymän alussa kuva ja laskurit rinnakkain, kuva koko ruudulle napautuksella ("Näytä koko ruudulla", Esc/napautus palaa); versioissa oletuksena vain varsinaiset setit, muut tuotteet "+N muuta tuotetta" -avattavana (näkyvät suoraan, jos versio ei ole setissä) | 1 | Must | PM | Done | PM mobiilikuvat ✓ |
 | T-092 | Pakkaeditori ja sideboard: sideboard-rivit samanlaisiksi kuin pääpakan (yksi rivi), pienet "→ SB" / "→ Pää" / "+ SB" -painikkeet, ei sideboard-painiketta Legendeille, sääntöilmoitus kelluvana (ei sivun hyppyä) | 1 | Must | PM | Done | PM kuvat ✓ |
 | T-093 | Pakan tilastot uudelleen: yleiskuva renkain (pääpakka, Legendit, sideboard, omistus) ja avainluvuin, testikäsi esiin; Cost-käyrä tyypeittäin (pylväs näyttää kortit, keskiarvomerkki); värit donitsina ja RAM väreittäin; tyyppipalkki; nostotodennäköisyydet palkkeina hetki kerrallaan; ryhmälaskuri palkein | 1 | Must | PM | Done | PM kuvat ✓ |
+| T-094 | Dokumentaatio: CHANGELOG-versio ja STATUS.md ajan tasalle | 1 | Should | Dokumentoija | Done | – |

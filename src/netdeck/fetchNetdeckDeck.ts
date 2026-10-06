@@ -53,13 +53,12 @@ export async function fetchNetdeckDeck(uuid: string, options: FetchNetdeckDeckOp
       if (!response.ok) throw new NetdeckFetchError('network');
       const length = Number(response.headers.get('Content-Length'));
       if (Number.isFinite(length) && length > MAX_DECK_RESPONSE_CHARS) throw new NetdeckFetchError('too-large');
-      text = await response.text();
+      text = await readLimited(response, MAX_DECK_RESPONSE_CHARS, controller);
     } catch (error) {
       if (error instanceof NetdeckFetchError) throw error;
       if (options.signal?.aborted) throw options.signal.reason ?? error;
       throw new NetdeckFetchError(timedOut ? 'timeout' : 'network');
     }
-    if (text.length > MAX_DECK_RESPONSE_CHARS) throw new NetdeckFetchError('too-large');
 
     let json: unknown;
     try {
@@ -73,5 +72,30 @@ export async function fetchNetdeckDeck(uuid: string, options: FetchNetdeckDeckOp
   } finally {
     clearTimeout(timer);
     options.signal?.removeEventListener('abort', onCallerAbort);
+  }
+}
+
+/**
+ * Reads the body as text, at most `max` characters (SEC-023, T-047): the stream is read piece by piece and the
+ * request is cancelled as soon as the limit is passed, so a huge body without Content-Length never fills memory.
+ */
+async function readLimited(response: Response, max: number, controller: AbortController): Promise<string> {
+  if (response.body === null) {
+    const text = await response.text();
+    if (text.length > max) throw new NetdeckFetchError('too-large');
+    return text;
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let text = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    text += done ? decoder.decode() : decoder.decode(value, { stream: true });
+    if (text.length > max) {
+      void reader.cancel().catch(() => undefined);
+      controller.abort();
+      throw new NetdeckFetchError('too-large');
+    }
+    if (done) return text;
   }
 }

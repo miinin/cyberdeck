@@ -130,4 +130,11 @@ describe('netdeckToParsedDeck', () => {
     expect(parsed.rows.map((row) => [row.card.key, row.count])).toEqual([['u0', 4]]);
     expect(parsed.unrecognized).toEqual(['3 nope', '1 Ghost']);
   });
+
+  // SEC-024 (T-047): an id shown in place of a missing name is cleaned of control and bidi characters.
+  it('cleans an unknown id before showing it', () => {
+    const raw = { ...valid(), zones: [zone('deck', [entry('‮abc\u0007', 1)])] };
+    const parsed = netdeckToParsedDeck(parseNetdeckDeck(raw) as NetdeckDeck, cards);
+    expect(parsed.unrecognized).toEqual(['1 abc']);
+  });
 });
