@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Card } from './card';
 import type { DeckContent } from './deck';
-import { toCardsByKey } from './deckRules';
+import { ramLimits, toCardsByKey } from './deckRules';
 import {
   atLeastOneProbability,
   averageCost,
+  costCurveByType,
+  ramFit,
   averagePower,
   cheapOpeningProbability,
   drawProbabilities,
@@ -173,5 +175,32 @@ describe('atLeastKProbability and groupOdds (T-075)', () => {
     const { atLeastKProbability } = await import('./deckStats');
     // N=4, K=2, n=2: P(2) = 1/6
     expect(atLeastKProbability(4, 2, 2, 2)).toBeCloseTo(1 / 6, 10);
+  });
+});
+
+describe('costCurveByType and ramFit (T-093)', () => {
+  it('splits each Cost bucket by type, with its cards, no Legends and no cards without Cost', () => {
+    const buckets = costCurveByType(sample, cardsByKey, 6);
+    expect(buckets.map((b) => b.total)).toEqual([0, 2, 3, 0, 0, 1, 0]);
+    expect(buckets[1]?.byType).toEqual({ Unit: 0, Program: 0, Gear: 2, other: 0 });
+    expect(buckets[2]?.byType.Unit).toBe(3);
+    expect(buckets[2]?.cards.map((row) => [row.card.key, row.count])).toEqual([['unit2', 3]]);
+    // "6+" holds the higher Costs.
+    expect(costCurveByType(sample, cardsByKey, 4).map((b) => b.total)).toEqual([0, 2, 3, 0, 1]);
+  });
+
+  it('compares the RAM the Legends give with what the cards need, per colour', () => {
+    const blue = card('blue', { color: 'Blue', ram: 2 });
+    const byKey = toCardsByKey([...cards, blue]);
+    const d = deck([
+      ['legend', 1],
+      ['unit5', 2],
+      ['unit2', 1],
+      ['blue', 3],
+    ]);
+    expect(ramFit(d, byKey, ramLimits(d, byKey))).toEqual([
+      { color: 'Red', available: 3, needed: 2, overCopies: 0 },
+      { color: 'Blue', available: 0, needed: 2, overCopies: 3 },
+    ]);
   });
 });

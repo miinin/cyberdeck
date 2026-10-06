@@ -233,3 +233,76 @@ export function groupOdds(
     })),
   };
 }
+
+/** The main deck types drawn as their own colour in the charts (T-093); anything else is "other". */
+export const CHART_TYPES = ['Unit', 'Program', 'Gear'] as const;
+export type ChartType = (typeof CHART_TYPES)[number] | 'other';
+
+export function chartType(card: Card): ChartType {
+  return (CHART_TYPES as readonly string[]).includes(card.type) ? (card.type as ChartType) : 'other';
+}
+
+export interface CostBucket {
+  /** Cost of the bucket; the last one holds `last` and everything above it. */
+  readonly cost: number;
+  readonly total: number;
+  readonly byType: Readonly<Record<ChartType, number>>;
+  /** The cards of the bucket, most copies first, then by name. */
+  readonly cards: readonly { card: Card; count: number }[];
+}
+
+/**
+ * Cost curve split by type (T-093): copies per Cost 0 … `last` ("6+"), each bucket by Unit / Program / Gear,
+ * with the cards in it. Same counting as costCurve: no Legends, no cards without a Cost.
+ */
+export function costCurveByType(deck: DeckContent, cardsByKey: CardsByKey, last: number): CostBucket[] {
+  const buckets = Array.from({ length: last + 1 }, (_, cost) => ({
+    cost,
+    total: 0,
+    byType: { Unit: 0, Program: 0, Gear: 0, other: 0 } as Record<ChartType, number>,
+    cards: [] as { card: Card; count: number }[],
+  }));
+  for (const row of mainRows(deck, cardsByKey)) {
+    if (row.card.cost === null) continue;
+    const bucket = buckets[Math.min(Math.max(Math.trunc(row.card.cost), 0), last)];
+    if (bucket === undefined) continue;
+    bucket.total += row.count;
+    bucket.byType[chartType(row.card)] += row.count;
+    bucket.cards.push(row);
+  }
+  for (const bucket of buckets) {
+    bucket.cards.sort((a, b) => b.count - a.count || a.card.displayName.localeCompare(b.card.displayName, 'en'));
+  }
+  return buckets;
+}
+
+export interface RamFit {
+  readonly color: string;
+  /** RAM the deck's Legends of this colour give (0 = none). */
+  readonly available: number;
+  /** Highest RAM a main deck card of this colour needs, or null when no card of the colour has RAM. */
+  readonly needed: number | null;
+  /** Main deck copies of this colour that need more RAM than there is. */
+  readonly overCopies: number;
+}
+
+/**
+ * RAM per colour (T-093): what the Legends give against what the main deck needs. The rule itself is in
+ * validateDeck; this is the picture of it. Colours of the Legends and of the main deck, Legends' first.
+ */
+export function ramFit(deck: DeckContent, cardsByKey: CardsByKey, limits: ReadonlyMap<string, number>): RamFit[] {
+  const needed = new Map<string, number>();
+  const over = new Map<string, number>();
+  for (const { card, count } of mainRows(deck, cardsByKey)) {
+    if (card.color === null || card.ram === null) continue;
+    needed.set(card.color, Math.max(needed.get(card.color) ?? 0, card.ram));
+    if (card.ram > (limits.get(card.color) ?? 0)) over.set(card.color, (over.get(card.color) ?? 0) + count);
+  }
+  const colors = [...new Set([...limits.keys(), ...needed.keys()])];
+  return colors.map((color) => ({
+    color,
+    available: limits.get(color) ?? 0,
+    needed: needed.get(color) ?? null,
+    overCopies: over.get(color) ?? 0,
+  }));
+}
