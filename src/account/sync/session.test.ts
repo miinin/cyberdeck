@@ -256,4 +256,36 @@ describe('account deletion and public decks (T-098, SR-36)', () => {
     expect(publicDecks.docs.has(await publicDeckId(UID, deck.id))).toBe(true);
     session.dispose();
   });
+
+  it('runs beforeDeleteAccount before any deletion, so a pending public update cannot recreate a copy (SEC-098b-1)', async () => {
+    const b = browser();
+    const publicDecks = createMemoryPublicDecks({ now });
+    const deck = await b.account.decks.create(CONTENT);
+    await publicDecks.forUser(UID).publish({ ...PUBLIC_INPUT, deckId: deck.id });
+    const order: string[] = [];
+    const store = publicDecks.forUser(UID);
+    const wrapped = {
+      ...store,
+      removeMany: async (ids: readonly string[]) => {
+        order.push('removeMany');
+        return store.removeMany(ids);
+      },
+    };
+    const session = createAccountSession({
+      uid: UID,
+      ...b,
+      cloud,
+      publicDecks: wrapped,
+      beforeDeleteAccount: async () => {
+        order.push('before');
+      },
+      now,
+      locks: null,
+    });
+    session.start();
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    expect(await session.deleteAccountData()).toBe(true);
+    expect(order).toEqual(['before', 'removeMany']);
+    session.dispose();
+  });
 });

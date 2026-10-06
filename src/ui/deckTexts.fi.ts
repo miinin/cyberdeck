@@ -402,6 +402,7 @@ export const deckTextsFi = {
   publicLoading: 'Haetaan julkisia pakkoja…',
   publicEmpty: 'Julkisia pakkoja ei ole vielä. Voit julkaista oman pakkasi pakkaeditorin Näkyvyys-kohdasta.',
   publicError: 'Julkisia pakkoja ei voitu hakea. Tarkista verkkoyhteys ja yritä uudelleen.',
+  publicUnavailable: 'Julkiset pakat eivät ole juuri nyt saatavilla. Yritä myöhemmin uudelleen.',
   publicRetry: 'Yritä uudelleen',
   publicMore: 'Näytä lisää pakkoja',
   publicMoreLoading: 'Haetaan lisää…',

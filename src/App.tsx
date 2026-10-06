@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { createAccountSession, createBrowserAccountServices, createPublicDeckPublisher } from './account';
+import { createAccountSession, createBrowserAccountServices, createPublicDeckPublisher, watchPublicDecks } from './account';
 import type { AccountServices } from './account';
 import logoUrl from './assets/brand/cyberdeck-tcg-logo-header.webp';
 import { CARDS } from './data/cards';
@@ -53,10 +53,18 @@ export function App({
   // Public decks (T-098): reading works signed out; the publisher exists only for a signed-in account.
   const publicStore = useMemo(() => accountServices.publicDecks(uid), [accountServices, uid]);
   const publisher = useMemo(
-    () => (uid === null ? null : createPublicDeckPublisher({ store: publicStore })),
-    [uid, publicStore],
+    () =>
+      uid === null
+        ? null
+        : createPublicDeckPublisher({
+            store: publicStore,
+            isStillPublic: async (deckId) => (await openRepositories.decks.get(deckId))?.publish?.public === true,
+          }),
+    [uid, publicStore, openRepositories],
   );
   useEffect(() => () => publisher?.dispose(), [publisher]);
+  // A deck deleted or made private on another device loses its public copy (SEC-098b-2).
+  useEffect(() => (uid === null ? undefined : watchPublicDecks(openRepositories.decks, publicStore)), [uid, openRepositories, publicStore]);
   const publicApi = useMemo<PublicDecksApi>(
     () => ({ store: publicStore, publisher, signInAvailable: accountServices.auth.available }),
     [publicStore, publisher, accountServices],
@@ -72,8 +80,9 @@ export function App({
             account: openRepositories,
             cloud: accountServices.cloud(uid),
             publicDecks: publicStore,
+            beforeDeleteAccount: () => publisher?.drain() ?? Promise.resolve(),
           }),
-    [uid, signedOutRepositories, openRepositories, accountServices, publicStore],
+    [uid, signedOutRepositories, openRepositories, accountServices, publicStore, publisher],
   );
   useEffect(() => {
     session?.start();

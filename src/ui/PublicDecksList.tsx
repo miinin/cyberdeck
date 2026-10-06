@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { CloudError } from '../account';
 import { intlLocale } from '../locale';
 import { deckTexts } from './deckTexts';
 import { usePublicDecks } from './PublicDecksContext';
@@ -8,6 +9,11 @@ import { useNoIndex } from './useNoIndex';
 
 const dateFormat = new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short', timeStyle: 'short' });
 
+
+/** A lost connection says so; anything else (permission denied, server) is "not available right now". */
+function errorTextOf(error: unknown): string {
+  return error instanceof CloudError && error.kind === 'offline' ? deckTexts.publicError : deckTexts.publicUnavailable;
+}
 
 /**
  * The "Julkiset pakat" tab (T-098, D-025): 24 decks per page, newest update first, "Näytä lisää" for the next
@@ -23,6 +29,7 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
   const [more, setMore] = useState<'idle' | 'loading' | 'error'>('idle');
   const [live, setLive] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [errorText, setErrorText] = useState(deckTexts.publicError);
   /** Counts the reads of the first page; 0 = the one on opening, which the session cache may answer. */
   const [attempt, setAttempt] = useState(0);
   const firstNewRef = useRef<string | null>(null);
@@ -39,12 +46,13 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
         setRefreshing(false);
         setPhase('ready');
       },
-      () => {
+      (error: unknown) => {
         if (!active) return;
+        setErrorText(errorTextOf(error));
         setRefreshing(false);
         // A failed refresh keeps the list that is shown; a failed first read shows the error.
         setPhase((current) => (current === 'loading' ? 'error' : current));
-        setLive(deckTexts.publicError);
+        setLive(errorTextOf(error));
       },
     );
     return () => {
@@ -72,7 +80,10 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
         setMore('idle');
         setLive(deckTexts.publicLoadedLive(loaded.items.length));
       },
-      () => setMore('error'),
+      (error: unknown) => {
+        setErrorText(errorTextOf(error));
+        setMore('error');
+      },
     );
   };
 
@@ -97,7 +108,7 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
       )}
       {phase === 'error' && (
         <div className="notice notice-danger" role="alert">
-          <p>{deckTexts.publicError}</p>
+          <p>{errorText}</p>
           <button type="button" className="button-secondary" onClick={() => refresh()}>
             {deckTexts.publicRetry}
           </button>
@@ -161,7 +172,7 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
           </div>
           {more === 'error' && (
             <p className="field-error" role="alert">
-              {deckTexts.publicError}
+              {errorText}
             </p>
           )}
         </>

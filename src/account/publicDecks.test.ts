@@ -398,4 +398,57 @@ describe('public deck publisher (SR-34, SR-35)', () => {
     await vi.advanceTimersByTimeAsync(20_000);
     expect(memory.writes).toBe(0);
   });
+
+  it('drain stops the timers and a send waiting for the gap, so nothing is created after it (SEC-098b-1)', async () => {
+    const { memory, publisher } = setup();
+    publisher.schedule(input('deck-1', { name: 'Yksi' }));
+    await publisher.flush('deck-1');
+    // A second version waits for the minimum gap, a third for the 15 s timer.
+    publisher.schedule(input('deck-1', { name: 'Kaksi' }));
+    const waiting = publisher.flush('deck-1');
+    publisher.schedule(input('deck-2'));
+    await memory.forUser(UID).removeMany(['deck-1']);
+    const draining = publisher.drain();
+    await vi.advanceTimersByTimeAsync(60_000);
+    await Promise.all([draining, waiting]);
+    expect(memory.docs.size).toBe(0);
+  });
+
+  it('does not send a deck that is no longer public (SEC-098b-2)', async () => {
+    const memory = createMemoryPublicDecks();
+    let stillPublic = true;
+    const publisher = createPublicDeckPublisher({ store: memory.forUser(UID), isStillPublic: async () => stillPublic });
+    publisher.schedule(input('deck-1'));
+    stillPublic = false;
+    await publisher.flush('deck-1');
+    expect(memory.writes).toBe(0);
+    expect(publisher.state('deck-1')).toEqual({ kind: 'idle' });
+  });
+});
+
+describe('watchPublicDecks (SEC-098b-2)', () => {
+  it('removes the public copy of a deck that sync deleted or made private', async () => {
+    const { createMemoryRepositories } = await import('../storage');
+    const { watchPublicDecks } = await import('./publicWatch');
+    const repositories = createMemoryRepositories({ newId: (() => { let n = 0; return () => `deck-${(n += 1)}`; })() });
+    const content = { name: 'P', sections: [{ name: '', cards: [{ card: 'detonate', count: 1 }] }] };
+    const a = await repositories.decks.create(content);
+    const b = await repositories.decks.create(content);
+    await repositories.decks.setPublish(a.id, { public: true, nickname: null });
+    await repositories.decks.setPublish(b.id, { public: true, nickname: null });
+    const memory = createMemoryPublicDecks();
+    const store = memory.forUser(UID);
+    await store.publish(input(a.id));
+    await store.publish(input(b.id));
+    const stop = watchPublicDecks(repositories.decks, store);
+    await vi.waitFor(() => expect(memory.lists + memory.writes).toBeGreaterThan(0));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    // Sync brings the changes from another device: a is private now, b is gone.
+    const before = repositories.sync.read();
+    if (before === null) throw new Error('local data must be readable');
+    const privateA = { ...(before.decks[0] ?? (() => { throw new Error('deck'); })()), publish: { public: false, nickname: null } };
+    expect(repositories.sync.apply(before, { ...before, decks: [privateA] })).toBe(true);
+    await vi.waitFor(() => expect(memory.docs.size).toBe(0));
+    stop();
+  });
 });

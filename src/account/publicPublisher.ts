@@ -38,6 +38,8 @@ export interface PublicDeckPublisher {
   onChange(listener: () => void): () => void;
   /** Stops the timers without sending (the account changed). */
   dispose(): void;
+  /** Like dispose, and waits for the sends in flight. Call before account deletion (SEC-098b-1). */
+  drain(): Promise<void>;
 }
 
 interface Entry {
@@ -53,8 +55,10 @@ export function createPublicDeckPublisher(options: {
   delayMs?: number;
   minGapMs?: number;
   now?: () => Date;
+  /** Checked just before a send: false = the deck is gone or private (SEC-098b-2). */
+  isStillPublic?: (deckId: string) => Promise<boolean>;
 }): PublicDeckPublisher {
-  const { store, delayMs = PUBLIC_UPDATE_DELAY_MS, minGapMs = MIN_GAP_MS, now = () => new Date() } = options;
+  const { isStillPublic, store, delayMs = PUBLIC_UPDATE_DELAY_MS, minGapMs = MIN_GAP_MS, now = () => new Date() } = options;
   const entries = new Map<string, Entry>();
   const listeners = new Set<() => void>();
   let disposed = false;
@@ -89,7 +93,14 @@ export function createPublicDeckPublisher(options: {
         const wait = entry.lastSentAt + minGapMs - now().getTime();
         if (wait > 0) await new Promise<void>((resolve) => setTimeout(resolve, wait));
       }
+      // The account may have been deleted while waiting (SEC-098b-1).
+      if (disposed) return;
       try {
+        if (isStillPublic !== undefined && !(await isStillPublic(input.deckId))) {
+          setState(entry, IDLE);
+          return;
+        }
+        if (disposed) return;
         await store.publish(input);
         entry.lastSentAt = now().getTime();
         // A newer version arrived while sending: it keeps waiting for its own turn.
@@ -149,6 +160,10 @@ export function createPublicDeckPublisher(options: {
         stopTimer(entry);
         entry.input = null;
       }
+    },
+    async drain() {
+      this.dispose();
+      await Promise.all([...entries.values()].map((entry) => entry.chain));
     },
   };
 }

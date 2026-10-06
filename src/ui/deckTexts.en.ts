@@ -384,6 +384,7 @@ export const deckTextsEn: typeof deckTextsFi = {
   publicLoading: 'Loading public decks…',
   publicEmpty: 'There are no public decks yet. You can publish your own deck from the Visibility section of the deck editor.',
   publicError: 'Could not load public decks. Check your connection and try again.',
+  publicUnavailable: 'Public decks are not available right now. Try again later.',
   publicRetry: 'Try again',
   publicMore: 'Show more decks',
   publicMoreLoading: 'Loading more…',

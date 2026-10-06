@@ -30,6 +30,7 @@ export { CloudError } from './cloudError';
 export type { CloudErrorKind } from './cloudError';
 export { createFakeAuth, createMemoryCloud, createMemoryPublicDecks, FAKE_USER } from './memory';
 export type { FakeAuth, MemoryCloud, MemoryCloudPath, MemoryPublicDecks } from './memory';
+export { watchPublicDecks } from './publicWatch';
 export { createPublicDeckPublisher } from './publicPublisher';
 export type { PublicDeckPublisher, PublishState } from './publicPublisher';
 

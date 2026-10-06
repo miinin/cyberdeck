@@ -200,6 +200,7 @@ Käyttäjän oma pyyntö julkaista (palvelun tarjoaminen pyynnöstä). Kerrotaan
 
 ### 11.4 Säilytys ja poisto
 - Julkinen kopio säilyy, kunnes käyttäjä muuttaa pakan yksityiseksi, poistaa pakan tai poistaa tilin tiedot. Julkinen kopio poistetaan aina ennen yksityisiä tietoja (SR-35, SR-36). Jos poisto ei onnistu (ei yhteyttä), pakka pysyy julkisena ja sovellus sanoo sen.
+- Jos pakka poistetaan tai muutetaan yksityiseksi toisella laitteella ennen kuin synkronointi on ehtinyt, julkinen kopio voi jäädä näkyviin. Tällöin pyydä poistoa (11.7).
 - Kolmansien osapuolten tallentamia kopioita ei voi poistaa. Se kerrotaan julkaisuvahvistuksessa ja selosteessa.
 - Hakukoneindeksointi estetään (`noindex`, SR-41, K-P12). Se ei estä muita kopioimasta julkista sivua.
 - Päivitys julkiseen kopioon kirjoitetaan viivästettynä (aikaisintaan 15 s muutoksen jälkeen tai editorista poistuttaessa).

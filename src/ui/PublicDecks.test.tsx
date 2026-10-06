@@ -87,6 +87,13 @@ describe('public decks list', () => {
     expect(await screen.findByText('Julkisia pakkoja ei ole vielä', { exact: false })).toBeInTheDocument();
   });
 
+  it('says the list is unavailable, not offline, when the error is not a lost connection', async () => {
+    const memory = createMemoryPublicDecks();
+    memory.failNext('denied');
+    renderApp({ memory });
+    expect(await screen.findByRole('alert')).toHaveTextContent('eivät ole juuri nyt saatavilla');
+  });
+
   it('pages with "Näytä lisää pakkoja" and reads each page once (SR-33)', async () => {
     const memory = createMemoryPublicDecks({ now: (() => { let t = Date.parse('2026-10-06T10:00:00Z'); return () => new Date((t += 60_000)); })() });
     for (let i = 0; i < 26; i += 1) await publishAs(memory, `d${i}`, `Pakka ${i}`, null);
@@ -176,6 +183,7 @@ describe('visibility in the deck editor', () => {
     const memory = createMemoryPublicDecks();
     renderApp({ initial: storedDecks([DECK]), memory });
     await open();
+    expect(screen.getByText('Yksityinen', { selector: 'summary strong' }).closest('summary')).toHaveTextContent('Näkyvyys: Yksityinen');
     expect(screen.getByRole('radio', { name: /Yksityinen/ })).toBeChecked();
     const publicRadio = screen.getByRole('radio', { name: /Julkinen/ });
     expect(publicRadio).toBeDisabled();
