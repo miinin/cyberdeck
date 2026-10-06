@@ -5720,11 +5720,7 @@ section[aria-labelledby='have-heading'] {
   outline-offset: 2px;
 }
 
-/* "+ SB" beside the stepper, not under it (one row height). */
-.pick-table .col-deck {
-  white-space: nowrap;
-}
-
+/* "+ SB" beside the stepper, not under it (one row height), where there is room; narrow or with large text it wraps (T-023). */
 .pick-table .col-deck .card-row-controls {
   display: inline-flex;
   vertical-align: middle;
@@ -5733,6 +5729,12 @@ section[aria-labelledby='have-heading'] {
 .pick-table .col-deck .tile-action {
   margin-inline-start: var(--space-1);
   vertical-align: middle;
+}
+
+@media (min-width: 64rem) {
+  .pick-table .col-deck {
+    white-space: nowrap;
+  }
 }
 
 /*
@@ -6411,4 +6413,44 @@ section[aria-labelledby='have-heading'] {
   background: var(--color-bg);
   color: var(--color-text);
   font: inherit;
+}
+
+/*
+ * Phone list rows wrap (T-023): with large text the type, rarity and values move to the next line instead of
+ * widening the row past the screen. The picture is pinned to the left of the row.
+ */
+@media (max-width: 39.99rem) {
+  .card-table tbody tr {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-block-size: 5.5rem;
+    padding-inline-start: calc(3.5rem + 2 * var(--space-2));
+  }
+
+  .card-table tbody tr.is-owned,
+  .card-table tbody tr.is-playset {
+    padding-inline-start: calc(3.5rem + 2 * var(--space-2));
+  }
+
+  .card-table .cell-image {
+    position: absolute;
+    inset-block-start: var(--space-2);
+    inset-inline-start: var(--space-2);
+  }
+
+  .card-table .cell-name,
+  .card-table .cell-collection {
+    flex-basis: 100%;
+  }
+
+  .card-table .cell-collection {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .card-table .cell-number {
+    white-space: nowrap;
+  }
 }
