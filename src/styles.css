@@ -5260,3 +5260,47 @@ section[aria-labelledby='have-heading'] {
 #active-filters {
   scroll-margin-top: var(--space-4);
 }
+
+/*
+ * Phones (T-088). Image size changes nothing below 40 rem (even the smallest card fills the one column), so
+ * it is hidden. Version tiles in the card dialog: picture on the left, name, sets and counters on the right,
+ * every counter at the right edge. The share note goes under its button.
+ */
+@media (max-width: 39.99rem) {
+  .image-size-select {
+    display: none;
+  }
+
+  .card-dialog-details .art-tile:has(> .art-pick, > .art-thumb) {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    column-gap: var(--space-3);
+    row-gap: var(--space-1);
+    align-items: start;
+  }
+
+  .card-dialog-details .art-tile > * {
+    grid-column: 2;
+  }
+
+  .card-dialog-details .art-tile > .art-pick,
+  .card-dialog-details .art-tile > .art-thumb {
+    grid-column: 1;
+    grid-row: 1 / span 6;
+  }
+
+  .card-dialog-details .art-thumb {
+    width: 100%;
+    height: auto;
+  }
+
+  .card-dialog-details .art-count:not(.art-count--editions) {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .trade-share .hint {
+    display: block;
+    margin-block-start: var(--space-1);
+  }
+}
