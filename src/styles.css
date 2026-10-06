@@ -7452,3 +7452,155 @@ section[aria-labelledby='have-heading'] {
     page-break-after: auto;
   }
 }
+
+/* Collection progress (T-105): cards in the style of the deck statistics. */
+.collection-progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
+  gap: var(--space-4);
+  align-items: start;
+  margin-block-start: var(--space-4);
+}
+
+.collection-wide {
+  grid-column: 1 / -1;
+}
+
+.collection-empty {
+  max-inline-size: 40rem;
+  margin-block-start: var(--space-4);
+}
+
+.collection-empty-title {
+  margin: 0;
+}
+
+.collection-kpis {
+  flex: 1;
+}
+
+.progress-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 10rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  --bar: var(--color-brand-yellow);
+}
+
+.progress-row.seg-unit,
+.progress-row.seg-program,
+.progress-row.seg-gear,
+.progress-row.seg-other {
+  --bar: var(--seg);
+}
+
+.progress-row.progress-color {
+  --bar: var(--badge-color, var(--color-text-muted));
+}
+
+.progress-bar {
+  display: block;
+  block-size: 0.75rem;
+  background: var(--color-border);
+}
+
+.progress-fill {
+  display: block;
+  block-size: 100%;
+  background: var(--bar);
+}
+
+.progress-numbers {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.progress-pct {
+  color: var(--color-text-muted);
+}
+
+.progress-subtitle {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+.progress-more summary {
+  min-height: var(--target-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: var(--font-weight-bold);
+}
+
+.progress-more .progress-list {
+  margin-block-end: var(--space-2);
+}
+
+.missing-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.missing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.missing-tile {
+  display: grid;
+  gap: var(--space-1);
+  color: inherit;
+  text-decoration: none;
+}
+
+.missing-tile:hover .card-image,
+.missing-tile:focus-visible .card-image {
+  border-color: var(--color-brand-yellow);
+}
+
+.missing-tile-name {
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+}
+
+@media (max-width: 39.99rem) {
+  .overview-gauges {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .collection-kpis {
+    flex-basis: 100%;
+  }
+
+  .progress-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .progress-row .progress-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .site-header .main-nav a {
+    padding-inline: var(--space-2);
+  }
+}
