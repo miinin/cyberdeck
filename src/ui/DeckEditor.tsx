@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Card } from '../domain/card';
 import type { Deck, DeckContent } from '../domain/deck';
-import { MAX_DECK_DISTINCT_CARDS, SIDEBOARD_SIZE } from '../domain/deck';
+import { MAX_DECK_DISTINCT_CARDS, MAX_DECK_NAME_LENGTH, SIDEBOARD_SIZE } from '../domain/deck';
 import { checkDeckName, distinctRows, withDeckCount, withSideboardCount } from '../domain/deckEdit';
 import {
   MAX_MAIN_DECK,
@@ -542,6 +542,7 @@ export function DeckEditor({
             <input
               id="deck-name"
               type="text"
+              maxLength={MAX_DECK_NAME_LENGTH}
               value={nameText}
               aria-invalid={nameError !== null ? 'true' : undefined}
               aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
