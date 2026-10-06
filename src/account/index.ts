@@ -4,7 +4,7 @@
 import { FIREBASE_SITE, selectAuthMode } from './firebase/sites';
 import { CloudError } from './cloudError';
 import { createLazyAuthClient } from './lazyAuthClient';
-import type { AccountHints, AccountServices, CloudStore } from './types';
+import type { AccountHints, AccountServices, CloudStore, PublicDeckStore } from './types';
 
 export type {
   AccountHints,
@@ -19,14 +19,19 @@ export type {
   CloudMeta,
   CloudSnapshot,
   CloudStore,
+  PublicDeckCursor,
+  PublicDeckPage,
+  PublicDeckStore,
 } from './types';
 export { createAccountSession } from './sync/session';
 export type { AccountSession, FirstSignInChoice, SessionStatus } from './sync/session';
 export type { SyncState, SyncStatus } from './sync/syncEngine';
 export { CloudError } from './cloudError';
 export type { CloudErrorKind } from './cloudError';
-export { createFakeAuth, createMemoryCloud, FAKE_USER } from './memory';
-export type { FakeAuth, MemoryCloud, MemoryCloudPath } from './memory';
+export { createFakeAuth, createMemoryCloud, createMemoryPublicDecks, FAKE_USER } from './memory';
+export type { FakeAuth, MemoryCloud, MemoryCloudPath, MemoryPublicDecks } from './memory';
+export { createPublicDeckPublisher } from './publicPublisher';
+export type { PublicDeckPublisher, PublishState } from './publicPublisher';
 
 /**
  * Firebase-backed services for this build and host. Creating them loads nothing; the auth client and the
@@ -44,6 +49,7 @@ export function createBrowserAccountServices(hints: AccountHints): AccountServic
       },
     }),
     cloud: createLazyCloudStore,
+    publicDecks: createLazyPublicDecks,
   };
 }
 
@@ -70,5 +76,31 @@ function createLazyCloudStore(uid: string): CloudStore {
     readAll: async () => (await load()).readAll(),
     commit: async (change, expectedRev) => (await load()).commit(change, expectedRev),
     deleteAll: async () => (await load()).deleteAll(),
+  };
+}
+
+/** Loads the Firestore public decks store on the first call; reading works signed out. */
+function createLazyPublicDecks(uid: string | null): PublicDeckStore {
+  let store: Promise<PublicDeckStore> | null = null;
+  const load = () => {
+    if (store === null) {
+      const pending = import('./firebase/firestorePublicDecks').then((module) =>
+        module.createFirestorePublicDecks({ uid }),
+      );
+      store = pending;
+      pending.catch(() => {
+        if (store === pending) store = null;
+      });
+    }
+    return store.catch(() => {
+      throw new CloudError('offline');
+    });
+  };
+  return {
+    list: async (cursor) => (await load()).list(cursor),
+    get: async (pubId) => (await load()).get(pubId),
+    publish: async (input) => (await load()).publish(input),
+    remove: async (deckId) => (await load()).remove(deckId),
+    removeMany: async (deckIds) => (await load()).removeMany(deckIds),
   };
 }

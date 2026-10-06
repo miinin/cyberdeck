@@ -84,8 +84,10 @@ describe('buildPublicDeckInput', () => {
 describe('parsePublicDeck (SR-37)', () => {
   it('accepts a valid document and returns only whitelisted fields', () => {
     const parsed = parsePublicDeck(PUB_ID, { ...valid, ownerUid: 'secret', extra: 1 });
-    const { schemaVersion: _version, ...fields } = valid;
-    expect(parsed).toEqual({ pubId: PUB_ID, ...fields });
+    // toEqual ignores the undefined schemaVersion: the parsed deck has no such field.
+    expect(parsed).toEqual({ pubId: PUB_ID, ...valid, schemaVersion: undefined });
+    expect(parsed).not.toHaveProperty('schemaVersion');
+    expect(parsed).not.toHaveProperty('ownerUid');
   });
 
   it('rejects a bad id, a newer schema and broken fields', () => {

@@ -1,7 +1,7 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
-import { createFakeAuth, createMemoryCloud, FAKE_USER } from './account';
+import { createFakeAuth, createMemoryCloud, createMemoryPublicDecks, FAKE_USER } from './account';
 import type { FakeAuth } from './account';
 import { loadFirebase } from './account/firebase/loadFirebase';
 import { createMemoryRepositories } from './storage';
@@ -10,7 +10,7 @@ import { createMemoryRepositories } from './storage';
 
 async function renderApp(auth?: FakeAuth, initial: Record<string, string> = {}) {
   render(
-    <App cards={[]} repositories={createMemoryRepositories({ initial })} account={auth ? { auth, cloud: () => createMemoryCloud() } : undefined} />,
+    <App cards={[]} repositories={createMemoryRepositories({ initial })} account={auth ? { auth, cloud: () => createMemoryCloud(), publicDecks: createMemoryPublicDecks().forUser } : undefined} />,
   );
   await act(async () => {});
 }

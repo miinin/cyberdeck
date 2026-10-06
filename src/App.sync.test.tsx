@@ -1,7 +1,7 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
-import { createFakeAuth, createMemoryCloud, FAKE_USER } from './account';
+import { createFakeAuth, createMemoryCloud, createMemoryPublicDecks, FAKE_USER } from './account';
 import type { MemoryCloud } from './account';
 import { createMemoryRepositories } from './storage';
 import type { Repositories } from './storage';
@@ -15,7 +15,7 @@ async function renderApp(options: { repositories: Repositories; cloud: MemoryClo
   const auth = createFakeAuth(options.signedIn === false ? {} : { user: FAKE_USER });
   window.location.hash = '#/pakat';
   render(
-    <App cards={[]} repositories={options.repositories} account={{ auth, cloud: () => options.cloud }} />,
+    <App cards={[]} repositories={options.repositories} account={{ auth, cloud: () => options.cloud, publicDecks: createMemoryPublicDecks().forUser }} />,
   );
   await act(async () => {});
   return auth;

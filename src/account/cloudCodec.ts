@@ -14,6 +14,8 @@ import type { CloudChange, CloudDoc, CloudMeta, CloudSnapshot } from './types';
 
 /** The same root in both projects (D-017 Muutos K-P8). */
 export const CLOUD_ROOT = 'users';
+/** Public copies of decks (T-098): `publicDecks/{pubId}`, readable by everyone. */
+export const PUBLIC_COLLECTION = 'publicDecks';
 export const META_SCHEMA_VERSION = 1;
 export const DECK_DOC_SCHEMA_VERSION = 1;
 /** D-017 kohta 3: Firestore allows 1 MiB per document; the encoded collection must stay below this. */
