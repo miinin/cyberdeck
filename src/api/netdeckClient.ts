@@ -183,7 +183,10 @@ function toCatalog(pages: NetdeckPage[], reportedTotal: number): CardCatalog {
       const card = mapCard(raw);
       if (card === null) {
         skipped += 1;
-      } else if (!seenIds.has(card.id)) {
+      } else if (seenIds.has(card.id)) {
+        // A second card with the same id is dropped; it counts as skipped so the log number is right (B-003, T-008).
+        skipped += 1;
+      } else {
         seenIds.add(card.id);
         cards.push(card);
       }
