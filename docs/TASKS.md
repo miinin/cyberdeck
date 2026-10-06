@@ -13,7 +13,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-006 | [velka] Keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen ja testityyppien erottaminen sovelluksen tsconfigista | 1 | Could | Koodari | Backlog | – |
 | T-007 | [velka] SR-1:n lint-säännön kiertotiet suljettava (SEC-002) ennen rules_text-muotoilua | 1 | Should | Koodari | Backlog | Digiturva |
 | T-008 | Virhe- ja osittaisen tilan parannukset: kortit säilyvät uusintayrityksessä (B-001), fokus tuplaklikkauksessa (B-016), skipped-laskenta (B-003), virheteksti lajin mukaan (B-006), hinnan järkevyystarkistus (B-009) | 1 | Should | Koodari | Backlog | UX, Sisällöntuottaja, Testikäyttäjä |
-| T-009 | Hostingin kovennus: noscript, välimuistiotsakkeet (myös `index.html` `Cache-Control: no-cache`, SEC-011) ja puuttuvien assettien 404 (B-004), Firebase-API-avaimen rajaus (B-010) ennen datatallennusta | 1 | Should | Koodari | Backlog | Digiturva (SR-9) |
+| T-009 | Hostingin kovennus: noscript, välimuistiotsakkeet (myös `index.html` `Cache-Control: no-cache`, SEC-011) ja puuttuvien assettien 404 (B-004), Firebase-API-avaimen rajaus (B-010) ennen datatallennusta | 1 | Should | Koodari | Osittain (T-086: noscript, index.html no-cache, 404; API-avaimen rajaus jäljellä) | Digiturva (SR-9) |
 | T-010 | Haku ja suodatus korttilistaan (nimi, tyyppi, väri) | 1 | Must | Koodari | Done | UX, Sisällöntuottaja, Testikäyttäjä |
 | T-011 | Tietomalli ja paikallinen tallennuskerros (kokoelma, pakat), valmius Firebaseen ja painoksiin (D-007) | 1 | Must | Arkkitehti → Koodari | Done | Arkkitehti, Digiturva |
 | T-012 | Kokoelma: omistettujen korttien ja määrien merkintä helposti, ilmoitus "tiedot vain tässä selaimessa" (R-10) sekä newer-version-, reset- ja kirjoitus estetty -ilmoitukset (SEC-007) | 1 | Must | Koodari | Done | UX, Digiturva (Testikäyttäjä ja Dokumentoija MVP-1:n lopussa, D-009) |
@@ -34,7 +34,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-027 | Korttikuvat näkyviin käyttäjän 151 kuvan paketista (D-012) | 1 | Must | Arkkitehti → UX → Koodari | Done | UX, Digiturva |
 | T-028 | [velka] Teeman vaihdon siirtymät ja reduced-motion-sääntö: `transition: none` reduce-tilassa ja ei 0,12 s:n siirtymiä teeman vaihdossa (UX-005-2, UX-005-3) | 2 | Could | Koodari | Backlog | UX |
 | T-029 | [velka] `.claude/` pois ESLintin ja Vitestin piiristä, jotta worktreet eivät riko `npm run lint`/`npm test`:iä pääkansiossa (T-025:n koodikatselmointi). Tehdään T-026:n jälkeen (sama konfiguraatio). | 1 | Should | Koodari | Done (T-004) | – |
-| T-030 | [velka] Sivun hyppy, kun korttidialogi avautuu: `html { scrollbar-gutter: stable }` (UX-040) | 2 | Could | Koodari | Backlog | UX |
+| T-030 | [velka] Sivun hyppy, kun korttidialogi avautuu: `html { scrollbar-gutter: stable }` (UX-040) | 2 | Could | Koodari | Done (T-084) | UX |
 | T-031 | [velka] Ison korttikuvan latausvirhe nollataan dialogin sulkeutuessa, jotta uusi yritys on mahdollinen (UX-041) | 2 | Could | Koodari | Backlog | – |
 | T-032 | [velka] `/public/*.webp` .gitignoreen, jotta alkuperäiset kuvat eivät päädy repoon tai paikalliseen buildiin (SEC-019, L-005) | 1 | Should | Koodari | Done (T-004) | – |
 | T-033 | Kevyt toimintamalli tokenien säästämiseksi (D-014) | – | Must | PM | Done | – |
@@ -76,16 +76,17 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-069 | Järjestysvalitsimen hillitty fokustyyli | 1 | Must | PM | Done | – |
 | T-070 | Kortin klikkaus avaa tietonäkymän: kokoelma, want ja pakat | 1 | Must | PM | Done | – |
 | T-071 | Pienet korjaukset: liput, suodatinsirun kulma, Jaa Have/Want, Vie ja jaa -valikko, roskakori- ja kynäikonit, laskurin keskitys | 1 | Must | PM | Done | – |
-| T-072 | Korttien painokset kokoelmaan (D-020): versiot kortin tietonäkymässä, painosdata, kuvien tuonti | 1 | Must | PM | Review (dev) | Digiturva ✓ |
-| T-074 | Sideboard hakulistasta ja Pinoista, setti/versio-suodatin ja yhteenveto, UX-katselmoinnin korjaukset (M1–M5, M11) | 1 | Must | PM | Review (dev) | UX ✓ |
-| T-075 | Pakka-analyysi: korttiryhmän todennäköisyys vuoroittain, korvaajaehdotus puuttuville korteille | 1 | Should | PM | Review (dev) | – |
-| T-076 | Viralliset versiokuvat (82 kpl, Iconic ja Nova Rare) kortin tietonäkymään, kuva-avain kortti×harvinaisuus | 1 | Must | PM | Review (dev) | – |
-| T-077 | Versiot kuvituksina (D-021): galleria tietonäkymässä, haku näyttää osuvan kuvituksen, Kaikki kuvitukset -tila | 1 | Must | PM | Review (dev) | – |
-| T-078 | Viralliset harvinaisuudet (Epic Rare, Secret Rare, Iconic Rare…), kielivalitsin pelkkinä lippuina | 1 | Must | PM | Review (dev) | – |
-| T-079 | Viralliset harvinaisuussymbolit hover-selityksin, ylläpalkin kevyet ikonit (teema, liput, tili) | 1 | Must | PM | Review (dev) | – |
-| T-080 | Logo ylänurkkaan ja faviconiksi, ei sisäisiä vieritysalueita (suodatinpaneelit, dialogit) | 1 | Must | PM | Review (dev) | – |
-| T-081 | "N versiota", versioiden selausnuolet korttiruudussa, tietonäkymä mahtuu ruutuun ja tasatut laskurit, reitti #/kortti/<avain> | 1 | Must | PM | Review (dev) | – |
+| T-072 | Korttien painokset kokoelmaan (D-020): versiot kortin tietonäkymässä, painosdata, kuvien tuonti | 1 | Must | PM | Done | Digiturva ✓ |
+| T-074 | Sideboard hakulistasta ja Pinoista, setti/versio-suodatin ja yhteenveto, UX-katselmoinnin korjaukset (M1–M5, M11) | 1 | Must | PM | Done | UX ✓ |
+| T-075 | Pakka-analyysi: korttiryhmän todennäköisyys vuoroittain, korvaajaehdotus puuttuville korteille | 1 | Should | PM | Done | – |
+| T-076 | Viralliset versiokuvat (82 kpl, Iconic ja Nova Rare) kortin tietonäkymään, kuva-avain kortti×harvinaisuus | 1 | Must | PM | Done | – |
+| T-077 | Versiot kuvituksina (D-021): galleria tietonäkymässä, haku näyttää osuvan kuvituksen, Kaikki kuvitukset -tila | 1 | Must | PM | Done | – |
+| T-078 | Viralliset harvinaisuudet (Epic Rare, Secret Rare, Iconic Rare…), kielivalitsin pelkkinä lippuina | 1 | Must | PM | Done | – |
+| T-079 | Viralliset harvinaisuussymbolit hover-selityksin, ylläpalkin kevyet ikonit (teema, liput, tili) | 1 | Must | PM | Done | – |
+| T-080 | Logo ylänurkkaan ja faviconiksi, ei sisäisiä vieritysalueita (suodatinpaneelit, dialogit) | 1 | Must | PM | Done | – |
+| T-081 | "N versiota", versioiden selausnuolet korttiruudussa, tietonäkymä mahtuu ruutuun ja tasatut laskurit, reitti #/kortti/<avain> | 1 | Must | PM | Done | – |
 | T-082 | Versiokorjaukset (symboli seuraa versiota, kaikki versiot näkyvät, Rebecca), settikyltit, Kuvat/Lista, puuttuvien lisäys varmistuksella, uudet harvinaisuussymbolit, favicon-kulma, Myytävä-suodatin, harvinaisuudet 2 sarakkeessa | 1 | Must | PM | Done | – |
 | T-083 | Setit ja muut tuotteet erikseen, Beta/Retail-painos kokoelmassa, olemassa olevat kortit Betaksi (D-022), versionimi pois kuvan alta | 1 | Must | PM | Done | Digiturva ✓ |
 | T-084 | Ei nykimistä: vierityspalkin tila varattu, valittujen suodattimien rivi pitää korkeutensa, korttilaatikoiden tyyppirivi samalla korkeudella | 1 | Should | PM | Done | PM esikatselu ✓ |
 | T-085 | Gitleaks käyttöön: pre-commit-hook (`.githooks/`, `prepare`-skripti), `.gitleaks.toml`-poikkeukset, historian skannaus (D-023) | 1 | Must | PM | Done | PM testi: estää vuotavan commitin ✓ |
+| T-086 | Siivous ja hostingin kovennus (T-009:stä): TASKS-tilat ajan tasalle, `index.html` `Cache-Control: no-cache`, SPA-rewrite pois (puuttuva asset = 404, B-004), noscript | 1 | Should | PM | Done | Digiturva |
