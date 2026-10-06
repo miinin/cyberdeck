@@ -99,3 +99,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-093 | Pakan tilastot uudelleen: yleiskuva renkain (pääpakka, Legendit, sideboard, omistus) ja avainluvuin, testikäsi esiin; Cost-käyrä tyypeittäin (pylväs näyttää kortit, keskiarvomerkki); värit donitsina ja RAM väreittäin; tyyppipalkki; nostotodennäköisyydet palkkeina hetki kerrallaan; ryhmälaskuri palkein | 1 | Must | PM | Done | PM kuvat ✓ |
 | T-094 | Dokumentaatio: CHANGELOG-versio ja STATUS.md ajan tasalle | 1 | Should | Dokumentoija | Done | – |
 | T-096 | Pakan tilastot: Program ja Gear omilla väreillä, Eddies-kortti (myytävät vs. suositus hintarakenteen mukaan, Eddiet vuoroittain, myynti joka vuoro -todennäköisyys) (D-024) | 1 | Must | PM | Done | PM kuvat ✓ |
+| T-097 | Kortit-otsikon alta pois "Kirjatut versiot" -rivi, kokoelman koko pienenä himmeänä tekstinä | 1 | Should | PM | Done | – |
