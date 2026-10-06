@@ -27,12 +27,15 @@ export interface OwnedColumn {
   onArtChange?: (card: Card, art: Art, count: number) => void;
   /** The "Muokkaa kokoelmaa" switch (T-040): false hides the − and + buttons. */
   editable: boolean;
+  /** 'proxy' = the print queue (T-102): its own spoken texts and no playset edge. Default: the collection. */
+  kind?: 'owned' | 'proxy';
 }
 
 /** Box state (UX.md 7.5): only when the collection is ready; a 1 px edge colour, never a size change. */
 export function collectionState(card: Card, owned: OwnedColumn | undefined): string {
   if (owned?.mode !== 'ready') return '';
   const count = owned.countOf(card);
+  if (owned.kind === 'proxy') return count > 0 ? 'is-owned' : '';
   if (count >= playsetSize(card)) return 'is-owned is-playset';
   return count > 0 ? 'is-owned' : '';
 }
@@ -256,6 +259,7 @@ function CardBox({
               onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
               onLimit={owned.onLimit}
               editable={owned.editable}
+              kind={owned.kind}
               min={artMode ? 0 : owned.minOf?.(card)}
             />
           </div>

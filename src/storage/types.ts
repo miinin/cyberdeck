@@ -133,6 +133,8 @@ export interface Repositories {
   collection: CollectionRepository;
   /** The want list: the same interface and rules as the collection, under its own key (D-018). */
   wants: CollectionRepository;
+  /** The proxy print queue (T-102): the collection's interface and rules, local only (not synced). */
+  proxy: CollectionRepository;
   decks: DeckRepository;
   preferences: PreferencesRepository;
   /** false = browser storage is not in use and data lives only in memory (the UI shows a notice, SR-13). */

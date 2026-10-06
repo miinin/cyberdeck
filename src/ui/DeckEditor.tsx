@@ -70,6 +70,8 @@ import { Stepper } from './Stepper';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
 import { useWants } from './useWants';
+import { proxyTexts } from './proxyTexts';
+import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 import { trackDeckSave } from './useDecks';
 import { EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
 
@@ -102,6 +104,7 @@ export function DeckEditor({
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const { snapshot: collection } = useCollection(repositories.collection);
   const wants = useWants(repositories.wants);
+  const proxyQueue = useProxyQueue(repositories.proxy);
 
   const [phase, setPhase] = useState<'loading' | 'ready' | 'not-found' | 'unavailable'>('loading');
   const [content, setContent] = useState<DeckContent>({ name: '', sections: [] });
@@ -978,6 +981,21 @@ export function DeckEditor({
               </ul>
             </div>
           )}
+
+          <div className="missing-add proxy-send">
+            <SendToProxyButton
+              rows={[...allCounts].filter(([key]) => cardsByKey.has(key)).map(([card, count]) => ({ card, count }))}
+              queue={proxyQueue}
+              label={proxyTexts.sendDeck}
+            />
+            {collectionReady && missingCards.length > 0 && (
+              <SendToProxyButton
+                rows={missingCards.map((row) => ({ card: row.card.key, count: row.missing }))}
+                queue={proxyQueue}
+                label={proxyTexts.sendMissing}
+              />
+            )}
+          </div>
 
           <DeckStats
             deck={content}
