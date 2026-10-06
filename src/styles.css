@@ -6964,3 +6964,224 @@ section[aria-labelledby='have-heading'] {
   padding-inline-start: var(--space-2);
   border-inline-start: 4px solid var(--badge-color, var(--color-border-strong));
 }
+
+/* Proxy printing (T-102). The sheets are paper: fixed white and black in both themes. */
+.proxy-disclaimer {
+  max-width: var(--prose-max-width);
+  margin-block: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 4px solid var(--color-brand-yellow);
+  background: var(--color-surface);
+  font-weight: var(--font-weight-bold);
+}
+
+.proxy-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block: var(--space-3);
+}
+
+.proxy-add,
+.proxy-queue {
+  margin-block-start: var(--space-6);
+  scroll-margin-block-start: var(--space-4);
+}
+
+.proxy-add:focus,
+.proxy-queue:focus {
+  outline: none;
+}
+
+.proxy-settings {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-block: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+}
+
+.proxy-print-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.proxy-print-hint {
+  flex-basis: 100%;
+  max-width: var(--prose-max-width);
+  margin: 0;
+}
+
+.proxy-send {
+  margin-block-end: var(--space-3);
+}
+
+.proxy-preview-heading {
+  margin-block-start: var(--space-6);
+}
+
+/*
+ * The sheets: --u is one millimetre when printing and a fraction of it in the preview, so the preview fits
+ * the width of the page and the printout has exact sizes.
+ */
+.proxy-print-area {
+  --u: min(1mm, calc(100cqw / 210));
+  container-type: inline-size;
+  page: proxy;
+}
+
+.proxy-sheets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.proxy-sheet {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: calc(var(--u) * 210);
+  height: calc(var(--u) * 297);
+  overflow: hidden;
+  background: #fff;
+  color: #000;
+  border: 1px solid var(--color-border-strong);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.proxy-card {
+  position: absolute;
+  overflow: hidden;
+  background: #fff;
+}
+
+.proxy-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.proxy-card-missing {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: calc(var(--u) * 4);
+  border: calc(var(--u) * 0.3) dashed #555;
+  font-size: calc(var(--u) * 4.5);
+  text-align: center;
+}
+
+/* Small and quiet: at the bottom edge, half see-through, with a soft shadow so it reads on light and dark art. */
+.proxy-mark {
+  position: absolute;
+  inset-inline-end: calc(var(--u) * 2.5);
+  bottom: calc(var(--u) * 1);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: calc(var(--u) * 1.8);
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  line-height: 1;
+  opacity: 0.5;
+  text-shadow: 0 0 calc(var(--u) * 0.6) rgb(0 0 0 / 0.9);
+  pointer-events: none;
+}
+
+.proxy-cut {
+  position: absolute;
+  background: #000;
+}
+
+.proxy-calibration-frame {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: calc(var(--u) * 0.3) solid #000;
+  font-size: calc(var(--u) * 4);
+}
+
+.proxy-ruler {
+  position: absolute;
+  height: calc(var(--u) * 0.3);
+  background: #000;
+}
+
+.proxy-ruler-tick {
+  position: absolute;
+  top: calc(var(--u) * -2.5);
+  width: calc(var(--u) * 0.3);
+  height: calc(var(--u) * 5.3);
+  background: #000;
+}
+
+.proxy-ruler-label {
+  position: absolute;
+  top: calc(var(--u) * 4);
+  left: 0;
+  font-size: calc(var(--u) * 3.5);
+  white-space: nowrap;
+}
+
+.proxy-calibration-note,
+.proxy-calibration-footer {
+  position: absolute;
+  margin: 0;
+  font-size: calc(var(--u) * 3.2);
+  line-height: 1.4;
+}
+
+@page proxy {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  body.is-proxy-view .site-header,
+  body.is-proxy-view .site-footer,
+  body.is-proxy-view .proxy-screen {
+    display: none !important;
+  }
+
+  body.is-proxy-view,
+  body.is-proxy-view main {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+
+  body.is-proxy-view main.container {
+    max-width: none;
+    width: auto;
+  }
+
+  body.is-proxy-view .proxy-print-area {
+    --u: 1mm;
+    container-type: normal;
+  }
+
+  body.is-proxy-view .proxy-sheets {
+    display: block;
+  }
+
+  body.is-proxy-view .proxy-sheet {
+    border: 0;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  body.is-proxy-view .proxy-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+}

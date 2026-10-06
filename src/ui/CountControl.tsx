@@ -4,6 +4,7 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import { MAX_COLLECTION_COUNT } from '../domain/collection';
 import { CardName } from './CardName';
+import { proxyTexts } from './proxyTexts';
 import { copiesSuffix, texts } from './texts';
 
 export type CountControlMode = 'loading' | 'ready' | 'locked';
@@ -18,8 +19,8 @@ export interface CountControlProps {
   onLimit: (card: Card) => void;
   /** false = browsing: only the count and its state are shown, no buttons (T-040). */
   editable?: boolean;
-  /** 'want' = the want list (T-064b): its own spoken texts and no playset mark. Default: the collection. */
-  kind?: 'owned' | 'want' | 'version';
+  /** 'want' = the want list (T-064b), 'proxy' = the print queue (T-102): their own spoken texts and no playset mark. Default: the collection. */
+  kind?: 'owned' | 'want' | 'version' | 'proxy';
   /** The count cannot go below this (D-020: the sum of the versions). Default 0. */
   min?: number;
   /** Names the control for screen readers instead of the card name (a version row). */
@@ -27,20 +28,21 @@ export interface CountControlProps {
 }
 
 /** The count with its spoken equivalents and the playset mark (✓). */
-function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'owned' | 'want' | 'version' }) {
+function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'owned' | 'want' | 'version' | 'proxy' }) {
   const want = kind === 'want';
+  const proxy = kind === 'proxy';
   return (
     <span className="count">
       {count > 0 ? (
         <>
-          <span className="visually-hidden">{want ? texts.wantPrefix : texts.countPrefix}</span>
+          <span className="visually-hidden">{proxy ? proxyTexts.countPrefix : want ? texts.wantPrefix : texts.countPrefix}</span>
           {count}
           <span className="visually-hidden">{copiesSuffix(count)}</span>
         </>
       ) : (
         <>
           <span aria-hidden="true">0</span>
-          <span className="visually-hidden">{want ? texts.notWanted : texts.notOwned}</span>
+          <span className="visually-hidden">{proxy ? proxyTexts.notQueued : want ? texts.notWanted : texts.notOwned}</span>
         </>
       )}
       {kind === 'owned' && count >= playsetSize(card) && (
@@ -126,7 +128,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
         onClick={decrease}
       >
         <span className="visually-hidden">
-          {kind === 'want' ? texts.decreaseWant : texts.decreaseOne}
+          {kind === 'proxy' ? proxyTexts.decreaseOne : kind === 'want' ? texts.decreaseWant : texts.decreaseOne}
           {label ?? <CardName card={card} />}
         </span>
         <span aria-hidden="true">{texts.minusSymbol}</span>
@@ -141,7 +143,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
         onClick={increase}
       >
         <span className="visually-hidden">
-          {kind === 'want' ? texts.increaseWant : texts.increaseOne}
+          {kind === 'proxy' ? proxyTexts.increaseOne : kind === 'want' ? texts.increaseWant : texts.increaseOne}
           {label ?? <CardName card={card} />}
         </span>
         <span aria-hidden="true">+</span>

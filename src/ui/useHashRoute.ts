@@ -7,7 +7,9 @@ export type Route =
   { name: 'cards' } | { name: 'card'; key: string } | { name: 'decks' } | { name: 'deck'; id: string } | { name: 'share'; data: string }
   | { name: 'trade'; data: string } | { name: 'havewant' }
   // Public decks (T-098): the list tab and one public deck by its pubId.
-  | { name: 'publicDecks' } | { name: 'publicDeck'; id: string };
+  | { name: 'publicDecks' } | { name: 'publicDeck'; id: string }
+  // Proxy print queue (T-102).
+  | { name: 'proxy' };
 
 export function parseHash(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/');
@@ -18,6 +20,8 @@ export function parseHash(hash: string): Route {
     if (parts.length === 1 || (parts.length === 2 && parts[1] === '')) return { name: 'havewant' };
     return { name: 'trade', data: parts.length === 2 ? (parts[1] ?? '') : '' };
   }
+  // "#/proxy": the Proxy section (T-102).
+  if (parts[0] === 'proxy') return { name: 'proxy' };
   // "#/kortti/<cardKey>": the Cards view with that card's details open (T-081). An unknown key is handled by the view.
   if (parts[0] === 'kortti' && parts.length === 2 && parts[1] !== undefined && parts[1] !== '') {
     try {
@@ -39,6 +43,7 @@ export function routeHash(route: Route): string {
   if (route.name === 'card') return `#/kortti/${encodeURIComponent(route.key)}`;
   if (route.name === 'share') return `#/jaa/${route.data}`;
   if (route.name === 'havewant') return '#/vaihto';
+  if (route.name === 'proxy') return '#/proxy';
   if (route.name === 'publicDecks') return '#/pakat/julkiset';
   if (route.name === 'publicDeck') return `#/pakat/julkinen/${route.id}`;
   if (route.name === 'trade') return `#/vaihto/${route.data}`;
