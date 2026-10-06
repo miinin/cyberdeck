@@ -1,21 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import type { PublicDeckCursor, PublicDeckStore } from '../account';
-import type { PublicDeck } from '../domain/publicDeck';
 import { intlLocale } from '../locale';
 import { deckTexts } from './deckTexts';
 import { usePublicDecks } from './PublicDecksContext';
+import { cachedPublicDecks, rememberPublicDecks } from './publicDecksCache';
+import type { LoadedPublicDecks as Loaded } from './publicDecksCache';
 import { useNoIndex } from './useNoIndex';
 
 const dateFormat = new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short', timeStyle: 'short' });
 
-interface Loaded {
-  items: PublicDeck[];
-  next: PublicDeckCursor | null;
-  dropped: number;
-}
-
-/** The pages already read in this session, per store (SR-33: no repeated reads when switching tabs). */
-const sessionCache = new WeakMap<PublicDeckStore, Loaded>();
 
 /**
  * The "Julkiset pakat" tab (T-098, D-025): 24 decks per page, newest update first, "Näytä lisää" for the next
@@ -24,7 +16,7 @@ const sessionCache = new WeakMap<PublicDeckStore, Loaded>();
 export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void }) {
   useNoIndex();
   const { store } = usePublicDecks();
-  const [data, setData] = useState<Loaded | null>(() => (store === null ? null : (sessionCache.get(store) ?? null)));
+  const [data, setData] = useState<Loaded | null>(() => (store === null ? null : (cachedPublicDecks(store) ?? null)));
   const [phase, setPhase] = useState<'loading' | 'ready' | 'error'>(
     data !== null ? 'ready' : store === null ? 'error' : 'loading',
   );
@@ -36,13 +28,13 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
   const firstNewRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (store === null || (attempt === 0 && sessionCache.has(store))) return;
+    if (store === null || (attempt === 0 && cachedPublicDecks(store) !== undefined)) return;
     let active = true;
     store.list(null).then(
       (page) => {
         if (!active) return;
         const loaded = { items: page.items, next: page.next, dropped: page.dropped };
-        sessionCache.set(store, loaded);
+        rememberPublicDecks(store, loaded);
         setData(loaded);
         setRefreshing(false);
         setPhase('ready');
@@ -73,7 +65,7 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
     store.list(data.next).then(
       (page) => {
         const loaded = { items: [...data.items, ...page.items], next: page.next, dropped: data.dropped + page.dropped };
-        sessionCache.set(store, loaded);
+        rememberPublicDecks(store, loaded);
         // Focus moves to the first new deck, so the page does not jump and keyboard users continue from there.
         firstNewRef.current = page.items[0]?.pubId ?? null;
         setData(loaded);

@@ -4,6 +4,7 @@
  */
 import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
+import { publicDeckId } from '../domain/publicDeck';
 import type { Deck } from '../domain/deck';
 import { CLOUD_ROOT } from './cloudCodec';
 import { CloudError, toCloudError } from './cloudError';
@@ -453,6 +454,29 @@ describe('createFirestoreCloudStore', () => {
     expect(fake.docs.get(`users/${UID}`)).toEqual({ schemaVersion: 1, rev: 1, updatedAt: SERVER_TIME });
     await store.readAll();
     expect(fake.queries).toEqual([{ path: `users/${UID}/decks`, limit: MAX_DECKS + 1 }]);
+  });
+
+  it('deletes the public copies of the cloud decks before their private documents (T-098, SR-36)', async () => {
+    const fake = createFakeFirestore();
+    const store = createFirestoreCloudStore({ uid: UID, load: async () => fake.modules, now: () => NOW });
+    await store.commit(change({ putDecks: [deck('d1'), deck('d2')] }), 0);
+    const pub1 = await publicDeckId(UID, 'd1');
+    const pub2 = await publicDeckId(UID, 'd2');
+    fake.docs.set(`publicDecks/${pub1}`, { deckId: 'd1' });
+    fake.docs.set(`publicDecks/${pub2}`, { deckId: 'd2' });
+    fake.docs.set('publicDecks/someoneelse', { deckId: 'x' });
+    const deleted: string[] = [];
+    const remove = fake.docs.delete.bind(fake.docs);
+    fake.docs.delete = (path: string) => {
+      deleted.push(path);
+      return remove(path);
+    };
+    await store.deleteAll();
+    expect([...fake.docs.keys()]).toEqual(['publicDecks/someoneelse']);
+    const lastPublic = Math.max(...[pub1, pub2].map((id) => deleted.indexOf(`publicDecks/${id}`)));
+    const firstPrivate = Math.min(...['d1', 'd2'].map((id) => deleted.indexOf(`users/${UID}/decks/${id}`)));
+    expect(lastPublic).toBeGreaterThanOrEqual(0);
+    expect(lastPublic).toBeLessThan(firstPrivate);
   });
 
   it('reports a failed SDK load as offline and loads again on the next call', async () => {

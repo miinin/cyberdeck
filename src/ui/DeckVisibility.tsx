@@ -52,6 +52,8 @@ export function DeckVisibility({
   const isPublic = publish?.public === true;
   const id = useId();
   const [choosing, setChoosing] = useState(false);
+  // The panel stays open while the owner works in it, also right after the deck became private or public.
+  const [open, setOpen] = useState(isPublic);
   // The nickname is hidden unless the owner turns it on: no pre-filled name, ever (SR-38).
   const [showNick, setShowNick] = useState((publish?.nickname ?? null) !== null);
   const [nickText, setNickText] = useState(publish?.nickname ?? '');
@@ -87,6 +89,7 @@ export function DeckVisibility({
     if (ok) {
       setChoosing(false);
       setLive(deckTexts.visPrivateLive);
+      privateRadioRef.current?.focus();
     } else {
       setError(deckTexts.visRemoveFailed);
       publicRadioRef.current?.focus();
@@ -110,6 +113,8 @@ export function DeckVisibility({
     if (result === 'ok') {
       setChoosing(false);
       setLive(wasPublic ? deckTexts.visNicknameSavedLive : deckTexts.visPublishedLive);
+      // The publish button is replaced by "Päivitä nimimerkki": focus stays in the panel.
+      publicRadioRef.current?.focus();
     } else {
       setError(result === 'empty' ? deckTexts.visEmpty : result === 'too-large' ? deckTexts.visTooLarge : deckTexts.visFailed);
       publishButtonRef.current?.focus();
@@ -120,7 +125,7 @@ export function DeckVisibility({
   const status = publish === undefined || !isPublic ? '' : statusText(publish, state);
 
   return (
-    <details className="deck-visibility" open={formOpen || undefined}>
+    <details className="deck-visibility" open={open} onToggle={(event) => setOpen(event.currentTarget.open)}>
       <summary>
         {deckTexts.visHeading}: <strong>{summary}</strong>
       </summary>

@@ -32,6 +32,7 @@ import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
 import { PublicDecksList } from './PublicDecksList';
 import { usePublicDecks } from './PublicDecksContext';
+import { forgetPublicDecks } from './publicDecksCache';
 import { routeHash } from './useHashRoute';
 import { useCollection } from './useCollection';
 import { useDecks } from './useDecks';
@@ -272,7 +273,7 @@ export function DecksView({
   onOpen: (id: string) => void;
 }) {
   const repository = repositories.decks;
-  const { publisher } = usePublicDecks();
+  const { store: publicStore, publisher } = usePublicDecks();
   const [removeFailed, setRemoveFailed] = useState(false);
   const { phase, decks, notices, reload } = useDecks(repository);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
@@ -370,6 +371,7 @@ export function DecksView({
             setRemoveFailed(true);
             throw error;
           }
+          forgetPublicDecks(publicStore);
         }
         await repository.remove(deck.id);
       },

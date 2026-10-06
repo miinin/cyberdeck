@@ -411,7 +411,7 @@ export const deckTextsFi = {
   publicListLabel: 'Julkiset pakat',
   publicLegends: 'Legendit',
   publicNoLegends: 'Ei Legendejä',
-  publicCardCount: (count: number) => `${count} korttia`,
+  publicCardCount: (count: number) => (count === 1 ? '1 kortti' : `${count} korttia`),
   publicAnonymous: 'Nimetön',
   publicBy: 'Julkaisija',
   publicUpdated: 'Päivitetty',

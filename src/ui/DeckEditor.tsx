@@ -50,6 +50,7 @@ import { DeckPickImage } from './DeckPickImage';
 import { DeckVisibility } from './DeckVisibility';
 import type { PublishResult } from './DeckVisibility';
 import { usePublicDecks } from './PublicDecksContext';
+import { forgetPublicDecks } from './publicDecksCache';
 import type { PublishState } from '../account';
 
 /** A constant, so useSyncExternalStore sees an unchanged snapshot. */
@@ -111,7 +112,7 @@ export function DeckEditor({
   // Publishing settings (T-098) live in the stored deck, not in the content the autosave writes.
   const [publish, setPublish] = useState<DeckPublish | undefined>(undefined);
   const publishRef = useRef<DeckPublish | undefined>(undefined);
-  const { publisher, signInAvailable } = usePublicDecks();
+  const { store: publicStore, publisher, signInAvailable } = usePublicDecks();
   const subscribePublish = useCallback(
     (listener: () => void) => publisher?.onChange(listener) ?? (() => undefined),
     [publisher],
@@ -308,13 +309,13 @@ export function DeckEditor({
         const built = buildPublicDeckInput(deckId, contentRef.current, cardsByKey, settings.nickname);
         if (built.ok) {
           publisher.schedule(built.input);
-          void publisher.flush(deckId);
+          void publisher.flush(deckId).then(() => forgetPublicDecks(publicStore));
         }
       }
     };
     // cardsByKey is read at unmount time only; a change of it must not run the cleanup.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [repository, deckId, publisher]);
+  }, [repository, deckId, publisher, publicStore]);
 
   /** Writes the publishing settings after the autosave has finished, so the two never conflict (T-098). */
   const savePublish = async (next: DeckPublish | undefined): Promise<void> => {
@@ -346,6 +347,7 @@ export function DeckEditor({
       return 'failed';
     }
     publicDirty.current = false;
+    forgetPublicDecks(publicStore);
     return 'ok';
   };
 
@@ -355,6 +357,7 @@ export function DeckEditor({
       await publisher?.unpublish(deckId);
       await savePublish({ public: false, nickname: publishRef.current?.nickname ?? null });
       publicDirty.current = false;
+      forgetPublicDecks(publicStore);
       return true;
     } catch {
       return false;

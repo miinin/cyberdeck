@@ -1,6 +1,8 @@
 import { createMemoryRepositories } from '../../storage';
 import type { Repositories } from '../../storage';
-import { createMemoryCloud } from '../memory';
+import { createMemoryCloud, createMemoryPublicDecks } from '../memory';
+import type { MemoryPublicDecks } from '../memory';
+import { publicDeckId } from '../../domain/publicDeck';
 import type { MemoryCloud } from '../memory';
 import { createAccountSession } from './session';
 
@@ -208,6 +210,50 @@ describe('deleting the account data', () => {
     window.dispatchEvent(new Event('focus'));
     await settle();
     expect(cloud.paths()).toEqual([]);
+    session.dispose();
+  });
+});
+
+describe('account deletion and public decks (T-098, SR-36)', () => {
+  const PUBLIC_INPUT = { name: 'Pakka', legends: '', cardCount: 2, deck: 'QQ', nickname: null };
+
+  async function publicSetup() {
+    const b = browser();
+    const publicDecks: MemoryPublicDecks = createMemoryPublicDecks({ now });
+    const deck = await b.account.decks.create(CONTENT);
+    await b.account.decks.setPublish(deck.id, { public: true, nickname: 'Nick' });
+    await publicDecks.forUser(UID).publish({ ...PUBLIC_INPUT, deckId: deck.id });
+    const session = createAccountSession({ uid: UID, ...b, cloud, publicDecks: publicDecks.forUser(UID), now, locks: null });
+    session.start();
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    return { b, publicDecks, deck, session };
+  }
+
+  it('deletes the public copies before the private cloud data', async () => {
+    const { publicDecks, deck, session } = await publicSetup();
+    const pubId = await publicDeckId(UID, deck.id);
+    expect(publicDecks.docs.has(pubId)).toBe(true);
+    // The cloud still has the private data at the moment the public copy is gone.
+    const privateAtDeletion: string[] = [];
+    const original = cloud.deleteAll;
+    cloud.deleteAll = async () => {
+      privateAtDeletion.push(publicDecks.docs.has(pubId) ? 'public still there' : 'public gone');
+      return original();
+    };
+    expect(await session.deleteAccountData()).toBe(true);
+    expect(privateAtDeletion).toEqual(['public gone']);
+    expect(publicDecks.docs.size).toBe(0);
+    expect(cloud.paths()).toEqual([]);
+    session.dispose();
+  });
+
+  it('keeps the private data when a public copy cannot be deleted, and resumes syncing', async () => {
+    const { b, publicDecks, deck, session } = await publicSetup();
+    publicDecks.failNext('offline');
+    expect(await session.deleteAccountData()).toBe(false);
+    expect(cloud.paths()).toContain('meta');
+    expect((await b.account.decks.list()).value).toHaveLength(1);
+    expect(publicDecks.docs.has(await publicDeckId(UID, deck.id))).toBe(true);
     session.dispose();
   });
 });
