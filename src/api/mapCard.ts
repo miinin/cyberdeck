@@ -14,8 +14,12 @@ function nonEmptyString(value: unknown): string | null {
   return trimmed === '' ? null : trimmed;
 }
 
-function finiteNumber(value: unknown): number | null {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+/** Highest game value (Cost, Power, RAM) accepted from the API; the game has far smaller values (B-009). */
+export const MAX_GAME_VALUE = 99;
+
+/** A game value: a whole number 0 … MAX_GAME_VALUE. Anything else (-5, 1.5, 1e308) is shown as missing (B-009, T-008). */
+function gameValue(value: unknown): number | null {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= MAX_GAME_VALUE ? value : null;
 }
 
 const MAX_TEXT = 200;
@@ -90,9 +94,9 @@ export function mapCard(raw: unknown): Card | null {
     displayName,
     type,
     color: nonEmptyString(fields.color),
-    cost: finiteNumber(fields.cost),
-    power: finiteNumber(fields.power),
-    ram: finiteNumber(fields.ram),
+    cost: gameValue(fields.cost),
+    power: gameValue(fields.power),
+    ram: gameValue(fields.ram),
     rarity: nonEmptyString(fields.rarity),
     eddiable: typeof fields.is_eddiable === 'boolean' ? fields.is_eddiable : null,
     key,
