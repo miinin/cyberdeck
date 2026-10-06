@@ -6965,73 +6965,333 @@ section[aria-labelledby='have-heading'] {
   border-inline-start: 4px solid var(--badge-color, var(--color-border-strong));
 }
 
-/* Proxy printing (T-102). The sheets are paper: fixed white and black in both themes. */
-.proxy-disclaimer {
-  max-width: var(--prose-max-width);
-  margin-block: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border-inline-start: 4px solid var(--color-brand-yellow);
-  background: var(--color-surface);
+/* Proxy printing (T-102, layout T-104). The sheets are paper: fixed white and black in both themes. */
+.proxy-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-6);
+  margin-block-end: var(--space-4);
+}
+
+.proxy-head h1 {
+  margin: 0;
+}
+
+/* "1 Choose cards → 2 Check the sheet → 3 Print": one quiet line, one size. */
+.proxy-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: proxy-step;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.proxy-steps li {
+  counter-increment: proxy-step;
+}
+
+.proxy-steps li::before {
+  content: counter(proxy-step);
+  margin-inline-end: var(--space-1);
+  color: var(--color-accent-edge);
   font-weight: var(--font-weight-bold);
 }
 
-.proxy-jump {
+.proxy-steps li:not(:last-child)::after {
+  content: '→';
+  margin-inline-start: var(--space-3);
+}
+
+.proxy-layout {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.proxy-pick,
+.proxy-panel {
+  min-width: 0;
+}
+
+.proxy-col-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-lg);
+}
+
+.proxy-results-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
   margin-block: var(--space-3);
 }
 
-.proxy-add,
-.proxy-queue {
-  margin-block-start: var(--space-6);
-  scroll-margin-block-start: var(--space-4);
+.proxy-results-bar .status-line {
+  margin: 0;
 }
 
-.proxy-add:focus,
-.proxy-queue:focus {
+/* Compact picker: the small picture and the name, the count control; the game values are on the card itself. */
+.proxy-pick .card-grid {
+  --card-min: 9.5rem;
+  gap: var(--space-2);
+}
+
+.proxy-pick .card-box {
+  gap: var(--space-1);
+  padding: var(--space-2);
+}
+
+.proxy-pick .card-head .card-cost,
+.proxy-pick .card-meta {
+  display: none;
+}
+
+.proxy-pick .card-name {
+  font-size: var(--font-size-sm);
+}
+
+.proxy-pick .card-image-button {
+  cursor: copy;
+}
+
+.proxy-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+}
+
+.proxy-panel-head .proxy-col-title:focus {
   outline: none;
 }
 
-.proxy-settings {
+.proxy-summary {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.proxy-pager {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   gap: var(--space-3);
-  margin-block: var(--space-4);
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
+  margin-block-end: var(--space-2);
+}
+
+.proxy-pager-label {
+  min-width: 6rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
 }
 
 .proxy-print-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2) var(--space-3);
+  margin-block: var(--space-3) var(--space-2);
 }
 
-.proxy-print-hint {
-  flex-basis: 100%;
-  max-width: var(--prose-max-width);
+.proxy-settings {
+  font-size: var(--font-size-sm);
+}
+
+.proxy-settings summary {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--target-min);
+  cursor: pointer;
+  color: var(--color-text-muted);
+}
+
+.proxy-settings-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+}
+
+.proxy-settings-body .hint {
   margin: 0;
+}
+
+/* The notice under the sheet: small and quiet, not a box. */
+.proxy-note {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
 }
 
 .proxy-send {
   margin-block-end: var(--space-3);
 }
 
-.proxy-preview-heading {
-  margin-block-start: var(--space-6);
+@media (min-width: 64rem) {
+  .proxy-layout {
+    grid-template-columns: minmax(0, 1fr) clamp(20rem, 34vw, 30rem);
+    gap: var(--space-6);
+  }
+
+  /* The panel never grows past the window: the sheet gets what is left (--proxy-reserve is the rest of the panel). */
+  .proxy-panel {
+    position: sticky;
+    inset-block-start: var(--space-3);
+  }
+
+  /* The settings open over the sheet (a popover), so the panel keeps its height. */
+  .proxy-settings {
+    position: relative;
+  }
+
+  .proxy-settings[open] .proxy-settings-body {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 100%;
+    z-index: 5;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface-raised);
+    box-shadow: 0 0 1rem rgb(0 0 0 / 0.4);
+  }
+}
+
+.proxy-panel {
+  --proxy-reserve: 15rem;
+  scroll-margin-block-start: var(--space-2);
+}
+
+.proxy-panel:has(.proxy-pager) {
+  --proxy-reserve: 18.5rem;
+}
+
+@media (max-width: 63.999rem) {
+  .proxy-panel {
+    --proxy-reserve: 8rem;
+  }
+
+  .proxy-panel:has(.proxy-pager) {
+    --proxy-reserve: 11rem;
+  }
+}
+
+/* The flash of a counter and of the new place on the sheet: colour only, no movement (also with reduced motion). */
+@keyframes proxy-flash {
+  from {
+    background-color: var(--color-brand-yellow);
+    color: #000;
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
+@keyframes proxy-slot-flash {
+  from {
+    outline-color: var(--color-accent-edge);
+    box-shadow: 0 0 0 0.25rem var(--color-accent-edge);
+  }
+
+  to {
+    outline-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.proxy-flash {
+  padding-inline: var(--space-1);
+  animation: proxy-flash 900ms ease-out;
+}
+
+.proxy-fly {
+  position: fixed;
+  z-index: 60;
+  margin: 0;
+  transform-origin: 0 0;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.proxy-card.is-new {
+  z-index: 2;
+  outline: 0.2rem solid transparent;
+  animation: proxy-slot-flash 1200ms ease-out 0.3s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proxy-card.is-new {
+    animation-delay: 0s;
+  }
+}
+
+.proxy-card-remove {
+  position: absolute;
+  inset-block-start: 0.2rem;
+  inset-inline-end: 0.2rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.7);
+  color: #fff;
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.proxy-card-remove:hover,
+.proxy-card-remove:focus-visible {
+  background: #b00020;
+}
+
+/* An empty sheet on screen: the same size as a sheet, with the hint in it. */
+.proxy-sheet-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: calc(var(--u) * 210);
+  block-size: calc(var(--u) * 297);
+  margin-inline: auto;
+  padding: var(--space-4);
+  border: 2px dashed var(--color-border-strong);
+  color: var(--color-text-muted);
+  text-align: center;
 }
 
 /*
- * The sheets: --u is one millimetre when printing and a fraction of it in the preview, so the preview fits
- * the width of the page and the printout has exact sizes.
+ * The sheets: --u is one millimetre when printing and a fraction of it on screen, so the preview fits the width
+ * of the panel and its height (--proxy-reserve is what the rest of the panel needs) and the printout has exact sizes.
  */
 .proxy-print-area {
-  --u: min(1mm, calc(100cqw / 210));
+  --u: max(0.5px, min(1mm, calc(100cqw / 210), calc((100dvh - var(--proxy-reserve, 20rem)) / 297)));
   container-type: inline-size;
   page: proxy;
+}
+
+/* On screen one sheet at a time; the printout has all of them. */
+@media screen {
+  .proxy-sheet:not(.is-current) {
+    display: none;
+  }
 }
 
 .proxy-sheets {
@@ -7158,6 +7418,13 @@ section[aria-labelledby='have-heading'] {
     margin: 0;
     padding: 0;
     background: #fff;
+  }
+
+  body.is-proxy-view .proxy-layout,
+  body.is-proxy-view .proxy-panel {
+    display: block;
+    position: static;
+    inset: auto;
   }
 
   body.is-proxy-view main.container {

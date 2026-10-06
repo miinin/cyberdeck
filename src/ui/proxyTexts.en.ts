@@ -4,33 +4,35 @@ import type { proxyTextsFi } from './proxyTexts.fi';
 /** English texts of the Proxy section (T-102); the same shape as the Finnish ones. */
 export const proxyTextsEn: typeof proxyTextsFi = {
   navProxy: 'Proxy',
-  heading: 'Proxy printing',
-  intro:
-    'Add cards to the print queue and print them on A4 sheets at the right size: 63 × 88 mm, nine cards per sheet. The queue stays in this browser until you clear it.',
+  heading: 'Proxy',
+  stepsLabel: 'How it works',
+  steps: ['Pick cards', 'Check the sheet', 'Print at 100% size'],
+  panelHeading: 'Print sheet',
+  pickHeading: 'Pick cards',
+  sheetPager: 'Sheet pages',
+  prevSheet: 'Previous sheet',
+  nextSheet: 'Next sheet',
+  removeFromSheet: (name: string) => `Remove from the sheet: ${name}`,
+  addByImage: 'Add to the sheet: ',
+  emptySheet: 'The sheet is empty. Add cards from the picker.',
+  barSummary: (cards: number, sheets: number) =>
+    `Sheet: ${cards === 1 ? '1 card' : `${cards} cards`} · ${sheets === 1 ? '1 sheet' : `${sheets} sheets`}`,
+  showSheet: 'Show sheet',
   disclaimer: 'For personal playtesting only, not for sale or tournaments.',
   summary: (cards: number, sheets: number) =>
     `${cards === 1 ? '1 card' : `${cards} cards`} · ${sheets === 1 ? '1 sheet' : `${sheets} sheets`}`,
-  jumpToQueue: 'Go to the queue',
-  jumpToAdd: 'Add cards',
 
-  queueHeading: 'Print queue',
   queueLoading: 'Loading the queue…',
   queueUnavailable: 'The queue could not be read. Reload the page. If the problem continues, check your browser privacy settings.',
-  queueEmpty:
-    'The queue is empty. Search for cards below and add them with the plus button, or send cards from the want list in Have/Want or from Decks.',
-  queueListLabel: 'Cards in the queue',
   queueFull: `The queue is full: it holds at most ${MAX_PROXY_CARDS} cards.`,
   queueFullLive: `The queue is full, at most ${MAX_PROXY_CARDS} cards.`,
   clearQueue: 'Clear the queue',
   queueCleared: 'The queue was cleared.',
   queuedLive: (name: string, count: number) => `${name}: ${count} in the queue`,
 
-  addHeading: 'Add cards to the queue',
-  addIntro: 'Search and filter as in the Cards section. The plus button adds the card to the queue; each art of a card has its own box.',
   filtersHeading: 'Search and filters',
   resultsHeading: 'Search results',
   resultsCaption: 'Cards to add',
-  queueCaption: 'Cards in the print queue',
   noResults: 'No cards match the search.',
   clearFilters: 'Clear search and filters',
 
@@ -39,7 +41,7 @@ export const proxyTextsEn: typeof proxyTextsFi = {
   countPrefix: 'In the queue: ',
   notQueued: 'Not in the queue',
 
-  settingsHeading: 'Print settings',
+  settingsHeading: 'Settings',
   gapLegend: 'Gap between cards',
   gapOption: (mm: number) => `${mm} mm`,
   cutMarks: 'Cut marks at the sheet edges',
@@ -47,15 +49,12 @@ export const proxyTextsEn: typeof proxyTextsFi = {
   calibration: 'Print a calibration sheet first',
   calibrationHint: 'One extra sheet to check that the printer does not scale the size.',
 
-  previewHeading: 'Preview',
-  previewHint: 'The sheets are shown smaller. In the printout the sizes are exact millimetres.',
   sheetLabel: (n: number, total: number) => `Sheet ${n}/${total}`,
   calibrationSheetLabel: 'Calibration sheet',
   printButton: 'Print',
   preparing: 'Preparing the print…',
   printHint:
     'In the browser print dialog choose paper A4 and scale 100% (actual size), not "Fit to page". Turn off headers and footers if the browser offers them.',
-  printNothing: 'Add cards to the queue first.',
 
   calibrationTitle: 'Calibration sheet',
   calibrationBody:

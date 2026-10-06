@@ -1,5 +1,5 @@
 import { getCardImage } from '../data/cardImages';
-import { CARD_HEIGHT_MM, CARD_WIDTH_MM, gridOrigin, RULER_TICKS_MM } from '../domain/proxySheet';
+import { CARD_HEIGHT_MM, CARD_WIDTH_MM, CARDS_PER_SHEET, gridOrigin, RULER_TICKS_MM } from '../domain/proxySheet';
 import type { CutMark, ProxyCopy, Sheet } from '../domain/proxySheet';
 import { proxyTexts } from './proxyTexts';
 
@@ -23,13 +23,35 @@ function CutMarkLine({ mark }: { mark: CutMark }) {
 }
 
 /** One card on a sheet: its picture at 63 × 88 mm and the small PROXY mark. */
-function PlacedProxyCard({ copy, xMm, yMm, showMark }: { copy: ProxyCopy; xMm: number; yMm: number; showMark: boolean }) {
+function PlacedProxyCard({
+  copy,
+  index,
+  xMm,
+  yMm,
+  showMark,
+  onRemove,
+}: {
+  copy: ProxyCopy;
+  index: number;
+  xMm: number;
+  yMm: number;
+  showMark: boolean;
+  onRemove?: (copy: ProxyCopy) => void;
+}) {
   const src = copy.artUrl ?? getCardImage(copy.key)?.large ?? null;
   return (
     <div
       className="proxy-card"
+      data-copy={index}
       style={{ left: mm(xMm), top: mm(yMm), width: mm(CARD_WIDTH_MM), height: mm(CARD_HEIGHT_MM) }}
     >
+      {onRemove !== undefined && (
+        // Screen only (proxy-screen is hidden in print): removes this copy from the sheet.
+        <button type="button" className="proxy-card-remove proxy-screen" onClick={() => onRemove(copy)}>
+          <span aria-hidden="true">×</span>
+          <span className="visually-hidden">{proxyTexts.removeFromSheet(copy.name)}</span>
+        </button>
+      )}
       {src === null ? (
         <span className="proxy-card-missing">
           <span lang="en">{copy.name}</span>
@@ -49,11 +71,11 @@ function PlacedProxyCard({ copy, xMm, yMm, showMark }: { copy: ProxyCopy; xMm: n
 }
 
 /** The calibration sheet (63 × 88 mm frame and a 100 mm ruler): the printout shows whether the size is scaled. */
-function CalibrationSheet() {
+function CalibrationSheet({ current }: { current: boolean }) {
   const { xMm, yMm } = gridOrigin(0);
   const rulerY = yMm + CARD_HEIGHT_MM + 24;
   return (
-    <section className="proxy-sheet proxy-sheet--calibration" aria-label={proxyTexts.calibrationSheetLabel}>
+    <section className={current ? 'proxy-sheet proxy-sheet--calibration is-current' : 'proxy-sheet proxy-sheet--calibration'} aria-label={proxyTexts.calibrationSheetLabel}>
       <div
         className="proxy-calibration-frame"
         style={{ left: mm(xMm), top: mm(yMm), width: mm(CARD_WIDTH_MM), height: mm(CARD_HEIGHT_MM) }}
@@ -84,18 +106,37 @@ export function ProxySheets({
   sheets,
   showMark,
   calibration,
+  current,
+  onRemove,
 }: {
   sheets: readonly Sheet<ProxyCopy>[];
   showMark: boolean;
   calibration: boolean;
+  /** The page the screen shows (the calibration sheet counts as page 0 when it is on); print shows all pages. */
+  current: number;
+  /** Adds the × buttons of the screen preview. */
+  onRemove?: (copy: ProxyCopy) => void;
 }) {
+  const offset = calibration ? 1 : 0;
   return (
     <div className="proxy-sheets">
-      {calibration && <CalibrationSheet />}
+      {calibration && <CalibrationSheet current={current === 0} />}
       {sheets.map((sheet, index) => (
-        <section key={index} className="proxy-sheet" aria-label={proxyTexts.sheetLabel(index + 1, sheets.length)}>
+        <section
+          key={index}
+          className={current === index + offset ? 'proxy-sheet is-current' : 'proxy-sheet'}
+          aria-label={proxyTexts.sheetLabel(index + 1, sheets.length)}
+        >
           {sheet.cards.map((placed, cardIndex) => (
-            <PlacedProxyCard key={cardIndex} copy={placed.card} xMm={placed.xMm} yMm={placed.yMm} showMark={showMark} />
+            <PlacedProxyCard
+              key={cardIndex}
+              copy={placed.card}
+              index={index * CARDS_PER_SHEET + cardIndex}
+              xMm={placed.xMm}
+              yMm={placed.yMm}
+              showMark={showMark}
+              onRemove={onRemove}
+            />
           ))}
           {sheet.marks.map((mark, markIndex) => (
             <CutMarkLine key={markIndex} mark={mark} />

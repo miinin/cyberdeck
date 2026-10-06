@@ -67,6 +67,7 @@ function BoxPicture({
   index,
   onStep,
   onOpenImage,
+  imageLabel,
 }: {
   card: Card;
   imageUrl: string | null;
@@ -74,13 +75,14 @@ function BoxPicture({
   index: number;
   onStep: (delta: number) => void;
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  imageLabel?: string;
 }) {
   const n = versionUrls?.length ?? 0;
-  if (versionUrls === undefined || n < 2) return <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} />;
+  if (versionUrls === undefined || n < 2) return <CardImage card={card} onOpen={onOpenImage} artUrl={imageUrl} actionLabel={imageLabel} />;
   const step = onStep;
   return (
     <div className="card-picture">
-      <CardImage key={index} card={card} onOpen={onOpenImage} artUrl={versionUrls[index] ?? null} />
+      <CardImage key={index} card={card} onOpen={onOpenImage} artUrl={versionUrls[index] ?? null} actionLabel={imageLabel} />
       <span className="art-count-badge">{texts.versionPosition(index + 1, n)}</span>
       <button type="button" className="version-step version-step--prev" aria-label={texts.versionPrev(card.displayName)} onClick={() => step(-1)}>
         <span aria-hidden="true">‹</span>
@@ -139,6 +141,7 @@ export function CardList({
   owned,
   decksOf,
   onOpenImage,
+  imageLabel,
   renderFoot,
 }: {
   cards: readonly Card[];
@@ -150,6 +153,8 @@ export function CardList({
   decksOf?: (card: Card) => readonly string[];
   /** Opens the enlarged image (T-027 UX); the button is where focus returns. */
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  /** Spoken text of the picture button when it does not enlarge (Proxy adds on click). */
+  imageLabel?: string;
   /** Per-card control in place of the collection control (Have/Want, T-067). */
   renderFoot?: (card: Card) => ReactNode;
 }) {
@@ -163,6 +168,7 @@ export function CardList({
           owned={owned}
           decksOf={decksOf}
           onOpenImage={onOpenImage}
+          imageLabel={imageLabel}
           renderFoot={renderFoot}
         />
       ))}
@@ -177,6 +183,7 @@ function CardBox({
   owned,
   decksOf,
   onOpenImage,
+  imageLabel,
   renderFoot,
 }: {
   item: CardListItem;
@@ -184,6 +191,7 @@ function CardBox({
   owned?: OwnedColumn;
   decksOf?: (card: Card) => readonly string[];
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
+  imageLabel?: string;
   renderFoot?: (card: Card) => ReactNode;
 }) {
   const { card, art, imageUrl, artCount, versionUrls, versionRarities, startVersion = 0 } = item;
@@ -200,7 +208,7 @@ function CardBox({
   return (
     <li className={'card-box card-box--art ' + state}>
       {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
-      <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} />
+      <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} imageLabel={imageLabel} />
       <div className="card-head">
         <dl className="card-cost">
           <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>

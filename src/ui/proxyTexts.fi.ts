@@ -3,33 +3,35 @@ import { MAX_PROXY_CARDS } from '../domain/proxySheet';
 /** Texts of the Proxy section and the buttons that send cards to its print queue (T-102). */
 export const proxyTextsFi = {
   navProxy: 'Proxy',
-  heading: 'Proxy-tulostus',
-  intro:
-    'Lisää kortit tulostusjonoon ja tulosta ne A4-arkeille oikeassa koossa: 63 × 88 mm, yhdeksän korttia arkilla. Jono säilyy tällä selaimella, kunnes tyhjennät sen.',
+  heading: 'Proxy',
+  stepsLabel: 'Näin se toimii',
+  steps: ['Valitse kortit', 'Tarkista arkki', 'Tulosta 100 % koossa'],
+  panelHeading: 'Tulostusarkki',
+  pickHeading: 'Valitse kortit',
+  sheetPager: 'Arkin sivut',
+  prevSheet: 'Edellinen arkki',
+  nextSheet: 'Seuraava arkki',
+  removeFromSheet: (name: string) => `Poista arkilta: ${name}`,
+  addByImage: 'Lisää arkille: ',
+  emptySheet: 'Arkki on tyhjä. Lisää kortteja valinnasta.',
+  barSummary: (cards: number, sheets: number) =>
+    `Arkki: ${cards === 1 ? '1 kortti' : `${cards} korttia`} · ${sheets === 1 ? '1 arkki' : `${sheets} arkkia`}`,
+  showSheet: 'Näytä arkki',
   disclaimer: 'Vain henkilökohtaiseen testikäyttöön, ei myyntiin eikä turnauksiin.',
   summary: (cards: number, sheets: number) =>
     `${cards === 1 ? '1 kortti' : `${cards} korttia`} · ${sheets === 1 ? '1 arkki' : `${sheets} arkkia`}`,
-  jumpToQueue: 'Siirry jonoon',
-  jumpToAdd: 'Lisää kortteja',
 
-  queueHeading: 'Tulostusjono',
   queueLoading: 'Ladataan jonoa…',
   queueUnavailable: 'Jonoa ei voitu lukea. Lataa sivu uudelleen. Jos ongelma jatkuu, tarkista selaimen yksityisyysasetukset.',
-  queueEmpty:
-    'Jono on tyhjä. Hae kortteja alta ja lisää ne plus-painikkeella, tai lähetä kortteja Have/Want-näkymän want-listalta tai Pakoista.',
-  queueListLabel: 'Jonossa olevat kortit',
   queueFull: `Jono on täynnä: siihen mahtuu enintään ${MAX_PROXY_CARDS} korttia.`,
   queueFullLive: `Jono on täynnä, enintään ${MAX_PROXY_CARDS} korttia.`,
   clearQueue: 'Tyhjennä jono',
   queueCleared: 'Jono tyhjennettiin.',
   queuedLive: (name: string, count: number) => `${name}: ${count} jonossa`,
 
-  addHeading: 'Lisää kortteja jonoon',
-  addIntro: 'Hae ja suodata kuten Kortit-osiossa. Plus-painike lisää kortin jonoon; kortin eri kuvitukset ovat omina ruutuinaan.',
   filtersHeading: 'Haku ja suodattimet',
   resultsHeading: 'Hakutulokset',
   resultsCaption: 'Lisättävät kortit',
-  queueCaption: 'Tulostusjonon kortit',
   noResults: 'Hakua vastaavia kortteja ei löytynyt.',
   clearFilters: 'Tyhjennä haku ja suodattimet',
 
@@ -39,7 +41,7 @@ export const proxyTextsFi = {
   countPrefix: 'Jonossa ',
   notQueued: 'Ei jonossa',
 
-  settingsHeading: 'Tulostusasetukset',
+  settingsHeading: 'Asetukset',
   gapLegend: 'Rako korttien välissä',
   gapOption: (mm: number) => `${mm} mm`,
   cutMarks: 'Leikkausmerkit arkin reunoilla',
@@ -47,15 +49,12 @@ export const proxyTextsFi = {
   calibration: 'Tulosta ensin kalibrointiarkki',
   calibrationHint: 'Yksi lisäarkki, jolla tarkistat, että tulostin ei skaalaa kokoa.',
 
-  previewHeading: 'Esikatselu',
-  previewHint: 'Arkit näkyvät pienennettyinä. Tulosteessa mitat ovat tarkat millimetrit.',
   sheetLabel: (n: number, total: number) => `Arkki ${n}/${total}`,
   calibrationSheetLabel: 'Kalibrointiarkki',
   printButton: 'Tulosta',
   preparing: 'Valmistellaan tulostusta…',
   printHint:
     'Valitse selaimen tulostusikkunassa paperiksi A4 ja skaalaukseksi 100 % (todellinen koko), älä "Sovita sivulle". Poista otsikot ja alatunnisteet, jos selain tarjoaa niitä.',
-  printNothing: 'Lisää ensin kortteja jonoon.',
 
   calibrationTitle: 'Kalibrointiarkki',
   calibrationBody:
