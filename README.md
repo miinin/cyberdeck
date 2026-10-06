@@ -11,7 +11,9 @@ Cyberdeck ei ole WeirdCon, Netdeck.gg:n eikä CD PROJEKT REDin hyväksymä tai t
 
 ## Pikakäynnistys
 
-Tarvitset Node.js:n version 22.13 tai uudemman. Avaimia tai ympäristömuuttujia ei tarvita.
+Tarvitset Node.js:n version 22.13 tai uudemman sekä [gitleaksin](https://github.com/gitleaks/gitleaks) (`winget install Gitleaks.Gitleaks`, macOS: `brew install gitleaks`). Avaimia tai ympäristömuuttujia ei tarvita.
+
+`npm ci` ottaa käyttöön pre-commit-hookin (`.githooks/`), joka ajaa gitleaksin jokaisen commitin staged-muutoksille ja estää commitin, jos niissä on salaisuus tai jos gitleaks puuttuu (D-023). Sallitut poikkeukset ovat tiedostossa `.gitleaks.toml`.
 
 ```
 npm ci              # asenna riippuvuudet package-lock.jsonin mukaan
