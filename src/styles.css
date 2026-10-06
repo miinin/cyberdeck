@@ -6454,3 +6454,168 @@ section[aria-labelledby='have-heading'] {
     white-space: nowrap;
   }
 }
+
+/*
+ * T-096: chart colours of their own. --color-info and --color-accent-2 are the same cyan in the dark theme,
+ * so Program and Gear looked alike. Unit yellow, Program cyan, Gear magenta; darker shades in the light theme.
+ */
+.deck-stats {
+  --seg-program: #1fe0ff;
+  --seg-gear: #ff4fd8;
+}
+
+:root[data-theme='light'] .deck-stats {
+  --seg-unit: #b38f00;
+  --seg-program: #00728a;
+  --seg-gear: #b0008a;
+}
+
+/* Eddies */
+.eddies {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.eddies-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.eddies-count {
+  margin: 0;
+}
+
+.eddies-number {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.eddies-of {
+  color: var(--color-text-muted);
+}
+
+.eddies-verdict {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.tone-ok {
+  color: var(--color-success);
+}
+
+.tone-warn {
+  color: var(--color-warning);
+}
+
+.tone-neutral {
+  color: var(--color-text);
+}
+
+.eddies-meter {
+  position: relative;
+  display: block;
+  block-size: 0.875rem;
+  background: var(--color-border);
+}
+
+.eddies-meter-fill {
+  display: block;
+  block-size: 100%;
+  background: currentColor;
+  transition: inline-size 0.35s ease;
+}
+
+.eddies-meter-mark {
+  position: absolute;
+  inset-block: -0.25rem;
+  inline-size: 3px;
+  margin-inline-start: -1px;
+  background: var(--color-text);
+  box-shadow: 0 0 0 1px var(--color-bg);
+}
+
+.eddies-curve-title {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.eddies-curve {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: end;
+  gap: var(--space-2);
+  block-size: 8.5rem;
+  margin: 0;
+  padding: 1.25rem 0 1.5rem;
+  list-style: none;
+  border-block-end: 1px solid var(--color-border-strong);
+}
+
+.eddies-turn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  block-size: 100%;
+}
+
+.eddies-turn-track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  inline-size: min(100%, 2.5rem);
+  border: 1px dashed var(--color-border-strong);
+  border-block-end: 0;
+}
+
+.eddies-turn-fill {
+  display: block;
+  inline-size: 100%;
+  background: linear-gradient(0deg, var(--color-brand-yellow), color-mix(in srgb, var(--color-brand-yellow) 60%, var(--color-success)));
+  transition: block-size 0.35s ease;
+}
+
+.eddies-turn.is-target .eddies-turn-track {
+  border-color: var(--color-text);
+  border-style: solid;
+}
+
+.eddies-turn-value {
+  margin-block-end: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.eddies-turn-label {
+  position: absolute;
+  inset-block-end: -1.5rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.eddies-turn.is-target .eddies-turn-label {
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.eddies-oncurve {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eddies-meter-fill,
+  .eddies-turn-fill {
+    transition: none;
+  }
+}

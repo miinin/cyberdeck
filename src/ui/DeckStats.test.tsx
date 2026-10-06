@@ -79,6 +79,19 @@ describe('DeckStats (T-053)', () => {
     expect(odds()[0]).toBe('61 %');
   });
 
+  // T-096: sellable cards against the recommendation, and Eddies by turn.
+  it('shows the Eddies card: sellable count, recommendation and the turn curve', () => {
+    const sellableCards = toCardsByKey(testCards.map((c, i) => ({ ...c, eddiable: c.type !== 'Legend' && i % 2 === 0 })));
+    const grouped = groupDeck(fullDeck, sellableCards);
+    render(
+      <DeckStats deck={fullDeck} cardsByKey={sellableCards} colors={colorDistribution(fullDeck, sellableCards)} groups={grouped.groups} mainCount={42} missingText="" rng={lcg(5)} />,
+    );
+    expect(screen.getByRole('heading', { name: 'Eddiet (€$)' })).toBeInTheDocument();
+    expect(screen.getByText(/^Pakassa on \d+ myytävää korttia, suositus noin \d+\.$/)).toBeInTheDocument();
+    expect(screen.getByText(/^Vuoro 1: keskimäärin/)).toBeInTheDocument();
+    expect(screen.getByText(/^Myynti joka vuoro vuoroon 2 asti:/)).toBeInTheDocument();
+  });
+
   it('shows dashes for an empty deck and disables the test hand', () => {
     renderStats(emptyDeck);
     expect(screen.getAllByText('ei tietoa')).toHaveLength(3);

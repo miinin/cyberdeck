@@ -524,3 +524,17 @@ Päätöksessä on viisi osaa.
 3. **Poikkeukset (`.gitleaks.toml`):** oletussäännöt ovat käytössä. Sallittuja ovat Firebasen web-API-avaimet, jotka ovat julkisia ja tuotantobundlessa (rajaus tehdään T-009:ssä), sekä `cards.json`:n `imageKey`-kentät, jotka ovat tunnisteita. Uusi poikkeus vaatii perustelun tiedostoon.
 4. **Historia:** koko historia (327 committia) skannattiin käyttöönotossa. Löydetyt 24 osumaa olivat kaikki edellä mainittuja ei-salaisuuksia. Oikeita vuotoja ei löytynyt.
 **Seuraukset:** `git commit --no-verify` ohittaa hookin. Jos tarvitaan pakottava tarkistus, gitleaks lisätään CI:hin (workflow-muutos, Digiturva).
+
+## D-024 · Eddies-malli ja myytävien korttien suositus · 2026-10-06 · Päättäjä: käyttäjä (pyyntö), PM (malli)
+**Tila:** Hyväksytty. Tehtävä T-096.
+**Konteksti:** Käyttäjä halusi pakan tilastoihin visuaalisen näkymän Eddieiksi myytävistä korteista ja suositusmäärän pakan hintarakenteen mukaan.
+**Säännöt (virallinen pelinohje, choombattler.com/how-to-play):**
+- Eddies-alue on pelin alussa tyhjä.
+- Kerran vuorossa saa myydä yhden €$-merkityn kortin, ja se on 1 Eddie loppupelin.
+- Eddiet valmistuvat joka vuoro uudelleen.
+- Legendin voi käyttää 1 Eddienä.
+**Päätös:**
+1. **Simulointi:** myytävät kortit (€$, `eddiable`) simuloidaan kiinteällä siemenellä. Malli myy kortin joka vuoro, kun kädessä on myytävä. Aloituskäsi on 6 korttia, ja kortti nostetaan joka vuoro, myös ensimmäisellä. Tuloksena saadaan Eddiet keskimäärin vuoroittain ja todennäköisyys myydä joka vuoro.
+2. **Suositus:** pienin myytävien määrä, jolla kortin voi myydä joka vuoro tavoitevuoroon asti vähintään 80 %:ssa peleistä. Tavoitevuoro on pakan keskihinta ylöspäin pyöristettynä, 2–6.
+3. **Legendit eivät ole mukana:** Legendien käyttöä Eddieinä ei lasketa. Suositus on siksi varovainen.
+**Seuraukset:** Oletukset näkyvät käyttäjälle tilastokortin huomautuksessa. Jos sääntöihin tulee tarkennuksia, muutos tehdään yhteen paikkaan (`src/domain/eddies.ts`).

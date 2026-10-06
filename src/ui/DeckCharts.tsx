@@ -4,6 +4,8 @@ import type { Card } from '../domain/card';
 import type { ColorShare } from '../domain/deckRules';
 import { CHART_TYPES, chartType } from '../domain/deckStats';
 import type { ChartType, CostBucket, DrawOddsRow, RamFit } from '../domain/deckStats';
+import { EDDIE_TARGET_CHANCE } from '../domain/eddies';
+import type { EddieSummary } from '../domain/eddies';
 import { typeColorClass } from './CardColor';
 import { CardName } from './CardName';
 import { deckTexts, formatDecimal, formatPercent } from './deckTexts';
@@ -263,4 +265,78 @@ export function DrawOdds({ rows, moments }: { rows: readonly DrawOddsRow[]; mome
       </ul>
     </div>
   );
+}
+
+/**
+ * Eddies (T-096): sellable cards against the recommendation for this deck's Cost, as a meter, and the
+ * average Eddies each turn against the ideal one a turn. Numbers are in the text; the bars are decoration.
+ */
+export function EddiesPanel({ summary }: { summary: EddieSummary }) {
+  const { sellable, deckSize, recommended, curve, targetTurn, byType, unknown } = summary;
+  const diff = recommended === null ? 0 : sellable - recommended;
+  const tone: Tone = recommended === null ? 'neutral' : diff < -2 ? 'warn' : diff > 4 ? 'warn' : 'ok';
+  const scale = Math.max(1, deckSize);
+  const onCurve = curve.onCurve[targetTurn - 1] ?? 0;
+  return (
+    <div className="eddies">
+      <div className="eddies-head">
+        <p className="eddies-count">
+          <strong className={`eddies-number tone-${tone}`}>{sellable}</strong> <span>{deckTexts.eddiesSellable}</span>{' '}
+          <span className="eddies-of">{deckTexts.eddiesOf(deckSize)}</span>
+        </p>
+        {recommended !== null && (
+          <p className={`eddies-verdict tone-${tone}`}>
+            {deckTexts.eddiesRecommended(recommended)} ·{' '}
+            {diff < -2 ? deckTexts.eddiesLow(-diff) : diff > 4 ? deckTexts.eddiesHigh(diff) : deckTexts.eddiesOk}
+          </p>
+        )}
+      </div>
+      <span className="eddies-meter" aria-hidden="true">
+        <span className={`eddies-meter-fill tone-${tone}`} style={{ inlineSize: `${(Math.min(sellable, scale) / scale) * 100}%` }} />
+        {recommended !== null && <span className="eddies-meter-mark" style={{ insetInlineStart: `${(recommended / scale) * 100}%` }} />}
+      </span>
+      {recommended !== null && <p className="visually-hidden">{deckTexts.eddiesRecommendedSpoken(sellable, recommended)}</p>}
+      {byType.size > 0 && (
+        <ul className="chart-legend">
+          {[...byType].map(([type, count]) => (
+            <li key={type}>
+              <span className={`legend-swatch seg-${chartTypeOf(type)}`} aria-hidden="true" />
+              <span lang="en">{type}</span> <strong>{count}</strong>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="eddies-curve-title">{deckTexts.eddiesCurveTitle}</p>
+      <ol className="eddies-curve">
+        {curve.expected.map((avg, index) => {
+          const turn = index + 1;
+          return (
+            <li key={turn} className={'eddies-turn' + (turn === targetTurn ? ' is-target' : '')}>
+              <span className="eddies-turn-value" aria-hidden="true">
+                {formatDecimal(avg)}
+              </span>
+              <span className="eddies-turn-track" aria-hidden="true" style={{ blockSize: `${(turn / curve.expected.length) * 100}%` }}>
+                <span className="eddies-turn-fill" style={{ blockSize: `${(avg / turn) * 100}%` }} />
+              </span>
+              <span className="eddies-turn-label" aria-hidden="true">
+                {turn}
+              </span>
+              <span className="visually-hidden">{deckTexts.eddiesCurveTurn(turn, formatDecimal(avg))}</span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="eddies-oncurve">
+        <strong>{deckTexts.eddiesOnCurve(targetTurn, formatPercent(onCurve))}</strong>
+      </p>
+      {recommended !== null && <p className="hint">{deckTexts.eddiesWhy(targetTurn, formatPercent(EDDIE_TARGET_CHANCE))}</p>}
+      {unknown > 0 && <p className="hint">{deckTexts.eddiesUnknown(unknown)}</p>}
+      <p className="hint">{deckTexts.eddiesNote}</p>
+    </div>
+  );
+}
+
+function chartTypeOf(type: string): string {
+  return (CHART_TYPES as readonly string[]).includes(type) ? type.toLowerCase() : 'other';
 }
