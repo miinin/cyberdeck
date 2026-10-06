@@ -193,6 +193,9 @@ Huomiot:
 | R-18 | Testi- ja tuotantosivusto käyttävät samaa Firebase-projektia (D-017). Testisivuston koodi (mikä tahansa testiin yhdistetty PR) voi testisivustolle kirjautuneen käyttäjän tokenilla lukea, muuttaa tai poistaa saman käyttäjän tuotantodatan `users/{uid}`, koska säännöt eivät näe pyynnön sivustoa (SEC-030). | Medium | PM / käyttäjä | Avoin, **vaatii käyttäjän hyväksynnän** (PRIVACY K-P8). Torjunta: SR-21 kohta 2 (juuri ei oletuksena `users`), vain kehittäjä ja testaajat kirjautuvat testisivustolle, PR-katselmointi. Pysyvä korjaus: erillinen testiprojekti (MVP2-1, D-017 vaihtoehto D). |
 | R-19 | Kuka tahansa Google-käyttäjä voi omalla uid:llään kuluttaa Sparkin päiväkiintiön tai 1 GiB:n, koska säännöt eivät rajaa dokumenttien määrää (SEC-032) | Low | PM / käyttäjä | Avoin. Paikallinen ensin: sovellus toimii, vain synkronointi katkeaa päiväksi. Ei kustannuksia (Spark). Kokorajat SR-22. App Check myöhemmin, jos väärinkäyttöä havaitaan. |
 | R-20 | Jaettu tietokone: tilin pakat ja kokoelma jäävät selaimeen uloskirjautuessa (käyttäjän valinta D-017), ja Google-istunto voi jäädä selaimeen | Low | PM / UX | Avoin. Torjunta SR-26 (ilmoitus, `last-uid` poistetaan, `prompt: 'select_account'`, tilin data ei näy uloskirjautuneena, suositus poistopainikkeesta). PRIVACY.md 10.6. |
+| R-21 | Julkiset pakat (T-098): kuka tahansa voi kirjautumatta listata `publicDecks`-kokoelmaa silmukassa ja kuluttaa Sparkin päivittäisen lukukiintiön, jolloin kaikkien synkronointi katkeaa päiväksi. Lisäksi roskapostitus usealla Google-tilillä (SEC-098-4) | Medium | PM / käyttäjä | Avoin. Torjunta SR-33 ja SR-34. Jäännös käyttäjän päätettäväksi (K-P11). App Check, jos väärinkäyttöä havaitaan. |
+| R-22 | Orvot julkiset pakat: julkinen kopio jää, jos pakka poistetaan offline-tilassa tai sovellus kaatuu poistojen välissä (SEC-098-6) | Low | Koodari / PM | Avoin. Torjunta SR-35 ja SR-36, jäännös SR-42 (poisto konsolista pyynnöstä). |
+| R-23 | Asiaton sisältö, toisen henkilötiedot tai esiintyminen toisena nimimerkillä julkisissa pakoissa ilman moderointia (SEC-098-5) | Low | PM / käyttäjä | Avoin. Torjunta SR-38 ja SR-42. Ilmiantotoiminto K-P10. |
 
 ## 10. Hyväksytyt riskit
 
@@ -402,3 +405,10 @@ Korvaa luvun 12 ennakoidut vaatimukset MVP2-2, MVP2-3, MVP2-5–MVP2-9 kirjautum
   - **SR-28** Riippuvuus `firebase@12.19.0` tarkalla versiolla, `@grpc/grpc-js`-override (SEC-031), build-tarkistus.
   - **SR-29** Tietosuoja: Firestoreen vain uid, pakat, kokoelma ja meta. 16+ ja tietosuojateksti kirjautumisdialogissa, seloste ennen avaamista muille.
 - **Riskit:** R-14 (torjutaan SR-22:lla ja SR-25:llä), uudet R-18, R-19, R-20.
+
+## 18. T-098: julkiset pakat (D-025)
+- **Raportti:** `reports/SEC-098-julkiset-pakat.md`, sääntöehdotus `reports/SEC-098-liite-firestore.rules`.
+- **Uusi luottamusraja:** ensimmäinen Firestore-kokoelma, jota kuka tahansa voi lukea ja listata kirjautumatta. Kaikki `publicDecks`-kentät ovat julkisia, ja jokainen luku kuluttaa projektin yhteistä Spark-kiintiötä.
+- **STRIDE:** raportin taulukko (S1–S2, T1–T4, R1, I1–I4, D1–D4, E1–E3).
+- **Turvavaatimukset (ehdotus, PM hyväksyy):** SR-30 omistajuus uid-sidotulla tiivisteellä ilman julkista uid:tä, SR-31 kenttärajat, SR-32 sisältö = jakolinkki, SR-33 listaus ja kiintiöt, SR-34 kirjoitustahti, SR-35 yksityiseksi ja poisto, SR-36 tilin poisto, SR-37 renderöinti, SR-38 julkaisun käyttöliittymä, SR-39 Tallenna omaksi, SR-40 sääntöjen rajaus ja deploy, SR-41 noindex, SR-42 ylläpitäjän poistoreitti.
+- **Riskit:** uudet R-21, R-22, R-23. Käyttäjän päätökset K-P9–K-P12.
