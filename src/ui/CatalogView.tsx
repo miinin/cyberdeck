@@ -3,7 +3,7 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { CardKey } from '../domain/cardKey';
 import { countOf, minCountOf } from '../domain/collection';
-import { protectedCount, setCopiesByEdition, targetPrinting } from '../domain/edition';
+import { editionPrinting, protectedCount, setCopiesByEdition, targetPrinting } from '../domain/edition';
 import type { CollectionEntry } from '../domain/collection';
 import { artRarity, artsOf, entryChanges, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
 import type { Art } from '../domain/arts';
@@ -28,6 +28,7 @@ import {
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardFilters } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
+import { EditionConfirmDialog, editionConfirmed, markEditionConfirmed } from './EditionConfirmDialog';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
 import type { CardListItem } from './CardList';
@@ -152,7 +153,8 @@ export function CatalogView({
   const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [editMode, setEditMode] = useState<boolean | null>(null);
   // The edition the + adds to (D-022); saved like the other view settings.
-  const [edition, setEdition] = useState<DefaultEdition>('beta');
+  const [editionState, setEdition] = useState<DefaultEdition>('beta');
+  const edition = editionState;
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const userChose = useRef({ view: false, edit: false, edition: false });
   useEffect(() => {
@@ -193,6 +195,21 @@ export function CatalogView({
     userChose.current.edition = true;
     setEdition(next);
     savePreference(repositories.preferences.saveDefaultEdition(next));
+  };
+  // T-101: the first add of a card with both editions in a session asks which edition it is.
+  const [pendingAdd, setPendingAdd] = useState<{ card: Card; run: (edition: DefaultEdition) => void } | null>(null);
+  const needsEditionConfirm = (card: Card, adding: boolean) =>
+    adding && editionPrinting(card, 'beta') !== null && editionPrinting(card, 'retail') !== null && !editionConfirmed();
+  const guardAdd = (card: Card, adding: boolean, run: (edition: DefaultEdition) => void) => {
+    if (needsEditionConfirm(card, adding)) setPendingAdd({ card, run });
+    else run(editionState);
+  };
+  const handleEditionChosen = (chosen: DefaultEdition) => {
+    const pending = pendingAdd;
+    setPendingAdd(null);
+    markEditionConfirmed();
+    handleEditionChange(chosen);
+    pending?.run(chosen);
   };
   const handleEditChange = (next: boolean) => {
     userChose.current.edit = true;
@@ -362,7 +379,7 @@ export function CatalogView({
     if (count !== wanted) collectionStore.setCount(card.key, wanted);
   };
   /** The card box's counter (D-022): a card with a Welcome to Night City printing counts by edition. */
-  const handleCountChange = (card: Card, count: number) => {
+  const handleCountChange = (card: Card, count: number, edition: DefaultEdition = editionState) => {
     if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
     if (collection.phase !== 'ready' || targetPrinting(card, edition) === null) {
       collectionStore.setCount(card.key, count);
@@ -376,7 +393,7 @@ export function CatalogView({
       collectionAnnouncer.announceLimit(card);
     }
   };
-  const handleArtChange = (card: Card, art: Art, next: number) => {
+  const handleArtChange = (card: Card, art: Art, next: number, edition: DefaultEdition = editionState) => {
     const before = entryOf(card);
     if (next > (ownedPerArt(before, card, artsFor(card)).get(art.artId) ?? 0) && countIn(collection, card.key) >= 999) {
       collectionAnnouncer.announceLimit(card);
@@ -437,14 +454,15 @@ export function CatalogView({
       : {
           mode: collection.phase,
           countOf: (card) => countIn(collection, card.key),
-          onChange: handleCountChange,
+          onChange: (card, count) => guardAdd(card, count > countIn(collection, card.key), (ed) => handleCountChange(card, count, ed)),
           onLimit: collectionAnnouncer.announceLimit,
           minOf: (card) =>
             targetPrinting(card, edition) === null ? minCountOf(collection.saved, card.key) : protectedCount(collection.saved, card),
           artCountOf: (card, art) => ownedPerArt(entryOf(card), card, artsFor(card)).get(art.artId) ?? 0,
           onArtChange: (card, art, count) => {
             if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
-            handleArtChange(card, art, count);
+            const adding = art.rarity === null && count > (ownedPerArt(entryOf(card), card, artsFor(card)).get(art.artId) ?? 0);
+            guardAdd(card, adding, (ed) => handleArtChange(card, art, count, ed));
           },
           editable,
         };
@@ -476,7 +494,11 @@ export function CatalogView({
               card={openCard}
               count={countIn(collection, openCard.key)}
               mode="ready"
-              onChange={(card, count) => collectionStore.setCount(card.key, count)}
+              onChange={(card, count) => {
+                if (needsEditionConfirm(card, count > countIn(collection, card.key))) {
+                  setPendingAdd({ card, run: (ed) => handleCountChange(card, count, ed) });
+                } else collectionStore.setCount(card.key, count);
+              }}
               onLimit={collectionAnnouncer.announceLimit}
               editable={editable}
               min={minCountOf(collection.saved, openCard.key)}
@@ -497,7 +519,11 @@ export function CatalogView({
             versionCount={(printing) => versionCountIn(collection, openCard.key, printing)}
             editable={editable}
             onChange={(printing, count) => collectionStore.setVersionCount(openCard.key, printing, count)}
-            onArtChange={(art, count) => handleArtChange(openCard, art, count)}
+            onArtChange={(art, count) =>
+              guardAdd(openCard, art.rarity === null && count > (ownedPerArt(entryOf(openCard), openCard, artsFor(openCard)).get(art.artId) ?? 0), (ed) =>
+                handleArtChange(openCard, art, count, ed),
+              )
+            }
             onLimit={collectionAnnouncer.announceLimit}
             shownArt={shownArt}
             onShowArt={setShownArt}
@@ -757,6 +783,7 @@ export function CatalogView({
       </div>
 
       {view === 'table' && preview.preview}
+      <EditionConfirmDialog card={pendingAdd?.card ?? null} onChoose={handleEditionChosen} onCancel={() => setPendingAdd(null)} />
       <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} artUrl={shownArt} />
     </>
   );

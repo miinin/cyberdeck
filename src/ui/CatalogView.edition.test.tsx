@@ -5,6 +5,7 @@ import type { Printing } from '../domain/printing';
 import { createMemoryRepositories } from '../storage';
 import type { Repositories } from '../storage';
 import { CatalogView } from './CatalogView';
+import { resetEditionConfirmed } from './EditionConfirmDialog';
 
 const COLLECTION_KEY = 'cyberdeck:collection';
 const EDITION_KEY = 'cyberdeck:default-edition';
@@ -51,6 +52,7 @@ const minus = (name: string) => within(box(name)).getByRole('button', { name: `V
 const saved = async (repositories: Repositories) => (await repositories.collection.load()).value.entries;
 
 beforeEach(() => {
+  resetEditionConfirmed();
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 afterEach(() => {
@@ -75,6 +77,7 @@ describe('CatalogView: default edition (D-022)', () => {
     const repositories = createMemoryRepositories();
     await renderView(repositories);
     await user.click(plus('Alpha'));
+    await user.click(within(screen.getByRole('dialog', { name: 'Lisätäänkö Beta vai Retail?' })).getByRole('button', { name: 'Lisää Beta' }));
     await settle();
     expect(await saved(repositories)).toEqual([{ card: 'alpha', count: 1, versions: { [BETA]: 1 } }]);
 
@@ -124,6 +127,71 @@ describe('CatalogView: default edition (D-022)', () => {
     await user.click(minus('Bravo'));
     await settle();
     expect(await saved(repositories)).toEqual([{ card: 'bravo', count: 1 }]);
+  });
+});
+
+describe('CatalogView: edition check before the first add (T-101)', () => {
+  const dialogName = 'Lisätäänkö Beta vai Retail?';
+
+  it('asks before the first add, with the β hint, and adds to the chosen edition', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories();
+    await renderView(repositories);
+    await user.click(plus('Alpha'));
+    const dialog = screen.getByRole('dialog', { name: dialogName });
+    expect(within(dialog).getByText('Beta-kortin numeron edessä on β (esim. β005a), Retail-kortissa ei.')).toBeInTheDocument();
+    expect(await saved(repositories)).toEqual([]);
+    await user.click(within(dialog).getByRole('button', { name: 'Lisää Retail' }));
+    await settle();
+    expect(await saved(repositories)).toEqual([{ card: 'alpha', count: 1, versions: { [RETAIL]: 1 } }]);
+    expect(await repositories.preferences.loadDefaultEdition()).toBe('retail');
+    expect(screen.queryByRole('dialog', { name: dialogName })).toBeNull();
+  });
+
+  it('does not ask again in the same session', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories();
+    await renderView(repositories);
+    await user.click(plus('Alpha'));
+    await user.click(screen.getByRole('button', { name: 'Lisää Beta' }));
+    await settle();
+    await user.click(plus('Alpha'));
+    await settle();
+    expect(screen.queryByRole('dialog', { name: dialogName })).toBeNull();
+    expect(await saved(repositories)).toEqual([{ card: 'alpha', count: 2, versions: { [BETA]: 2 } }]);
+  });
+
+  it('Peru adds nothing and the question stays for the next add', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories();
+    await renderView(repositories);
+    await user.click(plus('Alpha'));
+    await user.click(screen.getByRole('button', { name: 'Peru' }));
+    await settle();
+    expect(await saved(repositories)).toEqual([]);
+    await user.click(plus('Alpha'));
+    expect(screen.getByRole('dialog', { name: dialogName })).toBeInTheDocument();
+  });
+
+  it('is not asked for a card without both editions', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories();
+    await renderView(repositories);
+    await user.click(plus('Bravo'));
+    await settle();
+    expect(screen.queryByRole('dialog', { name: dialogName })).toBeNull();
+    expect(await saved(repositories)).toEqual([{ card: 'bravo', count: 1 }]);
+  });
+
+  it('is not asked when removing', async () => {
+    const user = userEvent.setup();
+    const repositories = createMemoryRepositories({
+      initial: { [COLLECTION_KEY]: stored([{ card: 'alpha', count: 2, versions: { [BETA]: 2 } }]) },
+    });
+    await renderView(repositories);
+    await user.click(minus('Alpha'));
+    await settle();
+    expect(screen.queryByRole('dialog', { name: dialogName })).toBeNull();
   });
 });
 

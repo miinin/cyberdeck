@@ -60,6 +60,7 @@ import type { DeckView } from './DeckList';
 import { DeckPickTable } from './DeckPickTable';
 import { DeckStats } from './DeckStats';
 import { Sideboard } from './Sideboard';
+import { deckProblems } from './DeckProblems';
 import type { MissingCard } from '../domain/deckExport';
 import { findSubstitutes } from '../domain/substitutes';
 import type { PickBlocker } from './DeckPickTable';
@@ -374,6 +375,7 @@ export function DeckEditor({
 
   const issues = useMemo(() => validateDeck(content, cardsByKey), [content, cardsByKey]);
   const totals = useMemo(() => deckTotals(content, cardsByKey), [content, cardsByKey]);
+  const problems = useMemo(() => deckProblems(issues, totals.main), [issues, totals.main]);
   const limits = useMemo(() => ramLimits(content, cardsByKey), [content, cardsByKey]);
   const counts = useMemo(() => deckCounts(content), [content]);
   const allCounts = useMemo(() => allDeckCounts(content), [content]);
@@ -600,6 +602,15 @@ export function DeckEditor({
   const showDeck = () => {
     sideRef.current?.scrollIntoView?.({ block: 'start' });
     deckHeadingRef.current?.focus({ preventScroll: true });
+  };
+
+  /** Moves focus to the row an issue is about (T-101). The page only scrolls if the row is out of view. */
+  const showRow = (key: string, part: 'main' | 'side') => {
+    const row = document.querySelector<HTMLElement>(`[data-deck-row="${CSS.escape(key)}"][data-deck-part="${part}"]`);
+    const target = row?.querySelector<HTMLElement>('button');
+    if (row === null || row === undefined || target === null || target === undefined) return;
+    row.scrollIntoView?.({ block: 'nearest' });
+    target.focus({ preventScroll: true });
   };
 
   const showIssues = () => {
@@ -918,6 +929,19 @@ export function DeckEditor({
                     <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
                       {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
                       {issue.message}
+                      {issue.severity === 'error' && issue.cards.length > 0 && (
+                        <>
+                          {' '}
+                          <button
+                            type="button"
+                            className="link-button"
+                            aria-label={deckTexts.showRowNamed(cardsByKey.get(issue.cards[0] ?? '')?.displayName ?? '')}
+                            onClick={() => showRow(issue.cards[0] ?? '', issue.type.startsWith('sideboard-') ? 'side' : 'main')}
+                          >
+                            {deckTexts.showRow}
+                          </button>
+                        </>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -942,10 +966,13 @@ export function DeckEditor({
             hoverProps={preview.bind}
             onMoveToSideboard={(card) => moveCopy(card, true)}
             onAddToSideboard={addToSideboard}
+            problems={problems}
           />
           <Sideboard
             rows={sideRows}
             size={sideboardSize(content)}
+            view={deckView}
+            problems={problems}
             onChange={setSideCount}
             onMoveToMain={(card) => moveCopy(card, false)}
             onOpenImage={openImage}
