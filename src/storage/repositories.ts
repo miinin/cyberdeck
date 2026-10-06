@@ -36,6 +36,8 @@ import {
   MAX_BACKUPS_PER_AGGREGATE,
   WANTS_KEY,
   WANTS_SCHEMA_VERSION,
+  PROXY_KEY,
+  PROXY_SCHEMA_VERSION,
   THEME_KEY,
   VIEW_KEY,
   EDIT_MODE_KEY,
@@ -46,7 +48,7 @@ import {
   ACCOUNT_DELETE_PENDING_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
-import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS, migrateCollectionV2ToV3, WANTS_MIGRATIONS } from './migrations';
+import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS, migrateCollectionV2ToV3, PROXY_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
 import type {
   CollectionRepository,
   DeckRepository,
@@ -78,12 +80,12 @@ export interface RepositoryOptions {
    */
   namespace?: string;
   /** Tests only; default []. */
-  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[] };
+  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[]; proxy?: readonly Migration[] };
 }
 
 /** One stored entity: its key, schema and how its value is wrapped in the envelope's data. */
 interface Aggregate<T> {
-  name: 'collection' | 'decks' | 'wants';
+  name: 'collection' | 'decks' | 'wants' | 'proxy';
   key: string;
   spec: EnvelopeSpec<T>;
   empty: T;
@@ -152,6 +154,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const collectionKey = prefix === null ? COLLECTION_KEY : `${prefix}collection`;
   const decksKey = prefix === null ? DECKS_KEY : `${prefix}decks`;
   const wantsKey = prefix === null ? WANTS_KEY : `${prefix}wants`;
+  const proxyKey = prefix === null ? PROXY_KEY : `${prefix}proxy`;
   const backupPrefix = prefix === null ? BACKUP_PREFIX : `${prefix}backup:`;
   const syncBaseKey = `${prefix ?? 'cyberdeck:'}sync-base`;
   /** Same-tab listeners: `ui` hear sync-driven writes, `changes` hear every write (the sync engine). */
@@ -175,6 +178,14 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     spec: specWith(WANTS_SCHEMA_VERSION, WANTS_MIGRATIONS, options.migrations?.wants, parseCollection),
     empty: EMPTY_COLLECTION,
     toData: (wants) => ({ entries: wants.entries }),
+  };
+
+  const proxyAggregate: Aggregate<Collection> = {
+    name: 'proxy',
+    key: proxyKey,
+    spec: specWith(PROXY_SCHEMA_VERSION, PROXY_MIGRATIONS, options.migrations?.proxy, parseCollection),
+    empty: EMPTY_COLLECTION,
+    toData: (queue) => ({ entries: queue.entries }),
   };
 
   const decksAggregate: Aggregate<Deck[]> = {
@@ -361,6 +372,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
 
   const collection = collectionRepository(collectionAggregate, collectionKey);
   const wants = collectionRepository(wantsAggregate, wantsKey);
+  const proxy = collectionRepository(proxyAggregate, proxyKey);
 
   const decks: DeckRepository = {
     list: async () => load(decksAggregate),
@@ -623,6 +635,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   return {
     collection,
     wants,
+    proxy,
     decks,
     preferences,
     persistent: options.persistent,
