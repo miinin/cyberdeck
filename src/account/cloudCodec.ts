@@ -28,7 +28,18 @@ function deckDocSpec(id: DeckId): EnvelopeSpec<Deck> {
     migrations: [],
     parse: (data) =>
       isRecord(data)
-        ? parseDeck({ id, name: data.name, sections: data.sections, createdAt: data.createdAt, updatedAt: data.updatedAt })
+        ? parseDeck({
+            id,
+            name: data.name,
+            sections: data.sections,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
+            // Stored flat as visibility + nickname; both are optional (decks from before T-098 are private).
+            publish:
+              data.visibility === undefined
+                ? undefined
+                : { public: data.visibility === 'public', nickname: data.nickname ?? null },
+          })
         : null,
   };
 }
@@ -123,6 +134,9 @@ export function encodeDeckDoc(deck: Deck, savedAt: string) {
       })),
       createdAt: deck.createdAt,
       updatedAt: deck.updatedAt,
+      ...(deck.publish === undefined
+        ? {}
+        : { visibility: deck.publish.public ? 'public' : 'private', nickname: deck.publish.nickname }),
     },
   };
 }

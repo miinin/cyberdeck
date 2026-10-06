@@ -14,10 +14,11 @@ import {
   MAX_DECK_DISTINCT_CARDS,
   MAX_DECK_NAME_LENGTH,
   MAX_DECKS,
+  MAX_NICKNAME_LENGTH,
   MAX_SECTION_NAME_LENGTH,
   MAX_SECTIONS,
 } from './deck';
-import type { Deck, DeckCard, DeckContent, DeckId, DeckSection } from './deck';
+import type { Deck, DeckCard, DeckContent, DeckId, DeckPublish, DeckSection } from './deck';
 
 /** A validated value and the number of rows, sections or decks that were left out. */
 export interface Parsed<T> {
@@ -158,20 +159,36 @@ export function parseDeckContent(raw: unknown): Parsed<DeckContent> | null {
   return { value: { name, sections }, dropped };
 }
 
+/** Cleans a nickname: 1–30 characters after cleaning, or null. */
+export function cleanNickname(value: unknown): string | null {
+  return cleanText(value, 1, MAX_NICKNAME_LENGTH);
+}
+
+/** `{ public, nickname }` (T-098). Null when the shape is wrong; the caller then treats the deck as private. */
+export function parseDeckPublish(raw: unknown): DeckPublish | null {
+  if (!isRecord(raw) || typeof raw.public !== 'boolean') return null;
+  if (raw.nickname === null || raw.nickname === undefined) return { public: raw.public, nickname: null };
+  const nickname = cleanNickname(raw.nickname);
+  return nickname === null ? null : { public: raw.public, nickname };
+}
+
 /** A stored deck: deck content plus id and timestamps. An invalid timestamp becomes the epoch. */
 export function parseDeck(raw: unknown): Parsed<Deck> | null {
   if (!isRecord(raw) || !isDeckId(raw.id)) return null;
   const content = parseDeckContent(raw);
   if (content === null) return null;
+  const publish = raw.publish === undefined ? undefined : parseDeckPublish(raw.publish);
+  const base = {
+    id: raw.id,
+    name: content.value.name,
+    sections: content.value.sections,
+    createdAt: parseTimestamp(raw.createdAt),
+    updatedAt: parseTimestamp(raw.updatedAt),
+  };
   return {
-    value: {
-      id: raw.id,
-      name: content.value.name,
-      sections: content.value.sections,
-      createdAt: parseTimestamp(raw.createdAt),
-      updatedAt: parseTimestamp(raw.updatedAt),
-    },
-    dropped: content.dropped,
+    value: publish === undefined || publish === null ? base : { ...base, publish },
+    // A broken publish setting makes the deck private and is counted as a repair.
+    dropped: content.dropped + (raw.publish !== undefined && publish === null ? 1 : 0),
   };
 }
 

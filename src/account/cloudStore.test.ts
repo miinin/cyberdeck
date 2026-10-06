@@ -195,6 +195,17 @@ describe.each([
     expect(Object.keys(h.getRaw('meta') as object).sort()).toEqual(['rev', 'schemaVersion', 'updatedAt']);
   });
 
+  it('stores the publishing settings as visibility and nickname and reads them back (T-098, SR-35)', async () => {
+    const publicDeck: Deck = { ...deck('d1'), publish: { public: true, nickname: 'Nick' } };
+    const privateDeck: Deck = { ...deck('d2'), publish: { public: false, nickname: null } };
+    await h.store.commit(change({ putDecks: [publicDeck, privateDeck, deck('d3')] }), 0);
+    const stored = h.getRaw('decks/d1') as { data: object };
+    expect(Object.keys(stored.data).sort()).toEqual(['createdAt', 'name', 'nickname', 'sections', 'updatedAt', 'visibility']);
+    expect(stored.data).toMatchObject({ visibility: 'public', nickname: 'Nick' });
+    expect((h.getRaw('decks/d3') as { data: object }).data).not.toHaveProperty('visibility');
+    expect((await h.store.readAll()).decks).toEqual([publicDeck, privateDeck, deck('d3')]);
+  });
+
   it('writes the validated values, not the raw input (SR-23 kohta 6)', async () => {
     const raw: Deck = { ...deck('d1', '  Pakka‮  '), createdAt: 'x'.repeat(100) };
     await h.store.commit(change({ putDecks: [raw] }), 0);

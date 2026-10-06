@@ -1,7 +1,7 @@
 import type { CardKey } from '../domain/cardKey';
 import type { Collection } from '../domain/collection';
 import type { PrintingKey } from '../domain/printing';
-import type { Deck, DeckContent, DeckId } from '../domain/deck';
+import type { Deck, DeckContent, DeckId, DeckPublish } from '../domain/deck';
 
 export type LoadNotice =
   /** Some rows were dropped, the rest was kept. */
@@ -41,6 +41,11 @@ export interface DeckRepository {
    * a different updatedAt → StorageError('conflict') and nothing is written (T-042, T-054d).
    */
   update(id: DeckId, content: DeckContent, options?: { expectedUpdatedAt?: string }): Promise<Deck>;
+  /**
+   * Sets the publishing settings of a deck (T-098); undefined = private. `update` never changes them. Updates
+   * updatedAt, so sync carries the setting. Unknown id → StorageError('not-found').
+   */
+  setPublish(id: DeckId, publish: DeckPublish | undefined): Promise<Deck>;
   /** Unknown id is not an error. */
   remove(id: DeckId): Promise<void>;
   subscribe(listener: () => void): () => void;
