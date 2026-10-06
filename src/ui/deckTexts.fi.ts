@@ -111,6 +111,13 @@ export const deckTextsFi = {
   sideboardEmpty: (size: number) => `Sideboard on valinnainen. Jos käytät sitä, siinä on tasan ${size} korttia.`,
   moveToSideboard: (name: string) => `Siirrä sideboardiin: ${name}`,
   moveToMain: 'Siirrä pääpakkaan',
+  moveToMainNamed: (name: string) => `Siirrä pääpakkaan: ${name}`,
+  // Short visible labels of the small row buttons (T-092); the full action is the accessible name and the tooltip.
+  moveToMainShort: '→ Pää',
+  moveToSideboardShort: '→ SB',
+  addToSideboardShort: '+ SB',
+  moveToSideboardTitle: 'Siirrä sideboardiin',
+  addToSideboardTitle: 'Lisää sideboardiin',
   removeFromSideboard: (name: string) => `Poista sideboardista: ${name}`,
   inSideboard: (count: number) => `Sideboardissa ${count}`,
   movedToMain: (name: string) => `${name} siirretty pääpakkaan.`,

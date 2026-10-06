@@ -4,15 +4,23 @@ import type { DeckRow } from '../domain/deckRules';
 import { SIDEBOARD_SIZE } from '../domain/deck';
 import type { HoverPreviewProps } from './CardHoverPreview';
 import { CardName } from './CardName';
+import { typeColorClass } from './CardColor';
+import { CostGem, cardMeta } from './DeckPickTable';
+import { DeckCardImage } from './DeckList';
 import { deckTexts } from './deckTexts';
 import { Stepper } from './Stepper';
+import { texts } from './texts';
 
-/** The sideboard of the deck (T-058): optional, exactly SIDEBOARD_SIZE cards when used. Not part of the main deck rules. */
+/**
+ * The sideboard of the deck (T-058): optional, exactly SIDEBOARD_SIZE cards when used. Not part of the main deck rules.
+ * Its rows are the main deck's rows (T-092): art, cost, name, copies, stepper and a small "→ main" button on one line.
+ */
 export function Sideboard({
   rows,
   size,
   onChange,
   onMoveToMain,
+  onOpenImage,
   hoverProps,
   headingRef,
 }: {
@@ -20,6 +28,7 @@ export function Sideboard({
   size: number;
   onChange: (card: Card, count: number) => void;
   onMoveToMain: (card: Card) => void;
+  onOpenImage: (card: Card) => void;
   hoverProps: (card: Card) => HoverPreviewProps;
   /** Focus target after the last row moved to the main deck (T-074). */
   headingRef?: Ref<HTMLHeadingElement>;
@@ -32,10 +41,23 @@ export function Sideboard({
       ) : (
         <ul className="deck-tiles">
           {rows.map(({ card, count }) => (
-            <li key={card.key} className="deck-tile" {...hoverProps(card)}>
-              <span className="deck-tile-name">
-                <CardName card={card} muteSubname />
+            <li key={card.key} className={`deck-tile has-move ${typeColorClass(card.color)}`} {...hoverProps(card)}>
+              <span className="deck-tile-art" aria-hidden="true">
+                <DeckCardImage card={card} className="deck-tile-img" />
               </span>
+              <span className="deck-tile-gem">
+                <CostGem card={card} />
+              </span>
+              <button
+                type="button"
+                className="deck-tile-name"
+                aria-haspopup="dialog"
+                aria-label={`${texts.enlargeImage}${card.displayName}`}
+                title={cardMeta(card)}
+                onClick={() => onOpenImage(card)}
+              >
+                <CardName card={card} muteSubname />
+              </button>
               <span className="deck-tile-count" aria-hidden="true">
                 {deckTexts.copies(count)}
               </span>
@@ -48,9 +70,14 @@ export function Sideboard({
                 countLabel={deckTexts.inSideboard(count)}
                 onChange={(next) => onChange(card, next)}
               />
-              <button type="button" className="button-secondary" onClick={() => onMoveToMain(card)}>
-                {deckTexts.moveToMain}
-                <span className="visually-hidden"> {card.displayName}</span>
+              <button
+                type="button"
+                className="tile-action deck-tile-move"
+                aria-label={deckTexts.moveToMainNamed(card.displayName)}
+                title={deckTexts.moveToMain}
+                onClick={() => onMoveToMain(card)}
+              >
+                {deckTexts.moveToMainShort}
               </button>
             </li>
           ))}

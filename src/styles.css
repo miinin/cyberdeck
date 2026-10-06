@@ -5613,3 +5613,124 @@ section[aria-labelledby='have-heading'] {
     grid-column: 1 / -1;
   }
 }
+
+/*
+ * Deck editor rows and sideboard (T-092). Main deck and sideboard rows share one shape: the move button is a
+ * small fifth column, so a row stays one line high on a phone. "+ SB" in the search results uses the same
+ * button. The rule toast floats at the bottom instead of pushing the results down (no jumping page).
+ */
+.tile-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 1.75rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tile-action:hover {
+  border-color: var(--color-accent-2);
+  color: var(--color-accent-2);
+}
+
+.tile-action:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.deck-tile.has-move {
+  grid-template-columns: 2rem minmax(0, 1fr) 2rem auto auto;
+  grid-template-areas: 'gem name count step move';
+}
+
+.deck-tile.has-move.is-missing {
+  grid-template-areas:
+    'gem name count step move'
+    'gem miss count step move';
+}
+
+.deck-tile.has-move .deck-tile-art {
+  inset-inline-end: 10rem;
+}
+
+.deck-tile-move {
+  grid-area: move;
+}
+
+.toast-slot {
+  position: fixed;
+  z-index: 30;
+  inset-inline: var(--space-3);
+  bottom: var(--space-4);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.toast-slot .toast {
+  max-inline-size: 34rem;
+  margin: 0;
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.45);
+  pointer-events: auto;
+}
+
+/* Above the phone deck bar. */
+@media (max-width: 63.999rem) {
+  .toast-slot {
+    bottom: 4.75rem;
+  }
+}
+
+.toast-slot .toast {
+  flex-wrap: nowrap;
+  padding-block: var(--space-1);
+}
+
+.toast-close {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.toast-close:hover {
+  color: var(--color-text);
+}
+
+.toast-close:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* "+ SB" beside the stepper, not under it (one row height). */
+.pick-table .col-deck {
+  white-space: nowrap;
+}
+
+.pick-table .col-deck .card-row-controls {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.pick-table .col-deck .tile-action {
+  margin-inline-start: var(--space-1);
+  vertical-align: middle;
+}

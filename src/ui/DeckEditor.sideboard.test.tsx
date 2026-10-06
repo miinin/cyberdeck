@@ -30,11 +30,20 @@ describe('Add to sideboard from the picker', () => {
     expect(screen.getByText(/yhteensä jo 3 kopiota/)).toBeInTheDocument();
   }, 20000);
 
-  it('refuses a Legend', async () => {
+  // T-092: a Legend cannot go to the sideboard, so it gets no button that would only show a refusal.
+  it('offers no sideboard button for a Legend, but does for a Unit', async () => {
     await openEditor([]);
-    fireEvent.click(within(table()).getByRole('button', { name: 'Lisää sideboardiin: L1' }));
+    expect(within(table()).queryByRole('button', { name: 'Lisää sideboardiin: L1' })).not.toBeInTheDocument();
+    expect(within(table()).getByRole('button', { name: 'Lisää sideboardiin: Unit 3' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Sideboard (0/7)' })).toBeInTheDocument();
-    expect(screen.getByText('Legend-korttia ei voi laittaa sideboardiin.')).toBeInTheDocument();
+  }, 20000);
+
+  it('shows the rule toast in a status region outside the result list (no jump)', async () => {
+    await openEditor([['u3', 3]]);
+    fireEvent.click(within(table()).getByRole('button', { name: 'Lisää sideboardiin: Unit 3' }));
+    const toast = screen.getByText(/yhteensä jo 3 kopiota/);
+    expect(toast.closest('[role="status"]')).toHaveClass('toast-slot');
+    expect(table()).not.toContainElement(toast);
   }, 20000);
 
   it('labels the sideboard stepper as the sideboard and announces a move to the main deck', async () => {
