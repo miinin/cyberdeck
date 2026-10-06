@@ -8,7 +8,7 @@ import {
   MAX_MAIN_DECK,
   MIN_MAIN_DECK,
   MAX_COPIES,
-  addBlocker,
+  addBlockerInfo,
   allDeckCounts,
   sideboardCounts,
   sideboardSize,
@@ -21,9 +21,6 @@ import {
   ramLimits,
   toCardsByKey,
   validateDeck,
-  deckCounts as countsOfDeck,
-  deckTotals as totalsOfDeck,
-  LEGEND_COUNT as LEGEND_LIMIT,
   MAX_COPIES as COPY_LIMIT,
 } from '../domain/deckRules';
 import {
@@ -497,23 +494,22 @@ export function DeckEditor({
   };
 
   /**
-   * The short mark tells a same-name Legend (refused) from a broken limit (allowed, T-045). The reason
-   * always matches the mark: a same-name Legend wins over the Legend count (UX-045).
+   * A card whose next copy would make the deck illegal is dimmed with a visible reason (T-103). A same-name
+   * Legend is refused; every other block only warns and the card can still be added (T-045).
    */
   const blockerOf = (card: Card): PickBlocker | null => {
     if (hasSameNameLegend(card, content, cardsByKey)) {
       return { reason: deckTexts.sameLegendReason(card.name), short: deckTexts.blockedLegend };
     }
-    const blocker = addBlocker(card, content, cardsByKey);
-    if (blocker === null) return null;
-    // T-057: mark only when the deck is already over a limit, not when the next copy would be.
-    const count = countsOfDeck(content).get(card.key) ?? 0;
-    const over =
-      card.type === 'Legend'
-        ? count > 0 && totalsOfDeck(content, cardsByKey).legends > LEGEND_LIMIT
-        : count > COPY_LIMIT || (count > 0 && blocker.startsWith('RAM'));
-    if (!over) return null;
-    return { reason: deckTexts.dimmedHint(blocker), short: deckTexts.blockedLimit };
+    const info = addBlockerInfo(card, content, cardsByKey);
+    if (info === null) return null;
+    const short =
+      info.kind === 'ram-over'
+        ? deckTexts.blockedRam(info.ram ?? 0, info.color ?? '', info.limit ?? 0)
+        : info.kind === 'copies-full'
+          ? deckTexts.blockedCopies(COPY_LIMIT)
+          : deckTexts.blockedLegendsFull;
+    return { reason: deckTexts.dimmedHint(info.message), short };
   };
 
   const handleName = (text: string) => {
@@ -602,15 +598,6 @@ export function DeckEditor({
   const showDeck = () => {
     sideRef.current?.scrollIntoView?.({ block: 'start' });
     deckHeadingRef.current?.focus({ preventScroll: true });
-  };
-
-  /** Moves focus to the row an issue is about (T-101). The page only scrolls if the row is out of view. */
-  const showRow = (key: string, part: 'main' | 'side') => {
-    const row = document.querySelector<HTMLElement>(`[data-deck-row="${CSS.escape(key)}"][data-deck-part="${part}"]`);
-    const target = row?.querySelector<HTMLElement>('button');
-    if (row === null || row === undefined || target === null || target === undefined) return;
-    row.scrollIntoView?.({ block: 'nearest' });
-    target.focus({ preventScroll: true });
   };
 
   const showIssues = () => {
@@ -798,6 +785,7 @@ export function DeckEditor({
             searchInputRef={searchInputRef}
           />
           <p className="hint pick-hint">{deckTexts.pickHint}</p>
+          <p className="hint pick-hint pick-explain">{deckTexts.blockedExplain}</p>
           <div role="status" className="toast-slot">
             {toast !== null && (
               <p className="toast">
@@ -829,9 +817,14 @@ export function DeckEditor({
                       hoverProps={imageSize === 'small' ? preview.bind(card) : undefined}
                       hint={
                         blocker !== null && (
-                          <span id={hintId} className="visually-hidden">
-                            {blocker.reason}
-                          </span>
+                          <>
+                            <span className="pick-blocked" aria-hidden="true">
+                              ⚠ {blocker.short}
+                            </span>
+                            <span id={hintId} className="visually-hidden">
+                              {blocker.reason}
+                            </span>
+                          </>
                         )
                       }
                     >
@@ -929,19 +922,6 @@ export function DeckEditor({
                     <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
                       {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
                       {issue.message}
-                      {issue.severity === 'error' && issue.cards.length > 0 && (
-                        <>
-                          {' '}
-                          <button
-                            type="button"
-                            className="link-button"
-                            aria-label={deckTexts.showRowNamed(cardsByKey.get(issue.cards[0] ?? '')?.displayName ?? '')}
-                            onClick={() => showRow(issue.cards[0] ?? '', issue.type.startsWith('sideboard-') ? 'side' : 'main')}
-                          >
-                            {deckTexts.showRow}
-                          </button>
-                        </>
-                      )}
                     </li>
                   ))}
                 </ul>

@@ -42,22 +42,54 @@ describe('Problem marks in the deck list (T-101)', () => {
     expect(screen.getByText('⚠ ei 0 eikä 7')).toBeInTheDocument();
   });
 
-  it('moves focus to the row from the issue list', async () => {
-    const user = userEvent.setup();
+  it('lists the problems as text without a "show row" button (T-103)', async () => {
     openEditor([['u0', 20], ['u1', 20], ['u2', 15]]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
-    await user.click(screen.getAllByRole('button', { name: /^Näytä pakassa: Unit/ })[0] as HTMLElement);
-    const focused = document.activeElement as HTMLElement;
-    expect(focused.closest('[data-deck-row]')).toBe(row('u0'));
+    expect(screen.getAllByRole('listitem').some((item) => item.textContent?.includes('Unit 0'))).toBe(true);
+    expect(screen.queryByRole('button', { name: /^Näytä pakassa/ })).not.toBeInTheDocument();
+    expect(screen.queryByText('Näytä rivi')).not.toBeInTheDocument();
   });
 });
 
-describe('Legend names as text (T-101)', () => {
-  it('lists the Legends under the image slots', async () => {
+describe('Legends as a section like the main deck (T-103)', () => {
+  it('shows the Legends as deck rows with free slots as placeholder rows', async () => {
     openEditor([['l1', 1], ['l2', 1]]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
-    const names = within(deckRegion()).getByRole('list', { name: 'Legendit' });
-    expect(within(names).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['L1', 'L2']);
+    const heading = within(deckRegion()).getByRole('heading', { level: 2, name: 'Legendit (2/3)' });
+    const list = heading.closest('.deck-section')?.querySelector('ul.deck-tiles') as HTMLElement;
+    const rows = within(list).getAllByRole('listitem');
+    expect(rows).toHaveLength(3);
+    expect(rows[0]).toHaveClass('deck-tile');
+    expect(rows[0]).toHaveTextContent('L1');
+    expect(rows[1]).toHaveTextContent('L2');
+    expect(rows[2]).toHaveTextContent('Vapaa Legend-paikka');
+    expect(deckRegion().querySelector('.legend-slots, .legend-names')).toBeNull();
+  });
+
+  it('shows the Legends as cards with their own controls in the stacks view', async () => {
+    const user = userEvent.setup();
+    openEditor([['l1', 1]]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await user.click(screen.getByRole('radio', { name: 'Pinot' }));
+    const heading = within(deckRegion()).getByRole('heading', { level: 2, name: 'Legendit (1/3)' });
+    const section = heading.closest('.deck-section') as HTMLElement;
+    expect(within(section).getByRole('button', { name: 'Suurenna kuva: L1, 1 pakassa' })).toBeInTheDocument();
+    expect(within(section).getAllByText('Vapaa Legend-paikka')).toHaveLength(2);
+    await user.click(within(section).getByRole('button', { name: 'Poista pakasta: L1' }));
+    expect(within(section).getAllByText('Vapaa Legend-paikka')).toHaveLength(3);
+  });
+});
+
+describe('Stacks by colour and type (T-103)', () => {
+  it('groups the stacks by colour, then type, and keeps the list by type', async () => {
+    const user = userEvent.setup();
+    openEditor([['u0', 3], ['u1', 1]]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    expect(within(deckRegion()).getByRole('heading', { level: 3, name: 'Unit (4)' })).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: 'Pinot' }));
+    expect(within(deckRegion()).getByRole('heading', { level: 3, name: 'Red · Unit (4)' })).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: 'Lista' }));
+    expect(within(deckRegion()).getByRole('heading', { level: 3, name: 'Unit (4)' })).toBeInTheDocument();
   });
 });
 

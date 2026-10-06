@@ -1,7 +1,7 @@
 import type { Card } from './card';
 import type { DeckContent } from './deck';
 import { checkDeckName, copyDeckName, uniqueDeckName, withDeckCount } from './deckEdit';
-import { addBlocker, colorDistribution, costCurve, groupDeck, hasSameNameLegend, ramLimits, toCardsByKey, validateDeck } from './deckRules';
+import { addBlocker, addBlockerInfo, colorDistribution, costCurve, groupDeck, hasSameNameLegend, ramLimits, toCardsByKey, validateDeck } from './deckRules';
 
 function card(key: string, overrides: Partial<Card> = {}): Card {
   return {
@@ -175,6 +175,12 @@ describe('addBlocker', () => {
     expect(addBlocker(at('u0'), start, byKey)).toBeNull();
     expect(addBlocker(at('l1'), start, byKey)).toBe('Pakassa on jo 3 Legendiä.');
   });
+  it('tells the kind of blocker and the numbers behind a RAM block (T-103)', () => {
+    expect(addBlockerInfo(at('big'), start, byKey)).toMatchObject({ kind: 'ram-over', ram: 5, color: 'Red', limit: 4 });
+    expect(addBlockerInfo(at('u0'), deck([...legendRows, ['u0', 3]]), byKey)?.kind).toBe('copies-full');
+    expect(addBlockerInfo(at('l1'), start, byKey)?.kind).toBe('legends-full');
+    expect(addBlockerInfo(at('u0'), start, byKey)).toBeNull();
+  });
   it('blocks a second Legend with the same name', () => {
     const dupe = card('l1b', { name: 'L1', type: 'Legend' });
     expect(addBlocker(dupe, deck([['l1', 1]]), toCardsByKey([...all, dupe]))).toBe('Pakassa on jo Legend L1.');
@@ -249,6 +255,26 @@ describe('groupDeck', () => {
     expect(grouped.groups.map((group) => group.type)).toEqual(['Unit', 'Gear', 'Program', 'Weird']);
     expect(grouped.groups[0]?.rows.map((row) => row.card.key)).toEqual(['unit-a', 'unit-b']);
     expect(grouped.unknown).toEqual([{ key: 'ghost', count: 3 }]);
+  });
+
+  it('also groups the main deck by colour, then type (T-103)', () => {
+    const cards = [
+      card('b-unit', { color: 'Blue', cost: 1 }),
+      card('r-prog', { color: 'Red', type: 'Program', cost: 1 }),
+      card('r-gear', { color: 'Red', type: 'Gear', cost: 1 }),
+      card('r-unit-b', { color: 'Red', cost: 3 }),
+      card('r-unit-a', { color: 'Red', cost: 1 }),
+      card('g-unit', { color: 'Green', cost: 1 }),
+      card('y-odd', { color: 'Yellow', type: 'Weird', cost: 1 }),
+    ];
+    const grouped = groupDeck(
+      deck([['b-unit', 1], ['r-prog', 1], ['r-gear', 1], ['r-unit-b', 1], ['r-unit-a', 1], ['g-unit', 1], ['y-odd', 1]]),
+      toCardsByKey(cards),
+    );
+    expect(grouped.colorGroups.map((group) => `${group.color} ${group.type}`)).toEqual([
+      'Red Unit', 'Red Gear', 'Red Program', 'Yellow Weird', 'Green Unit', 'Blue Unit',
+    ]);
+    expect(grouped.colorGroups[0]?.rows.map((row) => row.card.key)).toEqual(['r-unit-a', 'r-unit-b']);
   });
 });
 

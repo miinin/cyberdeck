@@ -4,7 +4,6 @@ import type { Card } from '../domain/card';
 import type { ColorShare } from '../domain/deckRules';
 import { CHART_TYPES, chartType } from '../domain/deckStats';
 import type { ChartType, CostBucket, DrawOddsRow, RamFit } from '../domain/deckStats';
-import { EDDIE_TARGET_CHANCE } from '../domain/eddies';
 import type { EddieSummary } from '../domain/eddies';
 import { typeColorClass } from './CardColor';
 import { CardName } from './CardName';
@@ -272,9 +271,12 @@ export function DrawOdds({ rows, moments }: { rows: readonly DrawOddsRow[]; mome
  * average Eddies each turn against the ideal one a turn. Numbers are in the text; the bars are decoration.
  */
 export function EddiesPanel({ summary }: { summary: EddieSummary }) {
-  const { sellable, deckSize, recommended, curve, targetTurn, byType, unknown } = summary;
-  const diff = recommended === null ? 0 : sellable - recommended;
-  const tone: Tone = recommended === null ? 'neutral' : diff < -2 ? 'warn' : diff > 4 ? 'warn' : 'ok';
+  const { sellable, deckSize, target, curve, targetTurn, byType, unknown } = summary;
+  const under = target === null ? 0 : Math.max(0, target.min - sellable);
+  const over = target === null ? 0 : Math.max(0, sellable - target.max);
+  const tone: Tone = target === null ? 'neutral' : under > 0 || over > 0 ? 'warn' : 'ok';
+  const range = target === null ? '' : target.min === target.max ? String(target.min) : `${target.min}–${target.max}`;
+  const pct = target === null ? '' : formatShareRange(target.shareLow, target.shareHigh);
   const scale = Math.max(1, deckSize);
   const onCurve = curve.onCurve[targetTurn - 1] ?? 0;
   return (
@@ -284,18 +286,23 @@ export function EddiesPanel({ summary }: { summary: EddieSummary }) {
           <strong className={`eddies-number tone-${tone}`}>{sellable}</strong> <span>{deckTexts.eddiesSellable}</span>{' '}
           <span className="eddies-of">{deckTexts.eddiesOf(deckSize)}</span>
         </p>
-        {recommended !== null && (
+        {target !== null && (
           <p className={`eddies-verdict tone-${tone}`}>
-            {deckTexts.eddiesRecommended(recommended)} ·{' '}
-            {diff < -2 ? deckTexts.eddiesLow(-diff) : diff > 4 ? deckTexts.eddiesHigh(diff) : deckTexts.eddiesOk}
+            {deckTexts.eddiesRecommended(range, pct)} ·{' '}
+            {under > 0 ? deckTexts.eddiesLow(under) : over > 0 ? deckTexts.eddiesHigh(over) : deckTexts.eddiesOk}
           </p>
         )}
       </div>
       <span className="eddies-meter" aria-hidden="true">
         <span className={`eddies-meter-fill tone-${tone}`} style={{ inlineSize: `${(Math.min(sellable, scale) / scale) * 100}%` }} />
-        {recommended !== null && <span className="eddies-meter-mark" style={{ insetInlineStart: `${(recommended / scale) * 100}%` }} />}
+        {target !== null && (
+          <span
+            className="eddies-meter-mark"
+            style={{ insetInlineStart: `${(target.min / scale) * 100}%`, inlineSize: `max(3px, ${((target.max - target.min) / scale) * 100}%)` }}
+          />
+        )}
       </span>
-      {recommended !== null && <p className="visually-hidden">{deckTexts.eddiesRecommendedSpoken(sellable, recommended)}</p>}
+      {target !== null && <p className="visually-hidden">{deckTexts.eddiesRecommendedSpoken(sellable, range, pct)}</p>}
       {byType.size > 0 && (
         <ul className="chart-legend">
           {[...byType].map(([type, count]) => (
@@ -330,11 +337,18 @@ export function EddiesPanel({ summary }: { summary: EddieSummary }) {
       <p className="eddies-oncurve">
         <strong>{deckTexts.eddiesOnCurve(targetTurn, formatPercent(onCurve))}</strong>
       </p>
-      {recommended !== null && <p className="hint">{deckTexts.eddiesWhy(targetTurn, formatPercent(EDDIE_TARGET_CHANCE))}</p>}
+      {target !== null && <p className="hint">{deckTexts.eddiesWhy}</p>}
       {unknown > 0 && <p className="hint">{deckTexts.eddiesUnknown(unknown)}</p>}
       <p className="hint">{deckTexts.eddiesNote}</p>
     </div>
   );
+}
+
+/** "55–60 %" (or "58 %" when both round the same). */
+function formatShareRange(low: number, high: number): string {
+  const a = Math.round(low * 100);
+  const b = Math.round(high * 100);
+  return a === b ? `${a} %` : `${a}–${b} %`;
 }
 
 function chartTypeOf(type: string): string {

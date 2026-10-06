@@ -82,14 +82,15 @@ describe('Deck editor result picker', () => {
     expect(row).toHaveTextContent('Sama Legend');
     const add = within(row).getByRole('button', { name: 'Lisää pakkaan: L1' });
     expect(add).toHaveAccessibleDescription('Pakassa on jo Legend L1.');
-    // T-057: a card not yet over a limit gets no mark, even if the next copy would break it.
-    expect(rowOf('Big')).not.toHaveTextContent('Ylittää rajan');
+    // T-103: a card whose next copy would break a rule is marked too, with the numbers.
+    expect(rowOf('Big')).toHaveTextContent(/⚠ RAM 9 > Red \d/);
+    expect(rowOf('Unit 3')).not.toHaveTextContent('⚠');
   });
 
   it('shows no block marks on the main deck rows of an empty deck (T-052)', async () => {
     await openEditor([]);
-    for (const name of ['Unit 0', 'Unit 13', 'Big']) expect(rowOf(name)).not.toHaveTextContent('Ylittää rajan');
-    expect(within(table()).queryByText('Ylittää rajan')).not.toBeInTheDocument();
+    for (const name of ['Unit 0', 'Unit 13', 'Big']) expect(rowOf(name)).not.toHaveTextContent('⚠');
+    expect(within(table()).queryByText(/⚠/)).not.toBeInTheDocument();
   });
 
   it('filters by Cost, Power and RAM and shows the choices as removable chips (T-052)', async () => {
@@ -216,6 +217,18 @@ describe('Deck editor result picker', () => {
     fireEvent.pointerEnter(item, { pointerType: 'mouse' });
     act(() => vi.advanceTimersByTime(PREVIEW_DELAY_MS));
     expect(document.querySelector('.card-hover-preview')).not.toBeNull();
+  });
+
+  it('Kuvat: a card that would make the deck illegal is dimmed with a visible reason (T-103)', async () => {
+    await openEditor([['l1', 1]]);
+    fireEvent.click(screen.getByRole('radio', { name: 'Kuvat' }));
+    const list = screen.getByRole('list', { name: 'Lisää kortteja' });
+    const big = within(list).getAllByRole('button', { name: 'Lisää pakkaan: Big' })[0]?.closest('li') as HTMLElement;
+    expect(big).toHaveClass('is-dimmed');
+    expect(big).toHaveTextContent(/⚠ RAM 9 > Red \d/);
+    const plain = within(list).getAllByRole('button', { name: 'Lisää pakkaan: Unit 3' })[0]?.closest('li') as HTMLElement;
+    expect(plain).not.toHaveClass('is-dimmed');
+    expect(plain).not.toHaveTextContent('⚠');
   });
 
   it('shows the image size choice only in the Kuvat view', async () => {
