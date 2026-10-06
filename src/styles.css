@@ -6895,3 +6895,18 @@ section[aria-labelledby='have-heading'] {
 .edition-confirm .row-actions {
   flex-wrap: wrap;
 }
+
+/* Sideboard in the stacks view (T-101): the cards side by side at full height, each with its buttons visible. */
+.deck-stacks--spread {
+  display: block;
+}
+
+.stack-cards--spread {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: var(--space-3);
+}
+
+.stack-cards--spread .stack-card {
+  block-size: auto;
+}
