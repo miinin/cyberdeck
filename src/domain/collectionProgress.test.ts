@@ -110,3 +110,20 @@ describe('missingCards', () => {
     expect(missingCards(cards, own({ card: 'alpha', count: 1 }, { card: 'beta', count: 1 }, { card: 'gamma', count: 1 }))).toEqual([]);
   });
 });
+
+describe('specialArtProgress names', () => {
+  it('shows the Iconic kinds as one official "Iconic Rare" row (T-105)', () => {
+    const card = (key: string, rarity: string): Card => ({
+      id: key, slug: key, name: key, subname: null, displayName: key, type: 'Unit', color: 'Red', cost: 1, power: 1, ram: 1, rarity: 'Rare', key,
+      printings: [
+        { key: `${key}:1`, setCode: 's', setName: 'Welcome to Night City — Retail', number: '1', rarity: 'Rare', language: 'en', artist: null, imageKey: `${key}-1` },
+        { key: `${key}:2`, setCode: 's', setName: 'Welcome to Night City — Retail', number: '2', rarity, language: 'en', artist: null, imageKey: `${key}-2` },
+      ],
+    });
+    const cards = [card('a', 'Iconic Legend'), card('b', 'Iconic Other'), card('c', 'Nova Rare')];
+    expect(specialArtProgress(cards, { entries: [] }).map((row) => [row.rarity, row.total])).toEqual([
+      ['Iconic Rare', 2],
+      ['Nova Rare', 1],
+    ]);
+  });
+});

@@ -76,7 +76,10 @@ export function rarityProgress(cards: readonly Card[], collection: Collection): 
   return ordered.map((rarity) => ({ rarity, ...(rows.get(rarity) as Progress) }));
 }
 
-/** Per special art (Iconic Legend, Iconic Other, Iconic Secret, Nova Rare, D-021): cards with that art and those with a copy of it. Rows without cards are left out. */
+/**
+ * Per special art rarity under its official name (D-021, T-078): Iconic Legend, Iconic Other and Iconic Secret are one
+ * "Iconic Rare" row, Nova Rare its own. Cards with that art and those with a copy of it. Rows without cards are left out.
+ */
 export function specialArtProgress(
   cards: readonly Card[],
   collection: Collection,
@@ -89,13 +92,15 @@ export function specialArtProgress(
     const owned = ownedPerArt(entry, card, arts);
     for (const art of arts) {
       if (art.rarity === null) continue;
-      const row = rows.get(art.rarity) ?? { owned: 0, total: 0 };
+      const name = officialRarity(art.rarity) ?? art.rarity;
+      const row = rows.get(name) ?? { owned: 0, total: 0 };
       row.total += 1;
       if ((owned.get(art.artId) ?? 0) > 0) row.owned += 1;
-      rows.set(art.rarity, row);
+      rows.set(name, row);
     }
   }
-  return SPECIAL_ART_RARITIES.filter((rarity) => rows.has(rarity)).map((rarity) => ({ rarity, ...(rows.get(rarity) as Progress) }));
+  const order = [...new Set(SPECIAL_ART_RARITIES.map((rarity) => officialRarity(rarity) ?? rarity))];
+  return order.filter((rarity) => rows.has(rarity)).map((rarity) => ({ rarity, ...(rows.get(rarity) as Progress) }));
 }
 
 export interface ValueProgress extends Progress {
