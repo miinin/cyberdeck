@@ -5304,3 +5304,312 @@ section[aria-labelledby='have-heading'] {
     margin-block-start: var(--space-1);
   }
 }
+
+/*
+ * Card details on phones (T-090): a full-screen view instead of a box on a backdrop. The name and the close
+ * button stay at the top while the view scrolls (the view is the page; nothing scrolls inside it). The
+ * image leaves room for the counts on the first screen. Every section is one row: label left, control right.
+ */
+@media (max-width: 39.99rem) {
+  .card-dialog.has-details {
+    padding: 0;
+    background: var(--color-bg);
+  }
+
+  .card-dialog.has-details .card-dialog-body {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0 var(--space-4) var(--space-6);
+    border: 0;
+  }
+
+  .card-dialog.has-details .card-dialog-header {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    align-items: center;
+    margin: 0 calc(-1 * var(--space-4)) var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .card-dialog.has-details .card-dialog-content {
+    display: block;
+  }
+
+  .card-dialog.has-details .card-dialog-image {
+    margin-inline: auto;
+    max-height: 46dvh;
+  }
+
+  .card-dialog.has-details .card-dialog-details {
+    gap: 0;
+    margin-block-start: var(--space-3);
+  }
+
+  .card-dialog-details > section {
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .card-dialog-details > section:not(.card-versions) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .card-dialog-details > section:not(.card-versions) > h3 {
+    grid-column: 1;
+    margin: 0;
+  }
+
+  .card-dialog-details > section:not(.card-versions) > .count-control {
+    grid-column: 2;
+  }
+
+  .card-dialog-details > section:not(.card-versions) > :not(h3):not(.count-control) {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  .card-dialog-details > section:not(.card-versions) > ul {
+    color: var(--color-text);
+    font-size: var(--font-size-base);
+  }
+
+  /* Versions: compact rows, a small picture, the counters at the right edge. */
+  .card-dialog-details .art-gallery {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .card-dialog-details .art-tile:has(> .art-pick, > .art-thumb) {
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+  }
+
+  .card-dialog-details .art-tile {
+    padding: var(--space-2) 0;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+  }
+
+  .card-dialog-details .art-tile:last-child {
+    border-bottom: 0;
+  }
+
+  .card-dialog-details .art-breakdown summary {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  .card-dialog-details .art-tile.is-selected .art-thumb {
+    outline: 2px solid var(--color-accent-2);
+    outline-offset: 1px;
+  }
+}
+
+/*
+ * List view on phones (T-090): each row is a small card row, no sideways scrolling. Picture left; name;
+ * type, rarity and the game values with their names; the count at the right. Column headers stay for
+ * screen readers (sorting is the "Järjestys" select).
+ */
+@media (max-width: 39.99rem) {
+  .table-scroll {
+    overflow: visible;
+    border: 0;
+  }
+
+  .card-table,
+  .card-table tbody {
+    display: block;
+  }
+
+  .card-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .card-table tbody tr {
+    display: grid;
+    grid-template-columns: 3.5rem repeat(5, auto) minmax(0, 1fr);
+    grid-template-areas:
+      'img name name name name name name'
+      'img type rarity cost power ram .'
+      'img count count count count count count';
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .card-table tbody th,
+  .card-table tbody td {
+    padding: 0;
+    border: 0;
+  }
+
+  .card-table .cell-image {
+    grid-area: img;
+    align-self: start;
+    inline-size: 3.5rem;
+  }
+
+  .card-table .cell-image .card-image-button,
+  .card-table .cell-image .card-image {
+    inline-size: 3.5rem;
+  }
+
+  .card-table .cell-name {
+    grid-area: name;
+    min-inline-size: 0;
+  }
+
+  .card-table .cell-type {
+    grid-area: type;
+  }
+
+  .card-table .cell-rarity {
+    grid-area: rarity;
+  }
+
+  .card-table .cell-number:nth-of-type(4) {
+    grid-area: cost;
+  }
+
+  .card-table .cell-number:nth-of-type(5) {
+    grid-area: power;
+  }
+
+  .card-table .cell-number:nth-of-type(6) {
+    grid-area: ram;
+  }
+
+  .card-table tbody .cell-number::before {
+    content: attr(data-label) ' ';
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .card-table .cell-collection {
+    grid-area: count;
+    justify-self: end;
+  }
+
+  .card-table tr.is-owned > :first-child,
+  .card-table tr.is-playset > :first-child {
+    box-shadow: none;
+  }
+
+  .card-table tr.is-owned {
+    box-shadow: inset 3px 0 0 var(--color-accent-edge);
+    padding-inline-start: var(--space-2);
+  }
+
+  .card-table tr.is-playset {
+    box-shadow: inset 3px 0 0 var(--color-success);
+    padding-inline-start: var(--space-2);
+  }
+}
+
+/*
+ * T-091: the whole card at once. Tapping the image (or "Näytä kuva koko ruudulla") shows it on the whole
+ * screen; a tap or Esc returns. On phones the details start with the image and the counts side by side,
+ * so the first screen holds the card and its counts without scrolling.
+ */
+.card-zoom-open {
+  display: none;
+}
+
+.card-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: var(--space-2);
+  border: 0;
+  background: rgba(0, 0, 0, 0.92);
+  cursor: zoom-out;
+}
+
+.card-zoom img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.card-dialog-image {
+  cursor: zoom-in;
+}
+
+@media (max-width: 39.99rem) {
+  .card-dialog.has-details .card-dialog-content {
+    display: grid;
+    grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+    gap: var(--space-2) var(--space-3);
+    align-items: start;
+  }
+
+  .card-dialog.has-details .card-dialog-image {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 100%;
+    max-height: none;
+    margin: 0;
+  }
+
+  .card-dialog.has-details .card-zoom-open {
+    display: block;
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+    min-height: var(--target-min);
+    padding-inline: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+
+  .card-dialog.has-details .card-dialog-details {
+    display: contents;
+  }
+
+  .card-dialog-details > section.detail-collection,
+  .card-dialog-details > section.detail-want {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    grid-column: 2;
+    padding-block: 0;
+    border-top: 0;
+  }
+
+  .card-dialog-details > section.detail-collection {
+    grid-row: 1;
+  }
+
+  .card-dialog-details > section.detail-want {
+    grid-row: 2;
+  }
+
+  .card-dialog-details > section.card-versions,
+  .card-dialog-details > section.detail-decks {
+    grid-column: 1 / -1;
+  }
+}

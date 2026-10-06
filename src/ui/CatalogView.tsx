@@ -507,7 +507,7 @@ export function CatalogView({
           />
         )}
         {wants.snapshot.phase === 'ready' && (
-          <section aria-labelledby="card-detail-want">
+          <section aria-labelledby="card-detail-want" className="detail-want">
             <h3 id="card-detail-want">{texts.detailWant}</h3>
             <CountControl
               card={openCard}
@@ -524,7 +524,7 @@ export function CatalogView({
           </section>
         )}
         {decksPhase === 'ready' && (
-          <section aria-labelledby="card-detail-decks">
+          <section aria-labelledby="card-detail-decks" className="detail-decks">
             <h3 id="card-detail-decks">{texts.detailDecks}</h3>
             {(decksByCard.get(openCard.key) ?? NO_DECKS).length === 0 ? (
               <p>{texts.detailNoDecks}</p>

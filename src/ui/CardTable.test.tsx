@@ -49,3 +49,19 @@ describe('CardTable sorting', () => {
     expect(within(screen.getByRole('columnheader', { name: 'Kuva' })).queryByRole('button')).toBeNull();
   });
 });
+
+// T-090: on phones the rows are restacked with CSS grid; explicit roles keep the table for screen readers,
+// and every game value carries its name for the label shown beside it.
+describe('CardTable phone layout hooks', () => {
+  it('keeps explicit table roles and names the game values', () => {
+    render(<CardTable cards={[c('A', 5)]} onOpenImage={() => {}} />);
+    expect(screen.getByRole('table')).toHaveAttribute('role', 'table');
+    const row = screen.getAllByRole('row')[1];
+    expect(row).toHaveAttribute('role', 'row');
+    const labels = within(row as HTMLElement)
+      .getAllByRole('cell')
+      .map((cell) => cell.getAttribute('data-label'))
+      .filter((label) => label !== null);
+    expect(labels).toEqual(['Cost', 'Power', 'RAM']);
+  });
+});

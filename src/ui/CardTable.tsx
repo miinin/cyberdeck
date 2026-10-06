@@ -33,7 +33,7 @@ type SortState = CardSort;
 function SortHeader({ label, column, sort, onSort, numeric = false }: { label: string; column: SortKey; sort: SortState; onSort: (column: SortKey) => void; numeric?: boolean }) {
   const active = sort.key === column ? sort.direction : null;
   return (
-    <th scope="col" className={numeric ? 'cell-number' : undefined} aria-sort={active === null ? undefined : active === 'asc' ? 'ascending' : 'descending'}>
+    <th scope="col" role="columnheader" className={numeric ? 'cell-number' : undefined} aria-sort={active === null ? undefined : active === 'asc' ? 'ascending' : 'descending'}>
       <button type="button" className="sort-button" onClick={() => onSort(column)}>
         {label}
         {active !== null && <span aria-hidden="true"> {active === 'asc' ? '▲' : '▼'}</span>}
@@ -84,11 +84,12 @@ export function CardTable({
   };
   return (
     <div className="table-scroll" role="region" aria-label={texts.tableRegionLabel(caption)} tabIndex={0}>
-      <table className="card-table">
+      {/* Explicit roles (T-090): on phones the rows are restacked with CSS grid, which drops the native table semantics in some browsers. */}
+      <table className="card-table" role="table">
         <caption className="visually-hidden">{caption}</caption>
-        <thead>
-          <tr>
-            <th scope="col">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th scope="col" role="columnheader">
               <span className="visually-hidden">{texts.columnImage}</span>
             </th>
             <SortHeader label={texts.columnName} column="name" sort={sort} onSort={onSort} />
@@ -97,16 +98,16 @@ export function CardTable({
             <SortHeader label={texts.columnCost} column="cost" sort={sort} onSort={onSort} numeric />
             <SortHeader label={texts.columnPower} column="power" sort={sort} onSort={onSort} numeric />
             <SortHeader label={texts.columnRam} column="ram" sort={sort} onSort={onSort} numeric />
-            {owned !== undefined && <th scope="col">{texts.columnCollection}</th>}
+            {owned !== undefined && <th scope="col" role="columnheader">{texts.columnCollection}</th>}
           </tr>
         </thead>
-        <tbody>
+        <tbody role="rowgroup">
           {rows.map((card) => (
-            <tr key={card.id} className={collectionState(card, owned)} {...hoverProps?.(card)}>
-              <td className="cell-image">
+            <tr key={card.id} role="row" className={collectionState(card, owned)} {...hoverProps?.(card)}>
+              <td role="cell" className="cell-image">
                 <CardImage card={card} onOpen={onOpenImage} artUrl={artUrlOf?.(card) ?? null} />
               </td>
-              <th scope="row" className="cell-name">
+              <th scope="row" role="rowheader" className="cell-name">
                 <button
                   type="button"
                   className="link-button"
@@ -125,7 +126,7 @@ export function CardTable({
                 </button>
                 {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
               </th>
-              <td>
+              <td role="cell" className="cell-type">
                 <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
                   {card.type}
                 </span>
@@ -133,20 +134,20 @@ export function CardTable({
                   , <CardColor color={card.color} />
                 </span>
               </td>
-              <td>
+              <td role="cell" className="cell-rarity">
                 <RarityCell rarity={rarityOf?.(card) ?? card.rarity} />
               </td>
-              <td className="cell-number">
+              <td role="cell" className="cell-number" data-label={texts.columnCost}>
                 <Value value={card.cost} missing={texts.noCost} />
               </td>
-              <td className="cell-number">
+              <td role="cell" className="cell-number" data-label={texts.columnPower}>
                 <Value value={card.power} missing={texts.noPower} />
               </td>
-              <td className="cell-number">
+              <td role="cell" className="cell-number" data-label={texts.columnRam}>
                 <Value value={card.ram} missing={texts.noRam} />
               </td>
               {owned !== undefined && (
-                <td className="cell-collection">
+                <td role="cell" className="cell-collection">
                   <CountControl
                     card={card}
                     count={owned.countOf(card)}

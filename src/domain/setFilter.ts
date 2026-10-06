@@ -2,6 +2,7 @@ import type { Card } from './card';
 import type { Collection } from './collection';
 import { versionsOf } from './collection';
 import { setFamilyName, setFilterId } from './printing';
+import type { Printing } from './printing';
 
 /** "sets" = the two Welcome to Night City sets (D-022); "other" = starter decks, promos, tournaments and the like. */
 export type SetGroup = 'sets' | 'other';
@@ -27,6 +28,11 @@ export function setOptions(cards: readonly Card[]): SetOption[] {
   const options = [...seen].map(([family, label]): SetOption => ({ family, label, group: SET_ORDER.includes(family) ? 'sets' : 'other' }));
   const sets = SET_ORDER.flatMap((id) => options.filter((option) => option.family === id));
   return [...sets, ...options.filter((option) => option.group === 'other')];
+}
+
+/** Is the printing in one of the actual sets (D-022), not a starter deck, promo or prize? */
+export function isMainSetPrinting(printing: Printing): boolean {
+  return SET_ORDER.includes(setFilterId(printing));
 }
 
 /** Does the card have a printing in this set (filter id)? */
