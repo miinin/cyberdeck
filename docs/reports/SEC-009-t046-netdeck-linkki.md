@@ -28,7 +28,7 @@ Ei Critical- eikä High-löydöksiä. Löydökset: 2 × Low, 1 × Info. Ei estä
 **Odotettu:** luku keskeytyy 512 kt:n kohdalla · **Havaittu:** luku jatkuu, kunnes runko loppuu tai 10 s aikakatkaisu laukeaa.
 **Vaikutus:** vain Netdeckin (tai sen kaappaajan) hallitsema vastaus voi kuormittaa käyttäjän oman välilehden muistia enintään 10 sekunnin ajan. Ei tietovuotoa. Koodari tunnisti rajoitteen luovutuksessa.
 **Korjausehdotus:** lue `response.body.getReader()`-silmukassa ja peruuta (`reader.cancel()`, `controller.abort()`), kun luettu määrä ylittää rajan. Voidaan kirjata `[velka]`-tehtäväksi.
-**Tila:** Avoin
+**Tila:** Korjattu (T-047)
 
 ### SEC-024 · Tunnistamattoman rivin `card.id` näytetään siivoamatta · Low
 **Sijainti:** src/domain/netdeckDeck.ts `netdeckToParsedDeck` (label `row.id`, kun `card.name` puuttuu) · **Tehtävä:** T-046
@@ -36,7 +36,7 @@ Ei Critical- eikä High-löydöksiä. Löydökset: 2 × Low, 1 × Info. Ei estä
 **Odotettu:** näytettävä teksti siivottu kuten muut nimet (`cleanText`) · **Havaittu:** id validoidaan vain tyypin ja pituuden (≤ 64) osalta.
 **Vaikutus:** kosmeettinen tekstin harhautus (bidi-ohjausmerkit) raporttinäkymässä. Ei XSS:ää, koska renderöinti on tekstinä, ja teksti on katkaistu 100 merkkiin. Id:tä ei tallenneta.
 **Korjausehdotus:** validoi `card.id` tiukasti (esim. `/^[0-9A-Za-z-]{1,64}$/`) ja hylkää vastaus muuten, tai käytä labelissa `cleanText(row.id, 1, 64) ?? '?'`.
-**Tila:** Avoin
+**Tila:** Korjattu (T-047)
 
 ### SEC-025 · Netdeck näkee käyttäjän IP-osoitteen ja Originin linkkihaussa · Info
 **Sijainti:** src/netdeck/fetchNetdeckDeck.ts, firebase.json (CSP) · **Tehtävä:** T-046
