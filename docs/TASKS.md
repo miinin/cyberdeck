@@ -106,3 +106,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-101 | Painoksen varmistus kokoelmaan lisätessä, pakkaeditorin ongelmamerkinnät, Legend-tekstit, Sideboard Pinot-näkymään, hillitympi Gear-väri | 1 | Should | PM → Koodari | Review | PM esikatselu |
 | T-102 | Proxy-tulostus: valitut kortit A4-arkeille oikeassa koossa (63 × 88 mm, 3 × 3), tulostus selaimesta | 1 | Should | PM → Koodari | Review | – |
 | T-103 | Pakkaeditori 2: myytävien suositus 55–60 %, laittomaksi tekevät kortit näkyviin, Legendit osioksi, pinot värin ja tyypin mukaan | 1 | Should | PM → Koodari | Katselmoitavana | – |
+| T-104 | Proxy-näkymän uudelleensuunnittelu: valinta vasemmalla, sticky-tulostusarkki oikealla, lento-animaatio, tiivis ohje | 1 | Should | Koodari | Review | PM esikatselu |

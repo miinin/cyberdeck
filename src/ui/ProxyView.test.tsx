@@ -43,11 +43,15 @@ describe('Proxy section (T-102)', () => {
     document.body.classList.remove('is-proxy-view');
   });
 
-  it('shows the heading, the disclaimer, the empty queue and the nav link as the current page', async () => {
+  it('shows the heading, the three steps, the disclaimer, the empty sheet and the nav link as the current page', async () => {
     await renderProxy();
-    expect(screen.getByRole('heading', { level: 1, name: 'Proxy-tulostus' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Proxy' })).toBeInTheDocument();
+    const steps = within(screen.getByRole('list', { name: 'Näin se toimii' })).getAllByRole('listitem');
+    expect(steps.map((step) => step.textContent)).toEqual(['Valitse kortit', 'Tarkista arkki', 'Tulosta 100 % koossa']);
     expect(screen.getByText('Vain henkilökohtaiseen testikäyttöön, ei myyntiin eikä turnauksiin.')).toBeInTheDocument();
-    expect(screen.getByText(/Jono on tyhjä/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Tulostusarkki' })).toBeInTheDocument();
+    expect(screen.getByText('Arkki on tyhjä. Lisää kortteja valinnasta.')).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Arkin sivut' })).not.toBeInTheDocument();
     expect(screen.getByText('0 korttia · 0 arkkia')).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: /päävalikko|sivut|valikko/i });
     expect(within(nav).getByRole('link', { name: 'Proxy' })).toHaveAttribute('aria-current', 'page');
@@ -64,8 +68,9 @@ describe('Proxy section (T-102)', () => {
     expect(screen.getByText('2 korttia · 1 arkki')).toBeInTheDocument();
     const sheet = screen.getByRole('region', { name: 'Arkki 1/1' });
     expect(within(sheet).getAllByText('Alpha')).toHaveLength(2);
-    expect(screen.getByRole('list', { name: 'Tulostusjonon kortit' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tulosta' })).toBeEnabled();
+    // The mobile bar shows the same count.
+    expect(screen.getByText('Arkki: 2 korttia · 1 arkki')).toBeInTheDocument();
     // The collection and the want list are not touched.
     expect((await repositories.collection.load()).value.entries).toEqual([]);
     expect((await repositories.wants.load()).value.entries).toEqual([]);
@@ -75,10 +80,62 @@ describe('Proxy section (T-102)', () => {
     const user = userEvent.setup();
     const repositories = await renderProxy(storedProxy([['alpha', 1]]));
     expect(screen.getByText('1 kortti · 1 arkki')).toBeInTheDocument();
-    const queued = screen.getByRole('list', { name: 'Tulostusjonon kortit' });
-    await user.click(within(queued).getByRole('button', { name: 'Poista jonosta yksi kappale: Alpha' }));
+    const picker = screen.getByRole('list', { name: 'Lisättävät kortit' });
+    await user.click(within(picker).getByRole('button', { name: 'Poista jonosta yksi kappale: Alpha' }));
     await waitFor(async () => expect(await queueRows(repositories)).toEqual([]));
     expect(screen.getByText('0 korttia · 0 arkkia')).toBeInTheDocument();
+  });
+
+  it('adds a copy with a click on the picture and removes one with the × on the sheet', async () => {
+    const user = userEvent.setup();
+    const repositories = await renderProxy();
+    const picker = within(screen.getByRole('list', { name: 'Lisättävät kortit' }));
+    // No picture in the test data: the picture button is only there for cards that have one, the plus button always.
+    await user.click(add('Beta'));
+    await user.click(add('Beta'));
+    await waitFor(async () => expect(await queueRows(repositories)).toEqual([{ card: 'beta', count: 2 }]));
+    const sheet = screen.getByRole('region', { name: 'Arkki 1/1' });
+    await user.click(within(sheet).getAllByRole('button', { name: 'Poista arkilta: Beta' })[0] as HTMLElement);
+    await waitFor(async () => expect(await queueRows(repositories)).toEqual([{ card: 'beta', count: 1 }]));
+    expect(screen.getByText('1 kortti · 1 arkki')).toBeInTheDocument();
+    expect(within(sheet).getAllByRole('button', { name: 'Poista arkilta: Beta' })).toHaveLength(1);
+    expect(picker.getByRole('button', { name: 'Poista jonosta yksi kappale: Beta' })).toBeInTheDocument();
+  });
+
+  it('pages the sheets, shows the page of a new copy and falls back when a page disappears', async () => {
+    const user = userEvent.setup();
+    const repositories = await renderProxy(storedProxy([['alpha', 9], ['beta', 1]]));
+    const pager = screen.getByRole('group', { name: 'Arkin sivut' });
+    expect(within(pager).getByText('Arkki 1/2')).toBeInTheDocument();
+    expect(within(pager).getByRole('button', { name: 'Edellinen arkki' })).toBeDisabled();
+    await user.click(within(pager).getByRole('button', { name: 'Seuraava arkki' }));
+    expect(within(pager).getByText('Arkki 2/2')).toBeInTheDocument();
+    expect(within(pager).getByRole('button', { name: 'Seuraava arkki' })).toBeDisabled();
+    expect(screen.getByRole('region', { name: 'Arkki 1/2' })).not.toHaveClass('is-current');
+    expect(screen.getByRole('region', { name: 'Arkki 2/2' })).toHaveClass('is-current');
+    // A new copy lands on page 2 (the tenth place is free there), and the pager follows it from page 1.
+    await user.click(within(pager).getByRole('button', { name: 'Edellinen arkki' }));
+    await user.click(add('Gamma Ray'));
+    await waitFor(() => expect(within(pager).getByText('Arkki 2/2')).toBeInTheDocument());
+    expect(screen.getByRole('region', { name: 'Arkki 2/2' })).toHaveClass('is-current');
+    // Removing the copies of page 2 leaves page 1.
+    const second = screen.getByRole('region', { name: 'Arkki 2/2' });
+    await user.click(within(second).getByRole('button', { name: 'Poista arkilta: Gamma Ray' }));
+    await user.click(within(second).getByRole('button', { name: 'Poista arkilta: Beta' }));
+    await waitFor(async () => expect(await queueRows(repositories)).toEqual([{ card: 'alpha', count: 9 }]));
+    expect(screen.queryByRole('group', { name: 'Arkin sivut' })).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Arkki 1/1' })).toHaveClass('is-current');
+  });
+
+  it('has the bar that leads to the sheet on a narrow window', async () => {
+    const user = userEvent.setup();
+    const scroll = vi.fn();
+    Element.prototype.scrollIntoView = scroll;
+    await renderProxy(storedProxy([['alpha', 11]]));
+    expect(screen.getByText('Arkki: 11 korttia · 2 arkkia')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Näytä arkki' }));
+    expect(scroll).toHaveBeenCalled();
+    expect(screen.getByRole('heading', { level: 2, name: 'Tulostusarkki' })).toHaveFocus();
   });
 
   it('keeps the queue over a reload (new view, same storage) and starts a new sheet after nine cards', async () => {
