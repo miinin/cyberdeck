@@ -44,6 +44,8 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-084–T-094 (2026-10-05–06): ei nykimistä, gitleaks (D-023), hostingin kovennus, mobiilikorjaukset 1–4 (tietonäkymä, Lista), esikatselukanavien kiintiö, sideboard-rivit ja kelluva sääntöilmoitus (T-092), pakan tilastot uusiksi (T-093), dokumentaatio (T-094).
+- T-047 Netdeck-kovennus (oma PR, valmistuu rinnakkain)
 - T-053 Pakan tilastot ja testikäsi (2026-10-03, PR #25)
 - T-052 Kelluva esikatselu, isommat kuvat, Cost/Power/RAM-suodattimet (2026-10-03, PR #24)
 - T-051 Pakat-sivu ja tuontiraportti (2026-10-03, PR #22)
@@ -75,10 +77,11 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - T-000 Projektin alustus ja julkaisuputki (2026-09-30)
 
 ## Seuraavaksi (PM:n priorisointi)
-1. T-050 ja T-051 julkaistu 2026-10-03. T-052 ja T-053 julkaistu 2026-10-03. Seuraavaksi käyttäjän palaute uudistuksesta; velat T-047, T-042, T-043, T-030, T-031.
-2. Käyttäjä 2026-10-02: MVP-1:n loppukatselmoinnit (UX, Sisällöntuottaja, Testikäyttäjä, Dokumentoija) eivät ole vielä ajankohtaisia, joten ne siirretään myöhemmäksi.
-3. Velat: T-047, T-041 (DeckEditorin pilkkominen), T-042, T-043, T-030, T-031.
-4. Backlogissa T-002–T-009 (velka ja parannukset). T-003 on peruttu (korvattu T-026:lla). T-004 on nostettu Must-tasolle (testit CI:hin).
+1. UX- ja Testikäyttäjä-katselmointi mobiilista.
+2. T-008 virhetilanteet.
+3. T-023 iso tekstikoko.
+4. Firebase-API-avaimen rajaus Cloud Consolessa (käyttäjä).
+5. Puuttuvat versiokuvat (79 kpl).
 
 **Tokenien säästö (käyttäjä 2026-10-02):** tokenit kuluvat nopeasti, ja käyttöraja katkaisi kaksi rinnakkaista Koodaria. Aja yksi agentti kerrallaan, pidä tehtävänannot lyhyinä ja tyhjennä istunto (`/clear`) tehtävien välissä.
 
