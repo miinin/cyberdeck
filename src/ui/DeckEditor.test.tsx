@@ -121,6 +121,12 @@ describe('Deck editor', () => {
     await waitFor(async () => expect((await repositories.decks.get('a'))?.name).toBe('Uusi nimi'));
   });
 
+  // SEC-007 (T-043): the field stops at the same 100 characters the domain allows.
+  it('limits the name field to 100 characters', async () => {
+    openEditor([]);
+    expect(await screen.findByLabelText('Pakan nimi')).toHaveAttribute('maxlength', '100');
+  });
+
   it('shows a save error and retries', async () => {
     const user = userEvent.setup();
     const repositories = openEditor([]);
