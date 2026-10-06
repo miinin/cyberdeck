@@ -1,0 +1,23 @@
+# Gitleaks (D-023): the default rules plus the known non-secrets of this repo.
+title = "cyberdeck"
+
+[extend]
+useDefault = true
+
+# Firebase web config keys are public by design: they ship in the bundle (T-054). Restricting them is T-009.
+[[allowlists]]
+description = "Firebase web API keys (public)"
+regexTarget = "match"
+regexes = [
+  '''AIzaSyDulWCXsbWoRQG58MaUqypk2Mycf6X7KN4''',
+  '''AIzaSyDyvDT1RKZy2QmRxKgCzk9Jm-y6aDunIVs''',
+]
+
+# Card image keys ("minotaur__night-city-...") look like keys to the generic rule; they are identifiers.
+[[allowlists]]
+description = "Card image keys in the card data"
+condition = "AND"
+targetRules = ["generic-api-key"]
+regexTarget = "line"
+regexes = ['''"imageKey":\s*"[a-z0-9_-]+"''']
+paths = ['''(^|/)src/data/cards\.json$''']

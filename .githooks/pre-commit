@@ -1,0 +1,21 @@
+#!/bin/sh
+# Gitleaks scans the staged changes before every commit (D-023). No skipping: a missing gitleaks stops the commit.
+GITLEAKS=$(command -v gitleaks)
+
+# winget on Windows: the shell started before the install may not have it on PATH yet.
+if [ -z "$GITLEAKS" ] && [ -n "$LOCALAPPDATA" ] && command -v cygpath >/dev/null 2>&1; then
+  winget_dir="$(cygpath -u "$LOCALAPPDATA")/Microsoft/WinGet"
+  for candidate in "$winget_dir"/Links/gitleaks.exe "$winget_dir"/Packages/Gitleaks.Gitleaks_*/gitleaks.exe; do
+    if [ -x "$candidate" ]; then
+      GITLEAKS=$candidate
+      break
+    fi
+  done
+fi
+
+if [ -z "$GITLEAKS" ]; then
+  echo "pre-commit: gitleaks puuttuu. Asenna: winget install Gitleaks.Gitleaks (macOS: brew install gitleaks)." >&2
+  exit 1
+fi
+
+exec "$GITLEAKS" git --pre-commit --staged --redact --no-banner --verbose .
