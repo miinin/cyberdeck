@@ -15,6 +15,19 @@ describe('firebase.json hosting headers', () => {
     expect(prod?.headers).toBeDefined();
     expect(test?.headers).toEqual(prod?.headers);
   });
+
+  // B-004: no SPA rewrite (routes are hash routes), so a missing /assets/ file is a 404, not index.html.
+  it('serves files only, no rewrites', () => {
+    for (const site of sites) expect('rewrites' in site).toBe(false);
+  });
+
+  // SEC-011: index.html is revalidated on every load, so a deploy reaches open browsers on the next load.
+  it('sends Cache-Control: no-cache for the page', () => {
+    for (const site of sites) {
+      const rule = site.headers.find((r) => r.regex !== undefined && new RegExp(r.regex).test('/') && new RegExp(r.regex).test('/index.html'));
+      expect(rule?.headers).toEqual([{ key: 'Cache-Control', value: 'no-cache' }]);
+    }
+  });
 });
 
 /** Parses the CSP of a site into directive → sources. */
@@ -79,7 +92,11 @@ describe('firebase.json Content-Security-Policy', () => {
 
   it('adds no header rules for the reserved /__/ paths', () => {
     for (const site of firebaseConfig.hosting) {
-      expect(site.headers.map((rule) => rule.source).filter((source) => source.startsWith('/__'))).toEqual([]);
+      const sources = site.headers.flatMap((rule) => (rule.source === undefined ? [] : [rule.source]));
+      expect(sources.filter((source) => source.startsWith('/__'))).toEqual([]);
+      // A regex rule must not reach them either (T-086: index.html no-cache).
+      const regexes = site.headers.flatMap((rule) => (rule.regex === undefined ? [] : [new RegExp(rule.regex)]));
+      expect(regexes.filter((regex) => regex.test('/__/auth/handler') || regex.test('/__/firebase/init.json'))).toEqual([]);
     }
   });
 });
