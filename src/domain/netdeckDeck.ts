@@ -99,7 +99,8 @@ export function netdeckToParsedDeck(deck: NetdeckDeck, cards: readonly Card[]): 
   for (const row of deck.rows) {
     const card = byId.get(row.id) ?? (row.name === null ? undefined : byKey.get(cardKey(row.name, row.subname)));
     if (card === undefined) {
-      const label = row.name === null ? row.id : row.subname === null ? row.name : `${row.name} - ${row.subname}`;
+      // The id is shown only when there is no name; cleaned like every other text (SEC-024, T-047).
+      const label = row.name === null ? (cleanText(row.id, 1, 64) ?? '?') : row.subname === null ? row.name : `${row.name} - ${row.subname}`;
       unrecognized.push(shortened(`${row.quantity} ${label}${row.zone === 'sideboard' ? ' (sideboard)' : ''}`));
       continue;
     }

@@ -39,6 +39,29 @@ describe('fetchNetdeckDeck', () => {
     expect(await kindOf(fetchNetdeckDeck(UUID, { fetchFn: byText }))).toBe('too-large');
   });
 
+  // SEC-023 (T-047): a body without Content-Length is read in pieces and cancelled at the limit, not read to the end.
+  it('stops reading an endless body at the limit and cancels it', async () => {
+    const chunk = new TextEncoder().encode(' '.repeat(64 * 1024));
+    let pulls = 0;
+    let cancelled = false;
+    const endless = async () =>
+      new Response(
+        new ReadableStream<Uint8Array>({
+          pull(controller) {
+            pulls += 1;
+            controller.enqueue(chunk);
+          },
+          cancel() {
+            cancelled = true;
+          },
+        }),
+      );
+    expect(await kindOf(fetchNetdeckDeck(UUID, { fetchFn: endless }))).toBe('too-large');
+    expect(cancelled).toBe(true);
+    // 512 kt / 64 kt = 8 pieces; the ninth passes the limit. A few more may be buffered ahead, never hundreds.
+    expect(pulls).toBeLessThan(20);
+  });
+
   it('times out', async () => {
     const hanging = vi.fn<typeof fetch>(
       (_input, init) =>
