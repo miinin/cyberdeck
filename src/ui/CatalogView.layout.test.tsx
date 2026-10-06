@@ -87,6 +87,26 @@ describe('CatalogView layout (T-050a)', () => {
     expect(screen.queryByRole('group', { name: 'Tyyppi' })).not.toBeInTheDocument();
   });
 
+  // T-087: on a phone the results are one tap away, not a long scroll past the open panel.
+  it('narrow: "Näytä N korttia" closes the panel, returns focus to the toggle and goes to the results', async () => {
+    stubWidth(false);
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    const user = userEvent.setup();
+    renderView();
+    const toggle = screen.getByRole('button', { name: 'Suodattimet' });
+    expect(screen.queryByRole('button', { name: /^Näytä/ })).not.toBeInTheDocument();
+
+    await user.click(toggle);
+    await user.click(screen.getByRole('checkbox', { name: 'Unit' }));
+    const units = cards.filter((card) => card.type === 'Unit').length;
+    await user.click(screen.getByRole('button', { name: units === 1 ? 'Näytä 1 kortti' : `Näytä ${units} korttia` }));
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveFocus();
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+  });
+
   it('shows a chip per selection; removing one moves focus to the next chip, the last one to the search field', async () => {
     stubWidth(true);
     const user = userEvent.setup();

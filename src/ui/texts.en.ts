@@ -167,6 +167,7 @@ export const textsEn: typeof textsFi = {
   clearFilters: 'Clear search and filters',
   filtersHeading: 'Filters',
   filtersToggle: (selected: number) => (selected === 0 ? 'Filters' : `Filters (${selected})`),
+  showResults: (n: number) => (n === 1 ? 'Show 1 card' : `Show ${n.toLocaleString('en-GB')} cards`),
   resultsHeading: 'Results',
   activeFilters: 'Selected filters',
   removeFilter: (value: string) => `Remove filter: ${value}`,

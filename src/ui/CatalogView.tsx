@@ -694,6 +694,7 @@ export function CatalogView({
               announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))
             }
             collapsibleBelow={WIDE_QUERY}
+            results={{ count: filtered.length, id: 'active-filters' }}
           />
         </section>
 

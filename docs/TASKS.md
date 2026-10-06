@@ -22,7 +22,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-015 | Pakan vienti ja tuonti .json- ja .txt-muodossa (varmuuskopio ja jakaminen, SR-18–SR-19) | 1 | Must | Koodari | Done | Arkkitehti, Digiturva, UX, Testikäyttäjä |
 | T-016 | [velka] `.claude/**` pois Vitestin ja ESLintin piiristä, valinnaisesti SEC-009 ja SEC-010 (document.cookie lintiin) | 1 | Should | Koodari | Backlog | – |
 | T-017 | [velka] `api/mapCard.ts`:n apufunktiot `domain/validate.ts`:stä (T-011:n koodikatselmoinnin suositus) | 1 | Could | Koodari | Backlog | – |
-| T-018 | Mobiilin kompakti suodatinlomake: tulos näkyviin pienellä näytöllä (B-011, UX-006), sarakkeiden rivitys (UX-003, B-002) | 2 | Should | Koodari | Backlog | UX |
+| T-018 | Mobiilin kompakti suodatinlomake: tulos näkyviin pienellä näytöllä (B-011, UX-006), sarakkeiden rivitys (UX-003, B-002) | 2 | Should | Koodari | Done (T-050, T-087) | UX |
 | T-019 | [velka] Kokoelman määrämuutos renderöi koko taulukon: mittaa ja tarvittaessa `memo` (T-012:n koodikatselmoinnin suositus) | 1 | Could | Koodari | Backlog | – |
 | T-020 | [velka] Painallussarjan osittain onnistunut tallennus kerrotaan ruudunlukijalle virheen lisäksi (T-012:n koodikatselmoinnin suositus) | 2 | Could | Koodari | Backlog | UX |
 | T-021 | Ulkoasu: Cyberpunk 2077 -henkinen visuaalinen ilme, käytettävyys ensin (D-010) | 1 | Must | UX → Koodari | Done | UX (Digiturva vain firebase.jsonin tai riippuvuuksien muuttuessa) |
@@ -90,3 +90,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-084 | Ei nykimistä: vierityspalkin tila varattu, valittujen suodattimien rivi pitää korkeutensa, korttilaatikoiden tyyppirivi samalla korkeudella | 1 | Should | PM | Done | PM esikatselu ✓ |
 | T-085 | Gitleaks käyttöön: pre-commit-hook (`.githooks/`, `prepare`-skripti), `.gitleaks.toml`-poikkeukset, historian skannaus (D-023) | 1 | Must | PM | Done | PM testi: estää vuotavan commitin ✓ |
 | T-086 | Siivous ja hostingin kovennus (T-009:stä): TASKS-tilat ajan tasalle, `index.html` `Cache-Control: no-cache`, SPA-rewrite pois (puuttuva asset = 404, B-004), noscript | 1 | Should | PM | Done | Digiturva |
+| T-087 | Mobiili: yläpalkki kahdelle riville, suodatinpaneelin loppuun "Näytä N korttia" (sulkee paneelin ja vie tuloksiin), työkalurivin kytkin vasempaan reunaan | 1 | Should | PM | Done | PM mobiilikuvat ✓ |

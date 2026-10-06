@@ -5230,3 +5230,33 @@ section[aria-labelledby='have-heading'] {
 .edition-select .options {
   flex-wrap: wrap;
 }
+
+/*
+ * Phone layout (T-087). Header: logo and the icon tools on the first row, the navigation on the second
+ * (was three rows). Toolbar: the edit switch starts its own row from the left instead of hanging alone on the right.
+ */
+@media (max-width: 39.99rem) {
+  .site-header .main-nav {
+    order: 1;
+    flex-basis: 100%;
+  }
+
+  .site-header .main-nav a:first-child {
+    padding-inline-start: 0;
+  }
+
+  .list-toolbar .edit-switch {
+    margin-inline-start: 0;
+  }
+}
+
+/* "Näytä N korttia" at the end of the collapsed filter panel (T-087). */
+.filter-show-results {
+  width: 100%;
+  margin-block-start: var(--space-4);
+}
+
+/* The results scroll target sits below the page edge, not under it. */
+#active-filters {
+  scroll-margin-top: var(--space-4);
+}
