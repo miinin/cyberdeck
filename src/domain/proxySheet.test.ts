@@ -7,6 +7,7 @@ import {
   gridOrigin,
   layoutSheets,
   MAX_PROXY_CARDS,
+  parseProxyQueue,
   queueCopies,
   queueTotal,
   sheetCount,
@@ -121,6 +122,21 @@ describe('queueCopies', () => {
 
   it('skips cards the data does not know', () => {
     expect(queueCopies({ entries: [{ card: 'unknown-card', count: 3 }] }, BY_KEY, NO_ART)).toEqual([]);
+  });
+});
+
+describe('queue limits (SEC-102-1)', () => {
+  it('stops expanding at the copy limit', () => {
+    const queue = { entries: [{ card: 'detonate', count: 999 }] };
+    expect(queueCopies(queue, BY_KEY, NO_ART)).toHaveLength(MAX_PROXY_CARDS);
+  });
+
+  it('drops stored rows over the limit', () => {
+    const raw = { entries: [{ card: 'alpha', count: 150 }, { card: 'beta', count: 60 }, { card: 'delta', count: 500 }, { card: 'gamma', count: 50 }] };
+    const parsed = parseProxyQueue(raw);
+    expect(parsed?.value.entries).toEqual([{ card: 'alpha', count: 150 }, { card: 'gamma', count: 50 }]);
+    expect(parsed?.dropped).toBe(2);
+    expect(parseProxyQueue('x')).toBeNull();
   });
 });
 

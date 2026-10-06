@@ -16,6 +16,7 @@ import {
   withCount,
 } from '../domain/collection';
 import { isPrintingKey } from '../domain/printing';
+import { parseProxyQueue } from '../domain/proxySheet';
 import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
 import type { PrintingKey } from '../domain/printing';
@@ -183,7 +184,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const proxyAggregate: Aggregate<Collection> = {
     name: 'proxy',
     key: proxyKey,
-    spec: specWith(PROXY_SCHEMA_VERSION, PROXY_MIGRATIONS, options.migrations?.proxy, parseCollection),
+    spec: specWith(PROXY_SCHEMA_VERSION, PROXY_MIGRATIONS, options.migrations?.proxy, parseProxyQueue),
     empty: EMPTY_COLLECTION,
     toData: (queue) => ({ entries: queue.entries }),
   };

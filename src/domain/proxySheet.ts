@@ -3,7 +3,9 @@ import { isCardKey } from './cardKey';
 import type { CardKey } from './cardKey';
 import { artsOf, ownedPerArt } from './arts';
 import { countOf, MAX_COLLECTION_COUNT, MAX_COLLECTION_ENTRIES, withCount } from './collection';
-import type { Collection } from './collection';
+import type { Collection, CollectionEntry } from './collection';
+import { parseCollection } from './validate';
+import type { Parsed } from './validate';
 
 /*
  * Proxy sheets (T-102): the print queue laid out on A4 sheets, 3 x 3 cards of 63 x 88 mm. Pure functions only;
@@ -142,20 +144,42 @@ export function queueCopies(
 ): ProxyCopy[] {
   const copies: ProxyCopy[] = [];
   for (const entry of queue.entries) {
+    if (copies.length >= MAX_PROXY_CARDS) break;
     const card = cardsByKey.get(entry.card);
     if (card === undefined) continue;
     const arts = artsOf(card, (key, rarity) => artUrlOf(key, rarity) !== null);
     if (arts.length === 0) {
-      for (let i = 0; i < entry.count; i += 1) copies.push({ key: card.key, name: card.displayName, artUrl: null });
+      for (let i = 0; i < entry.count && copies.length < MAX_PROXY_CARDS; i += 1) copies.push({ key: card.key, name: card.displayName, artUrl: null });
       continue;
     }
     const perArt = ownedPerArt(entry, card, arts);
     for (const art of arts) {
       const url = art.rarity === null ? null : artUrlOf(card.key, art.rarity);
-      for (let i = 0; i < (perArt.get(art.artId) ?? 0); i += 1) copies.push({ key: card.key, name: card.displayName, artUrl: url });
+      for (let i = 0; i < (perArt.get(art.artId) ?? 0) && copies.length < MAX_PROXY_CARDS; i += 1) copies.push({ key: card.key, name: card.displayName, artUrl: url });
     }
   }
   return copies;
+}
+
+/**
+ * Reads a stored queue (SEC-102-1): the collection's validation, then the queue's own limit. A row over
+ * MAX_PROXY_CARDS copies is dropped, and rows are kept only while the total stays within the limit.
+ */
+export function parseProxyQueue(raw: unknown): Parsed<Collection> | null {
+  const parsed = parseCollection(raw);
+  if (parsed === null) return null;
+  let dropped = parsed.dropped;
+  let total = 0;
+  const entries: CollectionEntry[] = [];
+  for (const entry of parsed.value.entries) {
+    if (entry.count > MAX_PROXY_CARDS || total + entry.count > MAX_PROXY_CARDS) {
+      dropped += 1;
+      continue;
+    }
+    total += entry.count;
+    entries.push(entry);
+  }
+  return { value: { entries }, dropped };
 }
 
 export interface QueueRow {
