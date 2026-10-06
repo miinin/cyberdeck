@@ -88,3 +88,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-082 | Versiokorjaukset (symboli seuraa versiota, kaikki versiot näkyvät, Rebecca), settikyltit, Kuvat/Lista, puuttuvien lisäys varmistuksella, uudet harvinaisuussymbolit, favicon-kulma, Myytävä-suodatin, harvinaisuudet 2 sarakkeessa | 1 | Must | PM | Done | – |
 | T-083 | Setit ja muut tuotteet erikseen, Beta/Retail-painos kokoelmassa, olemassa olevat kortit Betaksi (D-022), versionimi pois kuvan alta | 1 | Must | PM | Done | Digiturva ✓ |
 | T-084 | Ei nykimistä: vierityspalkin tila varattu, valittujen suodattimien rivi pitää korkeutensa, korttilaatikoiden tyyppirivi samalla korkeudella | 1 | Should | PM | Done | PM esikatselu ✓ |
+| T-085 | Gitleaks käyttöön: pre-commit-hook (`.githooks/`, `prepare`-skripti), `.gitleaks.toml`-poikkeukset, historian skannaus (D-023) | 1 | Must | PM | Done | PM testi: estää vuotavan commitin ✓ |

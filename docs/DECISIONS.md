@@ -514,3 +514,13 @@ Päätöksessä on viisi osaa.
 3. **Tietonäkymän perusversio:** perusversion ruudussa on WtNC-korteille suoraan erilliset laskurit Retail ja Beta. Muut painokset ovat Erittely-kohdassa.
 4. **Kertaluonteinen muunnos:** kokoelman schemaVersion nousee 2 → 3. Muunnoksessa jokaisen kortin versioimaton osuus (count − versioiden summa) kirjataan kortin Beta-painokselle (`welcometonightcitybeta:<numero>`, perusharvinaisuus), jos sellainen on. Muuten osuus jää versioimattomaksi. Muunnos ei muuta kokonaismääriä, ja se tehdään sekä paikalliselle että pilvestä luetulle datalle. Want-lista ei muutu. Vanha sovellusversio lukitsee synkan (newer), eikä se kirjoita erittelyä pois.
 **Seuraukset:** Pakat, want ja vaihto pysyvät korttitasolla. Digiturva katselmoi muunnoksen ennen tuotantoa.
+
+## D-023 · Gitleaks pre-commit-hookina · 2026-10-06 · Päättäjä: käyttäjä, PM
+**Tila:** Hyväksytty. Tehtävä T-085.
+**Konteksti:** Käyttäjä haluaa gitleaksin käyttöön niin, että se ajetaan aina ennen committia. Sääntö "ei salaisuuksia repoon" oli tähän asti vain ohje.
+**Päätös:**
+1. **Hook ilman npm-riippuvuutta:** hook on repossa (`.githooks/pre-commit`), ja `npm install`/`npm ci` ottaa sen käyttöön `prepare`-skriptillä (`git config core.hooksPath .githooks`). Huskya ei otettu, koska se olisi uusi riippuvuus samaan tehtävään.
+2. **Mitä hook tekee:** se ajaa `gitleaks git --pre-commit --staged` eli tarkistaa vain commitoitavat muutokset. Jos gitleaks puuttuu, commit estyy, joten tarkistus ei ohitu huomaamatta. Gitleaks asennetaan koneelle erikseen (winget tai brew), eikä sitä ole npm-paketeissa.
+3. **Poikkeukset (`.gitleaks.toml`):** oletussäännöt ovat käytössä. Sallittuja ovat Firebasen web-API-avaimet, jotka ovat julkisia ja tuotantobundlessa (rajaus tehdään T-009:ssä), sekä `cards.json`:n `imageKey`-kentät, jotka ovat tunnisteita. Uusi poikkeus vaatii perustelun tiedostoon.
+4. **Historia:** koko historia (327 committia) skannattiin käyttöönotossa. Löydetyt 24 osumaa olivat kaikki edellä mainittuja ei-salaisuuksia. Oikeita vuotoja ei löytynyt.
+**Seuraukset:** `git commit --no-verify` ohittaa hookin. Jos tarvitaan pakottava tarkistus, gitleaks lisätään CI:hin (workflow-muutos, Digiturva).
