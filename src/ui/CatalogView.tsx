@@ -9,7 +9,7 @@ import { artRarity, artsOf, entryChanges, matchedSpecialRarity, ownedPerArt, set
 import type { Art } from '../domain/arts';
 import { setFilterId } from '../domain/printing';
 import { variantImageUrl } from '../data/variantImages';
-import { hasSetPrinting, ownsSetVersion, setOptions, versionsBySet } from '../domain/setFilter';
+import { hasSetPrinting, ownsSetVersion, setOptions } from '../domain/setFilter';
 import type { MissingRow } from '../domain/wants';
 import { StorageError, isStoragePersisted, requestPersistentStorage } from '../storage';
 import type { CatalogViewMode, DefaultEdition, Repositories } from '../storage';
@@ -458,9 +458,6 @@ export function CatalogView({
   const setList = useMemo(() => setOptions(allCards), [allCards]);
   const setLabels = new Map(setList.map((option) => [option.family, option.label]));
   const setGroups = new Map(setList.map((option) => [option.family, option.group]));
-  const versionRows = collection.phase === 'ready' ? versionsBySet(allCards, collection.saved) : [];
-  const versionsText =
-    versionRows.length === 0 ? null : texts.versionsSummary(versionRows.map((r) => `${r.label}: ${r.count}`).join(' · '));
 
   const status = filterActive ? texts.filteredStatus(filtered.length, allCards.length) : cardCount(allCards.length);
   const listCaption = filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
@@ -601,11 +598,6 @@ export function CatalogView({
           <p id="card-status" className="status-line">
             {status}
           </p>
-          {versionsText !== null && (
-            <p id="versions-summary" className="status-line is-summary">
-              {versionsText}
-            </p>
-          )}
           {summary !== null && (
             <p id="collection-summary" className="status-line is-summary">
               {summary}

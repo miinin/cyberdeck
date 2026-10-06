@@ -847,7 +847,8 @@ describe('CatalogView: set filter and version summary (T-074)', () => {
       }),
     };
     const { container } = await renderView(createMemoryRepositories({ initial }), list);
-    expect(container.querySelector('#versions-summary')).toHaveTextContent('Kirjatut versiot: Welcome to Night City (Beta): 2');
+    // T-097: no per-set version line in the page head.
+    expect(container.querySelector('#versions-summary')).toBeNull();
     fireEvent.click(screen.getByRole('radio', { name: 'Omistetut' }));
     fireEvent.change(screen.getByLabelText('Setti / versio'), { target: { value: 'welcome-to-night-city-beta' } });
     expect(names()).toEqual(['Swordwise Huscle']);
