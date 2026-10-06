@@ -5523,3 +5523,93 @@ section[aria-labelledby='have-heading'] {
     padding-inline-start: var(--space-2);
   }
 }
+
+/*
+ * T-091: the whole card at once. Tapping the image (or "Näytä kuva koko ruudulla") shows it on the whole
+ * screen; a tap or Esc returns. On phones the details start with the image and the counts side by side,
+ * so the first screen holds the card and its counts without scrolling.
+ */
+.card-zoom-open {
+  display: none;
+}
+
+.card-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: var(--space-2);
+  border: 0;
+  background: rgba(0, 0, 0, 0.92);
+  cursor: zoom-out;
+}
+
+.card-zoom img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.card-dialog-image {
+  cursor: zoom-in;
+}
+
+@media (max-width: 39.99rem) {
+  .card-dialog.has-details .card-dialog-content {
+    display: grid;
+    grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+    gap: var(--space-2) var(--space-3);
+    align-items: start;
+  }
+
+  .card-dialog.has-details .card-dialog-image {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 100%;
+    max-height: none;
+    margin: 0;
+  }
+
+  .card-dialog.has-details .card-zoom-open {
+    display: block;
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+    min-height: var(--target-min);
+    padding-inline: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+
+  .card-dialog.has-details .card-dialog-details {
+    display: contents;
+  }
+
+  .card-dialog-details > section.detail-collection,
+  .card-dialog-details > section.detail-want {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    grid-column: 2;
+    padding-block: 0;
+    border-top: 0;
+  }
+
+  .card-dialog-details > section.detail-collection {
+    grid-row: 1;
+  }
+
+  .card-dialog-details > section.detail-want {
+    grid-row: 2;
+  }
+
+  .card-dialog-details > section.card-versions,
+  .card-dialog-details > section.detail-decks {
+    grid-column: 1 / -1;
+  }
+}

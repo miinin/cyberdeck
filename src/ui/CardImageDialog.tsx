@@ -25,12 +25,20 @@ export function CardImageDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [failedKey, setFailedKey] = useState<string | null>(null);
+  // T-091: the whole card on the whole screen (phones show it smaller beside the counts).
+  const [zoomed, setZoomed] = useState(false);
+  const zoomOpenRef = useRef<HTMLButtonElement>(null);
+  const unzoom = () => {
+    setZoomed(false);
+    zoomOpenRef.current?.focus();
+  };
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (dialog === null) return;
     if (card !== null && !dialog.open) dialog.showModal();
     else if (card === null && dialog.open) dialog.close();
+    setZoomed(false);
   }, [card]);
 
   const close = () => dialogRef.current?.close();
@@ -43,6 +51,13 @@ export function CardImageDialog({
       className={details === undefined ? 'card-dialog' : 'card-dialog has-details'}
       aria-labelledby="card-dialog-title"
       onClose={onClose}
+      // Esc closes the full-screen image first, then the dialog.
+      onCancel={(event) => {
+        if (zoomed) {
+          event.preventDefault();
+          unzoom();
+        }
+      }}
       // The dialog has no padding, so a click on the dialog element itself is a click on the backdrop.
       onClick={(event) => {
         if (event.target === event.currentTarget) close();
@@ -69,13 +84,24 @@ export function CardImageDialog({
               lang="en"
               loading="eager"
               onError={() => setFailedKey(imageSrc)}
+              onClick={() => setZoomed(true)}
             />
           ) : (
             <p role="alert">{texts.imageLoadError}</p>
           )}
+            {imageSrc !== null && failedKey !== imageSrc && (
+              <button type="button" ref={zoomOpenRef} className="button-secondary card-zoom-open" onClick={() => setZoomed(true)}>
+                {texts.zoomImage}
+              </button>
+            )}
             {details !== undefined && <div className="card-dialog-details">{details}</div>}
           </div>
         </div>
+      )}
+      {card !== null && zoomed && imageSrc !== null && (
+        <button type="button" className="card-zoom" aria-label={texts.zoomClose} onClick={unzoom} autoFocus>
+          <img src={imageSrc} alt={cardNameText(card)} lang="en" />
+        </button>
       )}
     </dialog>
   );

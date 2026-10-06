@@ -12,6 +12,7 @@ import { getCardImage } from '../data/cardImages';
 import { variantImageUrl } from '../data/variantImages';
 import { CountControl } from './CountControl';
 import { texts } from './texts';
+import { isMainSetPrinting } from '../domain/setFilter';
 
 export interface CardVersionsProps {
   card: Card;
@@ -137,25 +138,7 @@ export function CardVersions({
                 picture
               )}
               <span className="art-name">{art.rarity === null ? name : <RaritySymbol rarity={art.rarity} showName />}</span>
-              <span className="art-sets">
-                {setChips(art.printings).map((chip) => (
-                  <span key={chip.family} className="art-set">
-                    <span className="set-chip set-chip--family" title={chip.family}>
-                      {chip.short === chip.family ? (
-                        chip.family
-                      ) : (
-                        <>
-                          <span aria-hidden="true">{chip.short}</span>
-                          <span className="visually-hidden">{chip.family}</span>
-                        </>
-                      )}
-                    </span>
-                    {chip.tags.map((tag) => (
-                      <span key={tag} className="set-chip">{tag}</span>
-                    ))}
-                  </span>
-                ))}
-              </span>
+              <ArtSets printings={art.printings} />
               {art.rarity === null && editionRows.length > 0 ? (
                 <div className="art-count art-count--editions">
                   {editionRows.map(({ label, printing }) => {
@@ -247,5 +230,62 @@ export function CardVersions({
         })}
       </ul>
     </section>
+  );
+}
+
+function SetChipRow({ chip }: { chip: SetChip }) {
+  return (
+    <span className="art-set">
+      <span className="set-chip set-chip--family" title={chip.family}>
+        {chip.short === chip.family ? (
+          chip.family
+        ) : (
+          <>
+            <span aria-hidden="true">{chip.short}</span>
+            <span className="visually-hidden">{chip.family}</span>
+          </>
+        )}
+      </span>
+      {chip.tags.map((tag) => (
+        <span key={tag} className="set-chip">
+          {tag}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * Where a version comes from (T-091): the actual sets (D-022) are shown; starter decks, promos and prizes only
+ * when the version is in no set, otherwise behind a small "+N more" toggle.
+ */
+function ArtSets({ printings }: { printings: readonly Printing[] }) {
+  const main = setChips(printings.filter(isMainSetPrinting));
+  const other = setChips(printings.filter((printing) => !isMainSetPrinting(printing)));
+  if (main.length === 0) {
+    return (
+      <span className="art-sets">
+        {other.map((chip) => (
+          <SetChipRow key={chip.family} chip={chip} />
+        ))}
+      </span>
+    );
+  }
+  return (
+    <span className="art-sets">
+      {main.map((chip) => (
+        <SetChipRow key={chip.family} chip={chip} />
+      ))}
+      {other.length > 0 && (
+        <details className="art-other-sets">
+          <summary>{texts.otherProducts(other.length)}</summary>
+          <span className="art-sets">
+            {other.map((chip) => (
+              <SetChipRow key={chip.family} chip={chip} />
+            ))}
+          </span>
+        </details>
+      )}
+    </span>
   );
 }
