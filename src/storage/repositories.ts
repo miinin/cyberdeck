@@ -19,9 +19,9 @@ import { isPrintingKey } from '../domain/printing';
 import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
 import type { PrintingKey } from '../domain/printing';
-import type { Deck, DeckContent, DeckId } from '../domain/deck';
+import type { Deck, DeckContent, DeckId, DeckPublish } from '../domain/deck';
 import { isUid } from '../domain/uid';
-import { isDeckId, parseCollection, parseDeckContent, parseDeckList } from '../domain/validate';
+import { isDeckId, parseCollection, parseDeckContent, parseDeckList, parseDeckPublish } from '../domain/validate';
 import type { Parsed } from '../domain/validate';
 import { decodeEnvelope, encodeEnvelope } from './envelope';
 import type { EnvelopeSpec, Migration } from './envelope';
@@ -391,7 +391,27 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         if (expected !== undefined && existing.updatedAt !== expected) {
           throw new StorageError('conflict', 'Deck was changed elsewhere');
         }
-        const deck: Deck = { id, name, sections, createdAt: existing.createdAt, updatedAt: at.toISOString() };
+        // The publishing settings are not part of the content: an edit keeps them (T-098).
+        const base = { id, name, sections, createdAt: existing.createdAt, updatedAt: at.toISOString() };
+        const deck: Deck = existing.publish === undefined ? base : { ...base, publish: existing.publish };
+        return { next: current.map((item, itemIndex) => (itemIndex === index ? deck : item)), result: deck };
+      });
+    },
+    setPublish: async (id: DeckId, publish: DeckPublish | undefined) => {
+      const checked = publish === undefined ? undefined : parseDeckPublish(publish);
+      if (checked === null) throw new StorageError('invalid-input', 'Publish settings are not valid');
+      return mutate(decksAggregate, (current, at) => {
+        const index = isDeckId(id) ? current.findIndex((deck) => deck.id === id) : -1;
+        const existing = current[index];
+        if (existing === undefined) throw new StorageError('not-found', 'Deck not found');
+        const base = {
+          id,
+          name: existing.name,
+          sections: existing.sections,
+          createdAt: existing.createdAt,
+          updatedAt: at.toISOString(),
+        };
+        const deck: Deck = checked === undefined ? base : { ...base, publish: checked };
         return { next: current.map((item, itemIndex) => (itemIndex === index ? deck : item)), result: deck };
       });
     },

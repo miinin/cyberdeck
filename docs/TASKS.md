@@ -100,3 +100,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-094 | Dokumentaatio: CHANGELOG-versio ja STATUS.md ajan tasalle | 1 | Should | Dokumentoija | Done | – |
 | T-096 | Pakan tilastot: Program ja Gear omilla väreillä, Eddies-kortti (myytävät vs. suositus hintarakenteen mukaan, Eddiet vuoroittain, myynti joka vuoro -todennäköisyys) (D-024) | 1 | Must | PM | Done | PM kuvat ✓ |
 | T-097 | Kortit-otsikon alta pois "Kirjatut versiot" -rivi, kokoelman koko pienenä himmeänä tekstinä | 1 | Should | PM | Done | – |
+| T-098 | Julkiset pakat (D-025): näkyvyys yksityinen/julkinen, oma nimimerkki, Julkiset pakat -välilehti, Firestore publicDecks | 1 | Must | PM → Koodari | Done | Digiturva SEC-098 + SEC-098b ✓, säännöt deployattu |
+| T-099 | [velka] R-22: toisella laitteella poistetun tai yksityiseksi muutetun pakan julkinen kopio poistuu vasta, kun julkaissut laite avaa sovelluksen (SEC-098b-2 jäännösriski) | 2 | Could | Koodari | Backlog | Digiturva |

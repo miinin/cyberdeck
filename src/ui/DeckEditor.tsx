@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { Card } from '../domain/card';
-import type { Deck, DeckContent } from '../domain/deck';
+import type { Deck, DeckContent, DeckPublish } from '../domain/deck';
+import { buildPublicDeckInput } from '../domain/publicDeck';
 import { MAX_DECK_DISTINCT_CARDS, MAX_DECK_NAME_LENGTH, SIDEBOARD_SIZE } from '../domain/deck';
 import { checkDeckName, distinctRows, withDeckCount, withSideboardCount } from '../domain/deckEdit';
 import {
@@ -46,6 +47,14 @@ import { useCardHoverPreview } from './CardHoverPreview';
 import { CardImageDialog } from './CardImageDialog';
 import { cardNameText } from './CardName';
 import { DeckPickImage } from './DeckPickImage';
+import { DeckVisibility } from './DeckVisibility';
+import type { PublishResult } from './DeckVisibility';
+import { usePublicDecks } from './PublicDecksContext';
+import { forgetPublicDecks } from './publicDecksCache';
+import type { PublishState } from '../account';
+
+/** A constant, so useSyncExternalStore sees an unchanged snapshot. */
+const IDLE_PUBLISH: PublishState = { kind: 'idle' };
 import { DeckList } from './DeckList';
 import type { DeckView } from './DeckList';
 import { DeckPickTable } from './DeckPickTable';
@@ -100,6 +109,17 @@ export function DeckEditor({
   const [content, setContent] = useState<DeckContent>({ name: '', sections: [] });
   const contentRef = useRef(content);
   const [nameText, setNameText] = useState('');
+  // Publishing settings (T-098) live in the stored deck, not in the content the autosave writes.
+  const [publish, setPublish] = useState<DeckPublish | undefined>(undefined);
+  const publishRef = useRef<DeckPublish | undefined>(undefined);
+  const { store: publicStore, publisher, signInAvailable } = usePublicDecks();
+  const subscribePublish = useCallback(
+    (listener: () => void) => publisher?.onChange(listener) ?? (() => undefined),
+    [publisher],
+  );
+  const publishState = useSyncExternalStore(subscribePublish, () => publisher?.state(deckId) ?? IDLE_PUBLISH);
+  /** True after an edit in this editor: the public copy is sent when the editor is left (SR-34). */
+  const publicDirty = useRef(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [pickView, setPickView] = useState<DeckPickView>('list');
@@ -136,6 +156,17 @@ export function DeckEditor({
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const chain = useRef<Promise<unknown>>(Promise.resolve());
 
+  /** Queues the newest content of a public deck for the delayed public update (SR-34). */
+  const queuePublic = useCallback(
+    (saved: DeckContent) => {
+      const settings = publishRef.current;
+      if (publisher === null || settings === undefined || !settings.public) return;
+      const built = buildPublicDeckInput(deckId, saved, cardsByKey, settings.nickname);
+      if (built.ok) publisher.schedule(built.input);
+    },
+    [publisher, deckId, cardsByKey],
+  );
+
   const flush = useCallback(() => {
     clearTimeout(timer.current);
     const next = pending.current;
@@ -147,6 +178,7 @@ export function DeckEditor({
       .then(
         (saved) => {
           knownUpdatedAt.current = saved.updatedAt;
+          queuePublic(saved);
           setSaveError(null);
           setSaveState((state) => (pending.current === null ? 'saved' : state));
         },
@@ -157,12 +189,13 @@ export function DeckEditor({
           setSaveState('error');
         },
       );
-  }, [repository, deckId]);
+  }, [repository, deckId, queuePublic]);
 
   const schedule = useCallback(
     (next: DeckContent) => {
       contentRef.current = next;
       setContent(next);
+      publicDirty.current = true;
       pending.current = next;
       setSaveState('dirty');
       clearTimeout(timer.current);
@@ -183,6 +216,8 @@ export function DeckEditor({
         knownUpdatedAt.current = deck.updatedAt;
         const loaded = { name: deck.name, sections: deck.sections };
         contentRef.current = loaded;
+        publishRef.current = deck.publish;
+        setPublish(deck.publish);
         setContent(loaded);
         setNameText(deck.name);
         setPhase('ready');
@@ -207,11 +242,16 @@ export function DeckEditor({
           setPhase('not-found');
         } else if (deck.updatedAt !== knownUpdatedAt.current) {
           knownUpdatedAt.current = deck.updatedAt;
+          publishRef.current = deck.publish;
+          setPublish(deck.publish);
           const latest = { name: deck.name, sections: deck.sections };
-          contentRef.current = latest;
-          setContent(latest);
-          setNameText(deck.name);
-          setChangeText(deckTexts.reloadedLatest);
+          // Only the publishing settings may have changed (our own change): the content stays as it is.
+          if (JSON.stringify(latest) !== JSON.stringify(contentRef.current)) {
+            contentRef.current = latest;
+            setContent(latest);
+            setNameText(deck.name);
+            setChangeText(deckTexts.reloadedLatest);
+          }
         }
       }, () => undefined);
     });
@@ -262,8 +302,75 @@ export function DeckEditor({
       window.removeEventListener('pagehide', onPageHide);
       clearTimeout(timer.current);
       saveNow(true);
+      // Leaving the editor sends the public copy now (SR-34); the publisher outlives the editor.
+      const settings = publishRef.current;
+      if (publisher !== null && settings?.public === true && publicDirty.current) {
+        publicDirty.current = false;
+        const built = buildPublicDeckInput(deckId, contentRef.current, cardsByKey, settings.nickname);
+        if (built.ok) {
+          publisher.schedule(built.input);
+          void publisher.flush(deckId).then(() => forgetPublicDecks(publicStore));
+        }
+      }
     };
-  }, [repository, deckId]);
+    // cardsByKey is read at unmount time only; a change of it must not run the cleanup.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [repository, deckId, publisher, publicStore]);
+
+  /** Writes the publishing settings after the autosave has finished, so the two never conflict (T-098). */
+  const savePublish = async (next: DeckPublish | undefined): Promise<void> => {
+    flush();
+    await chain.current;
+    const saved = await repository.setPublish(deckId, next);
+    knownUpdatedAt.current = saved.updatedAt;
+    publishRef.current = saved.publish;
+    setPublish(saved.publish);
+  };
+
+  /** Publishes or updates the nickname: the setting goes to the private deck first, then the public copy (SR-35). */
+  const handlePublish = async (nickname: string | null): Promise<PublishResult> => {
+    if (publisher === null) return 'failed';
+    const built = buildPublicDeckInput(deckId, contentRef.current, cardsByKey, nickname);
+    if (!built.ok) return built.error;
+    const previous = publishRef.current;
+    try {
+      await savePublish({ public: true, nickname });
+    } catch {
+      return 'failed';
+    }
+    publisher.schedule(built.input);
+    await publisher.flush(deckId);
+    if (publisher.state(deckId).kind === 'error') {
+      // Not published: do not leave the deck marked public (best effort).
+      publisher.cancel(deckId);
+      await savePublish(previous).catch(() => undefined);
+      return 'failed';
+    }
+    publicDirty.current = false;
+    forgetPublicDecks(publicStore);
+    return 'ok';
+  };
+
+  /** Makes the deck private: the public copy is deleted first, and only then the setting changes (SR-35). */
+  const handleMakePrivate = async (): Promise<boolean> => {
+    try {
+      await publisher?.unpublish(deckId);
+      await savePublish({ public: false, nickname: publishRef.current?.nickname ?? null });
+      publicDirty.current = false;
+      forgetPublicDecks(publicStore);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleRetryPublic = () => {
+    const built = buildPublicDeckInput(deckId, contentRef.current, cardsByKey, publishRef.current?.nickname ?? null);
+    if (built.ok && publisher !== null) {
+      publisher.schedule(built.input);
+      void publisher.flush(deckId);
+    }
+  };
 
   const issues = useMemo(() => validateDeck(content, cardsByKey), [content, cardsByKey]);
   const totals = useMemo(() => deckTotals(content, cardsByKey), [content, cardsByKey]);
@@ -595,6 +702,16 @@ export function DeckEditor({
           </button>
         </div>
       )}
+
+      <DeckVisibility
+        publish={publish}
+        signedIn={publisher !== null}
+        signInAvailable={signInAvailable}
+        state={publishState}
+        onPublish={handlePublish}
+        onMakePrivate={handleMakePrivate}
+        onRetry={handleRetryPublic}
+      />
 
       <p className="visually-hidden" aria-live="polite" aria-atomic="true">
         {changeText}

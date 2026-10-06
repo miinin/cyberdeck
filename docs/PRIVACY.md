@@ -104,13 +104,14 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 | 2026-10-03 | Luku 10 (LUONNOS): T-054:n kirjautuminen ja pilvitallennus (D-016, D-017). Uusi inventaario (rivit 11–19), sijainti, peruste, säilytys ja poisto, evästeet, jaettu kone ja avoimet kysymykset K-P5–K-P8. Luku 7 korvattu kirjautumisen osalta luvulla 10, K-P3 ratkaistu (D-016: 16+). Raportti SEC-011-t054. | T-054 |
 | 2026-10-03 | Katselmointi SEC-013-t054a: rivi 11 ja luku 10.3 päivitetty Muutos K-P8:n mukaiseksi (juuri `users` molemmissa projekteissa, `test_users` poistui). Firestoren sijainti on toistaiseksi `nam5`, mikä on korjattava ennen T-054b:tä. Uusi avain `cyberdeck:account:redirect-pending` (arvo `1`) hyväksytty, ei henkilötietoa. Dialogin tietosuojateksti tarkennettava ennen julkaisua (SEC-038). | T-054a |
 | 2026-10-05 | Katselmointi SEC-062: vaihtolinkki lisätty inventaarioon (rivi 6b). Ei uusia tallennettavia kenttiä eikä evästeitä, ei verkkoliikennettä linkin datasta. | T-062 |
+| 2026-10-06 | Digiturva (SEC-098): luku 11 julkisista pakoista, luvun 10.1 lause Firebase-yhteydestä. Koodari kirjasi muutoksen tiedostoon toteutuksen yhteydessä (T-098). | T-098 |
 
 ## 10. MVP-2: kirjautuminen ja pilvitallennus (T-054, LUONNOS)
 
 > **Luonnos 2026-10-03 (Digiturva, SEC-011).** Voimaan, kun T-054 on toteutettu. Korvaa luvun 7 kirjautumisen ja pilvitallennuksen osalta (jaetut vaihtolistat ja kaverit ovat yhä luvussa 7). Päätökset D-016 (käyttäjä) ja D-017. Turvavaatimukset SR-21–SR-29 raportissa `reports/SEC-011-t054-uhkamalli.md`. Ei oikeudellinen kannanotto.
 
 ### 10.1 Yhteenveto
-- Kirjautuminen on **vapaaehtoinen** ja vain Google-tilillä. Ilman kirjautumista mikään luvuissa 1–6 ei muutu, eikä selain lataa Firebasen koodia eikä ota yhteyttä Googleen.
+- Kirjautuminen on **vapaaehtoinen** ja vain Google-tilillä. Ilman kirjautumista mikään luvuissa 1–6 ei muutu, eikä selain lataa Firebasen koodia eikä ota yhteyttä Googleen, paitsi kun avaat Julkiset pakat -välilehden tai julkisen pakan (luku 11).
 - Kirjautuneen käyttäjän pakat ja kokoelma tallentuvat Firestoreen (Google, EU: tuotanto `eur3`, testi `europe-north1`) ja selaimeen tilikohtaisesti. Googlen tilitiedot (nimi, sähköposti) ovat Firebase Authenticationissa, ei Firestoressa.
 - Rekisterinpitäjä: Miika Miinin, miikamiinin@gmail.com (K-P7). Kirjautumista ei avata muille ennen kuin tämä teksti on lisätty.
 - Firestoreen ei tallenneta sähköpostia, nimeä eikä kuvaa, vaan vain Googlen antama tunniste (uid) polussa sekä pakat ja kokoelma.
@@ -175,3 +176,41 @@ Sovellus ei aseta evästeitä. Firebase Auth käyttää IndexedDB:tä (rivi 16).
 | K-P6 | Poistetaanko käyttämättömät tilit automaattisesti (esim. 24 kk)? | Ei automaattista poistoa MVP:ssä (Spark ei tarjoa ajastettuja funktioita). Selosteessa: "säilytetään, kunnes poistat tiedot". | Selostetta |
 | K-P7 | Rekisterinpitäjän nimi ja yhteystieto selosteeseen (esim. OAuth-näkymän tukisähköposti)? | Käyttäjä päättää. Ei kirjata repoon ennen päätöstä. | Ratkaistu 2026-10-03: Miika Miinin, miikamiinin@gmail.com |
 | K-P8 | Hyväksyykö käyttäjä jäännösriskin R-18 (testisivuston koodi pääsee testisivustolle kirjautuneen käyttäjän tuotantodataan, koska projekti on yhteinen)? | Hyväksytään, kunhan testisivustolle kirjautuvat vain kehittäjä ja testaajat. Pysyvä korjaus: erillinen testiprojekti (IDEAS). | Ratkaistu 2026-10-03: erillinen testiprojekti (D-017) |
+
+## 11. Julkiset pakat (T-098, D-025, LUONNOS)
+
+> **Luonnos 2026-10-06.** Voimaan, kun T-098 on julkaistu ja Firestoren säännöt on deployattu molempiin projekteihin. Lähde: Digiturvan raportti SEC-098 (luku "PRIVACY.md-muutosehdotus"). Ei oikeudellinen kannanotto.
+
+### 11.1 Yhteenveto
+- Julkaiseminen on **vapaaehtoista, pakkakohtaista** ja vaatii Google-kirjautumisen. Pakka on oletuksena yksityinen.
+- Julkaistu tieto näkyy **kaikille internetissä ilman kirjautumista**. Google-tilin nimeä, sähköpostia tai uid:tä ei julkaista.
+- Nimimerkki on käyttäjän itse kirjoittama ja valinnainen. Se on oletuksena piilossa, eikä sitä esitäytetä Googlen nimellä. Ilman nimimerkkiä pakka näkyy nimellä "Nimetön".
+
+### 11.2 Tietoinventaario (lisäys lukuun 2, rivit 20–22)
+| # | Tieto | Lähde | Tarkoitus | Missä | Kuka pääsee | Henkilötieto? | Minimointi |
+|---|---|---|---|---|---|---|---|
+| 20 | Julkinen pakka: nimi, legendit, korttimäärä, kortit, julkaisu- ja päivitysaika | Käyttäjä julkaisee | Pakan jakaminen muille | Firestore `publicDecks/{pubId}` (tuotanto `eur3`, testi `europe-north1`) | **Kaikki internetissä**, projektin omistaja, Google käsittelijänä | Mahdollisesti (pakan nimi voi sisältää nimen) | Vain jakolinkin sisältö (SR-32), varoitus julkaistaessa (SR-38) |
+| 21 | Nimimerkki | Käyttäjä kirjoittaa itse, valinnainen | Julkaisijan näyttäminen | Kuten 20 sekä yksityinen pakka `users/{uid}/decks` (julkisuusasetus ja nimimerkki, jotta ne synkronoituvat) | Kaikki, jos "Näytä nimimerkkini" on valittu | **Kyllä**, jos käyttäjä kirjoittaa oikean nimensä | 1–30 merkkiä, oletuksena ei näkyvissä, ei esitäytetä Googlen nimellä |
+| 22 | `pubId` (pakkakohtainen tiiviste uid:stä ja pakan tunnisteesta) ja `deckId` | Sovellus | Omistajan oikeuksien tarkistus | Kuten 20 | Kaikki | Pseudonyymi, mutta ei yhdistettävissä käyttäjään eikä saman käyttäjän muihin pakkoihin ilman uid:tä | Ei uid:tä eikä käyttäjäkohtaista vakiota (SR-30) |
+
+Rivin 19 (IP-osoite Googlelle) "Kuka pääsee" -sarakkeeseen kuuluvat myös kirjautumattomat julkisten pakkojen lukijat: Firestore-SDK ladataan ja yhteys `firestore.googleapis.com`:iin avataan vasta, kun Julkiset pakat -välilehti tai julkinen pakka avataan.
+
+### 11.3 Käsittelyperuste (ehdotus, ei oikeudellinen kannanotto)
+Käyttäjän oma pyyntö julkaista (palvelun tarjoaminen pyynnöstä). Kerrotaan selosteessa ja julkaisuvahvistuksessa. Ikäraja 16 vuotta pätee (D-016).
+
+### 11.4 Säilytys ja poisto
+- Julkinen kopio säilyy, kunnes käyttäjä muuttaa pakan yksityiseksi, poistaa pakan tai poistaa tilin tiedot. Julkinen kopio poistetaan aina ennen yksityisiä tietoja (SR-35, SR-36). Jos poisto ei onnistu (ei yhteyttä), pakka pysyy julkisena ja sovellus sanoo sen.
+- Jos pakka poistetaan tai muutetaan yksityiseksi toisella laitteella ennen kuin synkronointi on ehtinyt, julkinen kopio voi jäädä näkyviin. Tällöin pyydä poistoa (11.7).
+- Kolmansien osapuolten tallentamia kopioita ei voi poistaa. Se kerrotaan julkaisuvahvistuksessa ja selosteessa.
+- Hakukoneindeksointi estetään (`noindex`, SR-41, K-P12). Se ei estä muita kopioimasta julkista sivua.
+- Päivitys julkiseen kopioon kirjoitetaan viivästettynä (aikaisintaan 15 s muutoksen jälkeen tai editorista poistuttaessa).
+
+### 11.5 Evästeet
+Ei muutosta: sovellus ei aseta evästeitä. Julkisten pakkojen lukeminen kirjautumatta ei käytä Authia.
+
+### 11.6 Seloste
+Tietosuojaselosteeseen lisätään kappale julkisista pakoista: mitä näkyy, kenelle, miten julkaisun voi poistaa ja ettei muiden tekemiä kopioita voi poistaa.
+
+### 11.7 Poistopyynnöt ja ylläpitäjän ohje (SR-42)
+- **Käyttäjälle (selosteeseen ja Tietoa-sivulle):** voit poistaa oman julkaisusi milloin tahansa muuttamalla pakan yksityiseksi tai poistamalla pakan. Jos löydät asiattoman pakan tai pakan, jossa on omia tietojasi, pyydä poistoa sähköpostilla rekisterinpitäjälle (miikamiinin@gmail.com, K-P7). Kerro pakan nimi ja nimimerkki.
+- **Ylläpitäjälle:** Firebase-konsoli → Firestore Database → kokoelma `publicDecks` → etsi dokumentti nimen tai nimimerkin mukaan (kentät `name` ja `nickname`) → Delete document. Tee sama molemmissa projekteissa (`cyberdeck-tcg` ja `cyberdeck-tcg-dev`), jos pakka on molemmissa. Dokumentin id on pseudonyymi eikä paljasta omistajaa. Ensimmäisessä versiossa ei ole ilmiantotoimintoa (K-P10), joten pyynnöt tulevat sähköpostilla. Poistettu pakka voi ilmestyä uudelleen, jos omistaja julkaisee sen uudelleen: tällöin ota yhteyttä omistajaan.

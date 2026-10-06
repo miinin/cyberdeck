@@ -48,6 +48,10 @@ export function DeckImport({
   onClose,
   startAtLink = false,
   sharedText,
+  sharedName,
+  sharedHeading = deckTexts.shareHeading,
+  sharedIntro = deckTexts.shareIntro,
+  closeLabel = deckTexts.importBack,
 }: {
   cards: readonly Card[];
   repositories: Repositories;
@@ -58,6 +62,13 @@ export function DeckImport({
   startAtLink?: boolean;
   /** Shared deck link (T-056): the list is checked on open and the source forms are hidden. */
   sharedText?: string;
+  /** Start name of a shared deck (a public deck's name, T-098). The list text has none. */
+  sharedName?: string;
+  /** Heading and intro of the shared view; public decks have their own (T-098). */
+  sharedHeading?: string;
+  sharedIntro?: string;
+  /** Text of the back button. */
+  closeLabel?: string;
 }) {
   const wants = useWants(repositories.wants);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
@@ -140,7 +151,7 @@ export function DeckImport({
     setInputError(null);
     setCollectionKnown(known);
     setReport(next);
-    setNameText(next.content.name);
+    setNameText(sharedName ?? next.content.name);
     setNameError(null);
     // Move focus to the result so a screen reader starts reading it.
     setTimeout(() => reportRef.current?.focus());
@@ -243,13 +254,13 @@ export function DeckImport({
       <p className="editor-crumb">
         <button type="button" className="link-button" onClick={onClose}>
           <span aria-hidden="true">← </span>
-          {deckTexts.importBack}
+          {closeLabel}
         </button>
       </p>
       <h1 ref={headingRef} tabIndex={-1}>
-        {sharedText === undefined ? deckTexts.importHeading : deckTexts.shareHeading}
+        {sharedText === undefined ? deckTexts.importHeading : sharedHeading}
       </h1>
-      <p>{sharedText === undefined ? deckTexts.importIntro : deckTexts.shareIntro}</p>
+      <p>{sharedText === undefined ? deckTexts.importIntro : sharedIntro}</p>
 
       <div className="import-sources" hidden={sharedText !== undefined}>
         <form className="deck-import-form import-source-panel" onSubmit={(event) => void handleFetch(event)} noValidate>
