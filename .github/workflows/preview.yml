@@ -29,4 +29,5 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG_DEV }}
           projectId: cyberdeck-tcg-dev
           target: test
-          expires: 14d
+          # 3 days (T-089): at most 50 channels per site; 14 days filled the quota and failed every PR (HTTP 429).
+          expires: 3d
