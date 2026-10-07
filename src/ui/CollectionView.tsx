@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { getCardImage } from '../data/cardImages';
 import { variantImageUrl } from '../data/variantImages';
@@ -30,7 +30,9 @@ import { collectionTexts } from './collectionTexts';
 import { formatPercent } from './deckTexts';
 import { cardCount } from './texts';
 import { ScanCardsButton, ScanPrompt } from './CardScanner';
+import { CollectionBinder } from './CollectionBinder';
 import { useCollection } from './useCollection';
+import { useCollectionPrefs } from './useCollectionPrefs';
 import { useDefaultEdition } from './useDefaultEdition';
 import { useWants } from './useWants';
 
@@ -88,6 +90,8 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
   const [edition, setEdition] = useDefaultEdition(repositories);
   const wants = useWants(repositories.wants);
   const proxyQueue = useProxyQueue(repositories.proxy);
+  const [prefs, setPrefs] = useCollectionPrefs(repositories.preferences);
+  const viewName = useId();
   const [filter, setFilter] = useState<MissingFilter>({ set: null, rarity: null });
 
   const ready = collection.phase === 'ready';
@@ -129,7 +133,32 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
       {collection.phase === 'loading' && <p>{collectionTexts.loading}</p>}
       {(collection.phase === 'unavailable' || collection.phase === 'locked') && <p role="alert">{collectionTexts.unavailable}</p>}
 
-      {ready && overview.distinct === 0 && (
+      {ready && (
+        <fieldset className="segmented collection-views">
+          <legend>{collectionTexts.viewLabel}</legend>
+          <div className="segmented-options">
+            {(['overview', 'binder'] as const).map((value) => (
+              <label key={value} className={'segmented-option' + (prefs.view === value ? ' is-on' : '')}>
+                <input type="radio" name={viewName} checked={prefs.view === value} onChange={() => setPrefs({ view: value })} />
+                {value === 'overview' ? collectionTexts.viewOverview : collectionTexts.viewBinder}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+
+      {ready && prefs.view === 'binder' && (
+        <CollectionBinder
+          cards={cards}
+          collection={saved}
+          art={prefs.art}
+          showMissing={prefs.showMissing}
+          onArtChange={(art) => setPrefs({ art })}
+          onShowMissingChange={(showMissing) => setPrefs({ showMissing })}
+        />
+      )}
+
+      {ready && prefs.view === 'overview' && overview.distinct === 0 && (
         <div className="stats-card collection-empty">
           <ScanPrompt {...scanProps} />
           <h2 className="collection-empty-title">{collectionTexts.emptyTitle}</h2>
@@ -142,7 +171,7 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
         </div>
       )}
 
-      {ready && overview.distinct > 0 && (
+      {ready && prefs.view === 'overview' && overview.distinct > 0 && (
         <div className="collection-progress">
           <section className="stats-card collection-wide" aria-labelledby="coll-overview">
             <h2 id="coll-overview" className="stats-card-title">
@@ -171,11 +200,6 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
                     {overview.playsets}/{overview.total}
                   </dd>
                   <dd className="kpi-hint">{collectionTexts.playsetsHint(overview.total)}</dd>
-                </div>
-                <div>
-                  <dt>{collectionTexts.sellableLabel}</dt>
-                  <dd>{overview.sellableCopies}</dd>
-                  <dd className="kpi-hint">{collectionTexts.sellableHint}</dd>
                 </div>
               </dl>
             </div>
