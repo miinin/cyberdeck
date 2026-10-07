@@ -1,6 +1,6 @@
 # T-106 · Korttien skannaus kameralla (selvitys ja suunnitelma)
 
-**Tila:** In Progress (vaiheet 0–1, haara `t-106-skanneri`). Päätökset: D-027 (A, kamera sallittu, painos valitaan alussa, vaihe 0 keinotekoisilla kuvilla).
+**Tila:** Review (vaiheet 0–1 valmiit, odottaa Digiturvaa ja puhelinkokeilua; vaiheet 0–1, haara `t-106-skanneri`). Päätökset: D-027 (A, kamera sallittu, painos valitaan alussa, vaihe 0 keinotekoisilla kuvilla).
 
 ## Tavoite
 Pelaaja lisää fyysiset korttinsa kokoelmaan näyttämällä ne puhelimen kameralle sen sijaan, että hakisi jokaisen nimeltä ja painaisi +. Kun kortteja on kymmeniä tai satoja, tämä on sovelluksen hitain työvaihe.
@@ -74,3 +74,32 @@ Pelaaja lisää fyysiset korttinsa kokoelmaan näyttämällä ne puhelimen kamer
 - Moss Machine (MTG, 256-bittinen pHash RGB-kanavittain): https://kairicollections.github.io/Moss-Machines-Magic-the-Gathering-sorting/
 - Card Recognition -suunnitelma (OpenCV.js, perspektiivin oikaisu, Tesseract.js): https://github.com/arthurb2l/japan-tcg-price-guide/issues/99
 - MTG-tunnistus OCR:llä (Quentin Fortier): https://fortierq.github.io/mtgscan-ocr-azure-flask-celery-socketio/
+
+## Vaihe 0: tulos (keinotekoinen testi, D-027)
+Mittaus: `npm run cards:measure-scanner` (233 kuvitusta × 12 skenaariota × 2 toistoa = 5592 vääristettyä kuvaa, kehys 360×503). Tiiviste: dHash 16×16 RGB-kanavittain, koko kortti + kuvitusalue (`src/domain/cardFingerprint.ts`), haku Hamming-etäisyydellä. Kameran kuvasta lasketaan tiiviste 10 ikkunasta (koko kuva + 9 hieman pienempää, siirrettyä ikkunaa), ja etäisyys on pienin. Ilman ikkunoita epäkeskeisyys (±5 %) pudotti top-1:n 62 %:iin.
+
+| Skenaario | top-1 | top-3 |
+|---|---|---|
+| puhdas | 99,6 | 100 |
+| kierto ±8° | 97,9 | 100 |
+| perspektiivi/vinous | 98,1 | 100 |
+| rajaus 3–8 % | 93,3 | 99,1 |
+| reunus 3–8 % | 98,7 | 100 |
+| epäkeskisyys ±5 % | 97,4 | 100 |
+| sumennus | 99,6 | 100 |
+| kirkkaus/kontrasti/lämpötila | 99,6 | 100 |
+| kohina | 99,6 | 100 |
+| heijastusläiskä | 99,6 | 100 |
+| JPEG 50 + pienennys | 99,4 | 100 |
+| yhdistetty (realistinen sekoitus) | 95,1 | 99,6 |
+| **Kaikki** | **98,1** | **99,9** |
+
+**Raja (top-1 ≥ 90 %, top-3 ≥ 98 %) täyttyy.** Kun hyväksytään oikea kortti (eri kuvitus, sama kortti), top-1 on 99,6 %. Lähes kaikki virheet ovat saman kortin kuvitusten sekaannuksia (Nova Rare / Iconic Legend / perus; rebecca-having-a-moment nova-rare ja perus ovat käytännössä sama kuva), jotka varmistusnäkymä hoitaa, koska käyttäjä valitsee kuvituksen. "Varma osuma" -sääntö (etäisyys ≤ 240 ja ero toiseen ≥ 40 bittiä): 53 % skannauksista, joissa väärin 0 kpl (otoksessa). Loput näyttävät kolme vaihtoehtoa.
+**Varaus:** keinotekoinen testi voi yliarvioida tarkkuuden (oikeat foliot, suojamuovi, taustat ja kameran käsittely). Oikeiden kuvien testi on avoin (D-027). Mittaus ei sisällä kortin tunnistusta taustasta: käyttäjä asettaa kortin kehykseen.
+
+## Luovutus (vaiheet 0 ja 1)
+Tehty: sormenjälkiskripti (`npm run cards:fingerprints` → `src/data/cardFingerprints.json`, 101 kt, 48 kt gzip, ladataan vasta skannerissa dynaamisella importilla), `cardFingerprint.ts` (+ testit), `fingerprintIndex.ts` (lataus ja validointi, testi varmistaa että JSON kattaa kaikki kuvitukset), `scanCrop.ts` (kehyksen alue videon pikseleinä, object-fit: cover), `CardScanner.tsx` (painosvalinta → kamera `facingMode: environment` painalluksesta → 63:88-kehys → napautus/Skannaa → varma osuma tai 3 vaihtoehtoa → määrä ± → lisäys → takaisin kameraan; stream pysäytetään suljettaessa ja unmountissa; lupa evätty / ei kameraa / muu virhe selkeällä tekstillä), `collectionEntry.ts` (CatalogView:n entryOf/writeEntry siirretty jaettuun tiedostoon, lisäys kulkee samaa D-020/21/22-polkua), Skannaa-painike Kortit- ja Kokoelma-näkymiin (vain jos `navigator.mediaDevices.getUserMedia` on), `firebase.json` `camera=(self)` molemmissa kohdissa, PRIVACY.md luku 12, SECURITY.md:n otsikkorivi. Ei uusia riippuvuuksia, ei CSP-muutoksia.
+Ei tehty (vaihe 2): automaattikuvaus, sarjatila/kumoa, want-lista/proxy-kohde.
+Testit: `npm test` 109 tiedostoa / 1471 testiä läpi, `npm run lint` ja `npm run build` läpi.
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2 (velka): (1) kuvaus ei tunnista korttia taustasta eikä oikaise perspektiiviä, vain kehys ja 10 ikkunaa; jos oikeilla kuvilla tarkkuus jää alle rajan, varasuunnitelma B (OpenCV.js). (2) Skannerin käyttöliittymää ei ole kokeiltu oikealla puhelimella, ainoastaan jsdom-testit ja CSS-katselmointi.
+Seuraavaksi: Digiturva (Permissions-Policy, dynaaminen JSON-lataus, kameran käyttö), sitten PM:n esikatselutarkistus puhelimella (kehyksen sijainti ja koko, iOS Safari).

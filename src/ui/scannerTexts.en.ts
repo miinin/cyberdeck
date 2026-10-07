@@ -1,0 +1,33 @@
+import type { scannerTextsFi } from './scannerTexts.fi';
+
+/** English texts of the card scanner (T-106); the same shape as the Finnish ones. */
+export const scannerTextsEn: typeof scannerTextsFi = {
+  open: 'Scan cards',
+  title: 'Scan cards',
+  close: 'Close',
+  cancel: 'Cancel',
+  editionIntro: 'Are you scanning Beta or Retail cards?',
+  editionNote: 'The edition cannot be read from the picture, so you choose it here. A Beta card has a β before its number.',
+  startWith: (edition: string) => `Scan ${edition}`,
+  starting: 'Starting the camera…',
+  videoLabel: 'Camera view',
+  frameHint: 'Put the card in the frame so that it fills the frame. Tilt the card if it reflects the light. Then tap Scan.',
+  capture: 'Scan',
+  scanning: 'Recognising…',
+  lastAdded: (copies: number, name: string, edition: string) => `Added ${copies} × ${name} (${edition}).`,
+  sureTitle: 'Is this the card?',
+  chooseTitle: 'Which one is the card?',
+  showOthers: 'Show other matches',
+  copiesLabel: 'Copies',
+  more: 'Add one',
+  fewer: 'Remove one',
+  add: (copies: number, edition: string) => `Add ${copies} × ${edition}`,
+  again: 'Scan again',
+  limit: 'A collection holds at most 999 copies of one card.',
+  collectionNotReady: 'The collection is not ready. Close the scanner and try again.',
+  denied: 'Camera access was denied. Allow the camera in your browser settings and try again.',
+  noCamera: 'No camera was found on this device.',
+  failed: 'The camera could not be started. Check that no other app is using it and try again.',
+  indexFailed: 'The recognition data could not be loaded. Reload the page.',
+  retry: 'Try again',
+};

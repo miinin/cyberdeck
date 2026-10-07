@@ -105,7 +105,7 @@ upgrade-insecure-requests
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: no-referrer` (rajapinta ei tarvitse tietoa lähettäjästä; tietojen minimointi)
 - `X-Frame-Options: DENY` (vanhojen selainten tuki, `frame-ancestors` kattaa uudet)
-- `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()`
+- `Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()`
 - `Cross-Origin-Opener-Policy: same-origin`
 - HSTS:ää ei tarvitse lisätä: Firebase Hosting asettaa sen jo *.web.app-osoitteissa (todennettu). Jos myöhemmin otetaan käyttöön oma verkkotunnus, HSTS tarkistetaan uudelleen.
 

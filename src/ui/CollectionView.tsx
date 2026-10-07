@@ -29,7 +29,9 @@ import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 import { collectionTexts } from './collectionTexts';
 import { formatPercent } from './deckTexts';
 import { cardCount } from './texts';
+import { ScanCardsButton } from './CardScanner';
 import { useCollection } from './useCollection';
+import { useDefaultEdition } from './useDefaultEdition';
 import { useWants } from './useWants';
 
 /** One row of a breakdown: the name, a bar (decoration) and the numbers (the text says everything). */
@@ -82,7 +84,8 @@ function MissingCard({ card }: { card: Card }) {
  * the numbers are always written out.
  */
 export function CollectionView({ cards, repositories }: { cards: readonly Card[]; repositories: Repositories }) {
-  const { snapshot: collection } = useCollection(repositories.collection);
+  const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
+  const [edition, setEdition] = useDefaultEdition(repositories);
   const wants = useWants(repositories.wants);
   const proxyQueue = useProxyQueue(repositories.proxy);
   const [filter, setFilter] = useState<MissingFilter>({ set: null, rarity: null });
@@ -118,6 +121,7 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
         <h1>
           {collectionTexts.heading}
         </h1>
+        <ScanCardsButton cards={cards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={setEdition} />
       </div>
 
       {collection.phase === 'loading' && <p>{collectionTexts.loading}</p>}
