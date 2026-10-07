@@ -28,16 +28,10 @@
 ## Luovutus
 
 **Koodari, 2026-10-08.**
-- **Myytävät pois:** luku,  ja sen testi poistettu. Kortit-näkymän suodatin ja pakkaeditorin Eddies ennallaan.
-- **Domain:**  (puhtaat funktiot: järjestys keräilynumeron mukaan, 9 taskua/sivu, sivutus, aukeaman sivut, kääntö, pyyhkäisyn tunnistus) + 11 testiä.
-- **Tallennus (SR-12):**  (näkymä, kuvitus, Show missing; JSON-avain , kenttäkohtainen validointi) + testi. Hook .
-- **UI:**  + valitsin Overview/Binder. Vain näkyvät sivut renderöidään, kuvat lazy. Aukeama (>= 64rem) kahdella sivulla ja taitteella, muuten yksi sivu. Nuolipainikkeet, nuolinäppäimet (kun fokus kansiossa), pyyhkäisy, aria-live-sivunumero, taskujen nimet "#12 Name, owned 2"/"missing". Animaatio vain . Teksti en + fi.
+- **Myytävät pois:** luku, `sellableCopies` ja sen testi poistettu. Kortit-näkymän suodatin ja pakkaeditorin Eddies ennallaan.
+- **Domain:** `src/domain/binder.ts` (puhtaat funktiot: järjestys keräilynumeron mukaan, 9 taskua/sivu, sivutus, aukeaman sivut, kääntö, pyyhkäisyn tunnistus) + 11 testiä.
+- **Tallennus (SR-12):** `PreferencesRepository.loadCollectionPrefs/saveCollectionPrefs` (näkymä, kuvitus, Show missing; JSON-avain `cyberdeck:collection-prefs`, kenttäkohtainen validointi) + testi. Hook `useCollectionPrefs`.
+- **UI:** `CollectionBinder.tsx` + valitsin Overview/Binder. Vain näkyvät sivut renderöidään, kuvat lazy. Aukeama (>= 64rem) kahdella sivulla ja taitteella, muuten yksi sivu. Nuolipainikkeet, nuolinäppäimet (kun fokus kansiossa), pyyhkäisy, aria-live-sivunumero, taskujen nimet "#12 Name, owned 2" / "missing". Animaatio vain `prefers-reduced-motion: no-preference`. Teksti en + fi.
 - **Päätökset:** (1) Omistus setissä = kyseisen setin painosten tallennetut versiot; kortti ilman yhtään tallennettua versiota lasketaan omistetuksi kokonaismäärällä. (2) Näkymiä ei ole omina hash-osoitteina (reititin ei tue alireittejä ilman muutoksia), vain muistettu valinta. (3) Setti ja sivu eivät säily istunnon yli.
-- Ei uusia riippuvuuksia. Unknown command: "test"
-
-
-Did you mean this?
-  npm test # Test a package
-To see a list of supported npm commands, run:
-  npm help 1507 läpi, lint ja build läpi.
+- Ei uusia riippuvuuksia. `npm test` 1507 läpi, lint ja build läpi.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (UX-katselmoinnissa tarkista aukeaman korkeus leveillä näytöillä ja pyyhkäisy oikealla laitteella).
