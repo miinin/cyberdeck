@@ -111,4 +111,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-106 | Korttien skannaus kameralla: selvitys ja suunnitelma (sormenjälkitunnistus laitteella, vaiheet 0–3) | 1 | Should | Koodari | Review | Digiturva (Permissions-Policy) |
 | T-107 | Kokoelma-välilehden ja mobiilinavigoinnin muutokset (käyttäjän toive 2026-10-07, sisältö tarkennetaan käyttäjän kanssa) | 1 | Should | PM | Backlog | – |
 | T-108 | Skannerin näkyvyys (Kokoelma-painike, tyhjän tilan kehotus, mobiilin kelluva painike) ja jatkuva skannaus automaattisella lisäyksellä | 1 | Should | Koodari | In Progress | PM esikatselu |
-| T-109 | Kokoelma: Myytävät-tilasto pois, näkymävalitsin ja kansionäkymä (3 × 3 -taskusivut, aukeama) | 1 | Should | Koodari | Backlog | PM esikatselu |
+| T-109 | Kokoelma: Myytävät-tilasto pois, näkymävalitsin ja kansionäkymä (3 × 3 -taskusivut, aukeama) | 1 | Should | Koodari | In Progress | PM esikatselu |
