@@ -195,6 +195,23 @@ describe('CardScanner', () => {
     expect(screen.queryByRole('dialog', { hidden: true })).not.toBeInTheDocument();
   });
 
+  it('stops the camera when the tab is hidden and asks for the edition again', async () => {
+    const user = await openScanner(createMemoryRepositories());
+    await user.click(screen.getByRole('button', { name: 'Skannaa Beta' }));
+    await settle();
+    expect(stopTrack).not.toHaveBeenCalled();
+    const hidden = vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+    try {
+      await act(async () => {
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+    } finally {
+      hidden.mockRestore();
+    }
+    expect(stopTrack).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Skannaa Beta' })).toBeInTheDocument();
+  });
+
   it('stops a camera that arrives after the scanner was unmounted', async () => {
     let resolve: (stream: unknown) => void = () => {};
     getUserMedia.mockReturnValueOnce(new Promise((r) => (resolve = r)));

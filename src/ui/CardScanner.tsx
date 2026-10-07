@@ -129,10 +129,11 @@ export function CardScannerDialog({
         if (mounted.current) setIndex(loaded);
       },
       () => {
-        if (mounted.current) {
-          setProblem(scannerTexts.indexFailed);
-          setStage('error');
-        }
+        if (!mounted.current) return;
+        stopStream(streamRef.current);
+        streamRef.current = null;
+        setProblem(scannerTexts.indexFailed);
+        setStage('error');
       },
     );
     return () => {
@@ -142,6 +143,19 @@ export function CardScannerDialog({
     };
   }, []);
 
+  // Never keep the camera on behind a hidden tab (SEC-106-1): release it and ask for the edition again.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (!document.hidden || streamRef.current === null) return;
+      stopStream(streamRef.current);
+      streamRef.current = null;
+      setResult(null);
+      setStage('edition');
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
   // The video element exists only in the camera stage; the stream lives on across stages.
   useEffect(() => {
     const video = videoRef.current;
@@ -149,6 +163,18 @@ export function CardScannerDialog({
     video.srcObject = streamRef.current;
     video.play().catch(() => undefined);
   }, [stage]);
+
+  function releaseCamera() {
+    stopStream(streamRef.current);
+    streamRef.current = null;
+  }
+
+  // Every error path releases the camera (SEC-106-2).
+  function fail(message: string) {
+    releaseCamera();
+    setProblem(message);
+    setStage('error');
+  }
 
   const start = async (chosen: Edition) => {
     markEditionConfirmed();
@@ -168,8 +194,7 @@ export function CardScannerDialog({
       setStage('camera');
     } catch (error) {
       if (!mounted.current) return;
-      setProblem(cameraProblem(error));
-      setStage('error');
+      fail(cameraProblem(error));
     }
   };
 
@@ -191,8 +216,7 @@ export function CardScannerDialog({
     canvas.height = CAPTURE_HEIGHT;
     const context = canvas.getContext('2d', { willReadFrequently: true });
     if (context === null) {
-      setProblem(scannerTexts.failed);
-      setStage('error');
+      fail(scannerTexts.failed);
       return;
     }
     context.drawImage(video, crop.x, crop.y, crop.width, crop.height, 0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT);
