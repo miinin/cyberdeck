@@ -4,7 +4,7 @@
 
 ## Tulos
 - **Löydökset:** Critical 0, High 0, Medium 1, Low 1, Info 2.
-- **Veto:** Kyllä, kunnes SEC-106-1 on korjattu. Korjaus on pieni (noin 10 riviä). SEC-106-2 kannattaa korjata samalla.
+- **Veto:** Ei enää blokkaa. SEC-106-1 ja SEC-106-2 on korjattu commitissa 03cecd3 ja varmistettu diffistä 2026-10-08.
 - Ajonaikaiset riippuvuudet eivät muuttuneet (`package.json`:iin tuli vain kaksi skriptiä, ja `sharp` oli jo devDependency). Siksi `npm audit` -ajoa ei tarvittu. Workflowt, `firestore.rules` ja `storage.rules` eivät muuttuneet.
 - Haaran historiasta ei löytynyt salaisuuksia (haettu `AIza`, `secret`, `password`, `api_key` ja `PRIVATE KEY` lisätyiltä riveiltä sormenjälki-JSONia lukuun ottamatta, koska se on pelkkää heksaa).
 
@@ -16,7 +16,7 @@
 **Odotettu:** Kamera sammuu, kun sivu ei ole näkyvissä (PM:n katselmointiperuste "välilehden vaihto", tietosuoja sisäänrakennetusti). · **Havaittu:** Stream pysähtyy vain dialogin sulkeutuessa tai komponentin poistuessa (unmount).
 **Vaikutus:** Kuvaa ei tallenneta eikä lähetetä, joten tietovuotoa ei ole. Laite kuitenkin kuvaa ilman, että käyttäjä näkee sitä, mikä on vastoin käyttäjän odotusta ja PRIVACY.md 12:n henkeä ("vain kun käyttäjä skannaa"). Mobiilissa selain yleensä mykistää taustalla olevan kameran, mutta silloin video jää paluun jälkeen mustaksi (track `muted` tai `ended`).
 **Korjausehdotus:** Lisää efekti, joka `document.visibilityState === 'hidden'` -tilassa kutsuu `stopStream(streamRef.current)`, asettaa `streamRef.current = null` ja palauttaa vaiheeksi `'edition'`, jos vaihe on `'camera'`, `'starting'` tai `'result'`. Tällöin paluun jälkeen kamera käynnistetään uudelleen käyttäjän painalluksesta, mikä sopii myös iOS:lle. Testi: `visibilitychange` (hidden) kutsuu trackien `stop()`-metodia.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 03cecd3) → Varmistettu (Digiturva 2026-10-08). Jäännös (Info): jos välilehti piilotetaan juuri, kun lupakysely on kesken (vaihe `starting`), myöhemmin saapuva stream ei laukaise käsittelijää. Käytännössä tilanne on epätodennäköinen, koska luvan myöntäminen vaatii näkyvän sivun.
 
 ### SEC-106-2 · Virhetila ei pysäytä jo avattua kameraa · Low
 **Sijainti:** `src/ui/CardScanner.tsx:193–196` (`capture`: `getContext` palauttaa nullin, jolloin `setStage('error')` ajetaan ilman `stopStream`:ia) · **Tehtävä:** T-106
@@ -24,7 +24,7 @@
 **Odotettu:** Virhetilaan siirtyminen sammuttaa kameran. · **Havaittu:** Kamera jää päälle, kunnes käyttäjä painaa Sulje tai Yritä uudelleen.
 **Vaikutus:** Sama kuin SEC-106-1 mutta harvinainen: kamera on päällä näkymättömänä.
 **Korjausehdotus:** Tee apufunktio `fail(message)`, joka pysäyttää streamin, nollaa `streamRef`:n ja asettaa virhetilan. Käytä sitä kaikissa virhepoluissa.
-**Tila:** Avoin
+**Tila:** Avoin → Korjattu (commit 03cecd3, `fail()` kaikissa virhepoluissa, myös indeksin latausvirheessä) → Varmistettu (Digiturva 2026-10-08)
 
 ### SEC-106-3 · Tulosvaiheessa kamera on päällä, vaikka videota ei näytetä · Info
 **Sijainti:** `src/ui/CardScanner.tsx:145–151` ja vaihe `'result'` · **Tehtävä:** T-106
