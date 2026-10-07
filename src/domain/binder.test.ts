@@ -115,3 +115,16 @@ describe('paging', () => {
     expect(swipeDirection(-80, 70)).toBe(0);
   });
 });
+
+describe('binderPockets with real-style numbers', () => {
+  it('orders numerically with letter variants after their number, even when the catalog order is scrambled', () => {
+    const numbers = ['010', '005b', '003', '144', '005a', '012', '001', '004', '009'];
+    const cards = numbers.map((n) => card(`k${n}`, [printing(RETAIL, 'wtnc', n), printing(RETAIL, 'wtnc', n, 'Common', 'fr')]));
+    expect(binderPockets(cards, retail, EMPTY, 'base').map((p) => p.number)).toEqual(['001', '003', '004', '005a', '005b', '009', '010', '012', '144']);
+  });
+
+  it('reads the number of the English printing, not a promo or other language', () => {
+    const x = card('x', [printing(RETAIL, 'wtnc', '900', 'Common', 'fr'), printing(RETAIL, 'wtnc', '007'), printing(RETAIL, 'wtnc', '143', 'Iconic Legend')]);
+    expect(binderPockets([x], retail, EMPTY, 'base')[0]?.number).toBe('007');
+  });
+});

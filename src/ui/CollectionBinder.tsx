@@ -19,7 +19,12 @@ function BinderPocket({ pocket }: { pocket: Pocket }) {
   const { card, number, copies, artRarity } = pocket;
   const owned = copies > 0;
   const name = cardNameText(card);
-  const src = owned ? ((artRarity === null ? null : variantImageUrl(card.key, artRarity)) ?? getCardImage(card.key)?.medium ?? null) : null;
+  // An owned card always shows something: the owned art, else the base picture, else its number and name.
+  const [failed, setFailed] = useState<readonly string[]>([]);
+  const candidates = owned
+    ? [artRarity === null ? null : variantImageUrl(card.key, artRarity), getCardImage(card.key)?.medium ?? null].filter((url): url is string => url !== null)
+    : [];
+  const src = candidates.find((url) => !failed.includes(url)) ?? null;
   return (
     <li className={`pocket ${owned ? 'pocket--owned' : 'pocket--missing'}`}>
       <a
@@ -28,9 +33,9 @@ function BinderPocket({ pocket }: { pocket: Pocket }) {
         aria-label={owned ? collectionTexts.pocketOwned(number, name, copies) : collectionTexts.pocketMissing(number, name)}
       >
         {src !== null ? (
-          <img className="pocket-image" src={src} width={CARD_IMAGE_WIDTH.md} height={cardImageHeight('md')} alt="" loading="lazy" decoding="async" />
+          <img className="pocket-image" src={src} width={CARD_IMAGE_WIDTH.md} height={cardImageHeight('md')} alt="" loading="lazy" decoding="async" onError={() => setFailed((list) => [...list, src])} />
         ) : (
-          <span className="pocket-ghost" aria-hidden="true">
+          <span className={`pocket-ghost${owned ? ' pocket-ghost--owned' : ''}`} aria-hidden="true">
             <span className="pocket-ghost-number">#{number}</span>
             <span className="pocket-ghost-name">{name}</span>
           </span>
@@ -186,16 +191,16 @@ export function CollectionBinder({
             </div>
           </div>
           <div className="binder-nav">
-            <button type="button" className="button-secondary" aria-disabled={atStart} onClick={() => !atStart && turn(-1)}>
-              <span aria-hidden="true">◀ </span>
-              {collectionTexts.binderPrev}
+            <button type="button" className="button-secondary" aria-label={collectionTexts.binderPrev} aria-disabled={atStart} onClick={() => !atStart && turn(-1)}>
+              <span aria-hidden="true">◀</span>
+              <span className="binder-nav-label">{collectionTexts.binderPrev}</span>
             </button>
             <p role="status" aria-live="polite" className="binder-position">
               {collectionTexts.binderPosition(first, last, pages.length)}
             </p>
-            <button type="button" className="button-secondary" aria-disabled={atEnd} onClick={() => !atEnd && turn(1)}>
-              {collectionTexts.binderNext}
-              <span aria-hidden="true"> ▶</span>
+            <button type="button" className="button-secondary" aria-label={collectionTexts.binderNext} aria-disabled={atEnd} onClick={() => !atEnd && turn(1)}>
+              <span className="binder-nav-label">{collectionTexts.binderNext}</span>
+              <span aria-hidden="true">▶</span>
             </button>
           </div>
           <p id={`${title}-help`} className="hint binder-help">
