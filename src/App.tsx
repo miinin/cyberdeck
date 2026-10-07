@@ -10,6 +10,8 @@ import { CatalogView } from './ui/CatalogView';
 import { DeckEditor } from './ui/DeckEditor';
 import { SharedDeckView } from './ui/SharedDeckView';
 import { HaveWantView } from './ui/HaveWantView';
+import { CollectionView } from './ui/CollectionView';
+import { collectionTexts } from './ui/collectionTexts';
 import { ProxyView } from './ui/ProxyView';
 import { proxyTexts } from './ui/proxyTexts';
 import { SharedTradeView } from './ui/SharedTradeView';
@@ -109,6 +111,9 @@ export function App({
             <a href="#/" aria-current={route.name === 'cards' || route.name === 'card' ? 'page' : undefined}>
               {deckTexts.navCards}
             </a>
+            <a href="#/kokoelma" aria-current={route.name === 'collection' ? 'page' : undefined}>
+              {collectionTexts.navCollection}
+            </a>
             <a
               href="#/pakat"
               aria-current={
@@ -199,6 +204,7 @@ export function App({
         {route.name === 'havewant' && (
           <HaveWantView cards={cards} repositories={openRepositories} />
         )}
+        {route.name === 'collection' && <CollectionView cards={cards} repositories={openRepositories} />}
         {route.name === 'proxy' && <ProxyView cards={cards} repositories={openRepositories} />}
         {route.name === 'trade' && (
           <SharedTradeView data={route.data} cards={cards} repositories={openRepositories} />

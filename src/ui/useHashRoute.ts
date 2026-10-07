@@ -9,7 +9,9 @@ export type Route =
   // Public decks (T-098): the list tab and one public deck by its pubId.
   | { name: 'publicDecks' } | { name: 'publicDeck'; id: string }
   // Proxy print queue (T-102).
-  | { name: 'proxy' };
+  | { name: 'proxy' }
+  // Collection progress (T-105).
+  | { name: 'collection' };
 
 export function parseHash(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/');
@@ -22,6 +24,8 @@ export function parseHash(hash: string): Route {
   }
   // "#/proxy": the Proxy section (T-102).
   if (parts[0] === 'proxy') return { name: 'proxy' };
+  // "#/kokoelma": the Collection progress section (T-105).
+  if (parts[0] === 'kokoelma') return { name: 'collection' };
   // "#/kortti/<cardKey>": the Cards view with that card's details open (T-081). An unknown key is handled by the view.
   if (parts[0] === 'kortti' && parts.length === 2 && parts[1] !== undefined && parts[1] !== '') {
     try {
@@ -44,6 +48,7 @@ export function routeHash(route: Route): string {
   if (route.name === 'share') return `#/jaa/${route.data}`;
   if (route.name === 'havewant') return '#/vaihto';
   if (route.name === 'proxy') return '#/proxy';
+  if (route.name === 'collection') return '#/kokoelma';
   if (route.name === 'publicDecks') return '#/pakat/julkiset';
   if (route.name === 'publicDeck') return `#/pakat/julkinen/${route.id}`;
   if (route.name === 'trade') return `#/vaihto/${route.data}`;
