@@ -103,3 +103,9 @@ Ei tehty (vaihe 2): automaattikuvaus, sarjatila/kumoa, want-lista/proxy-kohde.
 Testit: `npm test` 109 tiedostoa / 1471 testiä läpi, `npm run lint` ja `npm run build` läpi.
 Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2 (velka): (1) kuvaus ei tunnista korttia taustasta eikä oikaise perspektiiviä, vain kehys ja 10 ikkunaa; jos oikeilla kuvilla tarkkuus jää alle rajan, varasuunnitelma B (OpenCV.js). (2) Skannerin käyttöliittymää ei ole kokeiltu oikealla puhelimella, ainoastaan jsdom-testit ja CSS-katselmointi.
 Seuraavaksi: Digiturva (Permissions-Policy, dynaaminen JSON-lataus, kameran käyttö), sitten PM:n esikatselutarkistus puhelimella (kehyksen sijainti ja koko, iOS Safari).
+
+### Luovutus · Digiturva · 2026-10-08
+Katselmointi SEC-106 (`docs/reports/SEC-106-kameraskanneri.md`): Critical 0, High 0, Medium 1, Low 1, Info 2. **Veto: blokkaa Done-tilan, kunnes SEC-106-1 on korjattu.**
+Pakolliset: **SEC-106-1** (`src/ui/CardScanner.tsx:123–174`) – kamera jää päälle, kun välilehti piilotetaan; lisää `visibilitychange`-käsittely, joka pysäyttää streamin ja palauttaa painosvalintaan (testi). Suositus samaan PR:ään: **SEC-106-2** (`CardScanner.tsx:193–196`) – virhetila ei pysäytä streamia.
+Hyväksytty: `firebase.json` `camera=(self)` (ei muita muutoksia, CSP ennallaan), sormenjälki-JSONin lataus ja validointi, kuvadata ei tallennu eikä lähde laitteelta, kokoelmaan kirjoitus jaetun `collectionEntry.ts`:n kautta, PRIVACY.md 12 ja SECURITY.md.
+Seuraavaksi: Koodari korjaa SEC-106-1 (ja -2), Digiturva varmistaa diffistä.
