@@ -1,6 +1,6 @@
 # T-108 · Skannerin näkyvyys ja jatkuva skannaus
 
-**Tila:** In Progress. **Haara:** `t-108-skanneri-ux`, tehty T-106:n haarasta. PR:n kohdehaara on `t-106-skanneri`, kunnes PR #115 on yhdistetty. **Päättäjä:** käyttäjä (toive 2026-10-08), PM (sijoitus).
+**Tila:** Review. **Haara:** `t-108-skanneri-ux`, tehty T-106:n haarasta. PR:n kohdehaara on `t-106-skanneri`, kunnes PR #115 on yhdistetty. **Päättäjä:** käyttäjä (toive 2026-10-08), PM (sijoitus).
 
 ## Tavoite
 Käyttäjän mukaan skanneri on hieno mutta jää huomaamatta. Sen pitää näkyä selvästi olematta kuitenkaan pääominaisuus. Lisäksi tarvitaan tila, jossa kamera skannaa jatkuvasti ja lisää tunnistetut kortit automaattisesti, jotta monta korttia saa lisättyä yhdellä kertaa.
@@ -35,3 +35,9 @@ Käyttäjän mukaan skanneri on hieno mutta jää huomaamatta. Sen pitää näky
 - `npm test`, `npm run lint` ja `npm run build` menevät läpi.
 
 ## Luovutus
+**Koodari, 2026-10-08.** Valmis katselmoitavaksi.
+- **Tehty:** Kokoelma-näkymässä ensisijainen "Scan cards" -painike kameraikonilla, kelluva painike mobiilissa (alatila `scan-fab-spacer`, piilossa ≥40 rem) ja iso kehotus tyhjässä kokoelmassa (`ScanPrompt`). Kortit-näkymän painikkeessa kameraikoni. Tilan valinta (Yksi kerrallaan / Jatkuva) painosvalinnan yhteydessä, muistetaan laitteella `PreferencesRepository.loadScanMode/saveScanMode` -polun kautta (avain `cyberdeck:scan-mode`, SR-12:n mukaan storage-kerroksessa). Jatkuva tila: ajastin 280 ms, päätöslogiikka puhtaana `src/domain/continuousScan.ts` (kahden kuvan vahvistus, tuplien esto 700 ms, nollautuminen), vihreä välähdys, nimi kehyksessä, `navigator.vibrate`, session lista kumoa-painikkeineen ja "N cards added" -yhteenveto. Kumoa käyttää uutta `removeCopies`-funktiota (`collectionEntry.ts`), joka kulkee `addCopies`:n polun toiseen suuntaan. Kehyksen himmennys ja ohjeteksti, tilan ja painoksen näyttö kameran yläreunassa sekä "Change"-painike.
+- **Kamera (SEC-106):** ajastin on sidottu kamerakuvaan (`stage==='camera'`), joten se pysähtyy suljettaessa, piilotetulla välilehdellä (stream pois, vaihe palaa painosvalintaan) ja virheissä; tick ohittaa kierroksen myös `document.hidden`-tilassa.
+- **Testit:** `continuousScan.test.ts` (9), jatkuvan tilan komponenttitestit (6: lisäys, tuplien esto ja uudelleenlisäys, epävarma osuma, kumoa, pysähtyy suljettaessa, tila muistetaan), `repositories.test.ts` (scan mode). npm test 1491/1491, lint ja build läpi.
+- **Huomio PM:lle:** `ScanCardsButton` vaatii nyt `preferences`-propin (kutsujat päivitetty). Mobiilinavigaatio on ylhäällä headerissa, joten kelluva painike ei peitä sitä. Suositus velaksi: ajastinta ei ole testattu oikealla kameralla, joten tarkista esikatselusta puhelimella, että 280 ms/500 kB-tunnistus on riittävän nopea.
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1

@@ -44,6 +44,7 @@ import {
   EDIT_MODE_KEY,
   DECK_PICK_VIEW_KEY,
   DEFAULT_EDITION_KEY,
+  SCAN_MODE_KEY,
   ACCOUNT_LAST_UID_KEY,
   ACCOUNT_REDIRECT_PENDING_KEY,
   ACCOUNT_DELETE_PENDING_KEY,
@@ -64,6 +65,7 @@ import type {
   CatalogViewMode,
   DeckPickView,
   DefaultEdition,
+  ScanMode,
 } from './types';
 
 export interface RepositoryOptions {
@@ -537,6 +539,22 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         throw toStorageError(error, 'write');
       }
       return edition;
+    },
+    loadScanMode: async () => {
+      try {
+        return store.getItem(SCAN_MODE_KEY) === 'continuous' ? 'continuous' : 'single';
+      } catch {
+        return 'single';
+      }
+    },
+    saveScanMode: async (mode: ScanMode) => {
+      if (mode !== 'single' && mode !== 'continuous') throw new StorageError('invalid-input', 'Unknown scan mode');
+      try {
+        store.setItem(SCAN_MODE_KEY, mode);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return mode;
     },
     // Account hints never throw: a failed write only means the SDK is not preloaded next time.
     loadLastUid: () => {

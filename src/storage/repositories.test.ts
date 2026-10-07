@@ -714,3 +714,16 @@ describe('collection versions (D-020)', () => {
     });
   });
 });
+
+describe('preferences: scanner mode (T-108)', () => {
+  it('defaults to one at a time, remembers continuous and ignores unknown values', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadScanMode()).toBe('single');
+    await preferences.saveScanMode('continuous');
+    const again = createRepositories({ store, persistent: true }).preferences;
+    expect(await again.loadScanMode()).toBe('continuous');
+    await expectStorageError(preferences.saveScanMode('auto' as 'single'), 'invalid-input');
+    const odd = setup({ 'cyberdeck:scan-mode': 'both' });
+    expect(await odd.preferences.loadScanMode()).toBe('single');
+  });
+});

@@ -7,15 +7,19 @@ import type { Art } from '../domain/arts';
 import type { Card } from '../domain/card';
 import { CARD_IMAGE_ASPECT } from '../domain/cardImage';
 import { isConfident, queryFingerprints, rankFingerprints } from '../domain/cardFingerprint';
-import type { IndexedFingerprint } from '../domain/cardFingerprint';
+import type { FingerprintMatch, IndexedFingerprint } from '../domain/cardFingerprint';
+import { SCAN_INTERVAL_MS, initialContinuousState, stepContinuous } from '../domain/continuousScan';
 import type { Edition } from '../domain/edition';
 import { coverCropSource } from '../domain/scanCrop';
-import { MAX_COPIES, addCopies } from './collectionEntry';
+import type { PreferencesRepository, ScanMode } from '../storage';
+import { CameraIcon } from './CameraIcon';
+import { MAX_COPIES, addCopies, removeCopies } from './collectionEntry';
 import type { CollectionSnapshot, CollectionStore } from './collectionStore';
 import { markEditionConfirmed } from './EditionConfirmDialog';
 import { scannerTexts } from './scannerTexts';
 import { cardNameText } from './CardName';
 import { texts } from './texts';
+import { useScanMode } from './useScanMode';
 
 /** Width of the picture the frame is copied to; the height follows the card shape (63:88). */
 const CAPTURE_WIDTH = 360;
@@ -77,6 +81,40 @@ function cameraProblem(error: unknown): string {
   return scannerTexts.failed;
 }
 
+/** How long the green flash and the card name stay on the frame after an automatic add. */
+const FLASH_MS = 1400;
+
+/** One card the continuous mode added in this session (what Undo takes back). */
+interface SessionEntry {
+  uid: number;
+  target: Target;
+  edition: Edition;
+}
+
+/** Copies the frame to a canvas and ranks it against the index; null when there is no picture yet, 'failed' without a canvas. */
+function rankFrame(
+  video: HTMLVideoElement,
+  viewport: HTMLElement,
+  frame: HTMLElement,
+  index: readonly IndexedFingerprint[],
+): FingerprintMatch[] | 'failed' | null {
+  const box = viewport.getBoundingClientRect();
+  const rect = frame.getBoundingClientRect();
+  const crop = coverCropSource(
+    { width: video.videoWidth, height: video.videoHeight },
+    { width: box.width, height: box.height },
+    { x: rect.left - box.left, y: rect.top - box.top, width: rect.width, height: rect.height },
+  );
+  if (crop === null) return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = CAPTURE_WIDTH;
+  canvas.height = CAPTURE_HEIGHT;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  if (context === null) return 'failed';
+  context.drawImage(video, crop.x, crop.y, crop.width, crop.height, 0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT);
+  return rankFingerprints(queryFingerprints(context.getImageData(0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT)), index, 3);
+}
+
 function stopStream(stream: MediaStream | null) {
   stream?.getTracks().forEach((track) => track.stop());
 }
@@ -93,6 +131,8 @@ export function CardScannerDialog({
   store,
   edition: defaultEdition,
   onEditionChange,
+  mode,
+  onModeChange,
   onClose,
 }: {
   cards: readonly Card[];
@@ -100,6 +140,8 @@ export function CardScannerDialog({
   store: CollectionStore;
   edition: Edition;
   onEditionChange: (edition: Edition) => void;
+  mode: ScanMode;
+  onModeChange: (mode: ScanMode) => void;
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -118,6 +160,11 @@ export function CardScannerDialog({
   const [copies, setCopies] = useState(1);
   const [lastAdded, setLastAdded] = useState<string | null>(null);
   const [addProblem, setAddProblem] = useState<string | null>(null);
+  const [session, setSession] = useState<SessionEntry[]>([]);
+  const [flashName, setFlashName] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const flashTimer = useRef<number | undefined>(undefined);
+  const nextUid = useRef(1);
   const targets = useMemo(() => buildTargets(cards), [cards]);
 
   useEffect(() => {
@@ -138,6 +185,7 @@ export function CardScannerDialog({
     );
     return () => {
       mounted.current = false;
+      window.clearTimeout(flashTimer.current);
       stopStream(streamRef.current);
       streamRef.current = null;
     };
@@ -203,24 +251,12 @@ export function CardScannerDialog({
     const viewport = viewportRef.current;
     const frame = frameRef.current;
     if (video === null || viewport === null || frame === null || index === null) return;
-    const box = viewport.getBoundingClientRect();
-    const rect = frame.getBoundingClientRect();
-    const crop = coverCropSource(
-      { width: video.videoWidth, height: video.videoHeight },
-      { width: box.width, height: box.height },
-      { x: rect.left - box.left, y: rect.top - box.top, width: rect.width, height: rect.height },
-    );
-    if (crop === null) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = CAPTURE_WIDTH;
-    canvas.height = CAPTURE_HEIGHT;
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    if (context === null) {
+    const ranked = rankFrame(video, viewport, frame, index);
+    if (ranked === 'failed') {
       fail(scannerTexts.failed);
       return;
     }
-    context.drawImage(video, crop.x, crop.y, crop.width, crop.height, 0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT);
-    const ranked = rankFingerprints(queryFingerprints(context.getImageData(0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT)), index, 3);
+    if (ranked === null) return;
     const options = ranked.map((match) => targets.get(match.id)).filter((target): target is Target => target !== undefined);
     if (options.length === 0) return;
     const sure = isConfident(ranked);
@@ -232,6 +268,68 @@ export function CardScannerDialog({
     setLastAdded(null);
     setStage('result');
   };
+
+  /** Continuous mode: one copy of a card the camera has recognised twice in a row (T-108). */
+  const autoAdd = (id: string) => {
+    const target = targets.get(id);
+    if (target === undefined) return;
+    const name = cardNameText(target.card);
+    const outcome = addCopies(store.getSnapshot(), store, target.card, target.arts, target.art, edition, 1);
+    if (outcome !== 'added') {
+      setNotice(outcome === 'limit' ? scannerTexts.atLimit(name) : scannerTexts.collectionNotReady);
+      return;
+    }
+    const uid = nextUid.current;
+    nextUid.current += 1;
+    setSession((list) => [{ uid, target, edition }, ...list]);
+    setNotice(null);
+    setFlashName(name);
+    window.clearTimeout(flashTimer.current);
+    flashTimer.current = window.setTimeout(() => setFlashName(null), FLASH_MS);
+    if (typeof navigator.vibrate === 'function') navigator.vibrate(60);
+  };
+
+  const undo = (entry: SessionEntry) => {
+    const { card, arts, art } = entry.target;
+    const outcome = removeCopies(store.getSnapshot(), store, card, arts, art, entry.edition, 1);
+    if (outcome === 'added') {
+      setSession((list) => list.filter((item) => item.uid !== entry.uid));
+      setNotice(null);
+    } else {
+      setNotice(scannerTexts.collectionNotReady);
+    }
+  };
+
+  // The newest handlers for the timer below, which must not restart whenever the screen changes.
+  const handlers = useRef({ autoAdd, fail });
+  useEffect(() => {
+    handlers.current = { autoAdd, fail };
+  });
+
+  // Continuous mode (T-108): look at the frame a few times a second while the camera is on. The timer lives and dies
+  // with the camera stage, so it stops with the stream (SEC-106): on close, on a hidden tab and on every error.
+  useEffect(() => {
+    if (stage !== 'camera' || mode !== 'continuous' || index === null) return;
+    let state = initialContinuousState;
+    const timer = window.setInterval(() => {
+      const video = videoRef.current;
+      const viewport = viewportRef.current;
+      const frame = frameRef.current;
+      if (document.hidden || streamRef.current === null || video === null || viewport === null || frame === null) return;
+      const ranked = rankFrame(video, viewport, frame, index);
+      if (ranked === 'failed') {
+        handlers.current.fail(scannerTexts.failed);
+        return;
+      }
+      if (ranked === null) return;
+      const best = ranked[0];
+      const sureId = best !== undefined && isConfident(ranked) && targets.has(best.id) ? best.id : null;
+      const step = stepContinuous(state, sureId, Date.now());
+      state = step.state;
+      if (step.add !== null) handlers.current.autoAdd(step.add);
+    }, SCAN_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [stage, mode, index, targets]);
 
   const backToCamera = () => {
     setResult(null);
@@ -272,6 +370,20 @@ export function CardScannerDialog({
               <strong>{scannerTexts.editionIntro}</strong>
             </p>
             <p className="hint">{scannerTexts.editionNote}</p>
+            <div className="scanner-mode" role="group" aria-label={scannerTexts.modeLabel}>
+              {(['single', 'continuous'] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className="scanner-mode-option"
+                  aria-pressed={mode === option}
+                  onClick={() => onModeChange(option)}
+                >
+                  {option === 'single' ? scannerTexts.modeSingle : scannerTexts.modeContinuous}
+                </button>
+              ))}
+            </div>
+            <p className="hint">{scannerTexts.modeNote}</p>
             <div className="row-actions scanner-actions">
               <button type="button" className="button-primary" onClick={() => void start('beta')}>
                 {scannerTexts.startWith(texts.editionBeta)}
@@ -308,18 +420,71 @@ export function CardScannerDialog({
 
         {stage === 'camera' && (
           <>
-            <p className="scanner-edition">{editionName}</p>
-            <div ref={viewportRef} className="scanner-viewport" onClick={capture}>
-              <video ref={videoRef} className="scanner-video" aria-label={scannerTexts.videoLabel} autoPlay muted playsInline />
-              <div ref={frameRef} className="scanner-frame" aria-hidden="true" />
-            </div>
-            <p className="hint">{scannerTexts.frameHint}</p>
-            {lastAdded !== null && <p role="status">{lastAdded}</p>}
-            <div className="row-actions scanner-actions">
-              <button type="button" className="button-primary" disabled={index === null} onClick={capture}>
-                {scannerTexts.capture}
+            <div className="scanner-status">
+              <p className="scanner-edition">
+                {scannerTexts.modeStatus(mode === 'single' ? scannerTexts.modeSingle : scannerTexts.modeContinuous, editionName)}
+              </p>
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => {
+                  releaseCamera();
+                  setStage('edition');
+                }}
+              >
+                {scannerTexts.changeMode}
               </button>
-              <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
+            </div>
+            <div ref={viewportRef} className="scanner-viewport" onClick={mode === 'single' ? capture : undefined}>
+              <video ref={videoRef} className="scanner-video" aria-label={scannerTexts.videoLabel} autoPlay muted playsInline />
+              <div ref={frameRef} className="scanner-frame" data-flash={flashName !== null || undefined} aria-hidden="true" />
+              <p className="scanner-frame-label" aria-hidden="true">
+                {flashName !== null ? scannerTexts.addedFlash(flashName) : scannerTexts.fillFrame}
+              </p>
+            </div>
+            <p className="hint">{mode === 'single' ? scannerTexts.frameHint : scannerTexts.continuousHint}</p>
+            {mode === 'single' ? (
+              lastAdded !== null && <p role="status">{lastAdded}</p>
+            ) : (
+              <p role="status" className="scanner-live">
+                {notice ?? (flashName !== null ? scannerTexts.addedFlash(flashName) : '')}
+              </p>
+            )}
+            {mode === 'continuous' && session.length > 0 && (
+              <section className="scanner-session" aria-label={scannerTexts.sessionTitle}>
+                <h3 className="scanner-subtitle">{scannerTexts.cardsAdded(session.length)}</h3>
+                <ul className="scanner-session-list">
+                  {session.map((entry) => (
+                    <li key={entry.uid} className="scanner-session-item">
+                      {entry.target.imageUrl !== null ? (
+                        <img src={entry.target.imageUrl} alt="" width={36} height={Math.round(36 * CARD_IMAGE_ASPECT)} />
+                      ) : (
+                        <span className="card-image card-image--missing" aria-hidden="true" />
+                      )}
+                      <span className="scanner-session-name">
+                        {cardNameText(entry.target.card)}
+                        {entry.target.rarity !== null && <span className="scanner-option-art"> · {entry.target.rarity}</span>}
+                      </span>
+                      <button
+                        type="button"
+                        className="button-secondary scanner-undo"
+                        aria-label={scannerTexts.undoLabel(cardNameText(entry.target.card))}
+                        onClick={() => undo(entry)}
+                      >
+                        {scannerTexts.undo}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            <div className="row-actions scanner-actions">
+              {mode === 'single' && (
+                <button type="button" className="button-primary" disabled={index === null} onClick={capture}>
+                  {scannerTexts.capture}
+                </button>
+              )}
+              <button type="button" className={mode === 'single' ? 'button-secondary' : 'button-primary'} onClick={() => dialogRef.current?.close()}>
                 {scannerTexts.close}
               </button>
             </div>
@@ -423,15 +588,38 @@ export function ScanCardsButton(props: {
   store: CollectionStore;
   edition: Edition;
   onEditionChange: (edition: Edition) => void;
+  preferences: PreferencesRepository;
+  /** primary: the main action of the view; floating: round button in the corner on a phone (T-108). */
+  variant?: 'secondary' | 'primary' | 'floating';
 }) {
+  const { variant = 'secondary', preferences, ...dialogProps } = props;
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useScanMode(preferences);
   if (!cameraSupported() || props.snapshot.phase !== 'ready') return null;
+  const className = variant === 'floating' ? 'scan-fab' : `${variant === 'primary' ? 'button-primary' : 'button-secondary'} scan-open`;
   return (
     <>
-      <button type="button" className="button-secondary scan-open" onClick={() => setOpen(true)}>
+      <button type="button" className={className} onClick={() => setOpen(true)}>
+        <CameraIcon />
         {scannerTexts.open}
       </button>
-      {open && <CardScannerDialog {...props} onClose={() => setOpen(false)} />}
+      {variant === 'floating' && <div className="scan-fab-spacer" aria-hidden="true" />}
+      {open && <CardScannerDialog {...dialogProps} mode={mode} onModeChange={setMode} onClose={() => setOpen(false)} />}
     </>
+  );
+}
+
+/** Big invitation to scan on an empty collection (T-108); leaves itself out where there is no camera. */
+export function ScanPrompt(props: Omit<Parameters<typeof ScanCardsButton>[0], 'variant'>) {
+  if (!cameraSupported() || props.snapshot.phase !== 'ready') return null;
+  return (
+    <div className="scan-prompt">
+      <span className="scan-prompt-icon">
+        <CameraIcon size={40} />
+      </span>
+      <h2 className="scan-prompt-title">{scannerTexts.promptTitle}</h2>
+      <p>{scannerTexts.promptBody}</p>
+      <ScanCardsButton {...props} variant="primary" />
+    </div>
   );
 }
