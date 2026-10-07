@@ -1,6 +1,6 @@
 # T-106 · Korttien skannaus kameralla (selvitys ja suunnitelma)
 
-**Tila:** Suunnitelma. Toteutus alkaa käyttäjän päätösten jälkeen (kohta "Päätettävät").
+**Tila:** In Progress (vaiheet 0–1, haara `t-106-skanneri`). Päätökset: D-027 (A, kamera sallittu, painos valitaan alussa, vaihe 0 keinotekoisilla kuvilla).
 
 ## Tavoite
 Pelaaja lisää fyysiset korttinsa kokoelmaan näyttämällä ne puhelimen kameralle sen sijaan, että hakisi jokaisen nimeltä ja painaisi +. Kun kortteja on kymmeniä tai satoja, tämä on sovelluksen hitain työvaihe.
