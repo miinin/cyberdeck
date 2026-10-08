@@ -137,6 +137,7 @@ async function distort(src, s, r) {
   return { data, width: info.width, height: info.height };
 }
 
+const colorOf = new Map(JSON.parse(await readFile('./src/data/cards.json', 'utf8')).cards.map((c) => [c.key, c.color]));
 const index = JSON.parse(await readFile(build.FINGERPRINTS_PATH, 'utf8')).entries;
 const files = [];
 for (const dir of build.FINGERPRINT_SOURCE_DIRS) for (const n of (await readdir(dir)).sort()) files.push(`${dir}/${n}`);
@@ -168,7 +169,7 @@ for (const path of files) {
       }
       if (top.some((m) => m.id === id)) st.top3++;
       if (top[0].id.split('__')[0] === id.split('__')[0]) st.card1++;
-      results.push([top[0].id === id, top[0].distance, (top[1]?.distance ?? 9999) - top[0].distance]);
+      results.push([top[0].id === id, top[0].distance, (top[1]?.distance ?? 9999) - top[0].distance, colorOf.get(id.split('__')[0]) ?? '?', top[0].id.split('__')[0] === id.split('__')[0]]);
     }
   }
 }
@@ -190,11 +191,21 @@ console.log('Worst confusions:');
 for (const [k, c] of [...confusions].sort((a, b) => b[1] - a[1]).slice(0, 12)) console.log(`  ${c}x ${k}`);
 
 const { CONFIDENCE } = fp;
-const rules = [[CONFIDENCE.maxDistance, CONFIDENCE.minGap], [200, 30], [240, 20], [300, 40], [300, 60]];
+const rules = [[CONFIDENCE.maxDistance, CONFIDENCE.minGap], [240, 40], [580, 20], [580, 60], [650, 40]];
 for (const [maxDistance, minGap] of rules) {
   const sure = results.filter(([, d, g]) => d <= maxDistance && g >= minGap);
   const wrong = sure.filter(([ok]) => !ok).length;
   console.log(
     `sure (<=${maxDistance}, gap>=${minGap}): ${((100 * sure.length) / results.length).toFixed(1)} % of scans, wrong among them ${wrong} (${((100 * wrong) / Math.max(1, sure.length)).toFixed(2)} %)`,
   );
+}
+
+// Wrong sure matches per card colour (T-113b): wrong = another card (a different art of the same card is not counted).
+for (const [maxDistance, minGap] of rules.slice(0, 1)) {
+  console.log(`Per colour with the current rule (<=${maxDistance}, gap>=${minGap}): scans / sure / wrong card / wrong art`);
+  for (const color of [...new Set(results.map((r) => r[3]))].sort()) {
+    const mine = results.filter((r) => r[3] === color);
+    const sure = mine.filter(([, d, g]) => d <= maxDistance && g >= minGap);
+    console.log(`  ${color.padEnd(8)} ${mine.length} / ${sure.length} / ${sure.filter((r) => !r[4]).length} / ${sure.filter((r) => !r[0]).length}`);
+  }
 }

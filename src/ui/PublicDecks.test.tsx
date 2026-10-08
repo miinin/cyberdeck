@@ -176,14 +176,14 @@ describe('public deck view', () => {
 describe('visibility in the deck editor', () => {
   const open = async () => {
     window.location.hash = `#/pakat/${DECK.id}`;
-    return screen.findByText('Näkyvyys:', { exact: false });
+    return screen.findByRole('switch', { name: 'Julkinen' });
   };
 
   it('is private by default and disables "Julkinen" with a sign-in hint when signed out', async () => {
     const memory = createMemoryPublicDecks();
     renderApp({ initial: storedDecks([DECK]), memory });
     await open();
-    expect(screen.getByText('Yksityinen', { selector: '.visibility-state strong' }).closest('p')).toHaveTextContent('Näkyvyys: Yksityinen');
+    expect(screen.getByText('Vain sinä näet pakan.')).toBeInTheDocument();
     const publicSwitch = screen.getByRole('switch', { name: 'Julkinen' });
     expect(publicSwitch).toHaveAttribute('aria-checked', 'false');
     expect(publicSwitch).toBeDisabled();
@@ -340,7 +340,7 @@ describe('public list after publishing', () => {
     // The list is read (empty) and cached first.
     await screen.findByText('Julkisia pakkoja ei ole vielä', { exact: false });
     window.location.hash = `#/pakat/${DECK.id}`;
-    await screen.findByText('Näkyvyys:', { exact: false });
+    await screen.findByRole('switch', { name: 'Julkinen' });
     await user.click(screen.getByRole('switch', { name: 'Julkinen' }));
     await user.click(screen.getByRole('button', { name: 'Julkaise pakka' }));
     await screen.findByText(/Pakka on julkinen/);

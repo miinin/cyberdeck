@@ -183,8 +183,8 @@ export interface ConfidenceRule {
   readonly minGap: number;
 }
 
-/** Tuned by scripts/cards/measureScanner.mjs on distorted pictures (T-106). */
-export const CONFIDENCE: ConfidenceRule = { maxDistance: 240, minGap: 40 };
+/** Set from real phone measurements (T-113b): the right card was 322..640 away (median ~500), wrong ones mostly 590..670. */
+export const CONFIDENCE: ConfidenceRule = { maxDistance: 580, minGap: 40 };
 
 /** True when the best match is close enough and clearly ahead of the second best (matches sorted, closest first). */
 export function isConfident(matches: readonly FingerprintMatch[], rule: ConfidenceRule = CONFIDENCE): boolean {
@@ -192,4 +192,28 @@ export function isConfident(matches: readonly FingerprintMatch[], rule: Confiden
   if (best === undefined || best.distance > rule.maxDistance) return false;
   const second = matches[1];
   return second === undefined || second.distance - best.distance >= rule.minGap;
+}
+
+/** Sharpness of a picture: the variance of the Laplacian of its grey levels (T-113). Higher = sharper; 0 for a flat or tiny picture. */
+export function frameSharpness(image: PixelImage): number {
+  const { data, width, height } = image;
+  if (width < 3 || height < 3) return 0;
+  const grey = new Float64Array(width * height);
+  for (let i = 0; i < grey.length; i++) {
+    grey[i] = 0.299 * (data[i * 4] ?? 0) + 0.587 * (data[i * 4 + 1] ?? 0) + 0.114 * (data[i * 4 + 2] ?? 0);
+  }
+  let sum = 0;
+  let sumSquares = 0;
+  let count = 0;
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const at = y * width + x;
+      const laplacian = 4 * (grey[at] ?? 0) - (grey[at - 1] ?? 0) - (grey[at + 1] ?? 0) - (grey[at - width] ?? 0) - (grey[at + width] ?? 0);
+      sum += laplacian;
+      sumSquares += laplacian * laplacian;
+      count += 1;
+    }
+  }
+  const mean = sum / count;
+  return sumSquares / count - mean * mean;
 }

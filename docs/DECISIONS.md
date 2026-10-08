@@ -574,3 +574,13 @@ Päätöksessä on viisi osaa.
 3. Painosta (Beta/Retail) ei tunnisteta kuvasta. Käyttäjä valitsee sen skannauksen alussa. Vaihe 3:n β-tunnistus jätetään pois.
 4. Vaihe 0 tehdään keinotekoisilla testikuvilla: korttikuvia vinoutetaan, rajataan, sumennetaan, valaistusta muutetaan ja kuviin lisätään kohinaa, heijastuksia ja JPEG-pakkausta. Oikeilla valokuvilla tarkkuus todennetaan myöhemmin, kun käyttäjä on kotona.
 **Seuraukset:** Keinotekoinen testi voi yliarvioida tarkkuuden. Varmistusnäkymä, jossa on kolme vaihtoehtoa, suojaa virheiltä, ja oikeiden kuvien testi on avoin jatkotoimi.
+
+## D-028 · Sivustorakenne: neljä päätason kohdetta · 2026-10-08 · Päättäjä: käyttäjä
+**Tila:** Hyväksytty. Toteutus tehdään T-112:n arvion jälkeen omina kortteinaan.
+**Konteksti:** T-112:n suunnitelmassa todettiin kaksi ongelmaa. Kokoelmaa muokataan Kortit-sivulla, mutta Kokoelma-sivulla on vain tilastot. Viisi päätason kohdetta on lisäksi liikaa puhelimelle.
+**Päätös:** Vaihtoehto A otetaan käyttöön. Päänavigoinnissa ovat Kortit · Kokoelma · Pakat · Vaihto.
+1. Kokoelma on "minun korttini": oma lista ja määrien muokkaus, skannaus, tilastot ja kansio.
+2. Kortit on korttitietokanta, jossa on pikalisäys.
+3. Proxy on toiminto pakan, puuttuvien korttien ja kortin tietojen sisällä. Proxy-jono näkyy yläpalkissa merkkinä, kun se ei ole tyhjä.
+4. Vanhat reitit ohjataan uusiin.
+**Seuraukset:** T-112:n UX-arvio tarkentaa yksityiskohdat ja pilkkoo toteutuksen. Kokoelman muokkauksen siirto koskee useita testejä.

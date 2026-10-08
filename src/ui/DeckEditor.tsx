@@ -716,7 +716,7 @@ export function DeckEditor({
       {tabbed && (
         <div ref={tabsRef} className="editor-tabs" role="group" aria-label={deckTexts.editorTabsLabel}>
           <button type="button" aria-pressed={tab === 'deck'} onClick={() => selectTab('deck', false)}>
-            {deckTexts.editorTabDeck(totals.main)}
+            {deckTexts.editorTabDeck}
           </button>
           <button type="button" aria-pressed={tab === 'add'} onClick={() => selectTab('add', false)}>
             {deckTexts.editorTabAdd}
@@ -946,16 +946,14 @@ export function DeckEditor({
               aria-label={deckTexts.mainProgress(totals.main)}
             />
             <p className="deck-head-sub">{deckTexts.legendsProgress(legendsCount)}</p>
-            <p className="deck-back">
-              <button
-                type="button"
-                className="link-button"
-                onClick={() => (tabbed ? selectTab('add', true) : searchInputRef.current?.focus())}
-              >
-                <span aria-hidden="true">← </span>
-                {deckTexts.backToSearch}
-              </button>
-            </p>
+            {!tabbed && (
+              <p className="deck-back">
+                <button type="button" className="link-button" onClick={() => searchInputRef.current?.focus()}>
+                  <span aria-hidden="true">← </span>
+                  {deckTexts.backToSearch}
+                </button>
+              </p>
+            )}
           </div>
 
           <div aria-live="polite" aria-atomic="true">

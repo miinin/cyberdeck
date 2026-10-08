@@ -303,16 +303,6 @@ h1:focus:not(:focus-visible) {
   border-bottom: 1px solid var(--color-border);
 }
 
-.site-header::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 7rem;
-  height: 3px;
-  background: var(--color-brand-yellow);
-}
-
 .site-header .container {
   display: flex;
   flex-wrap: wrap;
@@ -2073,7 +2063,7 @@ body:has(dialog[open]) {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  margin-block-end: var(--space-4);
+  margin-block-end: var(--space-2);
 }
 
 .editor-head .editor-crumb {
@@ -2081,7 +2071,7 @@ body:has(dialog[open]) {
 }
 
 .editor-crumb {
-  margin: var(--space-3) 0 var(--space-2);
+  margin: var(--space-2) 0 var(--space-1);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
@@ -2150,10 +2140,12 @@ h3,
   margin-block-start: 0;
 }
 
+/* Quiet text, no box (T-114): the save state is not a button-like thing. */
 .save-badge {
   margin: 0;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border);
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
   white-space: nowrap;
 }
 
@@ -6700,11 +6692,15 @@ section[aria-labelledby='have-heading'] {
   margin-block-start: var(--space-4);
 }
 
+/* One quiet row, no box (T-114). */
 .deck-visibility {
-  margin-block: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  margin-block: var(--space-2);
+}
+
+.visibility-hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }
 
 .visibility-switch-row {
@@ -6713,10 +6709,6 @@ section[aria-labelledby='have-heading'] {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-4);
-}
-
-.visibility-state {
-  margin: 0;
 }
 
 .visibility-switch-wrap {
@@ -8249,7 +8241,7 @@ section[aria-labelledby='have-heading'] {
 .editor-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin-block: var(--space-3);
+  margin-block: var(--space-2);
   border: 2px solid var(--color-border-strong);
 }
 
@@ -8324,4 +8316,98 @@ section[aria-labelledby='have-heading'] {
   .site-header .main-nav {
     display: none !important;
   }
+}
+
+/* Scan diagnostics (T-113a): developer panel, only with ?scandebug=1. No inner scroll: the textarea grows. */
+.scanner-debug {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+}
+
+/* Two fixed lines: the live numbers never change the height, so the buttons below never jump. Clipped, not scrolled. */
+.scanner-debug-line {
+  margin: 0;
+  block-size: 2.6em;
+  overflow: hidden;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+}
+
+.scanner-debug-count {
+  margin: 0;
+}
+
+/* Save sample and the four labels share one fixed-height area: two columns, two rows. */
+.scanner-debug > .button-secondary,
+.scanner-debug-pick {
+  min-block-size: calc(2 * var(--target-min) + 0.35rem);
+}
+
+.scanner-debug-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.scanner-debug-pick .button-secondary {
+  min-width: 0;
+  padding-inline: 0.4rem;
+  overflow: hidden;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scanner-debug-pick .link-button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.scanner-debug-tools {
+  display: flex;
+  gap: var(--space-4);
+}
+
+/* While measuring, the camera keeps most of the screen: the hints and the added-cards list step aside. */
+.scanner-body:has(.scanner-debug) .scanner-viewport {
+  block-size: min(52dvh, 30rem);
+}
+
+.scanner-body:has(.scanner-debug) .hint,
+.scanner-body:has(.scanner-debug) .scanner-session {
+  display: none;
+}
+
+.scanner-debug-json {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  resize: none;
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+}
+
+/* Frame state and the offer under the frame (T-113b). The offer row has a fixed height, so nothing jumps. */
+.scanner-frame[data-hold] {
+  border-color: var(--color-brand-yellow);
+  box-shadow:
+    0 0 0 100vmax rgba(0, 0, 0, 0.55),
+    0 0 14px 3px var(--color-brand-yellow);
+}
+.scanner-frame:not([data-hold]):not([data-flash]) {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.scanner-suggest {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: 3.5rem;
+}
+.scanner-suggest .scanner-session-name {
+  flex: 1;
+  min-inline-size: 0;
 }

@@ -1,6 +1,6 @@
 # T-112 · Sivustorakenteen UX-arvio ja uusi rakenne (suunnitelma)
 
-**Tila:** Backlog (suunnitelma, ei toteutusta). **Päättäjä:** käyttäjä (pyyntö 2026-10-08: "onko rakenne kärkevä, voiko jotain muuttaa? UX is the king"), PM (suunnitelma).
+**Tila:** Backlog. Rakenne valittu: A (D-028). **Päättäjä:** käyttäjä (pyyntö 2026-10-08: "onko rakenne kärkevä, voiko jotain muuttaa? UX is the king"), PM (suunnitelma).
 
 ## Nykyinen rakenne
 | Päänavigointi | Sisältö |
