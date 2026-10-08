@@ -41,7 +41,7 @@ export function ConfirmDeleteDialog({
             <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
               {deckTexts.cancel}
             </button>
-            <button type="button" className="button-primary" onClick={onConfirm}>
+            <button type="button" className="button-danger" onClick={onConfirm}>
               {deckTexts.deleteConfirm}
             </button>
           </div>

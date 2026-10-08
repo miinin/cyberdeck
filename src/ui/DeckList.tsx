@@ -14,10 +14,17 @@ import type { DeckProblems } from './DeckProblems';
 import { pickGestures } from './pickGestures';
 import { Stepper } from './Stepper';
 import { colorNames, texts } from './texts';
+import { SegmentedChoice } from './SegmentedChoice';
 
 export type DeckView = 'list' | 'stacks' | 'cards';
 
 /** The card image, or the dashed placeholder when there is none or it fails to load. */
+const DECK_VIEW_OPTIONS = [
+  ['list', deckTexts.deckViewList],
+  ['stacks', deckTexts.deckViewStacks],
+  ['cards', deckTexts.deckViewCards],
+] as const;
+
 export function DeckCardImage({ card, className }: { card: Card; className: string }) {
   const image = getCardImage(card.key);
   const [failed, setFailed] = useState(false);
@@ -101,7 +108,7 @@ export function DeckList({
         key={card.key}
         data-deck-row={card.key}
         data-deck-part="main"
-        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '') + (problemsOf(card) !== undefined ? ' is-problem' : '') + (onMoveToSideboard !== undefined && card.type !== 'Legend' ? ' has-move' : '')}
+        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '') + (problemsOf(card) !== undefined ? ' is-problem' : '')}
         onContextMenu={onContextMenu}
         onKeyDown={onKeyDown}
         {...hoverProps(card)}
@@ -242,29 +249,14 @@ export function DeckList({
             </h2>
             <SectionFlag problem={problems?.mainSection ?? null} />
           </div>
-          <fieldset className="view-select deck-view">
-            <legend className="visually-hidden">{deckTexts.deckViewLegend}</legend>
-            <div className="options">
-              {(
-                [
-                  ['list', deckTexts.deckViewList],
-                  ['stacks', deckTexts.deckViewStacks],
-                  ['cards', deckTexts.deckViewCards],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className="option">
-                  <input
-                    type="radio"
-                    name="deck-view"
-                    value={value}
-                    checked={view === value}
-                    onChange={() => onViewChange(value)}
-                  />{' '}
-                  {label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <SegmentedChoice
+            className="deck-view"
+            legend={deckTexts.deckViewLegend}
+            name="deck-view"
+            value={view}
+            options={DECK_VIEW_OPTIONS}
+            onChange={onViewChange}
+          />
         </div>
         {grouped.groups.length === 0 && grouped.unknown.length === 0 && <p className="hint">{deckTexts.deckEmpty}</p>}
         {view === 'cards' ? (

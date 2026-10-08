@@ -175,7 +175,7 @@ function SignedInMenu({
                   </button>
                   <button
                     type="button"
-                    className="button-primary"
+                    className="button-danger"
                     disabled={deleteStep === 'working'}
                     onClick={() => void deleteEverything()}
                   >

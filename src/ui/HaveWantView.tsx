@@ -149,7 +149,9 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
                 </div>
               )}
               {wantedCards.length === 0 ? (
-                <p>{texts.wantEmpty}</p>
+                <div className="empty">
+                  <p>{texts.wantEmpty}</p>
+                </div>
               ) : (
                 <CardList
                   cards={wantedCards}
@@ -180,10 +182,13 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
 
               <h3 id="want-search-heading">{texts.wantSearchHeading}</h3>
               <div className="field want-search">
-                <label htmlFor="want-search">{texts.wantSearchLabel}</label>
+                <label htmlFor="want-search" className="visually-hidden">
+                  {texts.wantSearchLabel}
+                </label>
                 <input
                   id="want-search"
                   type="search"
+                  placeholder={texts.searchPlaceholder}
                   autoComplete="off"
                   maxLength={SEARCH_MAX_LENGTH}
                   value={query}
@@ -235,7 +240,9 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
           {collection.phase === 'ready' && (
             <>
               {have.cards.length === 0 ? (
-                <p>{texts.haveEmpty}</p>
+                <div className="empty">
+                  <p>{texts.haveEmpty}</p>
+                </div>
               ) : (
                 <CardList
                   cards={have.cards}

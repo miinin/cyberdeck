@@ -34,7 +34,7 @@ export function MissingCards({
           <AddMissingToWantsButton rows={rows.map(({ card, missing }) => ({ card: card.key, missing }))} wants={wants} />
         </div>
       )}
-      <details>
+      <details className="disclosure">
         <summary>{deckTexts.missingListHeading}</summary>
         <ul>
           {rows.map(({ card, missing }) => (

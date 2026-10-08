@@ -29,14 +29,20 @@ import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 import { collectionTexts } from './collectionTexts';
 import { formatPercent } from './deckTexts';
 import { cardCount } from './texts';
-import { ScanCardsButton, ScanPrompt } from './CardScanner';
+import { ScanCardsButton, ScanPrompt, cameraSupported } from './CardScanner';
 import { CollectionBinder } from './CollectionBinder';
 import { useCollection } from './useCollection';
 import { useCollectionPrefs } from './useCollectionPrefs';
 import { useDefaultEdition } from './useDefaultEdition';
 import { useWants } from './useWants';
+import { SegmentedChoice } from './SegmentedChoice';
 
 /** One row of a breakdown: the name, a bar (decoration) and the numbers (the text says everything). */
+const COLLECTION_VIEW_OPTIONS = [
+  ['overview', collectionTexts.viewOverview],
+  ['binder', collectionTexts.viewBinder],
+] as const;
+
 function ProgressRow({ label, owned, total, barClass = '' }: { label: ReactNode; owned: number; total: number; barClass?: string }) {
   const share = total <= 0 ? 0 : owned / total;
   return (
@@ -127,17 +133,14 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
         <h1>{collectionTexts.heading}</h1>
         <div className="page-head-actions">
           {ready && (
-            <fieldset className="view-select collection-views">
-              <legend>{collectionTexts.viewLabel}</legend>
-              <div className="options">
-                {(['overview', 'binder'] as const).map((value) => (
-                  <label key={value} className="option">
-                    <input type="radio" name={viewName} checked={prefs.view === value} onChange={() => setPrefs({ view: value })} />{' '}
-                    {value === 'overview' ? collectionTexts.viewOverview : collectionTexts.viewBinder}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <SegmentedChoice
+              className="collection-views"
+              legend={collectionTexts.viewLabel}
+              name={viewName}
+              value={prefs.view}
+              options={COLLECTION_VIEW_OPTIONS}
+              onChange={(view) => setPrefs({ view })}
+            />
           )}
           <ScanCardsButton {...scanProps} />
         </div>
@@ -156,22 +159,20 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
       )}
 
       {ready && prefs.view === 'overview' && overview.distinct === 0 && (
-        <div className="stats-card collection-empty">
+        <div className="empty">
           <ScanPrompt {...scanProps} />
-          <h2 className="collection-empty-title">{collectionTexts.emptyTitle}</h2>
+          <h2>{collectionTexts.emptyTitle}</h2>
           <p>{collectionTexts.emptyBody}</p>
-          <p>
-            <a className="button-primary" href="#/">
-              {collectionTexts.emptyLink}
-            </a>
-          </p>
+          <a className={cameraSupported() ? 'button-secondary' : 'button-primary'} href="#/">
+            {collectionTexts.emptyLink}
+          </a>
         </div>
       )}
 
       {ready && prefs.view === 'overview' && overview.distinct > 0 && (
         <div className="collection-progress">
-          <section className="stats-card collection-wide" aria-labelledby="coll-overview">
-            <h2 id="coll-overview" className="stats-card-title">
+          <section className="panel collection-wide" aria-labelledby="coll-overview">
+            <h2 id="coll-overview" className="panel-title">
               {collectionTexts.overviewHeading}
             </h2>
             <div className="overview-gauges">
@@ -202,13 +203,13 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
             </div>
           </section>
 
-          <section className="stats-card" aria-labelledby="coll-sets">
-            <h2 id="coll-sets" className="stats-card-title">
+          <section className="panel" aria-labelledby="coll-sets">
+            <h2 id="coll-sets" className="panel-title">
               {collectionTexts.setsHeading}
             </h2>
             <ul className="progress-list">{mainSets.map(setRow)}</ul>
             {otherSets.length > 0 && (
-              <details className="progress-more">
+              <details className="disclosure progress-more">
                 <summary>
                   {collectionTexts.otherProducts} ({otherSets.length})
                 </summary>
@@ -218,8 +219,8 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
             <p className="hint">{data.versions ? collectionTexts.setsHint : collectionTexts.setsNoVersions}</p>
           </section>
 
-          <section className="stats-card" aria-labelledby="coll-rarity">
-            <h2 id="coll-rarity" className="stats-card-title">
+          <section className="panel" aria-labelledby="coll-rarity">
+            <h2 id="coll-rarity" className="panel-title">
               {collectionTexts.rarityHeading}
             </h2>
             <ul className="progress-list">
@@ -239,8 +240,8 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
             )}
           </section>
 
-          <section className="stats-card" aria-labelledby="coll-colors">
-            <h2 id="coll-colors" className="stats-card-title">
+          <section className="panel" aria-labelledby="coll-colors">
+            <h2 id="coll-colors" className="panel-title">
               {collectionTexts.colorsTypesHeading}
             </h2>
             <h3 className="progress-subtitle">{collectionTexts.colorsHeading}</h3>
@@ -269,8 +270,8 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
             </ul>
           </section>
 
-          <section className="stats-card collection-wide" aria-labelledby="coll-missing">
-            <h2 id="coll-missing" className="stats-card-title">
+          <section className="panel collection-wide" aria-labelledby="coll-missing">
+            <h2 id="coll-missing" className="panel-title">
               {collectionTexts.missingHeading}
             </h2>
             <p className="hint">{collectionTexts.missingIntro}</p>
@@ -329,7 +330,6 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
           </section>
         </div>
       )}
-      <ScanCardsButton {...scanProps} variant="floating" />
     </>
   );
 }

@@ -161,12 +161,12 @@ describe('CatalogView: edition check before the first add (T-101)', () => {
     expect(await saved(repositories)).toEqual([{ card: 'alpha', count: 2, versions: { [BETA]: 2 } }]);
   });
 
-  it('Peru adds nothing and the question stays for the next add', async () => {
+  it('Peruuta adds nothing and the question stays for the next add', async () => {
     const user = userEvent.setup();
     const repositories = createMemoryRepositories();
     await renderView(repositories);
     await user.click(plus('Alpha'));
-    await user.click(screen.getByRole('button', { name: 'Peru' }));
+    await user.click(screen.getByRole('button', { name: 'Peruuta' }));
     await settle();
     expect(await saved(repositories)).toEqual([]);
     await user.click(plus('Alpha'));

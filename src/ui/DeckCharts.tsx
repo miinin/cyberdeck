@@ -9,6 +9,7 @@ import { typeColorClass } from './CardColor';
 import { CardName } from './CardName';
 import { deckTexts, formatDecimal, formatPercent } from './deckTexts';
 import { colorNames } from './texts';
+import { SegmentedChoice } from './SegmentedChoice';
 
 /*
  * The charts of the deck statistics (T-093). Every chart is decoration over text that says the same: the
@@ -234,17 +235,15 @@ export function DrawOdds({ rows, moments }: { rows: readonly DrawOddsRow[]; mome
   const sorted = [...rows].sort((a, b) => (b.odds[moment] ?? 0) - (a.odds[moment] ?? 0) || a.card.displayName.localeCompare(b.card.displayName, 'en'));
   return (
     <div className="draw-odds">
-      <fieldset className="segmented">
-        <legend>{deckTexts.drawPick}</legend>
-        <div className="segmented-options">
-          {moments.map((label, index) => (
-            <label key={label} className={'segmented-option' + (moment === index ? ' is-on' : '')}>
-              <input type="radio" name={name} checked={moment === index} onChange={() => setMoment(index)} />
-              {label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <SegmentedChoice
+        legendVisible
+        fill
+        legend={deckTexts.drawPick}
+        name={name}
+        value={moment}
+        options={moments.map((label, index) => [index, label] as const)}
+        onChange={setMoment}
+      />
       <ul className="odds-bars">
         {sorted.map(({ card, count, odds }) => {
           const odd = odds[moment] ?? 0;

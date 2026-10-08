@@ -220,7 +220,8 @@ body {
 }
 
 h1,
-h2 {
+h2,
+h3 {
   margin: 0;
   line-height: var(--line-height-heading);
   font-weight: var(--font-weight-bold);
@@ -250,6 +251,13 @@ h2 {
   font-size: var(--font-size-lg);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-h2);
+}
+
+/* Every h3 is small caps text like the other labels (T-118, UX-118-20); the card name is the one exception (.card-name). */
+h3 {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
 }
 
 p {
@@ -391,16 +399,40 @@ main {
   letter-spacing: 0;
 }
 
-/* Panel with HUD corner brackets (UX.md 3.4). Gradients instead of clip-path, so focus rings are not clipped. */
+/*
+ * Panel (T-118): the one section box of the app: surface, 1 px border and a short yellow tick in the top left corner.
+ * The title is a small muted heading (h2 or h3 by place in the outline). Notices and the status box keep the left rail.
+ */
 .panel {
-  padding: var(--space-4);
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
   border: 1px solid var(--color-border);
-  background:
-    linear-gradient(var(--color-bracket), var(--color-bracket)) 0 0 / 16px 2px no-repeat,
-    linear-gradient(var(--color-bracket), var(--color-bracket)) 0 0 / 2px 16px no-repeat,
-    linear-gradient(var(--color-bracket), var(--color-bracket)) 100% 100% / 16px 2px no-repeat,
-    linear-gradient(var(--color-bracket), var(--color-bracket)) 100% 100% / 2px 16px no-repeat,
-    var(--color-surface);
+  background: var(--color-surface);
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset-block-start: -1px;
+  inset-inline-start: -1px;
+  inline-size: 2.5rem;
+  block-size: 2px;
+  background: var(--color-brand-yellow);
+}
+
+.panel p {
+  margin: 0;
+}
+
+.panel-title {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
 }
 
 /*
@@ -409,6 +441,7 @@ main {
  */
 .button-primary,
 .button-secondary,
+.button-danger,
 .step,
 .theme-toggle {
   position: relative;
@@ -427,6 +460,8 @@ main {
   letter-spacing: var(--letter-spacing-button);
   text-transform: uppercase;
   text-align: center;
+  /* Links drawn as buttons are not underlined; the hover underline below is the cue (T-118, UX-118-10). */
+  text-decoration: none;
   /* Long labels wrap instead of widening the page when text is enlarged (UX-008). */
   max-width: 100%;
   white-space: normal;
@@ -492,6 +527,36 @@ main {
   cursor: progress;
 }
 
+/* Dangerous action (T-118, UX-118-12): the secondary structure in the danger colours, so it never looks like "Save". */
+.button-danger {
+  background: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.button-danger::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--color-danger-surface);
+  clip-path: var(--shape-chamfer-inner);
+}
+
+.button-danger:hover {
+  color: var(--color-bg);
+  text-decoration: underline;
+}
+
+.button-danger:hover::before {
+  background: var(--color-danger);
+}
+
+/* Compact button (T-118, UX-118-21): the only smaller button text; the height stays --target-min. */
+.button-compact {
+  padding-inline: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
 /* Count buttons (UX.md 7.5): smaller chamfer, the symbol is not uppercase text. */
 .step {
   /* Custom properties resolve where they are declared, so the shapes are redeclared for the smaller cut. */
@@ -518,6 +583,40 @@ main {
   letter-spacing: 0;
 }
 
+/*
+ * Small count buttons and the small action button share one 6 px chamfer and a 32 px height (T-118, UX-118-08):
+ * the "+ SB" / "→ SB" button (.tile-action) and the −/+ of deck rows and the picker (.step--compact).
+ */
+.step--compact,
+.tile-action {
+  --cut: 0.375rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --cut-inner-2: calc(var(--cut) - 2px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner)),
+    calc(100% - var(--cut-inner)) 100%,
+    0 100%
+  );
+  --shape-chamfer-inner-2: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut-inner-2)),
+    calc(100% - var(--cut-inner-2)) 100%,
+    0 100%
+  );
+}
+
+.step--compact {
+  inline-size: 2rem;
+  block-size: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  font-size: var(--font-size-base);
+}
+
 /* "+" at the maximum count: striped and muted, but still focusable (UX.md 6.4, 7.5). */
 .step-plus[aria-disabled='true'] {
   background: var(--color-border-strong);
@@ -536,6 +635,7 @@ main {
 /* After the base rules: the chamfer would clip the focus ring (UX.md 7.9 kohta 7). */
 .button-primary:focus-visible,
 .button-secondary:focus-visible,
+.button-danger:focus-visible,
 .step:focus-visible,
 .theme-toggle:focus-visible {
   clip-path: none;
@@ -704,11 +804,12 @@ main {
   font-size: var(--font-size-sm);
 }
 
+/* Every text field is --target-min high in total (T-118, UX-118-07): a fixed block size, not min-height plus padding. */
 .field input[type='search'] {
   width: 100%;
-  min-height: var(--target-min);
+  block-size: var(--target-min);
   margin-block-start: var(--space-1);
-  padding: var(--space-2) var(--space-3);
+  padding: 0 var(--space-3);
   border: 1px solid var(--color-border-strong);
   border-bottom-width: 2px;
   border-radius: 0;
@@ -826,11 +927,6 @@ main {
 /* "Vain omistetut" (UX.md 6.6) */
 .owned-only {
   margin-block-start: var(--space-2);
-}
-
-.owned-only .option {
-  align-self: flex-start;
-  font-weight: var(--font-weight-bold);
 }
 
 @media (min-width: 40rem) {
@@ -1202,7 +1298,6 @@ main {
 
 .card-dialog-details h3 {
   margin: 0 0 var(--space-1);
-  font-size: 1rem;
 }
 
 .card-dialog-details ul {
@@ -1224,6 +1319,7 @@ body:has(dialog[open]) {
 @media (forced-colors: active) {
   .button-primary,
   .button-secondary,
+  .button-danger,
   .step,
   .theme-toggle,
   .account-button {
@@ -1247,11 +1343,13 @@ body:has(dialog[open]) {
 @media (prefers-reduced-motion: no-preference) {
   .button-primary,
   .button-secondary,
+  .button-danger,
   .step,
   .theme-toggle,
   .button-primary::before,
   .step-plus::before,
   .button-secondary::before,
+  .button-danger::before,
   .step-minus::before,
   .theme-toggle::before,
   .account-button,
@@ -1269,6 +1367,7 @@ body:has(dialog[open]) {
 
   .button-primary:active,
   .button-secondary:active,
+  .button-danger:active,
   .step:active,
   .theme-toggle:active,
   .account-button:active {
@@ -1369,6 +1468,8 @@ body:has(dialog[open]) {
   font-size: var(--font-size-card-name);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-body);
+  text-transform: none;
   overflow-wrap: anywhere;
 }
 
@@ -1493,7 +1594,10 @@ body:has(dialog[open]) {
 
 .card-collection {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  gap: var(--space-1) var(--space-3);
   margin-inline: auto;
 }
 
@@ -1539,6 +1643,8 @@ body:has(dialog[open]) {
 
 .dialog-close {
   flex: none;
+  inline-size: var(--target-min);
+  padding: 0;
   font-size: var(--font-size-lg);
   letter-spacing: 0;
   text-transform: none;
@@ -1599,7 +1705,13 @@ body:has(dialog[open]) {
   margin-inline-start: auto;
 }
 
+/*
+ * Segmented choice (T-118, UX-118-06): the one control for "pick one of a few" in the whole app. Radio labels,
+ * toggle buttons and links all use .segmented-option inside .segmented. Outer height is --target-min (2 px frame).
+ * Selected = yellow fill and black text (a fill, never colour alone: the frame and the focus ring stay).
+ */
 .view-select {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1610,9 +1722,112 @@ body:has(dialog[open]) {
   border: 0;
 }
 
+/* The legend names the group for screen readers; it is shown only with has-legend. */
 .view-select legend {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
   padding: 0;
-  float: left;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.view-select.has-legend legend {
+  position: static;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.segmented {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  border: 2px solid var(--color-border-strong);
+}
+
+.segmented--fill {
+  display: flex;
+  flex: 1 1 100%;
+}
+
+.segmented-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  block-size: calc(var(--target-min) - 4px);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.segmented--fill .segmented-option {
+  flex: 1 1 0;
+}
+
+.segmented-option + .segmented-option {
+  border-inline-start: 2px solid var(--color-border-strong);
+}
+
+.segmented-option:hover {
+  background: var(--color-surface-hover);
+  text-decoration: none;
+}
+
+.segmented-option:has(input:checked),
+.segmented-option[aria-pressed='true'],
+.segmented-option[aria-current='page'] {
+  background: var(--color-brand-yellow);
+  color: #000;
+}
+
+.segmented-option input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented-option:focus-visible,
+.segmented-option:has(input:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: -4px;
+}
+
+@media (forced-colors: active) {
+  .segmented-option:has(input:checked),
+  .segmented-option[aria-pressed='true'],
+  .segmented-option[aria-current='page'] {
+    background: Highlight;
+    color: HighlightText;
+  }
 }
 
 .edit-switch {
@@ -1750,14 +1965,42 @@ body:has(dialog[open]) {
   box-shadow: inset 3px 0 0 var(--color-success);
 }
 
+/*
+ * Text links (T-118, UX-118-10): one look for links and link buttons. Always underlined (yellow line in the dark theme,
+ * black in the light one), text colour from the theme, never the browser's blue and violet. Classed links (.brand,
+ * navigation, tiles, buttons) keep their own look: the plain rules have no specificity.
+ */
+:where(a:not([class])),
+.text-link,
 .link-button {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-edge);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+:where(a:not([class]):hover),
+.text-link:hover,
+.link-button:hover {
+  color: var(--color-info);
+}
+
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2rem;
   padding: 0;
   border: 0;
   background: transparent;
-  color: inherit;
   font: inherit;
   text-align: start;
   cursor: pointer;
+}
+
+.link-button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .link-button:hover {
@@ -1871,8 +2114,8 @@ body:has(dialog[open]) {
 .deck-rename input,
 .deck-name-field input {
   width: 100%;
-  min-height: var(--target-min);
-  padding: var(--space-2) var(--space-3);
+  block-size: var(--target-min);
+  padding: 0 var(--space-3);
   border: 1px solid var(--color-border-strong);
   border-bottom-width: 2px;
   border-radius: 0;
@@ -2077,17 +2320,6 @@ body:has(dialog[open]) {
   margin: var(--space-2) 0 var(--space-1);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-}
-
-.editor-crumb .link-button {
-  min-block-size: 1.5rem;
-  text-decoration: underline;
-  text-decoration-color: var(--color-accent-edge);
-  text-underline-offset: 0.2em;
-}
-
-.editor-crumb .link-button:hover {
-  color: var(--color-text);
 }
 
 h1,
@@ -2307,10 +2539,6 @@ h3,
 }
 
 /* Deck editor: toast, result view selector and image grid (T-045). */
-.pick-view {
-  margin: 0;
-}
-
 .pick-bar {
   display: flex;
   flex-wrap: wrap;
@@ -2832,7 +3060,8 @@ h3,
 }
 
 .pick-table .col-deck {
-  inline-size: 8.5rem;
+  /* −, count, + and "+ SB" side by side need about 10.5rem (T-118, UX-118-04). */
+  inline-size: 11rem;
 }
 
 .pick-table tbody tr:nth-child(even) {
@@ -2938,22 +3167,6 @@ h3,
   font-family: var(--font-mono);
   font-weight: var(--font-weight-bold);
   line-height: 1;
-}
-
-/* Smaller −/+ (32 px) in the picker, as in the deck rows. */
-.pick-table .step,
-.pick-image .step {
-  --cut: 0.4rem;
-  --cut-inner: calc(var(--cut) - 1px);
-  --cut-inner-2: calc(var(--cut) - 2px);
-  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
-  --shape-chamfer-inner: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner)), calc(100% - var(--cut-inner)) 100%, 0 100%);
-  --shape-chamfer-inner-2: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner-2)), calc(100% - var(--cut-inner-2)) 100%, 0 100%);
-  inline-size: 2rem;
-  block-size: 2rem;
-  min-width: 2rem;
-  min-height: 2rem;
-  font-size: var(--font-size-base);
 }
 
 .pick-table .card-row-controls,
@@ -3109,10 +3322,6 @@ h3,
   .pick-table .col-rarity {
     inline-size: 10rem;
   }
-
-  .pick-table .col-deck {
-    inline-size: 10rem;
-  }
 }
 
 /*
@@ -3253,12 +3462,7 @@ button.legality:focus-visible {
 
 /* Looks like a link, not like plain text (UX-050). */
 .deck-back .link-button {
-  min-block-size: 1.5rem;
   font-weight: var(--font-weight-bold);
-  text-decoration: underline;
-  text-decoration-color: var(--color-accent-edge);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.2em;
 }
 
 /* Side by side with the results it is a skip link, shown when focused (UX-044). */
@@ -3318,11 +3522,6 @@ button.legality:focus-visible {
   margin: 0;
   padding: 0;
   border: 0;
-}
-
-.deck-view .option {
-  min-block-size: 2rem;
-  font-size: var(--font-size-sm);
 }
 
 /* Legends: three image slots side by side, an empty slot as a dashed frame. */
@@ -3469,8 +3668,9 @@ button.legality:focus-visible {
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr) 2rem auto;
-  grid-template-areas: 'gem name count step';
+  /* One column set for every row (main deck, Legends, sideboard): the count, the −/+ and the move button line up. */
+  grid-template-columns: 2rem minmax(0, 1fr) 2.25rem auto 4rem;
+  grid-template-areas: 'gem name count step move';
   align-items: center;
   gap: 0 var(--space-2);
   min-block-size: 2.75rem;
@@ -3487,8 +3687,8 @@ button.legality:focus-visible {
 .deck-tile.is-missing,
 .deck-tile.is-problem {
   grid-template-areas:
-    'gem name count step'
-    'gem miss count step';
+    'gem name count step move'
+    'gem miss count step move';
   padding-block: 2px;
 }
 
@@ -3501,7 +3701,7 @@ button.legality:focus-visible {
   position: absolute;
   inset-block: 0;
   /* Ends where the count and the stepper begin. */
-  inset-inline-end: 6.5rem;
+  inset-inline-end: 11rem;
   z-index: -1;
   inline-size: 8rem;
   opacity: 0.38;
@@ -3593,20 +3793,6 @@ button.legality:focus-visible {
   gap: 2px;
 }
 
-.deck-tile .step {
-  --cut: 0.3rem;
-  --cut-inner: calc(var(--cut) - 1px);
-  --cut-inner-2: calc(var(--cut) - 2px);
-  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
-  --shape-chamfer-inner: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner)), calc(100% - var(--cut-inner)) 100%, 0 100%);
-  --shape-chamfer-inner-2: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner-2)), calc(100% - var(--cut-inner-2)) 100%, 0 100%);
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
-  min-width: 1.75rem;
-  min-height: 1.75rem;
-  font-size: var(--font-size-base);
-}
-
 .deck-card-count-spoken {
   display: contents;
 }
@@ -3674,9 +3860,12 @@ button.legality:focus-visible {
   position: absolute;
   inset: 0 0 auto;
   display: block;
-  padding: 0.3rem 2.5rem 0.6rem var(--space-2);
+  /* Solid (T-118, UX-118-05): the card's printed Cost and name never show through the label. */
+  box-sizing: border-box;
+  block-size: 1.75rem;
+  padding: 0.3rem 2.5rem 0 var(--space-2);
   overflow: hidden;
-  background: linear-gradient(to bottom, rgb(0 0 0 / 0.85) 60%, rgb(0 0 0 / 0));
+  background: #000;
   color: #f1f1ec;
   font-size: 0.875rem;
   font-weight: var(--font-weight-bold);
@@ -3812,7 +4001,8 @@ button.legality:focus-visible {
 
 /* Disabled actions (T-053): a muted fill and no pointer, so they do not look clickable. */
 .button-primary:disabled,
-.button-secondary:disabled {
+.button-secondary:disabled,
+.button-danger:disabled {
   background: var(--color-border);
   color: var(--color-text-muted);
   cursor: not-allowed;
@@ -3821,69 +4011,9 @@ button.legality:focus-visible {
 }
 
 .button-primary:disabled::before,
-.button-secondary:disabled::before {
+.button-secondary:disabled::before,
+.button-danger:disabled::before {
   background: var(--color-surface);
-}
-
-/* Draw odds (T-053): closed by default, the table scrolls inside its own region. */
-.stat-odds {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-
-.stat-odds > summary {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-block-size: var(--target-min);
-  padding: var(--space-1) var(--space-3);
-  color: var(--color-text);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-caps);
-  cursor: pointer;
-  list-style: none;
-}
-
-.stat-odds > summary::-webkit-details-marker {
-  display: none;
-}
-
-.stat-odds > summary::before {
-  content: '';
-  flex: none;
-  inline-size: 0.5rem;
-  block-size: 0.5rem;
-  border-block-end: 2px solid var(--color-accent-edge);
-  border-inline-end: 2px solid var(--color-accent-edge);
-  transform: rotate(-45deg);
-}
-
-.stat-odds[open] > summary::before {
-  transform: rotate(45deg);
-}
-
-.stat-odds > summary:hover {
-  background: var(--color-surface-hover);
-  text-decoration: underline;
-}
-
-.stat-odds > summary:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.stat-odds[open] > summary {
-  border-block-end: 1px solid var(--color-border);
-}
-
-.stat-odds .table-scroll {
-  border: 0;
-}
-
-.stat-odds > .hint {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
 }
 
 .odds-table .cell-name {
@@ -4010,7 +4140,6 @@ button.legality:focus-visible {
 
 @media (forced-colors: active) {
   .stat-summary > div,
-  .stat-odds,
   .hand-card-missing {
     border: 1px solid CanvasText;
   }
@@ -4111,10 +4240,10 @@ button.legality:focus-visible {
   grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
 }
 
+/* No overflow clipping here: the export menu opens over the next card (T-118, UX-118-01); the banner clips itself. */
 .deck-row {
   gap: 0;
   padding: 0;
-  overflow: hidden;
   border-block-start: 3px solid var(--color-accent-edge);
 }
 
@@ -4221,25 +4350,6 @@ button.legality:focus-visible {
   grid-column: 1 / -1;
 }
 
-/* Six actions on a card: compact, but still at least 2.75rem high. */
-.deck-row > .row-actions > button {
-  padding-inline: var(--space-2);
-  font-size: 0.875rem;
-}
-
-.deck-empty {
-  max-width: 44rem;
-}
-
-.deck-empty .deck-empty-title {
-  margin: 0;
-  font-size: var(--font-size-lg);
-}
-
-.deck-empty p {
-  margin: 0;
-}
-
 /* Import (T-051): the two sources side by side, the report in the deck column's style. */
 .import-sources {
   display: grid;
@@ -4252,15 +4362,6 @@ button.legality:focus-visible {
 
 .deck-import-form.import-source-panel {
   max-width: none;
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-inline-start: 3px solid var(--color-accent-edge);
-  background: var(--color-surface);
-}
-
-.import-source-panel h2 {
-  margin: 0;
-  font-size: var(--font-size-lg);
 }
 
 .import-source-panel .hint,
@@ -4270,8 +4371,8 @@ button.legality:focus-visible {
 
 .deck-import-form input[type='url'] {
   width: 100%;
-  min-height: var(--target-min);
-  padding: var(--space-2) var(--space-3);
+  block-size: var(--target-min);
+  padding: 0 var(--space-3);
   border: 1px solid var(--color-border-strong);
   border-bottom-width: 2px;
   border-radius: 0;
@@ -4311,10 +4412,6 @@ button.legality:focus-visible {
   align-items: start;
 }
 
-.import-layout h3 {
-  margin-block: 0 var(--space-2);
-}
-
 .import-head,
 .import-save,
 .import-rules {
@@ -4339,15 +4436,6 @@ button.legality:focus-visible {
   color: var(--color-success);
 }
 
-.deck-name-field.import-save {
-  padding: var(--space-4);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface);
-}
-
-.import-save h3 {
-  margin: 0;
-}
 
 .import-save .row-actions {
   margin-block-start: var(--space-1);
@@ -4534,7 +4622,7 @@ button.legality:focus-visible {
 
 /* T-066: the order selects look like the other fields: a thin border, a modest focus ring. */
 .sort-select select {
-  min-height: var(--target-min);
+  block-size: var(--target-min);
   max-width: 100%;
   padding: var(--space-1) var(--space-2);
   border: 1px solid var(--color-border-strong);
@@ -4709,7 +4797,7 @@ section[aria-labelledby='have-heading'] {
   position: absolute;
   inset-block-start: 100%;
   inset-inline-start: 0;
-  z-index: 5;
+  z-index: 20;
   display: grid;
   gap: var(--space-2);
   min-width: 12rem;
@@ -4894,13 +4982,6 @@ section[aria-labelledby='have-heading'] {
   font-weight: 600;
 }
 
-.art-breakdown summary {
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
-
 .art-breakdown .version-row {
   flex-wrap: wrap;
 }
@@ -4927,7 +5008,7 @@ section[aria-labelledby='have-heading'] {
 }
 
 .set-filter select {
-  min-height: var(--target-min);
+  block-size: var(--target-min);
   max-width: 100%;
   padding: var(--space-1) var(--space-2);
   border: 1px solid var(--color-border-strong);
@@ -5194,10 +5275,6 @@ section[aria-labelledby='have-heading'] {
     min-height: 0;
   }
 
-  .card-dialog-details .art-breakdown summary {
-    min-height: 32px;
-  }
-
   /* The breakdown opens over the neighbours' space, so no tile changes size or moves. */
   .card-dialog-details .art-breakdown[open] .version-list {
     position: absolute;
@@ -5234,10 +5311,6 @@ section[aria-labelledby='have-heading'] {
   margin: 0;
   font-size: 0.75rem;
   color: var(--color-text-muted);
-}
-
-.edition-select .options {
-  flex-wrap: wrap;
 }
 
 /*
@@ -5402,11 +5475,6 @@ section[aria-labelledby='have-heading'] {
 
   .card-dialog-details .art-tile:last-child {
     border-bottom: 0;
-  }
-
-  .card-dialog-details .art-breakdown summary {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
   }
 
   .card-dialog-details .art-tile.is-selected .art-thumb {
@@ -5580,9 +5648,6 @@ section[aria-labelledby='have-heading'] {
     grid-column: 1;
     grid-row: 3;
     width: 100%;
-    min-height: var(--target-min);
-    padding-inline: var(--space-2);
-    font-size: var(--font-size-sm);
   }
 
   .card-dialog.has-details .card-dialog-details {
@@ -5620,47 +5685,49 @@ section[aria-labelledby='have-heading'] {
  * button. The rule toast floats at the bottom instead of pushing the results down (no jumping page).
  */
 .tile-action {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-block-size: 1.75rem;
+  block-size: 2rem;
+  min-inline-size: 2rem;
   padding: 0 var(--space-2);
-  border: 1px solid var(--color-border-strong);
+  border: 0;
   border-radius: 0;
-  background: var(--color-surface-raised);
+  background: var(--color-border-strong);
   color: var(--color-text);
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: var(--font-weight-bold);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
+  clip-path: var(--shape-chamfer);
+}
+
+.tile-action::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--color-surface-raised);
+  clip-path: var(--shape-chamfer-inner);
 }
 
 .tile-action:hover {
-  border-color: var(--color-accent-2);
-  color: var(--color-accent-2);
+  background: var(--color-info);
+  text-decoration: underline;
+}
+
+.tile-action:hover::before {
+  background: var(--color-surface-hover);
 }
 
 .tile-action:focus-visible {
+  clip-path: none;
   outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.deck-tile.has-move {
-  grid-template-columns: 2rem minmax(0, 1fr) 2rem auto auto;
-  grid-template-areas: 'gem name count step move';
-}
-
-.deck-tile.has-move.is-missing,
-.deck-tile.has-move.is-problem {
-  grid-template-areas:
-    'gem name count step move'
-    'gem miss count step move';
-}
-
-.deck-tile.has-move .deck-tile-art {
-  inset-inline-end: 10rem;
+  outline-offset: var(--focus-offset);
 }
 
 .deck-tile-move {
@@ -5732,7 +5799,7 @@ section[aria-labelledby='have-heading'] {
   vertical-align: middle;
 }
 
-@media (min-width: 64rem) {
+@container picker (min-width: 26.01rem) {
   .pick-table .col-deck {
     white-space: nowrap;
   }
@@ -5765,38 +5832,6 @@ section[aria-labelledby='have-heading'] {
 
 .seg-other {
   --seg: var(--seg-other);
-}
-
-.stats-card {
-  position: relative;
-  display: grid;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4) var(--space-4);
-  border: 1px solid var(--color-border);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-raised) 70%, transparent), var(--color-surface));
-}
-
-.stats-card::before {
-  content: "";
-  position: absolute;
-  inset-block-start: -1px;
-  inset-inline-start: -1px;
-  inline-size: 2.5rem;
-  block-size: 2px;
-  background: var(--color-brand-yellow);
-}
-
-.stats-card p {
-  margin: 0;
-}
-
-.stats-card-title {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--letter-spacing-caps);
-  text-transform: uppercase;
 }
 
 /* Rings */
@@ -6239,54 +6274,9 @@ section[aria-labelledby='have-heading'] {
   gap: var(--space-3);
 }
 
-.segmented {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.segmented legend {
-  margin-block-end: var(--space-1);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.segmented-options {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  border: 1px solid var(--color-border-strong);
-}
-
-.segmented-option {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-block-size: var(--target-min);
-  padding: 0 var(--space-1);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  cursor: pointer;
-}
-
-.segmented-option + .segmented-option {
-  border-inline-start: 1px solid var(--color-border-strong);
-}
-
-.segmented-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.segmented-option.is-on {
-  background: var(--color-brand-yellow);
-  color: var(--color-on-accent);
-}
-
-.segmented-option:has(input:focus-visible) {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
+.draw-odds .view-select {
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .odds-bars {
@@ -6623,52 +6613,6 @@ section[aria-labelledby='have-heading'] {
 
 /* Public decks (T-098, D-025) */
 /* Own | Public: the same segmented choice as the Cards page view switch (T-115, T-117). */
-.deck-tabs {
-  display: inline-flex;
-  flex-wrap: nowrap;
-  inline-size: fit-content;
-  max-inline-size: 100%;
-  margin-block: var(--space-3);
-  border: 2px solid var(--color-border-strong);
-}
-
-.deck-tabs a {
-  display: grid;
-  place-items: center;
-  min-block-size: calc(var(--target-min) - 4px);
-  padding: 0 var(--space-3);
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font-weight: var(--font-weight-bold);
-  text-align: center;
-  text-decoration: none;
-}
-
-.deck-tabs a + a {
-  border-inline-start: 2px solid var(--color-border-strong);
-}
-
-.deck-tabs a:hover {
-  background: var(--color-surface-hover);
-}
-
-.deck-tabs a[aria-current='page'] {
-  background: var(--color-brand-yellow);
-  color: #000;
-}
-
-.deck-tabs a:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: -4px;
-}
-
-@media (forced-colors: active) {
-  .deck-tabs a[aria-current='page'] {
-    background: Highlight;
-    color: HighlightText;
-  }
-}
-
 .deck-public-badge {
   align-self: flex-start;
   padding: 0 var(--space-2);
@@ -6790,8 +6734,9 @@ section[aria-labelledby='have-heading'] {
 }
 
 /* T-101: rows and sections that break a deck rule. */
+/* Rows without a note line keep the (screen reader only) text in the name cell, so the grid gets no extra columns. */
 .deck-tile-notes {
-  grid-area: miss;
+  grid-area: name;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -6827,6 +6772,10 @@ section[aria-labelledby='have-heading'] {
 }
 .problem-flag--section {
   font-size: var(--font-size-sm);
+}
+.deck-tile.is-missing .deck-tile-notes,
+.deck-tile.is-problem .deck-tile-notes {
+  grid-area: miss;
 }
 .deck-tile.is-problem {
   border-inline-start-color: var(--color-danger);
@@ -6868,7 +6817,7 @@ section[aria-labelledby='have-heading'] {
 .edition-confirm-picture img {
   display: block;
   max-width: 100%;
-  max-height: 45vh;
+  max-height: 40dvh;
   height: auto;
 }
 .edition-confirm-mark {
@@ -7084,14 +7033,6 @@ section[aria-labelledby='have-heading'] {
 
 .proxy-settings {
   font-size: var(--font-size-sm);
-}
-
-.proxy-settings summary {
-  display: flex;
-  align-items: center;
-  min-block-size: var(--target-min);
-  cursor: pointer;
-  color: var(--color-text-muted);
 }
 
 .proxy-settings-body {
@@ -7446,15 +7387,6 @@ section[aria-labelledby='have-heading'] {
   grid-column: 1 / -1;
 }
 
-.collection-empty {
-  max-inline-size: 40rem;
-  margin-block-start: var(--space-4);
-}
-
-.collection-empty-title {
-  margin: 0;
-}
-
 .collection-kpis {
   flex: 1;
 }
@@ -7515,14 +7447,6 @@ section[aria-labelledby='have-heading'] {
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-caps);
-}
-
-.progress-more summary {
-  min-height: var(--target-min);
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-weight: var(--font-weight-bold);
 }
 
 .progress-more .progress-list {
@@ -7713,8 +7637,7 @@ section[aria-labelledby='have-heading'] {
 }
 
 /* Scan buttons, mode choice and continuous mode (T-108). */
-.scan-open,
-.scan-fab {
+.scan-open {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -7722,41 +7645,6 @@ section[aria-labelledby='have-heading'] {
 
 .scan-icon {
   flex: none;
-}
-
-/* A floating camera button for the Collection view on a phone, in the bottom right corner. It sits above the page
-   content only; the spacer after the view keeps the last lines from hiding under it. */
-.scan-fab {
-  position: fixed;
-  inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
-  inset-inline-end: var(--space-4);
-  z-index: 5;
-  min-block-size: var(--target-min);
-  padding: var(--space-2) var(--space-4);
-  border: 2px solid var(--color-brand-yellow);
-  border-radius: 999px;
-  background: var(--color-brand-yellow);
-  color: #000;
-  font: inherit;
-  font-weight: var(--font-weight-bold);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
-  cursor: pointer;
-}
-
-.scan-fab:focus-visible {
-  outline: 3px solid var(--color-text);
-  outline-offset: 2px;
-}
-
-.scan-fab-spacer {
-  block-size: calc(var(--target-min) + var(--space-6));
-}
-
-@media (min-width: 40rem) {
-  .scan-fab,
-  .scan-fab-spacer {
-    display: none;
-  }
 }
 
 .scan-prompt {
@@ -7775,30 +7663,7 @@ section[aria-labelledby='have-heading'] {
 }
 
 .scan-prompt-icon {
-  color: var(--color-brand-yellow);
-}
-
-.scanner-mode {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.scanner-mode-option {
-  flex: 1 1 8rem;
-  min-block-size: var(--target-min);
-  padding: var(--space-2) var(--space-3);
-  border: 2px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font: inherit;
-  cursor: pointer;
-}
-
-.scanner-mode-option[aria-pressed='true'] {
-  border-color: var(--color-brand-yellow);
-  box-shadow: 0 0 0 2px var(--color-brand-yellow);
-  font-weight: var(--font-weight-bold);
+  color: var(--color-accent-edge);
 }
 
 .scanner-status {
@@ -7807,11 +7672,6 @@ section[aria-labelledby='have-heading'] {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-}
-
-.scanner-status .link-button {
-  min-block-size: var(--target-min);
-  text-decoration: underline;
 }
 
 .scanner-frame[data-flash] {
@@ -8197,42 +8057,7 @@ section[aria-labelledby='have-heading'] {
 }
 
 .editor-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   margin-block: var(--space-2);
-  border: 2px solid var(--color-border-strong);
-}
-
-.editor-tabs button {
-  min-block-size: var(--target-min);
-  padding: var(--space-2) var(--space-3);
-  border: 0;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font: inherit;
-  font-weight: var(--font-weight-bold);
-  cursor: pointer;
-}
-
-.editor-tabs button + button {
-  border-inline-start: 2px solid var(--color-border-strong);
-}
-
-.editor-tabs button[aria-pressed='true'] {
-  background: var(--color-brand-yellow);
-  color: #000;
-}
-
-.editor-tabs button:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: -4px;
-}
-
-@media (forced-colors: active) {
-  .editor-tabs button[aria-pressed='true'] {
-    background: Highlight;
-    color: HighlightText;
-  }
 }
 
 /* Mobile navigation (T-111). Below 40 rem the header has two rows: the logo and tools first, then the main navigation
@@ -8401,7 +8226,7 @@ section[aria-labelledby='have-heading'] {
 /* Card page controls (T-115): one search row, segmented choices like the editor tabs, switches, one rhythm. */
 .search-row {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: var(--space-2);
 }
 .search-row .search-field {
@@ -8413,70 +8238,7 @@ section[aria-labelledby='have-heading'] {
 }
 .search-row .filter-toggle {
   flex: none;
-  align-self: stretch;
   margin-block-start: 0;
-}
-
-.view-select legend {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-.view-select {
-  position: relative;
-}
-.view-select .options {
-  display: inline-flex;
-  flex-wrap: nowrap;
-  gap: 0;
-  border: 2px solid var(--color-border-strong);
-}
-.view-select .option {
-  position: relative;
-  justify-content: center;
-  min-block-size: calc(var(--target-min) - 4px);
-  padding: 0 var(--space-3);
-  border: 0;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
-  text-decoration: none;
-}
-.view-select .option + .option {
-  border-inline-start: 2px solid var(--color-border-strong);
-}
-.view-select .option:hover {
-  background: var(--color-surface-hover);
-  text-decoration: none;
-}
-.view-select .option:has(input:checked) {
-  background: var(--color-brand-yellow);
-  color: #000;
-}
-.view-select .option input {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  margin: 0;
-  border: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-.view-select .option:has(input:focus-visible) {
-  outline: var(--focus-ring);
-  outline-offset: -4px;
-}
-@media (forced-colors: active) {
-  .view-select .option:has(input:checked) {
-    background: Highlight;
-    color: HighlightText;
-  }
 }
 
 .list-toolbar {
@@ -8682,14 +8444,11 @@ section[aria-labelledby='have-heading'] {
   margin-block: var(--space-3);
 }
 
-/* On a phone the floating camera button does the scanning on the Collection page, so the header keeps only the view choice. */
+/* On a phone the head actions start from the left (T-118, UX-118-09: the same compact scan button as on a desktop, no floating one). */
 @media (max-width: 39.99rem) {
   .page-head-actions {
     margin-inline-start: 0;
     justify-content: flex-start;
-  }
-  .page-head-actions .scan-open {
-    display: none;
   }
 }
 
@@ -8736,7 +8495,7 @@ section[aria-labelledby='have-heading'] {
   min-width: 0;
 }
 
-.deck-empty .deck-actions {
+.empty .deck-actions {
   inline-size: fit-content;
   max-inline-size: 100%;
   margin-block-start: var(--space-2);
@@ -8804,3 +8563,75 @@ section[aria-labelledby='have-heading'] {
 .deck-color-letter.is-yellow { color: var(--color-code-yellow); }
 .deck-color-letter.is-green { color: var(--color-code-green); }
 .deck-color-letter.is-blue { color: var(--color-code-blue); }
+
+/*
+ * Dialogs on a phone (T-118, UX-118-14, UX-118-17). The test hand and the edition question are full-screen views like the
+ * card details: the dialog layer scrolls as one page, with no frame and no scroll area inside. Confirmation dialogs
+ * stack their buttons full width with the main action on top (the DOM order stays: cancel first).
+ */
+@media (max-width: 39.99rem) {
+  .test-hand-dialog,
+  .edition-confirm {
+    padding: 0;
+    background: var(--color-bg);
+  }
+
+  .test-hand-body,
+  .edition-confirm .confirm-dialog-body {
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: 100dvh;
+    margin: 0;
+    border: 0;
+  }
+
+  .test-hand-body {
+    border-block-start: 3px solid var(--color-accent-edge);
+  }
+
+  .confirm-dialog .row-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .confirm-dialog .scanner-actions:not(.scanner-actions--cancel-first) {
+    flex-direction: column;
+  }
+}
+
+/* Trade link tables (T-118, UX-118-16): name, count and tradeable count as columns, "–" instead of repeated text. */
+.trade-table {
+  inline-size: 100%;
+  max-inline-size: 48rem;
+  border-collapse: collapse;
+}
+
+.trade-table th,
+.trade-table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: middle;
+}
+
+.trade-table thead th {
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.trade-table tbody th {
+  font-weight: var(--font-weight-normal);
+}
+
+.trade-table .trade-number {
+  inline-size: 6.5rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.trade-table thead .trade-number {
+  font-family: inherit;
+}

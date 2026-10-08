@@ -69,11 +69,11 @@ describe('public decks list', () => {
 
   it('is not indexed by search engines while shown (SR-41)', async () => {
     renderApp();
-    await screen.findByText('Julkisia pakkoja ei ole vielä', { exact: false });
+    await screen.findByRole('heading', { name: 'Ei vielä julkisia pakkoja' });
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', expect.stringContaining('noindex'));
     window.location.hash = '#/pakat';
     await screen.findByRole('link', { name: 'Omat pakat' });
-    await waitFor(() => expect(screen.queryByText('Julkisia pakkoja ei ole vielä', { exact: false })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Ei vielä julkisia pakkoja' })).toBeNull());
     expect(document.head.querySelector('meta[name="robots"]')).toBeNull();
   });
 
@@ -84,7 +84,7 @@ describe('public decks list', () => {
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Julkisia pakkoja ei voitu hakea');
     await userEvent.setup().click(within(alert).getByRole('button', { name: 'Yritä uudelleen' }));
-    expect(await screen.findByText('Julkisia pakkoja ei ole vielä', { exact: false })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Ei vielä julkisia pakkoja' })).toBeInTheDocument();
   });
 
   it('says the list is unavailable, not offline, when the error is not a lost connection', async () => {
@@ -338,7 +338,7 @@ describe('public list after publishing', () => {
     const user = userEvent.setup();
     renderApp({ signedIn: true, initial: ownDecks() });
     // The list is read (empty) and cached first.
-    await screen.findByText('Julkisia pakkoja ei ole vielä', { exact: false });
+    await screen.findByRole('heading', { name: 'Ei vielä julkisia pakkoja' });
     window.location.hash = `#/pakat/${DECK.id}`;
     await screen.findByRole('switch', { name: 'Julkinen' });
     await user.click(screen.getByRole('switch', { name: 'Julkinen' }));

@@ -462,12 +462,12 @@ export function CardScannerDialog({
               <strong>{scannerTexts.editionIntro}</strong>
             </p>
             <p className="hint">{scannerTexts.editionNote}</p>
-            <div className="scanner-mode" role="group" aria-label={scannerTexts.modeLabel}>
+            <div className="segmented segmented--fill" role="group" aria-label={scannerTexts.modeLabel}>
               {(['single', 'continuous'] as const).map((option) => (
                 <button
                   key={option}
                   type="button"
-                  className="scanner-mode-option"
+                  className="segmented-option"
                   aria-pressed={mode === option}
                   onClick={() => onModeChange(option)}
                 >
@@ -476,15 +476,15 @@ export function CardScannerDialog({
               ))}
             </div>
             <p className="hint">{scannerTexts.modeNote}</p>
-            <div className="row-actions scanner-actions">
+            <div className="row-actions scanner-actions scanner-actions--cancel-first">
+              <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
+                {scannerTexts.cancel}
+              </button>
               <button type="button" className="button-primary" onClick={() => void start('beta')}>
                 {scannerTexts.startWith(texts.editionBeta)}
               </button>
               <button type="button" className="button-primary" onClick={() => void start('retail')}>
                 {scannerTexts.startWith(texts.editionRetail)}
-              </button>
-              <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
-                {scannerTexts.cancel}
               </button>
             </div>
           </>
@@ -699,14 +699,14 @@ export function ScanCardsButton(props: {
   edition: Edition;
   onEditionChange: (edition: Edition) => void;
   preferences: PreferencesRepository;
-  /** primary: the main action of the view; floating: round button in the corner on a phone (T-108). */
-  variant?: 'secondary' | 'primary' | 'floating';
+  /** primary: the main action of the view (T-108). */
+  variant?: 'secondary' | 'primary';
 }) {
   const { variant = 'secondary', preferences, ...dialogProps } = props;
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useScanMode(preferences);
   if (!cameraSupported() || props.snapshot.phase !== 'ready') return null;
-  const className = variant === 'floating' ? 'scan-fab' : `${variant === 'primary' ? 'button-primary' : 'button-secondary'} scan-open`;
+  const className = `${variant === 'primary' ? 'button-primary' : 'button-secondary'} scan-open`;
   return (
     <>
       <button
@@ -718,7 +718,6 @@ export function ScanCardsButton(props: {
         <CameraIcon />
         {variant === 'secondary' ? scannerTexts.openShort : scannerTexts.open}
       </button>
-      {variant === 'floating' && <div className="scan-fab-spacer" aria-hidden="true" />}
       {open && <CardScannerDialog {...dialogProps} mode={mode} onModeChange={setMode} onClose={() => setOpen(false)} />}
     </>
   );

@@ -4,7 +4,7 @@ export const scannerTextsFi = {
   openShort: 'Skannaa',
   title: 'Skannaa kortteja',
   close: 'Sulje',
-  cancel: 'Peru',
+  cancel: 'Peruuta',
   editionIntro: 'Skannaatko Beta- vai Retail-kortteja?',
   editionNote: 'Painosta ei voi lukea kuvasta, joten valitset sen tässä. Beta-kortin numeron edessä on β.',
   startWith: (edition: string) => `Skannaa ${edition}`,

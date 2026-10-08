@@ -48,6 +48,9 @@ import { proxyTexts } from './proxyTexts';
 import { useProxyQueue } from './SendToProxy';
 import { SortSelect } from './SortSelect';
 import { cardCount, texts } from './texts';
+import { SegmentedChoice } from './SegmentedChoice';
+
+const GAP_OPTIONS = GAPS_MM.map((gap) => [gap, proxyTexts.gapOption(gap)] as const);
 
 /** The filters stay collapsed behind one button in the narrow picker; the search field is always visible. */
 const NEVER_QUERY = '(min-width: 9999rem)';
@@ -145,7 +148,7 @@ function ClearQueueDialog({
             <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
               {proxyTexts.clearKeep}
             </button>
-            <button type="button" className="button-primary" onClick={onClear}>
+            <button type="button" className="button-danger" onClick={onClear}>
               {proxyTexts.clearConfirm}
             </button>
           </div>
@@ -604,20 +607,17 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
             )}
           </div>
 
-          <details className="proxy-settings proxy-screen">
+          <details className="disclosure proxy-settings proxy-screen">
             <summary>{proxyTexts.settingsHeading}</summary>
             <div className="proxy-settings-body">
-              <fieldset className="view-select">
-                <legend>{proxyTexts.gapLegend}</legend>
-                <div className="options">
-                  {GAPS_MM.map((gap) => (
-                    <label key={gap} className="option">
-                      <input type="radio" name="proxy-gap" value={gap} checked={gapMm === gap} onChange={() => setGapMm(gap)} />{' '}
-                      {proxyTexts.gapOption(gap)}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+              <SegmentedChoice
+                legendVisible
+                legend={proxyTexts.gapLegend}
+                name="proxy-gap"
+                value={gapMm}
+                options={GAP_OPTIONS}
+                onChange={setGapMm}
+              />
               <label className="option">
                 <input type="checkbox" checked={cutMarks} onChange={(event) => setCutMarks(event.target.checked)} /> {proxyTexts.cutMarks}
               </label>

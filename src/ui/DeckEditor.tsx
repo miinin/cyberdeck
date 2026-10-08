@@ -51,6 +51,11 @@ import { forgetPublicDecks } from './publicDecksCache';
 import type { PublishState } from '../account';
 
 /** A constant, so useSyncExternalStore sees an unchanged snapshot. */
+const PICK_VIEW_OPTIONS = [
+  ['images', deckTexts.pickViewImages],
+  ['list', deckTexts.pickViewList],
+] as const;
+
 const IDLE_PUBLISH: PublishState = { kind: 'idle' };
 import { DeckList } from './DeckList';
 import type { DeckView } from './DeckList';
@@ -74,6 +79,7 @@ import { proxyTexts } from './proxyTexts';
 import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 import { trackDeckSave } from './useDecks';
 import { EDITOR_TABS_QUERY, EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
+import { SegmentedChoice } from './SegmentedChoice';
 
 /** A change is saved this long after the last edit (T-013). */
 export const AUTOSAVE_DELAY_MS = 500;
@@ -738,11 +744,11 @@ export function DeckEditor({
       )}
 
       {tabbed && (
-        <div ref={tabsRef} className="editor-tabs" role="group" aria-label={deckTexts.editorTabsLabel}>
-          <button type="button" aria-pressed={tab === 'deck'} onClick={() => selectTab('deck', false)}>
+        <div ref={tabsRef} className="segmented segmented--fill editor-tabs" role="group" aria-label={deckTexts.editorTabsLabel}>
+          <button type="button" className="segmented-option" aria-pressed={tab === 'deck'} onClick={() => selectTab('deck', false)}>
             {deckTexts.editorTabDeck}
           </button>
-          <button type="button" aria-pressed={tab === 'add'} onClick={() => selectTab('add', false)}>
+          <button type="button" className="segmented-option" aria-pressed={tab === 'add'} onClick={() => selectTab('add', false)}>
             {deckTexts.editorTabAdd}
           </button>
         </div>
@@ -820,28 +826,14 @@ export function DeckEditor({
             <button type="button" className="link-button focus-reveal" onClick={showDeck}>
               {deckTexts.goToDeck}
             </button>
-            <fieldset className="view-select pick-view">
-              <legend>{deckTexts.pickViewLegend}</legend>
-              <div className="options">
-                {(
-                  [
-                    ['list', deckTexts.pickViewList],
-                    ['images', deckTexts.pickViewImages],
-                  ] as const
-                ).map(([value, label]) => (
-                  <label key={value} className="option">
-                    <input
-                      type="radio"
-                      name="deck-pick-view"
-                      value={value}
-                      checked={pickView === value}
-                      onChange={() => handlePickView(value)}
-                    />{' '}
-                    {label}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <SegmentedChoice
+              className="pick-view"
+              legend={deckTexts.pickViewLegend}
+              name="deck-pick-view"
+              value={pickView}
+              options={PICK_VIEW_OPTIONS}
+              onChange={handlePickView}
+            />
             {pickView === 'images' && <ImageSizeSelect name="deck-image-size" value={imageSize} onChange={setImageSize} />}
           </div>
           <ActiveFilters

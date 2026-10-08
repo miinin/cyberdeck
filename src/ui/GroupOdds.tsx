@@ -24,7 +24,7 @@ export function GroupOdds({ deck, cardsByKey }: { deck: DeckContent; cardsByKey:
   const { copies, rows } = groupOdds(deck, cardsByKey, parseGroup(choice));
   return (
     <div className="group-odds">
-      <h3 className="stats-card-title">{deckTexts.groupOddsHeading}</h3>
+      <h3 className="panel-title">{deckTexts.groupOddsHeading}</h3>
       <div className="field">
         <label htmlFor={id}>{deckTexts.groupOddsLabel}</label>
         <select id={id} value={choice} onChange={(event) => setChoice(event.target.value)}>

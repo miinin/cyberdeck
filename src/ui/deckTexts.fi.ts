@@ -38,7 +38,7 @@ export const deckTextsFi = {
   navHaveWant: 'Have/Want',
 
   listHeading: 'Pakat',
-  listEmpty: 'Sinulla ei ole vielä pakkoja. Aloita luomalla ensimmäinen pakka.',
+  listEmpty: 'Rakenna pakka kortti kerrallaan, liitä valmis pakkalista tai hae julkinen pakka Netdeck.gg:stä.',
   listLoading: 'Ladataan pakkoja…',
   listUnavailable: 'Pakkoja ei voitu ladata. Lataa sivu uudelleen. Jos ongelma jatkuu, tarkista selaimen yksityisyysasetukset.',
   newDeck: 'Uusi pakka',
@@ -48,7 +48,6 @@ export const deckTextsFi = {
   allOwnedShort: 'Kaikki kokoelmassa',
   // Deck cards and empty state (T-051)
   listEmptyTitle: 'Ei vielä pakkoja',
-  listEmptyHint: 'Rakenna pakka kortti kerrallaan, liitä valmis pakkalista tai hae julkinen pakka Netdeck.gg:stä.',
   fetchNetdeck: 'Hae Netdeck.gg:stä',
   deckColors: 'Värit',
   decksLabel: 'Omat pakat',
@@ -357,7 +356,7 @@ export const deckTextsFi = {
   shareSaveButton: 'Tallenna omaksi pakaksi',
   shareInvalidHeading: 'Linkki ei toimi',
   shareInvalid: 'Pakan linkki on rikkinäinen tai liian pitkä. Pyydä lähettäjää jakamaan pakka uudelleen.',
-  shareToDecks: 'Siirry Pakat-sivulle',
+  shareToDecks: 'Siirry Pakat-osioon',
 
   // Import (T-014)
   importButton: 'Tuo pakkalista',
@@ -365,6 +364,8 @@ export const deckTextsFi = {
   importIntro: 'Liitä pakkalista tekstikenttään tai valitse .txt- tai .json-tiedosto. Rivit ovat muotoa "3 Kortin nimi - Alaotsikko".',
   importTextLabel: 'Pakkalista',
   importFileLabel: 'Tai valitse .txt- tai .json-tiedosto',
+  importFileButton: 'Valitse tiedosto',
+  importFileNone: 'Ei valittua tiedostoa',
   importCheck: 'Tarkista lista',
   importBack: 'Takaisin pakkoihin',
   importErrors: {
@@ -421,7 +422,8 @@ export const deckTextsFi = {
   tabPublic: 'Julkiset pakat',
   publicIntro: 'Muiden pelaajien julkaisemat pakat, uusimmat päivitykset ensin. Pakkoja voi katsoa kirjautumatta.',
   publicLoading: 'Haetaan julkisia pakkoja…',
-  publicEmpty: 'Julkisia pakkoja ei ole vielä. Voit julkaista oman pakkasi pakkaeditorin Näkyvyys-kohdasta.',
+  publicEmptyTitle: 'Ei vielä julkisia pakkoja',
+  publicEmpty: 'Voit julkaista oman pakkasi pakkaeditorin Näkyvyys-kohdasta.',
   publicError: 'Julkisia pakkoja ei voitu hakea. Tarkista verkkoyhteys ja yritä uudelleen.',
   publicUnavailable: 'Julkiset pakat eivät ole juuri nyt saatavilla. Yritä myöhemmin uudelleen.',
   publicRetry: 'Yritä uudelleen',
