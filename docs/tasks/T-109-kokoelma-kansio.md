@@ -1,6 +1,6 @@
 # T-109 · Kokoelma: kansionäkymä, myytävät-tilasto pois
 
-**Tila:** Review. **Haara:** `t-109-kokoelma-kansio`, tehty T-108:n haarasta. **Päättäjä:** käyttäjä (toive 2026-10-08), PM (toteutustapa).
+**Tila:** Done. **Haara:** `t-109-kokoelma-kansio`, tehty T-108:n haarasta. **Päättäjä:** käyttäjä (toive 2026-10-08), PM (toteutustapa).
 
 ## Tavoite
 - **Myytävät pois:** Myytävät (€$) -luku poistetaan Kokoelma-näkymän yleiskuvasta. Käyttäjän mukaan sille ei ole käyttöä. Pakkaeditorin Eddies-suositus (D-024) ja Kortit-näkymän myytävät-suodatin jäävät ennalleen.
