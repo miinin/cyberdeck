@@ -4,6 +4,7 @@ import type { proxyTextsFi } from './proxyTexts.fi';
 /** English texts of the Proxy section (T-102); the same shape as the Finnish ones. */
 export const proxyTextsEn: typeof proxyTextsFi = {
   navProxy: 'Proxy',
+  navBadgeLabel: (count: number) => `, ${count} ${count === 1 ? 'card' : 'cards'} in the queue`,
   heading: 'Proxy',
   stepsLabel: 'How it works',
   steps: ['Pick cards', 'Check the sheet', 'Print at 100% size'],
@@ -74,7 +75,8 @@ export const proxyTextsEn: typeof proxyTextsFi = {
   sendWant: 'To proxy queue',
   sendWantName: (name: string) => `Send to the proxy queue: ${name}`,
   sendDeck: 'Send the deck to the proxy queue',
-  sendMissing: 'Send the missing cards to the proxy queue',
+  addCardToQueue: 'Add to the proxy queue',
+  printMissing: 'Print the missing cards as proxies',
   sentResult: (added: number) => (added === 1 ? 'Added 1 card to the queue.' : `Added ${added} cards to the queue.`),
   sentPartial: (added: number, skipped: number) =>
     `Added ${added} ${added === 1 ? 'card' : 'cards'} to the queue. ${skipped} left out because the queue is full (at most ${MAX_PROXY_CARDS}).`,

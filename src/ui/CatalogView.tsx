@@ -57,6 +57,8 @@ import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
 import { useCollection } from './useCollection';
 import { useWants } from './useWants';
+import { SendToProxyButton, useProxyQueue } from './SendToProxy';
+import { proxyTexts } from './proxyTexts';
 import { useDecks } from './useDecks';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
@@ -115,6 +117,7 @@ export function CatalogView({
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
   const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
   const wants = useWants(repositories.wants);
+  const proxyQueue = useProxyQueue(repositories.proxy);
   // Which decks each card is in (T-013). Decks that cannot be read just leave the mention out.
   const { phase: decksPhase, decks } = useDecks(repositories.decks);
   const decksByCard = useMemo(() => {
@@ -528,6 +531,11 @@ export function CatalogView({
               <p>{texts.detailTradeable(tradeableCount(countIn(collection, openCard.key), openCard))}</p>
             )}
           </section>
+        )}
+        {proxyQueue.snapshot.phase === 'ready' && (
+          <div className="detail-proxy proxy-send">
+            <SendToProxyButton rows={[{ card: openCard.key, count: 1 }]} queue={proxyQueue} label={proxyTexts.addCardToQueue} />
+          </div>
         )}
         {decksPhase === 'ready' && (
           <section aria-labelledby="card-detail-decks" className="detail-decks">

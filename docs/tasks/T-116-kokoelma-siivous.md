@@ -1,6 +1,6 @@
 # T-116 · Kokoelman siivous, otsikoiden fokusreunus pois, glitch kaikille sivuille, Have/Want-tekstit (i)-vihjeisiin, proxy-tarjoukset
 
-**Tila:** Ready. **Haara:** `t-116-kokoelma-siivous` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-09: "julkaise kun valmista"), PM (ratkaisut).
+**Tila:** Review. **Haara:** `t-116-kokoelma-siivous` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-09: "julkaise kun valmista"), PM (ratkaisut).
 
 Tee kaikki yhteen PR:ään. Korjaa matkalla havaitsemasi ilmeiset ulkoasuviat (päällekkäisyydet, vaakavieritys, tasausviat) kysymättä ja listaa ne luovutukseen.
 
@@ -45,3 +45,16 @@ Tee kaikki yhteen PR:ään. Korjaa matkalla havaitsemasi ilmeiset ulkoasuviat (p
 - `npm test` (ajetaan kerran), `npm run lint` ja `npm run build` menevät läpi.
 
 ## Luovutus
+
+**Koodari, valmis katselmointiin.** Kaikki viisi kohtaa toteutettu.
+
+1. **Kokoelma:** näkymävalitsin on T-115:n `view-select`-segmentti otsikkorivin oikealla puolella (legend piilotettu), Skannaa on kompakti `secondary`-painike samalla rivillä (puhelimessa piilossa, koska kelluva kamerapainike hoitaa; ScanPrompt säilyy). Kansio: Setti- ja Kuvitus-valinnat pois. `binderPockets(cards, collection, hasArt)` kokoaa Retail+Beta (FR lasketaan Retailiin kuten ennen) yhteen settiin. Numero = englanninkielisen, ensisijaisesti Retail-painoksen numero, muuten Beta-numero (`005β`). Kappaleet = molempien settien tallennetut versiot yhteensä (muiden tuotteiden versiot ohitetaan; jos versioita ei ole tallennettu, kokonaismäärä). **Beta-merkki** (kortin vasen alakulma, himmeä): omistat Beta-versioita eikä yhtään Retail-versiota. Kuvitus = ensimmäinen omistettu erikoiskuvitus (englanti ensin, Retail ennen Betaa), muuten peruskuva. "Näytä puuttuvat" on `edit-switch` (`SwitchButton` exportattu ListToolbarista). `CollectionPrefs`: `art` poistettu, vanhat tallennetut arvot ohitetaan (testi). Kansion h2 on visually-hidden, omistusmäärä ja kytkin samalla rivillä.
+2. **Fokusreunus:** yhteinen sääntö `[tabindex='-1']:focus, :focus-visible { outline: none }`. Muut `tabIndex={-1}`-elementit ovat otsikoita ja yksi tulosteksti. `:focus-visible` säilyy painikkeilla ja linkeillä. Tarkistettu Chromella (outline none h1:llä).
+3. **Glitch:** `main > h1` -> `main h1` (`prefers-reduced-motion`-ehto ennallaan). Headless-Chrome raportoi reduced-motionin, joten itse animaatiota ei nähty, vain että sääntö osuu.
+4. **Have/Want:** uusi `InfoTip` (`src/ui/InfoTip.tsx`): (i)-painike, `aria-expanded`/`aria-controls`, napautus avaa, Esc ja ulkopuolinen napautus sulkee, hiiri-hover näyttää. Kolme vihjettä: sivun otsikko, Want, Have. Tyhjät tilat lyhyiksi ("Lista on tyhjä. Hae kortti alta.", "Ei vaihdettavia kortteja."), `wantSearchPrompt` poistettu, vaihdettavuuden selitys siirretty `haveIntro`-vihjeeseen. Popover on sijoitettu `.has-info-tip`-ylätason mukaan eikä aiheuta vaakavieritystä 320 px:llä.
+5. **Proxy:** D-028:n muutos oli jo kirjattu. Pakkaeditorissa "Tulosta puuttuvat proxyiksi" on nyt otsikkorivin alla (ei listan lopussa); "Lähetä pakka" jäi paikalleen. Uudet paikat: kortin tietonäkymä ("Lisää proxy-jonoon"), jaettu/julkinen pakka ja tuonnin tarkistus (`DeckImport`, sama komponentti; näkyy kun kokoelma on luettu ja pakasta puuttuu kortteja). Palaute oli jo "Jonoon lisättiin N korttia. Avaa Proxy-osio" (linkki), jätetty sellaisenaan. Navigaatiomerkki: `useProxyCount` (App) lukee jonon, päivittyy tallennuksen jälkeen (`useProxyQueue` lähettää window-tapahtuman, kun tallennus on valmis), reitin vaihtuessa ja toisesta välilehdestä; yli 99 näytetään "99+". Ruudunlukijalle piilotettu teksti "jonossa N korttia". Tarkistettu 320 px: yksi rivi. `useProxyQueue` on nyt funktio (ei enää suora `useCollection`-alias).
+
+**Muut korjaukset:** Beta-merkin ja ×N-merkin törmäys pienillä taskuilla ratkaistu pienentämällä merkki ja siirtämällä se vasempaan alakulmaan.
+**Testit:** binder-domain-testit uusittu (yksi setti, Beta-logiikka, muiden tuotteiden ohitus), CollectionBinder-testeihin kytkin- ja Beta-merkkitestit, HaveWant-testeihin InfoTip-testi, ProxyView-testeihin merkki ja kolme uutta tarjouspaikkaa, repositories-testiin vanha `art`-kenttä. `npm test`: 1539 läpi. Lint ja build läpi. Chrome 320/390/1440: ei vaakavieritystä (Kokoelma yleiskuva ja kansio, Have/Want, Kortit-tiedot).
+**Koodikatselmointi:** tehty · Pakollisia korjattu 0 · Suosituksia 2 (velka: (i)-vihjeen popover ei vielä väistä ruudun alareunaa; kansion numerojärjestyksessä Beta-vain-kortit (`001β`) sekoittuvat Retail-numeroiden joukkoon samalla numerolla).
+**Ei uutta riippuvuutta.**

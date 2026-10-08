@@ -266,6 +266,13 @@ h1:focus:not(:focus-visible) {
   outline: none;
 }
 
+/* Elements that only take focus from the script (headings, results; tabindex -1) never show a focus outline (T-116):
+   the focus move is for screen readers. Buttons, links and fields keep their :focus-visible ring. */
+[tabindex='-1']:focus,
+[tabindex='-1']:focus-visible {
+  outline: none;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -1268,8 +1275,8 @@ body:has(dialog[open]) {
     transform: translateY(1px);
   }
 
-  /* Once when the page opens; the heading stays mounted across states (UX.md 7.7). */
-  main > h1 {
+  /* Once when the page opens; the heading stays mounted across states (UX.md 7.7). Every page's main heading (T-116). */
+  main h1 {
     animation: glitch 0.4s steps(1, end) 1;
   }
 
@@ -7870,9 +7877,18 @@ section[aria-labelledby='have-heading'] {
 }
 
 /* Collection binder (T-109): a dark collector binder with plastic pockets. Dark in both themes, like a real one. */
-.collection-views {
-  max-inline-size: 24rem;
-  margin-block: var(--space-3) 0;
+.page-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2) var(--space-3);
+  min-inline-size: 0;
+  margin-inline-start: auto;
+}
+
+.page-head-actions .scan-open {
+  align-self: center;
 }
 
 .binder {
@@ -7888,26 +7904,13 @@ section[aria-labelledby='have-heading'] {
 .binder-controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
-  gap: var(--space-3) var(--space-6);
-}
-
-.binder-art {
-  min-inline-size: min(100%, 20rem);
-}
-
-.binder-toggle {
-  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  min-block-size: var(--target-min);
-  cursor: pointer;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
 }
 
-.binder-toggle input {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  accent-color: var(--color-brand-yellow);
+.binder-controls .edit-switch {
+  padding-inline: 0;
 }
 
 .binder-count,
@@ -8069,6 +8072,21 @@ section[aria-labelledby='have-heading'] {
   font-size: clamp(0.75rem, 1.6vw, 1rem);
   line-height: 1.15;
   overflow-wrap: anywhere;
+}
+
+/* A quiet corner mark on a card owned only as the Beta edition (T-116). */
+.pocket-beta {
+  position: absolute;
+  inset-block-end: 0.375rem;
+  inset-inline-start: 0.375rem;
+  padding: 0 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(10, 11, 16, 0.75);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.625rem;
+  line-height: 1.4;
+  z-index: 1;
 }
 
 .pocket-count {
@@ -8573,4 +8591,101 @@ section[aria-labelledby='have-heading'] {
   z-index: 1;
   padding-inline: 2px;
   background: var(--color-bg);
+}
+
+/* InfoTip (T-116): a small (i) button next to a heading that opens its help as a popover under the heading row. */
+.heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+.heading-row > h1,
+.heading-row > h2 {
+  margin: 0;
+}
+.has-info-tip {
+  position: relative;
+}
+.info-tip-button {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--target-min);
+  block-size: var(--target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.info-tip-button > span {
+  display: grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+.info-tip-button:hover > span,
+.info-tip-button[aria-expanded='true'] > span {
+  border-color: var(--color-accent-edge);
+  color: var(--color-accent-edge);
+}
+.info-tip-button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 0;
+}
+.info-tip-pop {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 20;
+  box-sizing: border-box;
+  inline-size: min(24rem, calc(100vw - 2 * var(--gutter)));
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: normal;
+  overflow-wrap: anywhere;
+}
+.info-tip-pop[hidden] {
+  display: none;
+}
+
+/* The print queue count next to "Proxy" in the main navigation (T-116): small, on the same line at 320 px. */
+.main-nav .nav-badge {
+  margin-inline-start: 0.25rem;
+  padding: 0 0.3em;
+  border-radius: 999px;
+  background: var(--color-brand-yellow);
+  color: #0b0c10;
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+.editor-proxy {
+  margin-block: var(--space-2);
+}
+.detail-proxy {
+  margin-block: var(--space-3);
+}
+
+/* On a phone the floating camera button does the scanning on the Collection page, so the header keeps only the view choice. */
+@media (max-width: 39.99rem) {
+  .page-head-actions {
+    margin-inline-start: 0;
+    justify-content: flex-start;
+  }
+  .page-head-actions .scan-open {
+    display: none;
+  }
 }

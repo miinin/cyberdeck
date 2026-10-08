@@ -14,6 +14,7 @@ import { CollectionView } from './ui/CollectionView';
 import { collectionTexts } from './ui/collectionTexts';
 import { ProxyView } from './ui/ProxyView';
 import { proxyTexts } from './ui/proxyTexts';
+import { useProxyCount } from './ui/SendToProxy';
 import { SharedTradeView } from './ui/SharedTradeView';
 import { DecksView } from './ui/DecksView';
 import { PublicDeckView } from './ui/PublicDeckView';
@@ -99,6 +100,7 @@ export function App({
   // T-055: the persistent browser storage button is no longer shown (cloud sync replaces it).
   const headerSlot: HTMLElement | null = null;
   const { route, navigate } = useHashRoute();
+  const proxyCount = useProxyCount(openRepositories.proxy, route.name);
 
   return (
     <PublicDecksContext.Provider value={publicApi}>
@@ -133,6 +135,14 @@ export function App({
             </a>
             <a href="#/proxy" aria-current={route.name === 'proxy' ? 'page' : undefined}>
               {proxyTexts.navProxy}
+              {proxyCount > 0 && (
+                <>
+                  <span className="nav-badge" aria-hidden="true">
+                    {proxyCount > 99 ? '99+' : proxyCount}
+                  </span>
+                  <span className="visually-hidden">{proxyTexts.navBadgeLabel(proxyCount)}</span>
+                </>
+              )}
             </a>
           </nav>
           <div className="header-tools">
