@@ -1,6 +1,6 @@
 # T-110 · Pakkaeditori mobiilissa: Pakka | Lisää kortteja
 
-**Tila:** Review. **Haara:** `t-110-pakka-mobiili` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "avaa pakka → miljoona riviä lisättäviä kortteja, pakka vasta rullauksen jälkeen"), PM (ratkaisu).
+**Tila:** Done. **Haara:** `t-110-pakka-mobiili` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "avaa pakka → miljoona riviä lisättäviä kortteja, pakka vasta rullauksen jälkeen"), PM (ratkaisu).
 
 ## Ongelma
 Alle 64rem leveydellä editorin osiot ovat allekkain järjestyksessä suodattimet, hakutulokset ja pakka. Avattu pakka näyttää siis ensin koko korttikatalogin.
