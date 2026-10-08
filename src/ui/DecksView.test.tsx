@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRepositories } from '../storage';
-import { legalCards, renderRoute, storedCollection, storedDecks } from './deckTestUtils';
+import { chooseImport, legalCards, renderRoute, storedCollection, storedDecks } from './deckTestUtils';
 
 const renderDecks = (repositories = createMemoryRepositories()) => renderRoute('#/pakat', repositories);
 
@@ -115,19 +115,58 @@ describe('Pakat list', () => {
       }),
     );
     const [card] = await screen.findAllByRole('listitem');
-    await waitFor(() => expect(card).toHaveTextContent('Kokoelmasta puuttuu 4 korttia.'));
+    await waitFor(() => expect(card).toHaveTextContent('Keskeneräinen · 3 rikettä · 4 puuttuu'));
   });
 
-  it('offers new, import and Netdeck in the empty state; Netdeck starts in the link field (T-051)', async () => {
+  it('offers new deck and an import menu in the empty state; Netdeck starts in the link field (T-051, T-117)', async () => {
     const user = userEvent.setup();
     renderDecks();
     await screen.findByText(/ei ole vielä pakkoja/);
     expect(screen.getByRole('button', { name: 'Uusi pakka' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tuo pakkalista' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Hae Netdeck.gg:stä' }));
+    const menu = screen.getByRole('button', { name: 'Tuo' });
+    expect(menu).toHaveAttribute('aria-expanded', 'false');
+    await chooseImport(user, 'Hae Netdeck.gg:stä');
     expect(screen.getByLabelText('Netdeck-linkki')).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Takaisin pakkoihin' }));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Hae Netdeck.gg:stä' })).toHaveFocus());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tuo' })).toHaveFocus());
+  });
+
+  it('opens the import menu with both sources and closes it with Escape and an outside press (T-117)', async () => {
+    const user = userEvent.setup();
+    renderDecks();
+    await screen.findByText(/ei ole vielä pakkoja/);
+    const toggle = screen.getByRole('button', { name: 'Tuo' });
+    expect(screen.queryByRole('button', { name: 'Tuo pakkalista' })).not.toBeInTheDocument();
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Tuo pakkalista' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Hae Netdeck.gg:stä' })).toBeVisible();
+    await user.keyboard('{Escape}');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveFocus();
+    await user.click(toggle);
+    await user.click(screen.getByRole('heading', { level: 1 }));
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('keeps the actions in the title row when there are decks, and offers the wants action only when cards are missing (T-117)', async () => {
+    renderDecks(
+      createMemoryRepositories({
+        initial: {
+          ...storedDecks([
+            { id: 'a', name: 'Valmis', cards: legalCards() },
+            { id: 'b', name: 'Kesken', cards: [['l1', 1], ['u0', 4]] },
+          ]),
+          ...storedCollection(legalCards()),
+        },
+      }),
+    );
+    const [ready, unfinished] = await screen.findAllByRole('listitem');
+    expect(screen.getByRole('button', { name: 'Uusi pakka' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tuo' })).toBeInTheDocument();
+    await waitFor(() => expect(unfinished).toHaveTextContent('puuttuu'));
+    expect(within(ready as HTMLElement).queryByRole('button', { name: /Lisää puuttuvat/ })).not.toBeInTheDocument();
+    expect(ready).toHaveTextContent('Laillinen · Kaikki kokoelmassa');
+    expect(within(unfinished as HTMLElement).getByRole('button', { name: 'Lisää puuttuvat wantiin: Kesken' })).toBeInTheDocument();
   });
 });
-

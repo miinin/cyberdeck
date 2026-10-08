@@ -28,6 +28,7 @@ import { countIn } from './collectionStore';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 import { DeckCardImage } from './DeckList';
 import { DeckImport } from './DeckImport';
+import { DeckActions } from './DeckImportMenu';
 import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
 import { PublicDecksList } from './PublicDecksList';
@@ -154,48 +155,54 @@ function DeckCardSummary({
           {deck.name}
           {nameAction}
         </h2>
-        {colors.length > 0 && (
-          <p className="deck-card-colors">
-            <span className="visually-hidden">{deckTexts.deckColors}: </span>
-            {colors.map((color) => (
-              <span key={color} className="deck-card-color">
-                <CardColor color={color} />
-              </span>
-            ))}
-          </p>
-        )}
-        <p className="deck-counts">{deckTexts.counts(totals.legends, totals.main)}</p>
+        <div className="deck-card-meta">
+          <p className="deck-counts">{deckTexts.counts(totals.legends, totals.main)}</p>
+          {colors.length > 0 && (
+            <p className="deck-card-colors">
+              <span className="visually-hidden">{deckTexts.deckColors}: </span>
+              {colors.map((color) => (
+                <span key={color} className="deck-card-color">
+                  <CardColor color={color} />
+                </span>
+              ))}
+            </p>
+          )}
+        </div>
         <progress
           className={`deck-progress is-${mainState}`}
           max={MAX_MAIN_DECK}
           value={Math.min(totals.main, MAX_MAIN_DECK)}
           aria-hidden="true"
         />
-        <div className="deck-card-facts">
+        <p className="deck-card-facts">
           {errors === 0 ? (
-            <p className="legality is-legal">
+            <span className="legality is-legal">
               <span aria-hidden="true">✓</span> {deckTexts.legalSpoken}
-            </p>
+            </span>
           ) : (
-            <p className="legality is-issues">
+            <span className="legality is-issues">
               <span aria-hidden="true">⚠</span> {deckTexts.unfinished(errors)}
-            </p>
+            </span>
           )}
           {missing !== null && copies > 0 && (
-            <p className={missing > 0 ? 'deck-card-missing' : 'deck-card-owned'}>
-              {deckTexts.missingFromCollection(missing)}
-            </p>
+            <>
+              <span aria-hidden="true"> · </span>
+              <span className={missing > 0 ? 'deck-card-missing' : 'deck-card-owned'}>
+                {missing > 0 ? deckTexts.missingShort(missing) : deckTexts.allOwnedShort}
+              </span>
+            </>
           )}
-          {missingRows.length > 0 && (
-            <div className="missing-add">
-              <AddMissingToWantsButton
-                rows={missingRows}
-                wants={wants}
-                name={deckTexts.forDeck(deckTexts.addMissingToWants, deck.name)}
-              />
-            </div>
-          )}
-        </div>
+        </p>
+        {missingRows.length > 0 && (
+          <div className="missing-add missing-add--quiet">
+            <AddMissingToWantsButton
+              rows={missingRows}
+              wants={wants}
+              className="link-button missing-link"
+              name={deckTexts.forDeck(deckTexts.addMissingToWants, deck.name)}
+            />
+          </div>
+        )}
         <p className="deck-updated">
           {deckTexts.updated} <time dateTime={deck.updatedAt}>{dateFormat.format(new Date(deck.updatedAt))}</time>
         </p>
@@ -397,32 +404,24 @@ export function DecksView({
         onOpen={onOpen}
         startAtLink={importing === 'link'}
         onClose={() => {
-          focusTarget.current = importing === 'link' ? 'netdeck' : 'import';
+          focusTarget.current = 'import-menu';
           setImporting(null);
         }}
       />
     );
   }
 
-  const actions = (
-    <div className="deck-toolbar">
-      <button type="button" className="button-primary" onClick={() => void handleCreate()}>
-        {deckTexts.newDeck}
-      </button>
-      <button type="button" className="button-secondary" data-focus-id="import" onClick={() => setImporting('text')}>
-        {deckTexts.importButton}
-      </button>
-      <button type="button" className="button-secondary" data-focus-id="netdeck" onClick={() => setImporting('link')}>
-        {deckTexts.fetchNetdeck}
-      </button>
-    </div>
-  );
+  const actions = <DeckActions onCreate={() => void handleCreate()} onImport={setImporting} />;
+  const showHeadActions = tab === 'own' && phase === 'ready' && decks.length > 0;
 
   return (
     <>
-      <h1 ref={headingRef} tabIndex={-1}>
-        {deckTexts.listHeading}
-      </h1>
+      <div className="page-head decks-head">
+        <h1 ref={headingRef} tabIndex={-1}>
+          {deckTexts.listHeading}
+        </h1>
+        {showHeadActions && actions}
+      </div>
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {live}
       </div>
@@ -471,7 +470,6 @@ export function DecksView({
             </div>
           ) : (
             <>
-              {actions}
               <ul className="deck-list" aria-label={deckTexts.decksLabel}>
                 {decks.map((deck) => (
                   <li key={deck.id} className="deck-row">

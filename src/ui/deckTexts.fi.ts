@@ -42,6 +42,10 @@ export const deckTextsFi = {
   listLoading: 'Ladataan pakkoja…',
   listUnavailable: 'Pakkoja ei voitu ladata. Lataa sivu uudelleen. Jos ongelma jatkuu, tarkista selaimen yksityisyysasetukset.',
   newDeck: 'Uusi pakka',
+  importMenu: 'Tuo',
+  /** Short form on the deck card's status line (T-117). */
+  missingShort: (count: number) => `${count} puuttuu`,
+  allOwnedShort: 'Kaikki kokoelmassa',
   // Deck cards and empty state (T-051)
   listEmptyTitle: 'Ei vielä pakkoja',
   listEmptyHint: 'Rakenna pakka kortti kerrallaan, liitä valmis pakkalista tai hae julkinen pakka Netdeck.gg:stä.',

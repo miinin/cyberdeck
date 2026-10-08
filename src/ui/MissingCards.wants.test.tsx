@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRepositories } from '../storage';
-import { renderRoute, storedCollection, storedDecks } from './deckTestUtils';
+import { chooseImport, renderRoute, storedCollection, storedDecks } from './deckTestUtils';
 
 const WANTS_KEY = 'cyberdeck:wants';
 
@@ -63,7 +63,7 @@ describe('Add missing cards to wants (T-061b)', () => {
   it('is offered in the import report too', async () => {
     const user = userEvent.setup();
     const repositories = renderRoute('#/pakat', createMemoryRepositories({ initial: storedCollection([['u0', 1]]) }));
-    await user.click(await screen.findByRole('button', { name: 'Tuo pakkalista' }));
+    await chooseImport(user, 'Tuo pakkalista');
     const field = screen.getByLabelText('Pakkalista');
     await user.click(field);
     await user.paste('3 Unit 0\n');

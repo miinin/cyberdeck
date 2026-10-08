@@ -1,4 +1,5 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import type userEvent from '@testing-library/user-event';
 import { App } from '../App';
 import type { Card } from '../domain/card';
 import { createMemoryRepositories } from '../storage';
@@ -88,4 +89,10 @@ export function renderRoute(hash: string, repositories: Repositories = createMem
   window.location.hash = hash;
   render(<App cards={testCards} repositories={repositories} />);
   return repositories;
+}
+
+/** Opens the Pakat page's "Tuo" menu and picks a source (T-117), e.g. 'Tuo pakkalista'. */
+export async function chooseImport(user: ReturnType<typeof userEvent.setup>, name: string): Promise<void> {
+  await user.click(await screen.findByRole('button', { name: 'Tuo' }));
+  await user.click(screen.getByRole('button', { name }));
 }
