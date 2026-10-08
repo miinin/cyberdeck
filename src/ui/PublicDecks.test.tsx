@@ -183,10 +183,10 @@ describe('visibility in the deck editor', () => {
     const memory = createMemoryPublicDecks();
     renderApp({ initial: storedDecks([DECK]), memory });
     await open();
-    expect(screen.getByText('Yksityinen', { selector: 'summary strong' }).closest('summary')).toHaveTextContent('Näkyvyys: Yksityinen');
-    expect(screen.getByRole('radio', { name: /Yksityinen/ })).toBeChecked();
-    const publicRadio = screen.getByRole('radio', { name: /Julkinen/ });
-    expect(publicRadio).toBeDisabled();
+    expect(screen.getByText('Yksityinen', { selector: '.visibility-state strong' }).closest('p')).toHaveTextContent('Näkyvyys: Yksityinen');
+    const publicSwitch = screen.getByRole('switch', { name: 'Julkinen' });
+    expect(publicSwitch).toHaveAttribute('aria-checked', 'false');
+    expect(publicSwitch).toBeDisabled();
     expect(screen.getByText('Kirjaudu sisään Googlella, jos haluat julkaista pakan.')).toBeInTheDocument();
     expect(memory.docs.size).toBe(0);
   });
@@ -195,7 +195,7 @@ describe('visibility in the deck editor', () => {
     const user = userEvent.setup();
     const { memory, repositories } = renderApp({ signedIn: true, initial: ownDecks() });
     await open();
-    await user.click(screen.getByRole('radio', { name: /Julkinen/ }));
+    await user.click(screen.getByRole('switch', { name: 'Julkinen' }));
 
     // Nothing is published before the confirmation.
     expect(memory.docs.size).toBe(0);
@@ -218,7 +218,7 @@ describe('visibility in the deck editor', () => {
     const user = userEvent.setup();
     const { memory } = renderApp({ signedIn: true, initial: ownDecks() });
     await open();
-    await user.click(screen.getByRole('radio', { name: /Julkinen/ }));
+    await user.click(screen.getByRole('switch', { name: 'Julkinen' }));
     await user.click(screen.getByRole('checkbox', { name: 'Näytä nimimerkkini' }));
     await user.click(screen.getByRole('button', { name: 'Julkaise pakka' }));
     expect(screen.getByText('Kirjoita nimimerkki (1–30 merkkiä) tai poista ruksi.')).toBeInTheDocument();
@@ -235,18 +235,33 @@ describe('visibility in the deck editor', () => {
     const user = userEvent.setup();
     const { memory } = renderApp({ signedIn: true, initial: ownDecks() });
     await open();
-    await user.click(screen.getByRole('radio', { name: /Julkinen/ }));
+    await user.click(screen.getByRole('switch', { name: 'Julkinen' }));
     await user.click(screen.getByRole('button', { name: 'Peruuta' }));
     expect(screen.queryByRole('button', { name: 'Julkaise pakka' })).toBeNull();
-    expect(screen.getByRole('radio', { name: /Yksityinen/ })).toBeChecked();
+    expect(screen.getByRole('switch', { name: 'Julkinen' })).toHaveAttribute('aria-checked', 'false');
     expect(memory.writes).toBe(0);
+  });
+
+  it('the switch works with the keyboard and reports its state', async () => {
+    const user = userEvent.setup();
+    renderApp({ signedIn: true, initial: ownDecks() });
+    await open();
+    const sw = screen.getByRole('switch', { name: 'Julkinen' });
+    expect(sw).toHaveAttribute('aria-checked', 'false');
+    sw.focus();
+    await user.keyboard(' ');
+    expect(sw).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('button', { name: 'Julkaise pakka' })).toBeInTheDocument();
+    await user.keyboard('{Enter}');
+    expect(sw).toHaveAttribute('aria-checked', 'false');
+    expect(screen.queryByRole('button', { name: 'Julkaise pakka' })).toBeNull();
   });
 
   it('keeps the deck private and says so when publishing fails', async () => {
     const user = userEvent.setup();
     const { memory, repositories } = renderApp({ signedIn: true, initial: ownDecks() });
     await open();
-    await user.click(screen.getByRole('radio', { name: /Julkinen/ }));
+    await user.click(screen.getByRole('switch', { name: 'Julkinen' }));
     memory.failNext('offline');
     await user.click(screen.getByRole('button', { name: 'Julkaise pakka' }));
     expect(await screen.findByText('Julkaiseminen ei onnistunut. Tarkista verkkoyhteys ja yritä uudelleen.')).toBeInTheDocument();
@@ -260,7 +275,7 @@ describe('visibility in the deck editor', () => {
     const user = userEvent.setup();
     const { memory, repositories } = renderApp({ signedIn: true, initial: ownDecks() });
     await open();
-    await user.click(screen.getByRole('radio', { name: /Julkinen/ }));
+    await user.click(screen.getByRole('switch', { name: 'Julkinen' }));
     await user.click(screen.getByRole('checkbox', { name: 'Näytä nimimerkkini' }));
     await user.type(screen.getByLabelText('Nimimerkki'), 'Nick');
     await user.click(screen.getByRole('button', { name: 'Julkaise pakka' }));
@@ -277,7 +292,7 @@ describe('visibility in the deck editor', () => {
     await user.click(screen.getByRole('button', { name: 'Tee pakasta yksityinen' }));
     await waitFor(() => expect(memory.docs.size).toBe(0));
     await waitFor(async () => expect((await decks.get(DECK.id))?.publish).toEqual({ public: false, nickname: 'Nick' }));
-    expect(screen.getByRole('radio', { name: /Yksityinen/ })).toBeChecked();
+    expect(screen.getByRole('switch', { name: 'Julkinen' })).toHaveAttribute('aria-checked', 'false');
   });
 });
 
@@ -326,7 +341,7 @@ describe('public list after publishing', () => {
     await screen.findByText('Julkisia pakkoja ei ole vielä', { exact: false });
     window.location.hash = `#/pakat/${DECK.id}`;
     await screen.findByText('Näkyvyys:', { exact: false });
-    await user.click(screen.getByRole('radio', { name: /Julkinen/ }));
+    await user.click(screen.getByRole('switch', { name: 'Julkinen' }));
     await user.click(screen.getByRole('button', { name: 'Julkaise pakka' }));
     await screen.findByText(/Pakka on julkinen/);
     window.location.hash = '#/pakat/julkiset';
