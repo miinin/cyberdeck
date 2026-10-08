@@ -8537,3 +8537,23 @@ section[aria-labelledby='have-heading'] {
 .deck-group {
   min-inline-size: 0;
 }
+
+/* Statistics overview on a narrow phone (T-115): the small rings wrap under the big one instead of overlapping, and the
+   key numbers drop to two columns when three do not fit. */
+.gauge-minis {
+  flex: 1 1 13rem;
+  min-inline-size: 0;
+}
+.gauge-minis li {
+  min-inline-size: 0;
+}
+.gauge-minis .gauge-label {
+  overflow-wrap: anywhere;
+}
+.kpi-tiles {
+  grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
+}
+.kpi-tiles > div {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}

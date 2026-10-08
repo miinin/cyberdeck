@@ -238,6 +238,22 @@ describe('Deck editor', () => {
     expect(imageList()).toHaveClass('pick-images');
   });
 
+  it('remembers the deck column view (T-115)', async () => {
+    const user = userEvent.setup();
+    const repositories = openEditor([['u0', 1]]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await user.click(screen.getByRole('radio', { name: 'Kortit' }));
+    expect(await repositories.preferences.loadDeckListView()).toBe('cards');
+  });
+
+  it('opens in the saved deck column view (T-115)', async () => {
+    const repositories = createMemoryRepositories({ initial: { ...storedDecks([{ ...base, cards: [] }]) } });
+    await repositories.preferences.saveDeckListView('stacks');
+    renderRoute('#/pakat/a', repositories);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await waitFor(() => expect(screen.getByRole('radio', { name: 'Pinot' })).toBeChecked());
+  });
+
   it('tells when the deck does not exist', async () => {
     renderRoute('#/pakat/missing', createMemoryRepositories());
     expect(await screen.findByRole('alert')).toHaveTextContent('Pakkaa ei löytynyt');

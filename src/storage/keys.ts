@@ -14,6 +14,8 @@ export const THEME_KEY = 'cyberdeck:theme';
 export const VIEW_KEY = 'cyberdeck:view';
 export const EDIT_MODE_KEY = 'cyberdeck:edit-mode';
 export const DECK_PICK_VIEW_KEY = 'cyberdeck:deck-pick-view';
+/** The deck column view of the editor (T-115): the raw string 'list', 'stacks' or 'cards'. */
+export const DECK_LIST_VIEW_KEY = 'cyberdeck:deck-list-view';
 /** Default edition of the card boxes' + and − (T-083, D-022): the raw string 'beta' or 'retail'. */
 export const DEFAULT_EDITION_KEY = 'cyberdeck:default-edition';
 /** Card scanner mode (T-108): the raw string 'single' or 'continuous'. */
