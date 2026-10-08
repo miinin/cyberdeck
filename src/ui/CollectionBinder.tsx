@@ -8,6 +8,7 @@ import type { Card } from '../domain/card';
 import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
 import type { Collection } from '../domain/collection';
 import { cardNameText } from './CardName';
+import { Chevron } from './Chevron';
 import { collectionTexts } from './collectionTexts';
 import { SwitchButton } from './ListToolbar';
 import { useMediaQuery, WIDE_QUERY } from './useMediaQuery';
@@ -159,7 +160,7 @@ export function CollectionBinder({
           </div>
           <div className="binder-nav">
             <button type="button" className="button-secondary" aria-label={collectionTexts.binderPrev} aria-disabled={atStart} onClick={() => !atStart && turn(-1)}>
-              <span aria-hidden="true">◀</span>
+              <Chevron direction="left" />
               <span className="binder-nav-label">{collectionTexts.binderPrev}</span>
             </button>
             <p role="status" aria-live="polite" className="binder-position">
@@ -167,7 +168,7 @@ export function CollectionBinder({
             </p>
             <button type="button" className="button-secondary" aria-label={collectionTexts.binderNext} aria-disabled={atEnd} onClick={() => !atEnd && turn(1)}>
               <span className="binder-nav-label">{collectionTexts.binderNext}</span>
-              <span aria-hidden="true">▶</span>
+              <Chevron direction="right" />
             </button>
           </div>
           <p id={`${title}-help`} className="hint binder-help">

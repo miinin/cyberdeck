@@ -49,9 +49,13 @@ export function SharedDeckView({
         <h1 ref={errorRef} tabIndex={-1}>
           {deckTexts.shareInvalidHeading}
         </h1>
-        <p role="alert">{deckTexts.shareInvalid}</p>
+        <div className="notice notice-danger" role="alert">
+          <p>{deckTexts.shareInvalid}</p>
+        </div>
         <p>
-          <a href={backHash}>{backLabel ?? deckTexts.shareToDecks}</a>
+          <a className="text-link" href={backHash}>
+            {backLabel ?? deckTexts.shareToDecks}
+          </a>
         </p>
       </>
     );

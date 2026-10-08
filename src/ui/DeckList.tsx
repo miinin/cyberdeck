@@ -59,7 +59,6 @@ export function DeckList({
   onOpenImage,
   hoverProps,
   onMoveToSideboard,
-  onAddToSideboard,
   problems,
 }: {
   grouped: DeckGroups;
@@ -74,8 +73,6 @@ export function DeckList({
   hoverProps: (card: Card) => HoverPreviewProps;
   /** Moves one copy to the sideboard (T-058). */
   onMoveToSideboard?: (card: Card) => void;
-  /** Stacks view: add a copy to the sideboard straight from the stack (T-074). */
-  onAddToSideboard?: (card: Card) => void;
   /** Rows and section counts that break a rule (T-101). */
   problems?: DeckProblems;
 }) {
@@ -191,15 +188,16 @@ export function DeckList({
             <Stepper name={card.displayName} count={count} showCount={false} onChange={(next) => onChange(card, next)} />
           </div>
         )}
-        {onAddToSideboard !== undefined && card.type !== 'Legend' && (
+        {onMoveToSideboard !== undefined && card.type !== 'Legend' && (
+          // The same action as the list row's button: the deck column always moves a copy (T-118, UX-118-24).
           <button
             type="button"
             className="tile-action"
-            aria-label={deckTexts.addToSideboard(card.displayName)}
-            title={deckTexts.addToSideboardTitle}
-            onClick={() => onAddToSideboard(card)}
+            aria-label={deckTexts.moveToSideboard(card.displayName)}
+            title={deckTexts.moveToSideboardTitle}
+            onClick={() => onMoveToSideboard(card)}
           >
-            {deckTexts.addToSideboardShort}
+            {deckTexts.moveToSideboardShort}
           </button>
         )}
       </li>

@@ -71,7 +71,7 @@ export const proxyTextsFi = {
   clearConfirm: 'Tyhjennä jono',
   clearKeep: 'Säilytä jono',
 
-  sendAllWants: 'Lähetä kaikki want-kortit proxy-jonoon',
+  sendAllWants: 'Kaikki proxy-jonoon',
   sendWant: 'Proxy-jonoon',
   sendWantName: (name: string) => `Lähetä proxy-jonoon: ${name}`,
   sendDeck: 'Lähetä pakka proxy-jonoon',

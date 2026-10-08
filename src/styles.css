@@ -866,7 +866,7 @@ main {
   gap: var(--space-2);
   min-width: 1.5rem;
   max-width: 100%;
-  min-height: 1.75rem;
+  min-height: 2rem;
   padding: 0 var(--space-2);
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface-raised);
@@ -1692,6 +1692,11 @@ body:has(dialog[open]) {
   color: var(--color-text);
 }
 
+/* Yellow is never a thin line on the light background (UX.md 3.1, T-118 UX-118-33): the yellow type uses the text colour. */
+:root[data-theme='light'] .type-badge-yellow {
+  --badge-color: var(--color-text);
+}
+
 /* List toolbar (T-040): view selector and the edit switch above the list. */
 .list-toolbar {
   display: flex;
@@ -2221,7 +2226,7 @@ body:has(dialog[open]) {
 }
 
 .deck-section h2,
-.editor-search h2 {
+.editor-add-heading {
   font-size: var(--font-size-base);
 }
 
@@ -2493,7 +2498,6 @@ h3,
   justify-content: center;
   gap: 0;
   min-inline-size: 2.25rem;
-  min-block-size: 2rem;
   padding: 0 var(--space-2);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -3509,12 +3513,13 @@ button.legality:focus-visible {
 }
 
 .deck-section-head {
+  /* The view choice is always on its own row under the title, with or without a warning flag (T-118, UX-118-41). */
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-3);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
   margin-block-end: var(--space-2);
+  padding-block-end: var(--space-2);
   border-block-end: 1px solid var(--color-border);
 }
 
@@ -4295,7 +4300,12 @@ button.legality:focus-visible {
 
 .deck-row .deck-name {
   font-size: var(--font-size-lg);
-  line-height: 1.2;
+  line-height: var(--line-height-heading);
+}
+
+/* The 44 px rename button must not stretch the line box of a two-line name (T-118, UX-118-40). */
+.deck-row .deck-name .icon-button {
+  margin-block: -0.75rem;
 }
 
 .deck-card-colors {
@@ -4672,17 +4682,9 @@ button.legality:focus-visible {
   margin-block-end: 0;
 }
 
+/* A link button like the others (T-118, UX-118-35): no indent, only a smaller text. */
 .missing-link {
-  min-height: 2rem;
-  padding-inline: var(--space-1);
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.missing-link:hover {
-  color: var(--color-text);
+  font-size: var(--font-size-sm);
 }
 
 .missing-result:empty {
@@ -4986,14 +4988,15 @@ section[aria-labelledby='have-heading'] {
   flex-wrap: wrap;
 }
 
+/* A tag over a picture: square like every other badge (T-118, UX-118-32). */
 .art-count-badge {
   position: absolute;
   inset-block-start: var(--space-1);
   inset-inline-start: var(--space-1);
   padding: 0 var(--space-1);
-  border-radius: 4px;
-  background: var(--surface, #000);
-  color: var(--text, #fff);
+  border-radius: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
   font-size: 0.75rem;
   border: 1px solid currentColor;
 }
@@ -5149,7 +5152,6 @@ section[aria-labelledby='have-heading'] {
   border: 1px solid rgba(255, 255, 255, 0.6);
   background: rgba(0, 0, 0, 0.7);
   color: #fff;
-  font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
 }
@@ -5820,18 +5822,29 @@ section[aria-labelledby='have-heading'] {
 
 .seg-unit {
   --seg: var(--seg-unit);
+  --seg-text: #0b0c10;
 }
 
 .seg-program {
   --seg: var(--seg-program);
+  --seg-text: #0b0c10;
 }
 
 .seg-gear {
   --seg: var(--seg-gear);
+  --seg-text: #0b0c10;
 }
 
 .seg-other {
   --seg: var(--seg-other);
+  --seg-text: #0b0c10;
+}
+
+/* Text on a segment keeps 4.5:1 in both themes (T-118, UX-118-26): the light theme's teal and grey are dark fills. */
+:root[data-theme='light'] .seg-program,
+:root[data-theme='light'] .seg-gear,
+:root[data-theme='light'] .seg-other {
+  --seg-text: #f3f0e6;
 }
 
 /* Rings */
@@ -5963,7 +5976,7 @@ section[aria-labelledby='have-heading'] {
 
 .kpi-tiles dt {
   color: var(--color-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
 }
@@ -5979,7 +5992,7 @@ section[aria-labelledby='have-heading'] {
 .kpi-tiles .kpi-hint {
   color: var(--color-text-muted);
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   font-weight: var(--font-weight-normal);
   line-height: 1.25;
 }
@@ -6258,7 +6271,7 @@ section[aria-labelledby='have-heading'] {
   place-items: center;
   min-inline-size: 3px;
   background: var(--seg);
-  color: var(--color-bg);
+  color: var(--seg-text, var(--color-bg));
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
@@ -6920,8 +6933,10 @@ section[aria-labelledby='have-heading'] {
   font-size: var(--font-size-sm);
 }
 
+/* A step is never split over two lines, and the arrow belongs to the step after it (T-118, UX-118-38). */
 .proxy-steps li {
   counter-increment: proxy-step;
+  white-space: nowrap;
 }
 
 .proxy-steps li::before {
@@ -6931,9 +6946,8 @@ section[aria-labelledby='have-heading'] {
   font-weight: var(--font-weight-bold);
 }
 
-.proxy-steps li:not(:last-child)::after {
-  content: '→';
-  margin-inline-start: var(--space-3);
+.proxy-steps li:not(:first-child)::before {
+  content: '→ ' counter(proxy-step);
 }
 
 .proxy-layout {
@@ -7026,7 +7040,7 @@ section[aria-labelledby='have-heading'] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--space-2) var(--space-3);
   margin-block: var(--space-3) var(--space-2);
 }
@@ -7165,22 +7179,42 @@ section[aria-labelledby='have-heading'] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.75rem;
-  min-height: 1.75rem;
+  isolation: isolate;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
   padding: 0;
-  border: 1px solid #fff;
-  border-radius: 50%;
-  background: rgb(0 0 0 / 0.7);
+  border: 0;
+  border-radius: 0;
+  /* A 28 px square with the 6 px chamfer of the small buttons; the white edge is the element, the dark fill is ::before. */
+  --cut: 0.375rem;
+  --cut-inner: calc(var(--cut) - 1px);
+  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  --shape-chamfer-inner: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner)), calc(100% - var(--cut-inner)) 100%, 0 100%);
+  background: #fff;
   color: #fff;
   font: inherit;
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
+  clip-path: var(--shape-chamfer);
 }
 
-.proxy-card-remove:hover,
-.proxy-card-remove:focus-visible {
+.proxy-card-remove::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: #14161c;
+  clip-path: var(--shape-chamfer-inner);
+}
+
+.proxy-card-remove:hover::before,
+.proxy-card-remove:focus-visible::before {
   background: #b00020;
+}
+
+.proxy-card-remove:focus-visible {
+  clip-path: none;
 }
 
 /* An empty sheet on screen: the same size as a sheet, with the hint in it. */
@@ -7940,7 +7974,7 @@ section[aria-labelledby='have-heading'] {
   inset-inline-start: 0.375rem;
   padding: 0 0.25rem;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(10, 11, 16, 0.75);
   color: rgba(255, 255, 255, 0.78);
   font-size: 0.625rem;
@@ -7948,14 +7982,15 @@ section[aria-labelledby='have-heading'] {
   z-index: 1;
 }
 
+/* The same "×N" tag as .stack-card-count: a yellow rectangle over the picture (T-118, UX-118-32, 43). */
 .pocket-count {
   position: absolute;
   inset-block-end: 0.375rem;
   inset-inline-end: 0.375rem;
-  padding: 0 0.5rem;
-  border-radius: 999px;
-  background: var(--color-brand-yellow);
-  color: #0b0c10;
+  padding: 0 var(--space-2);
+  border-radius: 0;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
@@ -8332,6 +8367,10 @@ section[aria-labelledby='have-heading'] {
 .kpi-tiles {
   grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
 }
+/* On the Collection page the tiles keep a sensible width instead of stretching over the whole card (T-118, UX-118-25). */
+.collection-kpis .kpi-tiles {
+  grid-template-columns: repeat(auto-fill, minmax(min(10rem, 100%), 14rem));
+}
 .kpi-tiles > div {
   min-inline-size: 0;
   overflow-wrap: anywhere;
@@ -8428,7 +8467,7 @@ section[aria-labelledby='have-heading'] {
 .main-nav .nav-badge {
   margin-inline-start: 0.25rem;
   padding: 0 0.3em;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-brand-yellow);
   color: #0b0c10;
   font-family: var(--font-mono);
@@ -8436,9 +8475,6 @@ section[aria-labelledby='have-heading'] {
   font-weight: var(--font-weight-bold);
   letter-spacing: 0;
   line-height: 1.4;
-}
-.editor-proxy {
-  margin-block: var(--space-2);
 }
 .detail-proxy {
   margin-block: var(--space-3);

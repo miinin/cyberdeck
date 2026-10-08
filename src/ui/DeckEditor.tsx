@@ -733,16 +733,6 @@ export function DeckEditor({
         </div>
       </div>
 
-      {collectionReady && missingCards.length > 0 && (
-        <div className="missing-add proxy-send editor-proxy">
-          <SendToProxyButton
-            rows={missingCards.map((row) => ({ card: row.card.key, count: row.missing }))}
-            queue={proxyQueue}
-            label={proxyTexts.printMissing}
-          />
-        </div>
-      )}
-
       {tabbed && (
         <div ref={tabsRef} className="segmented segmented--fill editor-tabs" role="group" aria-label={deckTexts.editorTabsLabel}>
           <button type="button" className="segmented-option" aria-pressed={tab === 'deck'} onClick={() => selectTab('deck', false)}>
@@ -792,6 +782,10 @@ export function DeckEditor({
 
       <div className="editor-layout">
         <section className="editor-filters" aria-labelledby="filters-heading" hidden={pickerHidden}>
+          {/* The title of the whole "add cards" part sits above the search row (T-118, UX-118-23); the results region is named by it. */}
+          <h2 id="search-heading" className="editor-add-heading">
+            {deckTexts.searchHeading}
+          </h2>
           <h2 id="filters-heading" className="filters-heading">
             {texts.filtersHeading}
           </h2>
@@ -817,7 +811,6 @@ export function DeckEditor({
         </section>
 
         <section className="editor-search" aria-labelledby="search-heading" data-image-size={imageSize} hidden={pickerHidden}>
-          <h2 id="search-heading">{deckTexts.searchHeading}</h2>
           <div className="pick-bar">
             <p className="status-line" role="status">
               {deckTexts.searchResults(filtered.length, cards.length)}
@@ -1008,7 +1001,6 @@ export function DeckEditor({
             onOpenImage={openImage}
             hoverProps={preview.bind}
             onMoveToSideboard={(card) => moveCopy(card, true)}
-            onAddToSideboard={addToSideboard}
             problems={problems}
           />
           <Sideboard
@@ -1048,6 +1040,13 @@ export function DeckEditor({
               queue={proxyQueue}
               label={proxyTexts.sendDeck}
             />
+            {collectionReady && missingCards.length > 0 && (
+              <SendToProxyButton
+                rows={missingCards.map((row) => ({ card: row.card.key, count: row.missing }))}
+                queue={proxyQueue}
+                label={proxyTexts.printMissing}
+              />
+            )}
           </div>
 
           <DeckStats

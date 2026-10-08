@@ -326,6 +326,8 @@ export const textsEn: typeof textsFi = {
   tradeShareTooBig: 'The collection is too big for a link.',
   tradeInvalidHeading: 'This link does not work',
   tradeInvalid: 'The trade link is broken or too long. Ask the sender to share it again.',
+  cardNotFound: 'The card was not found.',
+  cardNotFoundBack: 'Show all cards',
   tradeToCards: 'Go to Cards',
   tradeOpenOwn: 'Open your own Have/Want',
   tradeHeading: 'Trade link',

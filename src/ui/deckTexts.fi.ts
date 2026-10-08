@@ -187,7 +187,7 @@ export const deckTextsFi = {
   sameLegend: (name: string) => `Pakassa on jo Legend nimeltä ${name}.`,
   toastClose: 'Sulje ilmoitus',
   pickViewLegend: 'Näkymä',
-  pickViewList: 'Rivit',
+  pickViewList: 'Lista',
   pickViewImages: 'Kuvat',
   // Result picker (T-050b)
   pickHint: 'Napsauta korttia lisätäksesi. Oikea napsautus tai Shift+napsautus poistaa. Näppäimistöllä + ja −.',

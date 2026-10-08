@@ -180,7 +180,7 @@ export const deckTextsEn: typeof deckTextsFi = {
   sameLegend: (name: string) => `The deck already has a Legend named ${name}.`,
   toastClose: 'Dismiss notice',
   pickViewLegend: 'View',
-  pickViewList: 'Rows',
+  pickViewList: 'List',
   pickViewImages: 'Images',
   pickHint: 'Click a card to add it. Right-click or Shift+click removes it. On the keyboard, + and −.',
   resultsCaption: 'Search results',

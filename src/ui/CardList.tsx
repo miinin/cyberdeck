@@ -7,6 +7,7 @@ import type { Card } from '../domain/card';
 import type { Art } from '../domain/arts';
 import { artRarity } from '../domain/arts';
 import { CardColor, typeBadgeClass } from './CardColor';
+import { Chevron } from './Chevron';
 import { CardImage } from './CardImage';
 import { CostGem } from './DeckPickTable';
 import { CountControl } from './CountControl';
@@ -85,10 +86,10 @@ function BoxPicture({
       <CardImage key={index} card={card} onOpen={onOpenImage} artUrl={versionUrls[index] ?? null} actionLabel={imageLabel} />
       <span className="art-count-badge">{texts.versionPosition(index + 1, n)}</span>
       <button type="button" className="version-step version-step--prev" aria-label={texts.versionPrev(card.displayName)} onClick={() => step(-1)}>
-        <span aria-hidden="true">‹</span>
+        <Chevron direction="left" size={18} />
       </button>
       <button type="button" className="version-step version-step--next" aria-label={texts.versionNext(card.displayName)} onClick={() => step(1)}>
-        <span aria-hidden="true">›</span>
+        <Chevron direction="right" size={18} />
       </button>
     </div>
   );
@@ -250,7 +251,7 @@ function CardBox({
             className="card-rarity"
             hideLabel
           >
-            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={18} />}
+            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={18} showName={showArtLabel && art !== null} />}
           </Stat>
         </dl>
       </div>

@@ -226,7 +226,7 @@ describe('Sending cards to the proxy queue (T-102)', () => {
     expect(screen.getByText('Jonoon lisättiin 2 korttia.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Avaa Proxy-osio' })).toHaveAttribute('href', '#/proxy');
 
-    await user.click(screen.getByRole('button', { name: 'Lähetä kaikki want-kortit proxy-jonoon' }));
+    await user.click(screen.getByRole('button', { name: 'Kaikki proxy-jonoon' }));
     await waitFor(async () =>
       expect(await queueRows(repositories)).toEqual([
         { card: 'alpha', count: 4 },
@@ -262,7 +262,7 @@ describe('Sending cards to the proxy queue (T-102)', () => {
   it('says when the queue is full and nothing fits', async () => {
     const user = userEvent.setup();
     await renderProxy({ ...stored('cyberdeck:wants', [['alpha', 5]]), ...storedProxy([['beta', 200]]) }, '#/vaihto');
-    await user.click(screen.getByRole('button', { name: 'Lähetä kaikki want-kortit proxy-jonoon' }));
+    await user.click(screen.getByRole('button', { name: 'Kaikki proxy-jonoon' }));
     expect(await screen.findByText(/Jono on täynnä \(enintään 200 korttia\), mitään ei lisätty/)).toBeInTheDocument();
   });
 });

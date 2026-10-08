@@ -46,6 +46,7 @@ import { countIn, versionCountIn } from './collectionStore';
 import { ProxySheets } from './ProxySheets';
 import { proxyTexts } from './proxyTexts';
 import { useProxyQueue } from './SendToProxy';
+import { Chevron } from './Chevron';
 import { SortSelect } from './SortSelect';
 import { cardCount, texts } from './texts';
 import { SegmentedChoice } from './SegmentedChoice';
@@ -571,7 +572,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
           {pageCount > 1 && (
             <div className="proxy-pager proxy-screen" role="group" aria-label={proxyTexts.sheetPager}>
               <button type="button" className="button-secondary" disabled={pageIdx === 0} aria-label={proxyTexts.prevSheet} onClick={() => setPage(pageIdx - 1)}>
-                <span aria-hidden="true">{'‹'}</span>
+                <Chevron direction="left" />
               </button>
               <span className="proxy-pager-label">{pageLabel}</span>
               <button
@@ -581,7 +582,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
                 aria-label={proxyTexts.nextSheet}
                 onClick={() => setPage(pageIdx + 1)}
               >
-                <span aria-hidden="true">{'›'}</span>
+                <Chevron direction="right" />
               </button>
             </div>
           )}
