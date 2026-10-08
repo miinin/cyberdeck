@@ -320,7 +320,7 @@ export const deckTextsFi = {
   showDeck: 'Näytä pakka',
   goToDeck: 'Siirry pakkaan',
   editorTabsLabel: 'Pakkaeditorin osio',
-  editorTabDeck: (main: number) => `Pakka (${main}/${MIN_MAIN_DECK})`,
+  editorTabDeck: 'Pakka',
   editorTabAdd: 'Lisää kortteja',
   backToSearch: 'Takaisin hakuun',
   distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',

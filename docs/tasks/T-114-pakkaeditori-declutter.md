@@ -1,6 +1,6 @@
 # T-114 · Pakkaeditorin karsinta ja yläpalkin koristeviiva pois
 
-**Tila:** Ready. **Haara:** `t-113-skanneri-mittaus` (sama PR #124 käyttäjän pyynnöstä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "poista toisteisuus, declutter the shit out of this"), PM (ratkaisut).
+**Tila:** Review. **Haara:** `t-113-skanneri-mittaus` (sama PR #124 käyttäjän pyynnöstä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "poista toisteisuus, declutter the shit out of this"), PM (ratkaisut).
 
 ## Muutokset
 1. **Yläpalkin koristeviiva pois:** `.site-header::after`, eli keltainen 7rem viiva yläpalkin alla vasemmalla, poistetaan kaikilta leveyksiltä. Se sekoittuu aktiivisen sivun keltaiseen alaviivaan. Keltainen tarkoittaa jatkossa vain "aktiivinen tai valittu".
@@ -16,3 +16,8 @@
 - `npm test` (ajetaan kerran), `npm run lint` ja `npm run build` menevät läpi.
 
 ## Luovutus
+
+- Tehty: koristeviiva (`.site-header::after`) pois; välilehti on pelkkä "Pakka"/"Deck"; tallennustila hiljaiseksi tekstiksi ilman reunusta (`role="status"` ja virhe-notice ennallaan); vienti pysyy nimirivillä; näkyvyys yhdelle riville ilman laatikkoa ja "Näkyvyys: ..." -riviä, vihje (`aria-describedby`) rivillä, kytkimen nimi ja vahvistuslomake ennallaan; "Takaisin hakuun" poistettu renderöinnistä alle 64 rem; marginaaleja pienennetty (editor-head, crumb, tabs, deck-visibility).
+- Testit päivitetty: välilehden nimi, näkyvyysrivin haut, "Takaisin hakuun" -testi muutettu toteamaan, ettei linkkiä ole mobiilissa.
+- npm test 1519 läpi (ajettu kerran), lint ja build läpi. Ei selaimella tarkistettua 390 × 844 -ensinäkymää: PM katsoo esikatselusta.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0

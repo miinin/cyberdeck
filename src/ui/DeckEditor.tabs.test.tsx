@@ -41,7 +41,7 @@ describe('Deck editor tabs on a narrow screen', () => {
   it('opens a deck with cards on the deck tab and hides the picker', async () => {
     stubWidth(false);
     openEditor(legalCards());
-    const deckTab = await screen.findByRole('button', { name: 'Pakka (40/40)' });
+    const deckTab = await screen.findByRole('button', { name: 'Pakka' });
     expect(deckTab).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Lisää kortteja' })).toHaveAttribute('aria-pressed', 'false');
     expect(deckSection()).toBeVisible();
@@ -71,7 +71,7 @@ describe('Deck editor tabs on a narrow screen', () => {
     expect(deckSection()).not.toBeVisible();
     const search = screen.getByRole('searchbox');
     await user.type(search, 'unit 1');
-    await user.click(screen.getByRole('button', { name: /^Pakka \(/ }));
+    await user.click(screen.getByRole('button', { name: 'Pakka' }));
     expect(deckSection()).toBeVisible();
     expect(pickerSection()).not.toBeVisible();
     await user.click(screen.getByRole('button', { name: 'Lisää kortteja' }));
@@ -89,13 +89,11 @@ describe('Deck editor tabs on a narrow screen', () => {
     expect(screen.getByRole('heading', { level: 2, name: /Oma pakka/ })).toHaveFocus();
   });
 
-  it('"Back to search" in the deck changes to the add tab', async () => {
+  it('has no "Back to search" link in the deck, because the add tab does the same (T-114)', async () => {
     stubWidth(false);
-    const user = userEvent.setup();
     openEditor(legalCards());
-    await user.click(await screen.findByRole('button', { name: 'Takaisin hakuun' }));
-    expect(pickerSection()).toBeVisible();
-    expect(screen.getByRole('searchbox')).toHaveFocus();
+    await screen.findByRole('button', { name: 'Pakka' });
+    expect(screen.queryByRole('button', { name: 'Takaisin hakuun' })).not.toBeInTheDocument();
   });
 });
 
