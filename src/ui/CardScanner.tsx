@@ -709,9 +709,14 @@ export function ScanCardsButton(props: {
   const className = variant === 'floating' ? 'scan-fab' : `${variant === 'primary' ? 'button-primary' : 'button-secondary'} scan-open`;
   return (
     <>
-      <button type="button" className={className} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={className}
+        aria-label={variant === 'secondary' ? scannerTexts.open : undefined}
+        onClick={() => setOpen(true)}
+      >
         <CameraIcon />
-        {scannerTexts.open}
+        {variant === 'secondary' ? scannerTexts.openShort : scannerTexts.open}
       </button>
       {variant === 'floating' && <div className="scan-fab-spacer" aria-hidden="true" />}
       {open && <CardScannerDialog {...dialogProps} mode={mode} onModeChange={setMode} onClose={() => setOpen(false)} />}

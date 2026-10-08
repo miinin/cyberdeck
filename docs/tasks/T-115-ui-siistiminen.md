@@ -1,6 +1,6 @@
 # T-115 · UI-siistiminen: Kortit-sivun työkalurivi, pakkaeditorin otsikko ja kytkin, korttinäkymä pakkaan, sideboardin vaakavieritys
 
-**Tila:** Ready. **Haara:** `t-115-ui-siistiminen` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08, tuotannon kuvakaappaukset), PM (ratkaisut).
+**Tila:** Review. **Haara:** `t-115-ui-siistiminen` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08, tuotannon kuvakaappaukset), PM (ratkaisut).
 
 ## 1. Kortit-sivun työkalurivi (CatalogView, ListToolbar, CardFilters)
 **Ongelma:** ohjaimet ovat eri korkeuksilla ja eri tasoissa pystysuunnassa. Kuvat ja Lista näyttävät valintaruuduilta, "Kaikki versiot" kelluu irrallaan, skannauspainike on iso ja reunassa, ja hakuruudussa on raskas otsikko- ja ohjelaatikko.
@@ -38,3 +38,11 @@
 - `npm test` (ajetaan kerran), `npm run lint` ja `npm run build` menevät läpi.
 
 ## Luovutus
+
+- **1. Kortit-sivu:** haku ja "Suodattimet" samalla rivillä (otsikko ja ohje `visually-hidden`, `panel`-koriste pois; placeholderia ei lisätty, koska olemassa oleva testi kieltää sen). Kuvat/Lista, kuvakoko ja painos ovat segmenttivalitsimia (editorin välilehtien tyyli; radiot säilyvät, joten saavutettavuus ennallaan; sama tyyli pakkaeditorin valitsimissa). "Muokkaa kokoelmaa" ja "Kaikki versiot" ovat samanlaiset `role="switch"`-kytkimet. Skannaus on kompakti toissijainen painike "Skannaa" (`aria-label` "Skannaa kortteja" säilyy) järjestysrivillä; puhelimessa "Järjestys"-teksti on vain ruudunlukijalle, jotta järjestys ja skannaus mahtuvat yhdelle riville 390 px:llä (320 px:llä skannaus siirtyy omalle rivilleen).
+- **2. Pakkaeditori:** otsikkorivi on yksi rivi (nimi venyy, oikealla tallennustila ja vienti; alle 26 rem tallennustilasta näkyy vain ✓ ja teksti jää ruudunlukijalle). Näkyvyyskytkin käyttää `edit-switch`-tyyliä (kulmikas, teeman värit), ja vanha pyöreä kytkin-CSS poistettu. Vihje samalla rivillä tai heti alla.
+- **3. "Kortit"-näkymä:** kolmas vaihtoehto Lista / Pinot / Kortit sekä pääpakassa, legendeissä että sideboardissa. Kaksi kokonaista korttia rinnakkain (`1fr 1fr`), alkaen 40 rem `auto-fill minmax(10rem, 1fr)`; määrämerkki kulmassa, +/- kortin alla, ryhmittely kuten Lista-näkymässä. Valintaa ei muisteta istuntojen välillä, koska nykyinenkään pakkanäkymä ei ole tallennettu (vain komponentin tila). Tekstit fi/en (`deckViewCards`, `openShort`).
+- **4. Sideboard:** spread-ruudukko `minmax(min(7rem, 100%), 1fr)`, `min-inline-size: 0` ja rivittyvät painikkeet.
+- **Tarkistus:** Chromella (CDP, leveydet 320, 390, 1440): `scrollWidth` = leveys kaikissa (ei vaakavieritystä), Kortit-sivu, pakkaeditori, Kortit-näkymä ja Pinot-sideboard katsottu kuvakaappauksista. Ei sisäisiä vieritysalueita lisätty.
+- **Testit:** `npm test` 1526 läpi (ajettu kerran lopuksi, uusi testi Kortit-näkymälle), lint ja build läpi.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (320 px:n tilastoruudun "Legendit/Sideboard"-otsikot menevät päällekkäin; vanha vika, ei tämän kortin alaa).
