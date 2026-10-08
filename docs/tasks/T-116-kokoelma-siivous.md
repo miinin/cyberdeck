@@ -56,5 +56,5 @@ Tee kaikki yhteen PR:ään. Korjaa matkalla havaitsemasi ilmeiset ulkoasuviat (p
 
 **Muut korjaukset:** Beta-merkin ja ×N-merkin törmäys pienillä taskuilla ratkaistu pienentämällä merkki ja siirtämällä se vasempaan alakulmaan.
 **Testit:** binder-domain-testit uusittu (yksi setti, Beta-logiikka, muiden tuotteiden ohitus), CollectionBinder-testeihin kytkin- ja Beta-merkkitestit, HaveWant-testeihin InfoTip-testi, ProxyView-testeihin merkki ja kolme uutta tarjouspaikkaa, repositories-testiin vanha `art`-kenttä. `npm test`: 1539 läpi. Lint ja build läpi. Chrome 320/390/1440: ei vaakavieritystä (Kokoelma yleiskuva ja kansio, Have/Want, Kortit-tiedot).
-**Koodikatselmointi:** tehty · Pakollisia korjattu 0 · Suosituksia 2 (velka: (i)-vihjeen popover ei vielä väistä ruudun alareunaa; kansion numerojärjestyksessä Beta-vain-kortit (`001β`) sekoittuvat Retail-numeroiden joukkoon samalla numerolla).
+**Koodikatselmointi:** tehty · Pakollisia korjattu 0 · Suosituksia 1 (velka: kansion numerojärjestyksessä Beta-vain-kortit (`001β`) sekoittuvat Retail-numeroiden joukkoon samalla numerolla).
 **Ei uutta riippuvuutta.**

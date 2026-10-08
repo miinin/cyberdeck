@@ -8646,7 +8646,7 @@ section[aria-labelledby='have-heading'] {
   inset-inline-start: 0;
   z-index: 20;
   box-sizing: border-box;
-  inline-size: min(24rem, calc(100vw - 2 * var(--gutter)));
+  inline-size: min(20rem, calc(100vw - 32px));
   padding: var(--space-2) var(--space-3);
   border: 2px solid var(--color-border-strong);
   background: var(--color-surface-raised);
@@ -8654,6 +8654,10 @@ section[aria-labelledby='have-heading'] {
   font-size: var(--font-size-sm);
   font-weight: normal;
   overflow-wrap: anywhere;
+}
+.info-tip-pop.is-up {
+  inset-block-start: auto;
+  inset-block-end: 100%;
 }
 .info-tip-pop[hidden] {
   display: none;

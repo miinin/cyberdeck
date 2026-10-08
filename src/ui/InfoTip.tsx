@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { texts } from './texts';
 
@@ -12,8 +12,26 @@ export function InfoTip({ children, label = texts.infoTipLabel }: { children: Re
   const [hovered, setHovered] = useState(false);
   const rootRef = useRef<HTMLSpanElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLSpanElement>(null);
   const id = useId();
   const open = pinned || hovered;
+
+  // Keep the popover on the screen: open upwards when there is no room below, and slide it sideways off the edges.
+  useLayoutEffect(() => {
+    const pop = popRef.current;
+    if (!open || pop === null) return;
+    pop.classList.remove('is-up');
+    pop.style.translate = '';
+    const rect = pop.getBoundingClientRect();
+    const margin = 16;
+    const room = document.documentElement.clientWidth;
+    let shift = 0;
+    if (rect.right > room - margin) shift = room - margin - rect.right;
+    if (rect.left + shift < margin) shift = margin - rect.left;
+    const up = rect.bottom > window.innerHeight - 8 && rect.top - rect.height - 40 > 0;
+    pop.classList.toggle('is-up', up);
+    pop.style.translate = shift === 0 ? '' : `${shift}px 0`;
+  }, [open]);
 
   useEffect(() => {
     if (!pinned) return;
@@ -50,7 +68,13 @@ export function InfoTip({ children, label = texts.infoTipLabel }: { children: Re
       >
         <span aria-hidden="true">i</span>
       </button>
-      <span id={id} role="note" className="info-tip-pop" hidden={!open}>
+      <span
+        ref={popRef}
+        id={id}
+        role="note"
+        className="info-tip-pop"
+        hidden={!open}
+      >
         {children}
       </span>
     </span>
