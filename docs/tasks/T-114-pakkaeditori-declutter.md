@@ -1,6 +1,6 @@
 # T-114 · Pakkaeditorin karsinta ja yläpalkin koristeviiva pois
 
-**Tila:** Review. **Haara:** `t-113-skanneri-mittaus` (sama PR #124 käyttäjän pyynnöstä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "poista toisteisuus, declutter the shit out of this"), PM (ratkaisut).
+**Tila:** Done. **Haara:** `t-113-skanneri-mittaus` (sama PR #124 käyttäjän pyynnöstä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "poista toisteisuus, declutter the shit out of this"), PM (ratkaisut).
 
 ## Muutokset
 1. **Yläpalkin koristeviiva pois:** `.site-header::after`, eli keltainen 7rem viiva yläpalkin alla vasemmalla, poistetaan kaikilta leveyksiltä. Se sekoittuu aktiivisen sivun keltaiseen alaviivaan. Keltainen tarkoittaa jatkossa vain "aktiivinen tai valittu".

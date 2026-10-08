@@ -1,6 +1,6 @@
 # T-113 · Jatkuva skannaus toimimaan (suunnitelma)
 
-**Tila:** Backlog (suunnitelma, ei toteutusta). **Päättäjä:** käyttäjä (palaute 2026-10-08: "skannaus ilman kuvan ottamista ei toimi ollenkaan?"), PM (suunnitelma).
+**Tila:** Done. **Päättäjä:** käyttäjä (palaute 2026-10-08: "skannaus ilman kuvan ottamista ei toimi ollenkaan?"), PM (suunnitelma).
 
 ## Nykytila
 - **Yksi kerrallaan (toimii):** napautus ottaa kuvan. Kolme parasta osumaa näytetään, ja käyttäjä valitsee niistä, vaikka tunnistus ei olisi varma.
