@@ -8197,3 +8197,59 @@ section[aria-labelledby='have-heading'] {
     min-inline-size: 0;
   }
 }
+
+/* Deck editor tabs below 64rem (T-110): the deck or the card picker, one at a time. A segmented pair of toggle buttons. */
+.editor-filters[hidden],
+.editor-search[hidden],
+.editor-side[hidden] {
+  display: none;
+}
+
+.editor-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-block: var(--space-3);
+  border: 2px solid var(--color-border-strong);
+}
+
+.editor-tabs button {
+  min-block-size: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.editor-tabs button + button {
+  border-inline-start: 2px solid var(--color-border-strong);
+}
+
+.editor-tabs button[aria-pressed='true'] {
+  background: var(--color-brand-yellow);
+  color: #000;
+}
+
+.editor-tabs button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -4px;
+}
+
+.editor-add-cards {
+  inline-size: 100%;
+  min-block-size: 3.5rem;
+}
+
+/* The bottom bar of the deck editor sits above the mobile navigation (T-107). */
+.deck-bar {
+  bottom: var(--bottom-nav-height, 0px);
+}
+
+@media (forced-colors: active) {
+  .editor-tabs button[aria-pressed='true'] {
+    background: Highlight;
+    color: HighlightText;
+  }
+}

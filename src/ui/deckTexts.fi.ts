@@ -319,6 +319,10 @@ export const deckTextsFi = {
   mobileBarMain: (main: number) => `Pakka ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
   showDeck: 'Näytä pakka',
   goToDeck: 'Siirry pakkaan',
+  editorTabsLabel: 'Pakkaeditorin osio',
+  editorTabDeck: (main: number) => `Pakka (${main}/${MIN_MAIN_DECK})`,
+  editorTabAdd: 'Lisää kortteja',
+  editorAddCards: '+ Lisää kortteja',
   backToSearch: 'Takaisin hakuun',
   distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',
 

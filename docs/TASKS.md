@@ -109,6 +109,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-104 | Proxy-näkymän uudelleensuunnittelu: valinta vasemmalla, sticky-tulostusarkki oikealla, lento-animaatio, tiivis ohje | 1 | Should | Koodari | Done | PM esikatselu |
 | T-105 | Kokoelman edistymisnäkymä: yleiskuva, setit, harvinaisuudet, värit ja tyypit, puuttuvat kortit want-listalle ja proxy-jonoon | 1 | Should | Koodari | Done | PM esikatselu |
 | T-106 | Korttien skannaus kameralla: selvitys ja suunnitelma (sormenjälkitunnistus laitteella, vaiheet 0–3) | 1 | Should | Koodari | Done | Digiturva (Permissions-Policy) |
-| T-107 | Kokoelma-välilehden ja mobiilinavigoinnin muutokset (käyttäjän toive 2026-10-07, sisältö tarkennetaan käyttäjän kanssa) | 1 | Should | PM | Backlog | – |
+| T-107 | Mobiilinavigointi alapalkiksi: yksi rivi ylhäällä, kiinteä välilehtipalkki alhaalla | 1 | Should | Koodari | Ready | PM esikatselu |
 | T-108 | Skannerin näkyvyys (Kokoelma-painike, tyhjän tilan kehotus, mobiilin kelluva painike) ja jatkuva skannaus automaattisella lisäyksellä | 1 | Should | Koodari | Done | PM esikatselu |
 | T-109 | Kokoelma: Myytävät-tilasto pois, näkymävalitsin ja kansionäkymä (3 × 3 -taskusivut, aukeama) | 1 | Should | Koodari | Done | PM esikatselu |
+| T-110 | Pakkaeditori mobiilissa: välilehdet Pakka / Lisää kortteja, pakka näkyy ensin | 1 | Should | Koodari | Review | PM esikatselu |

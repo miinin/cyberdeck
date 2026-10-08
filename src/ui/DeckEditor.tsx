@@ -73,7 +73,7 @@ import { useWants } from './useWants';
 import { proxyTexts } from './proxyTexts';
 import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 import { trackDeckSave } from './useDecks';
-import { EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
+import { EDITOR_TABS_QUERY, EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
 
 /** A change is saved this long after the last edit (T-013). */
 export const AUTOSAVE_DELAY_MS = 500;
@@ -599,6 +599,10 @@ export function DeckEditor({
     );
 
   const showDeck = () => {
+    if (tabbed) {
+      selectTab('deck', true);
+      return;
+    }
     sideRef.current?.scrollIntoView?.({ block: 'start' });
     deckHeadingRef.current?.focus({ preventScroll: true });
   };
@@ -607,6 +611,33 @@ export function DeckEditor({
     issuesHeadingRef.current?.scrollIntoView?.({ block: 'nearest' });
     issuesHeadingRef.current?.focus({ preventScroll: true });
   };
+
+  // T-110: below 64rem the editor shows the deck or the card picker, one at a time. The default is chosen once, when
+  // the deck has loaded: the deck, or the picker for an empty deck. Both parts stay mounted, so filters and search persist.
+  const tabbed = useMediaQuery(EDITOR_TABS_QUERY, false);
+  const [tab, setTab] = useState<'deck' | 'add' | null>(null);
+  if (phase === 'ready' && tab === null) setTab(totals.main + totals.legends === 0 ? 'add' : 'deck');
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const tabFocus = useRef<'deck' | 'add' | null>(null);
+  const [tabRequest, setTabRequest] = useState(0);
+  const deckHidden = tabbed && tab === 'add';
+  const pickerHidden = tabbed && tab === 'deck';
+
+  // `focus` is false when the tab button itself was used (it keeps the focus); otherwise the focus follows to the new part.
+  const selectTab = (next: 'deck' | 'add', focus: boolean) => {
+    setTab(next);
+    tabFocus.current = focus ? next : null;
+    setTabRequest((count) => count + 1);
+  };
+
+  useEffect(() => {
+    if (tabRequest === 0) return;
+    tabsRef.current?.scrollIntoView?.({ block: 'start' });
+    const target = tabFocus.current;
+    tabFocus.current = null;
+    if (target === 'deck') deckHeadingRef.current?.focus({ preventScroll: true });
+    else if (target === 'add') searchInputRef.current?.focus({ preventScroll: true });
+  }, [tabRequest]);
 
   if (phase !== 'ready') {
     return (
@@ -682,6 +713,17 @@ export function DeckEditor({
         </div>
       </div>
 
+      {tabbed && (
+        <div ref={tabsRef} className="editor-tabs" role="group" aria-label={deckTexts.editorTabsLabel}>
+          <button type="button" aria-pressed={tab === 'deck'} onClick={() => selectTab('deck', false)}>
+            {deckTexts.editorTabDeck(totals.main)}
+          </button>
+          <button type="button" aria-pressed={tab === 'add'} onClick={() => selectTab('add', false)}>
+            {deckTexts.editorTabAdd}
+          </button>
+        </div>
+      )}
+
       {saveState === 'error' && saveError === 'conflict' && (
         <div className="notice notice-danger" role="alert">
           <p>{deckTexts.conflictMessage}</p>
@@ -719,7 +761,7 @@ export function DeckEditor({
       </p>
 
       <div className="editor-layout">
-        <section className="editor-filters" aria-labelledby="filters-heading">
+        <section className="editor-filters" aria-labelledby="filters-heading" hidden={pickerHidden}>
           <h2 id="filters-heading" className="filters-heading">
             {texts.filtersHeading}
           </h2>
@@ -744,7 +786,7 @@ export function DeckEditor({
           />
         </section>
 
-        <section className="editor-search" aria-labelledby="search-heading" data-image-size={imageSize}>
+        <section className="editor-search" aria-labelledby="search-heading" data-image-size={imageSize} hidden={pickerHidden}>
           <h2 id="search-heading">{deckTexts.searchHeading}</h2>
           <div className="pick-bar">
             <p className="status-line" role="status">
@@ -870,7 +912,7 @@ export function DeckEditor({
           )}
         </section>
 
-        <div className="deck-bar" hidden={deckInView}>
+        <div className="deck-bar" hidden={tabbed ? tab !== 'add' : deckInView}>
           <p className="deck-bar-text">
             <span className="deck-bar-part">{deckTexts.mobileBarMain(totals.main)}</span>
             <span aria-hidden="true">·</span>
@@ -881,7 +923,12 @@ export function DeckEditor({
           </button>
         </div>
 
-        <section className="editor-side" aria-labelledby="deck-heading" ref={sideRef}>
+        <section className="editor-side" aria-labelledby="deck-heading" ref={sideRef} hidden={deckHidden}>
+          {tabbed && (
+            <button type="button" className="button-primary editor-add-cards" onClick={() => selectTab('add', true)}>
+              {deckTexts.editorAddCards}
+            </button>
+          )}
           <div className="deck-head">
             <h2 id="deck-heading" className="visually-hidden" ref={deckHeadingRef} tabIndex={-1}>
               {deckTexts.sectionLabel(content.name)}
@@ -905,7 +952,11 @@ export function DeckEditor({
             />
             <p className="deck-head-sub">{deckTexts.legendsProgress(legendsCount)}</p>
             <p className="deck-back">
-              <button type="button" className="link-button" onClick={() => searchInputRef.current?.focus()}>
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => (tabbed ? selectTab('add', true) : searchInputRef.current?.focus())}
+              >
                 <span aria-hidden="true">← </span>
                 {deckTexts.backToSearch}
               </button>
