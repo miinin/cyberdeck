@@ -103,3 +103,16 @@ Digiturva tarkistaa kamerapyynnön muutoksen ja sen, ettei diagnostiikka tallenn
 6. **Testit:** puhtaat funktiot (3/4-ikkuna, terävyysraja, ehdotuksen 1,5 sekunnin pysyvyys ja tuplien esto). Olemassa olevat continuousScan-testit päivitetään, mutta niitä ei heikennetä.
 
 **Hyväksymiskriteerit:** `npm test` (ajetaan kerran), `npm run lint` ja `npm run build` menevät läpi. Mittausdatalla vähintään 17/22 lisätään automaattisesti ja "ei mikään" -tapaus hylätään.
+
+## T-113b · Luovutus
+- **Sääntö:** `CONFIDENCE = { maxDistance: 580, minGap: 40 }` (ei kiristetty). Jatkuva tila lisää kortin, kun sama varma id on 3:ssa viimeisistä 4 kuvasta (`stepContinuous`, ikkuna `window`); `AWAY_MS` säilyy. Kuvat, joiden terävyys on alle 150, ohitetaan eivätkä ole havaintoja.
+- **Ehdotus:** `stepSuggestion` (puhdas funktio): paras id (etäisyys enintään 650, ei varma) pysynyt 1,5 s -> kiinteän korkuinen rivi (pikkukuva, nimi, "Lisää"). Ehdotus vaihtuu vasta, kun uusi paras id on pysynyt 1,5 s. Napautus lisää yhden kappaleen kuten automaattinen lisäys (kumoa toimii), eikä sama ehdotus palaa heti. Ei käytössä `?scandebug=1`-tilassa.
+- **Kehys:** neutraali (valkoinen reuna, "Täytä kehys kortilla"), "Pidä paikallaan" (keltainen, kun id on ikkunassa 1–2 kertaa), "Lisätty" (vihreä). Ruudunlukijalle kerrotaan vain lisäys (`role="status"` ennallaan).
+- **measureScanner (synteettinen, 5592 skannausta, sääntö 580/40), värikohtaisesti:** skannauksia / varmoja / väärä kortti / väärä kuvitus
+  - Blue 1392 / 1277 / 0 / 1
+  - Green 1440 / 1291 / 0 / 1
+  - Red 1344 / 1211 / 0 / 3
+  - Yellow 1416 / 1251 / 0 / 1
+  Väärä varma kortti: 0 kaikissa väreissä. Kuusi "väärää" on saman kortin toinen kuvitus (nova/iconic), jota ei lasketa vääräksi kortiksi. Vertailu: 580/20 antaa 11, 580/60 antaa 4, 650/40 antaa 6 väärää kuvitusta. Skripti raportoi nyt värit (`colorOf` cards.jsonista).
+- **Testit:** continuousScan-testit kirjoitettu uudelleen (3/4-ikkuna, pitäminen, terävyys, ehdotuksen 1,5 s pysyvyys); entisiä testejä ei heikennetty. `npm test` 1525 läpi, lint ja build läpi.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (ei UI-testiä "Lisää"-ehdotuksen napille; logiikka katettu domain-testeillä).

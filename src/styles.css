@@ -8389,3 +8389,25 @@ section[aria-labelledby='have-heading'] {
   font-family: ui-monospace, monospace;
   font-size: 0.7rem;
 }
+
+/* Frame state and the offer under the frame (T-113b). The offer row has a fixed height, so nothing jumps. */
+.scanner-frame[data-hold] {
+  border-color: var(--color-brand-yellow);
+  box-shadow:
+    0 0 0 100vmax rgba(0, 0, 0, 0.55),
+    0 0 14px 3px var(--color-brand-yellow);
+}
+.scanner-frame:not([data-hold]):not([data-flash]) {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.scanner-suggest {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: 3.5rem;
+}
+.scanner-suggest .scanner-session-name {
+  flex: 1;
+  min-inline-size: 0;
+}

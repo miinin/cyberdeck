@@ -183,8 +183,8 @@ export interface ConfidenceRule {
   readonly minGap: number;
 }
 
-/** Tuned by scripts/cards/measureScanner.mjs on distorted pictures (T-106). */
-export const CONFIDENCE: ConfidenceRule = { maxDistance: 240, minGap: 40 };
+/** Set from real phone measurements (T-113b): the right card was 322..640 away (median ~500), wrong ones mostly 590..670. */
+export const CONFIDENCE: ConfidenceRule = { maxDistance: 580, minGap: 40 };
 
 /** True when the best match is close enough and clearly ahead of the second best (matches sorted, closest first). */
 export function isConfident(matches: readonly FingerprintMatch[], rule: ConfidenceRule = CONFIDENCE): boolean {

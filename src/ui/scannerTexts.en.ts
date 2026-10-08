@@ -37,6 +37,8 @@ export const scannerTextsEn: typeof scannerTextsFi = {
   modeStatus: (mode: string, edition: string) => `${mode} · ${edition}`,
   changeMode: 'Change',
   fillFrame: 'Fill the frame with the card',
+  holdStill: 'Hold still',
+  suggestAdd: 'Add',
   continuousHint: 'Hold the card in the frame until it flashes green. Take the card out of the frame before adding the same card again.',
   addedFlash: (name: string) => `Added: ${name}`,
   sessionTitle: 'Added cards',
