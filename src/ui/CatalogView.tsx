@@ -5,7 +5,7 @@ import type { CardKey } from '../domain/cardKey';
 import { countOf, minCountOf } from '../domain/collection';
 import { editionPrinting, protectedCount, setCopiesByEdition, targetPrinting } from '../domain/edition';
 import type { CollectionEntry } from '../domain/collection';
-import { artRarity, artsOf, entryChanges, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
+import { artRarity, artsOf, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
 import type { Art } from '../domain/arts';
 import { setFilterId } from '../domain/printing';
 import { variantImageUrl } from '../data/variantImages';
@@ -48,7 +48,9 @@ import { CollectionNotices, loadNotices } from './CollectionNotices';
 import { CountControl } from './CountControl';
 import { tradeableCount } from '../domain/tradeCompare';
 import { countIn, versionCountIn } from './collectionStore';
+import { entryOf as entryOfCard, writeEntry as writeCardEntry } from './collectionEntry';
 import { CardVersions } from './CardVersions';
+import { ScanCardsButton } from './CardScanner';
 import type { CollectionSnapshot } from './collectionStore';
 import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
@@ -356,28 +358,9 @@ export function CatalogView({
   const hasArt = (key: string, rarity: string) => variantImageUrl(key, rarity) !== null;
   const artsByCard = useMemo(() => new Map(allCards.map((card) => [card.key, artsOf(card, hasArt)])), [allCards]);
   const artsFor = (card: Card) => artsByCard.get(card.key) ?? [];
-  /** The card's row as shown now, with unsaved changes. */
-  const entryOf = (card: Card): CollectionEntry | undefined => {
-    const count = countIn(collection, card.key);
-    if (count === 0) return undefined;
-    const versions: Record<string, number> = {};
-    for (const printing of card.printings ?? []) {
-      const n = versionCountIn(collection, card.key, printing.key);
-      if (n > 0) versions[printing.key] = n;
-    }
-    return Object.keys(versions).length > 0 ? { card: card.key, count, versions } : { card: card.key, count };
-  };
-  /** Saves the change from `before` to `after`: the version counters first (the total follows them), then a count that still differs. */
-  const writeEntry = (card: Card, before: CollectionEntry | undefined, after: CollectionEntry | undefined) => {
-    const changes = entryChanges(before, after);
-    let count = before?.count ?? 0;
-    for (const [printing, n] of changes.versions) {
-      count += n - (before?.versions?.[printing] ?? 0);
-      collectionStore.setVersionCount(card.key, printing, n);
-    }
-    const wanted = after?.count ?? 0;
-    if (count !== wanted) collectionStore.setCount(card.key, wanted);
-  };
+  const entryOf = (card: Card): CollectionEntry | undefined => entryOfCard(collection, card);
+  const writeEntry = (card: Card, before: CollectionEntry | undefined, after: CollectionEntry | undefined) =>
+    writeCardEntry(collectionStore, card, before, after);
   /** The card box's counter (D-022): a card with a Welcome to Night City printing counts by edition. */
   const handleCountChange = (card: Card, count: number, edition: DefaultEdition = editionState) => {
     if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
@@ -734,6 +717,7 @@ export function CatalogView({
           />
           <div className="sort-row">
             <SortSelect sort={sort} onChange={setSort} />
+            <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} />
             {editable && collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
               <div className="missing-add missing-add--quiet">
                 <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />

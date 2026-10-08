@@ -103,10 +103,10 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-098 | Julkiset pakat (D-025): näkyvyys yksityinen/julkinen, oma nimimerkki, Julkiset pakat -välilehti, Firestore publicDecks | 1 | Must | PM → Koodari | Done | Digiturva SEC-098 + SEC-098b ✓, säännöt deployattu |
 | T-099 | [velka] R-22: toisella laitteella poistetun tai yksityiseksi muutetun pakan julkinen kopio poistuu vasta, kun julkaissut laite avaa sovelluksen (SEC-098b-2 jäännösriski) | 2 | Could | Koodari | Backlog | Digiturva |
 | T-100 | Agenttiroolien karsinta (D-026) ja promptiauditoinnin korjaukset | 1 | Should | PM | Done | – |
-| T-101 | Painoksen varmistus kokoelmaan lisätessä, pakkaeditorin ongelmamerkinnät, Legend-tekstit, Sideboard Pinot-näkymään, hillitympi Gear-väri | 1 | Should | PM → Koodari | Review | PM esikatselu |
-| T-102 | Proxy-tulostus: valitut kortit A4-arkeille oikeassa koossa (63 × 88 mm, 3 × 3), tulostus selaimesta | 1 | Should | PM → Koodari | Review | – |
-| T-103 | Pakkaeditori 2: myytävien suositus 55–60 %, laittomaksi tekevät kortit näkyviin, Legendit osioksi, pinot värin ja tyypin mukaan | 1 | Should | PM → Koodari | Katselmoitavana | – |
-| T-104 | Proxy-näkymän uudelleensuunnittelu: valinta vasemmalla, sticky-tulostusarkki oikealla, lento-animaatio, tiivis ohje | 1 | Should | Koodari | Review | PM esikatselu |
+| T-101 | Painoksen varmistus kokoelmaan lisätessä, pakkaeditorin ongelmamerkinnät, Legend-tekstit, Sideboard Pinot-näkymään, hillitympi Gear-väri | 1 | Should | PM → Koodari | Done | PM esikatselu |
+| T-102 | Proxy-tulostus: valitut kortit A4-arkeille oikeassa koossa (63 × 88 mm, 3 × 3), tulostus selaimesta | 1 | Should | PM → Koodari | Done | – |
+| T-103 | Pakkaeditori 2: myytävien suositus 55–60 %, laittomaksi tekevät kortit näkyviin, Legendit osioksi, pinot värin ja tyypin mukaan | 1 | Should | PM → Koodari | Done | – |
+| T-104 | Proxy-näkymän uudelleensuunnittelu: valinta vasemmalla, sticky-tulostusarkki oikealla, lento-animaatio, tiivis ohje | 1 | Should | Koodari | Done | PM esikatselu |
 | T-105 | Kokoelman edistymisnäkymä: yleiskuva, setit, harvinaisuudet, värit ja tyypit, puuttuvat kortit want-listalle ja proxy-jonoon | 1 | Should | Koodari | Done | PM esikatselu |
-| T-106 | Korttien skannaus kameralla: selvitys ja suunnitelma (sormenjälkitunnistus laitteella, vaiheet 0–3) | 1 | Should | PM | Suunnitelma | Digiturva (Permissions-Policy) |
+| T-106 | Korttien skannaus kameralla: selvitys ja suunnitelma (sormenjälkitunnistus laitteella, vaiheet 0–3) | 1 | Should | Koodari | Review | Digiturva (Permissions-Policy) |
 | T-107 | Kokoelma-välilehden ja mobiilinavigoinnin muutokset (käyttäjän toive 2026-10-07, sisältö tarkennetaan käyttäjän kanssa) | 1 | Should | PM | Backlog | – |

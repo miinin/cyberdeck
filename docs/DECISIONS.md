@@ -564,3 +564,13 @@ Päätöksessä on viisi osaa.
 2. Arkkitehti, UX Designer, Sisällöntuottaja, Testikäyttäjä ja Dokumentoija poistettiin agenttimäärittelyistä (`~/.claude/agents/`). PM tekee niiden työn itse tai antaa sen tilannekohtaisella tehtävänannolla yleisagentille. Malli valitaan työn mukaan.
 3. agents.md:n roolikuvaukset ja tarkistuslistat säilyvät tehtävänantojen lähdemateriaalina.
 **Seuraukset:** Katselmointien laajuus riippuu PM:n harkinnasta. Riskin mukaiset rajat ovat CLAUDE.md:ssä. Poistetut määrittelyt ovat varmuuskopiona kansiossa `~/.claude/backup/2026-10-06-prompt-audit/`.
+
+## D-027 · Korttien skannaus laitteella ilman painoksen tunnistusta · 2026-10-08 · Päättäjä: käyttäjä
+**Tila:** Hyväksytty. Tehtävä T-106.
+**Konteksti:** T-106:n suunnitelmassa oli neljä käyttäjän päätöstä. Käyttäjällä ei ole nyt kortteja käsillä testikuvia varten.
+**Päätös:**
+1. Toteutetaan ratkaisu A: kuvan sormenjälki lasketaan ja verrataan laitteella, eikä uusia riippuvuuksia tai pilvipalveluita käytetä.
+2. Kamera sallitaan: Permissions-Policy muutetaan muotoon `camera=(self)`, ja Digiturva katselmoi muutoksen.
+3. Painosta (Beta/Retail) ei tunnisteta kuvasta. Käyttäjä valitsee sen skannauksen alussa. Vaihe 3:n β-tunnistus jätetään pois.
+4. Vaihe 0 tehdään keinotekoisilla testikuvilla: korttikuvia vinoutetaan, rajataan, sumennetaan, valaistusta muutetaan ja kuviin lisätään kohinaa, heijastuksia ja JPEG-pakkausta. Oikeilla valokuvilla tarkkuus todennetaan myöhemmin, kun käyttäjä on kotona.
+**Seuraukset:** Keinotekoinen testi voi yliarvioida tarkkuuden. Varmistusnäkymä, jossa on kolme vaihtoehtoa, suojaa virheiltä, ja oikeiden kuvien testi on avoin jatkotoimi.

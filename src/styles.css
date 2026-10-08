@@ -7604,3 +7604,130 @@ section[aria-labelledby='have-heading'] {
     padding-inline: var(--space-2);
   }
 }
+
+/* Card scanner (T-106): camera view with a 63:88 frame, the matches as pictures, a count and Add. The dialog layer is the
+   only thing that scrolls (like the other dialogs); nothing inside has a scrollbar. */
+.scan-open {
+  align-self: flex-end;
+}
+
+.scanner-body {
+  width: min(36rem, 100%);
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+
+.scanner-body h2,
+.scanner-body h3,
+.scanner-body p {
+  margin: 0;
+}
+
+.scanner-subtitle {
+  font-size: var(--font-size-base);
+}
+
+.scanner-edition {
+  font-weight: var(--font-weight-bold);
+}
+
+.scanner-actions {
+  flex-wrap: wrap;
+}
+
+.scanner-viewport {
+  position: relative;
+  inline-size: 100%;
+  block-size: min(62dvh, 34rem);
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+}
+
+.scanner-video {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* The frame has the shape of a card; the shadow darkens everything outside it. */
+.scanner-frame {
+  position: absolute;
+  inset-block-start: 4%;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  block-size: 92%;
+  aspect-ratio: 63 / 88;
+  border: 3px solid var(--color-brand-yellow);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.scanner-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scanner-options[data-count='1'] {
+  grid-template-columns: minmax(0, 14rem);
+  justify-content: center;
+}
+
+.scanner-option {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  inline-size: 100%;
+  padding: var(--space-1);
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  text-align: start;
+  cursor: pointer;
+}
+
+.scanner-option[aria-pressed='true'] {
+  border-color: var(--color-brand-yellow);
+  box-shadow: 0 0 0 2px var(--color-brand-yellow);
+}
+
+.scanner-option img,
+.scanner-option .card-image {
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 63 / 88;
+  object-fit: contain;
+}
+
+.scanner-option-art {
+  color: var(--color-text-muted);
+}
+
+.scanner-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.scanner-count {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.scanner-count-value {
+  min-inline-size: 2.5ch;
+  text-align: center;
+  font-size: var(--font-size-lg, 1.25rem);
+  font-variant-numeric: tabular-nums;
+}

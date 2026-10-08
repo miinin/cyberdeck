@@ -17,7 +17,9 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "cards:update": "node scripts/cards-update.mjs",
-    "cards:images": "node scripts/cards-images.mjs"
+    "cards:images": "node scripts/cards-images.mjs",
+    "cards:fingerprints": "node scripts/cards-fingerprints.mjs",
+    "cards:measure-scanner": "node scripts/cards/measureScanner.mjs"
   },
   "dependencies": {
     "firebase": "12.19.0",
