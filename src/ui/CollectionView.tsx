@@ -124,36 +124,33 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
   return (
     <>
       <div className="page-head">
-        <h1>
-          {collectionTexts.heading}
-        </h1>
-        <ScanCardsButton {...scanProps} variant="primary" />
+        <h1>{collectionTexts.heading}</h1>
+        <div className="page-head-actions">
+          {ready && (
+            <fieldset className="view-select collection-views">
+              <legend>{collectionTexts.viewLabel}</legend>
+              <div className="options">
+                {(['overview', 'binder'] as const).map((value) => (
+                  <label key={value} className="option">
+                    <input type="radio" name={viewName} checked={prefs.view === value} onChange={() => setPrefs({ view: value })} />{' '}
+                    {value === 'overview' ? collectionTexts.viewOverview : collectionTexts.viewBinder}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          <ScanCardsButton {...scanProps} />
+        </div>
       </div>
 
       {collection.phase === 'loading' && <p>{collectionTexts.loading}</p>}
       {(collection.phase === 'unavailable' || collection.phase === 'locked') && <p role="alert">{collectionTexts.unavailable}</p>}
 
-      {ready && (
-        <fieldset className="segmented collection-views">
-          <legend>{collectionTexts.viewLabel}</legend>
-          <div className="segmented-options">
-            {(['overview', 'binder'] as const).map((value) => (
-              <label key={value} className={'segmented-option' + (prefs.view === value ? ' is-on' : '')}>
-                <input type="radio" name={viewName} checked={prefs.view === value} onChange={() => setPrefs({ view: value })} />
-                {value === 'overview' ? collectionTexts.viewOverview : collectionTexts.viewBinder}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      )}
-
       {ready && prefs.view === 'binder' && (
         <CollectionBinder
           cards={cards}
           collection={saved}
-          art={prefs.art}
           showMissing={prefs.showMissing}
-          onArtChange={(art) => setPrefs({ art })}
           onShowMissingChange={(showMissing) => setPrefs({ showMissing })}
         />
       )}

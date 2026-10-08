@@ -38,8 +38,8 @@ describe('Have/Want section (T-065)', () => {
   it('shows the heading, the empty states and the nav link as the current page', async () => {
     await renderView();
     expect(screen.getByRole('heading', { level: 1, name: 'Have/Want' })).toBeInTheDocument();
-    expect(screen.getByText(/Want-listalla ei ole vielä kortteja/)).toBeInTheDocument();
-    expect(screen.getByText(/Sinulla ei ole vielä vaihdettavia kortteja/)).toBeInTheDocument();
+    expect(screen.getByText(/Lista on tyhjä/)).toBeInTheDocument();
+    expect(screen.getByText(/Ei vaihdettavia kortteja/)).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: /päävalikko|sivut|valikko/i });
     expect(within(nav).getByRole('link', { name: 'Have/Want' })).toHaveAttribute('aria-current', 'page');
     expect(within(nav).getByRole('link', { name: 'Pakat' })).not.toHaveAttribute('aria-current');
@@ -88,7 +88,7 @@ describe('Have/Want section (T-065)', () => {
     await settle();
     expect(await wantEntries(repositories)).toEqual([]);
     expect(screen.getByRole('heading', { level: 2, name: 'Want' })).toHaveFocus();
-    expect(screen.getByText(/Want-listalla ei ole vielä kortteja/)).toBeInTheDocument();
+    expect(screen.getByText(/Lista on tyhjä/)).toBeInTheDocument();
   });
 
   it('lists only the tradeable copies of the collection, as text', async () => {
@@ -100,7 +100,7 @@ describe('Have/Want section (T-065)', () => {
     expect(within(section).getByText('Alpha')).toBeInTheDocument();
     expect(within(section).getByText('vaihdettavissa 2')).toBeInTheDocument();
     expect(within(section).queryByText('Beta')).toBeNull();
-    expect(within(section).queryByRole('button')).toBeNull();
+    expect(within(section).getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual(['Ohje']);
   });
 
   it('has the trade share button at the top', async () => {
@@ -149,5 +149,19 @@ describe('Have/Want card grid (T-067)', () => {
     expect(names()).toEqual(['Beta', 'Alpha']);
     await user.click(screen.getByRole('radio', { name: 'Iso' }));
     expect(document.querySelector('.have-want-results')).toHaveAttribute('data-image-size', 'large');
+  });
+
+  it('keeps the guidance in (i) tips instead of permanent paragraphs', async () => {
+    const user = userEvent.setup();
+    await renderView();
+    expect(screen.getByText(/Kokoa tähän kortit/)).not.toBeVisible();
+    const [pageTip] = screen.getAllByRole('button', { name: 'Ohje' });
+    expect(pageTip).toHaveAttribute('aria-expanded', 'false');
+    await user.click(pageTip as HTMLElement);
+    expect(pageTip).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText(/Kokoa tähän kortit/)).toBeVisible();
+    await user.keyboard('{Escape}');
+    expect(pageTip).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByText(/Kokoa tähän kortit/)).not.toBeVisible();
   });
 });

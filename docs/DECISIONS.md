@@ -584,3 +584,5 @@ Päätöksessä on viisi osaa.
 3. Proxy on toiminto pakan, puuttuvien korttien ja kortin tietojen sisällä. Proxy-jono näkyy yläpalkissa merkkinä, kun se ei ole tyhjä.
 4. Vanhat reitit ohjataan uusiin.
 **Seuraukset:** T-112:n UX-arvio tarkentaa yksityiskohdat ja pilkkoo toteutuksen. Kokoelman muokkauksen siirto koskee useita testejä.
+
+**D-028:n muutos 2026-10-09 (käyttäjä):** Proxy pysyy toistaiseksi päänavigoinnissa omana osionaan. Proxy-tarjoukset lisätään lisäksi mietittyihin paikkoihin: pakka, kortin tiedot, jaettu ja julkinen pakka, puuttuvat ja Have/Want (T-116). Päänavigoinnissa on siis viisi kohdetta, kunnes asiasta päätetään toisin.

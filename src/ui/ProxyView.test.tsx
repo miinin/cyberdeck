@@ -4,7 +4,9 @@ import { App } from '../App';
 import type { Card } from '../domain/card';
 import { createMemoryRepositories } from '../storage';
 import type { Repositories } from '../storage';
-import { legalCards, renderRoute, storedCollection, storedDecks } from './deckTestUtils';
+import { toCardsByKey } from '../domain/deckRules';
+import { encodeDeckShare } from '../domain/deckShare';
+import { legalCards, renderRoute, storedCollection, storedDecks, testCards } from './deckTestUtils';
 
 function card(slug: string, name: string): Card {
   return { id: `id-${slug}`, key: slug, slug, name, subname: null, displayName: name, type: 'Unit', color: 'Red', cost: 2, power: null, ram: null, rarity: null };
@@ -245,7 +247,7 @@ describe('Sending cards to the proxy queue (T-102)', () => {
       ...storedCollection([['u0', 3], ['u1', 1], ['l1', 1]]),
     };
     const repositories = renderRoute('#/pakat/a', createMemoryRepositories({ initial }));
-    await user.click(await screen.findByRole('button', { name: 'Lähetä puuttuvat proxy-jonoon' }));
+    await user.click(await screen.findByRole('button', { name: 'Tulosta puuttuvat proxyiksi' }));
     await waitFor(async () => expect((await queueRows(repositories)).length).toBeGreaterThan(0));
     const missing = await queueRows(repositories);
     expect(missing.find((row) => row.card === 'u0')).toBeUndefined();
@@ -262,5 +264,45 @@ describe('Sending cards to the proxy queue (T-102)', () => {
     await renderProxy({ ...stored('cyberdeck:wants', [['alpha', 5]]), ...storedProxy([['beta', 200]]) }, '#/vaihto');
     await user.click(screen.getByRole('button', { name: 'Lähetä kaikki want-kortit proxy-jonoon' }));
     expect(await screen.findByText(/Jono on täynnä \(enintään 200 korttia\), mitään ei lisätty/)).toBeInTheDocument();
+  });
+});
+
+describe('Proxy entry points and navigation badge (T-116)', () => {
+  it('shows the number of cards in the queue next to Proxy in the navigation, and nothing when it is empty', async () => {
+    await renderProxy({}, '#/vaihto');
+    const nav = screen.getByRole('navigation', { name: /päävalikko|sivut|valikko/i });
+    expect(within(nav).getByRole('link', { name: 'Proxy' })).toBeInTheDocument();
+    expect(nav.querySelector('.nav-badge')).toBeNull();
+  });
+
+  it('shows the queue size as a badge', async () => {
+    await renderProxy(storedProxy([['alpha', 2], ['beta', 1]]), '#/vaihto');
+    const nav = screen.getByRole('navigation', { name: /päävalikko|sivut|valikko/i });
+    expect(await within(nav).findByRole('link', { name: 'Proxy, jonossa 3 korttia' })).toBeInTheDocument();
+    expect(nav.querySelector('.nav-badge')).toHaveTextContent('3');
+  });
+
+  it('updates the badge when a card is added from another page', async () => {
+    const user = userEvent.setup();
+    await renderProxy({}, '#/kortti/alpha');
+    await user.click(await screen.findByRole('button', { name: 'Lisää proxy-jonoon' }));
+    const nav = screen.getByRole('navigation', { name: /päävalikko|sivut|valikko/i });
+    expect(await within(nav).findByRole('link', { name: 'Proxy, jonossa 1 kortti' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Avaa Proxy-osio' })).toHaveAttribute('href', '#/proxy');
+  });
+
+  it('adds a card from its detail view to the queue', async () => {
+    const user = userEvent.setup();
+    const repositories = await renderProxy({}, '#/kortti/gamma');
+    await user.click(await screen.findByRole('button', { name: 'Lisää proxy-jonoon' }));
+    await waitFor(async () => expect(await queueRows(repositories)).toEqual([{ card: 'gamma', count: 1 }]));
+  });
+
+  it('sends the missing cards of a shared deck to the queue', async () => {
+    const user = userEvent.setup();
+    const data = encodeDeckShare({ name: 'Jaettu', sections: [{ name: '', cards: [{ card: 'l1', count: 1 }, { card: 'u0', count: 3 }] }] }, toCardsByKey(testCards));
+    const repositories = renderRoute(`#/jaa/${data}`, createMemoryRepositories({ initial: storedCollection([['u0', 1]]) }));
+    await user.click(await screen.findByRole('button', { name: 'Tulosta puuttuvat proxyiksi' }));
+    await waitFor(async () => expect(await queueRows(repositories)).toEqual([{ card: 'l1', count: 1 }, { card: 'u0', count: 2 }]));
   });
 });

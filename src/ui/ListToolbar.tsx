@@ -52,7 +52,7 @@ const EDITION_OPTIONS: readonly (readonly [DefaultEdition, string])[] = [
 ];
 
 /** One switch style for the whole app (T-115): the "Muokkaa kokoelmaa" look. */
-function SwitchButton({ checked, label, onChange }: { checked: boolean; label: string; onChange: (next: boolean) => void }) {
+export function SwitchButton({ checked, label, onChange }: { checked: boolean; label: string; onChange: (next: boolean) => void }) {
   return (
     <button type="button" role="switch" aria-checked={checked} className="edit-switch" onClick={() => onChange(!checked)}>
       <span className="edit-switch-track" aria-hidden="true">
