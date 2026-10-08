@@ -8774,3 +8774,33 @@ section[aria-labelledby='have-heading'] {
     padding-inline: var(--space-2);
   }
 }
+
+/* Deck colour code (T-117), e.g. "GGR": each letter in its card colour. Text tokens are darker in the light theme so
+   yellow and green letters stay readable on a light card. */
+:root {
+  --color-code-red: var(--color-card-red);
+  --color-code-yellow: var(--color-card-yellow);
+  --color-code-green: var(--color-card-green);
+  --color-code-blue: var(--color-card-blue);
+}
+
+:root[data-theme='light'] {
+  --color-code-red: #b3202f;
+  --color-code-yellow: #7a5c00;
+  --color-code-green: #0f6e3c;
+  --color-code-blue: #1557a8;
+}
+
+.deck-color-code {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.deck-color-letter.is-red { color: var(--color-code-red); }
+.deck-color-letter.is-yellow { color: var(--color-code-yellow); }
+.deck-color-letter.is-green { color: var(--color-code-green); }
+.deck-color-letter.is-blue { color: var(--color-code-blue); }

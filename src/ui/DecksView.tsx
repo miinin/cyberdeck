@@ -22,7 +22,6 @@ import { buildPublicDeckInput } from '../domain/publicDeck';
 import type { MissingRow } from '../domain/wants';
 import { StorageError } from '../storage';
 import type { LoadNotice, Repositories, StorageErrorKind } from '../storage';
-import { CardColor } from './CardColor';
 import { AddMissingToWantsButton } from './AddMissingToWants';
 import { countIn } from './collectionStore';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
@@ -62,10 +61,19 @@ function noticeText(notice: LoadNotice): string | null {
   }
 }
 
-/** Colours of a deck: the Legends' colours first, then the main deck's, each once. */
-function deckColors(grouped: DeckGroups, main: readonly ColorShare[]): string[] {
-  const colors = [...grouped.legends.map((row) => row.card.color), ...main.map((share) => share.color)];
-  return [...new Set(colors.filter((color): color is string => color !== null))];
+/**
+ * The deck's colour code as players write it (T-117): one letter per Legend, the most common colour first, e.g. two
+ * Green and one Red Legend = "GGR". Without Legends, one letter per main deck colour.
+ */
+export function deckColorCode(grouped: DeckGroups, main: readonly ColorShare[]): string[] {
+  const legendColors = grouped.legends.map((row) => row.card.color).filter((color): color is string => color !== null);
+  if (legendColors.length === 0) {
+    return [...new Set(main.map((share) => share.color).filter((color): color is string => color !== null))];
+  }
+  const counts = new Map<string, number>();
+  for (const color of legendColors) counts.set(color, (counts.get(color) ?? 0) + 1);
+  // Map keeps first-seen order, and the sort is stable, so ties stay in Legend order.
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).flatMap(([color, count]) => Array<string>(count).fill(color));
 }
 
 /**
@@ -123,7 +131,7 @@ function DeckCardSummary({
   const totals = deckTotals(deck, cardsByKey);
   const errors = errorsOf(validateDeck(deck, cardsByKey)).length;
   const grouped = groupDeck(deck, cardsByKey);
-  const colors = deckColors(grouped, colorDistribution(deck, cardsByKey));
+  const colors = deckColorCode(grouped, colorDistribution(deck, cardsByKey));
   const mainState = totals.main < MIN_MAIN_DECK ? 'under' : totals.main > MAX_MAIN_DECK ? 'over' : 'ok';
   const missingRows: MissingRow[] = [];
   let missing: number | null = 0;
@@ -158,13 +166,15 @@ function DeckCardSummary({
         <div className="deck-card-meta">
           <p className="deck-counts">{deckTexts.counts(totals.legends, totals.main)}</p>
           {colors.length > 0 && (
-            <p className="deck-card-colors">
-              <span className="visually-hidden">{deckTexts.deckColors}: </span>
-              {colors.map((color) => (
-                <span key={color} className="deck-card-color">
-                  <CardColor color={color} />
-                </span>
-              ))}
+            <p className="deck-color-code">
+              <span className="visually-hidden">{`${deckTexts.deckColors}: ${colors.join(', ')}`}</span>
+              <span aria-hidden="true">
+                {colors.map((color, index) => (
+                  <span key={index} className={`deck-color-letter is-${color.toLowerCase()}`}>
+                    {color.charAt(0).toUpperCase()}
+                  </span>
+                ))}
+              </span>
             </p>
           )}
         </div>

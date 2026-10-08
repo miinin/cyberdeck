@@ -41,3 +41,5 @@ Valmis. Commitit suoraan `test`-haaraan (D-029).
 - **Testit:** DecksView-testit päivitetty ja kaksi uutta (valikko, Esc ja ulkopuolinen painallus; tilarivi ja wants-linkki). Apufunktio `chooseImport` (deckTestUtils) DeckImport-, DeckExportImport- ja MissingCards.wants-testeihin.
 - Tulokset: `npm test` 1541 läpi, lint ja build läpi.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
+
+**PM-lisäys 2026-10-09 (käyttäjän toive):** pakkakortin värit näytetään pelaajien lyhenteenä, esimerkiksi kaksi vihreää ja yksi punainen legend = **GGR**. Jokainen kirjain on oman korttivärinsä värinen. Yleisin väri tulee ensin, ja tasapelissä legendien järjestys ratkaisee. Ilman legendejä näytetään pääpakan värit, kukin kerran. Vaaleassa teemassa käytetään tummempia tekstivärejä luettavuuden vuoksi, ja ruudunlukija lukee värit sanoina. Toteutus `deckColorCode` (DecksView.tsx), testit tiedostossa `deckColorCode.test.ts`.
