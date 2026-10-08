@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRepositories } from '../storage';
-import { renderRoute, storedDecks } from './deckTestUtils';
+import { chooseImport, renderRoute, storedDecks } from './deckTestUtils';
 
 // Export and import of deck files (T-015, SR-18, SR-19).
 
@@ -86,7 +86,7 @@ describe('Deck file import', () => {
   async function openImport(initial: Record<string, string> = {}) {
     const user = userEvent.setup();
     const repositories = renderRoute('#/pakat', createMemoryRepositories({ initial }));
-    await user.click(await screen.findByRole('button', { name: 'Tuo pakkalista' }));
+    await chooseImport(user, 'Tuo pakkalista');
     return { user, repositories };
   }
   const picker = () => screen.getByLabelText('Tai valitse .txt- tai .json-tiedosto');

@@ -18,7 +18,9 @@ Säännöt: `rules.md`, roolit: `agents.md`. **Niitä ei ladata automaattisesti 
 - **Lue vähän:** älä lue kokonaan `docs/UX.md`:tä (170 kt), `docs/ARCHITECTURE.md`:tä (85 kt), `rules.md`:tä tai `agents.md`:tä. Hae tarvittava kohta grepillä ja lue vain se.
 - **Lyhyet tehtävänannot ja vastaukset.** Aliagentin paluuviesti kertoo vain tuloksen, avoimet kysymykset ja seuraavan askeleen, koska yksityiskohdat ovat kortissa.
 
-## Git ja julkaisu (D-001, D-003)
+## Git ja julkaisu (D-001, D-003, D-029)
+**Nyt voimassa D-029:** työ tehdään suoraan `test`-haaraan (paikalliset testit, lint ja build ensin), ja julkaisu-PR `test → main` tehdään heti ilman erillistä käskyä. Riskialttiit muutokset (tietomalli, säännöt, tallennus tai synkronointi, auth, firebase.json, workflowt, riippuvuudet) testataan ensin devissä, ja syy kerrotaan käyttäjälle. Alla oleva putki palaa käyttöön, kun käyttäjiä kutsutaan.
+
 ```
 t-XXX-haara → PR testiin (esikatselu) → PM yhdistää testiin → /julkaise → main
 ```

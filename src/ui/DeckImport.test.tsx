@@ -1,14 +1,14 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRepositories } from '../storage';
-import { renderRoute, storedCollection, storedDecks } from './deckTestUtils';
+import { chooseImport, renderRoute, storedCollection, storedDecks } from './deckTestUtils';
 
 const LIST = '# Tuotu testi\n// Legends (3)\n1 L1\n1 L2\n1 L3\n3 Unit 0\n2 Unit 1\n1 Nonexistent Card\n';
 
 async function openImport(initial: Record<string, string> = {}) {
   const user = userEvent.setup();
   const repositories = renderRoute('#/pakat', createMemoryRepositories({ initial }));
-  await user.click(await screen.findByRole('button', { name: 'Tuo pakkalista' }));
+  await chooseImport(user, 'Tuo pakkalista');
   return { user, repositories };
 }
 
@@ -134,10 +134,10 @@ describe('Deck list import', () => {
     expect(screen.getByRole('region', { name: 'Tarkistuksen tulos' })).toBeInTheDocument();
   });
 
-  it('returns to the list with the import button focused', async () => {
+  it('returns to the list with the import menu button focused', async () => {
     const { user } = await openImport();
     await user.click(screen.getByRole('button', { name: 'Takaisin pakkoihin' }));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Tuo pakkalista' })).toHaveFocus());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tuo' })).toHaveFocus());
   });
 });
 
