@@ -26,19 +26,16 @@ export interface CollectionOverview {
   copies: number;
   /** Cards owned in a full playset (3, or 1 for a Legend). */
   playsets: number;
-  /** Copies of cards that can be sold for eddies (€$). */
-  sellableCopies: number;
 }
 
 export function collectionOverview(cards: readonly Card[], collection: Collection): CollectionOverview {
-  const overview: CollectionOverview = { distinct: 0, total: cards.length, copies: 0, playsets: 0, sellableCopies: 0 };
+  const overview: CollectionOverview = { distinct: 0, total: cards.length, copies: 0, playsets: 0 };
   for (const card of cards) {
     const count = countOf(collection, card.key);
     if (count <= 0) continue;
     overview.distinct += 1;
     overview.copies += count;
     if (count >= playsetSize(card)) overview.playsets += 1;
-    if (card.eddiable === true) overview.sellableCopies += count;
   }
   return overview;
 }

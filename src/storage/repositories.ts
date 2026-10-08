@@ -44,12 +44,15 @@ import {
   EDIT_MODE_KEY,
   DECK_PICK_VIEW_KEY,
   DEFAULT_EDITION_KEY,
+  SCAN_MODE_KEY,
+  COLLECTION_PREFS_KEY,
   ACCOUNT_LAST_UID_KEY,
   ACCOUNT_REDIRECT_PENDING_KEY,
   ACCOUNT_DELETE_PENDING_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
 import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS, migrateCollectionV2ToV3, PROXY_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
+import { DEFAULT_COLLECTION_PREFS } from './types';
 import type {
   CollectionRepository,
   DeckRepository,
@@ -64,6 +67,8 @@ import type {
   CatalogViewMode,
   DeckPickView,
   DefaultEdition,
+  ScanMode,
+  CollectionPrefs,
 } from './types';
 
 export interface RepositoryOptions {
@@ -120,6 +125,24 @@ function specWith<T>(
  * with `v: 1` holds the collection as of schema 2; it is converted like the collection itself (D-022), so the
  * three-way merge compares like with like. `v: 2` bases are already converted. The want list is never converted.
  */
+/** Reads the saved Collection page choices; each field that is not valid falls back to its default. */
+function parseCollectionPrefs(raw: string | null): CollectionPrefs {
+  const prefs = { ...DEFAULT_COLLECTION_PREFS };
+  if (raw === null) return prefs;
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (typeof value === 'object' && value !== null) {
+      const { view, art, showMissing } = value as Record<string, unknown>;
+      if (view === 'overview' || view === 'binder') prefs.view = view;
+      if (art === 'base' || art === 'owned') prefs.art = art;
+      if (typeof showMissing === 'boolean') prefs.showMissing = showMissing;
+    }
+  } catch {
+    // Not JSON: the defaults.
+  }
+  return prefs;
+}
+
 function parseSyncBase(raw: string | null): SyncBase | null {
   if (raw === null) return null;
   try {
@@ -537,6 +560,41 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         throw toStorageError(error, 'write');
       }
       return edition;
+    },
+    loadScanMode: async () => {
+      try {
+        return store.getItem(SCAN_MODE_KEY) === 'continuous' ? 'continuous' : 'single';
+      } catch {
+        return 'single';
+      }
+    },
+    saveScanMode: async (mode: ScanMode) => {
+      if (mode !== 'single' && mode !== 'continuous') throw new StorageError('invalid-input', 'Unknown scan mode');
+      try {
+        store.setItem(SCAN_MODE_KEY, mode);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return mode;
+    },
+    loadCollectionPrefs: async () => {
+      try {
+        return parseCollectionPrefs(store.getItem(COLLECTION_PREFS_KEY));
+      } catch {
+        return { ...DEFAULT_COLLECTION_PREFS };
+      }
+    },
+    saveCollectionPrefs: async (prefs: CollectionPrefs) => {
+      const valid = parseCollectionPrefs(JSON.stringify(prefs));
+      if (valid.view !== prefs.view || valid.art !== prefs.art || valid.showMissing !== prefs.showMissing) {
+        throw new StorageError('invalid-input', 'Unknown collection preferences');
+      }
+      try {
+        store.setItem(COLLECTION_PREFS_KEY, JSON.stringify(valid));
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return valid;
     },
     // Account hints never throw: a failed write only means the SDK is not preloaded next time.
     loadLastUid: () => {

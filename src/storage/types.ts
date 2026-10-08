@@ -58,6 +58,15 @@ export type CatalogViewMode = 'grid' | 'table';
 export type DeckPickView = 'list' | 'images';
 /** Which Welcome to Night City edition the card boxes' + adds to (D-022). */
 export type DefaultEdition = 'beta' | 'retail';
+/** Card scanner mode (T-108): confirm every card, or add the recognised cards automatically. */
+export type ScanMode = 'single' | 'continuous';
+/** Collection page (T-109): the progress overview or the binder, and the binder's own options. */
+export interface CollectionPrefs {
+  view: 'overview' | 'binder';
+  art: 'base' | 'owned';
+  showMissing: boolean;
+}
+export const DEFAULT_COLLECTION_PREFS: CollectionPrefs = { view: 'overview', art: 'base', showMissing: true };
 
 /** User preferences that are not data (UX.md 8.7). Stored as raw strings, not in an envelope. */
 export interface PreferencesRepository {
@@ -77,6 +86,12 @@ export interface PreferencesRepository {
   /** Saved default edition, or 'beta' when nothing valid is saved. Never rejects because of storage problems. */
   loadDefaultEdition(): Promise<DefaultEdition>;
   saveDefaultEdition(edition: DefaultEdition): Promise<DefaultEdition>;
+  /** Saved scanner mode, or 'single' when nothing valid is saved. Never rejects because of storage problems. */
+  loadScanMode(): Promise<ScanMode>;
+  saveScanMode(mode: ScanMode): Promise<ScanMode>;
+  /** Saved Collection page choices; every missing or invalid field falls back to its default. Never rejects because of storage problems. */
+  loadCollectionPrefs(): Promise<CollectionPrefs>;
+  saveCollectionPrefs(prefs: CollectionPrefs): Promise<CollectionPrefs>;
   /** Account hint (T-054a): uid of the last signed-in account, or null when none or invalid. Never throws. */
   loadLastUid(): string | null;
   /** Saves a valid uid, or removes the hint for null or an invalid uid. Never throws (a hint only). */

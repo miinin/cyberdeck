@@ -714,3 +714,31 @@ describe('collection versions (D-020)', () => {
     });
   });
 });
+
+describe('preferences: scanner mode (T-108)', () => {
+  it('defaults to one at a time, remembers continuous and ignores unknown values', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadScanMode()).toBe('single');
+    await preferences.saveScanMode('continuous');
+    const again = createRepositories({ store, persistent: true }).preferences;
+    expect(await again.loadScanMode()).toBe('continuous');
+    await expectStorageError(preferences.saveScanMode('auto' as 'single'), 'invalid-input');
+    const odd = setup({ 'cyberdeck:scan-mode': 'both' });
+    expect(await odd.preferences.loadScanMode()).toBe('single');
+  });
+});
+
+describe('preferences: collection page (T-109)', () => {
+  it('defaults to the overview, remembers the choices and fixes invalid fields one by one', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadCollectionPrefs()).toEqual({ view: 'overview', art: 'base', showMissing: true });
+    await preferences.saveCollectionPrefs({ view: 'binder', art: 'owned', showMissing: false });
+    const again = createRepositories({ store, persistent: true }).preferences;
+    expect(await again.loadCollectionPrefs()).toEqual({ view: 'binder', art: 'owned', showMissing: false });
+    await expectStorageError(preferences.saveCollectionPrefs({ view: 'wall' as 'binder', art: 'base', showMissing: true }), 'invalid-input');
+    const odd = setup({ 'cyberdeck:collection-prefs': '{"view":"binder","art":"x","showMissing":"no"}' });
+    expect(await odd.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', art: 'base', showMissing: true });
+    const junk = setup({ 'cyberdeck:collection-prefs': 'not json' });
+    expect(await junk.preferences.loadCollectionPrefs()).toEqual({ view: 'overview', art: 'base', showMissing: true });
+  });
+});

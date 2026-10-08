@@ -107,6 +107,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 | 2026-10-05 | Katselmointi SEC-062: vaihtolinkki lisätty inventaarioon (rivi 6b). Ei uusia tallennettavia kenttiä eikä evästeitä, ei verkkoliikennettä linkin datasta. | T-062 |
 | 2026-10-06 | Digiturva (SEC-098): luku 11 julkisista pakoista, luvun 10.1 lause Firebase-yhteydestä. Koodari kirjasi muutoksen tiedostoon toteutuksen yhteydessä (T-098). | T-098 |
 | 2026-10-06 | Katselmointi SEC-102: proxy-tulostusjono lisätty inventaarioon (rivi 1c). Jono on paikallinen, sitä ei synkronoida, eikä se ole henkilötieto. | T-102 |
+| 2026-10-08 | Luku 12: korttien skannaus kameralla (D-027). Kuva käsitellään vain laitteella, ei tallenneta eikä lähetetä. Permissions-Policy sallii kameran omalle originille. | T-106 |
 
 ## 10. MVP-2: kirjautuminen ja pilvitallennus (T-054, LUONNOS)
 
@@ -216,3 +217,9 @@ Tietosuojaselosteeseen lisätään kappale julkisista pakoista: mitä näkyy, ke
 ### 11.7 Poistopyynnöt ja ylläpitäjän ohje (SR-42)
 - **Käyttäjälle (selosteeseen ja Tietoa-sivulle):** voit poistaa oman julkaisusi milloin tahansa muuttamalla pakan yksityiseksi tai poistamalla pakan. Jos löydät asiattoman pakan tai pakan, jossa on omia tietojasi, pyydä poistoa sähköpostilla rekisterinpitäjälle (miikamiinin@gmail.com, K-P7). Kerro pakan nimi ja nimimerkki.
 - **Ylläpitäjälle:** Firebase-konsoli → Firestore Database → kokoelma `publicDecks` → etsi dokumentti nimen tai nimimerkin mukaan (kentät `name` ja `nickname`) → Delete document. Tee sama molemmissa projekteissa (`cyberdeck-tcg` ja `cyberdeck-tcg-dev`), jos pakka on molemmissa. Dokumentin id on pseudonyymi eikä paljasta omistajaa. Ensimmäisessä versiossa ei ole ilmiantotoimintoa (K-P10), joten pyynnöt tulevat sähköpostilla. Poistettu pakka voi ilmestyä uudelleen, jos omistaja julkaisee sen uudelleen: tällöin ota yhteyttä omistajaan.
+
+## 12. Korttien skannaus kameralla (T-106, D-027)
+- **Kamera:** skannaus käyttää laitteen kameraa vain, kun käyttäjä avaa skannerin ja valitsee painoksen. Selain kysyy luvan, ja kamera sammuu, kun skanneri suljetaan.
+- **Kuva:** kameran kuvasta kopioidaan kortin kehyksen alue muistissa olevalle canvasille, ja siitä lasketaan pieni tiiviste. Kuvaa ei tallenneta (ei localStorageen eikä muualle), eikä sitä lähetetä minnekään. Tunnistus tapahtuu kokonaan laitteella eikä käytä ulkoisia palveluita.
+- **Tallennettava tieto:** vain kokoelmaan lisätty kortti, kuten muussakin lisäyksessä. Uusia tallennusavaimia tai henkilötietoja ei synny.
+- **Tekninen rajaus:** `Permissions-Policy` sallii kameran vain omalle originille (`camera=(self)`), muut ominaisuudet pysyvät estettyinä.
