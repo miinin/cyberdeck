@@ -307,6 +307,10 @@ export const deckTextsEn: typeof deckTextsFi = {
   mobileBarMain: (main: number) => `Deck ${main}/${MIN_MAIN_DECK}–${MAX_MAIN_DECK}`,
   showDeck: 'Show deck',
   goToDeck: 'Go to deck',
+  editorTabsLabel: 'Deck editor section',
+  editorTabDeck: (main: number) => `Deck (${main}/${MIN_MAIN_DECK})`,
+  editorTabAdd: 'Add cards',
+  editorAddCards: '+ Add cards',
   backToSearch: 'Back to search',
   distinctLimit: 'A deck holds at most 500 distinct cards, so a new card cannot be added.',
 

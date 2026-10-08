@@ -5252,19 +5252,10 @@ section[aria-labelledby='have-heading'] {
 }
 
 /*
- * Phone layout (T-087). Header: logo and the icon tools on the first row, the navigation on the second
- * (was three rows). Toolbar: the edit switch starts its own row from the left instead of hanging alone on the right.
+ * Phone layout (T-087, T-107). Header: one row with the logo and the icon tools; the navigation is a fixed bottom bar
+ * (T-107 block at the end of the file). Toolbar: the edit switch starts its own row from the left.
  */
 @media (max-width: 39.99rem) {
-  .site-header .main-nav {
-    order: 1;
-    flex-basis: 100%;
-  }
-
-  .site-header .main-nav a:first-child {
-    padding-inline-start: 0;
-  }
-
   .list-toolbar .edit-switch {
     margin-inline-start: 0;
   }
@@ -8195,5 +8186,154 @@ section[aria-labelledby='have-heading'] {
 
   .binder-position {
     min-inline-size: 0;
+  }
+}
+
+/* Deck editor tabs below 64rem (T-110): the deck or the card picker, one at a time. A segmented pair of toggle buttons. */
+.editor-filters[hidden],
+.editor-search[hidden],
+.editor-side[hidden] {
+  display: none;
+}
+
+.editor-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-block: var(--space-3);
+  border: 2px solid var(--color-border-strong);
+}
+
+.editor-tabs button {
+  min-block-size: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.editor-tabs button + button {
+  border-inline-start: 2px solid var(--color-border-strong);
+}
+
+.editor-tabs button[aria-pressed='true'] {
+  background: var(--color-brand-yellow);
+  color: #000;
+}
+
+.editor-tabs button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -4px;
+}
+
+.editor-add-cards {
+  inline-size: 100%;
+  min-block-size: 3.5rem;
+}
+
+/* The bottom bar of the deck editor sits above the mobile navigation (T-107). */
+.deck-bar {
+  bottom: var(--bottom-nav-height, 0px);
+}
+
+@media (forced-colors: active) {
+  .editor-tabs button[aria-pressed='true'] {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+
+/* Mobile bottom navigation (T-107). Below 40 rem the main navigation is a fixed bar at the bottom: one row, five equal
+   items. --bottom-nav-height is 0 from 40 rem up; the floating elements and the page padding use it. */
+:root {
+  --bottom-nav-height: 0px;
+}
+
+@media (max-width: 39.99rem) {
+  :root {
+    --bottom-nav-height: calc(var(--target-min) + env(safe-area-inset-bottom, 0px));
+  }
+
+  html {
+    scroll-padding-bottom: var(--bottom-nav-height);
+  }
+
+  body {
+    padding-block-end: var(--bottom-nav-height);
+  }
+
+  .site-header .main-nav {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+    gap: 0;
+    block-size: var(--bottom-nav-height);
+    padding-block-end: env(safe-area-inset-bottom, 0px);
+    background: var(--color-header-bg);
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  .site-header .main-nav a {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding-inline: 2px;
+    border-bottom: 0;
+    border-top: 3px solid transparent;
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .site-header .main-nav a:hover {
+    border-top-color: var(--color-header-text);
+  }
+
+  .site-header .main-nav a[aria-current='page'] {
+    border-top-color: var(--color-brand-yellow);
+  }
+
+  .site-header .main-nav a:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .scan-fab {
+    inset-block-end: calc(var(--space-4) + var(--bottom-nav-height));
+  }
+
+  .scan-fab-spacer {
+    block-size: calc(var(--target-min) + var(--space-6) + var(--bottom-nav-height));
+  }
+
+  .deck-bar {
+    bottom: var(--bottom-nav-height);
+  }
+}
+
+/* A low window (400 % zoom): the bar stays in the flow instead of covering the content. */
+@media (max-width: 39.99rem) and (max-height: 29.999rem) {
+  .site-header .main-nav {
+    position: static;
+    block-size: auto;
+  }
+
+  body {
+    padding-block-end: 0;
+  }
+}
+
+@media print {
+  .site-header .main-nav {
+    display: none !important;
+  }
+
+  body {
+    padding-block-end: 0 !important;
   }
 }
