@@ -6702,67 +6702,117 @@ section[aria-labelledby='have-heading'] {
 
 .deck-visibility {
   margin-block: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
 }
 
-.deck-visibility > summary {
+.visibility-switch-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.35em;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.visibility-state {
+  margin: 0;
+}
+
+.visibility-switch-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-bold);
+}
+
+/* The label of the active side is bright, the other one dimmed. */
+.visibility-switch-label {
+  color: var(--color-text-muted);
+}
+
+.visibility-switch-wrap:not(.is-public) .visibility-switch-private,
+.visibility-switch-wrap.is-public .visibility-switch-public {
+  color: var(--color-text);
+}
+
+.visibility-switch {
+  position: relative;
+  flex: none;
+  inline-size: 3.5rem;
   min-block-size: var(--target-min);
-  padding: 0 var(--space-4);
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
 }
 
-.deck-visibility > summary:focus-visible {
+.visibility-switch::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block: 50%;
+  block-size: 1.75rem;
+  transform: translateY(-50%);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+}
+
+.visibility-switch[aria-checked='true']::before {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+
+.visibility-switch-knob {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.25rem;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: var(--color-text);
+  transition: inset-inline-start 0.15s;
+}
+
+.visibility-switch[aria-checked='true'] .visibility-switch-knob {
+  inset-inline-start: calc(100% - 1.5rem);
+  background: #000;
+}
+
+.visibility-switch:focus-visible {
   outline: var(--focus-ring);
-  outline-offset: -3px;
+  outline-offset: 2px;
+}
+
+.visibility-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visibility-switch-knob {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .visibility-switch[aria-checked='true']::before {
+    background: Highlight;
+    border-color: Highlight;
+  }
 }
 
 .deck-visibility-body {
   display: grid;
   gap: var(--space-3);
   max-inline-size: 44rem;
-  padding: var(--space-2) var(--space-4) var(--space-4);
+  padding-block-start: var(--space-2);
 }
 
 .deck-visibility-body > * {
   margin: 0;
-}
-
-.visibility-options {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.visibility-option {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  min-block-size: var(--target-min);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-}
-
-.visibility-option:has(input:checked) {
-  border-color: var(--color-border-strong);
-  background: var(--color-surface-raised);
-}
-
-.visibility-option input {
-  flex: none;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  margin-block-start: 0.15rem;
-}
-
-.visibility-option > span {
-  display: grid;
-  gap: var(--space-1);
 }
 
 .visibility-form {
@@ -8228,16 +8278,6 @@ section[aria-labelledby='have-heading'] {
   outline-offset: -4px;
 }
 
-.editor-add-cards {
-  inline-size: 100%;
-  min-block-size: 3.5rem;
-}
-
-/* The bottom bar of the deck editor sits above the mobile navigation (T-107). */
-.deck-bar {
-  bottom: var(--bottom-nav-height, 0px);
-}
-
 @media (forced-colors: active) {
   .editor-tabs button[aria-pressed='true'] {
     background: Highlight;
@@ -8245,37 +8285,16 @@ section[aria-labelledby='have-heading'] {
   }
 }
 
-/* Mobile bottom navigation (T-107). Below 40 rem the main navigation is a fixed bar at the bottom: one row, five equal
-   items. --bottom-nav-height is 0 from 40 rem up; the floating elements and the page padding use it. */
-:root {
-  --bottom-nav-height: 0px;
-}
-
+/* Mobile navigation (T-111). Below 40 rem the header has two rows: the logo and tools first, then the main navigation
+   as one row of five equal items. The navigation never wraps (from 320 px up). */
 @media (max-width: 39.99rem) {
-  :root {
-    --bottom-nav-height: calc(var(--target-min) + env(safe-area-inset-bottom, 0px));
-  }
-
-  html {
-    scroll-padding-bottom: var(--bottom-nav-height);
-  }
-
-  body {
-    padding-block-end: var(--bottom-nav-height);
-  }
-
   .site-header .main-nav {
-    position: fixed;
-    inset-inline: 0;
-    inset-block-end: 0;
-    z-index: 20;
-    box-sizing: border-box;
+    order: 3;
+    flex: 1 0 100%;
     flex-wrap: nowrap;
     gap: 0;
-    block-size: var(--bottom-nav-height);
-    padding-block-end: env(safe-area-inset-bottom, 0px);
-    background: var(--color-header-bg);
-    border-block-start: 1px solid var(--color-border);
+    /* The row uses the full width of the screen so that five items fit at 320 px. */
+    margin-inline: calc(-1 * var(--gutter));
   }
 
   .site-header .main-nav a {
@@ -8283,57 +8302,26 @@ section[aria-labelledby='have-heading'] {
     min-width: 0;
     justify-content: center;
     padding-inline: 2px;
-    border-bottom: 0;
-    border-top: 3px solid transparent;
     font-size: 0.6875rem;
     letter-spacing: 0.02em;
     text-align: center;
     white-space: nowrap;
   }
 
-  .site-header .main-nav a:hover {
-    border-top-color: var(--color-header-text);
-  }
-
-  .site-header .main-nav a[aria-current='page'] {
-    border-top-color: var(--color-brand-yellow);
-  }
-
   .site-header .main-nav a:focus-visible {
     outline-offset: -3px;
   }
-
-  .scan-fab {
-    inset-block-end: calc(var(--space-4) + var(--bottom-nav-height));
-  }
-
-  .scan-fab-spacer {
-    block-size: calc(var(--target-min) + var(--space-6) + var(--bottom-nav-height));
-  }
-
-  .deck-bar {
-    bottom: var(--bottom-nav-height);
-  }
 }
 
-/* A low window (400 % zoom): the bar stays in the flow instead of covering the content. */
-@media (max-width: 39.99rem) and (max-height: 29.999rem) {
-  .site-header .main-nav {
-    position: static;
-    block-size: auto;
-  }
-
-  body {
-    padding-block-end: 0;
+@media (max-width: 23.99rem) {
+  .site-header .main-nav a {
+    font-size: 0.625rem;
+    letter-spacing: 0;
   }
 }
 
 @media print {
   .site-header .main-nav {
     display: none !important;
-  }
-
-  body {
-    padding-block-end: 0 !important;
   }
 }

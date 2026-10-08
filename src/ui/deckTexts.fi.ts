@@ -322,7 +322,6 @@ export const deckTextsFi = {
   editorTabsLabel: 'Pakkaeditorin osio',
   editorTabDeck: (main: number) => `Pakka (${main}/${MIN_MAIN_DECK})`,
   editorTabAdd: 'Lisää kortteja',
-  editorAddCards: '+ Lisää kortteja',
   backToSearch: 'Takaisin hakuun',
   distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',
 
@@ -448,7 +447,6 @@ export const deckTextsFi = {
 
   // Visibility of a deck in the editor (T-098, SR-38)
   visHeading: 'Näkyvyys',
-  visLabel: 'Pakan näkyvyys',
   visPrivate: 'Yksityinen',
   visPrivateHint: 'Vain sinä näet pakan.',
   visPublic: 'Julkinen',
