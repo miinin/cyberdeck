@@ -22,10 +22,12 @@ export type {
   DeckPickView,
   DefaultEdition,
   ScanMode,
+  CollectionPrefs,
   LocalData,
   SyncBase,
   SyncStorage,
 } from './types';
+export { DEFAULT_COLLECTION_PREFS } from './types';
 export { StorageError } from './errors';
 export type { StorageErrorKind } from './errors';
 export { isStoragePersisted, requestPersistentStorage } from './keyValueStore';

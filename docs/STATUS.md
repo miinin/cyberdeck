@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-08 (PM, T-106)
+# STATUS · päivitetty 2026-10-08 (PM, T-106–T-109)
 
 ## Yhdellä lauseella
 Kaikki T-093:een asti on tuotannossa (https://cyberdeck-tcg.web.app, versio 0.2.0): kokoelma, want-lista ja jakolinkit, korttien versiot kuvituksina, pakkaeditori ja tilastot, englanninkielinen käyttöliittymä sekä mobiilinäkymä.
@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-106 | Koodari, Digiturva | Review (PR #115) | Käyttäjä kokeilee skanneria puhelimella esikatselussa; oikeiden korttikuvien tarkkuustesti kotona (D-027) |
+| T-106, T-108, T-109 | – | Done, julkaistaan 2026-10-08 | Oikeiden korttikuvien tarkkuustesti kotona (D-027) |
 
 ## Avoimet
 - TASKS.md:n Backlog-rivit (T-002–T-009 sekä velat T-030, T-031, T-041–T-043, T-047).

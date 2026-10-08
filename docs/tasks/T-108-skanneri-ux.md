@@ -1,6 +1,6 @@
 # T-108 · Skannerin näkyvyys ja jatkuva skannaus
 
-**Tila:** Review. **Haara:** `t-108-skanneri-ux`, tehty T-106:n haarasta. PR:n kohdehaara on `t-106-skanneri`, kunnes PR #115 on yhdistetty. **Päättäjä:** käyttäjä (toive 2026-10-08), PM (sijoitus).
+**Tila:** Done. **Haara:** `t-108-skanneri-ux`, tehty T-106:n haarasta. PR:n kohdehaara on `t-106-skanneri`, kunnes PR #115 on yhdistetty. **Päättäjä:** käyttäjä (toive 2026-10-08), PM (sijoitus).
 
 ## Tavoite
 Käyttäjän mukaan skanneri on hieno mutta jää huomaamatta. Sen pitää näkyä selvästi olematta kuitenkaan pääominaisuus. Lisäksi tarvitaan tila, jossa kamera skannaa jatkuvasti ja lisää tunnistetut kortit automaattisesti, jotta monta korttia saa lisättyä yhdellä kertaa.

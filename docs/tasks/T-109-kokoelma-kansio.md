@@ -1,6 +1,6 @@
 # T-109 · Kokoelma: kansionäkymä, myytävät-tilasto pois
 
-**Tila:** Backlog (seuraa T-108:aa). **Haara:** `t-109-kokoelma-kansio`, tehty T-108:n haarasta. **Päättäjä:** käyttäjä (toive 2026-10-08), PM (toteutustapa).
+**Tila:** Done. **Haara:** `t-109-kokoelma-kansio`, tehty T-108:n haarasta. **Päättäjä:** käyttäjä (toive 2026-10-08), PM (toteutustapa).
 
 ## Tavoite
 - **Myytävät pois:** Myytävät (€$) -luku poistetaan Kokoelma-näkymän yleiskuvasta. Käyttäjän mukaan sille ei ole käyttöä. Pakkaeditorin Eddies-suositus (D-024) ja Kortit-näkymän myytävät-suodatin jäävät ennalleen.
@@ -26,3 +26,12 @@
 - `npm test`, `npm run lint` ja `npm run build` menevät läpi.
 
 ## Luovutus
+
+**Koodari, 2026-10-08.**
+- **Myytävät pois:** luku, `sellableCopies` ja sen testi poistettu. Kortit-näkymän suodatin ja pakkaeditorin Eddies ennallaan.
+- **Domain:** `src/domain/binder.ts` (puhtaat funktiot: järjestys keräilynumeron mukaan, 9 taskua/sivu, sivutus, aukeaman sivut, kääntö, pyyhkäisyn tunnistus) + 11 testiä.
+- **Tallennus (SR-12):** `PreferencesRepository.loadCollectionPrefs/saveCollectionPrefs` (näkymä, kuvitus, Show missing; JSON-avain `cyberdeck:collection-prefs`, kenttäkohtainen validointi) + testi. Hook `useCollectionPrefs`.
+- **UI:** `CollectionBinder.tsx` + valitsin Overview/Binder. Vain näkyvät sivut renderöidään, kuvat lazy. Aukeama (>= 64rem) kahdella sivulla ja taitteella, muuten yksi sivu. Nuolipainikkeet, nuolinäppäimet (kun fokus kansiossa), pyyhkäisy, aria-live-sivunumero, taskujen nimet "#12 Name, owned 2" / "missing". Animaatio vain `prefers-reduced-motion: no-preference`. Teksti en + fi.
+- **Päätökset:** (1) Omistus setissä = kyseisen setin painosten tallennetut versiot; kortti ilman yhtään tallennettua versiota lasketaan omistetuksi kokonaismäärällä. (2) Näkymiä ei ole omina hash-osoitteina (reititin ei tue alireittejä ilman muutoksia), vain muistettu valinta. (3) Setti ja sivu eivät säily istunnon yli.
+- Ei uusia riippuvuuksia. `npm test` 1507 läpi, lint ja build läpi.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (UX-katselmoinnissa tarkista aukeaman korkeus leveillä näytöillä ja pyyhkäisy oikealla laitteella).

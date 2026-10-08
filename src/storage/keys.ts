@@ -18,6 +18,8 @@ export const DECK_PICK_VIEW_KEY = 'cyberdeck:deck-pick-view';
 export const DEFAULT_EDITION_KEY = 'cyberdeck:default-edition';
 /** Card scanner mode (T-108): the raw string 'single' or 'continuous'. */
 export const SCAN_MODE_KEY = 'cyberdeck:scan-mode';
+/** Collection page choices (T-109): a small JSON object { view, art, showMissing }. */
+export const COLLECTION_PREFS_KEY = 'cyberdeck:collection-prefs';
 /**
  * Account hints (T-054a, D-017 kohta 1, SR-29 kohta 1): the uid of the last signed-in account, so the
  * Firebase SDK loads at startup only for users who have signed in, and a flag set just before a sign-in

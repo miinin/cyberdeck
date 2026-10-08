@@ -33,12 +33,12 @@ const own = (...entries: Collection['entries'][number][]): Collection => ({ entr
 
 describe('collectionOverview', () => {
   it('is all zero for an empty collection', () => {
-    expect(collectionOverview(cards, EMPTY_COLLECTION)).toEqual({ distinct: 0, total: 3, copies: 0, playsets: 0, sellableCopies: 0 });
+    expect(collectionOverview(cards, EMPTY_COLLECTION)).toEqual({ distinct: 0, total: 3, copies: 0, playsets: 0 });
   });
 
-  it('counts distinct cards, copies, playsets (1 for a Legend, 3 otherwise) and sellable copies', () => {
+  it('counts distinct cards, copies, playsets (1 for a Legend, 3 otherwise)', () => {
     const collection = own({ card: 'alpha', count: 2 }, { card: 'beta', count: 1 }, { card: 'gamma', count: 3 }, { card: 'not-a-card', count: 9 });
-    expect(collectionOverview(cards, collection)).toEqual({ distinct: 3, total: 3, copies: 6, playsets: 2, sellableCopies: 2 });
+    expect(collectionOverview(cards, collection)).toEqual({ distinct: 3, total: 3, copies: 6, playsets: 2 });
   });
 });
 
