@@ -3,6 +3,7 @@ import { MAX_PROXY_CARDS } from '../domain/proxySheet';
 /** Texts of the Proxy section and the buttons that send cards to its print queue (T-102). */
 export const proxyTextsFi = {
   navProxy: 'Proxy',
+  navBadgeLabel: (count: number) => `, jonossa ${count} ${count === 1 ? 'kortti' : 'korttia'}`,
   heading: 'Proxy',
   stepsLabel: 'Näin se toimii',
   steps: ['Valitse kortit', 'Tarkista arkki', 'Tulosta 100 % koossa'],
@@ -74,7 +75,8 @@ export const proxyTextsFi = {
   sendWant: 'Proxy-jonoon',
   sendWantName: (name: string) => `Lähetä proxy-jonoon: ${name}`,
   sendDeck: 'Lähetä pakka proxy-jonoon',
-  sendMissing: 'Lähetä puuttuvat proxy-jonoon',
+  addCardToQueue: 'Lisää proxy-jonoon',
+  printMissing: 'Tulosta puuttuvat proxyiksi',
   sentResult: (added: number) => (added === 1 ? 'Jonoon lisättiin 1 kortti.' : `Jonoon lisättiin ${added} korttia.`),
   sentPartial: (added: number, skipped: number) =>
     `Jonoon lisättiin ${added} ${added === 1 ? 'kortti' : 'korttia'}. ${skipped} jäi pois, koska jono on täynnä (enintään ${MAX_PROXY_CARDS}).`,

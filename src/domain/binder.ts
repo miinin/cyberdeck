@@ -4,25 +4,25 @@ import { countOf, versionsOf } from './collection';
 import { isSpecialRarity } from './arts';
 import { setFilterId } from './printing';
 import type { Printing } from './printing';
+import { isMainSetPrinting } from './setFilter';
 
 /*
- * The collection binder (T-109): the cards of one set as pocket pages, nine to a page, in collector number
- * order. Pure functions; the view only draws what they return.
+ * The collection binder (T-109, T-116): the cards of the one set (Retail and Beta together) as pocket pages,
+ * nine to a page, in collector number order. Pure functions; the view only draws what they return.
  */
 
 export const POCKETS_PER_PAGE = 9;
 
-/** Which picture an owned pocket shows: the card's ordinary art, or the special art the user owns. */
-export type BinderArt = 'base' | 'owned';
-
 export interface Pocket {
   card: Card;
-  /** The collector number as printed in this set, e.g. "012" or "005β"; "" when unknown. */
+  /** The collector number as printed (Retail's if the card has one, else Beta's, e.g. "012" or "005β"); "" when unknown. */
   number: string;
-  /** Copies owned in this set (0 = missing). */
+  /** Copies owned in the two main sets together (0 = missing). */
   copies: number;
-  /** The special rarity whose picture to show (mode 'owned'), else null. */
+  /** The special rarity whose picture to show: the one the user owns (first, English first), else null. */
   artRarity: string | null;
+  /** Owned, and only as the Beta edition (no Retail copy): shown with a quiet "Beta" mark. */
+  betaOnly: boolean;
 }
 
 /** Sort key of a collector number: its leading digits, then the rest as text ("5" < "5a" < "6"). */
@@ -38,53 +38,73 @@ export function compareCollectorNumbers(a: string, b: string): number {
   return xs < ys ? -1 : xs > ys ? 1 : 0;
 }
 
-/** The printings of a card in a set (filter id), English first, then by collector number. */
-function printingsInSet(card: Card, family: string): Printing[] {
+const BETA_FAMILY = 'welcome-to-night-city-beta';
+const isBeta = (printing: Printing) => setFilterId(printing) === BETA_FAMILY;
+
+/** The printings of a card in the two main sets (Retail and Beta, D-022): English first, Retail before Beta, then by collector number. */
+function mainPrintings(card: Card): Printing[] {
   return (card.printings ?? [])
-    .filter((printing) => setFilterId(printing) === family)
-    .sort((a, b) => Number(b.language === 'en') - Number(a.language === 'en') || compareCollectorNumbers(a.number, b.number));
+    .filter(isMainSetPrinting)
+    .sort(
+      (a, b) =>
+        Number(b.language === 'en') - Number(a.language === 'en') ||
+        Number(isBeta(a)) - Number(isBeta(b)) ||
+        compareCollectorNumbers(a.number, b.number),
+    );
 }
 
 /**
- * Copies of a card that belong to a set: the recorded versions of its printings there. A card with no
- * recorded versions at all counts with its total, since nothing says it is from elsewhere.
+ * Copies of a card in the main sets: the recorded versions of its printings there. A card with no recorded
+ * versions at all counts with its total, since nothing says it is from elsewhere.
  */
-export function copiesInSet(card: Card, family: string, collection: Collection): number {
+export function copiesInMainSets(card: Card, collection: Collection): number {
   const versions = versionsOf(collection, card.key);
   if (Object.keys(versions).length === 0) return countOf(collection, card.key);
-  return printingsInSet(card, family).reduce((sum, printing) => sum + (versions[printing.key] ?? 0), 0);
+  return mainPrintings(card).reduce((sum, printing) => sum + (versions[printing.key] ?? 0), 0);
 }
 
-/** The special rarity the user owns in this set and that has a picture, or null. */
-export function ownedSpecialRarity(card: Card, family: string, collection: Collection, hasArt: (cardKey: string, rarity: string) => boolean): string | null {
+/** The special rarity the user owns in the main sets and that has a picture, or null. */
+export function ownedSpecialRarity(card: Card, collection: Collection, hasArt: (cardKey: string, rarity: string) => boolean): string | null {
   const versions = versionsOf(collection, card.key);
-  for (const printing of printingsInSet(card, family)) {
+  for (const printing of mainPrintings(card)) {
     const rarity = printing.rarity;
     if (isSpecialRarity(rarity) && (versions[printing.key] ?? 0) > 0 && hasArt(card.key, rarity)) return rarity;
   }
   return null;
 }
 
-/** All pockets of a set in collector number order (the catalog order breaks ties). */
+/** Only the Beta edition is owned: some Beta copy is recorded and no Retail copy. Without recorded versions nothing says Beta. */
+export function ownsOnlyBeta(card: Card, collection: Collection): boolean {
+  const versions = versionsOf(collection, card.key);
+  let beta = 0;
+  let retail = 0;
+  for (const printing of mainPrintings(card)) {
+    const n = versions[printing.key] ?? 0;
+    if (isBeta(printing)) beta += n;
+    else retail += n;
+  }
+  return beta > 0 && retail === 0;
+}
+
+/** All pockets of the one binder set (every card of Retail and Beta once) in collector number order (the catalog order breaks ties). */
 export function binderPockets(
   cards: readonly Card[],
-  family: string,
   collection: Collection,
-  art: BinderArt,
   hasArt: (cardKey: string, rarity: string) => boolean = () => true,
 ): Pocket[] {
   const pockets: { pocket: Pocket; index: number }[] = [];
   cards.forEach((card, index) => {
-    const inSet = printingsInSet(card, family);
-    if (inSet.length === 0) return;
-    const copies = copiesInSet(card, family, collection);
+    const inSets = mainPrintings(card);
+    if (inSets.length === 0) return;
+    const copies = copiesInMainSets(card, collection);
     pockets.push({
       index,
       pocket: {
         card,
-        number: inSet[0]?.number ?? '',
+        number: inSets[0]?.number ?? '',
         copies,
-        artRarity: art === 'owned' && copies > 0 ? ownedSpecialRarity(card, family, collection, hasArt) : null,
+        artRarity: copies > 0 ? ownedSpecialRarity(card, collection, hasArt) : null,
+        betaOnly: copies > 0 && ownsOnlyBeta(card, collection),
       },
     });
   });

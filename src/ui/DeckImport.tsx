@@ -29,6 +29,8 @@ import { DeckCardImage } from './DeckList';
 import { CostGem } from './DeckPickTable';
 import { DeckStats } from './DeckStats';
 import { MissingCards } from './MissingCards';
+import { SendToProxyButton, useProxyQueue } from './SendToProxy';
+import { proxyTexts } from './proxyTexts';
 import { useWants } from './useWants';
 import { deckTexts } from './deckTexts';
 
@@ -71,6 +73,7 @@ export function DeckImport({
   closeLabel?: string;
 }) {
   const wants = useWants(repositories.wants);
+  const proxyQueue = useProxyQueue(repositories.proxy);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const [text, setText] = useState('');
   const [inputError, setInputError] = useState<InputError | null>(null);
@@ -365,6 +368,15 @@ export function DeckImport({
                     {deckTexts.missingFromCollection(report.missingTotal)}
                   </p>
                   <MissingCards rows={report.missingRows} deckName={report.content.name} wants={wants} />
+                  {report.missingRows.length > 0 && (
+                    <div className="missing-add proxy-send">
+                      <SendToProxyButton
+                        rows={report.missingRows.map((row) => ({ card: row.card.key, count: row.missing }))}
+                        queue={proxyQueue}
+                        label={proxyTexts.printMissing}
+                      />
+                    </div>
+                  )}
                 </>
               ) : (
                 <p className="notice notice-warning">{deckTexts.collectionNotReady}</p>

@@ -134,9 +134,8 @@ function parseCollectionPrefs(raw: string | null): CollectionPrefs {
   try {
     const value: unknown = JSON.parse(raw);
     if (typeof value === 'object' && value !== null) {
-      const { view, art, showMissing } = value as Record<string, unknown>;
+      const { view, showMissing } = value as Record<string, unknown>;
       if (view === 'overview' || view === 'binder') prefs.view = view;
-      if (art === 'base' || art === 'owned') prefs.art = art;
       if (typeof showMissing === 'boolean') prefs.showMissing = showMissing;
     }
   } catch {
@@ -605,7 +604,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     saveCollectionPrefs: async (prefs: CollectionPrefs) => {
       const valid = parseCollectionPrefs(JSON.stringify(prefs));
-      if (valid.view !== prefs.view || valid.art !== prefs.art || valid.showMissing !== prefs.showMissing) {
+      if (valid.view !== prefs.view || valid.showMissing !== prefs.showMissing) {
         throw new StorageError('invalid-input', 'Unknown collection preferences');
       }
       try {

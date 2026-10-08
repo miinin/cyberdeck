@@ -3,8 +3,9 @@ import {
   binderPockets,
   clampPage,
   compareCollectorNumbers,
-  copiesInSet,
+  copiesInMainSets,
   ownedSpecialRarity,
+  ownsOnlyBeta,
   paginate,
   swipeDirection,
   turnPage,
@@ -12,7 +13,6 @@ import {
 } from './binder';
 import type { Card } from './card';
 import type { Collection } from './collection';
-import { setFilterId } from './printing';
 import type { Printing } from './printing';
 
 const RETAIL = 'Welcome to Night City — Retail';
@@ -23,8 +23,6 @@ function printing(setName: string, setCode: string, number: string, rarity: stri
 function card(key: string, printings: Printing[]): Card {
   return { id: key, key, slug: key, name: key, subname: null, displayName: key, type: 'Unit', color: 'Red', cost: 1, power: null, ram: null, rarity: 'Common', printings };
 }
-const retail = setFilterId(printing(RETAIL, 'wtnc', '1'));
-const beta = setFilterId(printing(BETA, 'wtncb', '1'));
 const own = (...entries: Collection['entries'][number][]): Collection => ({ entries });
 const EMPTY: Collection = { entries: [] };
 
@@ -42,38 +40,55 @@ describe('binderPockets', () => {
   const c = card('c', [printing(BETA, 'wtncb', '001β')]);
   const cards = [a, b, c];
 
-  it('holds the cards that have a printing in the set, in collector number order', () => {
-    expect(binderPockets(cards, retail, EMPTY, 'base').map((p) => [p.card.key, p.number])).toEqual([['b', '002'], ['a', '012']]);
-    expect(binderPockets(cards, beta, EMPTY, 'base').map((p) => [p.card.key, p.number])).toEqual([['c', '001β'], ['a', '003β']]);
+  it('holds every card of Retail and Beta once, in collector number order (Retail number first)', () => {
+    expect(binderPockets(cards, EMPTY).map((p) => [p.card.key, p.number])).toEqual([['c', '001β'], ['b', '002'], ['a', '012']]);
   });
 
   it('keeps the catalog order for equal numbers', () => {
     const x = card('x', [printing(RETAIL, 'wtnc', '005')]);
     const y = card('y', [printing(RETAIL, 'wtnc', '005')]);
-    expect(binderPockets([y, x], retail, EMPTY, 'base').map((p) => p.card.key)).toEqual(['y', 'x']);
+    expect(binderPockets([y, x], EMPTY).map((p) => p.card.key)).toEqual(['y', 'x']);
   });
 
-  it('counts copies from the recorded versions of this set only', () => {
-    const collection = own({ card: 'a', count: 3, versions: { 'wtncb:003': 2, 'wtnc:012': 1 } });
-    expect(copiesInSet(a, retail, collection)).toBe(1);
-    expect(copiesInSet(a, beta, collection)).toBe(2);
-    expect(binderPockets(cards, retail, collection, 'base').map((p) => p.copies)).toEqual([0, 1]);
+  it('leaves out cards that are only in other products', () => {
+    const promo = card('p', [printing('Promo Pack', 'promo', '001')]);
+    expect(binderPockets([promo, b], EMPTY).map((p) => p.card.key)).toEqual(['b']);
+  });
+
+  it('counts the recorded versions of both main sets together, and ignores other products', () => {
+    const collection = own({ card: 'a', count: 4, versions: { 'wtncb:003': 2, 'wtnc:012': 1, 'promo:1': 1 } });
+    const withPromo = card('a', [...(a.printings ?? []), printing('Promo Pack', 'promo', '1')]);
+    expect(copiesInMainSets(a, collection)).toBe(3);
+    expect(copiesInMainSets(withPromo, collection)).toBe(3);
+    expect(binderPockets(cards, collection).map((p) => p.copies)).toEqual([0, 0, 3]);
   });
 
   it('counts copies without any recorded version as owned', () => {
-    expect(copiesInSet(a, retail, own({ card: 'a', count: 2 }))).toBe(2);
-    expect(copiesInSet(a, retail, EMPTY)).toBe(0);
+    expect(copiesInMainSets(a, own({ card: 'a', count: 2 }))).toBe(2);
+    expect(copiesInMainSets(a, EMPTY)).toBe(0);
   });
 
-  it('shows an owned special art only in the owned-art mode', () => {
+  it('marks a card as Beta only when just the Beta edition is owned', () => {
+    const onlyBeta = own({ card: 'a', count: 2, versions: { 'wtncb:003': 2 } });
+    const both = own({ card: 'a', count: 3, versions: { 'wtncb:003': 2, 'wtnc:012': 1 } });
+    const onlyRetail = own({ card: 'a', count: 1, versions: { 'wtnc:012': 1 } });
+    expect(ownsOnlyBeta(a, onlyBeta)).toBe(true);
+    expect(ownsOnlyBeta(a, both)).toBe(false);
+    expect(ownsOnlyBeta(a, onlyRetail)).toBe(false);
+    expect(ownsOnlyBeta(a, own({ card: 'a', count: 1 }))).toBe(false);
+    expect(binderPockets(cards, onlyBeta).map((p) => p.betaOnly)).toEqual([false, false, true]);
+    expect(binderPockets(cards, EMPTY).some((p) => p.betaOnly)).toBe(false);
+  });
+
+  it('shows the special art the user owns, and none when it is not owned', () => {
     const nova = card('n', [printing(RETAIL, 'wtnc', '020'), printing(RETAIL, 'wtnc', '120', 'Nova Rare')]);
     const collection = own({ card: 'n', count: 1, versions: { 'wtnc:120': 1 } });
     const hasArt = () => true;
-    expect(ownedSpecialRarity(nova, retail, collection, hasArt)).toBe('Nova Rare');
-    expect(ownedSpecialRarity(nova, retail, collection, () => false)).toBeNull();
-    expect(binderPockets([nova], retail, collection, 'owned', hasArt)[0]?.artRarity).toBe('Nova Rare');
-    expect(binderPockets([nova], retail, collection, 'base', hasArt)[0]?.artRarity).toBeNull();
-    expect(binderPockets([nova], retail, EMPTY, 'owned', hasArt)[0]?.artRarity).toBeNull();
+    expect(ownedSpecialRarity(nova, collection, hasArt)).toBe('Nova Rare');
+    expect(ownedSpecialRarity(nova, collection, () => false)).toBeNull();
+    expect(binderPockets([nova], collection, hasArt)[0]?.artRarity).toBe('Nova Rare');
+    expect(binderPockets([nova], EMPTY, hasArt)[0]?.artRarity).toBeNull();
+    expect(binderPockets([nova], own({ card: 'n', count: 1, versions: { 'wtnc:020': 1 } }), hasArt)[0]?.artRarity).toBeNull();
   });
 });
 
@@ -120,11 +135,11 @@ describe('binderPockets with real-style numbers', () => {
   it('orders numerically with letter variants after their number, even when the catalog order is scrambled', () => {
     const numbers = ['010', '005b', '003', '144', '005a', '012', '001', '004', '009'];
     const cards = numbers.map((n) => card(`k${n}`, [printing(RETAIL, 'wtnc', n), printing(RETAIL, 'wtnc', n, 'Common', 'fr')]));
-    expect(binderPockets(cards, retail, EMPTY, 'base').map((p) => p.number)).toEqual(['001', '003', '004', '005a', '005b', '009', '010', '012', '144']);
+    expect(binderPockets(cards, EMPTY).map((p) => p.number)).toEqual(['001', '003', '004', '005a', '005b', '009', '010', '012', '144']);
   });
 
   it('reads the number of the English printing, not a promo or other language', () => {
     const x = card('x', [printing(RETAIL, 'wtnc', '900', 'Common', 'fr'), printing(RETAIL, 'wtnc', '007'), printing(RETAIL, 'wtnc', '143', 'Iconic Legend')]);
-    expect(binderPockets([x], retail, EMPTY, 'base')[0]?.number).toBe('007');
+    expect(binderPockets([x], EMPTY)[0]?.number).toBe('007');
   });
 });

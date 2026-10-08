@@ -3,20 +3,20 @@ import type { KeyboardEvent, TouchEvent } from 'react';
 import { getCardImage } from '../data/cardImages';
 import { variantImageUrl } from '../data/variantImages';
 import { binderPockets, clampPage, pageNumbers, paginate, swipeDirection, turnPage, visiblePages } from '../domain/binder';
-import type { BinderArt, Pocket } from '../domain/binder';
+import type { Pocket } from '../domain/binder';
 import type { Card } from '../domain/card';
 import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
 import type { Collection } from '../domain/collection';
-import { setOptions } from '../domain/setFilter';
 import { cardNameText } from './CardName';
 import { collectionTexts } from './collectionTexts';
+import { SwitchButton } from './ListToolbar';
 import { useMediaQuery, WIDE_QUERY } from './useMediaQuery';
 
 const hasArt = (key: string, rarity: string) => variantImageUrl(key, rarity) !== null;
 
 /** One pocket: the card's picture (owned) or a dim outline with number and name (missing). */
 function BinderPocket({ pocket }: { pocket: Pocket }) {
-  const { card, number, copies, artRarity } = pocket;
+  const { card, number, copies, artRarity, betaOnly } = pocket;
   const owned = copies > 0;
   const name = cardNameText(card);
   // An owned card always shows something: the owned art, else the base picture, else its number and name.
@@ -30,7 +30,7 @@ function BinderPocket({ pocket }: { pocket: Pocket }) {
       <a
         className="pocket-link"
         href={`#/kortti/${encodeURIComponent(card.key)}`}
-        aria-label={owned ? collectionTexts.pocketOwned(number, name, copies) : collectionTexts.pocketMissing(number, name)}
+        aria-label={owned ? collectionTexts.pocketOwned(number, name, copies, betaOnly) : collectionTexts.pocketMissing(number, name)}
       >
         {src !== null ? (
           <img className="pocket-image" src={src} width={CARD_IMAGE_WIDTH.md} height={cardImageHeight('md')} alt="" loading="lazy" decoding="async" onError={() => setFailed((list) => [...list, src])} />
@@ -38,6 +38,11 @@ function BinderPocket({ pocket }: { pocket: Pocket }) {
           <span className={`pocket-ghost${owned ? ' pocket-ghost--owned' : ''}`} aria-hidden="true">
             <span className="pocket-ghost-number">#{number}</span>
             <span className="pocket-ghost-name">{name}</span>
+          </span>
+        )}
+        {betaOnly && (
+          <span className="pocket-beta" aria-hidden="true">
+            {collectionTexts.betaMark}
           </span>
         )}
         {copies >= 2 && (
@@ -51,35 +56,27 @@ function BinderPocket({ pocket }: { pocket: Pocket }) {
 }
 
 /**
- * The collector binder (T-109): the cards of one set in 3 x 3 pockets, a page (narrow screen) or a spread of
+ * The collector binder (T-109, T-116): the cards of the one set (Retail and Beta together) in 3 x 3 pockets, a page (narrow screen) or a spread of
  * two pages (wide screen) at a time. Only the visible pages are rendered, and the pictures load lazily.
  */
 export function CollectionBinder({
   cards,
   collection,
-  art,
   showMissing,
-  onArtChange,
   onShowMissingChange,
 }: {
   cards: readonly Card[];
   collection: Collection;
-  art: BinderArt;
   showMissing: boolean;
-  onArtChange: (art: BinderArt) => void;
   onShowMissingChange: (on: boolean) => void;
 }) {
-  const sets = useMemo(() => setOptions(cards), [cards]);
-  const [chosenSet, setChosenSet] = useState<string | null>(null);
-  const family = sets.some((option) => option.family === chosenSet) ? chosenSet : (sets[0]?.family ?? null);
   const [page, setPage] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const wide = useMediaQuery(WIDE_QUERY, false);
   const columns = wide ? 2 : 1;
-  const artName = useId();
   const title = useId();
 
-  const all = useMemo(() => (family === null ? [] : binderPockets(cards, family, collection, art, hasArt)), [cards, family, collection, art]);
+  const all = useMemo(() => binderPockets(cards, collection, hasArt), [cards, collection]);
   const ownedCount = all.filter((pocket) => pocket.copies > 0).length;
   const pages = useMemo(() => paginate(showMissing ? all : all.filter((pocket) => pocket.copies > 0)), [all, showMissing]);
   const current = clampPage(page, pages.length);
@@ -114,50 +111,20 @@ export function CollectionBinder({
 
   return (
     <section className="binder" aria-labelledby={title}>
-      <h2 id={title} className="binder-title">
+      <h2 id={title} className="binder-title visually-hidden">
         {collectionTexts.binderHeading}
       </h2>
       <div className="binder-controls">
-        <label className="sort-select">
-          {collectionTexts.binderSet}
-          <select
-            value={family ?? ''}
-            onChange={(event) => {
-              setChosenSet(event.target.value);
-              setPage(0);
-            }}
-          >
-            {sets.map((option) => (
-              <option key={option.family} value={option.family}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <fieldset className="segmented binder-art">
-          <legend>{collectionTexts.binderArtLabel}</legend>
-          <div className="segmented-options">
-            {(['base', 'owned'] as const).map((value) => (
-              <label key={value} className={'segmented-option' + (art === value ? ' is-on' : '')}>
-                <input type="radio" name={artName} checked={art === value} onChange={() => onArtChange(value)} />
-                {value === 'base' ? collectionTexts.binderArtBase : collectionTexts.binderArtOwned}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <label className="binder-toggle">
-          <input
-            type="checkbox"
-            checked={showMissing}
-            onChange={(event) => {
-              onShowMissingChange(event.target.checked);
-              setPage(0);
-            }}
-          />
-          {collectionTexts.binderShowMissing}
-        </label>
+        <p className="hint binder-count">{collectionTexts.binderOwnedCount(ownedCount, all.length)}</p>
+        <SwitchButton
+          checked={showMissing}
+          label={collectionTexts.binderShowMissing}
+          onChange={(on) => {
+            onShowMissingChange(on);
+            setPage(0);
+          }}
+        />
       </div>
-      <p className="hint binder-count">{collectionTexts.binderOwnedCount(ownedCount, all.length)}</p>
 
       {pages.length === 0 ? (
         <p className="binder-empty">{collectionTexts.binderEmpty}</p>
@@ -175,7 +142,7 @@ export function CollectionBinder({
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           >
-            <div className="binder-spread" key={`${family}-${shown[0]}`} data-turn={direction === 1 ? 'next' : 'prev'}>
+            <div className="binder-spread" key={shown[0]} data-turn={direction === 1 ? 'next' : 'prev'}>
               {shown.map((index) => (
                 <section key={index} className="binder-page" aria-labelledby={`${title}-p${index}`}>
                   <ul className="binder-pockets">

@@ -22,6 +22,7 @@ import { texts } from './texts';
 import { useCollection } from './useCollection';
 import { useWants } from './useWants';
 import { proxyTexts } from './proxyTexts';
+import { InfoTip } from './InfoTip';
 import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 
 /** At most this many search results are listed; a more exact search narrows them (the list stays short). */
@@ -108,11 +109,13 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   return (
     <>
       <div className="page-head">
-        <h1 ref={headingRef} tabIndex={-1}>
-          {texts.haveWantHeading}
-        </h1>
+        <div className="heading-row has-info-tip">
+          <h1 ref={headingRef} tabIndex={-1}>
+            {texts.haveWantHeading}
+          </h1>
+          <InfoTip>{texts.haveWantIntro}</InfoTip>
+        </div>
       </div>
-      <p>{texts.haveWantIntro}</p>
       {/* Stays mounted so screen readers announce each change. */}
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {live}
@@ -126,14 +129,16 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
         </div>
 
         <section aria-labelledby="want-heading">
-          <h2 id="want-heading" ref={wantHeadingRef} tabIndex={-1}>
-            {texts.wantHeading}
-          </h2>
+          <div className="heading-row has-info-tip">
+            <h2 id="want-heading" ref={wantHeadingRef} tabIndex={-1}>
+              {texts.wantHeading}
+            </h2>
+            <InfoTip>{texts.wantIntro}</InfoTip>
+          </div>
           {wants.phase === 'loading' && <p>{texts.wantLoading}</p>}
           {(wants.phase === 'unavailable' || wants.phase === 'locked') && <p role="alert">{texts.wantUnavailable}</p>}
           {wantReady && (
             <>
-              <p className="hint">{texts.wantIntro}</p>
               {wantedCards.length > 0 && (
                 <div className="missing-add proxy-send">
                   <SendToProxyButton
@@ -185,9 +190,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
                   onChange={(event) => setQuery(event.target.value)}
                 />
               </div>
-              {query.trim() === '' ? (
-                <p className="hint">{texts.wantSearchPrompt}</p>
-              ) : matches.length === 0 ? (
+              {query.trim() === '' ? null : matches.length === 0 ? (
                 <p role="status">{texts.wantSearchNone}</p>
               ) : (
                 <>
@@ -221,14 +224,16 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
         </section>
 
         <section aria-labelledby="have-heading">
-          <h2 id="have-heading">{texts.haveHeading}</h2>
+          <div className="heading-row has-info-tip">
+            <h2 id="have-heading">{texts.haveHeading}</h2>
+            <InfoTip>{texts.haveIntro}</InfoTip>
+          </div>
           {collection.phase === 'loading' && <p>{texts.haveLoading}</p>}
           {(collection.phase === 'unavailable' || collection.phase === 'locked') && (
             <p role="alert">{texts.haveUnavailable}</p>
           )}
           {collection.phase === 'ready' && (
             <>
-              <p className="hint">{texts.haveIntro}</p>
               {have.cards.length === 0 ? (
                 <p>{texts.haveEmpty}</p>
               ) : (

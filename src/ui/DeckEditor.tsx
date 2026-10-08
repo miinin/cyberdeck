@@ -727,6 +727,16 @@ export function DeckEditor({
         </div>
       </div>
 
+      {collectionReady && missingCards.length > 0 && (
+        <div className="missing-add proxy-send editor-proxy">
+          <SendToProxyButton
+            rows={missingCards.map((row) => ({ card: row.card.key, count: row.missing }))}
+            queue={proxyQueue}
+            label={proxyTexts.printMissing}
+          />
+        </div>
+      )}
+
       {tabbed && (
         <div ref={tabsRef} className="editor-tabs" role="group" aria-label={deckTexts.editorTabsLabel}>
           <button type="button" aria-pressed={tab === 'deck'} onClick={() => selectTab('deck', false)}>
@@ -1046,13 +1056,6 @@ export function DeckEditor({
               queue={proxyQueue}
               label={proxyTexts.sendDeck}
             />
-            {collectionReady && missingCards.length > 0 && (
-              <SendToProxyButton
-                rows={missingCards.map((row) => ({ card: row.card.key, count: row.missing }))}
-                queue={proxyQueue}
-                label={proxyTexts.sendMissing}
-              />
-            )}
           </div>
 
           <DeckStats

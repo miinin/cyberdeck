@@ -1,16 +1,52 @@
-import { useState } from 'react';
-import { addToQueue } from '../domain/proxySheet';
+import { useEffect, useState } from 'react';
+import { addToQueue, queueTotal } from '../domain/proxySheet';
 import type { AddResult, QueueRow } from '../domain/proxySheet';
 import type { CollectionRepository } from '../storage';
 import { proxyTexts } from './proxyTexts';
 import { useCollection } from './useCollection';
+
+/** Fired on the window when a queue change has been saved, so the navigation badge can read the new count (T-116). */
+const PROXY_SAVED_EVENT = 'cyberdeck:proxy-saved';
 
 /**
  * The print queue (T-102) has the collection's shape and rules, so it uses the same store and hook:
  * `useProxyQueue(repositories.proxy)`. `snapshot.saved` is the queue, `store.setCount(card, count)` changes it.
  * `repository` must be a stable reference.
  */
-export const useProxyQueue: (repository: CollectionRepository) => ReturnType<typeof useCollection> = useCollection;
+export function useProxyQueue(repository: CollectionRepository): ReturnType<typeof useCollection> {
+  const queue = useCollection(repository);
+  useEffect(
+    () =>
+      queue.store.onEvent((event) => {
+        if (event.type === 'idle') window.dispatchEvent(new Event(PROXY_SAVED_EVENT));
+      }),
+    [queue.store],
+  );
+  return queue;
+}
+
+/** The number of copies in the print queue, kept up to date for the navigation badge; 0 while loading or when storage fails. */
+export function useProxyCount(repository: CollectionRepository, refreshKey: unknown): number {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const refresh = () => {
+      repository.load().then(
+        (loaded) => alive && setCount(queueTotal(loaded.value)),
+        () => alive && setCount(0),
+      );
+    };
+    refresh();
+    window.addEventListener(PROXY_SAVED_EVENT, refresh);
+    const unsubscribe = repository.subscribe(refresh);
+    return () => {
+      alive = false;
+      window.removeEventListener(PROXY_SAVED_EVENT, refresh);
+      unsubscribe();
+    };
+  }, [repository, refreshKey]);
+  return count;
+}
 
 /** The queue as `useProxyQueue` returns it. */
 export type ProxyQueueHandle = ReturnType<typeof useProxyQueue>;

@@ -57,18 +57,44 @@ describe('CollectionBinder', () => {
 
   it('hides the missing cards on request and remembers the choices', async () => {
     const repositories = await renderBinder([['c1', 1], ['c5', 3]]);
-    await userEvent.click(screen.getByRole('checkbox', { name: /Näytä puuttuvat|Show missing/ }));
+    await userEvent.click(screen.getByRole('switch', { name: /Näytä puuttuvat|Show missing/ }));
     expect(pockets()).toHaveLength(2);
     expect(screen.getByRole('status')).toHaveTextContent(/Sivu 1 \/ 1|Page 1 \/ 1/);
-    expect(await repositories.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', art: 'base', showMissing: false });
+    expect(await repositories.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false });
   });
 
   it('opens on the binder when it was the last choice', async () => {
     const repositories = createMemoryRepositories({ initial: storedCollection([['c1', 1]]) });
-    await repositories.preferences.saveCollectionPrefs({ view: 'binder', art: 'owned', showMissing: true });
+    await repositories.preferences.saveCollectionPrefs({ view: 'binder', showMissing: true });
     window.location.hash = '#/kokoelma';
     render(<App cards={cards} repositories={repositories} />);
     expect(await screen.findAllByRole('link', { name: /#001 Card 1/ })).toHaveLength(1);
-    expect(screen.getByRole('radio', { name: /Omistamasi kuvitus|Show owned art/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /^(Kansio|Binder)$/ })).toBeChecked();
+  });
+
+  it('has no set or art choices, only the missing switch', async () => {
+    await renderBinder([['c1', 1]]);
+    expect(screen.queryByRole('combobox')).toBeNull();
+    expect(screen.queryByText(/Omistamasi kuvitus|Show owned art/)).toBeNull();
+    expect(screen.getByRole('switch', { name: /Näytä puuttuvat|Show missing/ })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('marks a card owned only as the Beta edition with a quiet Beta mark', async () => {
+    const BETA = 'Welcome to Night City — Beta';
+    const betaCard = card('b1', {
+      name: 'Beta Card',
+      displayName: 'Beta Card',
+      printings: [{ key: 'wtncb:001', setCode: 'wtncb', setName: BETA, number: '001β', rarity: 'Common', language: 'en', artist: null, imageKey: 'b1' }],
+    });
+    const repositories = createMemoryRepositories({ initial: storedCollection([['c1', 1]]) });
+    await repositories.collection.setCount('b1', 1);
+    await repositories.collection.setVersionCount('b1', 'wtncb:001', 1);
+    window.location.hash = '#/kokoelma';
+    render(<App cards={[...cards, betaCard]} repositories={repositories} />);
+    await userEvent.click(await screen.findByRole('radio', { name: /^(Kansio|Binder)$/ }));
+    const link = await screen.findByRole('link', { name: /#001β Beta Card, (omistettu|owned) 1, (Beta-painos|Beta edition)/ });
+    expect(within(link).getByText('Beta')).toBeInTheDocument();
+    const retailLink = screen.getByRole('link', { name: /^#001 Card 1, (omistettu|owned) 1$/ });
+    expect(within(retailLink).queryByText('Beta')).toBeNull();
   });
 });
