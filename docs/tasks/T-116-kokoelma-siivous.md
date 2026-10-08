@@ -1,6 +1,6 @@
 # T-116 · Kokoelman siivous, otsikoiden fokusreunus pois, glitch kaikille sivuille, Have/Want-tekstit (i)-vihjeisiin, proxy-tarjoukset
 
-**Tila:** Review. **Haara:** `t-116-kokoelma-siivous` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-09: "julkaise kun valmista"), PM (ratkaisut).
+**Tila:** Done. **Haara:** `t-116-kokoelma-siivous` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-09: "julkaise kun valmista"), PM (ratkaisut).
 
 Tee kaikki yhteen PR:ään. Korjaa matkalla havaitsemasi ilmeiset ulkoasuviat (päällekkäisyydet, vaakavieritys, tasausviat) kysymättä ja listaa ne luovutukseen.
 
