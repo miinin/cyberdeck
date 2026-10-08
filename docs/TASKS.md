@@ -119,3 +119,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-114 | Pakkaeditorin karsinta: määrä kerran, tallennus ja vienti nimen riville, näkyvyys yhdelle riville, koristeviiva pois | 1 | Should | Koodari | Done | PM esikatselu |
 | T-115 | UI-siistiminen: Kortit-sivun työkalurivi, pakkaeditorin otsikko ja yhtenäinen kytkin, korttinäkymä pakkaan, sideboardin vaakavieritys | 1 | Should | Koodari | Done | PM esikatselu |
 | T-116 | Kokoelman siivous (pieni näkymäkytkin, yksi kansiosetti Beta-merkillä, omistettu kuvitus), otsikkoreunus pois, glitch kaikille sivuille, Have/Want (i)-vihjeet, proxy-tarjoukset | 1 | Should | Koodari | Done | PM esikatselu |
+| T-117 | Pakat-sivun uudistus: otsikkorivi ja "+ Uusi pakka", "Tuo ▾" -valikko, kompakti Omat/Julkiset, yhtenäiset muodot, tiiviit pakkakortit | 1 | Should | Koodari | In Progress | – |
