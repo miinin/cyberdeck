@@ -72,3 +72,34 @@ export function addCopies(
     return 'limit';
   }
 }
+
+/** Takes back `copies` of one art that `addCopies` added (the scanner's Undo, T-108): the same path, the other way. */
+export function removeCopies(
+  snapshot: CollectionSnapshot,
+  store: CollectionStore,
+  card: Card,
+  arts: readonly Art[],
+  art: Art | null,
+  edition: Edition,
+  copies: number,
+): AddResult {
+  if (snapshot.phase !== 'ready') return 'unavailable';
+  const before = entryOf(snapshot, card);
+  const total = before?.count ?? 0;
+  if (art === null) {
+    store.setCount(card.key, Math.max(0, total - copies));
+    return 'added';
+  }
+  try {
+    const start = { entries: before === undefined ? [] : [before] };
+    const owned = ownedPerArt(before, card, arts).get(art.artId) ?? 0;
+    const edited =
+      art.rarity === null && targetPrinting(card, edition) !== null
+        ? setCopiesByEdition(start, card, edition, Math.max(0, total - copies))
+        : setArtCount(start, card, art.artId, Math.max(0, owned - copies), arts);
+    writeEntry(store, card, before, edited.entries[0]);
+    return 'added';
+  } catch {
+    return 'limit';
+  }
+}

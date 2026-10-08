@@ -717,7 +717,7 @@ export function CatalogView({
           />
           <div className="sort-row">
             <SortSelect sort={sort} onChange={setSort} />
-            <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} />
+            <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} preferences={repositories.preferences} />
             {editable && collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
               <div className="missing-add missing-add--quiet">
                 <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />

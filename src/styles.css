@@ -7731,3 +7731,166 @@ section[aria-labelledby='have-heading'] {
   font-size: var(--font-size-lg, 1.25rem);
   font-variant-numeric: tabular-nums;
 }
+
+/* Scan buttons, mode choice and continuous mode (T-108). */
+.scan-open,
+.scan-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.scan-icon {
+  flex: none;
+}
+
+/* A floating camera button for the Collection view on a phone, in the bottom right corner. It sits above the page
+   content only; the spacer after the view keeps the last lines from hiding under it. */
+.scan-fab {
+  position: fixed;
+  inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: var(--space-4);
+  z-index: 5;
+  min-block-size: var(--target-min);
+  padding: var(--space-2) var(--space-4);
+  border: 2px solid var(--color-brand-yellow);
+  border-radius: 999px;
+  background: var(--color-brand-yellow);
+  color: #000;
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.scan-fab:focus-visible {
+  outline: 3px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.scan-fab-spacer {
+  block-size: calc(var(--target-min) + var(--space-6));
+}
+
+@media (min-width: 40rem) {
+  .scan-fab,
+  .scan-fab-spacer {
+    display: none;
+  }
+}
+
+.scan-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding-block-end: var(--space-4);
+  margin-block-end: var(--space-4);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.scan-prompt-title,
+.scan-prompt p {
+  margin: 0;
+}
+
+.scan-prompt-icon {
+  color: var(--color-brand-yellow);
+}
+
+.scanner-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.scanner-mode-option {
+  flex: 1 1 8rem;
+  min-block-size: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.scanner-mode-option[aria-pressed='true'] {
+  border-color: var(--color-brand-yellow);
+  box-shadow: 0 0 0 2px var(--color-brand-yellow);
+  font-weight: var(--font-weight-bold);
+}
+
+.scanner-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.scanner-status .link-button {
+  min-block-size: var(--target-min);
+  text-decoration: underline;
+}
+
+.scanner-frame[data-flash] {
+  border-color: var(--color-success);
+  box-shadow:
+    0 0 0 100vmax rgba(0, 0, 0, 0.55),
+    0 0 18px 4px var(--color-success);
+}
+
+/* The hint over the dimmed part of the picture; the text sits on its own dark strip so it reads on any picture. */
+.scanner-frame-label {
+  position: absolute;
+  inset-inline: var(--space-2);
+  inset-block-end: var(--space-2);
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  text-align: center;
+  pointer-events: none;
+}
+
+.scanner-live:empty {
+  display: none;
+}
+
+.scanner-session {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.scanner-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scanner-session-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.scanner-session-item img,
+.scanner-session-item .card-image {
+  flex: none;
+  inline-size: 2.25rem;
+  block-size: auto;
+  aspect-ratio: 63 / 88;
+  object-fit: contain;
+}
+
+.scanner-session-name {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}

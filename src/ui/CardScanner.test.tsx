@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Card } from '../domain/card';
 import { cardFingerprint } from '../domain/cardFingerprint';
@@ -72,7 +72,7 @@ async function settle() {
 
 function Harness({ repositories, onEdition = () => {} }: { repositories: Repositories; onEdition?: (edition: string) => void }) {
   const { snapshot, store } = useCollection(repositories.collection);
-  return <ScanCardsButton cards={cards} snapshot={snapshot} store={store} edition="beta" onEditionChange={onEdition} />;
+  return <ScanCardsButton cards={cards} snapshot={snapshot} store={store} edition="beta" onEditionChange={onEdition} preferences={repositories.preferences} />;
 }
 
 async function openScanner(repositories: Repositories, onEdition?: (edition: string) => void) {
@@ -226,5 +226,88 @@ describe('CardScanner', () => {
       resolve({ getTracks: () => [{ stop: stopTrack }] });
     });
     expect(stopTrack).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Continuous mode (T-108)', () => {
+  // Fake timers do not mix with userEvent's own delays, so these tests click with fireEvent.
+  const click = async (name: string) => {
+    fireEvent.click(screen.getByRole('button', { name }));
+    await settle();
+  };
+  async function startContinuous(repositories: Repositories, button = 'Skannaa Beta') {
+    render(<Harness repositories={repositories} />);
+    await settle();
+    await click('Skannaa kortteja');
+    await click('Jatkuva');
+    await click(button);
+  }
+  const tick = async (ms: number) => {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(ms);
+    });
+  };
+  const saved = async (repositories: Repositories) => (await repositories.collection.load()).value.entries;
+
+  beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: false }));
+  afterEach(() => vi.useRealTimers());
+
+  it('adds a sure card once after two pictures, shows it in the list and does not double it', async () => {
+    const repositories = createMemoryRepositories();
+    await startContinuous(repositories);
+    shown = art(2);
+    await tick(280);
+    expect(await saved(repositories)).toEqual([]);
+    await tick(280 * 6);
+    expect(await saved(repositories)).toEqual([{ card: 'bravo', count: 1, versions: { 'welcometonightcitybeta:005a': 1 } }]);
+    expect(screen.getByText('1 kortti lisätty')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Kumoa: Bravo' })).toBeInTheDocument();
+  });
+
+  it('adds the same card again after the frame was out of use for a moment', async () => {
+    const repositories = createMemoryRepositories();
+    await startContinuous(repositories);
+    shown = art(2);
+    await tick(280 * 3);
+    shown = art(99);
+    await tick(280 * 4);
+    shown = art(2);
+    await tick(280 * 3);
+    expect((await saved(repositories))[0]?.count).toBe(2);
+    expect(screen.getByText('2 korttia lisätty')).toBeInTheDocument();
+  });
+
+  it('adds nothing for an unsure match', async () => {
+    const repositories = createMemoryRepositories();
+    await startContinuous(repositories);
+    shown = art(99);
+    await tick(280 * 8);
+    expect(await saved(repositories)).toEqual([]);
+  });
+
+  it('undoes exactly the copy it added', async () => {
+    const repositories = createMemoryRepositories();
+    await startContinuous(repositories);
+    shown = art(2);
+    await tick(280 * 3);
+    await click('Kumoa: Bravo');
+    expect(await saved(repositories)).toEqual([]);
+    expect(screen.queryByText('1 kortti lisätty')).not.toBeInTheDocument();
+  });
+
+  it('stops looking at the camera when the scanner closes', async () => {
+    const repositories = createMemoryRepositories();
+    await startContinuous(repositories);
+    await click('Sulje');
+    shown = art(2);
+    await tick(280 * 8);
+    expect(await saved(repositories)).toEqual([]);
+    expect(stopTrack).toHaveBeenCalledTimes(1);
+  });
+
+  it('remembers the mode on the device', async () => {
+    const repositories = createMemoryRepositories();
+    await startContinuous(repositories);
+    expect(await repositories.preferences.loadScanMode()).toBe('continuous');
   });
 });

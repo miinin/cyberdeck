@@ -29,7 +29,7 @@ import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 import { collectionTexts } from './collectionTexts';
 import { formatPercent } from './deckTexts';
 import { cardCount } from './texts';
-import { ScanCardsButton } from './CardScanner';
+import { ScanCardsButton, ScanPrompt } from './CardScanner';
 import { useCollection } from './useCollection';
 import { useDefaultEdition } from './useDefaultEdition';
 import { useWants } from './useWants';
@@ -115,13 +115,15 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
   const otherSets = data.sets.filter((row) => row.group === 'other');
   const setRow = (row: (typeof data.sets)[number]) => <ProgressRow key={row.family} label={row.label} owned={row.owned} total={row.total} />;
 
+  const scanProps = { cards, snapshot: collection, store: collectionStore, edition, onEditionChange: setEdition, preferences: repositories.preferences };
+
   return (
     <>
       <div className="page-head">
         <h1>
           {collectionTexts.heading}
         </h1>
-        <ScanCardsButton cards={cards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={setEdition} />
+        <ScanCardsButton {...scanProps} variant="primary" />
       </div>
 
       {collection.phase === 'loading' && <p>{collectionTexts.loading}</p>}
@@ -129,6 +131,7 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
 
       {ready && overview.distinct === 0 && (
         <div className="stats-card collection-empty">
+          <ScanPrompt {...scanProps} />
           <h2 className="collection-empty-title">{collectionTexts.emptyTitle}</h2>
           <p>{collectionTexts.emptyBody}</p>
           <p>
@@ -305,6 +308,7 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
           </section>
         </div>
       )}
+      <ScanCardsButton {...scanProps} variant="floating" />
     </>
   );
 }

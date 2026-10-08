@@ -21,6 +21,7 @@ export type {
   CatalogViewMode,
   DeckPickView,
   DefaultEdition,
+  ScanMode,
   LocalData,
   SyncBase,
   SyncStorage,
