@@ -924,11 +924,6 @@ export function DeckEditor({
         </div>
 
         <section className="editor-side" aria-labelledby="deck-heading" ref={sideRef} hidden={deckHidden}>
-          {tabbed && (
-            <button type="button" className="button-primary editor-add-cards" onClick={() => selectTab('add', true)}>
-              {deckTexts.editorAddCards}
-            </button>
-          )}
           <div className="deck-head">
             <h2 id="deck-heading" className="visually-hidden" ref={deckHeadingRef} tabIndex={-1}>
               {deckTexts.sectionLabel(content.name)}

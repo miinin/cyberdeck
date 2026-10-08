@@ -310,7 +310,6 @@ export const deckTextsEn: typeof deckTextsFi = {
   editorTabsLabel: 'Deck editor section',
   editorTabDeck: (main: number) => `Deck (${main}/${MIN_MAIN_DECK})`,
   editorTabAdd: 'Add cards',
-  editorAddCards: '+ Add cards',
   backToSearch: 'Back to search',
   distinctLimit: 'A deck holds at most 500 distinct cards, so a new card cannot be added.',
 
@@ -430,7 +429,6 @@ export const deckTextsEn: typeof deckTextsFi = {
 
   // Visibility of a deck in the editor (T-098, SR-38)
   visHeading: 'Visibility',
-  visLabel: 'Deck visibility',
   visPrivate: 'Private',
   visPrivateHint: 'Only you can see the deck.',
   visPublic: 'Public',

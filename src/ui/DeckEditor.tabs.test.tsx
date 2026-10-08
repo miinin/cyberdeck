@@ -47,7 +47,7 @@ describe('Deck editor tabs on a narrow screen', () => {
     expect(deckSection()).toBeVisible();
     expect(pickerSection()).not.toBeVisible();
     expect(filtersSection()).not.toBeVisible();
-    expect(screen.getByRole('button', { name: '+ Lisää kortteja' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: '+ Lisää kortteja' })).not.toBeInTheDocument();
     expect(document.querySelector('.deck-bar')).toHaveAttribute('hidden');
   });
 
@@ -78,13 +78,12 @@ describe('Deck editor tabs on a narrow screen', () => {
     expect(screen.getByRole('searchbox')).toHaveValue('unit 1');
   });
 
-  it('the big button and the bottom bar button change tabs and move the focus', async () => {
+  it('the add tab and the bottom bar button change tabs (the bar button moves the focus)', async () => {
     stubWidth(false);
     const user = userEvent.setup();
     openEditor(legalCards());
-    await user.click(await screen.findByRole('button', { name: '+ Lisää kortteja' }));
+    await user.click(await screen.findByRole('button', { name: 'Lisää kortteja' }));
     expect(pickerSection()).toBeVisible();
-    expect(screen.getByRole('searchbox')).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Näytä pakka' }));
     expect(deckSection()).toBeVisible();
     expect(screen.getByRole('heading', { level: 2, name: /Oma pakka/ })).toHaveFocus();

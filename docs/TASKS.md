@@ -113,4 +113,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-108 | Skannerin näkyvyys (Kokoelma-painike, tyhjän tilan kehotus, mobiilin kelluva painike) ja jatkuva skannaus automaattisella lisäyksellä | 1 | Should | Koodari | Done | PM esikatselu |
 | T-109 | Kokoelma: Myytävät-tilasto pois, näkymävalitsin ja kansionäkymä (3 × 3 -taskusivut, aukeama) | 1 | Should | Koodari | Done | PM esikatselu |
 | T-110 | Pakkaeditori mobiilissa: välilehdet Pakka / Lisää kortteja, pakka näkyy ensin | 1 | Should | Koodari | Done | PM esikatselu |
-| T-111 | Mobiilikorjaukset 2: navigointi ylös yhdelle riville, yksi "Lisää kortteja", näkyvyyskytkin Yksityinen ⇄ Julkinen | 1 | Should | Koodari | Ready | PM esikatselu |
+| T-111 | Mobiilikorjaukset 2: navigointi ylös yhdelle riville, yksi "Lisää kortteja", näkyvyyskytkin Yksityinen ⇄ Julkinen | 1 | Should | Koodari | Review | PM esikatselu |

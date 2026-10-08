@@ -52,8 +52,6 @@ export function DeckVisibility({
   const isPublic = publish?.public === true;
   const id = useId();
   const [choosing, setChoosing] = useState(false);
-  // The panel stays open while the owner works in it, also right after the deck became private or public.
-  const [open, setOpen] = useState(isPublic);
   // The nickname is hidden unless the owner turns it on: no pre-filled name, ever (SR-38).
   const [showNick, setShowNick] = useState((publish?.nickname ?? null) !== null);
   const [nickText, setNickText] = useState(publish?.nickname ?? '');
@@ -63,8 +61,7 @@ export function DeckVisibility({
   const [live, setLive] = useState('');
   const nickRef = useRef<HTMLInputElement>(null);
   const publishButtonRef = useRef<HTMLButtonElement>(null);
-  const privateRadioRef = useRef<HTMLInputElement>(null);
-  const publicRadioRef = useRef<HTMLInputElement>(null);
+  const switchRef = useRef<HTMLButtonElement>(null);
 
   const formOpen = choosing || isPublic;
   const wanted = showNick ? cleanNickname(nickText) : null;
@@ -89,11 +86,16 @@ export function DeckVisibility({
     if (ok) {
       setChoosing(false);
       setLive(deckTexts.visPrivateLive);
-      privateRadioRef.current?.focus();
+      setTimeout(() => switchRef.current?.focus());
     } else {
       setError(deckTexts.visRemoveFailed);
-      publicRadioRef.current?.focus();
+      setTimeout(() => switchRef.current?.focus());
     }
+  };
+
+  const toggle = () => {
+    if (formOpen) void selectPrivate();
+    else selectPublic();
   };
 
   const submit = async (event: FormEvent) => {
@@ -113,8 +115,8 @@ export function DeckVisibility({
     if (result === 'ok') {
       setChoosing(false);
       setLive(wasPublic ? deckTexts.visNicknameSavedLive : deckTexts.visPublishedLive);
-      // The publish button is replaced by "Päivitä nimimerkki": focus stays in the panel.
-      publicRadioRef.current?.focus();
+      // The publish button is replaced by "Päivitä nimimerkki": focus goes back to the switch.
+      setTimeout(() => switchRef.current?.focus());
     } else {
       setError(result === 'empty' ? deckTexts.visEmpty : result === 'too-large' ? deckTexts.visTooLarge : deckTexts.visFailed);
       publishButtonRef.current?.focus();
@@ -125,42 +127,37 @@ export function DeckVisibility({
   const status = publish === undefined || !isPublic ? '' : statusText(publish, state);
 
   return (
-    <details className="deck-visibility" open={open} onToggle={(event) => setOpen(event.currentTarget.open)}>
-      <summary>
-        {deckTexts.visHeading}: <strong>{summary}</strong>
-      </summary>
+    <section className="deck-visibility" aria-label={deckTexts.visHeading}>
+      <div className="visibility-switch-row">
+        <p className="visibility-state">
+          {deckTexts.visHeading}: <strong>{summary}</strong>
+        </p>
+        <div className={`visibility-switch-wrap${formOpen ? ' is-public' : ''}`}>
+          <span className="visibility-switch-label visibility-switch-private" aria-hidden="true">
+            {deckTexts.visPrivate}
+          </span>
+          <button
+            ref={switchRef}
+            type="button"
+            role="switch"
+            className="visibility-switch"
+            aria-checked={formOpen}
+            aria-labelledby={`${id}-public`}
+            aria-describedby={signedIn ? `${id}-hint` : `${id}-signin`}
+            disabled={busy || !signedIn}
+            onClick={toggle}
+          >
+            <span className="visibility-switch-knob" aria-hidden="true" />
+          </button>
+          <span id={`${id}-public`} className="visibility-switch-label visibility-switch-public">
+            {deckTexts.visPublic}
+          </span>
+        </div>
+      </div>
       <div className="deck-visibility-body">
-        <fieldset className="visibility-options" disabled={busy}>
-          <legend className="visually-hidden">{deckTexts.visLabel}</legend>
-          <label className="visibility-option">
-            <input
-              ref={privateRadioRef}
-              type="radio"
-              name={`${id}-visibility`}
-              checked={!formOpen}
-              onChange={() => void selectPrivate()}
-            />
-            <span>
-              <strong>{deckTexts.visPrivate}</strong>
-              <span className="hint">{deckTexts.visPrivateHint}</span>
-            </span>
-          </label>
-          <label className="visibility-option">
-            <input
-              ref={publicRadioRef}
-              type="radio"
-              name={`${id}-visibility`}
-              checked={formOpen}
-              disabled={!signedIn}
-              aria-describedby={signedIn ? undefined : `${id}-signin`}
-              onChange={selectPublic}
-            />
-            <span>
-              <strong>{deckTexts.visPublic}</strong>
-              <span className="hint">{deckTexts.visPublicHint}</span>
-            </span>
-          </label>
-        </fieldset>
+        <p id={`${id}-hint`} className="hint">
+          {formOpen ? deckTexts.visPublicHint : deckTexts.visPrivateHint}
+        </p>
         {!signedIn && (
           <p id={`${id}-signin`} className="hint">
             {signInAvailable ? deckTexts.visNeedSignIn : deckTexts.visSignInUnavailable}
@@ -251,6 +248,6 @@ export function DeckVisibility({
           {live}
         </div>
       </div>
-    </details>
+    </section>
   );
 }

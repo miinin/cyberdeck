@@ -1,6 +1,6 @@
 # T-111 · Mobiilikorjaukset 2: navigointi ylös yhdelle riville, yksi "Lisää kortteja", näkyvyyskytkin
 
-**Tila:** Ready. **Haara:** `t-111-mobiili-2` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08 tuotannon kuvakaappauksesta; navigoinnin sijainti valittu: "ylös, yksi rivi").
+**Tila:** Review. **Haara:** `t-111-mobiili-2` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08 tuotannon kuvakaappauksesta; navigoinnin sijainti valittu: "ylös, yksi rivi").
 
 ## 1. Päänavigointi ylös yhdelle riville (korvaa T-107:n alapalkin)
 - **Ongelma:** alapalkki sekoittui editorin välilehtiin, eikä sitä löytänyt.
@@ -32,3 +32,12 @@
 - `npm test`, `npm run lint` ja `npm run build` menevät läpi.
 
 ## Luovutus
+
+**Luovutus (Koodari, 2026-10-08) · Tila: Review**
+- Navigointi: T-107:n alapalkki poistettu (`--bottom-nav-height`, `position: fixed`, body-pehmuste, scroll-padding). Alle 40rem `.main-nav` on yläpalkin toisella rivillä (`order: 3`, `flex: 1 0 100%`, koko näytön leveys, viisi `flex: 1 1 0` -kohdetta, `nowrap`), aktiivinen keltainen alaviiva. Alle 24rem fontti 0.625rem, jotta "Collection" mahtuu 320 px:llä. Fokusjärjestys DOM:ssa on ennallaan (nav ennen työkaluja), vain visuaalinen järjestys vaihtuu.
+- Editori: iso `.editor-add-cards`-painike ja teksti `editorAddCards` poistettu. Valittu välilehti oli jo keltainen segmenttivalitsin. Tyhjän pakan "Takaisin hakuun" vie jo Lisää-välilehdelle.
+- Näkyvyys: `<details>` ja radiot korvattu `role="switch"`-painikkeella (`aria-checked`, nimi "Julkinen"), tekstit Yksityinen/Julkinen sen vieressä, julkinen vihreä (`--color-success`), tila myös tekstinä ("Näkyvyys: …"). Pois käytöstä kirjautumatta, kirjautumisvihje `aria-describedby`:ssä. Vahvistuslomake ja julkaisulogiikka ennallaan. Kytkin on `aria-checked=true` myös kun vahvistuslomake on auki (ennen julkaisua), Peruuta palauttaa. Teksti `visLabel` poistettu käytöstä.
+- Testit: DeckEditor.tabs ja PublicDecks päivitetty (radio -> switch), uusi näppäimistötesti (Space/Enter). Ei uusia riippuvuuksia.
+- Tulokset: `npm test` 1516/1516, lint ja build läpi.
+- Ei tarkistettu selaimessa (ei esikatselua tässä ajossa): 320 px:n navigointirivin mahtuminen ja kytkimen ulkoasu kannattaa katsoa PR:n esikatselusta.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (kytkimen "odottaa vahvistusta" -tila voisi saada oman tekstin).
