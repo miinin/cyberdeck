@@ -10,6 +10,7 @@ import {
   cardFingerprint,
   fingerprintDistance,
   hammingDistance,
+  frameSharpness,
   isConfident,
   isRegionHash,
   QUERY_WINDOWS,
@@ -176,5 +177,19 @@ describe('queryFingerprints', () => {
       return [card.data[i] ?? 0, card.data[i + 1] ?? 0, card.data[i + 2] ?? 0];
     });
     expect(rankFingerprints(queryFingerprints(frame), index, 1)[0]?.id).toBe('card-8');
+  });
+});
+
+describe('frameSharpness (T-113)', () => {
+  it('rates a sharp edge picture above a blurred one and a flat one at zero', () => {
+    const sharp = picture(40, 40, (x) => (x < 20 ? [0, 0, 0] : [255, 255, 255]));
+    const blurred = picture(40, 40, (x) => {
+      const v = Math.max(0, Math.min(255, (x - 10) * 12));
+      return [v, v, v];
+    });
+    const flat = picture(40, 40, () => [90, 90, 90]);
+    expect(frameSharpness(sharp)).toBeGreaterThan(frameSharpness(blurred));
+    expect(frameSharpness(blurred)).toBeGreaterThan(0);
+    expect(frameSharpness(flat)).toBe(0);
   });
 });

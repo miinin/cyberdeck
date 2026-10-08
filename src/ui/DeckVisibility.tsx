@@ -123,15 +123,11 @@ export function DeckVisibility({
     }
   };
 
-  const summary = isPublic ? deckTexts.visPublic : deckTexts.visPrivate;
   const status = publish === undefined || !isPublic ? '' : statusText(publish, state);
 
   return (
     <section className="deck-visibility" aria-label={deckTexts.visHeading}>
       <div className="visibility-switch-row">
-        <p className="visibility-state">
-          {deckTexts.visHeading}: <strong>{summary}</strong>
-        </p>
         <div className={`visibility-switch-wrap${formOpen ? ' is-public' : ''}`}>
           <span className="visibility-switch-label visibility-switch-private" aria-hidden="true">
             {deckTexts.visPrivate}
@@ -153,11 +149,11 @@ export function DeckVisibility({
             {deckTexts.visPublic}
           </span>
         </div>
-      </div>
-      <div className="deck-visibility-body">
-        <p id={`${id}-hint`} className="hint">
+        <p id={`${id}-hint`} className="hint visibility-hint">
           {formOpen ? deckTexts.visPublicHint : deckTexts.visPrivateHint}
         </p>
+      </div>
+      <div className="deck-visibility-body">
         {!signedIn && (
           <p id={`${id}-signin`} className="hint">
             {signInAvailable ? deckTexts.visNeedSignIn : deckTexts.visSignInUnavailable}

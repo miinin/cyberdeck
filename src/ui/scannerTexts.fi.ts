@@ -35,6 +35,8 @@ export const scannerTextsFi = {
   modeStatus: (mode: string, edition: string) => `${mode} · ${edition}`,
   changeMode: 'Vaihda',
   fillFrame: 'Täytä kehys kortilla',
+  holdStill: 'Pidä paikallaan',
+  suggestAdd: 'Lisää',
   continuousHint: 'Pidä kortti kehyksessä, kunnes se välähtää vihreänä. Vie kortti pois kehyksestä ennen samaa korttia uudelleen.',
   addedFlash: (name: string) => `Lisätty: ${name}`,
   sessionTitle: 'Lisätyt kortit',

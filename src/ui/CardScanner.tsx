@@ -6,9 +6,17 @@ import { artsOf } from '../domain/arts';
 import type { Art } from '../domain/arts';
 import type { Card } from '../domain/card';
 import { CARD_IMAGE_ASPECT } from '../domain/cardImage';
-import { isConfident, queryFingerprints, rankFingerprints } from '../domain/cardFingerprint';
+import { frameSharpness, isConfident, queryFingerprints, rankFingerprints } from '../domain/cardFingerprint';
 import type { FingerprintMatch, IndexedFingerprint } from '../domain/cardFingerprint';
-import { SCAN_INTERVAL_MS, initialContinuousState, stepContinuous } from '../domain/continuousScan';
+import {
+  SCAN_INTERVAL_MS,
+  candidateInWindow,
+  initialContinuousState,
+  initialSuggestionState,
+  isSharpEnough,
+  stepContinuous,
+  stepSuggestion,
+} from '../domain/continuousScan';
 import type { Edition } from '../domain/edition';
 import { coverCropSource } from '../domain/scanCrop';
 import type { PreferencesRepository, ScanMode } from '../storage';
@@ -19,6 +27,8 @@ import { markEditionConfirmed } from './EditionConfirmDialog';
 import { scannerTexts } from './scannerTexts';
 import { cardNameText } from './CardName';
 import { texts } from './texts';
+import { ScanDebugPanel, scanDebugRequested } from './ScanDebugPanel';
+import type { DebugReading } from './ScanDebugPanel';
 import { useScanMode } from './useScanMode';
 
 /** Width of the picture the frame is copied to; the height follows the card shape (63:88). */
@@ -92,12 +102,13 @@ interface SessionEntry {
 }
 
 /** Copies the frame to a canvas and ranks it against the index; null when there is no picture yet, 'failed' without a canvas. */
-function rankFrame(
+function readFrame(
   video: HTMLVideoElement,
   viewport: HTMLElement,
   frame: HTMLElement,
   index: readonly IndexedFingerprint[],
-): FingerprintMatch[] | 'failed' | null {
+  withSharpness = false,
+): { matches: FingerprintMatch[]; sharpness: number } | 'failed' | null {
   const box = viewport.getBoundingClientRect();
   const rect = frame.getBoundingClientRect();
   const crop = coverCropSource(
@@ -112,7 +123,30 @@ function rankFrame(
   const context = canvas.getContext('2d', { willReadFrequently: true });
   if (context === null) return 'failed';
   context.drawImage(video, crop.x, crop.y, crop.width, crop.height, 0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT);
-  return rankFingerprints(queryFingerprints(context.getImageData(0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT)), index, 3);
+  const pixels = context.getImageData(0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT);
+  return { matches: rankFingerprints(queryFingerprints(pixels), index, 3), sharpness: withSharpness ? frameSharpness(pixels) : 0 };
+}
+
+function rankFrame(
+  video: HTMLVideoElement,
+  viewport: HTMLElement,
+  frame: HTMLElement,
+  index: readonly IndexedFingerprint[],
+): FingerprintMatch[] | 'failed' | null {
+  const read = readFrame(video, viewport, frame, index);
+  return read === null || read === 'failed' ? read : read.matches;
+}
+
+/** Asks the camera to keep focusing on its own; a device without the setting is left as it is (T-113). */
+async function requestContinuousFocus(stream: MediaStream) {
+  try {
+    const track = stream.getTracks()[0];
+    const capabilities = track?.getCapabilities?.() as { focusMode?: string[] } | undefined;
+    if (track === undefined || !capabilities?.focusMode?.includes('continuous')) return;
+    await track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] });
+  } catch {
+    // Not supported or refused: the scanner works without it.
+  }
 }
 
 function stopStream(stream: MediaStream | null) {
@@ -163,6 +197,9 @@ export function CardScannerDialog({
   const [session, setSession] = useState<SessionEntry[]>([]);
   const [flashName, setFlashName] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [holding, setHolding] = useState(false);
+  const [suggestion, setSuggestion] = useState<{ id: string; target: Target } | null>(null);
+  const tappedSuggestion = useRef<string | null>(null);
   const flashTimer = useRef<number | undefined>(undefined);
   const nextUid = useRef(1);
   const targets = useMemo(() => buildTargets(cards), [cards]);
@@ -232,13 +269,18 @@ export function CardScannerDialog({
     setStage('starting');
     try {
       // Started from the tap on the edition button: iOS only allows the camera after a user action.
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false,
+      });
       if (!mounted.current) {
         stopStream(stream);
         return;
       }
       stopStream(streamRef.current);
       streamRef.current = stream;
+      await requestContinuousFocus(stream);
+      if (!mounted.current || streamRef.current !== stream) return;
       setStage('camera');
     } catch (error) {
       if (!mounted.current) return;
@@ -289,6 +331,14 @@ export function CardScannerDialog({
     if (typeof navigator.vibrate === 'function') navigator.vibrate(60);
   };
 
+  /** The "Add" button under the frame: one copy of the offered match, like an automatic add (T-113b). */
+  const addSuggested = () => {
+    if (suggestion === null) return;
+    tappedSuggestion.current = suggestion.id;
+    setSuggestion(null);
+    autoAdd(suggestion.id);
+  };
+
   const undo = (entry: SessionEntry) => {
     const { card, arts, art } = entry.target;
     const outcome = removeCopies(store.getSnapshot(), store, card, arts, art, entry.edition, 1);
@@ -311,25 +361,67 @@ export function CardScannerDialog({
   useEffect(() => {
     if (stage !== 'camera' || mode !== 'continuous' || index === null) return;
     let state = initialContinuousState;
+    let offer = initialSuggestionState;
+    const measuring = scanDebugRequested();
     const timer = window.setInterval(() => {
       const video = videoRef.current;
       const viewport = viewportRef.current;
       const frame = frameRef.current;
       if (document.hidden || streamRef.current === null || video === null || viewport === null || frame === null) return;
-      const ranked = rankFrame(video, viewport, frame, index);
-      if (ranked === 'failed') {
+      const read = readFrame(video, viewport, frame, index, true);
+      if (read === 'failed') {
         handlers.current.fail(scannerTexts.failed);
         return;
       }
-      if (ranked === null) return;
+      // A blurred picture is no observation at all (T-113b).
+      if (read === null || !isSharpEnough(read.sharpness)) return;
+      const ranked = read.matches;
       const best = ranked[0];
-      const sureId = best !== undefined && isConfident(ranked) && targets.has(best.id) ? best.id : null;
-      const step = stepContinuous(state, sureId, Date.now());
+      const sure = best !== undefined && isConfident(ranked) && targets.has(best.id);
+      const sureId = sure ? best.id : null;
+      const now = Date.now();
+      const step = stepContinuous(state, sureId, now);
       state = step.state;
-      if (step.add !== null) handlers.current.autoAdd(step.add);
+      // The diagnostics measure only: nothing is added to the collection while ?scandebug=1 is on (T-113a).
+      if (step.add !== null && !measuring) handlers.current.autoAdd(step.add);
+      setHolding(step.add === null && candidateInWindow(state) !== null);
+      if (measuring) return;
+      offer = stepSuggestion(offer, best?.id ?? null, best?.distance ?? Infinity, sure, now);
+      if (offer.best !== tappedSuggestion.current) tappedSuggestion.current = null;
+      const shownId = offer.shown !== null && offer.shown !== tappedSuggestion.current ? offer.shown : null;
+      const found = shownId === null ? undefined : targets.get(shownId);
+      setSuggestion((current) => (current?.id === shownId ? current : shownId !== null && found !== undefined ? { id: shownId, target: found } : null));
     }, SCAN_INTERVAL_MS);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+      setHolding(false);
+      setSuggestion(null);
+    };
   }, [stage, mode, index, targets]);
+
+  /** One diagnostics reading of the current frame (T-113a, only used with ?scandebug=1). */
+  const measureDebug = (): DebugReading | null => {
+    const video = videoRef.current;
+    const viewport = viewportRef.current;
+    const frame = frameRef.current;
+    if (document.hidden || streamRef.current === null || video === null || viewport === null || frame === null || index === null) return null;
+    const read = readFrame(video, viewport, frame, index, true);
+    if (read === null || read === 'failed') return null;
+    const [first, second] = read.matches;
+    const focus = (streamRef.current.getTracks()[0]?.getSettings?.() as { focusMode?: string } | undefined)?.focusMode;
+    return {
+      top3: read.matches.map((m) => {
+        const card = targets.get(m.id)?.card;
+        return { id: m.id, name: card === undefined ? m.id : cardNameText(card), distance: m.distance };
+      }),
+      gap: first !== undefined && second !== undefined ? second.distance - first.distance : null,
+      confident: isConfident(read.matches),
+      sharpness: read.sharpness,
+      resolution: `${video.videoWidth}x${video.videoHeight}`,
+      focus: focus ?? 'unknown',
+    };
+  };
+  const debug = useMemo(() => scanDebugRequested(), []);
 
   const backToCamera = () => {
     setResult(null);
@@ -437,11 +529,28 @@ export function CardScannerDialog({
             </div>
             <div ref={viewportRef} className="scanner-viewport" onClick={mode === 'single' ? capture : undefined}>
               <video ref={videoRef} className="scanner-video" aria-label={scannerTexts.videoLabel} autoPlay muted playsInline />
-              <div ref={frameRef} className="scanner-frame" data-flash={flashName !== null || undefined} aria-hidden="true" />
+              <div ref={frameRef} className="scanner-frame" data-flash={flashName !== null || undefined} data-hold={(holding && flashName === null) || undefined} aria-hidden="true" />
               <p className="scanner-frame-label" aria-hidden="true">
-                {flashName !== null ? scannerTexts.addedFlash(flashName) : scannerTexts.fillFrame}
+                {flashName !== null ? scannerTexts.addedFlash(flashName) : holding ? scannerTexts.holdStill : scannerTexts.fillFrame}
               </p>
             </div>
+            {mode === 'continuous' && (
+              <div className="scanner-suggest">
+                {suggestion !== null && (
+                  <>
+                    {suggestion.target.imageUrl !== null ? (
+                      <img src={suggestion.target.imageUrl} alt="" width={36} height={Math.round(36 * CARD_IMAGE_ASPECT)} />
+                    ) : (
+                      <span className="card-image card-image--missing" aria-hidden="true" />
+                    )}
+                    <span className="scanner-session-name">{cardNameText(suggestion.target.card)}</span>
+                    <button type="button" className="button-primary" onClick={addSuggested}>
+                      {scannerTexts.suggestAdd}
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
             <p className="hint">{mode === 'single' ? scannerTexts.frameHint : scannerTexts.continuousHint}</p>
             {mode === 'single' ? (
               lastAdded !== null && <p role="status">{lastAdded}</p>
@@ -450,6 +559,7 @@ export function CardScannerDialog({
                 {notice ?? (flashName !== null ? scannerTexts.addedFlash(flashName) : '')}
               </p>
             )}
+            {debug && index !== null && <ScanDebugPanel measure={measureDebug} />}
             {mode === 'continuous' && session.length > 0 && (
               <section className="scanner-session" aria-label={scannerTexts.sessionTitle}>
                 <h3 className="scanner-subtitle">{scannerTexts.cardsAdded(session.length)}</h3>
