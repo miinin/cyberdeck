@@ -83,3 +83,23 @@ Digiturva tarkistaa kamerapyynnön muutoksen ja sen, ettei diagnostiikka tallenn
 - **Ei lisäyksiä kokoelmaan:** jatkuva tila ei lisää mitään kokoelmaan, kun diagnostiikkatila on päällä.
 
 **Huomio T-113b:hen:** käyttäjällä on käsillä vain sinisiä kortteja, joten mittausdata on yksiväristä. Kynnykset ja usean kuvan sääntö viritetään oikealla datalla, mutta muiden värien korttien tulos pitää todentaa erikseen. Siihen käytetään `scripts/cards/measureScanner.mjs`-ajoa kaikilla väreillä (värikohtainen tulos raporttiin), ja oikeat kuvat muista väreistä tarkistetaan myöhemmin. Väärien osumien raja pidetään tiukkana: osuman ero toiseksi parhaaseen ei saa laskea alle sen, minkä synteettinen mittaus kestää kaikilla väreillä.
+
+## Mittaustulos 2026-10-08 (käyttäjä, puhelin 1080×1920, 23 sinistä korttia)
+- **Oikea kortti paras osuma:** 22/22 näytteessä. Yhdessä näytteessä oikeaa ei ollut kolmen parhaan joukossa.
+- **Oikean osuman etäisyys:** 322–640, mediaani noin 500. Nykyinen raja 240 ei toteudu koskaan, ja tämä vahvistaa syyn 1.
+- **Ero toiseksi parhaaseen:** 3–286. Ero on pieni (alle 40) viidessä näytteessä 22:sta.
+- **Väärät ehdokkaat:** etäisyys yleensä 590–670. Saman kortin toinen kuvitus voi olla lähempänä (Floor It -kortin nova-rare 556).
+- **Hylättävä tapaus:** ainoa "ei mikään" -näyte oli 578, ero 15.
+- **Terävyys:** 248–1803. Matala terävyys ei yksin ennustanut virhettä, joten terävyysraja asetetaan vain hyvin matalaksi.
+
+## T-113b · Määrittely (Ready)
+**Haara:** `t-113-skanneri-mittaus`, sama PR #124 kuin muut T-113-osat.
+
+1. **Uusi sääntö:** `CONFIDENCE = { maxDistance: 580, minGap: 40 }`. Yksi kerrallaan -tila esivalitsee varman osuman tällä säännöllä, kuten ennenkin.
+2. **Jatkuva tila:** `stepContinuous` muutetaan niin, että kortti lisätään, kun sama varma id on ollut **3:ssa viimeisistä 4** kuvasta. Ikkunan kuvat ovat peräkkäisiä, ja tyhjä tai epävarma kuva on oma havaintonsa. Tuplien esto (`AWAY_MS`) säilyy. Kuvat, joiden terävyys on alle 150, ohitetaan, eikä niitä lasketa havainnoiksi.
+3. **Ehdotus:** jos sama paras id (etäisyys enintään 650) on ollut paras vähintään 1,5 sekuntia mutta ei ole varma, kehyksen alle tulee kiinteän korkuinen rivi, jossa ovat pikkukuva, nimi ja painike **"Lisää"**. Napautus lisää yhden kappaleen session listaan kuten automaattinen lisäys, ja kumoa toimii samoin. Ehdotus päivittyy vasta, kun paras id vaihtuu ja uusi on pysynyt 1,5 sekuntia, joten mikään ei pompi sormen alla.
+4. **Kehyksen tila:** "Etsitään" (neutraali), "Pidä paikallaan" (keltainen reunus, kun sama id on 1–2 kertaa ikkunassa) ja "Lisätty" (vihreä välähdys, nykyinen). Tila kerrotaan ruudunlukijalle vain lisäyksen kohdalla (nykyinen `role="status"`), eikä jatkuvasti.
+5. **Muut värit:** aja `scripts/cards/measureScanner.mjs` uudella säännöllä ja raportoi väärät varmat osumat **värikohtaisesti** luovutukseen. Jos jollain värillä on väärä varma osuma uudella säännöllä, kiristä `minGap` tai `maxDistance` niin, että väärä varma osuma on 0, ja kerro tulos.
+6. **Testit:** puhtaat funktiot (3/4-ikkuna, terävyysraja, ehdotuksen 1,5 sekunnin pysyvyys ja tuplien esto). Olemassa olevat continuousScan-testit päivitetään, mutta niitä ei heikennetä.
+
+**Hyväksymiskriteerit:** `npm test` (ajetaan kerran), `npm run lint` ja `npm run build` menevät läpi. Mittausdatalla vähintään 17/22 lisätään automaattisesti ja "ei mikään" -tapaus hylätään.
