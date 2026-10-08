@@ -37,7 +37,7 @@ import {
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { StorageError } from '../storage';
-import type { DeckPickView, Repositories, StorageErrorKind } from '../storage';
+import type { DeckListView, DeckPickView, Repositories, StorageErrorKind } from '../storage';
 import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import { CardFilters } from './CardFilters';
 import { useCardHoverPreview } from './CardHoverPreview';
@@ -137,6 +137,7 @@ export function DeckEditor({
   const clickAdds = useMediaQuery(FINE_POINTER_QUERY, true);
   const preview = useCardHoverPreview();
   const [deckView, setDeckView] = useState<DeckView>('list');
+  const deckViewChosen = useRef(false);
   const [deckInView, setDeckInView] = useState(false);
   const sideRef = useRef<HTMLElement>(null);
   const deckHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -268,6 +269,19 @@ export function DeckEditor({
       if (!pickViewChosen.current) setPickView(saved);
     });
   }, [repositories]);
+
+  // The deck column view is remembered too (T-115); a choice made before loading wins.
+  useEffect(() => {
+    void repositories.preferences.loadDeckListView().then((saved) => {
+      if (!deckViewChosen.current) setDeckView(saved);
+    });
+  }, [repositories]);
+
+  const handleDeckView = (next: DeckListView) => {
+    deckViewChosen.current = true;
+    setDeckView(next);
+    repositories.preferences.saveDeckListView(next).catch(() => undefined);
+  };
 
   // The "same Legend" message goes away by itself after 4 s (T-045).
   useEffect(() => {
@@ -984,7 +998,7 @@ export function DeckEditor({
           <DeckList
             grouped={grouped}
             view={deckView}
-            onViewChange={setDeckView}
+            onViewChange={handleDeckView}
             mainCount={totals.main}
             legendsCount={legendsCount}
             ownedOf={(card) => (collectionReady ? countIn(collection, card.key) : null)}

@@ -56,6 +56,8 @@ export type Theme = 'dark' | 'light';
 export type CatalogViewMode = 'grid' | 'table';
 /** Deck editor search results as a text list or an image grid (T-045). */
 export type DeckPickView = 'list' | 'images';
+/** The deck column of the editor as a list, stacks or whole cards (T-115). */
+export type DeckListView = 'list' | 'stacks' | 'cards';
 /** Which Welcome to Night City edition the card boxes' + adds to (D-022). */
 export type DefaultEdition = 'beta' | 'retail';
 /** Card scanner mode (T-108): confirm every card, or add the recognised cards automatically. */
@@ -83,6 +85,9 @@ export interface PreferencesRepository {
   /** Saved deck editor result view, or 'list' when nothing valid is saved. Never rejects because of storage problems. */
   loadDeckPickView(): Promise<DeckPickView>;
   saveDeckPickView(view: DeckPickView): Promise<DeckPickView>;
+  /** Saved deck column view, or 'list' when nothing valid is saved. Never rejects because of storage problems. */
+  loadDeckListView(): Promise<DeckListView>;
+  saveDeckListView(view: DeckListView): Promise<DeckListView>;
   /** Saved default edition, or 'beta' when nothing valid is saved. Never rejects because of storage problems. */
   loadDefaultEdition(): Promise<DefaultEdition>;
   saveDefaultEdition(edition: DefaultEdition): Promise<DefaultEdition>;

@@ -43,6 +43,7 @@ import {
   VIEW_KEY,
   EDIT_MODE_KEY,
   DECK_PICK_VIEW_KEY,
+  DECK_LIST_VIEW_KEY,
   DEFAULT_EDITION_KEY,
   SCAN_MODE_KEY,
   COLLECTION_PREFS_KEY,
@@ -66,6 +67,7 @@ import type {
   Theme,
   CatalogViewMode,
   DeckPickView,
+  DeckListView,
   DefaultEdition,
   ScanMode,
   CollectionPrefs,
@@ -540,6 +542,23 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       if (view !== 'list' && view !== 'images') throw new StorageError('invalid-input', 'Unknown view');
       try {
         store.setItem(DECK_PICK_VIEW_KEY, view);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return view;
+    },
+    loadDeckListView: async () => {
+      try {
+        const saved = store.getItem(DECK_LIST_VIEW_KEY);
+        return saved === 'stacks' || saved === 'cards' ? saved : 'list';
+      } catch {
+        return 'list';
+      }
+    },
+    saveDeckListView: async (view: DeckListView) => {
+      if (view !== 'list' && view !== 'stacks' && view !== 'cards') throw new StorageError('invalid-input', 'Unknown view');
+      try {
+        store.setItem(DECK_LIST_VIEW_KEY, view);
       } catch (error) {
         throw toStorageError(error, 'write');
       }

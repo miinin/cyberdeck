@@ -51,6 +51,18 @@ const EDITION_OPTIONS: readonly (readonly [DefaultEdition, string])[] = [
   ['retail', texts.editionRetail],
 ];
 
+/** One switch style for the whole app (T-115): the "Muokkaa kokoelmaa" look. */
+function SwitchButton({ checked, label, onChange }: { checked: boolean; label: string; onChange: (next: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={checked} className="edit-switch" onClick={() => onChange(!checked)}>
+      <span className="edit-switch-track" aria-hidden="true">
+        <span className="edit-switch-thumb" />
+      </span>
+      {label}
+    </button>
+  );
+}
+
 /**
  * Above the list (T-040): the view selector and the "Muokkaa kokoelmaa" switch.
  * `editable` undefined leaves the switch out (the collection is not ready, so nothing can be edited).
@@ -103,11 +115,6 @@ export function ListToolbar({
       {imageSize !== undefined && (
         <ImageSizeSelect name="image-size" value={imageSize} onChange={(next) => onImageSizeChange?.(next)} />
       )}
-      {allArts !== undefined && (
-        <label className="option all-arts">
-          <input type="checkbox" checked={allArts} onChange={(event) => onAllArtsChange?.(event.target.checked)} /> {texts.artsAllLabel}
-        </label>
-      )}
       {editable === true && edition !== undefined && (
         <fieldset className="view-select edition-select">
           <legend>{texts.editionLegend}</legend>
@@ -131,19 +138,13 @@ export function ListToolbar({
           </p>
         </fieldset>
       )}
-      {editable !== undefined && (
-        <button
-          type="button"
-          role="switch"
-          aria-checked={editable}
-          className="edit-switch"
-          onClick={() => onEditChange(!editable)}
-        >
-          <span className="edit-switch-track" aria-hidden="true">
-            <span className="edit-switch-thumb" />
-          </span>
-          {texts.editSwitchLabel}
-        </button>
+      {(editable !== undefined || allArts !== undefined) && (
+        <div className="toolbar-switches">
+          {editable !== undefined && <SwitchButton checked={editable} label={texts.editSwitchLabel} onChange={onEditChange} />}
+          {allArts !== undefined && (
+            <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={(next) => onAllArtsChange?.(next)} />
+          )}
+        </div>
       )}
     </div>
   );

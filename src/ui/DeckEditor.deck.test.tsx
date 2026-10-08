@@ -94,6 +94,18 @@ describe('Deck column', () => {
     expect(within(region).getByRole('button', { name: 'Poista pakasta: Unit 0' })).toBeInTheDocument();
   });
 
+  it('has a "Kortit" view: whole cards with their copies and a stepper under each (T-115)', async () => {
+    const user = userEvent.setup();
+    openEditor([['u0', 3], ['u1', 1]]);
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await user.click(screen.getByRole('radio', { name: 'Kortit' }));
+    const region = deckRegion();
+    const card = within(region).getByRole('button', { name: 'Suurenna kuva: Unit 0, 3 pakassa' });
+    expect(card.closest('ul')).toHaveClass('stack-cards--cards');
+    await user.click(within(region).getByRole('button', { name: 'Poista pakasta: Unit 0' }));
+    expect(within(region).getByRole('button', { name: 'Suurenna kuva: Unit 0, 2 pakassa' })).toBeInTheDocument();
+  });
+
   it('shows colours, types, RAM limits and missing cards under "Tilastot"', async () => {
     openEditor([['l1', 1], ['u0', 3], ['u1', 1]], storedCollection([]));
     const stats = await screen.findByRole('region', { name: 'Tilastot' });

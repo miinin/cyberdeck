@@ -1,6 +1,7 @@
 /** Finnish texts of the card scanner (T-106). The English object has the same shape. */
 export const scannerTextsFi = {
   open: 'Skannaa kortteja',
+  openShort: 'Skannaa',
   title: 'Skannaa kortteja',
   close: 'Sulje',
   cancel: 'Peru',

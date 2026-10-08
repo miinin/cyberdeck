@@ -209,6 +209,7 @@ export const deckTextsFi = {
   deckViewLegend: 'Pakkanäkymä',
   deckViewList: 'Lista',
   deckViewStacks: 'Pinot',
+  deckViewCards: 'Kortit',
   /** Copies on a deck tile or a stack card, e.g. "×3". */
   copies: (count: number) => `×${count}`,
   stackCard: (name: string, count: number) => `Suurenna kuva: ${name}, ${count} pakassa`,

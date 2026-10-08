@@ -134,47 +134,53 @@ export function CardFilters({
     <form
       role="search"
       aria-label={texts.filterFormLabel}
-      className="card-filters panel"
+      className="card-filters"
       onSubmit={(event) => {
         event.preventDefault();
         onSearchSubmit();
       }}
     >
-      <div className="field">
-        <label htmlFor="card-search">{texts.searchLabel}</label>
-        <p id="card-search-hint" className="hint">
-          {texts.searchHint}
-        </p>
-        <input
-          ref={searchInputRef}
-          id="card-search"
-          type="search"
-          aria-describedby="card-search-hint"
-          autoComplete="off"
-          spellCheck={false}
-          autoCapitalize="none"
-          enterKeyHint="search"
-          maxLength={SEARCH_MAX_LENGTH}
-          value={criteria.query}
-          onChange={handleChange}
-          onCompositionEnd={handleCompositionEnd}
-          onKeyDown={handleKeyDown}
-        />
-      </div>
+      <div className="search-row">
+        <div className="field search-field">
+          <label htmlFor="card-search" className="visually-hidden">
+            {texts.searchLabel}
+          </label>
+          <p id="card-search-hint" className="visually-hidden">
+            {texts.searchHint}
+          </p>
+          <input
+            ref={searchInputRef}
+            id="card-search"
+            type="search"
+            // A visible hint only (T-115): the accessible name still comes from the hidden <label>.
+            placeholder={texts.searchPlaceholder}
+            aria-describedby="card-search-hint"
+            autoComplete="off"
+            spellCheck={false}
+            autoCapitalize="none"
+            enterKeyHint="search"
+            maxLength={SEARCH_MAX_LENGTH}
+            value={criteria.query}
+            onChange={handleChange}
+            onCompositionEnd={handleCompositionEnd}
+            onKeyDown={handleKeyDown}
+          />
+        </div>
 
-      {!alwaysOpen && (
-        <button
-          type="button"
-          ref={toggleRef}
-          className="button-secondary filter-toggle"
-          aria-expanded={open}
-          aria-controls="filter-panel"
-          onClick={() => setOpen(!open)}
-        >
-          {texts.filtersToggle(selected)}
-          <span className="filter-toggle-icon" aria-hidden="true" />
-        </button>
-      )}
+        {!alwaysOpen && (
+          <button
+            type="button"
+            ref={toggleRef}
+            className="button-secondary filter-toggle"
+            aria-expanded={open}
+            aria-controls="filter-panel"
+            onClick={() => setOpen(!open)}
+          >
+            {texts.filtersToggle(selected)}
+            <span className="filter-toggle-icon" aria-hidden="true" />
+          </button>
+        )}
+      </div>
 
       <div id="filter-panel" className="filter-panel" hidden={!alwaysOpen && !open}>
         {collectionFilter !== undefined && (

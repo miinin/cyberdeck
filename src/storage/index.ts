@@ -20,6 +20,7 @@ export type {
   Theme,
   CatalogViewMode,
   DeckPickView,
+  DeckListView,
   DefaultEdition,
   ScanMode,
   CollectionPrefs,

@@ -140,6 +140,7 @@ export const textsEn: typeof textsFi = {
 
   filterFormLabel: 'Search and filter cards',
   searchLabel: 'Search by name',
+  searchPlaceholder: 'Search by name…',
   searchHint: 'Card name or subname. Part of a word is enough.',
   filterHint: 'Choose one or more. With no choice, all cards are shown.',
   typeLegend: 'Type',

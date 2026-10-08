@@ -136,14 +136,16 @@ export function DeckVisibility({
             ref={switchRef}
             type="button"
             role="switch"
-            className="visibility-switch"
+            className="edit-switch visibility-switch"
             aria-checked={formOpen}
             aria-labelledby={`${id}-public`}
             aria-describedby={signedIn ? `${id}-hint` : `${id}-signin`}
             disabled={busy || !signedIn}
             onClick={toggle}
           >
-            <span className="visibility-switch-knob" aria-hidden="true" />
+            <span className="edit-switch-track" aria-hidden="true">
+              <span className="edit-switch-thumb" />
+            </span>
           </button>
           <span id={`${id}-public`} className="visibility-switch-label visibility-switch-public">
             {deckTexts.visPublic}
