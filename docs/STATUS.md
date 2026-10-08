@@ -1,7 +1,7 @@
 # STATUS · päivitetty 2026-10-09 (PM, T-107–T-116)
 
 ## Yhdellä lauseella
-Kaikki T-093:een asti on tuotannossa (https://cyberdeck-tcg.web.app, versio 0.2.0): kokoelma, want-lista ja jakolinkit, korttien versiot kuvituksina, pakkaeditori ja tilastot, englanninkielinen käyttöliittymä sekä mobiilinäkymä.
+Kaikki T-116:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
 Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna: Testikäyttäjän ja UX:n katselmointi mobiilista sekä MVP-1:n loppukatselmoinnit (D-014).
