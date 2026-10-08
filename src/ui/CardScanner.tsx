@@ -357,7 +357,8 @@ export function CardScannerDialog({
       const sureId = best !== undefined && isConfident(ranked) && targets.has(best.id) ? best.id : null;
       const step = stepContinuous(state, sureId, Date.now());
       state = step.state;
-      if (step.add !== null) handlers.current.autoAdd(step.add);
+      // The diagnostics measure only: nothing is added to the collection while ?scandebug=1 is on (T-113a).
+      if (step.add !== null && !scanDebugRequested()) handlers.current.autoAdd(step.add);
     }, SCAN_INTERVAL_MS);
     return () => window.clearInterval(timer);
   }, [stage, mode, index, targets]);

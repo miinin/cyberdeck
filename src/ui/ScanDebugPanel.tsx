@@ -55,21 +55,27 @@ export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null
   const [samples, setSamplesState] = useState<Sample[]>(savedSamples);
   const [fallback, setFallback] = useState<string | null>(null);
 
+  // The live line stops while a sample is being labelled, so nothing moves under the user's finger.
+  const picking = frozen !== null;
   useEffect(() => {
+    if (picking) return;
     const timer = window.setInterval(() => setReading(measureRef.current()), TICK_MS);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [picking]);
 
   const setSamples = (next: Sample[]) => {
     savedSamples = next;
     setSamplesState(next);
   };
 
-  const copy = (list: Sample[]) => {
+  // The automatic copy after a sample is silent; the text box for copying by hand only opens from "Copy results".
+  const copy = (list: Sample[], showFallback: boolean) => {
     const json = JSON.stringify(list);
     writeClipboard(json).then(
       () => setFallback(null),
-      () => setFallback(json),
+      () => {
+        if (showFallback) setFallback(json);
+      },
     );
   };
 
@@ -87,7 +93,7 @@ export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null
     ];
     setSamples(next);
     setFrozen(null);
-    copy(next);
+    copy(next, false);
   };
 
   return (
@@ -97,13 +103,15 @@ export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null
           ? 'Waiting for a picture...'
           : `${reading.top3.map((m, i) => `${i + 1}. ${m.name} ${m.distance}`).join(' | ')} | gap ${reading.gap ?? '-'} | confident ${reading.confident ? 'yes' : 'no'} | sharp ${round(reading.sharpness)} | ${reading.resolution} | focus ${reading.focus}`}
       </p>
+      <p className="scanner-debug-count">
+        {`${samples.length} samples · copied to the clipboard after every sample`}
+      </p>
       {frozen === null ? (
         <button type="button" className="button-secondary" disabled={reading === null} onClick={() => setFrozen(reading)}>
           Save sample
         </button>
       ) : (
         <div className="scanner-debug-pick">
-          <p>Which card is it?</p>
           {frozen.top3.map((m, i) => (
             <button key={m.id} type="button" className="button-secondary" onClick={() => save((i + 1) as 1 | 2 | 3)}>
               {`${i + 1}. ${m.name} (${m.distance})`}
@@ -117,10 +125,9 @@ export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null
           </button>
         </div>
       )}
-      <p>{`${samples.length} samples (all results are copied to the clipboard after every sample)`}</p>
       {samples.length > 0 && (
-        <div className="scanner-debug-pick">
-          <button type="button" className="button-secondary" onClick={() => copy(samples)}>
+        <div className="scanner-debug-tools">
+          <button type="button" className="link-button" onClick={() => copy(samples, true)}>
             Copy results
           </button>
           <button type="button" className="link-button" onClick={() => setSamples(samples.slice(0, -1))}>

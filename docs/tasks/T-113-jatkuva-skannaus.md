@@ -75,3 +75,11 @@ Digiturva tarkistaa kamerapyynnön muutoksen ja sen, ettei diagnostiikka tallenn
 - Testit: npm test 1519 läpi (ajettu kerran), lint ja build läpi.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (mittaus ajaa kehyksen kopioinnin erikseen jatkuvan tilan ajastimen rinnalla; kehittäjätilassa hyväksyttävä).
 - Esikatselu mittaukseen: `<preview>/?scandebug=1#/kokoelma`. Digiturvan tarkistus: kamerapyyntö ja diagnostiikan tallentamattomuus (SEC-106).
+
+**PM-korjaus 2026-10-08 (käyttäjän palaute: kaksi mittauskierrosta hukkaan):**
+- **Näytteet säilyvät:** ne pysyvät moduulin muistissa skannerin sulkemisen ja vaiheen vaihdon yli, ja jokainen tallennus kopioi kaikki tulokset leikepöydälle. Viimeisen näytteen voi kumota.
+- **Elävä rivi:** se pysähtyy valinnan ajaksi, ja sillä on kiinteä kahden rivin korkeus, joten painikkeet eivät pompi. Valintapainikkeet ovat 2 × 2 -ruudukossa.
+- **Kamera pysyy isona:** diagnostiikkatilassa vihjeet ja lisättyjen korttien lista piilotetaan.
+- **Ei lisäyksiä kokoelmaan:** jatkuva tila ei lisää mitään kokoelmaan, kun diagnostiikkatila on päällä.
+
+**Huomio T-113b:hen:** käyttäjällä on käsillä vain sinisiä kortteja, joten mittausdata on yksiväristä. Kynnykset ja usean kuvan sääntö viritetään oikealla datalla, mutta muiden värien korttien tulos pitää todentaa erikseen. Siihen käytetään `scripts/cards/measureScanner.mjs`-ajoa kaikilla väreillä (värikohtainen tulos raporttiin), ja oikeat kuvat muista väreistä tarkistetaan myöhemmin. Väärien osumien raja pidetään tiukkana: osuman ero toiseksi parhaaseen ei saa laskea alle sen, minkä synteettinen mittaus kestää kaikilla väreillä.
