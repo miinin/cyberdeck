@@ -1,6 +1,6 @@
 # T-107 · Mobiilinavigointi alapalkiksi
 
-**Tila:** Review. **Haara:** `t-107-mobiilinav` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "kaksikerroksinen navigointipalkki"), PM (ratkaisu).
+**Tila:** Done. **Haara:** `t-107-mobiilinav` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "kaksikerroksinen navigointipalkki"), PM (ratkaisu).
 
 ## Ongelma
 Puhelimessa yläpalkissa on logo- ja ikonirivi, jonka alla viisi navigointilinkkiä rivittyy kahdelle riville. Tuloksena on kolmikerroksinen ja sekava yläpalkki.

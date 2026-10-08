@@ -30,3 +30,6 @@ export const FINE_POINTER_QUERY = '(pointer: fine)';
 
 /** A pointer that can hover: the hover preview is shown only there (T-050b). */
 export const HOVER_QUERY = '(hover: hover) and (pointer: fine)';
+
+/** Below the L breakpoint the deck editor shows one part at a time: the deck or the card picker (T-110). */
+export const EDITOR_TABS_QUERY = '(max-width: 63.999rem)';

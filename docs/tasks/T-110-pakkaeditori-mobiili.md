@@ -1,6 +1,6 @@
 # T-110 · Pakkaeditori mobiilissa: Pakka | Lisää kortteja
 
-**Tila:** Ready. **Haara:** `t-110-pakka-mobiili` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "avaa pakka → miljoona riviä lisättäviä kortteja, pakka vasta rullauksen jälkeen"), PM (ratkaisu).
+**Tila:** Done. **Haara:** `t-110-pakka-mobiili` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08: "avaa pakka → miljoona riviä lisättäviä kortteja, pakka vasta rullauksen jälkeen"), PM (ratkaisu).
 
 ## Ongelma
 Alle 64rem leveydellä editorin osiot ovat allekkain järjestyksessä suodattimet, hakutulokset ja pakka. Avattu pakka näyttää siis ensin koko korttikatalogin.
@@ -24,3 +24,9 @@ Alle 64rem leveydellä editorin osiot ovat allekkain järjestyksessä suodattime
 - `npm test`, `npm run lint` ja `npm run build` menevät läpi.
 
 ## Luovutus
+
+**Koodari, 2026-10-08.** Toteutettu `DeckEditor.tsx`:ssä: alle 64rem (`EDITOR_TABS_QUERY` `useMediaQuery.ts`:ssä, fallback false) `aria-pressed`-painikepari "Pakka (n/40)" | "Lisää kortteja" otsikkorivin alla; piilotettu osio `hidden`-attribuutilla (kaikki pysyy mountattuna, joten suodattimet ja haku säilyvät; CSS `[hidden]{display:none}`, koska `.editor-side` on flex). Oletus valitaan kerran latauksen jälkeen (pakka, tyhjälle pakalle Lisää). Vaihto vierittää tab-palkin kohdalle; välilehtipainikkeella fokus pysyy painikkeessa, muista laukaisijoista (iso "+ Lisää kortteja", `.deck-bar`:in "Näytä pakka", "Takaisin hakuun", "Siirry pakkaan") fokus siirtyy pakan otsikkoon tai hakukenttään. `.deck-bar` näkyy vain Lisää-välilehdellä. Tekstit fi/en `deckTexts`-tiedostoissa. Testit: `DeckEditor.tabs.test.tsx` (6 kpl: oletus tyhjä/ei-tyhjä, vaihto molempiin suuntiin ja tilan säilyminen, fokus, leveä näkymä).
+`.deck-bar`-offset: `bottom: var(--bottom-nav-height, 0px)` -fallbackilla (T-107:n muuttuja, ei vielä testissä). TASKS.md/kortti-tiedostot tulevat T-107-PR:stä, joten TASKS.md voi konfliktoida mergessä (rivit vierekkäin).
+Testit: `npm test` 1515/1515, lint ja build läpi. Selaimessa 320 px ei tarkistettu.
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
+Seuraavaksi: PM esikatselu.
