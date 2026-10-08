@@ -8557,3 +8557,20 @@ section[aria-labelledby='have-heading'] {
   min-inline-size: 0;
   overflow-wrap: anywhere;
 }
+
+/* Cost chart (T-115): the average label has its own band above the bars, and the bar counts sit on top of the dashed
+   average line, so the line never runs through a number. */
+.cost-chart-plot {
+  padding-block-start: 1.25rem;
+}
+
+.cost-avg {
+  z-index: 0;
+}
+
+.cost-col-count {
+  position: relative;
+  z-index: 1;
+  padding-inline: 2px;
+  background: var(--color-bg);
+}

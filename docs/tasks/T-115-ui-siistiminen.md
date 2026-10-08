@@ -1,6 +1,6 @@
 # T-115 · UI-siistiminen: Kortit-sivun työkalurivi, pakkaeditorin otsikko ja kytkin, korttinäkymä pakkaan, sideboardin vaakavieritys
 
-**Tila:** Review. **Haara:** `t-115-ui-siistiminen` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08, tuotannon kuvakaappaukset), PM (ratkaisut).
+**Tila:** Done. **Haara:** `t-115-ui-siistiminen` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08, tuotannon kuvakaappaukset), PM (ratkaisut).
 
 ## 1. Kortit-sivun työkalurivi (CatalogView, ListToolbar, CardFilters)
 **Ongelma:** ohjaimet ovat eri korkeuksilla ja eri tasoissa pystysuunnassa. Kuvat ja Lista näyttävät valintaruuduilta, "Kaikki versiot" kelluu irrallaan, skannauspainike on iso ja reunassa, ja hakuruudussa on raskas otsikko- ja ohjelaatikko.
