@@ -49,3 +49,22 @@ Digiturva tarkistaa kamerapyynnön muutoksen ja sen, ettei diagnostiikka tallenn
 - Jatkuvassa tilassa vähintään 9 korttia 10:stä lisätään 2 sekunnin sisällä tavallisessa sisävalossa.
 - Vääriä lisäyksiä on 0 kahdestakymmenestä.
 - Käyttäjä näkee koko ajan, mitä skanneri tekee.
+
+---
+
+## T-113a · Määrittely (Ready, 2026-10-08)
+**Haara:** `t-113-skanneri-mittaus`. Tavoite on, että käyttäjä voi tänään mitata skannerin oikeilla korteilla puhelimellaan.
+
+1. **Kamerapyyntö:** kamera pyydetään asetuksilla `{ facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }`. Kun stream on auki, kutsutaan `track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] })`, jos `getCapabilities().focusMode` sisältää arvon `continuous`. Kutsu tehdään try/catchissa, eikä virhe kaada skanneria. Tavallisen käyttäjän skannaus pysyy muuten ennallaan.
+2. **Terävyys:** uusi puhdas funktio `frameSharpness(image: PixelImage): number` tiedostoon `src/domain/cardFingerprint.ts` tai uuteen domain-tiedostoon. Se laskee Laplacen varianssin harmaasävystä. Funktiolle tehdään yksikkötesti (terävä kuva > sumea kuva).
+3. **Diagnostiikkatila:** tila on päällä vain, kun URL:ssa on `?scandebug=1` (`location.search`, ei hash). Silloin skannerin kameranäkymässä, kehyksen alla, näkyy tiivis paneeli:
+   - **Elävä rivi**, joka päivittyy noin 3 kertaa sekunnissa molemmissa tiloissa: 3 parasta osumaa (nimi ja etäisyys), ero 1. ja 2. välillä, `isConfident` kyllä/ei, terävyys sekä videon resoluutio (`videoWidth × videoHeight`) ja tarkennustila.
+   - **"Tallenna näyte"** -painike jäädyttää nykyisen kuvan luvut ja näyttää 3 parasta osumaa painikkeina sekä painikkeen "Ei mikään näistä". Käyttäjä napauttaa oikeaa korttia, ja näyte tallentuu muistiin (komponentin tila, ei tallennusta eikä lähetystä) muodossa `{ oikea: 1|2|3|0, top3: [{nimi, id, etäisyys}], ero, terävyys, resoluutio }`.
+   - **Laskuri** "N näytettä" ja painike **"Kopioi tulokset"**: `navigator.clipboard.writeText(JSON)`. Jos kopiointi ei onnistu, JSON näytetään `<textarea readonly>`-kentässä, josta sen voi kopioida käsin. Kenttä saa kasvaa korkeutta, eikä siinä ole sisäistä vieritystä.
+   - Tekstit vain englanniksi kovakoodattuna. Kyseessä on kehittäjätila, eikä sitä käännetä.
+4. **Tietoturva:** kuvia ei tallenneta, mitään ei lähetetä, eikä uusia riippuvuuksia lisätä. Kamera sammuu kuten ennenkin (SEC-106).
+5. **Testit:** terävyysfunktio, sekä se, että diagnostiikkapaneelia ei näy ilman parametria ja että se näkyy parametrin kanssa (kameraa mockaten kuten nykyisissä CardScanner-testeissä).
+
+**Hyväksymiskriteerit:** `npm test` (ajetaan kerran), `npm run lint` ja `npm run build` menevät läpi, ja PR:n esikatselu toimii puhelimella osoitteessa `<preview>/?scandebug=1#/kokoelma`.
+
+## T-113a · Luovutus

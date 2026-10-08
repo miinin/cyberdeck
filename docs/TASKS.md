@@ -115,4 +115,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-110 | Pakkaeditori mobiilissa: välilehdet Pakka / Lisää kortteja, pakka näkyy ensin | 1 | Should | Koodari | Done | PM esikatselu |
 | T-111 | Mobiilikorjaukset 2: navigointi ylös yhdelle riville, yksi "Lisää kortteja", näkyvyyskytkin Yksityinen ⇄ Julkinen | 1 | Should | Koodari | Done | PM esikatselu |
 | T-112 | Sivustorakenteen UX-arvio: käyttäjäpolut, hypoteesit ja rakennevaihtoehdot A (4 kohdetta) / B (3 kohdetta) | 1 | Should | PM → UX (Opus) | Backlog | – |
-| T-113 | Jatkuva skannaus toimimaan: mittaus, usean kuvan varmuus, elävä palaute ja "Lisää"-ehdotus, parempi kamerakuva | 1 | Should | Koodari | Backlog | Digiturva (kamera) |
+| T-113 | Jatkuva skannaus toimimaan: mittaus, usean kuvan varmuus, elävä palaute ja "Lisää"-ehdotus, parempi kamerakuva | 1 | Should | Koodari | In Progress | Digiturva (kamera) |
