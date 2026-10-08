@@ -68,3 +68,10 @@ Digiturva tarkistaa kamerapyynnön muutoksen ja sen, ettei diagnostiikka tallenn
 **Hyväksymiskriteerit:** `npm test` (ajetaan kerran), `npm run lint` ja `npm run build` menevät läpi, ja PR:n esikatselu toimii puhelimella osoitteessa `<preview>/?scandebug=1#/kokoelma`.
 
 ## T-113a · Luovutus
+
+- Kamerapyyntö: `width/height ideal 1920×1080`; `focusMode: continuous` asetetaan try/catchissa vain, jos laite ilmoittaa tuen (`requestContinuousFocus`, `CardScanner.tsx`).
+- `frameSharpness` (Laplacen varianssi) tiedostossa `src/domain/cardFingerprint.ts`, yksikkötesti mukana.
+- Diagnostiikka: `src/ui/ScanDebugPanel.tsx`, näkyy vain osoitteella `?scandebug=1` (query, ei hash) kameranäkymässä molemmissa tiloissa. Elävä rivi 330 ms välein, "Save sample" / "Copy results" (leikepöytä, varana readonly-textarea ilman sisäistä vieritystä). Näytteet vain komponentin tilassa; ei tallennusta eikä lähetystä; ei uusia riippuvuuksia. Kamera sammuu kuten ennen.
+- Testit: npm test 1519 läpi (ajettu kerran), lint ja build läpi.
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (mittaus ajaa kehyksen kopioinnin erikseen jatkuvan tilan ajastimen rinnalla; kehittäjätilassa hyväksyttävä).
+- Esikatselu mittaukseen: `<preview>/?scandebug=1#/kokoelma`. Digiturvan tarkistus: kamerapyyntö ja diagnostiikan tallentamattomuus (SEC-106).

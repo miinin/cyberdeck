@@ -8325,3 +8325,29 @@ section[aria-labelledby='have-heading'] {
     display: none !important;
   }
 }
+
+/* Scan diagnostics (T-113a): developer panel, only with ?scandebug=1. No inner scroll: the textarea grows. */
+.scanner-debug {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+.scanner-debug-line {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+}
+.scanner-debug-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.scanner-debug-json {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  resize: none;
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+}

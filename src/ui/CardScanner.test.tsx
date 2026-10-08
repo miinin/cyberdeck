@@ -120,7 +120,7 @@ describe('CardScanner', () => {
     expect(getUserMedia).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: 'Skannaa Retail' }));
     await settle();
-    expect(getUserMedia).toHaveBeenCalledWith({ video: { facingMode: 'environment' }, audio: false });
+    expect(getUserMedia).toHaveBeenCalledWith({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
     expect(onEdition).toHaveBeenCalledWith('retail');
     expect(screen.getByRole('button', { name: 'Skannaa' })).toBeEnabled();
   });
@@ -309,5 +309,32 @@ describe('Continuous mode (T-108)', () => {
     const repositories = createMemoryRepositories();
     await startContinuous(repositories);
     expect(await repositories.preferences.loadScanMode()).toBe('continuous');
+  });
+});
+
+describe('Scan diagnostics (T-113a)', () => {
+  afterEach(() => window.history.replaceState(null, '', '/'));
+
+  it('shows no panel without ?scandebug=1', async () => {
+    await openScanner(createMemoryRepositories());
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Skannaa Beta' }));
+    await settle();
+    expect(screen.queryByRole('region', { name: 'Scan diagnostics' })).toBeNull();
+    expect(getUserMedia).toHaveBeenCalledWith({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+  });
+
+  it('shows the panel with ?scandebug=1 and saves a sample', async () => {
+    window.history.replaceState(null, '', '/?scandebug=1');
+    const user = await openScanner(createMemoryRepositories());
+    await user.click(screen.getByRole('button', { name: 'Skannaa Beta' }));
+    await settle();
+    expect(screen.getByRole('region', { name: 'Scan diagnostics' })).toBeTruthy();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    expect(screen.getByRole('status', { name: '' }).textContent).toMatch(/1\. Alpha 0 .*confident yes .*640x480/);
+    await user.click(screen.getByRole('button', { name: 'Save sample' }));
+    await user.click(screen.getByRole('button', { name: /^1\. Alpha/ }));
+    expect(screen.getByText('1 samples')).toBeTruthy();
   });
 });
