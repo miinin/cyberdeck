@@ -586,3 +586,13 @@ Päätöksessä on viisi osaa.
 **Seuraukset:** T-112:n UX-arvio tarkentaa yksityiskohdat ja pilkkoo toteutuksen. Kokoelman muokkauksen siirto koskee useita testejä.
 
 **D-028:n muutos 2026-10-09 (käyttäjä):** Proxy pysyy toistaiseksi päänavigoinnissa omana osionaan. Proxy-tarjoukset lisätään lisäksi mietittyihin paikkoihin: pakka, kortin tiedot, jaettu ja julkinen pakka, puuttuvat ja Have/Want (T-116). Päänavigoinnissa on siis viisi kohdetta, kunnes asiasta päätetään toisin.
+
+## D-029 · Suoraan tuotantoon, kunnes käyttäjiä kutsutaan · 2026-10-09 · Päättäjä: käyttäjä
+**Tila:** Hyväksytty. Korvaa toistaiseksi D-001:n ja D-003:n PR-esikatseluputken.
+**Konteksti:** Sivustolla on vain yksi käyttäjä. PR-esikatselun build (noin 6 min) ja sen odottaminen hidastavat jokaista muutosta.
+**Päätös:**
+1. Muutokset tehdään suoraan `test`-haaraan, ilman t-XXX-haaraa ja ilman PR:ää testiin. Testit, lint ja build ajetaan paikallisesti ennen pushia.
+2. Julkaisu tehdään heti julkaisu-PR:llä `test → main` ilman erillistä käskyä. Suojaushook kysyy luvan edelleen.
+3. Poikkeus: jos muutos on riskialtis (tietomalli, Firestore-säännöt, tallennus tai synkronointi, tunnistautuminen, firebase.json, workflowt tai riippuvuudet), se testataan ensin devissä. PM kertoo käyttäjälle, miksi.
+4. PR-esikatseluputkeen palataan, kun käyttäjä kutsuu lisää käyttäjiä.
+**Seuraukset:** Virhe päätyy tuotantoon nopeammin. Riskin pienentävät paikalliset testit, poikkeuslista ja se, että vain yksi käyttäjä on altistunut.
