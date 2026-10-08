@@ -152,11 +152,11 @@ export function Sideboard({
       </div>
       {rows.length === 0 ? (
         <p className="hint">{deckTexts.sideboardEmpty(SIDEBOARD_SIZE)}</p>
-      ) : view === 'stacks' ? (
+      ) : view !== 'list' ? (
         // At most 7 cards, each with its own buttons: side by side, not overlapping (T-101), or the buttons hide under the next card.
         <div className="deck-stacks deck-stacks--spread">
           <div className="deck-group">
-            <ul className="stack-cards stack-cards--spread">{rows.map(renderStackCard)}</ul>
+            <ul className={`stack-cards stack-cards--spread${view === 'cards' ? ' stack-cards--cards' : ''}`}>{rows.map(renderStackCard)}</ul>
           </div>
         </div>
       ) : (

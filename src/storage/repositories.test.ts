@@ -742,3 +742,18 @@ describe('preferences: collection page (T-109)', () => {
     expect(await junk.preferences.loadCollectionPrefs()).toEqual({ view: 'overview', art: 'base', showMissing: true });
   });
 });
+
+describe('preferences: deck column view (T-115)', () => {
+  it('defaults to the list, remembers stacks and cards and ignores unknown values', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadDeckListView()).toBe('list');
+    await preferences.saveDeckListView('cards');
+    const again = createRepositories({ store, persistent: true }).preferences;
+    expect(await again.loadDeckListView()).toBe('cards');
+    await again.saveDeckListView('stacks');
+    expect(await preferences.loadDeckListView()).toBe('stacks');
+    await expectStorageError(preferences.saveDeckListView('grid' as 'list'), 'invalid-input');
+    const odd = setup({ 'cyberdeck:deck-list-view': 'grid' });
+    expect(await odd.preferences.loadDeckListView()).toBe('list');
+  });
+});

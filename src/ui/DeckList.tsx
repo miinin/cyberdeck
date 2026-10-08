@@ -15,7 +15,7 @@ import { pickGestures } from './pickGestures';
 import { Stepper } from './Stepper';
 import { colorNames, texts } from './texts';
 
-export type DeckView = 'list' | 'stacks';
+export type DeckView = 'list' | 'stacks' | 'cards';
 
 /** The card image, or the dashed placeholder when there is none or it fails to load. */
 export function DeckCardImage({ card, className }: { card: Card; className: string }) {
@@ -149,6 +149,8 @@ export function DeckList({
 
   /** `controls`: the stepper under the card, for the few cards shown side by side (Legends). */
   const renderStackCard = (row: DeckRow, controls = false) => {
+    // In the cards view every card shows whole with its stepper under it (T-115).
+    controls = controls || view === 'cards';
     const { card, count } = row;
     const { onContextMenu, onKeyDown } = pickGestures(count, (next) => onChange(card, next), false);
     return (
@@ -206,11 +208,11 @@ export function DeckList({
           </h2>
           <SectionFlag problem={problems?.legends ?? null} />
         </div>
-        {view === 'stacks' ? (
+        {view !== 'list' ? (
           // At most three cards, each with its own buttons: side by side like the sideboard.
           <div className="deck-stacks deck-stacks--spread">
             <div className="deck-group">
-              <ul className="stack-cards stack-cards--spread">
+              <ul className={`stack-cards stack-cards--spread${view === 'cards' ? ' stack-cards--cards' : ''}`}>
                 {grouped.legends.map((row) => renderStackCard(row, true))}
                 {Array.from({ length: emptySlots }, (_, i) => (
                   <li key={`empty-${i}`} className="stack-card is-empty">
@@ -247,6 +249,7 @@ export function DeckList({
                 [
                   ['list', deckTexts.deckViewList],
                   ['stacks', deckTexts.deckViewStacks],
+                  ['cards', deckTexts.deckViewCards],
                 ] as const
               ).map(([value, label]) => (
                 <label key={value} className="option">
@@ -264,7 +267,18 @@ export function DeckList({
           </fieldset>
         </div>
         {grouped.groups.length === 0 && grouped.unknown.length === 0 && <p className="hint">{deckTexts.deckEmpty}</p>}
-        {view === 'stacks' ? (
+        {view === 'cards' ? (
+          <div className="deck-groups">
+            {grouped.groups.map((group) => (
+              <div key={group.type} className="deck-group">
+                <h3 className="deck-group-title" lang="en">
+                  {group.type} ({group.rows.reduce((sum, row) => sum + row.count, 0)})
+                </h3>
+                <ul className="stack-cards stack-cards--spread stack-cards--cards">{group.rows.map((row) => renderStackCard(row))}</ul>
+              </div>
+            ))}
+          </div>
+        ) : view === 'stacks' ? (
           // T-103: stacks by colour and type, the colour on the heading's edge.
           <div className="deck-stacks">
             {grouped.colorGroups.map((group) => (

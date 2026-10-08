@@ -3,6 +3,7 @@ import type { scannerTextsFi } from './scannerTexts.fi';
 /** English texts of the card scanner (T-106); the same shape as the Finnish ones. */
 export const scannerTextsEn: typeof scannerTextsFi = {
   open: 'Scan cards',
+  openShort: 'Scan',
   title: 'Scan cards',
   close: 'Close',
   cancel: 'Cancel',

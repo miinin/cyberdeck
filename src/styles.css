@@ -2096,16 +2096,15 @@ h3,
 
 .editor-titlebar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-4);
 }
 
 .editor-titlebar .editor-name-field {
-  flex: 1 1 18rem;
+  flex: 1 1 0;
   min-width: 0;
-  max-width: 48rem;
   margin: 0;
   gap: var(--space-1);
 }
@@ -2131,7 +2130,8 @@ h3,
 
 .editor-tools {
   display: flex;
-  flex-wrap: wrap;
+  flex: none;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--space-2) var(--space-3);
 }
@@ -6707,8 +6707,7 @@ section[aria-labelledby='have-heading'] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-4);
+  gap: 0 var(--space-3);
 }
 
 .visibility-switch-wrap {
@@ -6728,72 +6727,14 @@ section[aria-labelledby='have-heading'] {
   color: var(--color-text);
 }
 
+/* The visibility switch is an .edit-switch (one switch style, T-115): only its disabled look is added here. */
 .visibility-switch {
-  position: relative;
-  flex: none;
-  inline-size: 3.5rem;
-  min-block-size: var(--target-min);
   padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.visibility-switch::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  inset-block: 50%;
-  block-size: 1.75rem;
-  transform: translateY(-50%);
-  border: 2px solid var(--color-border-strong);
-  border-radius: 999px;
-  background: var(--color-surface-raised);
-}
-
-.visibility-switch[aria-checked='true']::before {
-  border-color: var(--color-success);
-  background: var(--color-success);
-}
-
-.visibility-switch-knob {
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 0.25rem;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: var(--color-text);
-  transition: inset-inline-start 0.15s;
-}
-
-.visibility-switch[aria-checked='true'] .visibility-switch-knob {
-  inset-inline-start: calc(100% - 1.5rem);
-  background: #000;
-}
-
-.visibility-switch:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
 }
 
 .visibility-switch:disabled {
   cursor: not-allowed;
   opacity: 0.55;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .visibility-switch-knob {
-    transition: none;
-  }
-}
-
-@media (forced-colors: active) {
-  .visibility-switch[aria-checked='true']::before {
-    background: Highlight;
-    border-color: Highlight;
-  }
 }
 
 .deck-visibility-body {
@@ -8410,4 +8351,226 @@ section[aria-labelledby='have-heading'] {
 .scanner-suggest .scanner-session-name {
   flex: 1;
   min-inline-size: 0;
+}
+
+/* Deck "Cards" view (T-115): whole cards, two side by side on a phone, more on wider screens. */
+.stack-cards--cards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 40rem) {
+  .stack-cards--cards {
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  }
+}
+.stack-cards--cards .stack-card-name {
+  display: none;
+}
+.stack-cards--cards .stack-card-button {
+  transform: none;
+}
+
+/* Spread stacks (sideboard, legends) never widen the page (T-115): columns may shrink, the buttons wrap. */
+.stack-cards--spread:not(.stack-cards--cards) {
+  grid-template-columns: repeat(auto-fill, minmax(min(7rem, 100%), 1fr));
+}
+.stack-cards--spread .stack-card {
+  min-inline-size: 0;
+}
+.stack-card-actions {
+  flex-wrap: wrap;
+  min-inline-size: 0;
+}
+
+/* Card page controls (T-115): one search row, segmented choices like the editor tabs, switches, one rhythm. */
+.search-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.search-row .search-field {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.search-row .field input[type='search'] {
+  margin-block-start: 0;
+}
+.search-row .filter-toggle {
+  flex: none;
+  align-self: stretch;
+  margin-block-start: 0;
+}
+
+.view-select legend {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.view-select {
+  position: relative;
+}
+.view-select .options {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  border: 2px solid var(--color-border-strong);
+}
+.view-select .option {
+  position: relative;
+  justify-content: center;
+  min-block-size: calc(var(--target-min) - 4px);
+  padding: 0 var(--space-3);
+  border: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+.view-select .option + .option {
+  border-inline-start: 2px solid var(--color-border-strong);
+}
+.view-select .option:hover {
+  background: var(--color-surface-hover);
+  text-decoration: none;
+}
+.view-select .option:has(input:checked) {
+  background: var(--color-brand-yellow);
+  color: #000;
+}
+.view-select .option input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.view-select .option:has(input:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: -4px;
+}
+@media (forced-colors: active) {
+  .view-select .option:has(input:checked) {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+
+.list-toolbar {
+  gap: var(--space-2) var(--space-3);
+  margin-block-end: var(--space-2);
+}
+.toolbar-switches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-4);
+}
+@media (min-width: 40rem) {
+  .toolbar-switches {
+    margin-inline-start: auto;
+  }
+}
+.sort-row {
+  gap: var(--space-2) var(--space-3);
+}
+.sort-row .scan-open {
+  align-self: center;
+  margin-inline-start: auto;
+}
+.toolbar-switches {
+  gap: 0 var(--space-3);
+}
+.toolbar-switches .edit-switch {
+  padding-inline: 0;
+}
+/* On a phone the order selects and the scan button share one row: the label is spoken, not shown. */
+@media (max-width: 39.99rem) {
+  .sort-row .sort-select {
+    flex-wrap: nowrap;
+  }
+  .sort-row .sort-select label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .sort-row .sort-select select {
+    min-inline-size: 0;
+    padding-inline: var(--space-1);
+  }
+}
+
+/* On a very narrow phone the save state is only the check mark (the text stays for screen readers), so the name keeps room. */
+@media (max-width: 25.99rem) {
+  .save-badge.is-saved [role='status'] {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* A card's own buttons never stick out of its column, even with large text (T-115). */
+.stack-card-actions > * {
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+.stack-card-actions .tile-action {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.deck-stacks,
+.deck-groups,
+.deck-group {
+  min-inline-size: 0;
+}
+
+/* Statistics overview on a narrow phone (T-115): the small rings wrap under the big one instead of overlapping, and the
+   key numbers drop to two columns when three do not fit. */
+.gauge-minis {
+  flex: 1 1 13rem;
+  min-inline-size: 0;
+}
+.gauge-minis li {
+  min-inline-size: 0;
+}
+.gauge-minis .gauge-label {
+  overflow-wrap: anywhere;
+}
+.kpi-tiles {
+  grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
+}
+.kpi-tiles > div {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Cost chart (T-115): the average label has its own band above the bars, and the bar counts sit on top of the dashed
+   average line, so the line never runs through a number. */
+.cost-chart-plot {
+  padding-block-start: 1.25rem;
+}
+
+.cost-avg {
+  z-index: 0;
+}
+
+.cost-col-count {
+  position: relative;
+  z-index: 1;
+  padding-inline: 2px;
+  background: var(--color-bg);
 }

@@ -200,6 +200,7 @@ export const deckTextsEn: typeof deckTextsFi = {
   deckViewLegend: 'Deck view',
   deckViewList: 'List',
   deckViewStacks: 'Stacks',
+  deckViewCards: 'Cards',
   copies: (count: number) => `×${count}`,
   stackCard: (name: string, count: number) => `Enlarge image: ${name}, ${count} in deck`,
   statsHeading: 'Statistics',
