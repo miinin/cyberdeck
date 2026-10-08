@@ -8522,3 +8522,18 @@ section[aria-labelledby='have-heading'] {
     white-space: nowrap;
   }
 }
+
+/* A card's own buttons never stick out of its column, even with large text (T-115). */
+.stack-card-actions > * {
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+.stack-card-actions .tile-action {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.deck-stacks,
+.deck-groups,
+.deck-group {
+  min-inline-size: 0;
+}

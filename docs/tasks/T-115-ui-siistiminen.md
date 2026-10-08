@@ -46,3 +46,5 @@
 - **Tarkistus:** Chromella (CDP, leveydet 320, 390, 1440): `scrollWidth` = leveys kaikissa (ei vaakavieritystä), Kortit-sivu, pakkaeditori, Kortit-näkymä ja Pinot-sideboard katsottu kuvakaappauksista. Ei sisäisiä vieritysalueita lisätty.
 - **Testit:** `npm test` 1526 läpi (ajettu kerran lopuksi, uusi testi Kortit-näkymälle), lint ja build läpi.
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (320 px:n tilastoruudun "Legendit/Sideboard"-otsikot menevät päällekkäin; vanha vika, ei tämän kortin alaa).
+
+- **Korjaus (sideboardin vaakavieritys):** aiempi tarkistus tehtiin tyhjällä sideboardilla. Toisto kortit sisällä (1–3 korttia, 320 px, vanha CSS): `scrollWidth` 322 ja leveä elementti oli `.tile-action` ("→ Pää") `.stack-card-actions`:ssa, joka ylitti sarakkeensa 2 px. Korjaus: `.stack-card-actions` rivittyy ja sen lapset eivät ylitä saraketta (`max-inline-size: 100%`, ellipsis), ja `.deck-stacks`, `.deck-groups` ja `.deck-group` saavat `min-inline-size: 0`. Tarkistus Chromella 320 ja 390 px, sideboardissa 3 korttia: `scrollWidth` = leveys Lista-, Pinot- ja Kortit-näkymässä.
