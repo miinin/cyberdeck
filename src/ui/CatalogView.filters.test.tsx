@@ -44,7 +44,9 @@ describe('CatalogView search and filters: structure', () => {
     expect(input).toHaveAttribute('type', 'search');
     expect(input).toHaveAccessibleDescription('Kortin nimi tai alaotsikko. Osa sanasta riittää.');
     expect(input).toHaveAttribute('maxlength', '100');
-    expect(input).not.toHaveAttribute('placeholder');
+    // The placeholder is a visible hint only; the name comes from the label (T-115).
+    expect(input).toHaveAccessibleName('Hae nimellä');
+    expect(input).toHaveAttribute('placeholder', 'Hae nimellä…');
     expect(input).not.toHaveFocus();
     expect(document.body).toHaveFocus();
   });

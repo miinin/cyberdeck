@@ -152,6 +152,8 @@ export function CardFilters({
             ref={searchInputRef}
             id="card-search"
             type="search"
+            // A visible hint only (T-115): the accessible name still comes from the hidden <label>.
+            placeholder={texts.searchPlaceholder}
             aria-describedby="card-search-hint"
             autoComplete="off"
             spellCheck={false}

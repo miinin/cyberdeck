@@ -157,6 +157,7 @@ export const textsFi = {
   // Search and filters: UX.md luku 5 (PM accepted K6–K8 on 2026-10-01).
   filterFormLabel: 'Hae ja suodata kortteja',
   searchLabel: 'Hae nimellä',
+  searchPlaceholder: 'Hae nimellä…',
   searchHint: 'Kortin nimi tai alaotsikko. Osa sanasta riittää.',
   filterHint: 'Valitse yksi tai useampi. Ilman valintaa näytetään kaikki.',
   typeLegend: 'Tyyppi',
