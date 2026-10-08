@@ -1,6 +1,6 @@
 # T-111 · Mobiilikorjaukset 2: navigointi ylös yhdelle riville, yksi "Lisää kortteja", näkyvyyskytkin
 
-**Tila:** Review. **Haara:** `t-111-mobiili-2` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08 tuotannon kuvakaappauksesta; navigoinnin sijainti valittu: "ylös, yksi rivi").
+**Tila:** Done. **Haara:** `t-111-mobiili-2` (testistä). **Päättäjä:** käyttäjä (palaute 2026-10-08 tuotannon kuvakaappauksesta; navigoinnin sijainti valittu: "ylös, yksi rivi").
 
 ## 1. Päänavigointi ylös yhdelle riville (korvaa T-107:n alapalkin)
 - **Ongelma:** alapalkki sekoittui editorin välilehtiin, eikä sitä löytänyt.
