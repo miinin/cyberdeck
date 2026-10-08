@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Card } from '../domain/card';
 import { cardFingerprint } from '../domain/cardFingerprint';
@@ -8,6 +8,7 @@ import { createMemoryRepositories } from '../storage';
 import type { Repositories } from '../storage';
 import { ScanCardsButton } from './CardScanner';
 import { resetEditionConfirmed } from './EditionConfirmDialog';
+import { resetScanDebugSamples } from './ScanDebugPanel';
 import { useCollection } from './useCollection';
 
 /** A fixed random-looking picture per seed, so each "card" has its own fingerprint. */
@@ -313,7 +314,10 @@ describe('Continuous mode (T-108)', () => {
 });
 
 describe('Scan diagnostics (T-113a)', () => {
-  afterEach(() => window.history.replaceState(null, '', '/'));
+  afterEach(() => {
+    window.history.replaceState(null, '', '/');
+    resetScanDebugSamples();
+  });
 
   it('shows no panel without ?scandebug=1', async () => {
     await openScanner(createMemoryRepositories());
@@ -335,6 +339,27 @@ describe('Scan diagnostics (T-113a)', () => {
     expect(screen.getByRole('status', { name: '' }).textContent).toMatch(/1\. Alpha 0 .*confident yes .*640x480/);
     await user.click(screen.getByRole('button', { name: 'Save sample' }));
     await user.click(screen.getByRole('button', { name: /^1\. Alpha/ }));
-    expect(screen.getByText('1 samples')).toBeTruthy();
+    expect(screen.getByText(/^1 samples/)).toBeTruthy();
+    // A wrong tap is undone without losing the rest (T-113a fix).
+    await user.click(screen.getByRole('button', { name: 'Undo last sample' }));
+    expect(screen.getByText(/^0 samples/)).toBeTruthy();
+  });
+
+  it('keeps the samples when the scanner is closed and opened again', async () => {
+    window.history.replaceState(null, '', '/?scandebug=1');
+    const repositories = createMemoryRepositories();
+    const user = await openScanner(repositories);
+    await user.click(screen.getByRole('button', { name: 'Skannaa Beta' }));
+    await settle();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    await user.click(screen.getByRole('button', { name: 'Save sample' }));
+    await user.click(screen.getByRole('button', { name: /^1. Alpha/ }));
+    cleanup();
+    const again = await openScanner(repositories);
+    await again.click(screen.getByRole('button', { name: 'Skannaa Beta' }));
+    await settle();
+    expect(screen.getByText(/^1 samples/)).toBeTruthy();
   });
 });

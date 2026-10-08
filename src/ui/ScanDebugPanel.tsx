@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 
 /*
  * Scan diagnostics (T-113a): a developer panel under the scanner frame, only with `?scandebug=1` in the address.
- * Nothing is stored or sent: the samples live in this component's state until the page closes, and the user copies
- * them by hand. The texts are hard-coded English on purpose (developer mode, not translated).
+ * Nothing is stored or sent. The samples live in this module (not in the component), so closing the scanner, taking a
+ * picture or switching modes does not lose them; only a page reload does. Every saved sample also copies all results to
+ * the clipboard (the tap is the user gesture), so a reload loses nothing that was not already copied. The texts are hard-coded English on purpose (developer mode, not translated).
  */
 
 export interface DebugReading {
@@ -32,6 +33,18 @@ export function scanDebugRequested(): boolean {
 
 const round = (value: number) => Math.round(value * 10) / 10;
 
+/** The samples of this page load, kept outside the component so they survive the scanner closing (T-113a). */
+let savedSamples: Sample[] = [];
+
+/** For tests: forget the samples of earlier tests. */
+export function resetScanDebugSamples() {
+  savedSamples = [];
+}
+
+function writeClipboard(json: string): Promise<void> {
+  return typeof navigator.clipboard?.writeText === 'function' ? navigator.clipboard.writeText(json) : Promise.reject(new Error('no clipboard'));
+}
+
 export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null }) {
   const measureRef = useRef(measure);
   useEffect(() => {
@@ -39,7 +52,7 @@ export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null
   });
   const [reading, setReading] = useState<DebugReading | null>(null);
   const [frozen, setFrozen] = useState<DebugReading | null>(null);
-  const [samples, setSamples] = useState<Sample[]>([]);
+  const [samples, setSamplesState] = useState<Sample[]>(savedSamples);
   const [fallback, setFallback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -47,10 +60,23 @@ export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null
     return () => window.clearInterval(timer);
   }, []);
 
+  const setSamples = (next: Sample[]) => {
+    savedSamples = next;
+    setSamplesState(next);
+  };
+
+  const copy = (list: Sample[]) => {
+    const json = JSON.stringify(list);
+    writeClipboard(json).then(
+      () => setFallback(null),
+      () => setFallback(json),
+    );
+  };
+
   const save = (correct: 0 | 1 | 2 | 3) => {
     if (frozen === null) return;
-    setSamples((list) => [
-      ...list,
+    const next = [
+      ...samples,
       {
         correct,
         top3: frozen.top3.map((m) => ({ name: m.name, id: m.id, distance: m.distance })),
@@ -58,17 +84,10 @@ export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null
         sharpness: round(frozen.sharpness),
         resolution: frozen.resolution,
       },
-    ]);
+    ];
+    setSamples(next);
     setFrozen(null);
-  };
-
-  const copy = () => {
-    const json = JSON.stringify(samples, null, 1);
-    const written = typeof navigator.clipboard?.writeText === 'function' ? navigator.clipboard.writeText(json) : Promise.reject(new Error('no clipboard'));
-    written.then(
-      () => setFallback(null),
-      () => setFallback(json),
-    );
+    copy(next);
   };
 
   return (
@@ -98,13 +117,18 @@ export function ScanDebugPanel({ measure }: { measure: () => DebugReading | null
           </button>
         </div>
       )}
-      <p>{`${samples.length} samples`}</p>
+      <p>{`${samples.length} samples (all results are copied to the clipboard after every sample)`}</p>
       {samples.length > 0 && (
-        <button type="button" className="button-secondary" onClick={copy}>
-          Copy results
-        </button>
+        <div className="scanner-debug-pick">
+          <button type="button" className="button-secondary" onClick={() => copy(samples)}>
+            Copy results
+          </button>
+          <button type="button" className="link-button" onClick={() => setSamples(samples.slice(0, -1))}>
+            Undo last sample
+          </button>
+        </div>
       )}
-      {fallback !== null && <textarea className="scanner-debug-json" readOnly aria-label="Results" rows={fallback.split('\n').length} value={fallback} />}
+      {fallback !== null && <textarea className="scanner-debug-json" readOnly aria-label="Results" rows={Math.max(3, Math.ceil(fallback.length / 40))} value={fallback} />}
     </section>
   );
 }
