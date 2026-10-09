@@ -1,6 +1,6 @@
 # T-119 · Skannaa suoraan pakkaan
 
-**Tila:** Ready. **Päättäjä:** käyttäjä (2026-10-09: idea "skannaa suoraan pakkaan"; valinnat alla), PM (määrittely).
+**Tila:** Done. **Päättäjä:** käyttäjä (2026-10-09: idea "skannaa suoraan pakkaan"; valinnat alla), PM (määrittely).
 
 ## Tavoite
 Fyysisen pakan saa sovellukseen skannaamalla. Nykyinen skanneri (`CardScannerDialog`, T-106/T-108/T-113) lisää kortit aina kokoelmaan. Nyt sitä voi käyttää myös pakan kokoamiseen.
