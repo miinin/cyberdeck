@@ -112,6 +112,7 @@ export const textsFi = {
   enlargeImage: 'Suurenna kuva: ',
   closeDialog: 'Sulje',
   zoomImage: 'Näytä koko ruudulla',
+  zoomImageShort: 'Koko ruudulla',
   zoomClose: 'Sulje koko ruudun kuva',
   detailCollection: 'Kokoelmassa',
   detailWant: 'Want-listalla',

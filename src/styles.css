@@ -457,6 +457,8 @@ main {
   font: inherit;
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
+  /* Explicit: inside a smaller parent the buttons keep the one size (T-118, UX-118-21). */
+  font-size: var(--font-size-base);
   letter-spacing: var(--letter-spacing-button);
   text-transform: uppercase;
   text-align: center;
@@ -767,6 +769,7 @@ main {
   --tone-surface: var(--color-warning-surface);
 }
 
+/* Empty state (T-118, UX-118-19): the one box for "nothing here yet": a heading, one sentence, the actions on the left. */
 .empty {
   display: flex;
   flex-direction: column;
@@ -775,6 +778,80 @@ main {
   padding: var(--space-4);
   border: 1px dashed var(--color-border-strong);
   background: var(--color-surface);
+}
+
+.empty > h2,
+.empty > p {
+  margin: 0;
+}
+
+/*
+ * Disclosure (T-118, UX-118-11): every <details> looks the same: a 44 px bold caps summary with a yellow triangle that
+ * turns when open. The native marker is hidden.
+ */
+.disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--target-min);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure > summary::before {
+  content: '';
+  flex: none;
+  inline-size: 0;
+  block-size: 0;
+  border-block: 0.3125rem solid transparent;
+  border-inline-start: 0.5rem solid var(--color-accent-edge);
+}
+
+.disclosure[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.disclosure > summary:hover {
+  text-decoration: underline;
+}
+
+.disclosure > summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/*
+ * File input (T-118, UX-118-13): the native control is hidden (.visually-hidden) and its label is drawn as a secondary
+ * button, so the browser's grey button never shows. The chosen name sits next to it as quiet text.
+ */
+.file-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.file-input:has(input:focus-visible) label {
+  clip-path: none;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.file-input-name {
+  flex: 1 1 10rem;
+  min-inline-size: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
 }
 
 /* Search and filter form (UX.md 3.4, 5.4, 5.9) */
@@ -1751,9 +1828,11 @@ body:has(dialog[open]) {
   font-size: var(--font-size-sm);
 }
 
+/* fit-content: in a column of the page it is only as wide as its options, not stretched over the row. */
 .segmented {
   display: inline-flex;
   flex-wrap: nowrap;
+  inline-size: fit-content;
   min-inline-size: 0;
   max-inline-size: 100%;
   border: 2px solid var(--color-border-strong);
@@ -1762,6 +1841,7 @@ body:has(dialog[open]) {
 .segmented--fill {
   display: flex;
   flex: 1 1 100%;
+  inline-size: auto;
 }
 
 .segmented-option {
@@ -1994,6 +2074,7 @@ body:has(dialog[open]) {
 .link-button {
   display: inline-flex;
   align-items: center;
+  gap: 0.25em;
   min-block-size: 2rem;
   padding: 0;
   border: 0;
@@ -3674,7 +3755,7 @@ button.legality:focus-visible {
   isolation: isolate;
   display: grid;
   /* One column set for every row (main deck, Legends, sideboard): the count, the −/+ and the move button line up. */
-  grid-template-columns: 2rem minmax(0, 1fr) 2.25rem auto 4rem;
+  grid-template-columns: 2rem minmax(0, 1fr) 2rem auto 3.5rem;
   grid-template-areas: 'gem name count step move';
   align-items: center;
   gap: 0 var(--space-2);
@@ -3706,7 +3787,7 @@ button.legality:focus-visible {
   position: absolute;
   inset-block: 0;
   /* Ends where the count and the stepper begin. */
-  inset-inline-end: 11rem;
+  inset-inline-end: 10.5rem;
   z-index: -1;
   inline-size: 8rem;
   opacity: 0.38;
@@ -4665,7 +4746,9 @@ button.legality:focus-visible {
 }
 
 .sort-row .sort-select,
-.sort-row .missing-add {
+.sort-row .missing-add,
+.list-toolbar .sort-select {
+  /* In a row of controls the order select is centred with the others, not lifted by a bottom margin (T-118, UX-118-07). */
   margin-block-end: 0;
 }
 
@@ -4747,6 +4830,10 @@ button.legality:focus-visible {
 /* T-068: Have/Want search looks like the catalog search; the Have section gets air above it. */
 .want-search {
   max-width: 24rem;
+}
+
+#want-search-heading {
+  margin-block: var(--space-4) var(--space-2);
 }
 
 section[aria-labelledby='have-heading'] {
@@ -6410,13 +6497,14 @@ section[aria-labelledby='have-heading'] {
 
 .group-odds select {
   inline-size: 100%;
-  min-block-size: var(--target-min);
+  block-size: var(--target-min);
   padding: 0 var(--space-2);
   border: 1px solid var(--color-border-strong);
   border-radius: 0;
   background: var(--color-bg);
   color: var(--color-text);
   font: inherit;
+  font-size: var(--font-size-base);
 }
 
 /*
@@ -6977,6 +7065,12 @@ section[aria-labelledby='have-heading'] {
 
 .proxy-results-bar .status-line {
   margin: 0;
+}
+
+.card-art-label {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 /* Compact picker: the small picture and the name, the count control; the game values are on the card itself. */
@@ -7700,6 +7794,11 @@ section[aria-labelledby='have-heading'] {
   color: var(--color-accent-edge);
 }
 
+/* Actions of an empty state sit on the left (T-118, UX-118-19). */
+.scan-prompt .scan-open {
+  align-self: flex-start;
+}
+
 .scanner-status {
   display: flex;
   flex-wrap: wrap;
@@ -8239,7 +8338,9 @@ section[aria-labelledby='have-heading'] {
     grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
   }
 }
-.stack-cards--cards .stack-card-name {
+.stack-cards--cards .stack-card-name,
+.stack-cards--spread .stack-card-name {
+  /* Whole cards (the Cards view, Legends, sideboard) show their own printed name; the label is for overlapped stacks only. */
   display: none;
 }
 .stack-cards--cards .stack-card-button {
@@ -8368,7 +8469,7 @@ section[aria-labelledby='have-heading'] {
   grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
 }
 /* On the Collection page the tiles keep a sensible width instead of stretching over the whole card (T-118, UX-118-25). */
-.collection-kpis .kpi-tiles {
+.kpi-tiles.collection-kpis {
   grid-template-columns: repeat(auto-fill, minmax(min(10rem, 100%), 14rem));
 }
 .kpi-tiles > div {
@@ -8477,6 +8578,7 @@ section[aria-labelledby='have-heading'] {
   line-height: 1.4;
 }
 .detail-proxy {
+  grid-column: 1 / -1;
   margin-block: var(--space-3);
 }
 
@@ -8670,4 +8772,24 @@ section[aria-labelledby='have-heading'] {
 
 .trade-table thead .trade-number {
   font-family: inherit;
+}
+
+/*
+ * Header on a tablet (T-118, UX-118-42): from 40 to 64 rem the logo and the tools share the first row and the
+ * navigation has the second row, as on a phone, so the tools never sit alone on a row of their own.
+ */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .site-header .main-nav {
+    order: 3;
+    flex: 1 0 100%;
+    flex-wrap: nowrap;
+  }
+}
+
+/* A 320 px phone: the filter button gives the search field the room for its whole hint (T-118, UX-118-42). */
+@media (max-width: 23.99rem) {
+  .search-row .filter-toggle {
+    padding-inline: var(--space-3);
+    font-size: var(--font-size-sm);
+  }
 }

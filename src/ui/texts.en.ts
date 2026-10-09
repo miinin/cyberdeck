@@ -97,6 +97,7 @@ export const textsEn: typeof textsFi = {
   enlargeImage: 'Enlarge image: ',
   closeDialog: 'Close',
   zoomImage: 'Show full screen',
+  zoomImageShort: 'Full screen',
   zoomClose: 'Close the full-screen card',
   detailCollection: 'In collection',
   detailWant: 'On want list',

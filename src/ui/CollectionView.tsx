@@ -134,7 +134,6 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
         <div className="page-head-actions">
           {ready && (
             <SegmentedChoice
-              className="collection-views"
               legend={collectionTexts.viewLabel}
               name={viewName}
               value={prefs.view}

@@ -820,7 +820,6 @@ export function DeckEditor({
               {deckTexts.goToDeck}
             </button>
             <SegmentedChoice
-              className="pick-view"
               legend={deckTexts.pickViewLegend}
               name="deck-pick-view"
               value={pickView}

@@ -248,7 +248,6 @@ export function DeckList({
             <SectionFlag problem={problems?.mainSection ?? null} />
           </div>
           <SegmentedChoice
-            className="deck-view"
             legend={deckTexts.deckViewLegend}
             name="deck-view"
             value={view}

@@ -232,6 +232,12 @@ function CardBox({
           )}
         </h3>
       </div>
+      {/* The version's name is also shown (T-118, UX-118-27): boxes of one card differ only by the picture otherwise. */}
+      {showArtLabel && art !== null && (
+        <p className="card-art-label" aria-hidden="true" lang={art.rarity === null ? undefined : 'en'}>
+          {art.rarity === null ? texts.artBase : officialRarity(art.rarity)}
+        </p>
+      )}
       <div className="card-meta">
         <p className="card-type">
           <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
@@ -251,7 +257,7 @@ function CardBox({
             className="card-rarity"
             hideLabel
           >
-            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={18} showName={showArtLabel && art !== null} />}
+            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={18} />}
           </Stat>
         </dl>
       </div>

@@ -89,6 +89,17 @@ describe('Deck list import', () => {
     await waitFor(() => expect(screen.getByLabelText('Pakkalista')).toHaveValue('1 L1'));
   });
 
+  it('draws the file field as a button and shows the chosen file name (T-118, UX-118-13)', async () => {
+    const { user } = await openImport();
+    const input = screen.getByLabelText('Tai valitse .txt- tai .json-tiedosto');
+    expect(input).toHaveClass('visually-hidden');
+    expect(screen.getByText('Valitse tiedosto')).toHaveClass('button-secondary');
+    expect(screen.getByText('Ei valittua tiedostoa')).toBeInTheDocument();
+    await user.upload(input, new File(['1 L1'], 'pakka.txt', { type: 'text/plain' }));
+    expect(await screen.findByText('pakka.txt')).toBeInTheDocument();
+    expect(screen.queryByText('Ei valittua tiedostoa')).toBeNull();
+  });
+
   it('saves nothing until "Tallenna pakaksi", then creates a new deck with the editable name and opens it', async () => {
     const { user, repositories } = await openImport(storedDecks([{ id: 'a', name: 'Tuotu testi', cards: [] }]));
     await check(user, LIST);

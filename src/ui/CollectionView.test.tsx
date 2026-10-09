@@ -21,6 +21,30 @@ async function renderCollection(entries: [string, number][], repositories: Repos
 }
 
 describe('CollectionView', () => {
+  describe('on a phone and on a desktop alike (T-118, UX-118-09)', () => {
+    beforeEach(() => {
+      Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: vi.fn() }, configurable: true });
+    });
+    afterEach(() => {
+      Reflect.deleteProperty(navigator, 'mediaDevices');
+    });
+
+    it('has the scan button in the title row and no floating camera button', async () => {
+      await renderCollection([['alpha', 3]]);
+      const head = (await screen.findByRole('heading', { level: 1 })).closest('.page-head') as HTMLElement;
+      expect(within(head).getByRole('button', { name: /Skannaa kortteja|Scan cards/ })).toHaveClass('button-secondary');
+      expect(screen.getAllByRole('button', { name: /Skannaa kortteja|Scan cards/ })).toHaveLength(1);
+      expect(document.querySelector('.scan-fab, .scan-fab-spacer')).toBeNull();
+    });
+
+    it('shows the scan prompt once more in the empty state, left aligned in one box', async () => {
+      await renderCollection([]);
+      const empty = (await screen.findByRole('heading', { name: /kokoelmasi on vielä tyhjä|collection is still empty/i })).closest('.empty');
+      expect(empty).not.toBeNull();
+      expect(within(empty as HTMLElement).getByRole('button', { name: /Skannaa kortteja|Scan cards/ })).toHaveClass('button-primary');
+    });
+  });
+
   it('shows the nav item between Cards and Decks', async () => {
     await renderCollection([]);
     const links = within(screen.getByRole('navigation', { name: /päävalikko|main menu/i })).getAllByRole('link');

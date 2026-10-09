@@ -299,7 +299,7 @@ export function DeckImport({
               </button>
             </div>
           </form>
-  
+
           <form className="deck-import-form import-source-panel panel" onSubmit={(event) => void handleCheck(event)} noValidate>
             <h2 className="panel-title">{deckTexts.textHeading}</h2>
             <label htmlFor="import-text">{deckTexts.importTextLabel}</label>

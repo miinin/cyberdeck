@@ -85,6 +85,10 @@ describe('Pakat list', () => {
     const opener = await screen.findByRole('button', { name: 'Poista pakka: Oma' });
     await user.click(opener);
     const dialog = screen.getByRole('dialog', { name: 'Poistetaanko pakka?' });
+    // The destructive action is drawn as a danger button and comes after "Peruuta" (T-118, UX-118-12, 17).
+    const buttons = within(dialog).getAllByRole('button');
+    expect(buttons.map((button) => button.textContent)).toEqual(['Peruuta', 'Poista pakka']);
+    expect(buttons[1]).toHaveClass('button-danger');
     await user.click(within(dialog).getByRole('button', { name: 'Peruuta' }));
     expect((await repositories.decks.list()).value).toHaveLength(1);
     expect(opener).toHaveFocus();
