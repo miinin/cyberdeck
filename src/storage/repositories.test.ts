@@ -731,22 +731,25 @@ describe('preferences: scanner mode (T-108)', () => {
 describe('preferences: collection page (T-109)', () => {
   it('defaults to the owned cards, remembers the choices and fixes invalid fields one by one', async () => {
     const { preferences, store } = setup();
-    expect(await preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: true });
-    await preferences.saveCollectionPrefs({ view: 'binder', showMissing: false });
+    expect(await preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: true, binder: 'set' });
+    await preferences.saveCollectionPrefs({ view: 'binder', showMissing: false, binder: 'custom' });
     const again = createRepositories({ store, persistent: true }).preferences;
-    expect(await again.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false });
-    await expectStorageError(preferences.saveCollectionPrefs({ view: 'wall' as 'binder', showMissing: true }), 'invalid-input');
+    expect(await again.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false, binder: 'custom' });
+    await expectStorageError(preferences.saveCollectionPrefs({ view: 'wall' as 'binder', showMissing: true, binder: 'set' }), 'invalid-input');
     const odd = setup({ 'cyberdeck:collection-prefs': '{"view":"binder","art":"x","showMissing":"no"}' });
-    expect(await odd.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: true });
+    expect(await odd.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: true, binder: 'set' });
     const old = setup({ 'cyberdeck:collection-prefs': '{"view":"binder","art":"owned","showMissing":false}' });
-    expect(await old.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false });
+    expect(await old.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false, binder: 'set' });
     const junk = setup({ 'cyberdeck:collection-prefs': 'not json' });
-    expect(await junk.preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: true });
+    expect(await junk.preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: true, binder: 'set' });
     // T-112: a saved overview stays, a value this version does not know falls back to the default.
     const kept = setup({ 'cyberdeck:collection-prefs': '{"view":"overview","showMissing":false}' });
-    expect(await kept.preferences.loadCollectionPrefs()).toEqual({ view: 'overview', showMissing: false });
+    expect(await kept.preferences.loadCollectionPrefs()).toEqual({ view: 'overview', showMissing: false, binder: 'set' });
     const future = setup({ 'cyberdeck:collection-prefs': '{"view":"wall","showMissing":false}' });
-    expect(await future.preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: false });
+    expect(await future.preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: false, binder: 'set' });
+    // T-120: an unknown binder mode falls back to the set.
+    const mode = setup({ 'cyberdeck:collection-prefs': '{"view":"binder","binder":"x"}' });
+    expect(await mode.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: true, binder: 'set' });
   });
 });
 
@@ -762,5 +765,54 @@ describe('preferences: deck column view (T-115)', () => {
     await expectStorageError(preferences.saveDeckListView('grid' as 'list'), 'invalid-input');
     const odd = setup({ 'cyberdeck:deck-list-view': 'grid' });
     expect(await odd.preferences.loadDeckListView()).toBe('list');
+  });
+});
+
+describe('preferences: own binder layout (T-120)', () => {
+  const KEY = 'cyberdeck:binder-layout';
+  const full = (keys: (string | null)[]) => [...keys, ...Array.from({ length: 9 - keys.length }, () => null)];
+
+  it('has no layout at first, remembers one and pads it to whole pages', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadBinderLayout()).toBeNull();
+    const saved = await preferences.saveBinderLayout({ v: 1, name: '  My binder  ', pockets: ['a', null, 'b'] });
+    expect(saved).toEqual({ v: 1, name: 'My binder', pockets: full(['a', null, 'b']) });
+    const again = createRepositories({ store, persistent: true }).preferences;
+    expect(await again.loadBinderLayout()).toEqual(saved);
+  });
+
+  it('cuts the name to 40 characters', async () => {
+    const { preferences } = setup();
+    const saved = await preferences.saveBinderLayout({ v: 1, name: 'x'.repeat(60), pockets: [] });
+    expect(saved.name).toHaveLength(40);
+    expect(saved.pockets).toHaveLength(9);
+  });
+
+  it('reads stored data defensively: anything wrong is no layout, and nothing throws', async () => {
+    const bad: string[] = [
+      'not json',
+      'null',
+      '[]',
+      '{"v":2,"name":"x","pockets":[]}',
+      '{"v":1,"name":5,"pockets":[]}',
+      '{"v":1,"name":"x","pockets":"a"}',
+      '{"v":1,"name":"x","pockets":[1]}',
+      '{"v":1,"name":"x","pockets":["Not A Key"]}',
+      '{"v":1,"name":"x","pockets":["__proto__"]}',
+      `{"v":1,"name":"x","pockets":["${'a'.repeat(101)}"]}`,
+      `{"v":1,"name":"x","pockets":[${Array.from({ length: 901 }, () => 'null').join(',')}]}`,
+    ];
+    for (const raw of bad) {
+      const { preferences } = setup({ [KEY]: raw });
+      expect(await preferences.loadBinderLayout()).toBeNull();
+    }
+    const edge = setup({ [KEY]: `{"v":1,"name":"x","pockets":[${Array.from({ length: 900 }, () => 'null').join(',')}]}` });
+    expect((await edge.preferences.loadBinderLayout())?.pockets).toHaveLength(900);
+  });
+
+  it('refuses to save an invalid layout', async () => {
+    const { preferences } = setup();
+    await expectStorageError(preferences.saveBinderLayout({ v: 1, name: 'x', pockets: ['Bad Key'] }), 'invalid-input');
+    await expectStorageError(preferences.saveBinderLayout({ v: 1, name: 'x', pockets: Array.from({ length: 901 }, () => null) }), 'invalid-input');
   });
 });

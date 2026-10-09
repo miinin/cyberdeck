@@ -19,7 +19,7 @@ async function renderCollection(
   repositories: Repositories = createMemoryRepositories({ initial: entries.length > 0 ? storedCollection(entries) : {} }),
   view: View = 'overview',
 ) {
-  await repositories.preferences.saveCollectionPrefs({ view, showMissing: true });
+  await repositories.preferences.saveCollectionPrefs({ view, showMissing: true, binder: 'set' });
   window.location.hash = '#/kokoelma';
   render(<App cards={cards} repositories={repositories} />);
   await act(async () => {

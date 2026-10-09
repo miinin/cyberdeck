@@ -1,3 +1,4 @@
+import type { BinderLayout } from '../domain/binderLayout';
 import type { CardKey } from '../domain/cardKey';
 import type { Collection } from '../domain/collection';
 import type { PrintingKey } from '../domain/printing';
@@ -66,8 +67,10 @@ export type ScanMode = 'single' | 'continuous';
 export interface CollectionPrefs {
   view: 'own' | 'overview' | 'binder';
   showMissing: boolean;
+  /** The binder shows the set in number order or the user's own binder (T-120). */
+  binder: 'set' | 'custom';
 }
-export const DEFAULT_COLLECTION_PREFS: CollectionPrefs = { view: 'own', showMissing: true };
+export const DEFAULT_COLLECTION_PREFS: CollectionPrefs = { view: 'own', showMissing: true, binder: 'set' };
 
 /** User preferences that are not data (UX.md 8.7). Stored as raw strings, not in an envelope. */
 export interface PreferencesRepository {
@@ -96,6 +99,10 @@ export interface PreferencesRepository {
   /** Saved Collection page choices; every missing or invalid field falls back to its default. Never rejects because of storage problems. */
   loadCollectionPrefs(): Promise<CollectionPrefs>;
   saveCollectionPrefs(prefs: CollectionPrefs): Promise<CollectionPrefs>;
+  /** The saved own binder layout, or null when none or it is not valid (the caller then starts a new one). Never rejects because of storage problems. */
+  loadBinderLayout(): Promise<BinderLayout | null>;
+  /** Saves a valid layout (the name is trimmed and cut to its limit). Rejects with StorageError when the layout is not valid or saving fails. */
+  saveBinderLayout(layout: BinderLayout): Promise<BinderLayout>;
   /** Account hint (T-054a): uid of the last signed-in account, or null when none or invalid. Never throws. */
   loadLastUid(): string | null;
   /** Saves a valid uid, or removes the hint for null or an invalid uid. Never throws (a hint only). */
