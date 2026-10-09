@@ -214,7 +214,7 @@ export function App({
         {route.name === 'havewant' && (
           <HaveWantView cards={cards} repositories={openRepositories} />
         )}
-        {route.name === 'collection' && <CollectionView cards={cards} repositories={openRepositories} />}
+        {route.name === 'collection' && <CollectionView cards={cards} repositories={openRepositories} headerSlot={headerSlot} />}
         {route.name === 'proxy' && <ProxyView cards={cards} repositories={openRepositories} />}
         {route.name === 'trade' && (
           <SharedTradeView data={route.data} cards={cards} repositories={openRepositories} />

@@ -135,7 +135,7 @@ function parseCollectionPrefs(raw: string | null): CollectionPrefs {
     const value: unknown = JSON.parse(raw);
     if (typeof value === 'object' && value !== null) {
       const { view, showMissing } = value as Record<string, unknown>;
-      if (view === 'overview' || view === 'binder') prefs.view = view;
+      if (view === 'own' || view === 'overview' || view === 'binder') prefs.view = view;
       if (typeof showMissing === 'boolean') prefs.showMissing = showMissing;
     }
   } catch {

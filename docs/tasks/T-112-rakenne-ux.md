@@ -1,6 +1,6 @@
 # T-112 · Sivustorakenteen UX-arvio ja uusi rakenne (suunnitelma)
 
-**Tila:** Backlog. Rakenne valittu: A (D-028). **Päättäjä:** käyttäjä (pyyntö 2026-10-08: "onko rakenne kärkevä, voiko jotain muuttaa? UX is the king"), PM (suunnitelma).
+**Tila:** In Progress. Rakenne valittu: A (D-028). **Päättäjä:** käyttäjä (pyyntö 2026-10-08: "onko rakenne kärkevä, voiko jotain muuttaa? UX is the king"), PM (suunnitelma).
 
 ## Nykyinen rakenne
 | Päänavigointi | Sisältö |
@@ -42,3 +42,20 @@
 ## Riskit
 - Kokoelman muokkauksen siirto koskee monia testejä (`CatalogView.collection.test.tsx`). Arvioidaan toteutuskortissa.
 - Reittien muutos rikkoo kirjanmerkit, ellei uudelleenohjausta tehdä.
+
+## Toteutus 2026-10-09 (käyttäjä: "Tee T-112 ja julkaise")
+**PM:n rajaus:** rakenne on jo päätetty (D-028 ja sen muutos: viisi kohdetta, Proxy pysyy). Täyttä käyttäjäpolkuarviota ei tehdä, koska se kuluttaisi paljon tokeneita eikä muuttaisi päätöstä. Jäljellä olevista D-028:n osista toteutetaan tärkein, hypoteesi 1: **Kokoelma on "minun korttini"**. Hypoteesi 3 on jo toteutettu (T-108, T-117). Hypoteesit 4 ja 5 (T-118) jäävät IDEAS-ehdokkaiksi.
+
+### Hyväksymiskriteerit
+- [ ] Kokoelma-sivun näkymävalitsimeen (`COLLECTION_VIEW_OPTIONS`, `SegmentedChoice`) tulee ensimmäiseksi **"Omat kortit"** / "My cards". Järjestys: Omat kortit · Yleiskuva · Kansio. Uuden käyttäjän oletus on Omat kortit (tallennettu `useCollectionPrefs`-valinta säilyy).
+- [ ] Omat kortit -näkymässä on korttilista, jossa näkyvät vain omistetut kortit, **määrien muokkaus on suoraan päällä**, ja haku ja suodattimet toimivat kuten Kortit-sivulla. Toteutus käyttää CatalogViewin olemassa olevaa logiikkaa (suodatin `owned`, `editMode`, rivien pysyminen näkyvissä nollaan laskun jälkeen, T-074:n settisääntö) eikä kopioi sitä. Esimerkiksi CatalogView saa propsin (`mode: 'catalog' | 'collection'`), jossa omistus-suodatin on lukittu `owned`-arvoon ja muokkauskytkin on piilossa ja aina päällä. Otsikoita, `headerSlot`-painikkeita tai live-alueita ei tule tuplana.
+- [ ] Tyhjässä kokoelmassa Omat kortit näyttää nykyisen skannauskehotuksen (`ScanPrompt`) ja linkin Kortit-sivulle ("Selaa kortteja ja lisää"). Lukittu tai ei saatavilla oleva kokoelma näyttää saman tilan kuin nykyään.
+- [ ] Kortit-sivu säilyy ennallaan (pikalisäys ja kytkin "Muokkaa kokoelmaa" säilyvät). Tekstit, jotka ohjaavat muuttamaan määriä Kortit-sivulla, ohjaavat nyt Kokoelmaan (grep `Kortit-sivu`/`Cards page` src:stä, myös Have/Want). Reitit eivät muutu (näkymä on tallennettu valinta), joten uudelleenohjauksia ei tarvita. Kortin tietojen avaaminen Omat kortit -listasta toimii.
+- [ ] fi ja en. Ei inner scrollia, ei päällekkäisyyksiä 320 px:llä, käytä T-118:n komponentteja.
+- [ ] Testit: Kokoelman näkymävalitsin (3 vaihtoehtoa, oletus), Omat kortit näyttää vain omistetut, määrän muutos tallentuu, tyhjä tila, Kortit-sivun nykyiset testit läpi muuttumattomina. `npm test`, `npm run lint`, `npm run build`.
+
+### Luovutus
+
+**Koodari 2026-10-09:** Kokoelma-sivun näkymävalitsin on nyt Omat kortit · Yleiskuva · Kansio, uuden käyttäjän oletus on Omat kortit (`CollectionPrefs.view` hyväksyy `own`; vanhat `overview`/`binder` säilyvät, tuntematon arvo antaa oletuksen). `CatalogView` sai propsin `mode: 'collection'` (omistus-suodatin lukittu `owned`, muokkaus aina päällä, ei omaa otsikkoa, ei kytkintä eikä skannauspainiketta) ja `shared`-propsin, jolla Kokoelma antaa omat collection/wants/proxy-storensa listalle (ei kahta erillistä storea). Tyhjä kokoelma näyttää ScanPromptin ja linkin "Selaa kortteja ja lisää". Tekstit: emptyBody/emptyLink ja Have-ohje ("Kokoelma-osiossa"). Testit: 1568 läpi, lint ja build läpi.
+Avoin: omat kortit -listan saavutettava nimi on edelleen "Kaikki kortit" (ei kortin tekstiä uudelle); Kokoelman skannauksen oletuspainos-tila (`useDefaultEdition`) on erillinen listan painostilasta, päivittyy vasta uudelleenlatauksessa.
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2

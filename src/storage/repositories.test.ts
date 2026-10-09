@@ -729,9 +729,9 @@ describe('preferences: scanner mode (T-108)', () => {
 });
 
 describe('preferences: collection page (T-109)', () => {
-  it('defaults to the overview, remembers the choices and fixes invalid fields one by one', async () => {
+  it('defaults to the owned cards, remembers the choices and fixes invalid fields one by one', async () => {
     const { preferences, store } = setup();
-    expect(await preferences.loadCollectionPrefs()).toEqual({ view: 'overview', showMissing: true });
+    expect(await preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: true });
     await preferences.saveCollectionPrefs({ view: 'binder', showMissing: false });
     const again = createRepositories({ store, persistent: true }).preferences;
     expect(await again.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false });
@@ -741,7 +741,12 @@ describe('preferences: collection page (T-109)', () => {
     const old = setup({ 'cyberdeck:collection-prefs': '{"view":"binder","art":"owned","showMissing":false}' });
     expect(await old.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false });
     const junk = setup({ 'cyberdeck:collection-prefs': 'not json' });
-    expect(await junk.preferences.loadCollectionPrefs()).toEqual({ view: 'overview', showMissing: true });
+    expect(await junk.preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: true });
+    // T-112: a saved overview stays, a value this version does not know falls back to the default.
+    const kept = setup({ 'cyberdeck:collection-prefs': '{"view":"overview","showMissing":false}' });
+    expect(await kept.preferences.loadCollectionPrefs()).toEqual({ view: 'overview', showMissing: false });
+    const future = setup({ 'cyberdeck:collection-prefs': '{"view":"wall","showMissing":false}' });
+    expect(await future.preferences.loadCollectionPrefs()).toEqual({ view: 'own', showMissing: false });
   });
 });
 

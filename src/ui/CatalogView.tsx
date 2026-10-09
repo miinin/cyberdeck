@@ -57,6 +57,7 @@ import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
 import { useCollection } from './useCollection';
 import { useWants } from './useWants';
+import type { WantsHandle } from './useWants';
 import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 import { proxyTexts } from './proxyTexts';
 import { useDecks } from './useDecks';
@@ -92,12 +93,14 @@ function collectionSummary(snapshot: CollectionSnapshot, cards: readonly Card[])
   return distinct === 0 ? texts.collectionEmpty : texts.collectionSummary(distinct, total);
 }
 
-export function CatalogView({
-  cards: allCards,
-  repositories,
-  headerSlot = null,
-  routeCardKey = null,
-}: {
+/** The stores a host page already owns (T-112): "Omat kortit" on the Collection page shares them, so no change is lost between views. */
+export interface SharedStores {
+  collection: ReturnType<typeof useCollection>;
+  wants: WantsHandle;
+  proxyQueue: ReturnType<typeof useProxyQueue>;
+}
+
+type CatalogProps = {
   /** All cards, bundled with the app (D-013). A stable reference: it also owns the live announcements. */
   cards: readonly Card[];
   /** Created once in App (a stable reference). */
@@ -106,18 +109,49 @@ export function CatalogView({
   headerSlot?: HTMLElement | null;
   /** The card whose details the URL asks for (#/kortti/<key>, T-081); an unknown key opens nothing. */
   routeCardKey?: string | null;
-}) {
+  /**
+   * 'collection' (T-112) is the Collection page's "Omat kortit" view: the same list and filters, but only owned cards,
+   * counts always editable, no heading of its own (the host page has it) and no scan button (it is in the host's title row).
+   */
+  mode?: 'catalog' | 'collection';
+  /** Stores owned by the host page; required in 'collection' mode. */
+  shared?: SharedStores;
+};
+
+function OwnStoresCatalog(props: CatalogProps) {
+  const { repositories } = props;
+  const collection = useCollection(repositories.collection);
+  const wants = useWants(repositories.wants);
+  const proxyQueue = useProxyQueue(repositories.proxy);
+  return <CatalogBody {...props} stores={{ collection, wants, proxyQueue }} />;
+}
+
+export function CatalogView(props: CatalogProps) {
+  return props.shared === undefined ? <OwnStoresCatalog {...props} /> : <CatalogBody {...props} stores={props.shared} />;
+}
+
+function CatalogBody({
+  cards: allCards,
+  repositories,
+  headerSlot = null,
+  routeCardKey = null,
+  mode = 'catalog',
+  stores,
+}: CatalogProps & { stores: SharedStores }) {
+  const locked = mode === 'collection';
+  /** The ownership filter a list starts with and returns to when cleared: fixed to owned cards in 'collection' mode. */
+  const baseFilter: CollectionFilter = locked ? 'owned' : 'all';
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
   const collectionAllRef = useRef<HTMLInputElement>(null);
-  const [collectionChoice, setCollectionFilter] = useState<CollectionFilter>('all');
+  const [collectionChoice, setCollectionFilter] = useState<CollectionFilter>(baseFilter);
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
   const [setChoice, setSetChoice] = useState<string | null>(null);
   const [kept, setKept] = useState<ReadonlySet<CardKey>>(NO_KEYS);
-  const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
-  const wants = useWants(repositories.wants);
-  const proxyQueue = useProxyQueue(repositories.proxy);
+  const { snapshot: collection, store: collectionStore } = stores.collection;
+  const wants = stores.wants;
+  const proxyQueue = stores.proxyQueue;
   // Which decks each card is in (T-013). Decks that cannot be read just leave the mention out.
   const { phase: decksPhase, decks } = useDecks(repositories.decks);
   const decksByCard = useMemo(() => {
@@ -184,7 +218,7 @@ export function CatalogView({
   if (editMode === null && preferencesLoaded && collection.phase === 'ready') {
     setEditMode(allCards.every((card) => countOf(collection.saved, card.key) === 0));
   }
-  const editable = editMode === true;
+  const editable = locked || editMode === true;
   const savePreference = (save: Promise<unknown>) => {
     // No message to the user, as with the theme (T-025 A3); only the error kind.
     save.catch((error: unknown) => {
@@ -223,10 +257,10 @@ export function CatalogView({
   };
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
-  if (collectionChoice !== 'all' && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
-    setCollectionFilter('all');
+  if (collectionChoice !== baseFilter && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
+    setCollectionFilter(baseFilter);
   }
-  const collectionFilter: CollectionFilter = collection.phase === 'ready' ? collectionChoice : 'all';
+  const collectionFilter: CollectionFilter = locked ? 'owned' : collection.phase === 'ready' ? collectionChoice : 'all';
   const listedOnly = collectionFilter === 'owned';
   const visibleCards = (
     next: CardFilterCriteria,
@@ -247,7 +281,7 @@ export function CatalogView({
     });
   };
   const isActive = (next: CardFilterCriteria, nextFilter: CollectionFilter, family: string | null = setChoice) =>
-    isFilterActive(next) || nextFilter !== 'all' || family !== null;
+    isFilterActive(next) || nextFilter !== baseFilter || family !== null;
 
   const filtered = visibleCards(criteria, collectionFilter, kept);
   // T-060: the grid follows the shared order; the table sorts the same way itself (header buttons).
@@ -271,6 +305,8 @@ export function CatalogView({
   // The cards are there from the first render, so the live region starts with the loaded message.
   // It already tells the unfiltered result, so that result is not announced again right away.
   const allShown = describeResult(false, allCards.length, allCards.length);
+  // The size of the list the live messages compare to: every card, or in 'collection' mode the owned ones.
+  const listTotal = locked && collection.phase === 'ready' ? allCards.filter((card) => countIn(collection, card.key) > 0).length : allCards.length;
   const announcer = useDelayedAnnouncement(allCards, allShown.key);
   const collectionAnnouncer = useCollectionAnnouncements(announcer, collectionStore, allCards, collection.saveError);
 
@@ -312,7 +348,7 @@ export function CatalogView({
     }
   }, [persistence]);
 
-  const focusHeading = () => headingRef.current?.focus();
+  const focusHeading = () => (headingRef.current ?? searchInputRef.current)?.focus();
 
   /** Any change of the search, a selection or "Vain omistetut" (UX.md 5.6, 6.6). */
   const updateFilters = (
@@ -328,7 +364,7 @@ export function CatalogView({
     const announcement = describeResult(
       isActive(next, nextFilter),
       visibleCards(next, nextFilter, NO_KEYS).length,
-      allCards.length,
+      listTotal,
     );
     if (when === 'later') announcer.announceLater(announcement);
     else if (when === 'now') announcer.announceNow(announcement, force);
@@ -344,7 +380,7 @@ export function CatalogView({
       describeResult(
         isActive(criteria, collectionFilter, family),
         visibleCards(criteria, collectionFilter, NO_KEYS, family).length,
-        allCards.length,
+        listTotal,
       ),
       true,
     );
@@ -352,7 +388,7 @@ export function CatalogView({
 
   const handleClearFilters = () => {
     setSetChoice(null);
-    updateFilters(EMPTY_CRITERIA, 'all', 'now', true);
+    updateFilters(EMPTY_CRITERIA, baseFilter, 'now', true);
     // The button disappears with the empty result; the search field is the natural next step (UX.md 5.7).
     searchInputRef.current?.focus();
   };
@@ -467,7 +503,7 @@ export function CatalogView({
   const listCaption = filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
   const noResults = filtered.length === 0;
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
-  const noOwnedCards = noResults && listedOnly && !isFilterActive(criteria);
+  const noOwnedCards = !locked && noResults && listedOnly && !isFilterActive(criteria);
 
   // T-070: the card detail panel in the image dialog; counters only once their stores are ready.
   const details =
@@ -578,19 +614,19 @@ export function CatalogView({
   };
 
   const handleShowAll = () => {
-    updateFilters(criteria, 'all', 'now', true);
+    updateFilters(criteria, baseFilter, 'now', true);
     collectionAllRef.current?.focus();
   };
 
   // Chips for the selected values, in the order of the form (T-050a, T-052).
   const activeFilters: ActiveFilter[] = [
-    ...(collectionFilter === 'all'
+    ...(locked || collectionFilter === 'all'
       ? []
       : [
           {
             id: 'collection',
             label: COLLECTION_FILTER_LABELS[collectionFilter],
-            onRemove: () => updateFilters(criteria, 'all', 'later'),
+            onRemove: () => updateFilters(criteria, baseFilter, 'later'),
           },
         ]),
     ...(setChoice === null
@@ -607,24 +643,32 @@ export function CatalogView({
 
   return (
     <>
-      <div className="page-head">
-        <h1 ref={headingRef} tabIndex={-1}>
-          {texts.heading}
-        </h1>
-        <div className="page-head-status">
-          <p id="card-status" className="status-line">
-            {status}
+      {locked ? (
+        summary !== null && (
+          <p id="collection-summary" className="status-line is-summary">
+            {summary}
           </p>
-          {summary !== null && (
-            <p id="collection-summary" className="status-line is-summary">
-              {summary}
+        )
+      ) : (
+        <div className="page-head">
+          <h1 ref={headingRef} tabIndex={-1}>
+            {texts.heading}
+          </h1>
+          <div className="page-head-status">
+            <p id="card-status" className="status-line">
+              {status}
             </p>
-          )}
+            {summary !== null && (
+              <p id="collection-summary" className="status-line is-summary">
+                {summary}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       {/* Stays mounted so screen readers announce each change. */}
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
-        {announcer.text ?? texts.loaded(allCards.length)}
+        {announcer.text ?? texts.loaded(listTotal)}
       </div>
 
       {routeCardKey !== null && routeCardKey !== dismissedKey && routeCard === null && (
@@ -691,7 +735,7 @@ export function CatalogView({
             )}
             numberOptions={numberFilterOptionsFor(allCards, criteria)}
             searchInputRef={searchInputRef}
-            collectionFilter={collection.phase === 'ready' ? collectionFilter : undefined}
+            collectionFilter={collection.phase === 'ready' && !locked ? collectionFilter : undefined}
             collectionAllRef={collectionAllRef}
             onCollectionFilterChange={(next) => updateFilters(criteria, next, 'later')}
             onQueryChange={(query, composing) =>
@@ -709,7 +753,7 @@ export function CatalogView({
               updateCriteria({ ...criteria, [group]: toggleValue(criteria[group], value) }, 'later')
             }
             onSearchSubmit={() =>
-              announcer.announceNow(describeResult(filterActive, filtered.length, allCards.length))
+              announcer.announceNow(describeResult(filterActive, filtered.length, listTotal))
             }
             collapsibleBelow={WIDE_QUERY}
             results={{ count: filtered.length, id: 'active-filters' }}
@@ -725,6 +769,7 @@ export function CatalogView({
             onViewChange={handleViewChange}
             editable={collection.phase === 'ready' ? editable : undefined}
             onEditChange={handleEditChange}
+            hideEditSwitch={locked}
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
             allArts={view === 'grid' ? allArts : undefined}
@@ -734,7 +779,7 @@ export function CatalogView({
           />
           <div className="sort-row">
             <SortSelect sort={sort} onChange={setSort} />
-            <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} preferences={repositories.preferences} />
+            {!locked && <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} preferences={repositories.preferences} />}
             {editable && collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
               <div className="missing-add missing-add--quiet">
                 <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />
