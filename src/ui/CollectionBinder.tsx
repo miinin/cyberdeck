@@ -167,6 +167,15 @@ function BinderPocket({
 function BinderCover({ side, title, status }: { side: 'front' | 'back'; title: string; status: string }) {
   return (
     <section className={`binder-page binder-cover binder-cover--${side}`} aria-label={side === 'front' ? collectionTexts.coverFront : collectionTexts.coverBack}>
+      {/* An empty page of pockets, hidden: the cover takes exactly the size of a page, so the buttons below do not move. */}
+      <div className="binder-cover-sizer" aria-hidden="true">
+        <ul className="binder-pockets">
+          {Array.from({ length: POCKETS_PER_PAGE }, (_, i) => (
+            <li key={i} className="pocket" />
+          ))}
+        </ul>
+        <span className="binder-page-number" />
+      </div>
       <span className="binder-cover-art" aria-hidden="true" />
       {side === 'front' && (
         <div className="binder-cover-text">
@@ -387,7 +396,7 @@ export function CollectionBinder({
   };
 
   return (
-    <section className="binder" aria-labelledby={title}>
+    <section className="binder" data-columns={columns} aria-labelledby={title}>
       <h2 id={title} className="binder-title visually-hidden">
         {collectionTexts.binderHeading}
       </h2>
@@ -460,7 +469,7 @@ export function CollectionBinder({
         role="group"
         aria-label={collectionTexts.binderGroup}
         aria-describedby={`${title}-help`}
-        data-columns={view.kind === 'pages' ? columns : 1}
+        data-columns={columns}
         tabIndex={0}
         onKeyDown={onKeyDown}
         onTouchStart={onTouchStart}
@@ -483,6 +492,10 @@ export function CollectionBinder({
                     />
                   );
                 })}
+                {/* A short last page keeps the height of a full one. */}
+                {Array.from({ length: Math.max(0, POCKETS_PER_PAGE - (pages[index]?.length ?? 0)) }, (_, i) => (
+                  <li key={`filler-${i}`} className="pocket pocket--filler" aria-hidden="true" />
+                ))}
               </ul>
               <h3 id={`${title}-p${index}`} className="binder-page-number">
                 {collectionTexts.binderPage(index + 1)}
