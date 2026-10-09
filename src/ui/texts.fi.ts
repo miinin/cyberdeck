@@ -106,6 +106,7 @@ export const textsFi = {
   loaded: (count: number) => `${cardCount(count)} ladattu.`,
 
   tableCaption: 'Kaikki kortit',
+  tableCaptionOwn: 'Omat kortit',
   tableCaptionFiltered: 'Hakua vastaavat kortit',
   // Card images: T-027 UX handover (PM accepted the dialog on 2026-10-02).
   columnImage: 'Kuva',

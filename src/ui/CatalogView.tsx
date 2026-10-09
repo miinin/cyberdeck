@@ -500,7 +500,7 @@ function CatalogBody({
   const setGroups = new Map(setList.map((option) => [option.family, option.group]));
 
   const status = filterActive ? texts.filteredStatus(filtered.length, allCards.length) : cardCount(allCards.length);
-  const listCaption = filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
+  const listCaption = locked ? texts.tableCaptionOwn : filterActive ? texts.tableCaptionFiltered : texts.tableCaption;
   const noResults = filtered.length === 0;
   // "Vain omistetut" alone and nothing owned: guide to marking cards instead (UX.md 6.6).
   const noOwnedCards = !locked && noResults && listedOnly && !isFilterActive(criteria);

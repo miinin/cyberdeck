@@ -114,7 +114,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-109 | Kokoelma: Myytävät-tilasto pois, näkymävalitsin ja kansionäkymä (3 × 3 -taskusivut, aukeama) | 1 | Should | Koodari | Done | PM esikatselu |
 | T-110 | Pakkaeditori mobiilissa: välilehdet Pakka / Lisää kortteja, pakka näkyy ensin | 1 | Should | Koodari | Done | PM esikatselu |
 | T-111 | Mobiilikorjaukset 2: navigointi ylös yhdelle riville, yksi "Lisää kortteja", näkyvyyskytkin Yksityinen ⇄ Julkinen | 1 | Should | Koodari | Done | PM esikatselu |
-| T-112 | Sivustorakenteen UX-arvio: käyttäjäpolut, hypoteesit ja rakennevaihtoehdot A (4 kohdetta) / B (3 kohdetta) | 1 | Should | PM → UX (Opus) | Backlog | – |
+| T-112 | Sivustorakenne (D-028): Kokoelma = "Omat kortit" (lista ja määrien muokkaus Kokoelma-sivulla) | 1 | Should | Koodari | Done | PM esikatselu |
 | T-113 | Jatkuva skannaus toimimaan: mittaus, usean kuvan varmuus, elävä palaute ja "Lisää"-ehdotus, parempi kamerakuva | 1 | Should | Koodari | Done | Digiturva (kamera) |
 | T-114 | Pakkaeditorin karsinta: määrä kerran, tallennus ja vienti nimen riville, näkyvyys yhdelle riville, koristeviiva pois | 1 | Should | Koodari | Done | PM esikatselu |
 | T-115 | UI-siistiminen: Kortit-sivun työkalurivi, pakkaeditorin otsikko ja yhtenäinen kytkin, korttinäkymä pakkaan, sideboardin vaakavieritys | 1 | Should | Koodari | Done | PM esikatselu |

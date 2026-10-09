@@ -92,6 +92,7 @@ export const textsEn: typeof textsFi = {
   loaded: (count: number) => `${cardCountEn(count)} loaded.`,
 
   tableCaption: 'All cards',
+  tableCaptionOwn: 'My cards',
   tableCaptionFiltered: 'Cards matching your search',
   columnImage: 'Image',
   enlargeImage: 'Enlarge image: ',

@@ -1,6 +1,6 @@
 # T-112 · Sivustorakenteen UX-arvio ja uusi rakenne (suunnitelma)
 
-**Tila:** In Progress. Rakenne valittu: A (D-028). **Päättäjä:** käyttäjä (pyyntö 2026-10-08: "onko rakenne kärkevä, voiko jotain muuttaa? UX is the king"), PM (suunnitelma).
+**Tila:** Done. Rakenne valittu: A (D-028). **Päättäjä:** käyttäjä (pyyntö 2026-10-08: "onko rakenne kärkevä, voiko jotain muuttaa? UX is the king"), PM (suunnitelma).
 
 ## Nykyinen rakenne
 | Päänavigointi | Sisältö |
@@ -59,3 +59,4 @@
 **Koodari 2026-10-09:** Kokoelma-sivun näkymävalitsin on nyt Omat kortit · Yleiskuva · Kansio, uuden käyttäjän oletus on Omat kortit (`CollectionPrefs.view` hyväksyy `own`; vanhat `overview`/`binder` säilyvät, tuntematon arvo antaa oletuksen). `CatalogView` sai propsin `mode: 'collection'` (omistus-suodatin lukittu `owned`, muokkaus aina päällä, ei omaa otsikkoa, ei kytkintä eikä skannauspainiketta) ja `shared`-propsin, jolla Kokoelma antaa omat collection/wants/proxy-storensa listalle (ei kahta erillistä storea). Tyhjä kokoelma näyttää ScanPromptin ja linkin "Selaa kortteja ja lisää". Tekstit: emptyBody/emptyLink ja Have-ohje ("Kokoelma-osiossa"). Testit: 1568 läpi, lint ja build läpi.
 Avoin: omat kortit -listan saavutettava nimi on edelleen "Kaikki kortit" (ei kortin tekstiä uudelle); Kokoelman skannauksen oletuspainos-tila (`useDefaultEdition`) on erillinen listan painostilasta, päivittyy vasta uudelleenlatauksessa.
 Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 2
+- **PM 2026-10-09:** listan saavutettava nimi Omat kortit -näkymässä on "Omat kortit" / "My cards" (`tableCaptionOwn`), testi päivitetty. Avoin 2 (skannauksen oletuspainos päivittyy vasta uudelleenlatauksessa) jää pieneksi velaksi. `npm test` 1568/1568, lint ja build läpi.

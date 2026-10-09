@@ -55,7 +55,7 @@ describe('CollectionView', () => {
 
   describe('Omat kortit (T-112)', () => {
     const own = (entries: [string, number][], repositories?: Repositories) => renderCollection(entries, repositories, 'own');
-    const rows = () => within(screen.getByRole('list', { name: /Kaikki kortit|All cards/ })).getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
+    const rows = () => within(screen.getByRole('list', { name: /^(Omat kortit|My cards)$/ })).getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
 
     it('offers three views in the order Omat kortit, Yleiskuva, Kansio, and starts on the first for a new user', async () => {
       window.location.hash = '#/kokoelma';
