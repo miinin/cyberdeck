@@ -17,6 +17,8 @@ import {
 } from '../domain/collection';
 import { isPrintingKey } from '../domain/printing';
 import { parseProxyQueue } from '../domain/proxySheet';
+import { normalizeBinderLayout } from '../domain/binderLayout';
+import type { BinderLayout } from '../domain/binderLayout';
 import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
 import type { PrintingKey } from '../domain/printing';
@@ -46,6 +48,7 @@ import {
   DECK_LIST_VIEW_KEY,
   DEFAULT_EDITION_KEY,
   SCAN_MODE_KEY,
+  BINDER_LAYOUT_KEY,
   COLLECTION_PREFS_KEY,
   ACCOUNT_LAST_UID_KEY,
   ACCOUNT_REDIRECT_PENDING_KEY,
@@ -134,9 +137,10 @@ function parseCollectionPrefs(raw: string | null): CollectionPrefs {
   try {
     const value: unknown = JSON.parse(raw);
     if (typeof value === 'object' && value !== null) {
-      const { view, showMissing } = value as Record<string, unknown>;
+      const { view, showMissing, binder } = value as Record<string, unknown>;
       if (view === 'own' || view === 'overview' || view === 'binder') prefs.view = view;
       if (typeof showMissing === 'boolean') prefs.showMissing = showMissing;
+      if (binder === 'set' || binder === 'custom') prefs.binder = binder;
     }
   } catch {
     // Not JSON: the defaults.
@@ -180,6 +184,8 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const decksKey = prefix === null ? DECKS_KEY : `${prefix}decks`;
   const wantsKey = prefix === null ? WANTS_KEY : `${prefix}wants`;
   const proxyKey = prefix === null ? PROXY_KEY : `${prefix}proxy`;
+  // The own binder holds the account's cards and a free-text name, so it follows the account like the proxy queue (T-120).
+  const binderLayoutKey = prefix === null ? BINDER_LAYOUT_KEY : `${prefix}binder-layout`;
   const backupPrefix = prefix === null ? BACKUP_PREFIX : `${prefix}backup:`;
   const syncBaseKey = `${prefix ?? 'cyberdeck:'}sync-base`;
   /** Same-tab listeners: `ui` hear sync-driven writes, `changes` hear every write (the sync engine). */
@@ -604,11 +610,29 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     saveCollectionPrefs: async (prefs: CollectionPrefs) => {
       const valid = parseCollectionPrefs(JSON.stringify(prefs));
-      if (valid.view !== prefs.view || valid.showMissing !== prefs.showMissing) {
+      if (valid.view !== prefs.view || valid.showMissing !== prefs.showMissing || valid.binder !== prefs.binder) {
         throw new StorageError('invalid-input', 'Unknown collection preferences');
       }
       try {
         store.setItem(COLLECTION_PREFS_KEY, JSON.stringify(valid));
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return valid;
+    },
+    loadBinderLayout: async () => {
+      try {
+        const raw = store.getItem(binderLayoutKey);
+        return raw === null ? null : normalizeBinderLayout(JSON.parse(raw));
+      } catch {
+        return null;
+      }
+    },
+    saveBinderLayout: async (layout: BinderLayout) => {
+      const valid = normalizeBinderLayout(layout);
+      if (valid === null) throw new StorageError('invalid-input', 'Invalid binder layout');
+      try {
+        store.setItem(binderLayoutKey, JSON.stringify(valid));
       } catch (error) {
         throw toStorageError(error, 'write');
       }

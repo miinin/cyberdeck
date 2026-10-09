@@ -122,3 +122,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-117 | Pakat-sivun uudistus: otsikkorivi ja "+ Uusi pakka", "Tuo ▾" -valikko, kompakti Omat/Julkiset, yhtenäiset muodot, tiiviit pakkakortit | 1 | Should | Koodari | Done | – |
 | T-118 | Koko sivuston UI-yhtenäisyys ja viimeistely: auditointi (UX-118) ja korjaukset | 1 | Must | UX (Opus) → Koodari | Done | PM esikatselu |
 | T-119 | Skannaa suoraan pakkaan: skanneri pakkaeditorista ja Pakat-listalta, valinnat pakkaan / pakkaan ja kokoelmaan sekä pääpakka / sideboard | 1 | Should | Koodari | Done | PM esikatselu |
+| T-120 | Oma kansio: Setti / Oma kansio -valinta, omistettujen korttien vapaa sijoittelu taskuihin (tallennus laitteelle), etu- ja takakansi | 1 | Should | Koodari | Done | Digiturva (tallennus) |

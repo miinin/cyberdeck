@@ -63,6 +63,14 @@ export function copiesInMainSets(card: Card, collection: Collection): number {
   return mainPrintings(card).reduce((sum, printing) => sum + (versions[printing.key] ?? 0), 0);
 }
 
+/**
+ * Copies of a card that can be put in the own binder (T-120): the copies in the main sets, or, for a card that has
+ * no printing there at all, all its copies.
+ */
+export function placeableCopies(card: Card, collection: Collection): number {
+  return mainPrintings(card).length === 0 ? countOf(collection, card.key) : copiesInMainSets(card, collection);
+}
+
 /** The special rarity the user owns in the main sets and that has a picture, or null. */
 export function ownedSpecialRarity(card: Card, collection: Collection, hasArt: (cardKey: string, rarity: string) => boolean): string | null {
   const versions = versionsOf(collection, card.key);
@@ -86,6 +94,22 @@ export function ownsOnlyBeta(card: Card, collection: Collection): boolean {
   return beta > 0 && retail === 0;
 }
 
+/** One pocket for a card (also for the own binder, T-120): `copies` is what the user owns of it, 0 = a ghost. */
+export function pocketFor(
+  card: Card,
+  collection: Collection,
+  hasArt: (cardKey: string, rarity: string) => boolean = () => true,
+  copies: number = placeableCopies(card, collection),
+): Pocket {
+  return {
+    card,
+    number: mainPrintings(card)[0]?.number ?? '',
+    copies,
+    artRarity: copies > 0 ? ownedSpecialRarity(card, collection, hasArt) : null,
+    betaOnly: copies > 0 && ownsOnlyBeta(card, collection),
+  };
+}
+
 /** All pockets of the one binder set (every card of Retail and Beta once) in collector number order (the catalog order breaks ties). */
 export function binderPockets(
   cards: readonly Card[],
@@ -96,17 +120,7 @@ export function binderPockets(
   cards.forEach((card, index) => {
     const inSets = mainPrintings(card);
     if (inSets.length === 0) return;
-    const copies = copiesInMainSets(card, collection);
-    pockets.push({
-      index,
-      pocket: {
-        card,
-        number: inSets[0]?.number ?? '',
-        copies,
-        artRarity: copies > 0 ? ownedSpecialRarity(card, collection, hasArt) : null,
-        betaOnly: copies > 0 && ownsOnlyBeta(card, collection),
-      },
-    });
+    pockets.push({ index, pocket: pocketFor(card, collection, hasArt, copiesInMainSets(card, collection)) });
   });
   pockets.sort((a, b) => compareCollectorNumbers(a.pocket.number, b.pocket.number) || a.index - b.index);
   return pockets.map((entry) => entry.pocket);
@@ -148,4 +162,42 @@ export function swipeDirection(dx: number, dy: number, threshold = 48): 1 | -1 |
 export function pageNumbers(shown: readonly number[]): { first: number; last: number } {
   const first = (shown[0] ?? 0) + 1;
   return { first, last: (shown[shown.length - 1] ?? 0) + 1 };
+}
+
+/*
+ * The book around the pages (T-120): the front cover, the pages and the back cover. A "sheet" number names a place in it:
+ * 0 = the front cover, 1..n = page 1..n, n + 1 = the back cover. The covers are always alone on screen.
+ */
+export type BookView = { kind: 'front' } | { kind: 'back' } | { kind: 'pages'; pages: number[] };
+
+export function bookViews(pageCount: number, columns: 1 | 2): BookView[] {
+  const views: BookView[] = [{ kind: 'front' }];
+  for (let page = 0; page < pageCount; page += columns) {
+    views.push({ kind: 'pages', pages: visiblePages(page, pageCount, columns) });
+  }
+  views.push({ kind: 'back' });
+  return views;
+}
+
+/** The index of the view that shows the sheet; a sheet outside the book is the nearest end. */
+export function viewIndexOfSheet(views: readonly BookView[], sheet: number, pageCount: number): number {
+  if (!Number.isFinite(sheet) || sheet <= 0) return 0;
+  if (sheet >= pageCount + 1) return views.length - 1;
+  const index = views.findIndex((view) => view.kind === 'pages' && view.pages.includes(Math.trunc(sheet) - 1));
+  return index === -1 ? views.length - 1 : index;
+}
+
+/** The first sheet of a view: where the book stays when the screen changes between one page and a spread. */
+export function sheetOfView(view: BookView, pageCount: number): number {
+  if (view.kind === 'front') return 0;
+  if (view.kind === 'back') return pageCount + 1;
+  return (view.pages[0] ?? 0) + 1;
+}
+
+/** Turning the book: forward (+1) or back (-1) through the covers and, on a wide screen, by a whole spread. */
+export function turnBook(sheet: number, direction: 1 | -1, pageCount: number, columns: 1 | 2): number {
+  const views = bookViews(pageCount, columns);
+  const index = Math.min(Math.max(0, viewIndexOfSheet(views, sheet, pageCount) + direction), views.length - 1);
+  const view = views[index];
+  return view === undefined ? 0 : sheetOfView(view, pageCount);
 }
