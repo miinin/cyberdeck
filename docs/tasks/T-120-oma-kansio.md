@@ -1,6 +1,6 @@
 # T-120 · Oma kansio ja kannet
 
-**Tila:** Review. **Päättäjä:** käyttäjä (2026-10-09: "kustomoitava kokoelman kansio, nykyinen/omat valinnat, sijoittelu kuten oikeassa kansiossa, etu- ja takakansi"; valinnat alla), PM (määrittely).
+**Tila:** Done. **Päättäjä:** käyttäjä (2026-10-09: "kustomoitava kokoelman kansio, nykyinen/omat valinnat, sijoittelu kuten oikeassa kansiossa, etu- ja takakansi"; valinnat alla), PM (määrittely).
 
 ## Tavoite
 Kokoelman Kansio-näkymässä (`CollectionBinder`, T-109/T-116) voi valita, näytetäänkö nykyinen setin numerojärjestys vai oma kansio, jonka kortit käyttäjä sijoittaa itse taskuihin kuten oikeassa keräilykansiossa. Kansiossa on myös etukansi ja takakansi.
