@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-09 (PM, T-107–T-116)
+# STATUS · päivitetty 2026-10-09 (PM, T-009, T-112, T-119)
 
 ## Yhdellä lauseella
 Kaikki T-116:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
@@ -9,11 +9,11 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-107–T-116 julkaistu 2026-10-08–09 | Seuraavaksi T-112 (rakenne A, D-028; Proxy pysyy navissa) |
+| – | – | T-112 (Omat kortit Kokoelmaan), T-119 (skannaa pakkaan) ja T-009 julkaistu 2026-10-09 | Seuraavaksi T-112 (rakenne A, D-028; Proxy pysyy navissa) |
 
 ## Avoimet
 - Skannerin tarkistus muilla kuin sinisillä korteilla oikeilla kuvilla (T-113, käyttäjä).
-- TASKS.md:n Backlog-rivit (T-002–T-009 sekä velat T-030, T-031, T-041–T-043, T-047).
+- TASKS.md:n Backlog-rivit (T-002–T-008 sekä velat T-030, T-031, T-041–T-043, T-047).
 - 79 puuttuvaa versiokuvaa: käyttäjä etsii ne.
 - Testikäyttäjän ja UX:n katselmointi mobiilista.
 

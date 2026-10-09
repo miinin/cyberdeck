@@ -13,7 +13,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-006 | [velka] Keskeneräisten pyyntöjen peruutus epäonnistumisen jälkeen ja testityyppien erottaminen sovelluksen tsconfigista | 1 | Could | Koodari | Backlog | – |
 | T-007 | [velka] SR-1:n lint-säännön kiertotiet suljettava (SEC-002) ennen rules_text-muotoilua | 1 | Should | Koodari | Backlog | Digiturva |
 | T-008 | Virhe- ja osittaisen tilan parannukset: kortit säilyvät uusintayrityksessä (B-001), fokus tuplaklikkauksessa (B-016), skipped-laskenta (B-003), virheteksti lajin mukaan (B-006), hinnan järkevyystarkistus (B-009) | 1 | Should | Koodari | Done (B-003, B-009 korjattu; B-001, B-006, B-016 vanhentuneet D-012:n myötä) | UX, Sisällöntuottaja, Testikäyttäjä |
-| T-009 | Hostingin kovennus: noscript, välimuistiotsakkeet (myös `index.html` `Cache-Control: no-cache`, SEC-011) ja puuttuvien assettien 404 (B-004), Firebase-API-avaimen rajaus (B-010) ennen datatallennusta | 1 | Should | Koodari | Osittain (T-086: noscript, index.html no-cache, 404; API-avaimen rajaus jäljellä) | Digiturva (SR-9) |
+| T-009 | Hostingin kovennus: noscript, välimuistiotsakkeet (myös `index.html` `Cache-Control: no-cache`, SEC-011) ja puuttuvien assettien 404 (B-004), Firebase-API-avaimen rajaus (B-010) ennen datatallennusta | 1 | Should | Koodari | Done (T-086: noscript, index.html no-cache, 404; API-avaimen rajaus todennettu 2026-10-09, R-14) | Digiturva (SR-9) |
 | T-010 | Haku ja suodatus korttilistaan (nimi, tyyppi, väri) | 1 | Must | Koodari | Done | UX, Sisällöntuottaja, Testikäyttäjä |
 | T-011 | Tietomalli ja paikallinen tallennuskerros (kokoelma, pakat), valmius Firebaseen ja painoksiin (D-007) | 1 | Must | Arkkitehti → Koodari | Done | Arkkitehti, Digiturva |
 | T-012 | Kokoelma: omistettujen korttien ja määrien merkintä helposti, ilmoitus "tiedot vain tässä selaimessa" (R-10) sekä newer-version-, reset- ja kirjoitus estetty -ilmoitukset (SEC-007) | 1 | Must | Koodari | Done | UX, Digiturva (Testikäyttäjä ja Dokumentoija MVP-1:n lopussa, D-009) |
@@ -114,10 +114,11 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-109 | Kokoelma: Myytävät-tilasto pois, näkymävalitsin ja kansionäkymä (3 × 3 -taskusivut, aukeama) | 1 | Should | Koodari | Done | PM esikatselu |
 | T-110 | Pakkaeditori mobiilissa: välilehdet Pakka / Lisää kortteja, pakka näkyy ensin | 1 | Should | Koodari | Done | PM esikatselu |
 | T-111 | Mobiilikorjaukset 2: navigointi ylös yhdelle riville, yksi "Lisää kortteja", näkyvyyskytkin Yksityinen ⇄ Julkinen | 1 | Should | Koodari | Done | PM esikatselu |
-| T-112 | Sivustorakenteen UX-arvio: käyttäjäpolut, hypoteesit ja rakennevaihtoehdot A (4 kohdetta) / B (3 kohdetta) | 1 | Should | PM → UX (Opus) | Backlog | – |
+| T-112 | Sivustorakenne (D-028): Kokoelma = "Omat kortit" (lista ja määrien muokkaus Kokoelma-sivulla) | 1 | Should | Koodari | Done | PM esikatselu |
 | T-113 | Jatkuva skannaus toimimaan: mittaus, usean kuvan varmuus, elävä palaute ja "Lisää"-ehdotus, parempi kamerakuva | 1 | Should | Koodari | Done | Digiturva (kamera) |
 | T-114 | Pakkaeditorin karsinta: määrä kerran, tallennus ja vienti nimen riville, näkyvyys yhdelle riville, koristeviiva pois | 1 | Should | Koodari | Done | PM esikatselu |
 | T-115 | UI-siistiminen: Kortit-sivun työkalurivi, pakkaeditorin otsikko ja yhtenäinen kytkin, korttinäkymä pakkaan, sideboardin vaakavieritys | 1 | Should | Koodari | Done | PM esikatselu |
 | T-116 | Kokoelman siivous (pieni näkymäkytkin, yksi kansiosetti Beta-merkillä, omistettu kuvitus), otsikkoreunus pois, glitch kaikille sivuille, Have/Want (i)-vihjeet, proxy-tarjoukset | 1 | Should | Koodari | Done | PM esikatselu |
 | T-117 | Pakat-sivun uudistus: otsikkorivi ja "+ Uusi pakka", "Tuo ▾" -valikko, kompakti Omat/Julkiset, yhtenäiset muodot, tiiviit pakkakortit | 1 | Should | Koodari | Done | – |
 | T-118 | Koko sivuston UI-yhtenäisyys ja viimeistely: auditointi (UX-118) ja korjaukset | 1 | Must | UX (Opus) → Koodari | Done | PM esikatselu |
+| T-119 | Skannaa suoraan pakkaan: skanneri pakkaeditorista ja Pakat-listalta, valinnat pakkaan / pakkaan ja kokoelmaan sekä pääpakka / sideboard | 1 | Should | Koodari | Done | PM esikatselu |

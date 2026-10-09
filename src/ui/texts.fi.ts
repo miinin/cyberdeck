@@ -106,6 +106,7 @@ export const textsFi = {
   loaded: (count: number) => `${cardCount(count)} ladattu.`,
 
   tableCaption: 'Kaikki kortit',
+  tableCaptionOwn: 'Omat kortit',
   tableCaptionFiltered: 'Hakua vastaavat kortit',
   // Card images: T-027 UX handover (PM accepted the dialog on 2026-10-02).
   columnImage: 'Kuva',
@@ -336,7 +337,7 @@ export const textsFi = {
   wantAddLabel: 'Lisää wantiin: ',
   wantInList: (count: number) => `wantissa ${count}`,
   haveHeading: 'Have',
-  haveIntro: 'Kortit, joita sinulla on yli täyden pelisarjan. Ne ovat vaihdettavissa. Määrää muutat Kortit-osiossa. Vaihdettavissa ovat kappaleet, jotka ylittävät täyden pelisarjan (3 kappaletta, Legend-korteista 1).',
+  haveIntro: 'Kortit, joita sinulla on yli täyden pelisarjan. Ne ovat vaihdettavissa. Määrää muutat Kokoelma-osiossa. Vaihdettavissa ovat kappaleet, jotka ylittävät täyden pelisarjan (3 kappaletta, Legend-korteista 1).',
   haveEmpty: 'Ei vaihdettavia kortteja.',
   haveLoading: 'Haetaan kokoelmaa…',
   haveUnavailable: 'Kokoelmaa ei voi tällä hetkellä lukea.',

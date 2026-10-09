@@ -36,9 +36,11 @@ import { useCollectionPrefs } from './useCollectionPrefs';
 import { useDefaultEdition } from './useDefaultEdition';
 import { useWants } from './useWants';
 import { SegmentedChoice } from './SegmentedChoice';
+import { CatalogView } from './CatalogView';
 
 /** One row of a breakdown: the name, a bar (decoration) and the numbers (the text says everything). */
 const COLLECTION_VIEW_OPTIONS = [
+  ['own', collectionTexts.viewOwn],
   ['overview', collectionTexts.viewOverview],
   ['binder', collectionTexts.viewBinder],
 ] as const;
@@ -91,8 +93,18 @@ function MissingCard({ card }: { card: Card }) {
  * by color and type) and what is missing, with buttons that act on the missing cards. Charts are decoration:
  * the numbers are always written out.
  */
-export function CollectionView({ cards, repositories }: { cards: readonly Card[]; repositories: Repositories }) {
-  const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
+export function CollectionView({
+  cards,
+  repositories,
+  headerSlot = null,
+}: {
+  cards: readonly Card[];
+  repositories: Repositories;
+  /** Header element for the persistent storage button, passed on to the owned cards list. */
+  headerSlot?: HTMLElement | null;
+}) {
+  const collectionHandle = useCollection(repositories.collection);
+  const { snapshot: collection, store: collectionStore } = collectionHandle;
   const [edition, setEdition] = useDefaultEdition(repositories);
   const wants = useWants(repositories.wants);
   const proxyQueue = useProxyQueue(repositories.proxy);
@@ -124,6 +136,12 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
   const mainSets = data.sets.filter((row) => row.group === 'sets');
   const otherSets = data.sets.filter((row) => row.group === 'other');
   const setRow = (row: (typeof data.sets)[number]) => <ProgressRow key={row.family} label={row.label} owned={row.owned} total={row.total} />;
+
+  // The owned cards list stays once shown, even if the last card is taken out: its rows stay visible until the filters change.
+  const [ownListShown, setOwnListShown] = useState(false);
+  const wantsOwnList = ready && prefs.view === 'own' && overview.distinct > 0;
+  if (wantsOwnList && !ownListShown) setOwnListShown(true);
+  const showOwnList = ready && prefs.view === 'own' && (wantsOwnList || ownListShown);
 
   const scanProps = { cards, snapshot: collection, store: collectionStore, edition, onEditionChange: setEdition, preferences: repositories.preferences };
 
@@ -157,7 +175,17 @@ export function CollectionView({ cards, repositories }: { cards: readonly Card[]
         />
       )}
 
-      {ready && prefs.view === 'overview' && overview.distinct === 0 && (
+      {showOwnList && (
+        <CatalogView
+          mode="collection"
+          cards={cards}
+          repositories={repositories}
+          headerSlot={headerSlot}
+          shared={{ collection: collectionHandle, wants, proxyQueue }}
+        />
+      )}
+
+      {ready && prefs.view !== 'binder' && !showOwnList && overview.distinct === 0 && (
         <div className="empty">
           <ScanPrompt {...scanProps} />
           <h2>{collectionTexts.emptyTitle}</h2>

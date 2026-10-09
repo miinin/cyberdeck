@@ -62,12 +62,12 @@ export type DeckListView = 'list' | 'stacks' | 'cards';
 export type DefaultEdition = 'beta' | 'retail';
 /** Card scanner mode (T-108): confirm every card, or add the recognised cards automatically. */
 export type ScanMode = 'single' | 'continuous';
-/** Collection page (T-109, T-116): the progress overview or the binder, and whether the binder shows missing cards. Older saved fields are ignored. */
+/** Collection page (T-109, T-116, T-112): the owned cards list, the progress overview or the binder, and whether the binder shows missing cards. Older saved fields are ignored. */
 export interface CollectionPrefs {
-  view: 'overview' | 'binder';
+  view: 'own' | 'overview' | 'binder';
   showMissing: boolean;
 }
-export const DEFAULT_COLLECTION_PREFS: CollectionPrefs = { view: 'overview', showMissing: true };
+export const DEFAULT_COLLECTION_PREFS: CollectionPrefs = { view: 'own', showMissing: true };
 
 /** User preferences that are not data (UX.md 8.7). Stored as raw strings, not in an envelope. */
 export interface PreferencesRepository {

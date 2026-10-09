@@ -65,6 +65,7 @@ export function ListToolbar({
   onViewChange,
   editable,
   onEditChange,
+  hideEditSwitch = false,
   imageSize,
   onImageSizeChange,
   allArts,
@@ -76,6 +77,8 @@ export function ListToolbar({
   onViewChange: (next: CatalogViewMode) => void;
   editable: boolean | undefined;
   onEditChange: (next: boolean) => void;
+  /** The edit switch is left out and editing is always on (the Collection page's own cards, T-112). */
+  hideEditSwitch?: boolean;
   imageSize?: ImageSize;
   onImageSizeChange?: (next: ImageSize) => void;
   /** The "all arts" switch (D-021); undefined leaves it out. Session state, never saved. */
@@ -106,9 +109,9 @@ export function ListToolbar({
           </p>
         </SegmentedChoice>
       )}
-      {(editable !== undefined || allArts !== undefined) && (
+      {((editable !== undefined && !hideEditSwitch) || allArts !== undefined) && (
         <div className="toolbar-switches">
-          {editable !== undefined && <SwitchButton checked={editable} label={texts.editSwitchLabel} onChange={onEditChange} />}
+          {editable !== undefined && !hideEditSwitch && <SwitchButton checked={editable} label={texts.editSwitchLabel} onChange={onEditChange} />}
           {allArts !== undefined && (
             <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={(next) => onAllArtsChange?.(next)} />
           )}

@@ -92,6 +92,7 @@ export const textsEn: typeof textsFi = {
   loaded: (count: number) => `${cardCountEn(count)} loaded.`,
 
   tableCaption: 'All cards',
+  tableCaptionOwn: 'My cards',
   tableCaptionFiltered: 'Cards matching your search',
   columnImage: 'Image',
   enlargeImage: 'Enlarge image: ',
@@ -313,7 +314,7 @@ export const textsEn: typeof textsFi = {
   wantAddLabel: 'Add to wants: ',
   wantInList: (count: number) => `in wants: ${count}`,
   haveHeading: 'Have',
-  haveIntro: 'Cards you own beyond a full playset. They are available for trade. Change counts in the Cards section. Copies beyond a full playset (3 copies, 1 for Legends) can be traded.',
+  haveIntro: 'Cards you own beyond a full playset. They are available for trade. Change counts in the Collection section. Copies beyond a full playset (3 copies, 1 for Legends) can be traded.',
   haveEmpty: 'No cards to trade.',
   haveLoading: 'Loading your collection…',
   haveUnavailable: 'The collection cannot be read right now.',
