@@ -13,7 +13,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 
 ## Avoimet
 - Skannerin tarkistus muilla kuin sinisillä korteilla oikeilla kuvilla (T-113, käyttäjä).
-- TASKS.md:n Backlog-rivit (T-002–T-009 sekä velat T-030, T-031, T-041–T-043, T-047).
+- TASKS.md:n Backlog-rivit (T-002–T-008 sekä velat T-030, T-031, T-041–T-043, T-047).
 - 79 puuttuvaa versiokuvaa: käyttäjä etsii ne.
 - Testikäyttäjän ja UX:n katselmointi mobiilista.
 
