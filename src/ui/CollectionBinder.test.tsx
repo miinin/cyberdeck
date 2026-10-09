@@ -24,6 +24,8 @@ async function renderBinder(entries: [string, number][], repositories: Repositor
     for (let round = 0; round < 5; round += 1) await Promise.resolve();
   });
   await userEvent.click(await screen.findByRole('radio', { name: /^(Kansio|Binder)$/ }));
+  // The binder opens on the front cover (T-120): turn to the first page.
+  await userEvent.click(screen.getByRole('button', { name: /Seuraava sivu|Next page/ }));
   return repositories;
 }
 
@@ -51,8 +53,10 @@ describe('CollectionBinder', () => {
     book.focus();
     await userEvent.keyboard('{ArrowLeft}');
     expect(screen.getByRole('status')).toHaveTextContent(/Sivu 1 \/ 2|Page 1 \/ 2/);
-    await userEvent.keyboard('{ArrowRight}{ArrowRight}');
+    await userEvent.keyboard('{ArrowRight}');
     expect(screen.getByRole('status')).toHaveTextContent(/Sivu 2 \/ 2|Page 2 \/ 2/);
+    await userEvent.keyboard('{ArrowRight}');
+    expect(screen.getByRole('status')).toHaveTextContent(/Takakansi|Back cover/);
   });
 
   it('hides the missing cards on request and remembers the choices', async () => {
@@ -60,15 +64,15 @@ describe('CollectionBinder', () => {
     await userEvent.click(screen.getByRole('switch', { name: /Näytä puuttuvat|Show missing/ }));
     expect(pockets()).toHaveLength(2);
     expect(screen.getByRole('status')).toHaveTextContent(/Sivu 1 \/ 1|Page 1 \/ 1/);
-    expect(await repositories.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false });
+    expect(await repositories.preferences.loadCollectionPrefs()).toEqual({ view: 'binder', showMissing: false, binder: 'set' });
   });
 
   it('opens on the binder when it was the last choice', async () => {
     const repositories = createMemoryRepositories({ initial: storedCollection([['c1', 1]]) });
-    await repositories.preferences.saveCollectionPrefs({ view: 'binder', showMissing: true });
+    await repositories.preferences.saveCollectionPrefs({ view: 'binder', showMissing: true, binder: 'set' });
     window.location.hash = '#/kokoelma';
     render(<App cards={cards} repositories={repositories} />);
-    expect(await screen.findAllByRole('link', { name: /#001 Card 1/ })).toHaveLength(1);
+    expect(await screen.findByRole('status')).toHaveTextContent(/Etukansi|Front cover/);
     expect(screen.getByRole('radio', { name: /^(Kansio|Binder)$/ })).toBeChecked();
   });
 
@@ -92,6 +96,7 @@ describe('CollectionBinder', () => {
     window.location.hash = '#/kokoelma';
     render(<App cards={[...cards, betaCard]} repositories={repositories} />);
     await userEvent.click(await screen.findByRole('radio', { name: /^(Kansio|Binder)$/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Seuraava sivu|Next page/ }));
     const link = await screen.findByRole('link', { name: /#001β Beta Card, (omistettu|owned) 1, (Beta-painos|Beta edition)/ });
     expect(within(link).getByText('Beta')).toBeInTheDocument();
     const retailLink = screen.getByRole('link', { name: /^#001 Card 1, (omistettu|owned) 1$/ });

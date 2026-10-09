@@ -170,6 +170,9 @@ export function CollectionView({
         <CollectionBinder
           cards={cards}
           collection={saved}
+          preferences={repositories.preferences}
+          mode={prefs.binder}
+          onModeChange={(binder) => setPrefs({ binder })}
           showMissing={prefs.showMissing}
           onShowMissingChange={(showMissing) => setPrefs({ showMissing })}
         />
