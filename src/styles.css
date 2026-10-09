@@ -8590,6 +8590,19 @@ section[aria-labelledby='have-heading'] {
   }
 }
 
+/* The title of the add-cards part and its Scan button share a row (T-119). */
+.editor-add-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.editor-add-head .scan-open {
+  align-self: center;
+}
+
 /* Decks page (T-117): the title row holds the actions, the cards are tight and quiet. */
 .decks-head {
   align-items: center;
@@ -8603,7 +8616,7 @@ section[aria-labelledby='have-heading'] {
 .deck-actions {
   position: relative;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: var(--space-2);
   min-inline-size: 0;
 }

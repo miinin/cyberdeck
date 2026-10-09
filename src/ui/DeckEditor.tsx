@@ -80,6 +80,10 @@ import { SendToProxyButton, useProxyQueue } from './SendToProxy';
 import { trackDeckSave } from './useDecks';
 import { EDITOR_TABS_QUERY, EDITOR_WIDE_QUERY, FINE_POINTER_QUERY, useMediaQuery } from './useMediaQuery';
 import { SegmentedChoice } from './SegmentedChoice';
+import { ScanCardsButton, cameraSupported } from './CardScanner';
+import type { DeckPart, ScanDeckTarget } from './CardScanner';
+import { clearDeckScan, deckScanRequested } from './scanIntent';
+import { useDefaultEdition } from './useDefaultEdition';
 
 /** A change is saved this long after the last edit (T-013). */
 export const AUTOSAVE_DELAY_MS = 500;
@@ -89,6 +93,12 @@ export const CHANGE_ANNOUNCE_MS = 400;
 
 /** The "same Legend" message stays this long (T-045). */
 export const TOAST_MS = 4000;
+
+/** Why a card cannot be added to the deck: a notice stays on the page, the rest is a short toast. */
+interface AddBlock {
+  text: string;
+  notice: boolean;
+}
 
 type SaveState = 'saved' | 'dirty' | 'saving' | 'error';
 type SaveErrorKind = StorageErrorKind | 'unknown';
@@ -108,7 +118,11 @@ export function DeckEditor({
 }) {
   const repository = repositories.decks;
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
-  const { snapshot: collection } = useCollection(repositories.collection);
+  const { snapshot: collection, store: collectionStore } = useCollection(repositories.collection);
+  const [scanEdition, setScanEdition] = useDefaultEdition(repositories);
+  // Opened from the Scan a new deck button (T-119): the scanner opens as soon as the editor shows.
+  const [scanAtStart] = useState(() => deckScanRequested(deckId));
+  useEffect(() => clearDeckScan, []);
   const wants = useWants(repositories.wants);
   const proxyQueue = useProxyQueue(repositories.proxy);
 
@@ -436,15 +450,43 @@ export function DeckEditor({
   );
   const missingCopies = missingCards.reduce((sum, row) => sum + row.missing, 0);
 
-  const setCount = (card: Card, count: number) => {
-    const base = contentRef.current;
+  /**
+   * The rules for raising a card in the main deck or the sideboard (T-045, T-074), shared by the buttons and the
+   * scanner (T-119): the reason text, or null when the change is allowed. A "notice" stays on the page; the rest is a toast.
+   */
+  const mainBlock = (base: DeckContent, card: Card, count: number): AddBlock | null => {
     if (count > (deckCounts(base).get(card.key) ?? 0) && hasSameNameLegend(card, base, cardsByKey)) {
-      setToast(deckTexts.sameLegend(card.name));
-      return;
+      return { text: deckTexts.sameLegend(card.name), notice: false };
     }
     const isNew = !deckCounts(base).has(card.key);
     if (isNew && count > 0 && distinctRows(base) >= MAX_DECK_DISTINCT_CARDS) {
-      setNotice(deckTexts.distinctLimit);
+      return { text: deckTexts.distinctLimit, notice: true };
+    }
+    return null;
+  };
+
+  const sideBlock = (base: DeckContent, card: Card, count: number): AddBlock | null => {
+    const side = sideboardCounts(base).get(card.key) ?? 0;
+    if (card.type === 'Legend') return { text: deckTexts.sideboardNoLegend, notice: false };
+    if (count > side && sideboardSize(base) >= SIDEBOARD_SIZE) {
+      return { text: deckTexts.sideboardFull(SIDEBOARD_SIZE), notice: false };
+    }
+    if (count > side && (allDeckCounts(base).get(card.key) ?? 0) >= MAX_COPIES) {
+      return { text: deckTexts.sideboardCopiesFull(MAX_COPIES), notice: false };
+    }
+    if (side === 0 && count > 0 && distinctRows(base) >= MAX_DECK_DISTINCT_CARDS) {
+      return { text: deckTexts.distinctLimit, notice: true };
+    }
+    return null;
+  };
+
+  const showBlock = (block: AddBlock) => (block.notice ? setNotice(block.text) : setToast(block.text));
+
+  const setCount = (card: Card, count: number) => {
+    const base = contentRef.current;
+    const block = mainBlock(base, card, count);
+    if (block !== null) {
+      showBlock(block);
       return;
     }
     setNotice(null);
@@ -467,17 +509,9 @@ export function DeckEditor({
 
   const setSideCount = (card: Card, count: number) => {
     const base = contentRef.current;
-    const side = sideboardCounts(base).get(card.key) ?? 0;
-    if (card.type === 'Legend') {
-      setToast(deckTexts.sideboardNoLegend);
-      return;
-    }
-    if (count > side && (allDeckCounts(base).get(card.key) ?? 0) >= MAX_COPIES) {
-      setToast(deckTexts.sideboardCopiesFull(MAX_COPIES));
-      return;
-    }
-    if (side === 0 && count > 0 && distinctRows(base) >= MAX_DECK_DISTINCT_CARDS) {
-      setNotice(deckTexts.distinctLimit);
+    const block = sideBlock(base, card, count);
+    if (block !== null) {
+      showBlock(block);
       return;
     }
     setNotice(null);
@@ -486,12 +520,37 @@ export function DeckEditor({
 
   /** Adds one copy straight to the sideboard from the search results (T-074). */
   const addToSideboard = (card: Card) => {
-    const base = contentRef.current;
-    if (card.type !== 'Legend' && sideboardSize(base) >= SIDEBOARD_SIZE) {
-      setToast(deckTexts.sideboardFull(SIDEBOARD_SIZE));
-      return;
-    }
-    setSideCount(card, (sideboardCounts(base).get(card.key) ?? 0) + 1);
+    setSideCount(card, (sideboardCounts(contentRef.current).get(card.key) ?? 0) + 1);
+  };
+
+  /** The deck the scanner fills (T-119): the same rules as the buttons, all copies or none. */
+  const scanTarget: ScanDeckTarget = {
+    name: content.name,
+    add: (card, part, copies) => {
+      let base = contentRef.current;
+      for (let i = 0; i < copies; i += 1) {
+        const main = deckCounts(base).get(card.key) ?? 0;
+        const side = sideboardCounts(base).get(card.key) ?? 0;
+        const copiesFull = (allDeckCounts(base).get(card.key) ?? 0) >= MAX_COPIES;
+        const block =
+          part === 'main'
+            ? (mainBlock(base, card, main + 1) ?? (copiesFull ? { text: deckTexts.sideboardCopiesFull(MAX_COPIES), notice: false } : null))
+            : sideBlock(base, card, side + 1);
+        if (block !== null) return block.text;
+        base = part === 'main' ? withDeckCount(base, card.key, main + 1) : withSideboardCount(base, card.key, side + 1);
+      }
+      setNotice(null);
+      schedule(base);
+      return null;
+    },
+    remove: (card: Card, part: DeckPart, copies: number) => {
+      const base = contentRef.current;
+      schedule(
+        part === 'main'
+          ? withDeckCount(base, card.key, Math.max(0, (deckCounts(base).get(card.key) ?? 0) - copies))
+          : withSideboardCount(base, card.key, Math.max(0, (sideboardCounts(base).get(card.key) ?? 0) - copies)),
+      );
+    },
   };
 
   /** Moves one copy; the total of the card stays the same, so no copy limit is touched. */
@@ -783,9 +842,23 @@ export function DeckEditor({
       <div className="editor-layout">
         <section className="editor-filters" aria-labelledby="filters-heading" hidden={pickerHidden}>
           {/* The title of the whole "add cards" part sits above the search row (T-118, UX-118-23); the results region is named by it. */}
-          <h2 id="search-heading" className="editor-add-heading">
-            {deckTexts.searchHeading}
-          </h2>
+          <div className="editor-add-head">
+            <h2 id="search-heading" className="editor-add-heading">
+              {deckTexts.searchHeading}
+            </h2>
+            {cameraSupported() && (
+              <ScanCardsButton
+                cards={cards}
+                snapshot={collection}
+                store={collectionStore}
+                edition={scanEdition}
+                onEditionChange={setScanEdition}
+                preferences={repositories.preferences}
+                deck={scanTarget}
+                openAtStart={scanAtStart}
+              />
+            )}
+          </div>
           <h2 id="filters-heading" className="filters-heading">
             {texts.filtersHeading}
           </h2>

@@ -28,6 +28,7 @@ import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 import { DeckCardImage } from './DeckList';
 import { DeckImport } from './DeckImport';
 import { DeckActions } from './DeckImportMenu';
+import { requestDeckScan } from './scanIntent';
 import { deckTexts } from './deckTexts';
 import { ExportButtons } from './ExportButtons';
 import { PublicDecksList } from './PublicDecksList';
@@ -341,11 +342,12 @@ export function DecksView({
     return true;
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (scan = false) => {
     const content: DeckContent = emptyDeckContent(uniqueDeckName(names));
     setFailure(null);
     try {
       const deck = await repository.create(content);
+      if (scan) requestDeckScan(deck.id);
       onOpen(deck.id);
     } catch (error) {
       setFailure(errorKind(error));
@@ -421,7 +423,7 @@ export function DecksView({
     );
   }
 
-  const actions = <DeckActions onCreate={() => void handleCreate()} onImport={setImporting} />;
+  const actions = <DeckActions onCreate={() => void handleCreate()} onScan={() => void handleCreate(true)} onImport={setImporting} />;
   const showHeadActions = tab === 'own' && phase === 'ready' && decks.length > 0;
 
   return (

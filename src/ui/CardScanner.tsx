@@ -21,6 +21,7 @@ import type { Edition } from '../domain/edition';
 import { coverCropSource } from '../domain/scanCrop';
 import type { PreferencesRepository, ScanMode } from '../storage';
 import { CameraIcon } from './CameraIcon';
+import { SegmentedChoice } from './SegmentedChoice';
 import { MAX_COPIES, addCopies, removeCopies } from './collectionEntry';
 import type { CollectionSnapshot, CollectionStore } from './collectionStore';
 import { markEditionConfirmed } from './EditionConfirmDialog';
@@ -35,11 +36,34 @@ import { useScanMode } from './useScanMode';
 const CAPTURE_WIDTH = 360;
 const CAPTURE_HEIGHT = Math.round((CAPTURE_WIDTH * 88) / 63);
 const MAX_SCAN_COPIES = 99;
+const DESTINATION_OPTIONS = [
+  ['deck', scannerTexts.destinationDeck],
+  ['both', scannerTexts.destinationBoth],
+] as const;
+const PART_OPTIONS = [
+  ['main', scannerTexts.partMain],
+  ['side', scannerTexts.partSide],
+] as const;
 
 /** Whether this browser can open a camera at all (the Scan button is left out when it cannot). */
 export function cameraSupported(): boolean {
   return typeof navigator !== 'undefined' && typeof navigator.mediaDevices?.getUserMedia === 'function';
 }
+
+/** The part of a deck a scanned card goes to. */
+export type DeckPart = 'main' | 'side';
+
+/**
+ * A deck the scanner fills (T-119). The editor that owns the deck implements it with its own rules, so the scanner
+ * never decides what the deck allows: `add` returns the reason text when the cards do not fit (nothing is added), else null.
+ */
+export interface ScanDeckTarget {
+  name: string;
+  add: (card: Card, part: DeckPart, copies: number) => string | null;
+  remove: (card: Card, part: DeckPart, copies: number) => void;
+}
+
+type ScanDestination = 'deck' | 'both';
 
 /** One picture the scanner can recognise: a card and the art the picture shows. */
 interface Target {
@@ -99,6 +123,9 @@ interface SessionEntry {
   uid: number;
   target: Target;
   edition: Edition;
+  /** The deck part the copy went to, or null when it did not go to a deck. */
+  inDeck: DeckPart | null;
+  inCollection: boolean;
 }
 
 /** Copies the frame to a canvas and ranks it against the index; null when there is no picture yet, 'failed' without a canvas. */
@@ -161,12 +188,12 @@ function stopStream(stream: MediaStream | null) {
  */
 export function CardScannerDialog({
   cards,
-  snapshot,
   store,
   edition: defaultEdition,
   onEditionChange,
   mode,
   onModeChange,
+  deck,
   onClose,
 }: {
   cards: readonly Card[];
@@ -176,6 +203,8 @@ export function CardScannerDialog({
   onEditionChange: (edition: Edition) => void;
   mode: ScanMode;
   onModeChange: (mode: ScanMode) => void;
+  /** Set when the scanner fills a deck (T-119); without it the cards go to the collection only. */
+  deck?: ScanDeckTarget;
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -194,6 +223,8 @@ export function CardScannerDialog({
   const [copies, setCopies] = useState(1);
   const [lastAdded, setLastAdded] = useState<string | null>(null);
   const [addProblem, setAddProblem] = useState<string | null>(null);
+  const [destination, setDestination] = useState<ScanDestination>('deck');
+  const [part, setPart] = useState<DeckPart>('main');
   const [session, setSession] = useState<SessionEntry[]>([]);
   const [flashName, setFlashName] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -311,19 +342,44 @@ export function CardScannerDialog({
     setStage('result');
   };
 
+  const toCollection = deck === undefined || destination === 'both';
+  /** A Legend always takes the Legend slot, whatever part is chosen (the sideboard allows none). */
+  const partOf = (card: Card): DeckPart => (card.type === 'Legend' ? 'main' : part);
+
+  /**
+   * Puts copies where the user chose (T-119): the deck first, by the editor's own rules, then the collection. If the
+   * collection refuses, the deck change is taken back, so the two never differ. Returns the problem text, or null.
+   */
+  const place = (target: Target, copies: number, limitText: string): string | null => {
+    const deckPart = deck === undefined ? null : partOf(target.card);
+    if (deck !== undefined && deckPart !== null) {
+      const blocked = deck.add(target.card, deckPart, copies);
+      if (blocked !== null) return blocked;
+    }
+    if (toCollection) {
+      const outcome = addCopies(store.getSnapshot(), store, target.card, target.arts, target.art, edition, copies);
+      if (outcome !== 'added') {
+        if (deck !== undefined && deckPart !== null) deck.remove(target.card, deckPart, copies);
+        return outcome === 'limit' ? limitText : scannerTexts.collectionNotReady;
+      }
+    }
+    return null;
+  };
+
   /** Continuous mode: one copy of a card the camera has recognised twice in a row (T-108). */
   const autoAdd = (id: string) => {
     const target = targets.get(id);
     if (target === undefined) return;
     const name = cardNameText(target.card);
-    const outcome = addCopies(store.getSnapshot(), store, target.card, target.arts, target.art, edition, 1);
-    if (outcome !== 'added') {
-      setNotice(outcome === 'limit' ? scannerTexts.atLimit(name) : scannerTexts.collectionNotReady);
+    const problemText = place(target, 1, scannerTexts.atLimit(name));
+    if (problemText !== null) {
+      setNotice(problemText);
       return;
     }
     const uid = nextUid.current;
     nextUid.current += 1;
-    setSession((list) => [{ uid, target, edition }, ...list]);
+    const inDeck = deck === undefined ? null : partOf(target.card);
+    setSession((list) => [{ uid, target, edition, inDeck, inCollection: toCollection }, ...list]);
     setNotice(null);
     setFlashName(name);
     window.clearTimeout(flashTimer.current);
@@ -341,8 +397,9 @@ export function CardScannerDialog({
 
   const undo = (entry: SessionEntry) => {
     const { card, arts, art } = entry.target;
-    const outcome = removeCopies(store.getSnapshot(), store, card, arts, art, entry.edition, 1);
+    const outcome = entry.inCollection ? removeCopies(store.getSnapshot(), store, card, arts, art, entry.edition, 1) : 'added';
     if (outcome === 'added') {
+      if (entry.inDeck !== null) deck?.remove(card, entry.inDeck, 1);
       setSession((list) => list.filter((item) => item.uid !== entry.uid));
       setNotice(null);
     } else {
@@ -428,18 +485,24 @@ export function CardScannerDialog({
     setStage('camera');
   };
 
+  const partText = (value: DeckPart) => (value === 'main' ? scannerTexts.partMain : scannerTexts.partSide);
   const editionName = edition === 'beta' ? texts.editionBeta : texts.editionRetail;
   const shown = result === null ? [] : result.sure && !expanded ? result.options.slice(0, 1) : result.options;
   const picked = result !== null && selected !== null ? (result.options[selected] ?? null) : null;
 
   const add = () => {
     if (picked === null) return;
-    const outcome = addCopies(snapshot, store, picked.card, picked.arts, picked.art, edition, copies);
-    if (outcome === 'added') {
-      setLastAdded(scannerTexts.lastAdded(copies, cardNameText(picked.card), editionName));
+    const problemText = place(picked, copies, scannerTexts.limit);
+    if (problemText === null) {
+      const name = cardNameText(picked.card);
+      setLastAdded(
+        deck === undefined
+          ? scannerTexts.lastAdded(copies, name, editionName)
+          : scannerTexts.lastAddedDeck(copies, name, deck.name, partText(partOf(picked.card)), toCollection ? editionName : null),
+      );
       backToCamera();
     } else {
-      setAddProblem(outcome === 'limit' ? scannerTexts.limit : scannerTexts.collectionNotReady);
+      setAddProblem(problemText);
     }
   };
 
@@ -454,14 +517,41 @@ export function CardScannerDialog({
       }}
     >
       <div className="confirm-dialog-body scanner-body">
-        <h2 id="scanner-title">{scannerTexts.title}</h2>
+        <h2 id="scanner-title">{deck === undefined ? scannerTexts.title : scannerTexts.titleDeck(deck.name)}</h2>
 
         {stage === 'edition' && (
           <>
-            <p>
-              <strong>{scannerTexts.editionIntro}</strong>
-            </p>
-            <p className="hint">{scannerTexts.editionNote}</p>
+            {deck !== undefined && (
+              <>
+                <SegmentedChoice
+                  legend={scannerTexts.destinationLabel}
+                  name="scan-destination"
+                  value={destination}
+                  options={DESTINATION_OPTIONS}
+                  onChange={setDestination}
+                  legendVisible
+                  fill
+                />
+                <SegmentedChoice
+                  legend={scannerTexts.partLabel}
+                  name="scan-part"
+                  value={part}
+                  options={PART_OPTIONS}
+                  onChange={setPart}
+                  legendVisible
+                  fill
+                />
+                <p className="hint">{scannerTexts.partNote}</p>
+              </>
+            )}
+            {toCollection && (
+              <>
+                <p>
+                  <strong>{scannerTexts.editionIntro}</strong>
+                </p>
+                <p className="hint">{scannerTexts.editionNote}</p>
+              </>
+            )}
             <div className="segmented segmented--fill" role="group" aria-label={scannerTexts.modeLabel}>
               {(['single', 'continuous'] as const).map((option) => (
                 <button
@@ -480,12 +570,20 @@ export function CardScannerDialog({
               <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
                 {scannerTexts.cancel}
               </button>
-              <button type="button" className="button-primary" onClick={() => void start('beta')}>
-                {scannerTexts.startWith(texts.editionBeta)}
-              </button>
-              <button type="button" className="button-primary" onClick={() => void start('retail')}>
-                {scannerTexts.startWith(texts.editionRetail)}
-              </button>
+              {toCollection ? (
+                <>
+                  <button type="button" className="button-primary" onClick={() => void start('beta')}>
+                    {scannerTexts.startWith(texts.editionBeta)}
+                  </button>
+                  <button type="button" className="button-primary" onClick={() => void start('retail')}>
+                    {scannerTexts.startWith(texts.editionRetail)}
+                  </button>
+                </>
+              ) : (
+                <button type="button" className="button-primary" onClick={() => void start(edition)}>
+                  {scannerTexts.startDeck}
+                </button>
+              )}
             </div>
           </>
         )}
@@ -514,7 +612,10 @@ export function CardScannerDialog({
           <>
             <div className="scanner-status">
               <p className="scanner-edition">
-                {scannerTexts.modeStatus(mode === 'single' ? scannerTexts.modeSingle : scannerTexts.modeContinuous, editionName)}
+                {scannerTexts.modeStatus(
+                  mode === 'single' ? scannerTexts.modeSingle : scannerTexts.modeContinuous,
+                  toCollection ? editionName : null,
+                )}
               </p>
               <button
                 type="button"
@@ -527,6 +628,7 @@ export function CardScannerDialog({
                 {scannerTexts.changeMode}
               </button>
             </div>
+            {deck !== undefined && <p className="hint scanner-deck-status">{scannerTexts.deckStatus(deck.name, partText(part))}</p>}
             <div ref={viewportRef} className="scanner-viewport" onClick={mode === 'single' ? capture : undefined}>
               <video ref={videoRef} className="scanner-video" aria-label={scannerTexts.videoLabel} autoPlay muted playsInline />
               <div ref={frameRef} className="scanner-frame" data-flash={flashName !== null || undefined} data-hold={(holding && flashName === null) || undefined} aria-hidden="true" />
@@ -667,7 +769,9 @@ export function CardScannerDialog({
                   </button>
                 </div>
                 <button type="button" className="button-primary" onClick={add}>
-                  {scannerTexts.add(copies, editionName)}
+                  {deck === undefined
+                    ? scannerTexts.add(copies, editionName)
+                    : scannerTexts.addToDeck(copies, deck.name, toCollection ? editionName : null)}
                 </button>
               </div>
             )}
@@ -701,18 +805,22 @@ export function ScanCardsButton(props: {
   preferences: PreferencesRepository;
   /** primary: the main action of the view (T-108). */
   variant?: 'secondary' | 'primary';
+  /** The deck the scanner fills (T-119); the collection need not be ready then, as a deck can be scanned alone. */
+  deck?: ScanDeckTarget;
+  /** Opens the scanner at once (the "Scan a new deck" start, T-119). */
+  openAtStart?: boolean;
 }) {
-  const { variant = 'secondary', preferences, ...dialogProps } = props;
-  const [open, setOpen] = useState(false);
+  const { variant = 'secondary', preferences, openAtStart = false, ...dialogProps } = props;
+  const [open, setOpen] = useState(openAtStart);
   const [mode, setMode] = useScanMode(preferences);
-  if (!cameraSupported() || props.snapshot.phase !== 'ready') return null;
+  if (!cameraSupported() || (props.deck === undefined && props.snapshot.phase !== 'ready')) return null;
   const className = `${variant === 'primary' ? 'button-primary' : 'button-secondary'} scan-open`;
   return (
     <>
       <button
         type="button"
         className={className}
-        aria-label={variant === 'secondary' ? scannerTexts.open : undefined}
+        aria-label={variant === 'secondary' ? (props.deck === undefined ? scannerTexts.open : scannerTexts.openDeck) : undefined}
         onClick={() => setOpen(true)}
       >
         <CameraIcon />

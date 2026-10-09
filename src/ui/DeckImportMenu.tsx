@@ -1,12 +1,24 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { cameraSupported } from './CardScanner';
+import { CameraIcon } from './CameraIcon';
 import { Chevron } from './Chevron';
+import { scannerTexts } from './scannerTexts';
 import { deckTexts } from './deckTexts';
 
 /**
  * The deck page's actions on one row (T-117): "+ New deck" and a secondary "Import ▾" menu with the two import
  * sources. The menu closes with Escape (focus returns to the toggle) and with a press outside it.
  */
-export function DeckActions({ onCreate, onImport }: { onCreate: () => void; onImport: (source: 'text' | 'link') => void }) {
+export function DeckActions({
+  onCreate,
+  onScan,
+  onImport,
+}: {
+  onCreate: () => void;
+  /** Creates a deck and opens the scanner for it (T-119). */
+  onScan: () => void;
+  onImport: (source: 'text' | 'link') => void;
+}) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -44,6 +56,12 @@ export function DeckActions({ onCreate, onImport }: { onCreate: () => void; onIm
         </span>
         {deckTexts.newDeck}
       </button>
+      {cameraSupported() && (
+        <button type="button" className="button-secondary scan-open" onClick={onScan}>
+          <CameraIcon />
+          {scannerTexts.scanNewDeck}
+        </button>
+      )}
       <button
         ref={toggleRef}
         type="button"
