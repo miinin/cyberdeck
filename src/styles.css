@@ -7884,9 +7884,19 @@ section[aria-labelledby='have-heading'] {
 }
 
 .binder {
+  /* A page is a little wider than three cards side by side; the book is one page, or two on a wide screen (T-120). */
+  --binder-page-max: 32rem;
+  --binder-width: calc(var(--binder-page-max) + 2 * var(--space-3) + 2px);
   display: grid;
   gap: var(--space-3);
+  inline-size: 100%;
+  max-inline-size: var(--binder-width);
   margin-block-start: var(--space-4);
+  margin-inline: auto;
+}
+
+.binder[data-columns='2'] {
+  --binder-width: calc(2 * var(--binder-page-max) + 2 * var(--space-3) + 2px);
 }
 
 .binder-title {
@@ -7961,7 +7971,7 @@ section[aria-labelledby='have-heading'] {
   display: grid;
   gap: var(--space-2);
   inline-size: 100%;
-  max-inline-size: 46rem;
+  max-inline-size: var(--binder-page-max);
   padding: var(--space-2);
 }
 
@@ -8281,10 +8291,8 @@ button.pocket-link {
 .binder-cover {
   position: relative;
   box-sizing: border-box;
-  align-content: center;
-  justify-items: center;
-  aspect-ratio: 2 / 3;
-  padding: clamp(var(--space-5), 8vw, 3rem);
+  grid-column: 1 / -1;
+  justify-self: center;
   border: 1px solid #2b303b;
   background:
     repeating-linear-gradient(90deg, rgba(31, 224, 255, 0.06) 0 1px, transparent 1px 2rem),
@@ -8338,8 +8346,35 @@ button.pocket-link {
   transform: scaleX(-1);
 }
 
+.binder-cover-sizer {
+  display: grid;
+  gap: var(--space-2);
+  visibility: hidden;
+}
+
+/* One line of text, like the page number of a page. */
+.binder-cover-sizer .binder-page-number::before {
+  content: 'a0';
+}
+
+/* A closed book on a wide screen: one page wide, in the middle, and no fold. */
+.binder-book[data-columns='2'] .binder-cover {
+  inline-size: 50%;
+}
+
+.binder-book[data-columns='2'] .binder-spread:has(.binder-cover)::before {
+  content: none;
+}
+
+.pocket.pocket--filler {
+  visibility: hidden;
+}
+
 .binder-cover-text {
-  position: relative;
+  position: absolute;
+  inset-inline: clamp(var(--space-4), 6vw, 2.5rem);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
   display: grid;
   gap: var(--space-3);
   max-inline-size: 100%;
