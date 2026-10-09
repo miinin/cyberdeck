@@ -150,8 +150,8 @@ export function TestHandDialog({
       <div className="test-hand-body">
         <div className="test-hand-header">
           <h2 id="test-hand-title">{deckTexts.testHandTitle}</h2>
-          <button type="button" className="button-secondary" onClick={close}>
-            {texts.closeDialog}
+          <button type="button" className="button-secondary dialog-close" aria-label={texts.closeDialog} onClick={close}>
+            {texts.closeSymbol}
           </button>
         </div>
         <div className="visually-hidden" aria-live="polite" aria-atomic="true">

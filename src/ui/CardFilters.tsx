@@ -7,6 +7,7 @@ import { NUMBER_GROUPS } from './ActiveFilters';
 import { CardColor } from './CardColor';
 import { texts } from './texts';
 import { useMediaQuery } from './useMediaQuery';
+import { SegmentedChoice } from './SegmentedChoice';
 
 /** Longest accepted search text (PM 2026-10-01). No message is shown at the limit (UX.md 5.3). */
 export const SEARCH_MAX_LENGTH = 100;
@@ -184,24 +185,16 @@ export function CardFilters({
 
       <div id="filter-panel" className="filter-panel" hidden={!alwaysOpen && !open}>
         {collectionFilter !== undefined && (
-          <fieldset className="owned-only">
-            <legend>{texts.collectionLegend}</legend>
-            <div className="options">
-              {COLLECTION_OPTIONS.map(([value, label]) => (
-                <label key={value} className="option">
-                  <input
-                    ref={value === 'all' ? collectionAllRef : undefined}
-                    type="radio"
-                    name="collection-filter"
-                    value={value}
-                    checked={collectionFilter === value}
-                    onChange={() => onCollectionFilterChange(value)}
-                  />{' '}
-                  {label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <SegmentedChoice
+            legendVisible
+            className="owned-only"
+            legend={texts.collectionLegend}
+            name="collection-filter"
+            value={collectionFilter}
+            options={COLLECTION_OPTIONS}
+            inputRef={(value) => (value === 'all' ? collectionAllRef : undefined)}
+            onChange={onCollectionFilterChange}
+          />
         )}
 
         {setOptions.length > 0 && onSetChange !== undefined && (

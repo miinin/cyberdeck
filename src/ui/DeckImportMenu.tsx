@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { Chevron } from './Chevron';
 import { deckTexts } from './deckTexts';
 
 /**
@@ -53,9 +54,7 @@ export function DeckActions({ onCreate, onImport }: { onCreate: () => void; onIm
         onClick={() => setOpen(!open)}
       >
         {deckTexts.importMenu}
-        <svg className="button-caret" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false">
-          <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <Chevron direction="down" size={12} className="button-caret" />
       </button>
       <div id={panelId} className="export-menu-panel deck-actions-panel" hidden={!open}>
         <button type="button" className="button-secondary" onClick={() => pick('text')}>

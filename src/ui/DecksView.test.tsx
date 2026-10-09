@@ -8,7 +8,7 @@ const renderDecks = (repositories = createMemoryRepositories()) => renderRoute('
 describe('Pakat list', () => {
   it('shows an empty state and the navigation', async () => {
     renderDecks();
-    expect(await screen.findByText(/ei ole vielä pakkoja/)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Ei vielä pakkoja' })).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Päävalikko' });
     expect(within(nav).getByRole('link', { name: 'Pakat' })).toHaveAttribute('aria-current', 'page');
     expect(within(nav).getByRole('link', { name: 'Kortit' })).not.toHaveAttribute('aria-current');
@@ -85,13 +85,17 @@ describe('Pakat list', () => {
     const opener = await screen.findByRole('button', { name: 'Poista pakka: Oma' });
     await user.click(opener);
     const dialog = screen.getByRole('dialog', { name: 'Poistetaanko pakka?' });
+    // The destructive action is drawn as a danger button and comes after "Peruuta" (T-118, UX-118-12, 17).
+    const buttons = within(dialog).getAllByRole('button');
+    expect(buttons.map((button) => button.textContent)).toEqual(['Peruuta', 'Poista pakka']);
+    expect(buttons[1]).toHaveClass('button-danger');
     await user.click(within(dialog).getByRole('button', { name: 'Peruuta' }));
     expect((await repositories.decks.list()).value).toHaveLength(1);
     expect(opener).toHaveFocus();
 
     await user.click(opener);
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Poista pakka' }));
-    expect(await screen.findByText(/ei ole vielä pakkoja/)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Ei vielä pakkoja' })).toBeInTheDocument();
     expect((await repositories.decks.list()).value).toHaveLength(0);
   });
 
@@ -121,7 +125,7 @@ describe('Pakat list', () => {
   it('offers new deck and an import menu in the empty state; Netdeck starts in the link field (T-051, T-117)', async () => {
     const user = userEvent.setup();
     renderDecks();
-    await screen.findByText(/ei ole vielä pakkoja/);
+    await screen.findByRole('heading', { name: 'Ei vielä pakkoja' });
     expect(screen.getByRole('button', { name: 'Uusi pakka' })).toBeInTheDocument();
     const menu = screen.getByRole('button', { name: 'Tuo' });
     expect(menu).toHaveAttribute('aria-expanded', 'false');
@@ -134,7 +138,7 @@ describe('Pakat list', () => {
   it('opens the import menu with both sources and closes it with Escape and an outside press (T-117)', async () => {
     const user = userEvent.setup();
     renderDecks();
-    await screen.findByText(/ei ole vielä pakkoja/);
+    await screen.findByRole('heading', { name: 'Ei vielä pakkoja' });
     const toggle = screen.getByRole('button', { name: 'Tuo' });
     expect(screen.queryByRole('button', { name: 'Tuo pakkalista' })).not.toBeInTheDocument();
     await user.click(toggle);

@@ -71,7 +71,7 @@ export const proxyTextsEn: typeof proxyTextsFi = {
   clearConfirm: 'Clear the queue',
   clearKeep: 'Keep the queue',
 
-  sendAllWants: 'Send all want cards to the proxy queue',
+  sendAllWants: 'All to the proxy queue',
   sendWant: 'To proxy queue',
   sendWantName: (name: string) => `Send to the proxy queue: ${name}`,
   sendDeck: 'Send the deck to the proxy queue',

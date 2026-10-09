@@ -111,6 +111,15 @@ describe('Scan button', () => {
     await settle();
     expect(screen.queryByRole('button', { name: 'Skannaa kortteja' })).not.toBeInTheDocument();
   });
+
+  it('is one compact button, not a floating one (T-118, UX-118-09)', async () => {
+    render(<Harness repositories={createMemoryRepositories()} />);
+    await settle();
+    const button = screen.getByRole('button', { name: 'Skannaa kortteja' });
+    expect(button).toHaveClass('button-secondary', 'scan-open');
+    expect(button).toHaveTextContent('Skannaa');
+    expect(document.querySelector('.scan-fab, .scan-fab-spacer')).toBeNull();
+  });
 });
 
 describe('CardScanner', () => {

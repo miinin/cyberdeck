@@ -136,7 +136,7 @@ export function DeckStats({
         {deckTexts.statsHeading}
       </h2>
 
-      <div className="stats-card stats-overview">
+      <div className="panel stats-overview">
         <h3 className="visually-hidden">{deckTexts.statsOverview}</h3>
         <div className="overview-gauges">
           <div className="gauge-main">
@@ -223,29 +223,29 @@ export function DeckStats({
       </div>
 
       {mainCount > 0 && (
-        <div className="stats-card">
-          <h3 className="stats-card-title">{deckTexts.curveHeading}</h3>
+        <div className="panel">
+          <h3 className="panel-title">{deckTexts.curveHeading}</h3>
           <CostChart buckets={stats.buckets} average={stats.avgCost} last={COST_CURVE_LAST} />
         </div>
       )}
 
       {mainCount > 0 && (
-        <div className="stats-card">
-          <h3 className="stats-card-title">{deckTexts.eddiesHeading}</h3>
+        <div className="panel">
+          <h3 className="panel-title">{deckTexts.eddiesHeading}</h3>
           <EddiesPanel summary={stats.eddies} />
         </div>
       )}
 
       {(colors.length > 0 || stats.fits.length > 0) && (
-        <div className="stats-card">
-          <h3 className="stats-card-title">{deckTexts.colorsRamHeading}</h3>
+        <div className="panel">
+          <h3 className="panel-title">{deckTexts.colorsRamHeading}</h3>
           <ColorRam colors={colors} mainCount={mainCount} fits={stats.fits} />
         </div>
       )}
 
       {typeCounts.length > 0 && (
-        <div className="stats-card">
-          <h3 className="stats-card-title">{deckTexts.typesHeading}</h3>
+        <div className="panel">
+          <h3 className="panel-title">{deckTexts.typesHeading}</h3>
           <TypeBar counts={typeCounts} />
           {hasPower && (
             <ValueCurve
@@ -260,37 +260,37 @@ export function DeckStats({
       )}
 
       {stats.odds.length > 0 && (
-        <div className="stats-card">
-          <h3 className="stats-card-title">{deckTexts.oddsHeading}</h3>
+        <div className="panel">
+          <h3 className="panel-title">{deckTexts.oddsHeading}</h3>
           <DrawOdds rows={stats.odds} moments={[deckTexts.drawOpening, ...DRAW_TURNS.map(deckTexts.drawTurnShort)]} />
           <p className="hint">{deckTexts.oddsNote(OPENING_HAND, DRAWS_PER_TURN)}</p>
         </div>
       )}
 
       {mainCount > 0 && (
-        <div className="stats-card">
+        <div className="panel">
           <GroupOdds deck={deck} cardsByKey={cardsByKey} />
         </div>
       )}
 
       {(missingText !== '' || (missingCards?.length ?? 0) > 0) && (
-        <div className="stats-card">
+        <div className="panel">
           {missingText !== '' && <p>{missingText}</p>}
           <MissingCards rows={missingCards ?? []} deckName={deck.name} wants={wants} substitutes={substitutes} />
         </div>
       )}
 
       {(stats.ram.length > 0 || stats.rarities.length > 0) && (
-        <div className="stats-card stats-small">
+        <div className="panel stats-small">
           {stats.ram.length > 0 && (
             <div className="stat-block">
-              <h3 className="stats-card-title">{deckTexts.ramDistLabel}</h3>
+              <h3 className="panel-title">{deckTexts.ramDistLabel}</h3>
               <p>{stats.ram.map(({ value, count }) => deckTexts.ramShare(value, count)).join(' · ')}</p>
             </div>
           )}
           {stats.rarities.length > 0 && (
             <div className="stat-block">
-              <h3 className="stats-card-title">{deckTexts.raritiesLabel}</h3>
+              <h3 className="panel-title">{deckTexts.raritiesLabel}</h3>
               <p>
                 {stats.rarities.map(({ rarity, count }, index) => (
                   <span key={rarity ?? ''}>

@@ -19,14 +19,15 @@ const storedWants = (entries: [string, number][]) => ({
 });
 const cards = [...testCards, card('evil', { name: '<b>Evil</b>', displayName: '<b>Evil</b>' })];
 
-/** A list item matched by its whole text (the name is in its own span). */
-function item(scope: { queryAllByRole: typeof screen.queryAllByRole }, text: RegExp): HTMLElement | null {
-  return scope.queryAllByRole('listitem').find((li) => text.test(li.textContent ?? '')) ?? null;
+/** The cell texts of the table row whose card name matches (the name is the row header; "–" stands for none). */
+function row(scope: { queryAllByRole: typeof screen.queryAllByRole }, name: RegExp): string[] | null {
+  const found = scope.queryAllByRole('row').find((tr) => name.test(tr.querySelector('th')?.textContent ?? ''));
+  return found === undefined ? null : [...found.children].map((cell) => (cell.textContent ?? '').replace('ei yhtään', ''));
 }
-async function findItem(scope: { queryAllByRole: typeof screen.queryAllByRole }, text: RegExp) {
+async function findRow(scope: { queryAllByRole: typeof screen.queryAllByRole }, name: RegExp) {
   return waitFor(() => {
-    const found = item(scope, text);
-    if (found === null) throw new Error('no item');
+    const found = row(scope, name);
+    if (found === null) throw new Error('no row');
     return found;
   });
 }
@@ -56,10 +57,10 @@ describe('Trade link route', () => {
     const haveSection = screen.getByRole('region', {
       name: 'Jakajan kokoelma',
     });
-    expect(item(within(haveSection), /Unit 0.*5 kappaletta, vaihdettavissa: 2 kappaletta/)).toBeInTheDocument();
-    expect(item(within(haveSection), /L1.*1 kappale, vaihdettavissa: ei yhtään/)).toBeInTheDocument();
+    expect(row(within(haveSection), /^Unit 0/)).toEqual(['Unit 0', '5', '2']);
+    expect(row(within(haveSection), /^L1/)).toEqual(['L1', '1', '–']);
     const wantSection = screen.getByRole('region', { name: 'Jakajan want' });
-    expect(item(within(wantSection), /Unit 5.*haluaa 2 kappaletta/)).toBeInTheDocument();
+    expect(row(within(wantSection), /^Unit 5/)).toEqual(['Unit 5', '2']);
 
     const compare = screen.getByRole('region', {
       name: 'Vertailu omaan kokoelmaasi',
@@ -71,11 +72,11 @@ describe('Trade link route', () => {
         }),
       ).toBeInTheDocument(),
     );
-    const lists = within(compare).getAllByRole('list');
-    expect(item(within(lists[0] as HTMLElement), /Unit 5.*1 kappale$/)).toBeInTheDocument();
+    const tables = within(compare).getAllByRole('table');
+    expect(row(within(tables[0] as HTMLElement), /^Unit 5/)).toEqual(['Unit 5', '1']);
     // They have 2 tradeable Unit 0 and I want 3 -> 2; L1 has no tradeable copy.
-    expect(item(within(lists[1] as HTMLElement), /Unit 0.*2 kappaletta$/)).toBeInTheDocument();
-    expect(item(within(lists[1] as HTMLElement), /L1/)).toBeNull();
+    expect(row(within(tables[1] as HTMLElement), /^Unit 0/)).toEqual(['Unit 0', '2']);
+    expect(row(within(tables[1] as HTMLElement), /^L1/)).toBeNull();
   });
 
   it('shows only the sharer lists and an explanation when the own collection is locked', async () => {
@@ -88,7 +89,7 @@ describe('Trade link route', () => {
       'cyberdeck:collection': newer,
     });
     expect(await screen.findByText(/vertailua ei voi näyttää/)).toBeInTheDocument();
-    expect(item(screen, /Unit 0.*5 kappaletta/)).toBeInTheDocument();
+    expect(row(screen, /^Unit 0/)).toEqual(['Unit 0', '5', '2']);
     expect(screen.queryByRole('heading', { name: 'Sinulla on, he haluavat' })).toBeNull();
   });
 
@@ -103,7 +104,7 @@ describe('Trade link route', () => {
   it.each(['%%%', 'AAAA'])('shows a plain error for invalid data "%s"', async (bad) => {
     open(bad);
     expect(await screen.findByRole('heading', { name: 'Linkki ei toimi' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Siirry Kortit-sivulle' })).toHaveAttribute('href', '#/');
+    expect(screen.getByRole('link', { name: 'Siirry Kortit-osioon' })).toHaveAttribute('href', '#/');
   });
 });
 
@@ -136,7 +137,7 @@ describe('Share trade button', () => {
     await act(async () => {
       window.location.hash = url.slice(url.indexOf('#'));
     });
-    expect(await findItem(screen, /Unit 0.*4 kappaletta, vaihdettavissa: 1 kappale/)).toBeInTheDocument();
+    expect(await findRow(screen, /^Unit 0/)).toEqual(['Unit 0', '4', '1']);
   });
 
   it('shows the link in a field when copying fails', async () => {

@@ -123,7 +123,8 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
             </div>
           )}
           {data.items.length === 0 ? (
-            <div className="empty deck-empty">
+            <div className="empty">
+              <h2>{deckTexts.publicEmptyTitle}</h2>
               <p>{deckTexts.publicEmpty}</p>
             </div>
           ) : (

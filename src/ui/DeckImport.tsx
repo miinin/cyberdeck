@@ -76,6 +76,7 @@ export function DeckImport({
   const proxyQueue = useProxyQueue(repositories.proxy);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const [text, setText] = useState('');
+  const [fileName, setFileName] = useState<string | null>(null);
   const [inputError, setInputError] = useState<InputError | null>(null);
   const [linkText, setLinkText] = useState('');
   const [linkError, setLinkError] = useState<LinkError | null>(null);
@@ -112,6 +113,7 @@ export function DeckImport({
     const file = input.files?.[0];
     input.value = '';
     if (file === undefined) return;
+    setFileName(file.name);
     // The size is checked before the file is read (SR-17, SR-18).
     const isJson = file.name.toLowerCase().endsWith('.json') || file.type === 'application/json';
     if (file.size > (isJson ? MAX_JSON_IMPORT_BYTES : MAX_IMPORT_BYTES)) {
@@ -265,70 +267,79 @@ export function DeckImport({
       </h1>
       <p>{sharedText === undefined ? deckTexts.importIntro : sharedIntro}</p>
 
-      <div className="import-sources" hidden={sharedText !== undefined}>
-        <form className="deck-import-form import-source-panel" onSubmit={(event) => void handleFetch(event)} noValidate>
-          <h2>{deckTexts.linkHeading}</h2>
-          <label htmlFor="import-link">{deckTexts.linkLabel}</label>
-          <input
-            ref={linkRef}
-            id="import-link"
-            type="url"
-            autoComplete="off"
-            value={linkText}
-            aria-invalid={linkError !== null ? 'true' : undefined}
-            aria-describedby={linkError !== null ? 'import-link-hint import-link-error' : 'import-link-hint'}
-            onChange={(event) => {
-              setLinkText(event.target.value);
-              setLinkError(null);
-            }}
-          />
-          <p id="import-link-hint" className="hint">
-            {deckTexts.linkHint}
-          </p>
-          {linkError !== null && (
-            <p id="import-link-error" className="field-error" role="alert">
-              {deckTexts.linkErrors[linkError]}
+      {sharedText === undefined && (
+        <div className="import-sources">
+          <form className="deck-import-form import-source-panel panel" onSubmit={(event) => void handleFetch(event)} noValidate>
+            <h2 className="panel-title">{deckTexts.linkHeading}</h2>
+            <label htmlFor="import-link">{deckTexts.linkLabel}</label>
+            <input
+              ref={linkRef}
+              id="import-link"
+              type="url"
+              autoComplete="off"
+              value={linkText}
+              aria-invalid={linkError !== null ? 'true' : undefined}
+              aria-describedby={linkError !== null ? 'import-link-hint import-link-error' : 'import-link-hint'}
+              onChange={(event) => {
+                setLinkText(event.target.value);
+                setLinkError(null);
+              }}
+            />
+            <p id="import-link-hint" className="hint">
+              {deckTexts.linkHint}
             </p>
-          )}
-          <div className="row-actions">
-            <button type="submit" className="button-primary" disabled={linkLoading}>
-              {linkLoading ? deckTexts.linkLoading : deckTexts.linkButton}
-            </button>
-          </div>
-        </form>
+            {linkError !== null && (
+              <p id="import-link-error" className="field-error" role="alert">
+                {deckTexts.linkErrors[linkError]}
+              </p>
+            )}
+            <div className="row-actions">
+              <button type="submit" className="button-primary" disabled={linkLoading}>
+                {linkLoading ? deckTexts.linkLoading : deckTexts.linkButton}
+              </button>
+            </div>
+          </form>
 
-        <form className="deck-import-form import-source-panel" onSubmit={(event) => void handleCheck(event)} noValidate>
-          <h2>{deckTexts.textHeading}</h2>
-          <label htmlFor="import-text">{deckTexts.importTextLabel}</label>
-          <textarea
-            ref={textRef}
-            id="import-text"
-            rows={10}
-            spellCheck={false}
-            value={text}
-            aria-invalid={inputError !== null ? 'true' : undefined}
-            aria-describedby={inputError !== null ? 'import-error' : undefined}
-            onChange={(event) => edit(event.target.value)}
-          />
-          <label htmlFor="import-file">{deckTexts.importFileLabel}</label>
-          <input
-            id="import-file"
-            type="file"
-            accept=".txt,.json,text/plain,application/json"
-            onChange={(event) => void handleFile(event)}
-          />
-          {inputError !== null && (
-            <p id="import-error" className="field-error" role="alert">
-              {deckTexts.importErrors[inputError]}
-            </p>
-          )}
-          <div className="row-actions">
-            <button type="submit" className="button-primary">
-              {deckTexts.importCheck}
-            </button>
-          </div>
-        </form>
-      </div>
+          <form className="deck-import-form import-source-panel panel" onSubmit={(event) => void handleCheck(event)} noValidate>
+            <h2 className="panel-title">{deckTexts.textHeading}</h2>
+            <label htmlFor="import-text">{deckTexts.importTextLabel}</label>
+            <textarea
+              ref={textRef}
+              id="import-text"
+              rows={10}
+              spellCheck={false}
+              value={text}
+              aria-invalid={inputError !== null ? 'true' : undefined}
+              aria-describedby={inputError !== null ? 'import-error' : undefined}
+              onChange={(event) => edit(event.target.value)}
+            />
+            <label htmlFor="import-file">{deckTexts.importFileLabel}</label>
+            <div className="file-input">
+              <input
+                id="import-file"
+                className="visually-hidden"
+                type="file"
+                accept=".txt,.json,text/plain,application/json"
+                onChange={(event) => void handleFile(event)}
+              />
+              <label htmlFor="import-file" className="button-secondary" aria-hidden="true">
+                {deckTexts.importFileButton}
+              </label>
+              <span className="file-input-name">{fileName ?? deckTexts.importFileNone}</span>
+            </div>
+            {inputError !== null && (
+              <p id="import-error" className="field-error" role="alert">
+                {deckTexts.importErrors[inputError]}
+              </p>
+            )}
+            <div className="row-actions">
+              <button type="submit" className="button-primary">
+                {deckTexts.importCheck}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {report !== null && view !== null && (
         <section className="import-report" aria-labelledby="report-heading">
@@ -383,7 +394,7 @@ export function DeckImport({
               )}
             </div>
 
-            <form className="deck-name-field import-save" onSubmit={(event) => void handleSave(event)} noValidate>
+            <form className="deck-name-field import-save panel" onSubmit={(event) => void handleSave(event)} noValidate>
               <h3>{deckTexts.reportSaveHeading}</h3>
               <label htmlFor="import-name">{deckTexts.nameLabel}</label>
               <input

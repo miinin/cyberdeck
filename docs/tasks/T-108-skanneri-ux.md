@@ -41,3 +41,5 @@ Käyttäjän mukaan skanneri on hieno mutta jää huomaamatta. Sen pitää näky
 - **Testit:** `continuousScan.test.ts` (9), jatkuvan tilan komponenttitestit (6: lisäys, tuplien esto ja uudelleenlisäys, epävarma osuma, kumoa, pysähtyy suljettaessa, tila muistetaan), `repositories.test.ts` (scan mode). npm test 1491/1491, lint ja build läpi.
 - **Huomio PM:lle:** `ScanCardsButton` vaatii nyt `preferences`-propin (kutsujat päivitetty). Mobiilinavigaatio on ylhäällä headerissa, joten kelluva painike ei peitä sitä. Suositus velaksi: ajastinta ei ole testattu oikealla kameralla, joten tarkista esikatselusta puhelimella, että 280 ms:n tunnistusväli on riittävän nopea.
 Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1
+
+**Muutos (T-118, UX-118-09, PM 2026-10-09):** mobiilin kelluva kamerapainike (`scan-fab`, `scan-fab-spacer`) poistettiin. Kokoelmassa on kaikilla leveyksillä sama kompakti otsikkorivin "Skannaa"-painike (`.button-secondary.scan-open`), ja tyhjässä tilassa `ScanPrompt`. Testit päivitetty (`CardScanner.test.tsx`, `CollectionView.test.tsx`).

@@ -90,8 +90,11 @@ export function CardImageDialog({
             <p role="alert">{texts.imageLoadError}</p>
           )}
             {imageSrc !== null && failedKey !== imageSrc && (
-              <button type="button" ref={zoomOpenRef} className="button-secondary card-zoom-open" onClick={() => setZoomed(true)}>
-                {texts.zoomImage}
+              <button type="button" ref={zoomOpenRef} className="button-secondary button-compact card-zoom-open"
+                aria-label={texts.zoomImage}
+                onClick={() => setZoomed(true)}
+              >
+                {texts.zoomImageShort}
               </button>
             )}
             {details !== undefined && <div className="card-dialog-details">{details}</div>}

@@ -190,7 +190,7 @@ export function CardVersions({
                 </div>
               )}
               {breakdown(art).length > 0 && (
-              <details className="art-breakdown">
+              <details className="disclosure art-breakdown">
                 <summary>{texts.artBreakdown}</summary>
                 <ul className="version-list">
                   {breakdown(art)
@@ -277,7 +277,7 @@ function ArtSets({ printings }: { printings: readonly Printing[] }) {
         <SetChipRow key={chip.family} chip={chip} />
       ))}
       {other.length > 0 && (
-        <details className="art-other-sets">
+        <details className="disclosure art-other-sets">
           <summary>{texts.otherProducts(other.length)}</summary>
           <span className="art-sets">
             {other.map((chip) => (

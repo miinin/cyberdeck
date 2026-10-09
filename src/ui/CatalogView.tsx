@@ -494,7 +494,7 @@ export function CatalogView({
             )}
             {countIn(collection, openCard.key) >= playsetSize(openCard) && <p>{texts.playsetFull}</p>}
             {editable && countIn(collection, openCard.key) > 0 && countIn(collection, openCard.key) <= minCountOf(collection.saved, openCard.key) && (
-              <p>{texts.versionsLowerFirst}</p>
+              <p className="hint">{texts.versionsLowerFirst}</p>
             )}
           </section>
         )}
@@ -626,6 +626,15 @@ export function CatalogView({
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {announcer.text ?? texts.loaded(allCards.length)}
       </div>
+
+      {routeCardKey !== null && routeCardKey !== dismissedKey && routeCard === null && (
+        <div className="notice notice-danger" role="alert">
+          <p>{texts.cardNotFound}</p>
+          <a className="text-link" href="#/">
+            {texts.cardNotFoundBack}
+          </a>
+        </div>
+      )}
 
       <CollectionNotices
         snapshot={collection}

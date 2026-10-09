@@ -1,4 +1,5 @@
 import type { CatalogViewMode, DefaultEdition } from '../storage';
+import { SegmentedChoice } from './SegmentedChoice';
 import { texts } from './texts';
 
 /** Grid image size (T-050a): session state only, never saved. */
@@ -21,23 +22,14 @@ export function ImageSizeSelect({
   onChange: (next: ImageSize) => void;
 }) {
   return (
-    <fieldset className="view-select image-size-select">
-      <legend>{texts.imageSizeLegend}</legend>
-      <div className="options">
-        {IMAGE_SIZE_OPTIONS.map(([option, label]) => (
-          <label key={option} className="option">
-            <input
-              type="radio"
-              name={name}
-              value={option}
-              checked={value === option}
-              onChange={() => onChange(option)}
-            />{' '}
-            {label}
-          </label>
-        ))}
-      </div>
-    </fieldset>
+    <SegmentedChoice
+      className="image-size-select"
+      legend={texts.imageSizeLegend}
+      name={name}
+      value={value}
+      options={IMAGE_SIZE_OPTIONS}
+      onChange={onChange}
+    />
   );
 }
 
@@ -95,48 +87,24 @@ export function ListToolbar({
 }) {
   return (
     <div className="list-toolbar">
-      <fieldset className="view-select">
-        <legend>{texts.viewLegend}</legend>
-        <div className="options">
-          {VIEW_OPTIONS.map(([value, label]) => (
-            <label key={value} className="option">
-              <input
-                type="radio"
-                name="catalog-view"
-                value={value}
-                checked={view === value}
-                onChange={() => onViewChange(value)}
-              />{' '}
-              {label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <SegmentedChoice legend={texts.viewLegend} name="catalog-view" value={view} options={VIEW_OPTIONS} onChange={onViewChange} />
       {imageSize !== undefined && (
         <ImageSizeSelect name="image-size" value={imageSize} onChange={(next) => onImageSizeChange?.(next)} />
       )}
       {editable === true && edition !== undefined && (
-        <fieldset className="view-select edition-select">
-          <legend>{texts.editionLegend}</legend>
-          <div className="options">
-            {EDITION_OPTIONS.map(([value, label]) => (
-              <label key={value} className="option">
-                <input
-                  type="radio"
-                  name="default-edition"
-                  value={value}
-                  checked={edition === value}
-                  aria-describedby="edition-hint"
-                  onChange={() => onEditionChange?.(value)}
-                />{' '}
-                {label}
-              </label>
-            ))}
-          </div>
+        <SegmentedChoice
+          className="edition-select"
+          legend={texts.editionLegend}
+          name="default-edition"
+          value={edition}
+          options={EDITION_OPTIONS}
+          describedBy="edition-hint"
+          onChange={onEditionChange ?? (() => undefined)}
+        >
           <p id="edition-hint" className="visually-hidden">
             {texts.editionHint}
           </p>
-        </fieldset>
+        </SegmentedChoice>
       )}
       {(editable !== undefined || allArts !== undefined) && (
         <div className="toolbar-switches">

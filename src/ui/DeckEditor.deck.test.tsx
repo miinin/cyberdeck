@@ -90,7 +90,7 @@ describe('Deck column', () => {
     expect(within(region).queryByRole('button', { name: 'Poista pakasta: Unit 0' })).not.toBeInTheDocument();
     await user.pointer({ keys: '[MouseRight]', target: stackCard });
     expect(within(region).getByRole('button', { name: 'Suurenna kuva: Unit 0, 2 pakassa' })).toBeInTheDocument();
-    await user.click(screen.getByRole('radio', { name: 'Lista' }));
+    await user.click(within(screen.getByRole('group', { name: 'Pakkanäkymä' })).getByRole('radio', { name: 'Lista' }));
     expect(within(region).getByRole('button', { name: 'Poista pakasta: Unit 0' })).toBeInTheDocument();
   });
 

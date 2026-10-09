@@ -88,7 +88,7 @@ describe('Stacks by colour and type (T-103)', () => {
     expect(within(deckRegion()).getByRole('heading', { level: 3, name: 'Unit (4)' })).toBeInTheDocument();
     await user.click(screen.getByRole('radio', { name: 'Pinot' }));
     expect(within(deckRegion()).getByRole('heading', { level: 3, name: 'Red · Unit (4)' })).toBeInTheDocument();
-    await user.click(screen.getByRole('radio', { name: 'Lista' }));
+    await user.click(within(screen.getByRole('group', { name: 'Pakkanäkymä' })).getByRole('radio', { name: 'Lista' }));
     expect(within(deckRegion()).getByRole('heading', { level: 3, name: 'Unit (4)' })).toBeInTheDocument();
   });
 });

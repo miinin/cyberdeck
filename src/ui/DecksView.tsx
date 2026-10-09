@@ -435,11 +435,11 @@ export function DecksView({
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {live}
       </div>
-      <nav className="deck-tabs" aria-label={deckTexts.decksTabsLabel}>
-        <a href={routeHash({ name: 'decks' })} aria-current={tab === 'own' ? 'page' : undefined}>
+      <nav className="segmented" aria-label={deckTexts.decksTabsLabel}>
+        <a className="segmented-option" href={routeHash({ name: 'decks' })} aria-current={tab === 'own' ? 'page' : undefined}>
           {deckTexts.tabOwn}
         </a>
-        <a href={routeHash({ name: 'publicDecks' })} aria-current={tab === 'public' ? 'page' : undefined}>
+        <a className="segmented-option" href={routeHash({ name: 'publicDecks' })} aria-current={tab === 'public' ? 'page' : undefined}>
           {deckTexts.tabPublic}
         </a>
       </nav>
@@ -472,10 +472,9 @@ export function DecksView({
       {tab === 'own' && phase === 'ready' && (
         <>
           {decks.length === 0 ? (
-            <div className="empty deck-empty">
-              <h2 className="deck-empty-title">{deckTexts.listEmptyTitle}</h2>
+            <div className="empty">
+              <h2>{deckTexts.listEmptyTitle}</h2>
               <p>{deckTexts.listEmpty}</p>
-              <p className="hint">{deckTexts.listEmptyHint}</p>
               {actions}
             </div>
           ) : (
@@ -524,7 +523,7 @@ export function DecksView({
                         </button>
                         <button
                           type="button"
-                          className="button-secondary"
+                          className="button-secondary button-compact"
                           aria-label={deckTexts.forDeck(deckTexts.copy, deck.name)}
                           onClick={() => handleCopy(deck)}
                         >

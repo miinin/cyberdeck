@@ -30,7 +30,10 @@ describe('Shared deck route', () => {
     });
     expect(within(report).getByText('3 × Unit 0')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Jaettu pakka' })).toBeInTheDocument();
-    expect(screen.queryByLabelText('Pakkalista')).not.toBeVisible();
+    // The import forms are not rendered at all (T-118, UX-118-02), not only hidden.
+    expect(screen.queryByLabelText('Pakkalista')).toBeNull();
+    expect(screen.queryByLabelText('Netdeck-linkki')).toBeNull();
+    expect(screen.queryByLabelText('Tai valitse .txt- tai .json-tiedosto')).toBeNull();
     expect(screen.getByLabelText('Pakan nimi')).toHaveValue('Jaettu <b>pakka</b>');
     expect(document.querySelector('main b')).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Tallenna omaksi pakaksi' }));
@@ -43,7 +46,7 @@ describe('Shared deck route', () => {
     async (bad) => {
       renderRoute(`#/jaa/${bad}`);
       expect(await screen.findByRole('heading', { name: 'Linkki ei toimi' })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Siirry Pakat-sivulle' })).toHaveAttribute('href', '#/pakat');
+      expect(screen.getByRole('link', { name: 'Siirry Pakat-osioon' })).toHaveAttribute('href', '#/pakat');
     },
   );
 });

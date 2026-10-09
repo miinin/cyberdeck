@@ -66,7 +66,9 @@ export function PublicDeckView({
         <h1 ref={headingRef} tabIndex={-1}>
           {load.phase === 'missing' ? deckTexts.publicViewMissingHeading : deckTexts.publicViewHeading}
         </h1>
-        <p role="alert">{load.phase === 'missing' ? deckTexts.publicViewMissing : deckTexts.publicViewError}</p>
+        <div className="notice notice-danger" role="alert">
+          <p>{load.phase === 'missing' ? deckTexts.publicViewMissing : deckTexts.publicViewError}</p>
+        </div>
         {load.phase === 'error' && (
           <p>
             <button type="button" className="button-secondary" onClick={() => {
@@ -78,7 +80,9 @@ export function PublicDeckView({
           </p>
         )}
         <p>
-          <a href="#/pakat/julkiset">{deckTexts.publicBack}</a>
+          <a className="text-link" href="#/pakat/julkiset">
+            {deckTexts.publicBack}
+          </a>
         </p>
       </>
     );

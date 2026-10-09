@@ -31,7 +31,7 @@ export function Stepper({
     <div className="card-row-controls">
       <button
         type="button"
-        className="step step-minus"
+        className="step step--compact step-minus"
         aria-disabled={count === 0 ? 'true' : undefined}
         aria-label={removeLabel ?? deckTexts.removeCard(name)}
         aria-keyshortcuts={shortcuts ? '-' : undefined}
@@ -45,7 +45,7 @@ export function Stepper({
       </span>
       <button
         type="button"
-        className="step step-plus"
+        className="step step--compact step-plus"
         aria-label={addLabel ?? deckTexts.addCard(name)}
         aria-describedby={describedBy}
         aria-keyshortcuts={shortcuts ? '+' : undefined}

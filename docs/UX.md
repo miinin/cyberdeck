@@ -177,9 +177,9 @@ Komponenttien toiminta ja rakenne ovat ennallaan. Tässä on ulkoasun muutos. Vi
 - Mikään kiinnitetty (sticky) elementti ei saa peittää fokusoitua elementtiä (2.4.11). Sticky-elementtejä ei käytetä.
 
 **Tekstikenttä** (T-010)
-- Näkyvä `<label>` kentän yläpuolella (`--font-weight-bold`, versaalit, `--font-size-sm`). Placeholderia ei käytetä labelin tai ohjeen korvikkeena.
+- Näkyvä `<label>` kentän yläpuolella (`--font-weight-bold`, versaalit, `--font-size-sm`). Placeholderia ei käytetä labelin tai ohjeen korvikkeena. **Poikkeus (T-118, UX-118-29):** hakukentässä (Kortit, Have/Want, Proxy, pakkaeditori) label on visuaalisesti piilotettu (`.visually-hidden`, ruudunlukija kuulee sen) ja kentässä on placeholder "Hae nimellä…". Muissa kentissä label näkyy aina.
 - Ohjeteksti labelin ja kentän välissä (`--font-size-sm`, `--color-text-muted`), liitetty kenttään `aria-describedby`-attribuutilla.
-- Kenttä: korkeus vähintään `--target-min`, leveys 100 % (enintään `24rem`, kun leveys on ≥ 640 px), tausta `--color-surface-raised`, teksti `--color-text` (paino 500), reuna 1 px `--color-border-strong` ja alareuna 2 px, suorat kulmat, sisäväli `--space-2` `--space-3`, fonttikoko `--font-size-base` (≥ 16 px estää iOS:n automaattisen zoomauksen).
+- Kenttä: korkeus **tasan** `--target-min` ulkomittana (`block-size`, T-118),  leveys 100 % (enintään `24rem`, kun leveys on ≥ 640 px), tausta `--color-surface-raised`, teksti `--color-text` (paino 500), reuna 1 px `--color-border-strong` ja alareuna 2 px, suorat kulmat, sisäväli `--space-2` `--space-3`, fonttikoko `--font-size-base` (≥ 16 px estää iOS:n automaattisen zoomauksen).
 - Hover: reuna `--color-info`. Fokus: reuna `--color-info` ja `--focus-ring` (`outline-offset: 2px`).
 
 **Valintaruutu ja valintaryhmä** (T-010)
@@ -190,7 +190,7 @@ Komponenttien toiminta ja rakenne ovat ennallaan. Tässä on ulkoasun muutos. Vi
 - Ryhmä on `<fieldset>`, jonka nimi on `<legend>` (`--font-weight-bold`, versaalit). Fieldsetin oletusreuna poistetaan, ja sisäväli on 0.
 - Vaihtoehdot rivitetään: `display: flex; flex-wrap: wrap; gap: var(--space-2)`.
 
-**Paneeli** (uusi, T-021): hakulomake (`.card-filters`). Tausta `--color-surface`, 1 px `--color-border` ja kaksi kulmasulkua (vasen yläkulma ja oikea alakulma, 16 px × 2 px `--color-bracket`, toteutus `background`-gradienteilla, ei `clip-path`). Selainmuistutuksella (`.storage-reminder`) on sen sijaan 3 px:n vasen kisko `--color-info` ja tausta `--color-surface`. Tyhjä tila (`.empty`): 1 px katkoviivareuna `--color-border-strong`, tausta `--color-surface`.
+**Paneeli** (`.panel`, T-118, korvaa kulmasulkupaneelin ja `.stats-card`:in): tausta `--color-surface`, 1 px `--color-border` ja vasemman yläkulman 40 × 2 px keltainen tikku (`::before`). Otsikko `.panel-title` (h2 tai h3, 16 px, versaalit, `--color-text-muted`). Käytössä kokoelman ja pakan tilastokorteissa, tuontilomakkeissa ja vaihtolinkin osioissa. Vasen kisko on vain ilmoituksilla (`.notice`), tilannelaatikolla ja selainmuistutuksella (`.storage-reminder`, 3 px `--color-info`). Tyhjä tila (`.empty`): 1 px katkoviivareuna `--color-border-strong`, tausta `--color-surface`, h2 ja yksi lause, toiminnot vasemmalle (T-118).
 
 **Visuaalisesti piilotettu teksti** (`.visually-hidden`)
 - Ruudunlukijalle tarkoitettu teksti, joka ei näy. Käytetään vakiintunutta clip-toteutusta (ei `display: none` eikä `visibility: hidden`, jotka piilottavat myös ruudunlukijalta).
@@ -199,6 +199,27 @@ Komponenttien toiminta ja rakenne ovat ennallaan. Tässä on ulkoasun muutos. Vi
 
 - Kaikki liike (animaatiot, siirtymät) on kirjoitettu ehdon `@media (prefers-reduced-motion: no-preference)` sisään. Ilman ehtoa tai `reduce`-tilassa ei ole liikettä. Nykyinen `reduce`-ylikirjoitus (`animation-duration: 0.01ms`, `transition-duration: 0.01ms`) säilytetään turvaverkkona.
 - Sallittu liike on lueteltu 7.7:ssä: otsikon yksi lyhyt glitch sivun avautuessa, ~~latauspalkin pyyhkäisy~~ (poistettu T-026) ja värisiirtymät (0.12 s). Mikään ei vilku yli 3 kertaa sekunnissa.
+
+### 3.6 Yhtenäisyysstandardi (T-118)
+
+Koko sivuston UI-yhtenäisyys on kirjattu auditointiraporttiin `docs/reports/UX-118-yhtenaisyys.md` (luku a). Tiivistelmä toteutetuista yhteisistä luokista (`src/styles.css`). Uusi komponentti käyttää näitä, ei omaa tyyliä:
+
+| Komponentti | Luokka | Sääntö |
+|---|---|---|
+| Valinta yhdestä (Kuvat/Lista, välilehdet, tilat) | `.segmented` + `.segmented-option` (React: `SegmentedChoice`) | 44 px ulkomitta, 2 px kehys, 18 px lihavoitu, valittu = keltainen täyttö ja musta teksti. Radio, painike (`aria-pressed`) ja linkki (`aria-current`) käyttävät samaa. Yksivalinta on aina tämä, ei valintaruutu-chip. |
+| Vaarallinen toiminto | `.button-danger` | Toissijaisen rakenne `--color-danger`-väreillä. Oletusfokus on Peruuta-painikkeessa. |
+| Tiivis painike | `.button-compact` | 16 px, 44 px korkea. Painikkeissa on vain 18 px tai tämä. |
+| Määrälaskuri | `.step` 44 px, `.step--compact` 32 px | Kaksi kokoa. `.tile-action` ("→ SB") on 32 px ja sama 6 px viiste. |
+| Avattava osio | `.disclosure` | `<details>`, 44 px yhteenveto, versaalit, keltainen kolmio kääntyy auki-tilassa. |
+| Tiedostokenttä | `.file-input` | Natiivi kenttä piilossa, label on toissijainen painike, valitun tiedoston nimi himmeänä. |
+| Linkki | `a` (ilman luokkaa), `.text-link`, `.link-button` | Aina alleviivattu (keltainen viiva tummalla, musta vaaleella), teksti `--color-text`, hover `--color-info`. Ei selaimen sinistä eikä violettia. |
+| Otsikot | h1 36, h2 22, h3 16 px | Kaikki lihavoituja ja versaaleja. Pieni alkukirjain vain kortin nimellä (`.card-name`). |
+| Laskuri ×N | `.stack-card-count`, `.pocket-count` | Keltainen suorakulma kuvan päällä. Listassa pelkkä teksti. Ei pyöristyksiä (poikkeus: (i)-vihje ja kustannuskuvake). |
+| Nuolet | `Chevron` (SVG) | Yksi 2 px viivan nuoli kaikkialla (ei ◀ ▶ ‹ ›). |
+
+**Mobiilidialogit (T-118, UX-118-14, päätös 2026-10-09):** alle 40 rem leveällä isot dialogit (kortin tiedot, testikäsi, painosvarmistus) ovat koko näytön näkymiä ilman kehystä. Dialogikerros vierii kokonaisuutena kuin sivu, eikä sen sisällä ole omia vieritysalueita. Pienet vahvistukset (pakan poisto, jonon tyhjennys, ensikirjautuminen) pysyvät keskitettyinä laatikkoina. Vahvistusdialogin painikkeet ovat alle 40 rem leveällä täysleveinä pinossa, pääpainike ylhäällä ja Peruuta alimmaisena (DOM-järjestys: Peruuta ensin).
+
+**Kelluvaa painiketta ei ole (UX-118-09):** Kokoelman skannaus on aina otsikkorivin "Skannaa"-painike (`.button-secondary.scan-open`) kaikilla leveyksillä. Tyhjässä tilassa sen lisäksi on ensisijainen "Skannaa kortteja" -kehotus.
 
 ---
 

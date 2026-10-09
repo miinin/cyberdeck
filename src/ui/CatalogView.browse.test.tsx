@@ -99,7 +99,7 @@ describe('CatalogView: view selector and table (T-040)', () => {
     await repositories.preferences.saveView('table');
     await renderView(repositories);
     const headers = screen.getAllByRole('columnheader').map((cell) => cell.textContent);
-    expect(headers).toEqual(['Kuva', 'Nimi', 'Tyyppi', 'Rarity', 'Cost', 'Power', 'RAM', 'Kokoelma']);
+    expect(headers).toEqual(['Kuva', 'Nimi', 'Tyyppi', 'Harvinaisuus', 'Cost', 'Power', 'RAM', 'Kokoelma']);
     const region = screen.getByRole('region', { name: /taulukko/ });
     expect(region).toHaveAttribute('tabindex', '0');
     expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(3);

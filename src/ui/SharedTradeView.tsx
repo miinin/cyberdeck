@@ -11,29 +11,72 @@ import { texts } from './texts';
 import { useCollection } from './useCollection';
 import { useWants } from './useWants';
 
-/** Rows of known cards as React text; cards missing from the card data are left out (they are counted elsewhere). */
-function CardRows({
+interface TradeRow {
+  card: Card;
+  count: number;
+  /** Tradeable copies; undefined = the column is not shown. */
+  tradeable?: number;
+}
+
+/** Rows of known cards as a table of React text; cards missing from the card data are left out (they are counted elsewhere). */
+function CardTable({
   rows,
   cardsByKey,
-  describe,
+  caption,
+  countHeading,
+  tradeableOf,
 }: {
   rows: readonly CollectionEntry[];
   cardsByKey: ReadonlyMap<CardKey, Card>;
-  describe: (entry: CollectionEntry, card: Card) => string;
+  caption: string;
+  countHeading: string;
+  /** Adds the "Vaihdettavissa" column. */
+  tradeableOf?: (entry: CollectionEntry, card: Card) => number;
 }) {
-  const known = rows.flatMap((entry) => {
+  const known = rows.flatMap((entry): TradeRow[] => {
     const card = cardsByKey.get(entry.card);
-    return card === undefined ? [] : [{ entry, card }];
+    return card === undefined ? [] : [{ card, count: entry.count, tradeable: tradeableOf?.(entry, card) }];
   });
   if (known.length === 0) return <p>{texts.tradeNothing}</p>;
   return (
-    <ul>
-      {known.map(({ entry, card }) => (
-        <li key={entry.card}>
-          <CardName card={card} />: {describe(entry, card)}
-        </li>
-      ))}
-    </ul>
+    <table className="trade-table">
+      <caption className="visually-hidden">{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{texts.tradeColCard}</th>
+          <th scope="col" className="trade-number">
+            {countHeading}
+          </th>
+          {tradeableOf !== undefined && (
+            <th scope="col" className="trade-number">
+              {texts.tradeColTradeable}
+            </th>
+          )}
+        </tr>
+      </thead>
+      <tbody>
+        {known.map(({ card, count, tradeable }) => (
+          <tr key={card.key}>
+            <th scope="row">
+              <CardName card={card} />
+            </th>
+            <td className="trade-number">{count}</td>
+            {tradeable !== undefined && (
+              <td className="trade-number">
+                {tradeable > 0 ? (
+                  tradeable
+                ) : (
+                  <>
+                    <span aria-hidden="true">–</span>
+                    <span className="visually-hidden">{texts.tradeNoneTradeable}</span>
+                  </>
+                )}
+              </td>
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -73,9 +116,13 @@ export function SharedTradeView({
         <h1 ref={headingRef} tabIndex={-1}>
           {texts.tradeInvalidHeading}
         </h1>
-        <p role="alert">{texts.tradeInvalid}</p>
+        <div className="notice notice-danger" role="alert">
+          <p>{texts.tradeInvalid}</p>
+        </div>
         <p>
-          <a href="#/">{texts.tradeToCards}</a>
+          <a className="text-link" href="#/">
+            {texts.tradeToCards}
+          </a>
         </p>
       </>
     );
@@ -85,8 +132,8 @@ export function SharedTradeView({
     (entry) => !cardsByKey.has(entry.card),
   ).length;
   const loading = mine.phase === 'loading' || myWants.phase === 'loading';
-  const countRows = (rows: readonly CollectionEntry[]) => (
-    <CardRows rows={rows} cardsByKey={cardsByKey} describe={(entry) => texts.tradeCompareRow(entry.count)} />
+  const compareTable = (rows: readonly CollectionEntry[], caption: string) => (
+    <CardTable rows={rows} cardsByKey={cardsByKey} caption={caption} countHeading={texts.tradeColCount} />
   );
 
   return (
@@ -98,49 +145,63 @@ export function SharedTradeView({
       {shared.dropped > 0 && <p role="status">{texts.tradeDropped(shared.dropped)}</p>}
       {unknown > 0 && <p role="status">{texts.tradeUnknown(unknown)}</p>}
 
-      <section aria-labelledby="trade-compare-heading">
-        <h2 id="trade-compare-heading">{texts.tradeCompareHeading}</h2>
+      <section className="panel" aria-labelledby="trade-compare-heading">
+        <h2 id="trade-compare-heading" className="panel-title">
+          {texts.tradeCompareHeading}
+        </h2>
         {comparison !== null ? (
           <>
             <p className="hint">{texts.tradeCompareExplain}</p>
             <h3>{texts.tradeIGiveHeading}</h3>
-            {countRows(comparison.iCanGive)}
+            {compareTable(comparison.iCanGive, texts.tradeIGiveHeading)}
             <h3>{texts.tradeTheyGiveHeading}</h3>
-            {countRows(comparison.theyCanGive)}
+            {compareTable(comparison.theyCanGive, texts.tradeTheyGiveHeading)}
           </>
         ) : (
           <p>{loading ? texts.tradeCompareLoading : texts.tradeCompareUnavailable}</p>
         )}
       </section>
 
-      <section aria-labelledby="trade-have-heading">
-        <h2 id="trade-have-heading">{texts.tradeTheirHaveHeading}</h2>
-        {shared.have.entries.length === 0 ? (
-          <p>{texts.tradeEmptyList}</p>
-        ) : (
-          <CardRows
-            rows={shared.have.entries}
-            cardsByKey={cardsByKey}
-            describe={(entry, card) => texts.tradeHaveRow(entry.count, tradeableCount(entry.count, card))}
-          />
-        )}
+      <section className="panel" aria-labelledby="trade-have-heading">
+        <details className="disclosure">
+          <summary>
+            <span id="trade-have-heading">{texts.tradeTheirHaveHeading}</span>
+            <span className="hint"> ({shared.have.entries.length})</span>
+          </summary>
+          {shared.have.entries.length === 0 ? (
+            <p>{texts.tradeEmptyList}</p>
+          ) : (
+            <CardTable
+              rows={shared.have.entries}
+              cardsByKey={cardsByKey}
+              caption={texts.tradeTheirHaveHeading}
+              countHeading={texts.tradeColCount}
+              tradeableOf={(entry, card) => tradeableCount(entry.count, card)}
+            />
+          )}
+        </details>
       </section>
 
-      <section aria-labelledby="trade-want-heading">
-        <h2 id="trade-want-heading">{texts.tradeTheirWantHeading}</h2>
+      <section className="panel" aria-labelledby="trade-want-heading">
+        <h2 id="trade-want-heading" className="panel-title">
+          {texts.tradeTheirWantHeading}
+        </h2>
         {shared.want.entries.length === 0 ? (
           <p>{texts.tradeEmptyList}</p>
         ) : (
-          <CardRows
+          <CardTable
             rows={shared.want.entries}
             cardsByKey={cardsByKey}
-            describe={(entry) => texts.tradeWantRow(entry.count)}
+            caption={texts.tradeTheirWantHeading}
+            countHeading={texts.tradeColWants}
           />
         )}
       </section>
 
       <p>
-        <a href="#/">{texts.tradeToCards}</a>
+        <a className="button-secondary" href="#/vaihto">
+          {texts.tradeOpenOwn}
+        </a>
       </p>
     </>
   );

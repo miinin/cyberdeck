@@ -14,10 +14,17 @@ import type { DeckProblems } from './DeckProblems';
 import { pickGestures } from './pickGestures';
 import { Stepper } from './Stepper';
 import { colorNames, texts } from './texts';
+import { SegmentedChoice } from './SegmentedChoice';
 
 export type DeckView = 'list' | 'stacks' | 'cards';
 
 /** The card image, or the dashed placeholder when there is none or it fails to load. */
+const DECK_VIEW_OPTIONS = [
+  ['list', deckTexts.deckViewList],
+  ['stacks', deckTexts.deckViewStacks],
+  ['cards', deckTexts.deckViewCards],
+] as const;
+
 export function DeckCardImage({ card, className }: { card: Card; className: string }) {
   const image = getCardImage(card.key);
   const [failed, setFailed] = useState(false);
@@ -52,7 +59,6 @@ export function DeckList({
   onOpenImage,
   hoverProps,
   onMoveToSideboard,
-  onAddToSideboard,
   problems,
 }: {
   grouped: DeckGroups;
@@ -67,8 +73,6 @@ export function DeckList({
   hoverProps: (card: Card) => HoverPreviewProps;
   /** Moves one copy to the sideboard (T-058). */
   onMoveToSideboard?: (card: Card) => void;
-  /** Stacks view: add a copy to the sideboard straight from the stack (T-074). */
-  onAddToSideboard?: (card: Card) => void;
   /** Rows and section counts that break a rule (T-101). */
   problems?: DeckProblems;
 }) {
@@ -101,7 +105,7 @@ export function DeckList({
         key={card.key}
         data-deck-row={card.key}
         data-deck-part="main"
-        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '') + (problemsOf(card) !== undefined ? ' is-problem' : '') + (onMoveToSideboard !== undefined && card.type !== 'Legend' ? ' has-move' : '')}
+        className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '') + (problemsOf(card) !== undefined ? ' is-problem' : '')}
         onContextMenu={onContextMenu}
         onKeyDown={onKeyDown}
         {...hoverProps(card)}
@@ -184,15 +188,16 @@ export function DeckList({
             <Stepper name={card.displayName} count={count} showCount={false} onChange={(next) => onChange(card, next)} />
           </div>
         )}
-        {onAddToSideboard !== undefined && card.type !== 'Legend' && (
+        {onMoveToSideboard !== undefined && card.type !== 'Legend' && (
+          // The same action as the list row's button: the deck column always moves a copy (T-118, UX-118-24).
           <button
             type="button"
             className="tile-action"
-            aria-label={deckTexts.addToSideboard(card.displayName)}
-            title={deckTexts.addToSideboardTitle}
-            onClick={() => onAddToSideboard(card)}
+            aria-label={deckTexts.moveToSideboard(card.displayName)}
+            title={deckTexts.moveToSideboardTitle}
+            onClick={() => onMoveToSideboard(card)}
           >
-            {deckTexts.addToSideboardShort}
+            {deckTexts.moveToSideboardShort}
           </button>
         )}
       </li>
@@ -242,29 +247,13 @@ export function DeckList({
             </h2>
             <SectionFlag problem={problems?.mainSection ?? null} />
           </div>
-          <fieldset className="view-select deck-view">
-            <legend className="visually-hidden">{deckTexts.deckViewLegend}</legend>
-            <div className="options">
-              {(
-                [
-                  ['list', deckTexts.deckViewList],
-                  ['stacks', deckTexts.deckViewStacks],
-                  ['cards', deckTexts.deckViewCards],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className="option">
-                  <input
-                    type="radio"
-                    name="deck-view"
-                    value={value}
-                    checked={view === value}
-                    onChange={() => onViewChange(value)}
-                  />{' '}
-                  {label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <SegmentedChoice
+            legend={deckTexts.deckViewLegend}
+            name="deck-view"
+            value={view}
+            options={DECK_VIEW_OPTIONS}
+            onChange={onViewChange}
+          />
         </div>
         {grouped.groups.length === 0 && grouped.unknown.length === 0 && <p className="hint">{deckTexts.deckEmpty}</p>}
         {view === 'cards' ? (

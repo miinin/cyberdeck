@@ -74,7 +74,7 @@ export function Sideboard({
       key={card.key}
       data-deck-row={card.key}
       data-deck-part="side"
-      className={`deck-tile has-move ${typeColorClass(card.color)}` + (problemsOf(card) !== undefined ? ' is-problem' : '')}
+      className={`deck-tile ${typeColorClass(card.color)}` + (problemsOf(card) !== undefined ? ' is-problem' : '')}
       {...hoverProps(card)}
     >
       <span className="deck-tile-art" aria-hidden="true">
