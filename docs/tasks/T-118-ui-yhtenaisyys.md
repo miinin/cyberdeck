@@ -122,3 +122,5 @@ Valmis: `docs/reports/UX-118-yhtenaisyys.md` (43 löydöstä: 1 kriittinen, 15 k
 **Koodikatselmointi:** tehty · Pakollisia korjattu 3 (puuttuva CSS-kirjoitus ensimmäisessä komentosarjassa, venyvä segmentti, link-buttonin välilyönti) · Suosituksia 2 (velaksi: käyttämättömät vanhat luokat `card-row-meta`, `color-bar*`, `legend-slot-*`, `stat-summary`, `version-thumb*` voi poistaa erillisellä siivouksella. Kirjautuneen tilan näkymät on katsottava oikealla tilillä).
 
 **Testit ja tarkistukset:** `npm test` 116 tiedostoa ja 1550 testiä läpi (1544 ennen, 6 uutta), `npm run lint` ja `npm run build` läpi.
+
+**PM-lisäys 2026-10-09:** alle 24rem leveällä näytöllä logo pienennetään (1,5rem) ja työkalujen välit poistetaan. Näin 320 px:llä yläpalkki on kaksi riviä (logo ja työkalut, navigointi) eikä kolme. Tarkistettu headless Chromella 320, 360 ja 390 px, scrollWidth vastaa leveyttä. **Velka:** käyttämättömät CSS-luokat (`card-row-meta`, `color-bar*`, `stat-summary`, `version-thumb*`) poistetaan erillisessä siivouksessa.

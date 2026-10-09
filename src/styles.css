@@ -8793,3 +8793,19 @@ section[aria-labelledby='have-heading'] {
     font-size: var(--font-size-sm);
   }
 }
+
+/* Narrowest phones (T-118): logo and the four header tools stay on one row above the navigation, as on wider phones. */
+@media (max-width: 23.99rem) {
+  .brand img {
+    height: 1.5rem;
+  }
+
+  .header-tools,
+  .header-tools .language-switch {
+    gap: 0;
+  }
+
+  .site-header .container {
+    column-gap: var(--space-1);
+  }
+}
