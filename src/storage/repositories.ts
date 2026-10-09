@@ -184,6 +184,8 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const decksKey = prefix === null ? DECKS_KEY : `${prefix}decks`;
   const wantsKey = prefix === null ? WANTS_KEY : `${prefix}wants`;
   const proxyKey = prefix === null ? PROXY_KEY : `${prefix}proxy`;
+  // The own binder holds the account's cards and a free-text name, so it follows the account like the proxy queue (T-120).
+  const binderLayoutKey = prefix === null ? BINDER_LAYOUT_KEY : `${prefix}binder-layout`;
   const backupPrefix = prefix === null ? BACKUP_PREFIX : `${prefix}backup:`;
   const syncBaseKey = `${prefix ?? 'cyberdeck:'}sync-base`;
   /** Same-tab listeners: `ui` hear sync-driven writes, `changes` hear every write (the sync engine). */
@@ -620,7 +622,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     loadBinderLayout: async () => {
       try {
-        const raw = store.getItem(BINDER_LAYOUT_KEY);
+        const raw = store.getItem(binderLayoutKey);
         return raw === null ? null : normalizeBinderLayout(JSON.parse(raw));
       } catch {
         return null;
@@ -630,7 +632,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       const valid = normalizeBinderLayout(layout);
       if (valid === null) throw new StorageError('invalid-input', 'Invalid binder layout');
       try {
-        store.setItem(BINDER_LAYOUT_KEY, JSON.stringify(valid));
+        store.setItem(binderLayoutKey, JSON.stringify(valid));
       } catch (error) {
         throw toStorageError(error, 'write');
       }

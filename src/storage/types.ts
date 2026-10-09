@@ -167,6 +167,6 @@ export interface Repositories {
   persistent: boolean;
   /** Local data access for syncing (T-054c). */
   sync: SyncStorage;
-  /** Repositories of one account's data in the same store (keys `cyberdeck:u:{uid}:*`), same preferences. */
+  /** Repositories of one account's data in the same store (keys `cyberdeck:u:{uid}:*`); the preferences are shared except the own binder layout (T-120). */
   forAccount(uid: string): Repositories;
 }

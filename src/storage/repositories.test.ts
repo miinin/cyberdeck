@@ -810,6 +810,17 @@ describe('preferences: own binder layout (T-120)', () => {
     expect((await edge.preferences.loadBinderLayout())?.pockets).toHaveLength(900);
   });
 
+  it('keeps each account its own layout, and erasing the account removes it', async () => {
+    const repos = setup();
+    const account = repos.forAccount('user123');
+    await account.preferences.saveBinderLayout({ v: 1, name: 'Mine', pockets: ['a'] });
+    expect(repos.store.getItem('cyberdeck:u:user123:binder-layout')).not.toBeNull();
+    expect(await repos.preferences.loadBinderLayout()).toBeNull();
+    expect(await repos.forAccount('other').preferences.loadBinderLayout()).toBeNull();
+    account.sync.eraseAccount();
+    expect(await account.preferences.loadBinderLayout()).toBeNull();
+  });
+
   it('refuses to save an invalid layout', async () => {
     const { preferences } = setup();
     await expectStorageError(preferences.saveBinderLayout({ v: 1, name: 'x', pockets: ['Bad Key'] }), 'invalid-input');
