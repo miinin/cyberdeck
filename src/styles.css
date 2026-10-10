@@ -9115,7 +9115,18 @@ button.pocket-link {
 .results-table tbody th {
   min-inline-size: 0;
   font-weight: var(--font-weight-normal);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+}
+
+.results-table thead th.results-number {
+  white-space: nowrap;
+}
+
+/* The record already holds the game count: on a phone the name column gets the room (no words cut in the middle). */
+@media (max-width: 479px) {
+  .results-table .results-games {
+    display: none;
+  }
 }
 
 .results-table .results-number {
@@ -9254,6 +9265,7 @@ button.pocket-link {
   margin: 0;
 }
 
+.game-form .view-select.has-legend legend,
 .game-form .field-label {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);

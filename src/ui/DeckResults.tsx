@@ -40,7 +40,7 @@ const rate = (value: number | null) => (value === null ? '–' : gameTexts.perce
 function TallyCells({ row }: { row: Tally }) {
   return (
     <>
-      <td className="results-number">{row.games}</td>
+      <td className="results-number results-games">{row.games}</td>
       <td className="results-number" aria-label={gameTexts.recordAria(row.wins, row.losses, row.draws)}>
         {recordText(row)}
       </td>
@@ -65,7 +65,7 @@ function ResultsTable({
         <thead>
           <tr>
             <th scope="col">{firstColumn}</th>
-            <th scope="col" className="results-number">
+            <th scope="col" className="results-number results-games">
               {gameTexts.kpiGames}
             </th>
             <th scope="col" className="results-number">
