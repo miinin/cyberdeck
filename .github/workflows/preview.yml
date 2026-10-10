@@ -40,6 +40,10 @@ jobs:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.action == 'closed' }}
     runs-on: ubuntu-latest
     steps:
+      # The Firebase CLI needs firebase.json and .firebaserc of the project.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -51,7 +55,7 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
           printf '%s' "$SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
           FIREBASE="npx --yes firebase-tools@15.33.0"
-          $FIREBASE hosting:channel:list --site cyberdeck-tcg-dev --project cyberdeck-tcg-dev --json > "$RUNNER_TEMP/channels.json"
+          $FIREBASE hosting:channel:list --site cyberdeck-tcg-dev --project cyberdeck-tcg-dev --json > "$RUNNER_TEMP/channels.json" || { cat "$RUNNER_TEMP/channels.json"; rm -f "$GOOGLE_APPLICATION_CREDENTIALS"; exit 1; }
           node -e '
             const data = require(process.argv[1]);
             const prefix = "pr" + process.env.PR_NUMBER + "-";
