@@ -6,7 +6,7 @@
 import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
 import type { Deck, DeckId } from '../domain/deck';
-import { gameLogFits, MAX_GAME_LOG_BYTES, parseGameLog } from '../domain/games';
+import { gameLogFits, parseGameLog } from '../domain/games';
 import type { GameLog } from '../domain/games';
 import { isDeckId, isRecord, parseCollection, parseDeck } from '../domain/validate';
 import { COLLECTION_ENVELOPE_SPEC, decodeEnvelopeValue, GAMES_ENVELOPE_SPEC, WANTS_ENVELOPE_SPEC } from '../storage';
@@ -249,9 +249,7 @@ export function checkChange(change: CloudChange, maxCollectionBytes = MAX_COLLEC
     // SR-45: the same row, count and byte limits as the device, before anything is sent.
     const parsed = parseGameLog(change.games);
     if (parsed === null || parsed.dropped > 0) throw new CloudError('unknown');
-    if (!gameLogFits(parsed.value) || encodedSize(encodeGamesDoc(parsed.value, new Date(0).toISOString())) >= MAX_GAME_LOG_BYTES) {
-      throw new CloudError('too-large');
-    }
+    if (!gameLogFits(parsed.value)) throw new CloudError('too-large');
     checked.games = parsed.value;
   }
   return checked;
