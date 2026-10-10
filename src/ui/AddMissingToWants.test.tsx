@@ -50,7 +50,7 @@ describe('Add missing to wants in the card list (T-066)', () => {
   it('is only offered while editing the collection, and asks first what will happen', async () => {
     const user = userEvent.setup();
     const repositories = await renderCatalog(storedCollection([['l1', 1], ['u0', 1]]));
-    const done = screen.queryByRole('button', { name: 'Valmis' });
+    const done = screen.queryByRole('button', { name: 'Lopeta merkitseminen' });
     if (done !== null) await user.click(done);
     expect(screen.queryByRole('button', { name: 'Lisää puuttuvat wantiin' })).toBeNull();
     await user.click(await screen.findByRole('button', { name: 'Merkitse omat korttisi' }));

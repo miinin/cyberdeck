@@ -34,8 +34,8 @@ async function renderView(repositories: Repositories) {
 }
 
 const markButton = () => screen.queryByRole('button', { name: 'Merkitse omat korttisi' });
-const banner = () => screen.queryByRole('region', { name: 'Merkintätila.' });
-const done = () => screen.getByRole('button', { name: 'Valmis' });
+const banner = () => screen.queryByRole('region', { name: 'Merkitset omia korttejasi' });
+const done = () => screen.getByRole('button', { name: 'Lopeta merkitseminen' });
 const stepButtons = () => screen.queryAllByRole('button', { name: /^(Vähennä|Lisää) yksi kappale/ });
 
 describe('CatalogView: marking own cards (T-040, T-123)', () => {
