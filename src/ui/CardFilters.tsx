@@ -51,6 +51,12 @@ export interface CardFiltersProps {
    * with this id, so on a phone the results are one tap away instead of a long scroll past the filters.
    */
   results?: { count: number; id: string };
+  /**
+   * The gallery (T-123) has its own search field in its bar: leaves the one of the form out. The panel is then always
+   * open, and `onShowResults` gives its "Näytä N korttia" button (needs `results` for the count) a job of its own.
+   */
+  hideSearch?: boolean;
+  onShowResults?: () => void;
 }
 
 /** How many choices are selected; "Kaikki" in "Kokoelma" is not a choice (T-050a). */
@@ -97,6 +103,8 @@ export function CardFilters({
   onSearchSubmit,
   collapsibleBelow,
   results,
+  hideSearch = false,
+  onShowResults,
 }: CardFiltersProps) {
   // Without matchMedia (tests) the panel counts as wide: always open.
   const alwaysOpen = useMediaQuery(collapsibleBelow ?? 'all', true) || collapsibleBelow === undefined;
@@ -141,47 +149,49 @@ export function CardFilters({
         onSearchSubmit();
       }}
     >
-      <div className="search-row">
-        <div className="field search-field">
-          <label htmlFor="card-search" className="visually-hidden">
-            {texts.searchLabel}
-          </label>
-          <p id="card-search-hint" className="visually-hidden">
-            {texts.searchHint}
-          </p>
-          <input
-            ref={searchInputRef}
-            id="card-search"
-            type="search"
-            // A visible hint only (T-115): the accessible name still comes from the hidden <label>.
-            placeholder={texts.searchPlaceholder}
-            aria-describedby="card-search-hint"
-            autoComplete="off"
-            spellCheck={false}
-            autoCapitalize="none"
-            enterKeyHint="search"
-            maxLength={SEARCH_MAX_LENGTH}
-            value={criteria.query}
-            onChange={handleChange}
-            onCompositionEnd={handleCompositionEnd}
-            onKeyDown={handleKeyDown}
-          />
-        </div>
+      {!hideSearch && (
+        <div className="search-row">
+          <div className="field search-field">
+            <label htmlFor="card-search" className="visually-hidden">
+              {texts.searchLabel}
+            </label>
+            <p id="card-search-hint" className="visually-hidden">
+              {texts.searchHint}
+            </p>
+            <input
+              ref={searchInputRef}
+              id="card-search"
+              type="search"
+              // A visible hint only (T-115): the accessible name still comes from the hidden <label>.
+              placeholder={texts.searchPlaceholder}
+              aria-describedby="card-search-hint"
+              autoComplete="off"
+              spellCheck={false}
+              autoCapitalize="none"
+              enterKeyHint="search"
+              maxLength={SEARCH_MAX_LENGTH}
+              value={criteria.query}
+              onChange={handleChange}
+              onCompositionEnd={handleCompositionEnd}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
 
-        {!alwaysOpen && (
-          <button
-            type="button"
-            ref={toggleRef}
-            className="button-secondary filter-toggle"
-            aria-expanded={open}
-            aria-controls="filter-panel"
-            onClick={() => setOpen(!open)}
-          >
-            {texts.filtersToggle(selected)}
-            <span className="filter-toggle-icon" aria-hidden="true" />
-          </button>
-        )}
-      </div>
+          {!alwaysOpen && (
+            <button
+              type="button"
+              ref={toggleRef}
+              className="button-secondary filter-toggle"
+              aria-expanded={open}
+              aria-controls="filter-panel"
+              onClick={() => setOpen(!open)}
+            >
+              {texts.filtersToggle(selected)}
+              <span className="filter-toggle-icon" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      )}
 
       <div id="filter-panel" className="filter-panel" hidden={!alwaysOpen && !open}>
         {collectionFilter !== undefined && (
@@ -317,8 +327,8 @@ export function CardFilters({
             ),
           )}
         </div>
-        {!alwaysOpen && results !== undefined && (
-          <button type="button" className="button-primary filter-show-results" onClick={showResults}>
+        {(!alwaysOpen || onShowResults !== undefined) && results !== undefined && (
+          <button type="button" className="button-primary filter-show-results" onClick={onShowResults ?? showResults}>
             {texts.showResults(results.count)}
           </button>
         )}

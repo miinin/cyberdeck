@@ -2,17 +2,29 @@ import { useEffect, useRef } from 'react';
 import { deckTexts } from './deckTexts';
 
 /**
- * Native modal dialog that asks before a deck is deleted. Esc, "Peruuta" and the backdrop cancel;
+ * Native modal dialog that asks before something is deleted. Esc, "Peruuta" and the backdrop cancel;
  * every way ends in the dialog's close event, which calls `onCancel` (T-013). `name` null = closed.
+ * It asks about a deck unless the texts are given (T-122: a game); `extra` is a second paragraph.
  */
 export function ConfirmDeleteDialog({
   name,
   onConfirm,
   onCancel,
+  title = deckTexts.deleteTitle,
+  body = deckTexts.deleteBody,
+  confirmLabel = deckTexts.deleteConfirm,
+  cancelLabel = deckTexts.cancel,
+  extra,
 }: {
   name: string | null;
   onConfirm: () => void;
   onCancel: () => void;
+  title?: string;
+  /** The question, given the name. */
+  body?: (name: string) => string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  extra?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -35,14 +47,15 @@ export function ConfirmDeleteDialog({
     >
       {name !== null && (
         <div className="confirm-dialog-body">
-          <h2 id="confirm-dialog-title">{deckTexts.deleteTitle}</h2>
-          <p>{deckTexts.deleteBody(name)}</p>
+          <h2 id="confirm-dialog-title">{title}</h2>
+          <p>{body(name)}</p>
+          {extra !== undefined && <p>{extra}</p>}
           <div className="row-actions">
             <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
-              {deckTexts.cancel}
+              {cancelLabel}
             </button>
             <button type="button" className="button-danger" onClick={onConfirm}>
-              {deckTexts.deleteConfirm}
+              {confirmLabel}
             </button>
           </div>
         </div>

@@ -4,6 +4,7 @@
  */
 import type { Collection } from '../domain/collection';
 import type { Deck, DeckId } from '../domain/deck';
+import type { GameLog } from '../domain/games';
 import type { PublicDeck, PublicDeckInput } from '../domain/publicDeck';
 
 /** The signed-in account. `email` is shown in the UI from memory only, never stored (D-017 kohta 1, SR-29). */
@@ -123,6 +124,8 @@ export interface CloudSnapshot {
   collection: CloudDoc<Collection>;
   /** `users/{uid}/collection/want` (D-018), validated like the collection. */
   wants: CloudDoc<Collection>;
+  /** `users/{uid}/games/log` (T-122, D-030), validated with parseGameLog. */
+  games: CloudDoc<GameLog>;
   /** Invalid documents, rows and sections left out (shown as a warning, SR-23 kohta 3). */
   dropped: number;
   /** A document or the meta has a newer schema version: no writes (SR-23 kohta 4). */
@@ -139,6 +142,8 @@ export interface CloudChange {
   collection?: Collection;
   /** undefined = the want list is not written. */
   wants?: Collection;
+  /** undefined = the game log is not written. */
+  games?: GameLog;
 }
 
 export interface CloudStore {
@@ -149,6 +154,6 @@ export interface CloudStore {
    * Throws CloudError.
    */
   commit(change: CloudChange, expectedRev: number): Promise<number>;
-  /** Deletes every document under the account (decks, collection, wants and meta). Throws CloudError. */
+  /** Deletes every document under the account (decks, collection, wants, games and meta). Throws CloudError. */
   deleteAll(): Promise<void>;
 }

@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-10 (PM, ideataulukko)
+# STATUS · päivitetty 2026-10-10 (PM, T-123)
 
 ## Yhdellä lauseella
 Kaikki T-121:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | Ideataulukko (IDEAS.md, I-1–I-16) valmis 2026-10-10 | Käyttäjä valitsee ideoista tehtävät. PM:n suositus: I-1 Pakanvaihto-ohje ja I-2 yhteensopivuusmatriisi |
+| – | – | T-122 ja T-123 julkaistu 2026-10-10 | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
 
 ## Avoimet
 - Preview-kanavien poisto PR:n sulkeutuessa (preview.yml, delete_preview): PR #135:n sulkeutumisajo epäonnistui ennen korjausta 433eb35 (checkout ja listausvirheen näyttö). Korjaus varmistetaan seuraavan PR:n sulkeutumisajosta.
@@ -46,6 +46,8 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-123 Galleria ja Merkitse omat kortit (2026-10-10).
+- T-122 Pakan tulosseuranta (2026-10-10, PR #137, D-030): pelien kirjaus, tilastot ja synkka tilille. Velka T-124 (SEC-122-7).
 - T-084–T-094 (2026-10-05–06): ei nykimistä, gitleaks (D-023), hostingin kovennus, mobiilikorjaukset 1–4 (tietonäkymä, Lista), esikatselukanavien kiintiö, sideboard-rivit ja kelluva sääntöilmoitus (T-092), pakan tilastot uusiksi (T-093), dokumentaatio (T-094).
 - T-047 Netdeck-kovennus (oma PR, valmistuu rinnakkain)
 - T-053 Pakan tilastot ja testikäsi (2026-10-03, PR #25)

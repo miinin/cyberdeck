@@ -26,7 +26,8 @@ import {
   toggleValue,
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
-import { CardFilters } from './CardFilters';
+import { CardFilters, selectedFilterCount } from './CardFilters';
+import type { CardFiltersProps } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { EditionConfirmDialog, editionConfirmed, markEditionConfirmed } from './EditionConfirmDialog';
 import { CardImageDialog } from './CardImageDialog';
@@ -38,6 +39,10 @@ import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
 import type { CardSort } from '../domain/cardSort';
 import { CardTable } from './CardTable';
 import { ListToolbar } from './ListToolbar';
+import { CardGallery } from './CardGallery';
+import { galleryItemsOf } from './galleryItems';
+import { useGallery } from './useGallery';
+import { MARK_DONE_ID, MARK_OPEN_ID, MarkOwnBanner } from './MarkOwnBanner';
 import type { ImageSize } from './ListToolbar';
 import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import { useCardHoverPreview } from './CardHoverPreview';
@@ -116,6 +121,8 @@ type CatalogProps = {
   mode?: 'catalog' | 'collection';
   /** Stores owned by the host page; required in 'collection' mode. */
   shared?: SharedStores;
+  /** Tells the app when the gallery is open (T-123), so it can hide its header and footer. */
+  onGalleryChange?: (open: boolean) => void;
 };
 
 function OwnStoresCatalog(props: CatalogProps) {
@@ -137,8 +144,10 @@ function CatalogBody({
   routeCardKey = null,
   mode = 'catalog',
   stores,
+  onGalleryChange,
 }: CatalogProps & { stores: SharedStores }) {
   const locked = mode === 'collection';
+  const gallery = useGallery(onGalleryChange);
   /** The ownership filter a list starts with and returns to when cleared: fixed to owned cards in 'collection' mode. */
   const baseFilter: CollectionFilter = locked ? 'owned' : 'all';
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -191,6 +200,7 @@ function CatalogBody({
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
   const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [editMode, setEditMode] = useState<boolean | null>(null);
+  const markFocusRef = useRef<string | null>(null);
   // The edition the + adds to (D-022); saved like the other view settings.
   const [editionState, setEdition] = useState<DefaultEdition>('beta');
   const edition = editionState;
@@ -252,9 +262,16 @@ function CatalogBody({
   };
   const handleEditChange = (next: boolean) => {
     userChose.current.edit = true;
+    // T-123: the button that was pressed disappears, so focus moves to its counterpart.
+    markFocusRef.current = next ? MARK_DONE_ID : MARK_OPEN_ID;
     setEditMode(next);
     savePreference(repositories.preferences.saveEditMode(next));
   };
+  useEffect(() => {
+    if (markFocusRef.current === null) return;
+    document.getElementById(markFocusRef.current)?.focus();
+    markFocusRef.current = null;
+  }, [editMode]);
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
   if (collectionChoice !== baseFilter && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
@@ -285,7 +302,7 @@ function CatalogBody({
 
   const filtered = visibleCards(criteria, collectionFilter, kept);
   // T-060: the grid follows the shared order; the table sorts the same way itself (header buttons).
-  const sortedForGrid = view === 'grid' ? sortCards(filtered, sort.key, sort.direction) : filtered;
+  const sortedForGrid = view === 'grid' || gallery.open ? sortCards(filtered, sort.key, sort.direction) : filtered;
   const filterActive = isActive(criteria, collectionFilter);
   const artMatchesFilter = (art: Art) =>
     art.printings.some(
@@ -444,7 +461,7 @@ function CatalogBody({
 
   // One box per card, or in the "all arts" mode one per art (D-021).
   const gridItems: CardListItem[] | undefined =
-    view !== 'grid'
+    view !== 'grid' && !gallery.open
       ? undefined
       : allArts
         ? sortedForGrid.flatMap((card): CardListItem[] => {
@@ -641,7 +658,59 @@ function CatalogBody({
     ...criteriaFilters(criteria, (next) => updateCriteria(next, 'later')),
   ];
 
-  return (
+  /** The filter form; the gallery (T-123) shows the same one in its own page flow, without the search field. */
+  const filters = (extra: Partial<CardFiltersProps>) => (
+    <CardFilters
+      criteria={criteria}
+      setOptions={setList}
+      setFamily={setChoice}
+      onSetChange={handleSetChange}
+      typeOptions={filterOptions(
+        KNOWN_CARD_TYPES,
+        allCards.map((card) => card.type),
+        criteria.types,
+      )}
+      colorOptions={filterOptions(
+        KNOWN_CARD_COLORS,
+        allCards.map((card) => card.color),
+        criteria.colors,
+      )}
+      rarityOptions={filterOptions(
+        KNOWN_CARD_RARITIES,
+        allCards
+          .flatMap((card) => [card.rarity, ...(card.printings ?? []).map((p) => p.rarity)])
+          .map((r) => (r === null ? null : officialRarity(r))),
+        criteria.rarities,
+      )}
+      numberOptions={numberFilterOptionsFor(allCards, criteria)}
+      searchInputRef={searchInputRef}
+      collectionFilter={collection.phase === 'ready' && !locked ? collectionFilter : undefined}
+      collectionAllRef={collectionAllRef}
+      onCollectionFilterChange={(next) => updateFilters(criteria, next, 'later')}
+      onQueryChange={(query, composing) =>
+        updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
+      }
+      onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
+      onToggleColor={(color) =>
+        updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
+      }
+      onToggleSellable={() => updateCriteria({ ...criteria, sellable: criteria.sellable !== true }, 'later')}
+      onToggleRarity={(rarity) =>
+        updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later')
+      }
+      onToggleNumber={(group, value) =>
+        updateCriteria({ ...criteria, [group]: toggleValue(criteria[group], value) }, 'later')
+      }
+      onSearchSubmit={() =>
+        announcer.announceNow(describeResult(filterActive, filtered.length, listTotal))
+      }
+      collapsibleBelow={WIDE_QUERY}
+      results={{ count: filtered.length, id: 'active-filters' }}
+      {...extra}
+    />
+  );
+
+  const page = (
     <>
       {locked ? (
         summary !== null && (
@@ -666,11 +735,6 @@ function CatalogBody({
           </div>
         </div>
       )}
-      {/* Stays mounted so screen readers announce each change. */}
-      <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
-        {announcer.text ?? texts.loaded(listTotal)}
-      </div>
-
       {routeCardKey !== null && routeCardKey !== dismissedKey && routeCard === null && (
         <div className="notice notice-danger" role="alert">
           <p>{texts.cardNotFound}</p>
@@ -711,53 +775,7 @@ function CatalogBody({
           <h2 id="filters-heading" className="filters-heading">
             {texts.filtersHeading}
           </h2>
-          <CardFilters
-            criteria={criteria}
-            setOptions={setList}
-            setFamily={setChoice}
-            onSetChange={handleSetChange}
-            typeOptions={filterOptions(
-              KNOWN_CARD_TYPES,
-              allCards.map((card) => card.type),
-              criteria.types,
-            )}
-            colorOptions={filterOptions(
-              KNOWN_CARD_COLORS,
-              allCards.map((card) => card.color),
-              criteria.colors,
-            )}
-            rarityOptions={filterOptions(
-              KNOWN_CARD_RARITIES,
-              allCards
-                .flatMap((card) => [card.rarity, ...(card.printings ?? []).map((p) => p.rarity)])
-                .map((r) => (r === null ? null : officialRarity(r))),
-              criteria.rarities,
-            )}
-            numberOptions={numberFilterOptionsFor(allCards, criteria)}
-            searchInputRef={searchInputRef}
-            collectionFilter={collection.phase === 'ready' && !locked ? collectionFilter : undefined}
-            collectionAllRef={collectionAllRef}
-            onCollectionFilterChange={(next) => updateFilters(criteria, next, 'later')}
-            onQueryChange={(query, composing) =>
-              updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
-            }
-            onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
-            onToggleColor={(color) =>
-              updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
-            }
-            onToggleSellable={() => updateCriteria({ ...criteria, sellable: criteria.sellable !== true }, 'later')}
-            onToggleRarity={(rarity) =>
-              updateCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) }, 'later')
-            }
-            onToggleNumber={(group, value) =>
-              updateCriteria({ ...criteria, [group]: toggleValue(criteria[group], value) }, 'later')
-            }
-            onSearchSubmit={() =>
-              announcer.announceNow(describeResult(filterActive, filtered.length, listTotal))
-            }
-            collapsibleBelow={WIDE_QUERY}
-            results={{ count: filtered.length, id: 'active-filters' }}
-          />
+          {filters({})}
         </section>
 
         <section className="catalog-results" aria-labelledby="results-heading" data-image-size={imageSize}>
@@ -769,6 +787,8 @@ function CatalogBody({
             onViewChange={handleViewChange}
             editable={collection.phase === 'ready' ? editable : undefined}
             onEditChange={handleEditChange}
+            collectionEmpty={collection.phase === 'ready' && allCards.every((card) => countIn(collection, card.key) === 0)}
+            onGalleryOpen={locked ? undefined : gallery.openGallery}
             hideEditSwitch={locked}
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
@@ -777,6 +797,9 @@ function CatalogBody({
             edition={edition}
             onEditionChange={handleEditionChange}
           />
+          {!locked && collection.phase === 'ready' && editable && (
+            <MarkOwnBanner edition={edition} onEditionChange={handleEditionChange} onDone={() => handleEditChange(false)} />
+          )}
           <div className="sort-row">
             <SortSelect sort={sort} onChange={setSort} />
             {!locked && <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} preferences={repositories.preferences} />}
@@ -827,8 +850,36 @@ function CatalogBody({
             ))}
         </section>
       </div>
+    </>
+  );
 
-      {view === 'table' && preview.preview}
+  return (
+    <>
+      {/* Stays mounted so screen readers announce each change. */}
+      <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+        {announcer.text ?? texts.loaded(listTotal)}
+      </div>
+      {gallery.open ? (
+        <CardGallery
+          items={galleryItemsOf(gridItems ?? [])}
+          size={gallery.size}
+          onSizeChange={gallery.setSize}
+          query={criteria.query}
+          onQueryChange={(query, composing) => updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')}
+          searchInputRef={searchInputRef}
+          filterCount={selectedFilterCount(criteria, collection.phase === 'ready' && !locked ? collectionFilter : undefined) + (setChoice === null ? 0 : 1)}
+          renderFilters={(showResults) => filters({ hideSearch: true, collapsibleBelow: undefined, onShowResults: showResults })}
+          allArts={allArts}
+          onAllArtsChange={setAllArts}
+          onClose={gallery.closeGallery}
+          onClear={handleClearFilters}
+          onOpenDetails={handleOpenImage}
+        />
+      ) : (
+        page
+      )}
+
+      {view === 'table' && !gallery.open && preview.preview}
       <EditionConfirmDialog card={pendingAdd?.card ?? null} onChoose={handleEditionChosen} onCancel={() => setPendingAdd(null)} />
       <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} artUrl={shownArt} />
     </>

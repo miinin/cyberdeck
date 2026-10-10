@@ -133,6 +133,24 @@ describe('sync engine', () => {
     await a.engine.syncNow();
     expect((await a.repos.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 2 }]);
     expect(cloud.getRaw('collection/want')).toEqual({ garbage: true });
+    // SEC-122-1: a later local change must not overwrite the invalid document either.
+    await a.repos.wants.setCount('detonate', 3);
+    await a.engine.syncNow();
+    await a.engine.syncNow();
+    expect(cloud.getRaw('collection/want')).toEqual({ garbage: true });
+    expect((await a.repos.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 3 }]);
+  });
+
+  it('does not overwrite an invalid cloud collection after a later local change (SEC-122-1)', async () => {
+    const a = device(cloud);
+    await a.repos.collection.setCount('detonate', 2);
+    await a.engine.syncNow();
+    cloud.setRaw('collection/main', { garbage: true });
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    await a.engine.syncNow();
+    await a.repos.collection.setCount('detonate', 3);
+    await a.engine.syncNow();
+    expect(cloud.getRaw('collection/main')).toEqual({ garbage: true });
   });
 
   it('locks when the cloud want list has a newer schema', async () => {
@@ -330,5 +348,129 @@ describe('sync triggers', () => {
     window.dispatchEvent(new Event('focus'));
     await vi.advanceTimersByTimeAsync(10 * 60 * 1000);
     expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('sync engine: game results (T-122, D-030)', () => {
+  const GAME = {
+    deckId: 'deck1',
+    playedOn: '2026-10-05',
+    result: 'win',
+    opponentName: 'Blue aggro',
+    opponentLegends: [],
+    turn: null,
+    event: null,
+    sideboard: false,
+    note: null,
+  } as const;
+
+  it('syncs the log both ways: a push of the one document, a merge per game id', async () => {
+    const a = device(cloud);
+    const b = device(cloud);
+    const first = await a.repos.games.add(GAME);
+    await a.engine.syncNow();
+    expect(cloud.paths()).toEqual(['games/log', 'meta']);
+    expect(cloud.getRaw('games/log')).toMatchObject({ schemaVersion: 1, data: { games: [first] } });
+    await b.engine.syncNow();
+    expect((await b.repos.games.load()).value.games).toEqual([first]);
+
+    // Both devices add a game: both end up with both.
+    const second = await b.repos.games.add({ ...GAME, result: 'loss' });
+    await b.engine.syncNow();
+    const third = await a.repos.games.add({ ...GAME, result: 'draw' });
+    await a.engine.syncNow();
+    await b.engine.syncNow();
+    const ids = (await a.repos.games.load()).value.games.map((g) => g.id).sort();
+    expect(ids).toEqual([first.id, second.id, third.id].sort());
+    expect((await b.repos.games.load()).value.games.map((g) => g.id).sort()).toEqual(ids);
+
+    // A deletion and an edit on different devices.
+    await a.repos.games.remove(first.id);
+    await b.repos.games.update(second.id, { ...GAME, result: 'win' });
+    await a.engine.syncNow();
+    await b.engine.syncNow();
+    await a.engine.syncNow();
+    for (const side of [a, b]) {
+      const games = (await side.repos.games.load()).value.games;
+      expect(games.map((g) => g.id).sort()).toEqual([second.id, third.id].sort());
+      expect(games.find((g) => g.id === second.id)?.result).toBe('win');
+    }
+  });
+
+  it('does not touch the other documents when only the log changes', async () => {
+    const a = device(cloud);
+    await a.repos.collection.setCount('detonate', 1);
+    await a.engine.syncNow();
+    const before = cloud.getRaw('collection/main');
+    await a.repos.games.add(GAME);
+    await a.engine.syncNow();
+    expect(cloud.getRaw('collection/main')).toEqual(before);
+    expect(cloud.paths()).toContain('games/log');
+  });
+
+  it('keeps the local log and the cloud document when the cloud log is invalid', async () => {
+    const a = device(cloud);
+    const added = await a.repos.games.add(GAME);
+    await a.engine.syncNow();
+    cloud.setRaw('games/log', { garbage: true });
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    await a.engine.syncNow();
+    expect((await a.repos.games.load()).value.games).toEqual([added]);
+    expect(cloud.getRaw('games/log')).toEqual({ garbage: true });
+    // SEC-122-1: logging another game must not overwrite the invalid document on the next rounds.
+    await a.repos.games.add({ ...GAME, result: 'loss' });
+    await a.engine.syncNow();
+    await a.engine.syncNow();
+    expect(cloud.getRaw('games/log')).toEqual({ garbage: true });
+    expect((await a.repos.games.load()).value.games).toHaveLength(2);
+  });
+
+  it('treats the whole cloud log as invalid when one row cannot be read (SEC-122-2)', async () => {
+    const a = device(cloud);
+    const added = await a.repos.games.add(GAME);
+    await a.engine.syncNow();
+    const doc = cloud.getRaw('games/log') as { data: { games: Record<string, unknown>[] } };
+    const broken = { ...doc, data: { games: [{ ...doc.data.games[0], unexpected: 'x' }] } };
+    cloud.setRaw('games/log', broken);
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    await a.engine.syncNow();
+    expect((await a.repos.games.load()).value.games).toEqual([added]);
+    expect(cloud.getRaw('games/log')).toEqual(broken);
+  });
+
+  it('keeps the cloud log when it has more than 1000 rows, and deletes nothing', async () => {
+    const a = device(cloud);
+    const added = await a.repos.games.add(GAME);
+    await a.engine.syncNow();
+    const rows = Array.from({ length: 1001 }, (_, i) => ({ ...added, id: `g${i}` }));
+    const oversized = { schemaVersion: 1, savedAt: '', data: { games: rows } };
+    cloud.setRaw('games/log', oversized);
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    await a.engine.syncNow();
+    expect((await a.repos.games.load()).value.games).toEqual([added]);
+    expect(cloud.getRaw('games/log')).toEqual(oversized);
+  });
+
+  it('locks when the cloud log has a newer schema', async () => {
+    cloud.setRaw('games/log', { schemaVersion: 9, savedAt: '', data: {} });
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 2, updatedAt: '2026-10-03T10:00:00.000Z' });
+    const a = device(cloud);
+    await a.repos.games.add(GAME);
+    await a.engine.syncNow();
+    expect(a.engine.status().state).toBe('locked');
+    expect(cloud.getRaw('games/log')).toEqual({ schemaVersion: 9, savedAt: '', data: {} });
+  });
+
+  it('stops with an error and writes nothing when the local log is over the byte limit (SR-45)', async () => {
+    const note = 'ä'.repeat(500);
+    const rows = Array.from({ length: 999 }, (_, i) => ({ ...GAME, id: `g${i}`, createdAt: '2026-10-05T10:00:00.000Z', note }));
+    const initial = {
+      [`cyberdeck:u:${UID}:games`]: JSON.stringify({ schemaVersion: 1, savedAt: '2026-10-05T10:00:00.000Z', data: { games: rows } }),
+    };
+    const repos = createMemoryRepositories({ now, initial }).forAccount(UID);
+    const engine = createSyncEngine({ uid: UID, cloud, storage: repos.sync, now, locks: null });
+    await engine.syncNow();
+    expect(engine.status().state).toBe('error');
+    expect(cloud.paths()).toEqual([]);
   });
 });

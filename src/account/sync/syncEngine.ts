@@ -7,10 +7,12 @@
 import { EMPTY_COLLECTION, MAX_COLLECTION_ENTRIES } from '../../domain/collection';
 import type { Collection } from '../../domain/collection';
 import { MAX_DECKS } from '../../domain/deck';
+import { EMPTY_GAME_LOG, gameLogFits, sameGameLog } from '../../domain/games';
+import type { GameLog } from '../../domain/games';
 import type { LocalData, SyncBase, SyncStorage } from '../../storage';
 import { CloudError } from '../cloudError';
 import type { CloudChange, CloudDoc, CloudStore } from '../types';
-import { mergeCollection, mergeDecks, sameCollection } from './merge';
+import { mergeCollection, mergeDecks, mergeGames, sameCollection } from './merge';
 
 export type SyncState = 'idle' | 'syncing' | 'offline' | 'error' | 'locked';
 
@@ -39,12 +41,19 @@ type LockManagerLike = { request(name: string, callback: () => Promise<void>): P
 
 const MAX_ROUNDS = 3;
 
+/**
+ * SEC-122-1: the base rev when the cloud had an invalid aggregate. No real rev equals it, so the next round
+ * always runs a fullSync (which keeps the invalid document) instead of a push that would overwrite it.
+ */
+const NEVER_IN_SYNC_REV = Number.MAX_SAFE_INTEGER;
+
 function baseOf(data: LocalData, rev: number): SyncBase {
   return {
     rev,
     decks: data.decks.map((deck) => ({ id: deck.id, updatedAt: deck.updatedAt })),
     collection: data.collection,
     wants: data.wants,
+    games: data.games,
   };
 }
 
@@ -54,7 +63,8 @@ function sameAsBase(data: LocalData, base: SyncBase): boolean {
   return (
     data.decks.every((deck) => stamps.get(deck.id) === deck.updatedAt) &&
     sameCollection(data.collection, base.collection) &&
-    sameCollection(data.wants, base.wants)
+    sameCollection(data.wants, base.wants) &&
+    sameGameLog(data.games, base.games)
   );
 }
 
@@ -62,6 +72,12 @@ function sameAsBase(data: LocalData, base: SyncBase): boolean {
 function cloudValue(doc: CloudDoc<Collection>): Collection | null {
   if (doc.kind === 'ok') return doc.value;
   return doc.kind === 'missing' ? EMPTY_COLLECTION : null;
+}
+
+/** The cloud game log for the merge: missing is empty, invalid is null (never overwritten). */
+function cloudGames(doc: CloudDoc<GameLog>): GameLog | null {
+  if (doc.kind === 'ok') return doc.value;
+  return doc.kind === 'missing' ? EMPTY_GAME_LOG : null;
 }
 
 /** Thrown inside a round to end it with a state. */
@@ -116,7 +132,10 @@ export function createSyncEngine(options: {
       deleteDecks: base.decks.map((deck) => deck.id).filter((id) => !localIds.has(id)),
       collection: sameCollection(local.collection, base.collection) ? undefined : local.collection,
       wants: sameCollection(local.wants, base.wants) ? undefined : local.wants,
+      games: sameGameLog(local.games, base.games) ? undefined : local.games,
     };
+    // SR-45: a log over the limits is never sent, not even in part.
+    if (change.games !== undefined && !gameLogFits(change.games)) throw new Stop('error');
     const rev = await cloud.commit(change, base.rev);
     storage.saveBase(baseOf(local, rev));
   }
@@ -135,7 +154,9 @@ export function createSyncEngine(options: {
       base?.collection ?? EMPTY_COLLECTION,
     );
     const wants = mergeCollection(local.wants, cloudValue(snapshot.wants), base?.wants ?? EMPTY_COLLECTION);
+    const games = mergeGames(local.games, cloudGames(snapshot.games), base?.games ?? EMPTY_GAME_LOG);
     if (
+      !gameLogFits(games.log) ||
       decks.decks.length > MAX_DECKS ||
       collection.collection.entries.length > MAX_COLLECTION_ENTRIES ||
       wants.collection.entries.length > MAX_COLLECTION_ENTRIES
@@ -148,18 +169,22 @@ export function createSyncEngine(options: {
       deleteDecks: decks.remove,
       collection: collection.writeCloud ? collection.collection : undefined,
       wants: wants.writeCloud ? wants.collection : undefined,
+      games: games.writeCloud ? games.log : undefined,
     };
     const empty =
       change.putDecks.length === 0 &&
       change.deleteDecks.length === 0 &&
       change.collection === undefined &&
-      change.wants === undefined;
+      change.wants === undefined &&
+      change.games === undefined;
     const rev = empty ? expectedRev : await cloud.commit(change, expectedRev);
 
-    const merged: LocalData = { decks: decks.decks, collection: collection.collection, wants: wants.collection };
+    const merged: LocalData = { decks: decks.decks, collection: collection.collection, wants: wants.collection, games: games.log };
     // The device data is replaced only if it is still what the merge started from.
     if (!storage.apply(local, merged)) return false;
-    storage.saveBase(baseOf(merged, rev));
+    const cloudInvalid =
+      snapshot.collection.kind === 'invalid' || snapshot.wants.kind === 'invalid' || snapshot.games.kind === 'invalid';
+    storage.saveBase(baseOf(merged, cloudInvalid ? NEVER_IN_SYNC_REV : rev));
     return true;
   }
 

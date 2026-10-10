@@ -596,3 +596,13 @@ Päätöksessä on viisi osaa.
 3. Poikkeus: jos muutos on riskialtis (tietomalli, Firestore-säännöt, tallennus tai synkronointi, tunnistautuminen, firebase.json, workflowt tai riippuvuudet), se testataan ensin devissä. PM kertoo käyttäjälle, miksi.
 4. PR-esikatseluputkeen palataan, kun käyttäjä kutsuu lisää käyttäjiä.
 **Seuraukset:** Virhe päätyy tuotantoon nopeammin. Riskin pienentävät paikalliset testit, poikkeuslista ja se, että vain yksi käyttäjä on altistunut.
+
+## D-030 · Pelitulokset omana aggregaattinaan, yksi dokumentti · 2026-10-10 · Päättäjä: käyttäjä (sisältö), PM (rakenne)
+**Tila:** Hyväksytty sisällöltään (käyttäjä 2026-10-10). Rakenne: PM. Tehtävä T-122. Digiturva tekee uhkamallin ennen toteutusta ja katselmoi ennen yhdistämistä.
+**Konteksti:** Käyttäjä haluaa kirjata pelien tulokset pakoille (vastustajan nimi ja Legendit, Voitto/Tappio/Tasapeli, muistiinpano, aloittaja, tapahtuma, sideboard) ja synkronoida ne tilille kuten pakat. Synkka (D-017) lukee jokaisella täydellä kierroksella kaikki dokumentit, ja Sparkin kiintiö on 50 000 lukua päivässä.
+**Vaihtoehdot:**
+- **A) Yksi dokumentti `users/{uid}/games/log`, rivit pelin id:n mukaan (valittu).** Toistaa want-listan mallin (D-018): yksi luku kierroksella, kolmitiemerge rivin id:n mukaan kuten `mergeCollection`, ja sääntömuutos on pieni. − Firestoren 1 MiB:n raja, joten enintään 1 000 peliä ja 900 000 tavua (asiakas valvoo).
+- **B) Dokumentti per peli `users/{uid}/games/{id}`** kuten pakat. + Ei kokorajaa. − Lukumäärä kasvaa pelien mukana jokaisella täydellä synkalla, ja kiintiö voi täyttyä. Hylätään.
+- **C) Tulokset pakkadokumentin kenttänä.** + Poistuu pakan mukana. − Jokainen kirjaus muuttaa pakan `updatedAt`:n ja voi riitauttaa pakan muokkauksen toisella laitteella (pakka voittaa kokonaisena), ja julkaisu- ja vientipolut pitäisi suodattaa. Hylätään.
+**Päätös:** A. Pakan poisto poistaa sen tulokset. Tulokset eivät koskaan päädy julkiseen pakkaan, jakolinkkiin tai vientiin. Yksityiskohdat ovat T-122-kortissa.
+**Seuraukset:** Vastustajan nimi ja muistiinpano voivat sisältää kolmannen osapuolen tietoja (kaverin nimi), joten PRIVACY.md päivitetään (Digiturva). Kun pelejä on yli 1 000, tarvitaan arkistointi tai B-malli (IDEAS).

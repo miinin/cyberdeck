@@ -3,6 +3,8 @@
  * Firestore store on fake Firestore Lite modules. No network, no Firebase.
  */
 import type { Collection } from '../domain/collection';
+import { MAX_GAMES } from '../domain/games';
+import type { GameLog, GameRecord } from '../domain/games';
 import { MAX_DECKS } from '../domain/deck';
 import { publicDeckId } from '../domain/publicDeck';
 import type { Deck } from '../domain/deck';
@@ -30,6 +32,24 @@ function deck(id: string, name = 'Pakka'): Deck {
 
 const COLLECTION: Collection = { entries: [{ card: 'detonate', count: 3 }] };
 const WANTS: Collection = { entries: [{ card: 'detonate', count: 2 }] };
+
+function game(id: string, patch: Partial<GameRecord> = {}): GameRecord {
+  return {
+    id,
+    deckId: 'd1',
+    playedOn: '2026-10-05',
+    createdAt: '2026-10-05T18:00:00.000Z',
+    result: 'win',
+    opponentName: 'Blue aggro',
+    opponentLegends: ['v-streetkid'],
+    turn: 'first',
+    event: null,
+    sideboard: false,
+    note: null,
+    ...patch,
+  };
+}
+const GAMES: GameLog = { games: [game('g1')] };
 
 function deckDoc(data: unknown, schemaVersion: unknown = 1) {
   return { schemaVersion, savedAt: NOW.toISOString(), data };
@@ -169,6 +189,7 @@ describe.each([
       invalidDeckIds: [],
       collection: { kind: 'missing' },
       wants: { kind: 'missing' },
+      games: { kind: 'missing' },
       dropped: 0,
       locked: false,
       limitExceeded: false,
@@ -327,6 +348,78 @@ describe.each([
     expect(await h.store.readMeta()).toBeNull();
   });
 
+  it('writes the game log to users/{uid}/games/log and leaves it alone when not given (T-122)', async () => {
+    await h.store.commit(change({ collection: COLLECTION, games: GAMES }), 0);
+    let snapshot = await h.store.readAll();
+    expect(snapshot.games).toEqual({ kind: 'ok', value: GAMES });
+    expect(Object.keys(h.getRaw('games/log') as object).sort()).toEqual(['data', 'savedAt', 'schemaVersion']);
+    expect(h.getRaw('games/log')).toMatchObject({ schemaVersion: 1, data: { games: GAMES.games } });
+    expect(Object.keys((h.getRaw('games/log') as { data: object }).data)).toEqual(['games']);
+
+    await h.store.commit(change({ collection: { entries: [] } }), 1);
+    snapshot = await h.store.readAll();
+    expect(snapshot.games).toEqual({ kind: 'ok', value: GAMES });
+  });
+
+it('writes exactly the game fields the rules expect and refuses a row with another field (SR-43)', async () => {    const extra = { ...game('g1'), secret: 'x' } as GameRecord;    expect(await cloudErrorKind(h.store.commit(change({ games: { games: [extra] } }), 0))).toBe('unknown');    await h.store.commit(change({ games: GAMES }), 0);
+    const stored = h.getRaw('games/log') as { data: { games: object[] } };
+    expect(Object.keys(stored.data.games[0] ?? {}).sort()).toEqual([
+      'createdAt',
+      'deckId',
+      'event',
+      'id',
+      'note',
+      'opponentLegends',
+      'opponentName',
+      'playedOn',
+      'result',
+      'sideboard',
+      'turn',
+    ]);
+  });
+
+  it('validates the game log like a stored one and locks on a newer version (SR-44)', async () => {
+    // SEC-122-2: a row that cannot be read makes the whole log invalid (a dropped row is not a deletion).
+    h.setRaw('games/log', deckDoc({ games: [game('g1'), game('g1', { result: 'loss' }), { id: 'x' }, null] }));
+    let snapshot = await h.store.readAll();
+    expect(snapshot.games).toEqual({ kind: 'invalid' });
+    expect(snapshot.dropped).toBe(3);
+    h.setRaw('games/log', deckDoc({ games: [game('g1')] }));
+    snapshot = await h.store.readAll();
+    expect(snapshot.games).toEqual({ kind: 'ok', value: GAMES });
+    expect(snapshot.dropped).toBe(0);
+
+    h.setRaw('games/log', deckDoc({ games: 'x' }));
+    snapshot = await h.store.readAll();
+    expect(snapshot.games).toEqual({ kind: 'invalid' });
+    expect(snapshot.locked).toBe(false);
+
+    // More than MAX_GAMES rows: the whole document is invalid, never a deletion.
+    h.setRaw('games/log', deckDoc({ games: Array.from({ length: MAX_GAMES + 1 }, (_, i) => game(`g${i}`)) }));
+    expect((await h.store.readAll()).games).toEqual({ kind: 'invalid' });
+
+    h.setRaw('games/log', { schemaVersion: 7, savedAt: '', data: {} });
+    expect(await h.store.readAll()).toMatchObject({ locked: true, games: { kind: 'invalid' } });
+  });
+
+  it('refuses an invalid or oversized game log before sending anything (SR-45)', async () => {
+    expect(await cloudErrorKind(h.store.commit(change({ games: { games: [game('g1', { result: 'x' as never })] } }), 0))).toBe('unknown');
+    const many = { games: Array.from({ length: MAX_GAMES + 1 }, (_, i) => game(`g${i}`)) };
+    expect(await cloudErrorKind(h.store.commit(change({ games: many }), 0))).toBe('unknown');
+    // 999 rows with a 500 character ASCII note fit (about 0.75 MB); the same notes in 2-byte characters pass the byte limit.
+    const rows = (note: string) => ({ games: Array.from({ length: MAX_GAMES - 1 }, (_, i) => game(`g${i}`, { note })) });
+    expect(await cloudErrorKind(h.store.commit(change({ games: rows('ä'.repeat(500)) }), 0))).toBe('too-large');
+    expect(await h.store.readMeta()).toBeNull();
+    expect(await cloudErrorKind(h.store.commit(change({ games: rows('a'.repeat(500)) }), 0))).toBe('resolved');
+    expect(await h.store.readMeta()).toEqual({ rev: 1, newer: false });
+  });
+
+  it('counts the game log among the writes of one transaction', async () => {
+    const many = Array.from({ length: 499 }, (_, i) => deck(`d${i}`));
+    expect(await cloudErrorKind(h.store.commit(change({ putDecks: many, games: GAMES }), 0))).toBe('too-large');
+    expect(await h.store.readMeta()).toBeNull();
+  });
+
   it('validates the collection: invalid rows are dropped, a wrong shape is invalid', async () => {
     h.setRaw('collection/main', deckDoc({ entries: [{ card: 'detonate', count: 3 }, { card: 'detonate', count: 1 }, null] }, 3));
     let snapshot = await h.store.readAll();
@@ -388,7 +481,7 @@ describe.each([
   });
 
   it('deletes everything under the account and nothing else', async () => {
-    await h.store.commit(change({ putDecks: [deck('d1'), deck('d2')], collection: COLLECTION, wants: WANTS }), 0);
+    await h.store.commit(change({ putDecks: [deck('d1'), deck('d2')], collection: COLLECTION, wants: WANTS, games: GAMES }), 0);
     await h.store.deleteAll();
     expect(await h.store.readMeta()).toBeNull();
     expect(await h.store.readAll()).toMatchObject({
@@ -396,7 +489,9 @@ describe.each([
       decks: [],
       collection: { kind: 'missing' },
       wants: { kind: 'missing' },
+      games: { kind: 'missing' },
     });
+    expect(h.getRaw('games/log')).toBeUndefined();
     await h.store.deleteAll(); // already empty: fine
   });
 
@@ -444,12 +539,13 @@ describe('createFirestoreCloudStore', () => {
   it('uses users/{uid} paths, a MAX_DECKS + 1 query and the server time in the meta', async () => {
     const fake = createFakeFirestore();
     const store = createFirestoreCloudStore({ uid: UID, load: async () => fake.modules, now: () => NOW });
-    await store.commit(change({ putDecks: [deck('d1')], collection: COLLECTION, wants: WANTS }), 0);
+    await store.commit(change({ putDecks: [deck('d1')], collection: COLLECTION, wants: WANTS, games: GAMES }), 0);
     expect([...fake.docs.keys()].sort()).toEqual([
       `users/${UID}`,
       `users/${UID}/collection/main`,
       `users/${UID}/collection/want`,
       `users/${UID}/decks/d1`,
+      `users/${UID}/games/log`,
     ]);
     expect(fake.docs.get(`users/${UID}`)).toEqual({ schemaVersion: 1, rev: 1, updatedAt: SERVER_TIME });
     await store.readAll();

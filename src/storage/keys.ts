@@ -3,6 +3,8 @@ export const COLLECTION_KEY = 'cyberdeck:collection';
 export const DECKS_KEY = 'cyberdeck:decks';
 /** Want list (T-064a, D-018): the same shape as the collection, with its own key, envelope and cloud document. */
 export const WANTS_KEY = 'cyberdeck:wants';
+/** Game results (T-122, D-030): one log of games for all decks; signed in it is `cyberdeck:u:{uid}:games`. */
+export const GAMES_KEY = 'cyberdeck:games';
 /** Proxy print queue (T-102): the collection's shape (a count per card, the art as a breakdown), local only, never synced. */
 export const PROXY_KEY = 'cyberdeck:proxy';
 /**
@@ -45,6 +47,7 @@ export const COLLECTION_SCHEMA_VERSION = 3;
 export const DECKS_SCHEMA_VERSION = 1;
 export const WANTS_SCHEMA_VERSION = 1;
 export const PROXY_SCHEMA_VERSION = 1;
+export const GAMES_SCHEMA_VERSION = 1;
 export const MAX_BACKUPS_PER_AGGREGATE = 3;
 /** UI language, the raw string 'fi' or 'en' (T-068, D-019). Read synchronously at startup (src/locale.ts); not personal data, never synced. */
 export const LOCALE_KEY = 'cyberdeck:locale';
