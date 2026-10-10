@@ -75,7 +75,7 @@ export const gameTextsFi = {
   editGameFor: (label: string) => `Muokkaa peliä: ${label}`,
   deleteGameFor: (label: string) => `Poista peli: ${label}`,
   resultName: { win: 'Voitto', loss: 'Tappio', draw: 'Tasapeli' },
-  percent: (value: number) => `${value} %`,
+  percent: (value: number) => `${value}\u00a0%`,
   /** The day as the user reads it, e.g. "5.10.2026". */
   formatDay: (day: string) => formatDay(day, 'fi-FI'),
 };
