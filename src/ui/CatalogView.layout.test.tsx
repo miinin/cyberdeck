@@ -141,7 +141,7 @@ describe('CatalogView layout (T-050a)', () => {
     expect(screen.getByRole('button', { name: 'Poista suodatin: Unit' })).toHaveFocus();
   });
 
-  it('offers the image size only in the grid view, Keski by default', async () => {
+  it('offers the image size in the grid view, Keski by default, and greys it out in place in the list (T-126)', async () => {
     stubWidth(true);
     const user = userEvent.setup();
     renderView();
@@ -151,6 +151,6 @@ describe('CatalogView layout (T-050a)', () => {
     expect(screen.getByRole('region', { name: 'Tulokset' })).toHaveAttribute('data-image-size', 'large');
 
     await user.click(screen.getByRole('radio', { name: 'Lista' }));
-    expect(screen.queryByRole('group', { name: 'Kuvakoko' })).not.toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Kuvakoko' })).toBeDisabled();
   });
 });

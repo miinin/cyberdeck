@@ -18,10 +18,12 @@ export function ImageSizeSelect({
   name,
   value,
   onChange,
+  disabled,
 }: {
   name: string;
   value: ImageSize;
   onChange: (next: ImageSize) => void;
+  disabled?: boolean;
 }) {
   return (
     <SegmentedChoice
@@ -31,6 +33,7 @@ export function ImageSizeSelect({
       value={value}
       options={IMAGE_SIZE_OPTIONS}
       onChange={onChange}
+      disabled={disabled}
     />
   );
 }
@@ -81,9 +84,19 @@ function GalleryIcon() {
 }
 
 /** One switch style for the whole app (T-115). */
-export function SwitchButton({ checked, label, onChange }: { checked: boolean; label: string; onChange: (next: boolean) => void }) {
+export function SwitchButton({
+  checked,
+  label,
+  onChange,
+  disabled,
+}: {
+  checked: boolean;
+  label: string;
+  onChange: (next: boolean) => void;
+  disabled?: boolean;
+}) {
   return (
-    <button type="button" role="switch" aria-checked={checked} className="edit-switch" onClick={() => onChange(!checked)}>
+    <button type="button" role="switch" aria-checked={checked} className="edit-switch" disabled={disabled} onClick={() => onChange(!checked)}>
       <span className="edit-switch-track" aria-hidden="true">
         <span className="edit-switch-thumb" />
       </span>
@@ -97,7 +110,8 @@ export function SwitchButton({ checked, label, onChange }: { checked: boolean; l
  * right end, the "Merkitse omat kortit" button. "Kaikki versiot" and the order live in the filter panel.
  * `editable` undefined leaves the button out (the collection is not ready, so nothing can be edited);
  * while marking (`editable` true) the banner below the toolbar replaces it (T-123).
- * `imageSize` undefined leaves the image size selector out (T-050a: it only applies to the grid).
+ * `imageSize` undefined leaves the image size selector out; `imageSizeDisabled` greys it out in the list view, so the row
+ * does not jump when the view changes (T-126).
  */
 export function ListToolbar({
   view,
@@ -112,6 +126,7 @@ export function ListToolbar({
   edition,
   onEditionChange,
   scanSlot,
+  imageSizeDisabled = false,
 }: {
   view: CatalogViewMode;
   onViewChange: (next: CatalogViewMode) => void;
@@ -130,12 +145,14 @@ export function ListToolbar({
   onEditionChange?: (next: DefaultEdition) => void;
   /** The scan button (T-125): sits in the row after the gallery button. */
   scanSlot?: ReactNode;
+  /** The image size only applies to the grid (T-050a); in the list it stays in place but greyed out (T-126). */
+  imageSizeDisabled?: boolean;
 }) {
   return (
     <div className="list-toolbar">
       <SegmentedChoice legend={texts.viewLegend} name="catalog-view" value={view} options={VIEW_OPTIONS} onChange={onViewChange} />
       {imageSize !== undefined && (
-        <ImageSizeSelect name="image-size" value={imageSize} onChange={(next) => onImageSizeChange?.(next)} />
+        <ImageSizeSelect name="image-size" value={imageSize} onChange={(next) => onImageSizeChange?.(next)} disabled={imageSizeDisabled} />
       )}
       {onGalleryOpen !== undefined && (
         <button type="button" id="gallery-open" className="button-secondary gallery-open" onClick={onGalleryOpen}>

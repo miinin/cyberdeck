@@ -64,6 +64,8 @@ export interface CardFiltersProps {
   sort?: CardSort;
   onSortChange?: (next: CardSort) => void;
   allArts?: boolean;
+  /** Greys out "Kaikki versiot" in the list view instead of hiding it, so the panel does not jump (T-126). */
+  allArtsDisabled?: boolean;
   onAllArtsChange?: (next: boolean) => void;
 }
 
@@ -116,6 +118,7 @@ export function CardFilters({
   sort,
   onSortChange,
   allArts,
+  allArtsDisabled,
   onAllArtsChange,
 }: CardFiltersProps) {
   // Without matchMedia (tests) the panel counts as wide: always open.
@@ -211,7 +214,7 @@ export function CardFilters({
             <legend>{texts.viewOptionsLegend}</legend>
             {sort !== undefined && onSortChange !== undefined && <SortSelect sort={sort} onChange={onSortChange} />}
             {allArts !== undefined && onAllArtsChange !== undefined && (
-              <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={onAllArtsChange} />
+              <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={onAllArtsChange} disabled={allArtsDisabled} />
             )}
           </fieldset>
         )}

@@ -11,12 +11,11 @@ const EDITION_OPTIONS: readonly (readonly [DefaultEdition, string])[] = [
   ['retail', texts.editionRetail],
 ];
 
-/** A plus and a card (T-123): says "add cards" without words. */
+/** A checkmark (T-126): "mark the ones you own"; the earlier plus on a card read as an exit. */
 function MarkIcon() {
   return (
     <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false" className="mark-icon">
-      <rect x="6" y="3" width="10" height="14" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M3 10h6M6 7v6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

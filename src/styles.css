@@ -9988,3 +9988,19 @@ html[data-gallery='on'] main {
     order: 3;
   }
 }
+
+/* T-126: the image size and "Kaikki versiot" stay in place in the list view, greyed out, so nothing jumps. */
+.view-select:disabled,
+.edit-switch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.view-select:disabled .segmented-option {
+  cursor: not-allowed;
+}
+
+/* T-126: a muted green checkmark: says "mark the owned ones" without reading as a close button. */
+.mark-open .mark-icon {
+  color: color-mix(in srgb, var(--color-success) 65%, var(--color-text-muted, currentColor));
+}

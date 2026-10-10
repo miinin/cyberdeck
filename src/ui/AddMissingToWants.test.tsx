@@ -39,7 +39,7 @@ async function renderCatalog(initial: Record<string, string>) {
 
 /** Starts "Merkitse omat kortit" (the button is a tool of marking mode), presses the button and confirms in the dialog. */
 async function addFromList(user: ReturnType<typeof userEvent.setup>) {
-  const start = screen.queryByRole('button', { name: 'Merkitse omat kortit' });
+  const start = screen.queryByRole('button', { name: 'Merkitse omat korttisi' });
   if (start !== null) await user.click(start);
   await user.click(await screen.findByRole('button', { name: 'Lisää puuttuvat wantiin' }));
   const dialog = await screen.findByRole('dialog', { name: /Lisätäänkö/ });
@@ -53,7 +53,7 @@ describe('Add missing to wants in the card list (T-066)', () => {
     const done = screen.queryByRole('button', { name: 'Valmis' });
     if (done !== null) await user.click(done);
     expect(screen.queryByRole('button', { name: 'Lisää puuttuvat wantiin' })).toBeNull();
-    await user.click(await screen.findByRole('button', { name: 'Merkitse omat kortit' }));
+    await user.click(await screen.findByRole('button', { name: 'Merkitse omat korttisi' }));
     await user.click(await screen.findByRole('button', { name: 'Lisää puuttuvat wantiin' }));
     const dialog = await screen.findByRole('dialog', { name: 'Lisätäänkö 3 korttia want-listalle?' });
     expect(dialog).toHaveTextContent('Lisätään want-listalle 3 korttia (yhteensä 8 kappaletta)');
