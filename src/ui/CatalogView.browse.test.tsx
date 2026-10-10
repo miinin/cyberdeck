@@ -34,7 +34,7 @@ async function renderView(repositories: Repositories) {
 }
 
 const markButton = () => screen.queryByRole('button', { name: 'Merkitse omat kortit' });
-const banner = () => screen.queryByRole('region', { name: 'Merkitset omia korttejasi.' });
+const banner = () => screen.queryByRole('region', { name: 'Merkintätila.' });
 const done = () => screen.getByRole('button', { name: 'Valmis' });
 const stepButtons = () => screen.queryAllByRole('button', { name: /^(Vähennä|Lisää) yksi kappale/ });
 

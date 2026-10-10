@@ -30,7 +30,7 @@ export function MarkOwnButton({ onStart, collectionEmpty }: { onStart: () => voi
       <button
         type="button"
         id={MARK_OPEN_ID}
-        className="button-secondary mark-open"
+        className="button-secondary button-compact mark-open"
         title={texts.markHint}
         aria-describedby="mark-hint"
         onClick={onStart}
@@ -61,12 +61,12 @@ export function MarkOwnBanner({
 }) {
   return (
     <section className="mark-banner" aria-labelledby="mark-banner-title">
-      <div className="mark-banner-text">
-        <h3 id="mark-banner-title" className="mark-banner-title">
+      <p className="mark-banner-text">
+        <strong id="mark-banner-title" className="mark-banner-title">
           {texts.markBannerTitle}
-        </h3>
-        <p className="mark-banner-body">{texts.markBannerBody}</p>
-      </div>
+        </strong>{' '}
+        <span className="mark-banner-body">{texts.markBannerBody}</span>
+      </p>
       <div className="mark-banner-actions">
         <SegmentedChoice
           className="edition-select"
@@ -81,7 +81,7 @@ export function MarkOwnBanner({
             {texts.editionHint}
           </p>
         </SegmentedChoice>
-        <button type="button" id={MARK_DONE_ID} className="button-primary" onClick={onDone}>
+        <button type="button" id={MARK_DONE_ID} className="button-secondary button-compact" onClick={onDone}>
           {texts.markDone}
         </button>
       </div>
