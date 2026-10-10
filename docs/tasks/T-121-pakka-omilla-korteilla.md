@@ -1,6 +1,6 @@
 # T-121 · Pakka omilla korteilla
 
-**Tila:** Review. **Päättäjä:** käyttäjä (2026-10-10: IDEAS "kokoelmatietoinen korvaus", vaihtoehto A), PM (määrittely).
+**Tila:** Done. **Päättäjä:** käyttäjä (2026-10-10: IDEAS "kokoelmatietoinen korvaus", vaihtoehto A), PM (määrittely).
 
 ## Tavoite
 T-075 näyttää pakan puuttuvalle kortille yhden omistetun korvaajan (`src/domain/substitutes.ts`, `MissingCards`). Nyt käyttäjä näkee, kuinka pelattava pakka on heti omilla korteilla, ja saa yhdellä painalluksella pakasta kopion, jossa puuttuvat kopiot on korvattu omilla korteilla.
@@ -34,3 +34,6 @@ T-075 näyttää pakan puuttuvalle kortille yhden omistetun korvaajan (`src/doma
 - npm test 1607 läpi, lint ja build läpi. Ei visuaalista 320 px -tarkistusta selaimessa (käytetty olemassa olevia luokkia `hint`, `missing-add`, `button-secondary`).
 - Huom: RAM-rajat eivät oteta korvauksessa huomioon (kuten kortti määrittelee, vain kopiorajat).
 - Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (virhetoast kopion luontiin on yleinen, ei eriteltyä virhettä).
+
+### PM (2026-10-10)
+Hyväksytty. RAM-raja: korvaaja on samaa väriä, joten värin RAM-raja ei muutu; jos yksittäisen korvaajan RAM ylittää rajan, pakkaeditori näyttää sääntövirheen kopiossa, ja käyttäjä korjaa sen. Ei erillistä tarkistusta.
