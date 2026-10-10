@@ -1,5 +1,5 @@
 # T-123 · Galleria-tila ja selkeämpi kokoelman merkintä
-**Tila:** Ready · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
 **Katselmoinnit:** PM esikatselu (320 px, 768 px, 1440 px, tumma ja vaalea teema). Ei Digiturvaa: ei tallennus-, syöte- eikä riippuvuusmuutoksia.
 **Riippuvuudet:** T-040 (selaus ja muokkaus), T-050a (kuvakoko), T-077 (kuvitukset), T-091 (koko ruudun kuva).
 
@@ -65,14 +65,14 @@
 `editSwitchLabel` poistetaan, jos sitä ei enää käytetä (muista testit).
 
 ## Hyväksymiskriteerit
-- [ ] Galleria avautuu ja sulkeutuu (painike, ×, Esc, Takaisin, jos toteutettu). Fokus palaa oikein (testit).
-- [ ] Galleriassa näkyvät vain kuvat. Yläpalkki, alapalkki, suodatinsarake ja korttien tekstit ja laskurit eivät näy (testi).
-- [ ] Haku, suodattimet ja järjestys toimivat galleriassa ja säilyvät, kun galleria suljetaan (testi).
-- [ ] Katselin: edellinen ja seuraava (nuolet ja painikkeet), Esc ja Kortin tiedot -linkki (testit).
-- [ ] Ohjauspalkki häivytetään ja palautetaan, eikä se peitä ensimmäistä riviä.
-- [ ] "Muokkaa kokoelmaa" -kytkin on korvattu painikkeella ja tilapalkilla, Valmis lopettaa tilan, painosvalinta on palkissa, ja tallennettu asetus toimii kuten ennen (testit päivitetty, ei heikennetty).
-- [ ] Tekstit fi ja en. Ei sisäistä vieritystä, ei vaakavieritystä, ei päällekkäisyyksiä 320 px:llä, tumma ja vaalea teema, `prefers-reduced-motion` huomioitu.
-- [ ] Ei uusia riippuvuuksia. `npm test`, `npm run lint` ja `npm run build` läpi.
+- [x] Galleria avautuu ja sulkeutuu (painike, ×, Esc, Takaisin, jos toteutettu). Fokus palaa oikein (testit).
+- [x] Galleriassa näkyvät vain kuvat. Yläpalkki, alapalkki, suodatinsarake ja korttien tekstit ja laskurit eivät näy (testi).
+- [x] Haku, suodattimet ja järjestys toimivat galleriassa ja säilyvät, kun galleria suljetaan (testi).
+- [x] Katselin: edellinen ja seuraava (nuolet ja painikkeet), Esc ja Kortin tiedot -linkki (testit).
+- [x] Ohjauspalkki häivytetään ja palautetaan, eikä se peitä ensimmäistä riviä.
+- [x] "Muokkaa kokoelmaa" -kytkin on korvattu painikkeella ja tilapalkilla, Valmis lopettaa tilan, painosvalinta on palkissa, ja tallennettu asetus toimii kuten ennen (testit päivitetty, ei heikennetty).
+- [x] Tekstit fi ja en. Ei sisäistä vieritystä, ei vaakavieritystä, ei päällekkäisyyksiä 320 px:llä, tumma ja vaalea teema, `prefers-reduced-motion` huomioitu.
+- [x] Ei uusia riippuvuuksia. `npm test`, `npm run lint` ja `npm run build` läpi.
 
 ## Rajaukset
 - Galleria vain Kortit-sivulla (ei Kokoelma- tai Pakat-sivuilla, myöhemmin IDEAS).
@@ -108,3 +108,6 @@ Koodikatselmointi: tehty · Pakollisia korjattu 3 · Suosituksia 3
 - Velka (suositus): (1) `CatalogView.tsx` on yhä yli 800 riviä, ja `page`-JSX rakennetaan myös galleriassa; (2) kuvien esilataus katselimessa ei peruunnu nopeassa selauksessa; (3) tuplanäytön, näytönlukijan ja kosketuksen tosikäyttö testaamatta selaimessa.
 
 Seuraavaksi: PM:n esikatselu (320, 768, 1440 px, tumma ja vaalea). Ei Digiturvaa (ei tallennus-, syöte- eikä riippuvuusmuutoksia).
+
+### PM (2026-10-10)
+- Tarkistettu paikallisesta buildista: Kortit-sivu ja merkintäpalkki (320 px tumma, 1440 px vaalea) sekä galleria (320 ja 1440 px). Korjattu itse: Galleria-painikkeen ikonin ja tekstin väli. Poikkeamat 1–5 hyväksytty.

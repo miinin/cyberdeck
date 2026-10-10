@@ -9827,3 +9827,10 @@ html[data-gallery='on'] main {
     background: rgba(11, 12, 16, 0.6);
   }
 }
+
+/* Icon and text apart, like the scan button (T-123). */
+.gallery-open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
