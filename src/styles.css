@@ -10027,3 +10027,80 @@ html[data-gallery='on'] main {
 main:has(.mark-banner) {
   padding-block-end: 9rem;
 }
+
+/* T-127: a tighter floating marking bar: thin padding, 36 px controls, the title only where it fits. */
+.mark-banner {
+  row-gap: 0;
+  padding-block: var(--space-1) calc(var(--space-1) + env(safe-area-inset-bottom, 0px));
+}
+
+.mark-banner .button-secondary {
+  min-block-size: 2.25rem;
+}
+
+.mark-banner .segmented-option {
+  block-size: calc(2.25rem - 2px);
+}
+
+.mark-banner .missing-link {
+  font-size: var(--font-size-xs, 0.8125rem);
+}
+
+@media (max-width: 39.99rem) {
+  .mark-banner-title {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .mark-banner-actions {
+    flex: 1;
+    justify-content: space-between;
+  }
+
+  main:has(.mark-banner) {
+    padding-block-end: 6rem;
+  }
+}
+
+/*
+ * T-127: the light Cards page look (T-125) for every page: thin dim frames, no chamfers, 40 px high controls and a
+ * smaller text. Rules written for one place stay stronger than these.
+ */
+main .button-secondary,
+main .button-primary {
+  min-block-size: 2.5rem;
+  padding-block: 0;
+  padding-inline: var(--space-3);
+  font-size: var(--font-size-sm);
+  clip-path: none;
+}
+
+main .button-secondary::before,
+main .button-primary::before {
+  clip-path: none;
+}
+
+main .segmented {
+  border-width: 1px;
+}
+
+main .segmented-option {
+  block-size: calc(2.5rem - 2px);
+  padding-inline: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+main .segmented-option + .segmented-option {
+  border-inline-start-width: 1px;
+}
+
+main .field input[type='search'],
+main .field input[type='text'] {
+  block-size: 2.5rem;
+  min-block-size: 2.5rem;
+  border-bottom-width: 1px;
+}
