@@ -111,3 +111,7 @@ Seuraavaksi: PM:n esikatselu (320, 768, 1440 px, tumma ja vaalea). Ei Digiturvaa
 
 ### PM (2026-10-10)
 - Tarkistettu paikallisesta buildista: Kortit-sivu ja merkintäpalkki (320 px tumma, 1440 px vaalea) sekä galleria (320 ja 1440 px). Korjattu itse: Galleria-painikkeen ikonin ja tekstin väli. Poikkeamat 1–5 hyväksytty.
+
+### PM-korjaus (2026-10-10, käyttäjän palaute)
+- Merkintäpalkki oli liian raskas (iso kapiteeliotsikko ja keltainen VALMIS). Nyt se on yksi hillitty rivi "Merkintätila. …", ja painos ja Valmis ovat pieninä toissijaisina painikkeina. Merkitse omat kortit -painike on kompakti.
+- Puhelimessa järjestysvalinnat ja Skannaa ovat samalla rivillä (390 px), ja tyhjää suodatinriviä ei varata. Opittu: tarkista myös 390 px, täysi kokoelma ja Lista-näkymä, ei vain 320 px ja tyhjä kokoelma.
