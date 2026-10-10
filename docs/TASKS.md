@@ -124,4 +124,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-119 | Skannaa suoraan pakkaan: skanneri pakkaeditorista ja Pakat-listalta, valinnat pakkaan / pakkaan ja kokoelmaan sekä pääpakka / sideboard | 1 | Should | Koodari | Done | PM esikatselu |
 | T-120 | Oma kansio: Setti / Oma kansio -valinta, omistettujen korttien vapaa sijoittelu taskuihin (tallennus laitteelle), etu- ja takakansi | 1 | Should | Koodari | Done | Digiturva (tallennus) |
 | T-121 | Pakka omilla korteilla: kaikkien puuttuvien kopioiden korvaajat, pelattavuusluku ja "Tee kopio omilla korteilla" | 1 | Should | Koodari | Done | PM |
-| T-122 | Pakan tulosseuranta: pelien kirjaus (vastustaja, Legendit, V/T/Ta, lisätiedot), tilastot ja synkka tilille (D-030) | 1 | Should | Koodari | Ready | Digiturva (tallennus, synkka, säännöt) |
+| T-122 | Pakan tulosseuranta: pelien kirjaus (vastustaja, Legendit, V/T/Ta, lisätiedot), tilastot ja synkka tilille (D-030) | 1 | Should | Koodari | Done | Digiturva ✓ (SEC-122-1–3 korjattu, -7 velka T-124) |
+| T-124 | [velka] SEC-122-7: kun pilviaggregaatti on virheellinen, pohjaan tallennetaan sen kohdalla edellinen pohja eikä yhdistetty arvo (kokoelma, want, tulokset), jottei myöhemmin korjattu pilvi poista paikallisia lisäyksiä | 2 | Could | Koodari | Backlog | Digiturva |
