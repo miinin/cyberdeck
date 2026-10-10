@@ -79,3 +79,32 @@
 - Ei diaesitystä, ei kuvien latausta tai jakoa.
 
 ## Luovutus
+
+**Koodari · 2026-10-10 · Tila: toteutettu, odottaa PM:n esikatselua**
+
+Commitit (suoraan test-haaraan, D-029): `0c65a99` merkintäpainike ja tilapalkki, `6fe074b` galleria. Ei uusia riippuvuuksia, ei tallennusmuutoksia (`EDIT_MODE_KEY` ja oletuslogiikka ennallaan).
+
+**Merkitse omat kortit.** `MarkOwnBanner.tsx` (painike `MarkOwnButton` ja palkki `MarkOwnBanner`). Kytkimen tilalla toissijainen painike (plus- ja kortti-ikoni, `title` ja `aria-describedby` = `markHint`). Päällä: keltareunainen tilapalkki työkalurivin alla, jossa teksti, painosvalinta ja Valmis. Fokus siirtyy Valmis-painikkeeseen ja takaisin Merkitse-painikkeeseen. Tyhjällä kokoelmalla ja tilan ollessa pois päältä näkyy `markEmptyHint`. Kokoelma-sivulla (`locked`) ei painiketta eikä palkkia, ja painosvalinta pysyy työkalurivillä. `editSwitchLabel` poistettu.
+
+**Galleria.** `CardGallery.tsx` (palkki, ruudukko, tyhjä tulos), `GalleryViewer.tsx` (koko ruudun katselin), `galleryItems.ts` (kuvat ja nimet ruudukon kohteista), `useGallery.ts` (tila, historia, vieritys ja fokus), `useBarVisibility.ts` (häivytys). `CatalogView.tsx` sai vain tilan kytkennän ja `filters()`-apufunktion (sama lomake molemmissa näkymissä); `CardFilters` sai valinnaiset `hideSearch` ja `onShowResults`.
+- Galleria korvaa sivun sisällön (ei päällekkäisiä id:itä). Sovelluksen yläpalkki (sisältää navigoinnin) ja alapalkki piilotetaan `hidden`-attribuutilla (`App.tsx`, `onGalleryChange`), tumma tausta tulee `html[data-gallery=on]`-attribuutista. Galleriassa käytetään aina tummaa paletia myös vaaleassa teemassa.
+- Takaisin-painike toteutettu: avaus tekee `history.pushState` (sama osoite), sulkeminen kutsuu `history.back()`, ja `popstate` sulkee. Vierityskohta ja fokus (Galleria-painike) palautuvat.
+- Ohjauspalkki on `position: sticky`, joten se varaa itse ruudukon yläpuolisen tilan (ei erillistä välikettä) ja kelluu vieritettäessä. Työpöytä: häipyy 2,5 s kuluttua, ellei hiiri tai fokus ole palkissa tai suodatinpaneeli auki; palaa hiiren liikkeestä, näppäimestä, fokuksesta tai ylösvierityksestä. Kosketus (`hover: none`): piiloutuu alasvierityksessä, palaa ylösvierityksessä. Alle 600 px: ×, hakuikoni, Suodattimet ja koko; Kaikki versiot siirtyy suodatinpaneeliin, korttimäärä jää pois.
+- Suodatinpaneeli avautuu sivun vuossa palkin alle, ja "Näytä N korttia" sulkee sen ja vierittää ruudukkoon. Hakukenttä palkissa on sama `criteria.query`.
+- Katselin on natiivi `<dialog>` (Esc, fokuksen ansa), nuolinäppäimet, painikkeet, pyyhkäisy (pointer-tapahtumat), naapurikuvien esilataus, sijainti "i / n". Kortin tiedot avaa nykyisen tietodialogin, ja fokus palaa korttiin.
+
+**Poikkeamat kortista.**
+1. "Kortin tiedot" on painike (ei `<a href="#/kortti/…">`): hash-reitin käyttö olisi sotkenut Takaisin-historian ja `dismissedKey`-logiikan. Avaa saman tietonäkymän suoraan tilasta.
+2. Koko on kolmen vaihtoehdon segmentti (ei −/+). Alle 600 px palkki voi siksi mennä kahdelle riville 320 px:llä (ei päällekkäisyyksiä, rivit rivittyvät).
+3. Korttikuvaa vailla oleva kortti näyttää galleriassa nimensä katkoviivakehyksessä (muuten se olisi näkymätön).
+4. Kosketusnäyttöjen ja ohjauspalkin häivytyksen tosielämän tuntuma, 320 px:n ulkoasu ja vaalea teema on tarkistettu vain koodista ja jsdom-testeillä, ei selaimessa. PM:n esikatselu (320, 768, 1440 px, tumma ja vaalea) tarvitaan.
+
+**Testit.** `CatalogView.browse.test.tsx` ja `AddMissingToWants.test.tsx` päivitetty uuteen merkintäkäyttöliittymään (kattavuus kasvoi: painike, kuvaus, tyhjä muistutus, Valmis, fokus, painos palkissa, tallennettu asetus päällä ja pois). `CatalogView.test.tsx`: ei muita painikkeita kuin Galleria. Uudet: `CatalogView.gallery.test.tsx` (22 testiä: avaus, sulkeminen painikkeella, Esc, Takaisin, otsikko ja alapalkki piiloon, vain kuvat, haku, suodattimet ja Näytä N korttia, järjestys, tyhjä tulos, koko, katselin, pyyhkäisy, Kortin tiedot, häivytys, puhelinleveys) ja `galleryItems.test.ts`.
+
+**Tulokset.** `npx tsc --noEmit` ja `npx eslint . --max-warnings 0` puhtaat, `npm run build` läpi. `npm test`: 1764/1765 läpi; yksi epävakaa `DeckEditor.test.tsx` ("saves automatically after a short pause", 500 ms viive) kaatuu koko sarjan kuormassa mutta menee läpi yksin ajettuna (24/24). Se ei koske tätä muutosta.
+
+Koodikatselmointi: tehty · Pakollisia korjattu 3 · Suosituksia 3
+- Korjattu: `react-hooks/refs` -säännön vastaiset ref-kirjoitukset renderöinnin aikana (3 paikkaa); Valmis/Merkitse-painikkeiden fokus katosi tilanvaihdossa; työkalupalkin nimi oli sama kuin listan nimi.
+- Velka (suositus): (1) `CatalogView.tsx` on yhä yli 800 riviä, ja `page`-JSX rakennetaan myös galleriassa; (2) kuvien esilataus katselimessa ei peruunnu nopeassa selauksessa; (3) tuplanäytön, näytönlukijan ja kosketuksen tosikäyttö testaamatta selaimessa.
+
+Seuraavaksi: PM:n esikatselu (320, 768, 1440 px, tumma ja vaalea). Ei Digiturvaa (ei tallennus-, syöte- eikä riippuvuusmuutoksia).

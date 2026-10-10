@@ -26,7 +26,7 @@ export interface OwnedColumn {
   /** Copies of one art of a card; with it and onArtChange the boxes of an art item count that art (D-021). */
   artCountOf?: (card: Card, art: Art) => number;
   onArtChange?: (card: Card, art: Art, count: number) => void;
-  /** The "Muokkaa kokoelmaa" switch (T-040): false hides the − and + buttons. */
+  /** The marking mode ("Merkitse omat kortit", T-040, T-123): false hides the − and + buttons. */
   editable: boolean;
   /** 'proxy' = the print queue (T-102): its own spoken texts and no playset edge. Default: the collection. */
   kind?: 'owned' | 'proxy';
