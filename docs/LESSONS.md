@@ -40,5 +40,5 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 - PM yritti ottaa Firestoren API:n käyttöön viemällä kaiken kieltävät säännöt. Deploy loi samalla `(default)`-tietokannan oletussijaintiin `nam5` (USA) molemmissa projekteissa, vaikka päätös oli `europe-north1` (D-017). Sijaintia ei voi muuttaa, ja poisto vaatii käyttäjän.
 - Opetus: luo tietokanta aina ensin eksplisiittisellä sijainnilla (konsoli tai `firestore:databases:create --location`, kun API on päällä) ennen mitään firestore-deployta. API:n saa päälle ilman deployta konsolin API-sivulta.
 
-## L-%03d · 2026-10-10 · Esikatselu tehtiin liian kapeasti (T-123)
+## L-007 · 2026-10-10 · Esikatselu tehtiin liian kapeasti (T-123)
 PM tarkisti vain 320 px:n ja tyhjän kokoelman, joten puhelimen (390 px) työkalurivin hajoaminen ja raskas merkintäpalkki menivät tuotantoon. Jatkossa UI-muutos tarkistetaan 390 px:llä oikean kaltaisella datalla (täysi kokoelma), kaikissa näkymätiloissa, joihin muutos vaikuttaa (Kuvat ja Lista, tila päällä ja pois), ja kuvaa arvioidaan käyttäjän silmin, ei vain päällekkäisyyksien osalta.
