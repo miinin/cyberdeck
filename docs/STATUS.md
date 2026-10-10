@@ -12,7 +12,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 | – | – | T-120 (oma kansio, etu- ja takakansi) julkaistu 2026-10-09 | Käyttäjä kokeilee oman kansion muokkausta puhelimella; synkronointi tilille on IDEAS.md:ssä |
 
 ## Avoimet
-- Preview-kanavien kiintiö (50) täyttyy: workflow ei poista kanavaa PR:n sulkeutuessa (pysyvä korjaus odottaa käyttäjän päätöstä).
+- Preview-kanavat poistuvat nyt PR:n sulkeutuessa (preview.yml, delete_preview) ja vanhenevat 1 päivässä: varmista ensimmäisen sulkeutuvan PR:n ajosta.
 - Skannerin tarkistus muilla kuin sinisillä korteilla oikeilla kuvilla (T-113, käyttäjä).
 - TASKS.md:n Backlog-rivit (T-002–T-008 sekä velat T-030, T-031, T-041–T-043, T-047).
 - 79 puuttuvaa versiokuvaa: käyttäjä etsii ne.
