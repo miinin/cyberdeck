@@ -4736,22 +4736,6 @@ button.legality:focus-visible {
   box-shadow: inset 0 0 0 1px var(--color-text);
 }
 
-/* T-066: add-missing-to-wants button and its result. */
-.sort-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-4);
-  margin-block-end: var(--space-2);
-}
-
-.sort-row .sort-select,
-.sort-row .missing-add,
-.list-toolbar .sort-select {
-  /* In a row of controls the order select is centred with the others, not lifted by a bottom margin (T-118, UX-118-07). */
-  margin-block-end: 0;
-}
-
 .missing-add {
   display: flex;
   flex-wrap: wrap;
@@ -8601,67 +8585,11 @@ button.pocket-link {
   gap: var(--space-2) var(--space-3);
   margin-block-end: var(--space-2);
 }
-.toolbar-switches {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 var(--space-4);
-}
-@media (min-width: 40rem) {
-  .toolbar-switches {
-    margin-inline-start: auto;
-  }
-}
-.sort-row {
-  gap: var(--space-2) var(--space-3);
-}
-.sort-row .scan-open {
-  align-self: center;
-  margin-inline-start: auto;
-}
-.toolbar-switches {
-  gap: 0 var(--space-3);
-}
-.toolbar-switches .edit-switch {
-  padding-inline: 0;
-}
-/* On a phone the order selects and the scan button share one row: the label is spoken, not shown. */
 @media (max-width: 39.99rem) {
-  .sort-row {
-    column-gap: var(--space-2);
-  }
-  .sort-row .missing-add {
-    flex-basis: 100%;
-  }
   /* On a phone the filters are chosen in the folded panel, which then jumps to the results: no row is kept empty (T-084 is for wide screens). */
   .active-filters:empty {
     min-height: 0;
     margin-block-end: var(--space-2);
-  }
-  .sort-row .sort-select {
-    flex: 1 1 auto;
-    min-inline-size: 0;
-  }
-  .sort-row .scan-open {
-    flex: none;
-    padding-inline: var(--space-3);
-    font-size: var(--font-size-sm);
-  }
-  .sort-row .sort-select {
-    flex-wrap: nowrap;
-  }
-  .sort-row .sort-select label {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-  .sort-row .sort-select select {
-    min-inline-size: 0;
-    padding-inline: var(--space-1);
   }
 }
 
@@ -9442,39 +9370,9 @@ button.pocket-link {
   background: color-mix(in srgb, var(--color-bg) 55%, var(--color-surface));
 }
 
-/* One quiet line (T-123 fix): the mode is told in a sentence, the actions stay small; no second yellow button. */
-.mark-banner-text {
-  flex: 1 1 18rem;
-  min-inline-size: 0;
-  margin: 0;
-  font-size: var(--font-size-sm);
-}
-
-.mark-banner-title {
-  font-weight: var(--font-weight-bold);
-}
-
-.mark-banner-body {
-  color: var(--color-text-muted);
-}
-
 .mark-banner .segmented-option {
   padding-inline: var(--space-3);
   font-size: var(--font-size-sm);
-}
-
-.mark-banner-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-}
-
-@media (max-width: 39.99rem) {
-  .mark-banner-actions {
-    inline-size: 100%;
-    justify-content: space-between;
-  }
 }
 
 /*
@@ -9630,10 +9528,6 @@ html[data-gallery='on'] main {
   padding: var(--space-3) 1rem var(--space-4);
   border-block-end: 1px solid var(--color-border);
   background: var(--color-surface);
-}
-
-.gallery-filters-switch {
-  margin-block-start: var(--space-3);
 }
 
 .gallery-body {
@@ -9858,4 +9752,239 @@ html[data-gallery='on'] main {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+/*
+ * Lighter Cards page top (T-125). One search row, one tool row, and in marking mode one banner row: thin dim frames, no
+ * chamfers, 40 px high controls. Yellow only where something is active. Below 40 rem the tool row is icons (the words stay
+ * as accessible names), so it fits on one row at 320 px.
+ */
+@media (max-width: 63.99rem) {
+  .catalog-layout {
+    gap: var(--space-2);
+  }
+}
+
+.page-head h1 {
+  padding-block-end: var(--space-2);
+}
+
+.catalog-filters .search-row .field input[type='search'],
+.catalog-filters .filter-toggle {
+  block-size: 2.5rem;
+  min-block-size: 2.5rem;
+}
+
+.catalog-filters .search-row .field input[type='search'] {
+  border-bottom-width: 1px;
+}
+
+.catalog-filters .filter-toggle,
+.list-toolbar .button-secondary,
+.mark-banner .button-secondary {
+  min-block-size: 2.5rem;
+  padding-block: 0;
+  padding-inline: var(--space-3);
+  font-size: var(--font-size-sm);
+  clip-path: none;
+}
+
+.catalog-filters .filter-toggle::before,
+.list-toolbar .button-secondary::before,
+.mark-banner .button-secondary::before {
+  clip-path: none;
+}
+
+.list-toolbar {
+  gap: var(--space-2);
+  margin-block-end: var(--space-2);
+}
+
+.list-toolbar .segmented,
+.mark-banner .segmented {
+  border-width: 1px;
+}
+
+.list-toolbar .segmented-option,
+.mark-banner .segmented-option {
+  gap: var(--space-2);
+  block-size: calc(2.5rem - 2px);
+  padding-inline: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.list-toolbar .segmented-option + .segmented-option,
+.mark-banner .segmented-option + .segmented-option {
+  border-inline-start-width: 1px;
+}
+
+.toolbar-icon {
+  flex: none;
+}
+
+.list-toolbar .mark-open-row {
+  flex: none;
+  margin-inline-start: auto;
+}
+
+.view-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  min-inline-size: 0;
+}
+
+.view-options .sort-select {
+  margin-block-end: 0;
+}
+
+.mark-banner {
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+}
+
+.mark-banner-title {
+  flex: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.mark-banner-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.mark-banner .missing-add {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
+@media (max-width: 39.99rem) {
+  .page-head {
+    align-items: baseline;
+    gap: 0 var(--space-3);
+  }
+
+  .page-head h1 {
+    font-size: 1.75rem;
+  }
+
+  .page-head h1::after {
+    height: 2px;
+    box-shadow: none;
+  }
+
+  .page-head-status {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-3);
+  }
+
+  .page-head-status .status-line {
+    font-size: 0.8125rem;
+  }
+
+  /* The row fits at 320 px, so it never wraps; the empty-collection reminder is the one thing that gets a row below. */
+  .list-toolbar .mark-open-row {
+    display: contents;
+  }
+
+  .list-toolbar .mark-open {
+    margin-inline-start: auto;
+  }
+
+  .list-toolbar .segmented-option {
+    padding-inline: var(--space-2);
+  }
+
+  .list-toolbar .gallery-open,
+  .list-toolbar .scan-open {
+    min-inline-size: 2.5rem;
+    padding-inline: var(--space-2);
+  }
+
+  .list-toolbar .toolbar-label,
+  .list-toolbar .scan-open-label,
+  .list-toolbar .mark-open-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .list-toolbar .mark-open {
+    min-inline-size: 2.5rem;
+    padding-inline: var(--space-2);
+  }
+
+  .list-toolbar .mark-empty-hint {
+    flex: 1 1 100%;
+    order: 1;
+  }
+}
+
+/* The Cards page head and results sit closer together on a phone, so the first card starts high (T-125). */
+@media (max-width: 39.99rem) {
+  main:has(.catalog-layout) {
+    gap: var(--space-2);
+    padding-block-start: var(--space-3);
+  }
+
+  .page-head h1 {
+    padding-block-end: var(--space-1);
+    line-height: 1.1;
+  }
+
+  .catalog-results .mark-banner {
+    margin-block-end: var(--space-2);
+  }
+
+  .mark-banner .missing-link {
+    min-block-size: 1.75rem;
+  }
+}
+
+@media (max-width: 39.99rem) {
+  main:has(.catalog-layout) {
+    padding-block-start: var(--space-2);
+  }
+
+  .catalog-results .active-filters:empty {
+    margin-block-end: 0;
+  }
+}
+
+/* The order and the switch in the filter panel: the label on its own line, both selects side by side (T-125). */
+.view-options .sort-select {
+  flex: 1 1 100%;
+}
+
+.view-options .sort-select label {
+  flex: 1 1 100%;
+}
+
+.view-options .sort-select select {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+/* On a wide page the marking banner is one row: name, the link, the edition and Valmis. */
+@media (min-width: 40rem) {
+  .mark-banner .missing-add {
+    flex: 0 1 auto;
+    order: 2;
+  }
+
+  .mark-banner-actions {
+    order: 3;
+  }
 }

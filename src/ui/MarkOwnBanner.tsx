@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { DefaultEdition } from '../storage';
 import { SegmentedChoice } from './SegmentedChoice';
 import { texts } from './texts';
@@ -36,7 +37,7 @@ export function MarkOwnButton({ onStart, collectionEmpty }: { onStart: () => voi
         onClick={onStart}
       >
         <MarkIcon />
-        {texts.markOpen}
+        <span className="mark-open-label">{texts.markOpen}</span>
       </button>
       <p id="mark-hint" className="visually-hidden">
         {texts.markHint}
@@ -47,26 +48,34 @@ export function MarkOwnButton({ onStart, collectionEmpty }: { onStart: () => voi
 }
 
 /**
- * The bar shown while the user marks the cards they own (T-123): what the mode does, the edition the + adds to
- * (it only matters for marking) and "Valmis", which leaves the mode.
+ * The bar shown while the user marks the cards they own (T-123, T-125): one row with the mode name, the edition the + adds
+ * to (it only matters for marking) and "Valmis", which leaves the mode. What the mode does is a title and a description
+ * only; `extra` (the "add missing to wants" link) gets a row of its own.
  */
 export function MarkOwnBanner({
   edition,
   onEditionChange,
   onDone,
+  extra,
 }: {
   edition: DefaultEdition;
   onEditionChange: (next: DefaultEdition) => void;
   onDone: () => void;
+  extra?: ReactNode;
 }) {
   return (
-    <section className="mark-banner" aria-labelledby="mark-banner-title">
-      <p className="mark-banner-text">
-        <strong id="mark-banner-title" className="mark-banner-title">
-          {texts.markBannerTitle}
-        </strong>{' '}
-        <span className="mark-banner-body">{texts.markBannerBody}</span>
-      </p>
+    <section
+      className="mark-banner"
+      aria-labelledby="mark-banner-title"
+      aria-describedby="mark-banner-body"
+      title={texts.markBannerBody}
+    >
+      <strong id="mark-banner-title" className="mark-banner-title">
+        {texts.markBannerTitle}
+      </strong>
+      <span id="mark-banner-body" className="visually-hidden">
+        {texts.markBannerBody}
+      </span>
       <div className="mark-banner-actions">
         <SegmentedChoice
           className="edition-select"
@@ -85,6 +94,7 @@ export function MarkOwnBanner({
           {texts.markDone}
         </button>
       </div>
+      {extra}
     </section>
   );
 }

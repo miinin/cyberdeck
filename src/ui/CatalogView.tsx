@@ -34,7 +34,6 @@ import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
 import type { CardListItem } from './CardList';
 import { AddMissingToWantsButton } from './AddMissingToWants';
-import { SortSelect } from './SortSelect';
 import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
 import type { CardSort } from '../domain/cardSort';
 import { CardTable } from './CardTable';
@@ -656,6 +655,15 @@ function CatalogBody({
           },
         ]),
     ...criteriaFilters(criteria, (next) => updateCriteria(next, 'later')),
+    ...(sort.key === DEFAULT_SORT.key && sort.direction === DEFAULT_SORT.direction
+      ? []
+      : [
+          {
+            id: 'sort',
+            label: texts.sortChip(texts.sortOptions[sort.key], sort.direction === 'asc' ? texts.sortAscending : texts.sortDescending),
+            onRemove: () => setSort(DEFAULT_SORT),
+          },
+        ]),
   ];
 
   /** The filter form; the gallery (T-123) shows the same one in its own page flow, without the search field. */
@@ -706,6 +714,10 @@ function CatalogBody({
       }
       collapsibleBelow={WIDE_QUERY}
       results={{ count: filtered.length, id: 'active-filters' }}
+      sort={sort}
+      onSortChange={setSort}
+      allArts={view === 'grid' ? allArts : undefined}
+      onAllArtsChange={setAllArts}
       {...extra}
     />
   );
@@ -792,23 +804,33 @@ function CatalogBody({
             hideEditSwitch={locked}
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
-            allArts={view === 'grid' ? allArts : undefined}
-            onAllArtsChange={setAllArts}
             edition={edition}
             onEditionChange={handleEditionChange}
+            scanSlot={
+              locked ? undefined : (
+                <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} preferences={repositories.preferences} />
+              )
+            }
           />
           {!locked && collection.phase === 'ready' && editable && (
-            <MarkOwnBanner edition={edition} onEditionChange={handleEditionChange} onDone={() => handleEditChange(false)} />
+            <MarkOwnBanner
+              edition={edition}
+              onEditionChange={handleEditionChange}
+              onDone={() => handleEditChange(false)}
+              extra={
+                wants.snapshot.phase === 'ready' ? (
+                  <div className="missing-add missing-add--quiet">
+                    <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />
+                  </div>
+                ) : undefined
+              }
+            />
           )}
-          <div className="sort-row">
-            <SortSelect sort={sort} onChange={setSort} />
-            {!locked && <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} preferences={repositories.preferences} />}
-            {editable && collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
-              <div className="missing-add missing-add--quiet">
-                <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />
-              </div>
-            )}
-          </div>
+          {locked && editable && collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
+            <div className="missing-add missing-add--quiet">
+              <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />
+            </div>
+          )}
 
           <ActiveFilters
             filters={activeFilters}
@@ -868,9 +890,7 @@ function CatalogBody({
           onQueryChange={(query, composing) => updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')}
           searchInputRef={searchInputRef}
           filterCount={selectedFilterCount(criteria, collection.phase === 'ready' && !locked ? collectionFilter : undefined) + (setChoice === null ? 0 : 1)}
-          renderFilters={(showResults) => filters({ hideSearch: true, collapsibleBelow: undefined, onShowResults: showResults })}
-          allArts={allArts}
-          onAllArtsChange={setAllArts}
+          renderFilters={(showResults) => filters({ hideSearch: true, collapsibleBelow: undefined, onShowResults: showResults, allArts })}
           onClose={gallery.closeGallery}
           onClear={handleClearFilters}
           onOpenDetails={handleOpenImage}

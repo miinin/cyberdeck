@@ -824,7 +824,7 @@ export function ScanCardsButton(props: {
         onClick={() => setOpen(true)}
       >
         <CameraIcon />
-        {variant === 'secondary' ? scannerTexts.openShort : scannerTexts.open}
+        <span className="scan-open-label">{variant === 'secondary' ? scannerTexts.openShort : scannerTexts.open}</span>
       </button>
       {open && <CardScannerDialog {...dialogProps} mode={mode} onModeChange={setMode} onClose={() => setOpen(false)} />}
     </>

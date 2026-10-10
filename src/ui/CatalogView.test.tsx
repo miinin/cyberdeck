@@ -184,4 +184,17 @@ describe('CatalogView card order (T-060)', () => {
     await user.selectOptions(screen.getByRole('combobox', { name: 'Suunta' }), 'Laskeva');
     expect(headings()).toEqual(['Bee', 'Cat', 'Ant']);
   });
+
+  it('has the order and "Kaikki versiot" in the filter panel, and a changed order is a chip that resets it (T-125)', async () => {
+    const user = userEvent.setup();
+    const named = (i: number, name: string) => card(i, { name, displayName: name, key: name.toLowerCase() });
+    renderView([named(1, 'Bee'), named(2, 'Ant')]);
+    const panel = screen.getByRole('search');
+    expect(within(panel).getByRole('combobox', { name: 'Järjestys' })).toBeInTheDocument();
+    expect(within(panel).getByRole('switch', { name: 'Kaikki versiot' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Poista suodatin: Järjestys/ })).toBeNull();
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Järjestys' }), 'Nimi (A–Ö)');
+    await user.click(screen.getByRole('button', { name: 'Poista suodatin: Järjestys: Nimi (A–Ö), Nouseva' }));
+    expect(screen.getByRole('combobox', { name: 'Järjestys' })).toHaveValue('number');
+  });
 });

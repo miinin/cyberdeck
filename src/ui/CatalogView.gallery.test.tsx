@@ -202,10 +202,13 @@ describe('Gallery (T-123): filters, search and order', () => {
     await waitFor(() => expect(grid()).toBeNull());
   });
 
-  it('has the "Kaikki versiot" switch and remembers the size while the page lives', async () => {
+  it('has the "Kaikki versiot" switch in the filter panel and remembers the size while the page lives', async () => {
     const user = userEvent.setup();
     await renderView();
     await openGallery(user);
+    expect(within(screen.getByRole('toolbar')).queryByRole('switch')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Suodattimet' }));
+    expect(within(screen.getByRole('search')).getByRole('combobox', { name: 'Järjestys' })).toBeInTheDocument();
     expect(screen.getByRole('switch', { name: 'Kaikki versiot' })).toHaveAttribute('aria-checked', 'false');
     expect(grid()).toHaveAttribute('data-size', 'normal');
     await user.click(screen.getByRole('radio', { name: 'Valtava' }));
