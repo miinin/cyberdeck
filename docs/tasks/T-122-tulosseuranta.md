@@ -70,7 +70,7 @@ Tulokset ovat **oma aggregaattinsa, yksi dokumentti**, samalla mallilla kuin wan
 | win / loss / draw | Voitto / Tappio / Tasapeli | Win / Loss / Draw |
 | winShort / lossShort / drawShort | V / T / Ta | W / L / D |
 | opponent | Vastustaja | Opponent |
-| opponentPlaceholder | Esim. Villen sininen aggro | E.g. Alex's blue aggro |
+| opponentPlaceholder | Esim. sininen aggro | E.g. blue aggro |
 | opponentLegends | Vastustajan Legendit | Opponent's Legends |
 | legendsHint | Enintään 3. Värit päätellään Legendeistä. | Up to 3. Colours come from the Legends. |
 | unknownOpponent | Tuntematon | Unknown |
