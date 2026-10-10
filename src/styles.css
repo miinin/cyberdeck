@@ -9042,3 +9042,350 @@ button.pocket-link {
     column-gap: var(--space-1);
   }
 }
+
+/*
+ * Game results (T-122). The section sits in the deck column of the editor, below the statistics. Free text (opponent,
+ * event, note) wraps anywhere, so a long word never widens a 320 px view; nothing here scrolls on its own.
+ */
+.deck-results {
+  display: grid;
+  gap: var(--space-3);
+  margin-block-start: var(--space-4);
+  min-inline-size: 0;
+}
+
+.results-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding-block-end: var(--space-1);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.results-head .deck-section-title {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.deck-results .toast {
+  margin: 0;
+}
+
+.deck-results p {
+  margin: 0;
+}
+
+.results-empty {
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border-strong);
+}
+
+.deck-results .panel {
+  min-inline-size: 0;
+}
+
+.deck-results .kpi-tiles {
+  grid-template-columns: repeat(auto-fit, minmax(min(6.5rem, 100%), 1fr));
+}
+
+.results-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+
+.results-table th,
+.results-table td {
+  padding: var(--space-1) var(--space-1);
+  border-bottom: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: middle;
+}
+
+.results-table thead th {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+}
+
+.results-table tbody th {
+  min-inline-size: 0;
+  font-weight: var(--font-weight-normal);
+  overflow-wrap: break-word;
+}
+
+.results-table thead th.results-number {
+  white-space: nowrap;
+}
+
+/* The record already holds the game count: on a phone the name column gets the room (no words cut in the middle). */
+@media (max-width: 479px) {
+  .results-table .results-games {
+    display: none;
+  }
+}
+
+.results-table .results-number {
+  text-align: end;
+}
+
+.results-table td.results-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.results-table .deck-color-code {
+  font-size: 1rem;
+}
+
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 1.75rem;
+  padding: 0 var(--space-1);
+  border: 1px solid currentColor;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+
+.result-badge.is-win {
+  color: var(--color-code-green);
+}
+
+.result-badge.is-loss {
+  color: var(--color-code-red);
+}
+
+.result-badge.is-draw {
+  color: var(--color-text-muted);
+}
+
+.game-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-2);
+  align-items: start;
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.game-row-main {
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.game-row-line,
+.game-row-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-inline-size: 0;
+}
+
+.game-row-day {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.game-row-opponent {
+  min-inline-size: 0;
+  font-weight: var(--font-weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.game-tag {
+  max-inline-size: 100%;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.game-row-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.game-row-actions {
+  display: flex;
+  align-items: center;
+}
+
+.game-row-actions .icon-button {
+  margin-inline-start: 0;
+}
+
+.game-show-all {
+  margin-block-start: var(--space-2);
+}
+
+.deck-record {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+/* The form of one game. */
+.game-dialog-body {
+  min-inline-size: 0;
+}
+
+.game-form {
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.game-form h2 {
+  margin: 0;
+}
+
+.game-form p {
+  margin: 0;
+}
+
+.game-form .view-select.has-legend legend,
+.game-form .field-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-caps);
+}
+
+.game-form input[type='text'],
+.game-form input[type='search'],
+.game-form input[type='date'],
+.game-form textarea {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.game-form input[type='text'],
+.game-form input[type='search'],
+.game-form input[type='date'] {
+  block-size: var(--target-min);
+}
+
+.game-form textarea {
+  padding: var(--space-2) var(--space-3);
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;
+  min-block-size: 5rem;
+}
+
+.game-form input:hover,
+.game-form textarea:hover {
+  border-color: var(--color-info);
+}
+
+.game-form input:focus-visible,
+.game-form textarea:focus-visible {
+  border-color: var(--color-info);
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.game-form .segmented--fill {
+  inline-size: 100%;
+}
+
+.game-legends {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.game-chips,
+.game-matches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-inline-size: 100%;
+  min-block-size: var(--target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.game-chip:hover {
+  border-color: var(--color-info);
+}
+
+.game-chip-name {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+
+.game-match {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-inline-size: 100%;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.game-more-body {
+  display: grid;
+  gap: var(--space-3);
+  padding-block-start: var(--space-3);
+}
+
+@media (max-width: 39.99rem) {
+  .game-dialog {
+    padding: 0;
+    background: var(--color-bg);
+  }
+
+  .game-dialog .game-dialog-body {
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: 100dvh;
+    margin: 0;
+    border: 0;
+    border-block-start: 3px solid var(--color-accent-edge);
+  }
+}

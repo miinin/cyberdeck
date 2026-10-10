@@ -50,9 +50,9 @@ export const textsFi = {
   accountDialogTitle: 'Kirjaudu Google-tilillä',
   accountAgeLimit: 'Kirjautuminen on tarkoitettu 16 vuotta täyttäneille.',
   accountPrivacy:
-    'Tilille tallennetaan vain pakkasi, kokoelmasi ja want-listasi sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa.',
+    'Tilille tallennetaan vain pakkasi, kokoelmasi, want-listasi ja pelitulokset sekä Googlen antama tunniste, ei nimeäsi eikä sähköpostiasi. Tiedot säilytetään Googlen palvelimilla EU:ssa, ja voit poistaa ne milloin tahansa.',
   accountPrivacyGoogle:
-    'Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa, ei pakkojesi, kokoelmasi eikä want-listasi mukana.',
+    'Googlen tilitietosi (nimi ja sähköpostiosoite) säilyvät Firebase Authenticationissa, ei pakkojesi, kokoelmasi, want-listasi eikä pelitulostesi mukana.',
   accountPrivacyController: 'Rekisterinpitäjä: Miika Miinin, miikamiinin@gmail.com.',
   accountContinue: 'Jatka Googleen',
   accountCancel: 'Peruuta',
@@ -82,7 +82,7 @@ export const textsFi = {
   accountDelete: 'Poista tilin tiedot',
   accountDeleteTitle: 'Poistetaanko tilin tiedot?',
   accountDeleteBody:
-    'Pakat ja kokoelma poistetaan tililtä ja tästä selaimesta, ja Google-tilillä kirjautuminen poistetaan tästä palvelusta. Poistoa ei voi perua. Selaimen kirjautumattoman tilan tiedot eivät poistu.',
+    'Pakat, kokoelma, want-lista ja pelitulokset poistetaan tililtä ja tästä selaimesta, ja Google-tilillä kirjautuminen poistetaan tästä palvelusta. Poistoa ei voi perua. Selaimen kirjautumattoman tilan tiedot eivät poistu.',
   accountDeleteConfirm: 'Poista tiedot ja tili',
   accountDeleting: 'Poistetaan…',
   accountDeleteReauth: 'Siirrytään Googleen vahvistamaan kirjautuminen. Poisto valmistuu, kun palaat sivulle.',
@@ -92,7 +92,7 @@ export const textsFi = {
   // First sign-in with data on both sides (T-054c).
   accountChooseTitle: 'Tässä selaimessa ja tilillä on tietoja',
   accountChooseBody:
-    'Voit yhdistää selaimen pakat ja kokoelman tilin tietoihin tai käyttää vain tilin tietoja. Selaimen tiedoista tehdään varmuuskopio, eikä mitään poisteta ennen kuin tallennus tilille on onnistunut.',
+    'Voit yhdistää selaimen pakat, kokoelman ja pelitulokset tilin tietoihin tai käyttää vain tilin tietoja. Selaimen tiedoista tehdään varmuuskopio, eikä mitään poisteta ennen kuin tallennus tilille on onnistunut.',
   accountChooseMerge: 'Yhdistä',
   accountChooseAccountOnly: 'Käytä vain tilin tietoja',
   /** Fixed messages by AuthErrorKind (SR-21 kohta 4). */

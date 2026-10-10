@@ -52,16 +52,16 @@ describe('sync storage', () => {
   it('apply replaces the data only if it is still what the caller read', async () => {
     const { repos } = open();
     const sync = repos.forAccount('user123').sync;
-    const empty = { decks: [], collection: { entries: [] }, wants: { entries: [] } };
+    const empty = { decks: [], collection: { entries: [] }, wants: { entries: [] }, games: { games: [] } };
     expect(sync.read()).toEqual(empty);
     const account = repos.forAccount('user123');
     await account.decks.create(CONTENT);
 
-    expect(sync.apply(empty, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] } })).toBe(false);
+    expect(sync.apply(empty, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] }, games: { games: [] } })).toBe(false);
     expect((await account.collection.load()).value.entries).toEqual([]);
 
     const current = sync.read() ?? empty;
-    expect(sync.apply(current, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] } })).toBe(true);
+    expect(sync.apply(current, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] }, games: { games: [] } })).toBe(true);
     expect((await account.decks.list()).value).toEqual([]);
     expect((await account.collection.load()).value.entries).toEqual([{ card: 'detonate', count: 1 }]);
   });
@@ -71,7 +71,7 @@ describe('sync storage', () => {
     const account = repos.forAccount('user123');
     const listener = vi.fn();
     account.decks.subscribe(listener);
-    account.sync.apply({ decks: [], collection: { entries: [] }, wants: { entries: [] } }, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] } });
+    account.sync.apply({ decks: [], collection: { entries: [] }, wants: { entries: [] }, games: { games: [] } }, { decks: [], collection: { entries: [{ card: 'detonate', count: 1 }] }, wants: { entries: [] }, games: { games: [] } });
     expect(listener).toHaveBeenCalled();
   });
 
@@ -99,7 +99,7 @@ describe('sync storage', () => {
     const { store, repos } = open();
     const sync = repos.forAccount('user123').sync;
     store.setItem('cyberdeck:u:user123:sync-base', '{"v":1,"rev":2,"decks":[],"collection":{"entries":[]}}');
-    expect(sync.loadBase()).toEqual({ rev: 2, decks: [], collection: { entries: [] }, wants: { entries: [] } });
+    expect(sync.loadBase()).toEqual({ rev: 2, decks: [], collection: { entries: [] }, wants: { entries: [] }, games: { games: [] } });
     store.setItem('cyberdeck:u:user123:sync-base', '{"v":1,"rev":2,"decks":[],"collection":{"entries":[]},"wants":"x"}');
     expect(sync.loadBase()).toBeNull();
   });
@@ -109,16 +109,17 @@ describe('sync storage', () => {
     const sync = repos.forAccount('user123').sync;
     const entries = [{ card: 'detonate', count: 2 }];
     const baseKey = 'cyberdeck:u:user123:sync-base';
-    store.setItem(baseKey, JSON.stringify({ v: 1, rev: 2, decks: [], collection: { entries }, wants: { entries } }));
+    store.setItem(baseKey, JSON.stringify({ v: 1, rev: 2, decks: [], collection: { entries }, wants: { entries }, games: { games: [] } }));
     expect(sync.loadBase()).toEqual({
       rev: 2,
       decks: [],
       collection: { entries: [{ card: 'detonate', count: 2, versions: { 'welcometonightcitybeta:031': 2 } }] },
       wants: { entries },
+      games: { games: [] },
     });
-    store.setItem(baseKey, JSON.stringify({ v: 2, rev: 2, decks: [], collection: { entries }, wants: { entries } }));
+    store.setItem(baseKey, JSON.stringify({ v: 2, rev: 2, decks: [], collection: { entries }, wants: { entries }, games: { games: [] } }));
     expect(sync.loadBase()).toMatchObject({ collection: { entries } });
-    sync.saveBase({ rev: 3, decks: [], collection: { entries }, wants: { entries } });
+    sync.saveBase({ rev: 3, decks: [], collection: { entries }, wants: { entries }, games: { games: [] } });
     expect(JSON.parse(store.getItem(baseKey) ?? '')).toMatchObject({ v: 2 });
     expect(sync.loadBase()).toMatchObject({ rev: 3, collection: { entries } });
   });
@@ -149,7 +150,7 @@ describe('sync storage', () => {
     const { store, repos } = open();
     const sync = repos.forAccount('user123').sync;
     expect(sync.loadBase()).toBeNull();
-    const base = { rev: 3, decks: [{ id: 'abc', updatedAt: '2026-10-03T10:00:00.000Z' }], collection: { entries: [] }, wants: { entries: [] } };
+    const base = { rev: 3, decks: [{ id: 'abc', updatedAt: '2026-10-03T10:00:00.000Z' }], collection: { entries: [] }, wants: { entries: [] }, games: { games: [] } };
     sync.saveBase(base);
     expect(sync.loadBase()).toEqual(base);
     store.setItem('cyberdeck:u:user123:sync-base', '{"v":1,"rev":"x"}');
@@ -184,7 +185,7 @@ describe('erasing the account data', () => {
     await account.collection.setCount('detonate', 1);
     await account.wants.setCount('detonate', 1);
     account.sync.backupAll();
-    account.sync.saveBase({ rev: 1, decks: [], collection: { entries: [] }, wants: { entries: [] } });
+    account.sync.saveBase({ rev: 1, decks: [], collection: { entries: [] }, wants: { entries: [] }, games: { games: [] } });
     await repos.forAccount('other456').decks.create(CONTENT);
     await repos.decks.create(CONTENT);
     await repos.preferences.saveTheme('light');

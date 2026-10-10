@@ -60,6 +60,7 @@ const IDLE_PUBLISH: PublishState = { kind: 'idle' };
 import { DeckList } from './DeckList';
 import type { DeckView } from './DeckList';
 import { DeckPickTable } from './DeckPickTable';
+import { DeckResults } from './DeckResults';
 import { DeckStats } from './DeckStats';
 import { Sideboard } from './Sideboard';
 import { deckProblems } from './DeckProblems';
@@ -1177,6 +1178,8 @@ export function DeckEditor({
                   : deckTexts.collectionNotReady
             }
           />
+
+          <DeckResults deckId={deckId} repository={repositories.games} cards={cards} cardsByKey={cardsByKey} />
         </section>
       </div>
       <CardImageDialog card={zoomCard} onClose={() => setZoomCard(null)} />

@@ -21,6 +21,17 @@ import { normalizeBinderLayout } from '../domain/binderLayout';
 import type { BinderLayout } from '../domain/binderLayout';
 import type { Collection } from '../domain/collection';
 import { MAX_DECKS } from '../domain/deck';
+import {
+  EMPTY_GAME_LOG,
+  gameLogFits,
+  MAX_GAMES,
+  parseGameLog,
+  parseGameRecord,
+  sameGameLog,
+  withGame,
+  withoutDeck,
+} from '../domain/games';
+import type { GameInput, GameLog, GameRecord } from '../domain/games';
 import type { PrintingKey } from '../domain/printing';
 import type { Deck, DeckContent, DeckId, DeckPublish } from '../domain/deck';
 import { isUid } from '../domain/uid';
@@ -36,6 +47,8 @@ import {
   COLLECTION_SCHEMA_VERSION,
   DECKS_KEY,
   DECKS_SCHEMA_VERSION,
+  GAMES_KEY,
+  GAMES_SCHEMA_VERSION,
   MAX_BACKUPS_PER_AGGREGATE,
   WANTS_KEY,
   WANTS_SCHEMA_VERSION,
@@ -55,11 +68,19 @@ import {
   ACCOUNT_DELETE_PENDING_KEY,
 } from './keys';
 import type { KeyValueStore } from './keyValueStore';
-import { COLLECTION_MIGRATIONS, DECKS_MIGRATIONS, migrateCollectionV2ToV3, PROXY_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
+import {
+  COLLECTION_MIGRATIONS,
+  DECKS_MIGRATIONS,
+  GAMES_MIGRATIONS,
+  migrateCollectionV2ToV3,
+  PROXY_MIGRATIONS,
+  WANTS_MIGRATIONS,
+} from './migrations';
 import { DEFAULT_COLLECTION_PREFS } from './types';
 import type {
   CollectionRepository,
   DeckRepository,
+  GameLogRepository,
   Loaded,
   LoadNotice,
   LocalData,
@@ -91,12 +112,12 @@ export interface RepositoryOptions {
    */
   namespace?: string;
   /** Tests only; default []. */
-  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[]; proxy?: readonly Migration[] };
+  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[]; games?: readonly Migration[]; proxy?: readonly Migration[] };
 }
 
 /** One stored entity: its key, schema and how its value is wrapped in the envelope's data. */
 interface Aggregate<T> {
-  name: 'collection' | 'decks' | 'wants' | 'proxy';
+  name: 'collection' | 'decks' | 'wants' | 'games' | 'proxy';
   key: string;
   spec: EnvelopeSpec<T>;
   empty: T;
@@ -153,13 +174,16 @@ function parseSyncBase(raw: string | null): SyncBase | null {
   try {
     const data: unknown = JSON.parse(raw);
     if (typeof data !== 'object' || data === null || !('v' in data) || (data.v !== 1 && data.v !== 2)) return null;
-    const { rev, decks, collection, wants } = data as Record<string, unknown>;
+    const { rev, decks, collection, wants, games } = data as Record<string, unknown>;
     if (typeof rev !== 'number' || !Number.isSafeInteger(rev) || rev < 0 || !Array.isArray(decks)) return null;
     const parsedCollection = parseCollection(data.v === 1 ? migrateCollectionV2ToV3(collection) : collection);
     if (parsedCollection === null || parsedCollection.dropped > 0) return null;
     // A base saved before the want list existed has no wants: that is an empty list, not a lost base (D-018).
     const parsedWants = wants === undefined ? { value: EMPTY_COLLECTION, dropped: 0 } : parseCollection(wants);
     if (parsedWants === null || parsedWants.dropped > 0) return null;
+    // Likewise a base saved before the game results existed (T-122).
+    const parsedGames = games === undefined ? { value: EMPTY_GAME_LOG, dropped: 0 } : parseGameLog(games);
+    if (parsedGames === null || parsedGames.dropped > 0) return null;
     const rows: { id: DeckId; updatedAt: string }[] = [];
     for (const row of decks as unknown[]) {
       if (typeof row !== 'object' || row === null) return null;
@@ -167,7 +191,7 @@ function parseSyncBase(raw: string | null): SyncBase | null {
       if (!isDeckId(id) || typeof updatedAt !== 'string') return null;
       rows.push({ id, updatedAt });
     }
-    return { rev, decks: rows, collection: parsedCollection.value, wants: parsedWants.value };
+    return { rev, decks: rows, collection: parsedCollection.value, wants: parsedWants.value, games: parsedGames.value };
   } catch {
     return null;
   }
@@ -183,6 +207,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const collectionKey = prefix === null ? COLLECTION_KEY : `${prefix}collection`;
   const decksKey = prefix === null ? DECKS_KEY : `${prefix}decks`;
   const wantsKey = prefix === null ? WANTS_KEY : `${prefix}wants`;
+  const gamesKey = prefix === null ? GAMES_KEY : `${prefix}games`;
   const proxyKey = prefix === null ? PROXY_KEY : `${prefix}proxy`;
   // The own binder holds the account's cards and a free-text name, so it follows the account like the proxy queue (T-120).
   const binderLayoutKey = prefix === null ? BINDER_LAYOUT_KEY : `${prefix}binder-layout`;
@@ -209,6 +234,14 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     spec: specWith(WANTS_SCHEMA_VERSION, WANTS_MIGRATIONS, options.migrations?.wants, parseCollection),
     empty: EMPTY_COLLECTION,
     toData: (wants) => ({ entries: wants.entries }),
+  };
+
+  const gamesAggregate: Aggregate<GameLog> = {
+    name: 'games',
+    key: gamesKey,
+    spec: specWith(GAMES_SCHEMA_VERSION, GAMES_MIGRATIONS, options.migrations?.games, parseGameLog),
+    empty: EMPTY_GAME_LOG,
+    toData: (log) => ({ games: log.games }),
   };
 
   const proxyAggregate: Aggregate<Collection> = {
@@ -405,6 +438,59 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const wants = collectionRepository(wantsAggregate, wantsKey);
   const proxy = collectionRepository(proxyAggregate, proxyKey);
 
+  /** Builds a row from the caller's fields only and validates it like a stored one. */
+  function validGame(id: string, createdAt: string, input: GameInput): GameRecord {
+    const game = parseGameRecord({
+      id,
+      deckId: input.deckId,
+      playedOn: input.playedOn,
+      createdAt,
+      result: input.result,
+      opponentName: input.opponentName,
+      opponentLegends: input.opponentLegends,
+      turn: input.turn,
+      event: input.event,
+      sideboard: input.sideboard,
+      note: input.note,
+    });
+    if (game === null) throw new StorageError('invalid-input', 'The game is not valid');
+    return game;
+  }
+
+  /** The size limits of the whole log, checked before anything is written (SR-45). */
+  function checkedLog(log: GameLog): GameLog {
+    if (!gameLogFits(log)) throw new StorageError('limit-reached', 'The game log is full');
+    return log;
+  }
+
+  const games: GameLogRepository = {
+    load: async () => load(gamesAggregate),
+    add: async (input: GameInput) =>
+      mutate(gamesAggregate, (current, at) => {
+        if (current.games.length >= MAX_GAMES) throw new StorageError('limit-reached', 'The game log is full');
+        const id = newId();
+        if (current.games.some((game) => game.id === id)) {
+          throw new StorageError('unavailable', 'Could not create a unique game id');
+        }
+        const game = validGame(id, at.toISOString(), input);
+        return { next: checkedLog(withGame(current, game)), result: game };
+      }),
+    update: async (id: string, input: GameInput) =>
+      mutate(gamesAggregate, (current) => {
+        const existing = current.games.find((game) => game.id === id);
+        if (existing === undefined) throw new StorageError('not-found', 'Game not found');
+        const game = validGame(existing.id, existing.createdAt, input);
+        return { next: checkedLog(withGame(current, game)), result: game };
+      }),
+    remove: async (id: string) => {
+      mutate(gamesAggregate, (current) => {
+        const next = current.games.filter((game) => game.id !== id);
+        return { next: next.length === current.games.length ? current : { games: next }, result: undefined };
+      });
+    },
+    subscribe: (listener) => subscribe(gamesKey, listener),
+  };
+
   const decks: DeckRepository = {
     list: async () => load(decksAggregate),
     get: async (id: DeckId) => {
@@ -459,10 +545,21 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       });
     },
     remove: async (id: DeckId) => {
+      const removed = { value: false };
       mutate(decksAggregate, (current) => {
         const next = current.filter((deck) => deck.id !== id);
-        return { next: next.length === current.length ? current : next, result: undefined };
+        if (next.length === current.length) return { next: current, result: undefined };
+        removed.value = true;
+        return { next, result: undefined };
       });
+      if (!removed.value) return;
+      // Only the deleted deck's games go with it (T-122, SR-48, SEC-122-3): the games of a deck this device cannot
+      // see (e.g. an invalid cloud deck) stay. Failing here leaves them in the log, where nothing shows them.
+      try {
+        mutate(gamesAggregate, (current) => ({ next: withoutDeck(current, id), result: undefined }));
+      } catch {
+        // See above.
+      }
     },
     subscribe: (listener) => subscribe(decksKey, listener),
   };
@@ -650,7 +747,8 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     saveDeletePending: (pending: boolean) => writeHint(ACCOUNT_DELETE_PENDING_KEY, pending ? '1' : null),
   };
 
-  const serialize = (data: LocalData) => JSON.stringify([data.decks, data.collection.entries, data.wants.entries]);
+  const serialize = (data: LocalData) =>
+    JSON.stringify([data.decks, data.collection.entries, data.wants.entries, data.games.games]);
 
   function readLocal(): LocalData | null {
     const decksDecoded = decodeEnvelope(readRaw(decksKey), decksAggregate.spec);
@@ -659,10 +757,13 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     if (collectionDecoded.kind === 'newer' || collectionDecoded.kind === 'corrupt') return null;
     const wantsDecoded = decodeEnvelope(readRaw(wantsKey), wantsAggregate.spec);
     if (wantsDecoded.kind === 'newer' || wantsDecoded.kind === 'corrupt') return null;
+    const gamesDecoded = decodeEnvelope(readRaw(gamesKey), gamesAggregate.spec);
+    if (gamesDecoded.kind === 'newer' || gamesDecoded.kind === 'corrupt') return null;
     return {
       decks: decksDecoded.kind === 'ok' ? decksDecoded.value : [],
       collection: collectionDecoded.kind === 'ok' ? collectionDecoded.value : EMPTY_COLLECTION,
       wants: wantsDecoded.kind === 'ok' ? wantsDecoded.value : EMPTY_COLLECTION,
+      games: gamesDecoded.kind === 'ok' ? gamesDecoded.value : EMPTY_GAME_LOG,
     };
   }
 
@@ -681,6 +782,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       mutate(decksAggregate, () => ({ next: [...next.decks], result: undefined }));
       mutate(collectionAggregate, () => ({ next: next.collection, result: undefined }));
       mutate(wantsAggregate, () => ({ next: next.wants, result: undefined }));
+      mutate(gamesAggregate, (current) => ({ next: sameGameLog(current, next.games) ? current : next.games, result: undefined }));
       callAll(uiListeners);
       return true;
     },
@@ -696,7 +798,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     backupAll() {
       const at = now();
-      for (const aggregate of [decksAggregate, collectionAggregate, wantsAggregate]) {
+      for (const aggregate of [decksAggregate, collectionAggregate, wantsAggregate, gamesAggregate]) {
         const raw = readRaw(aggregate.key);
         if (raw !== null) backup(aggregate, raw, at);
       }
@@ -706,6 +808,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         store.removeItem(decksKey);
         store.removeItem(collectionKey);
         store.removeItem(wantsKey);
+        store.removeItem(gamesKey);
       } catch (error) {
         throw toStorageError(error, 'write');
       }
@@ -725,7 +828,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     onChange(listener) {
       changeListeners.add(listener);
-      const unsubscribe = subscribeTo ? subscribeTo([decksKey, collectionKey, wantsKey], listener) : () => {};
+      const unsubscribe = subscribeTo ? subscribeTo([decksKey, collectionKey, wantsKey, gamesKey], listener) : () => {};
       return () => {
         changeListeners.delete(listener);
         unsubscribe();
@@ -737,6 +840,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     collection,
     wants,
     proxy,
+    games,
     decks,
     preferences,
     persistent: options.persistent,

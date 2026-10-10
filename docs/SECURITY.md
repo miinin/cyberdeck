@@ -196,6 +196,7 @@ Huomiot:
 | R-21 | Julkiset pakat (T-098): kuka tahansa voi kirjautumatta listata `publicDecks`-kokoelmaa silmukassa ja kuluttaa Sparkin päivittäisen lukukiintiön, jolloin kaikkien synkronointi katkeaa päiväksi. Lisäksi roskapostitus usealla Google-tilillä (SEC-098-4) | Medium | PM / käyttäjä | Avoin. Torjunta SR-33 ja SR-34. Jäännös käyttäjän päätettäväksi (K-P11). App Check, jos väärinkäyttöä havaitaan. |
 | R-22 | Orvot julkiset pakat: julkinen kopio jää, jos pakka poistetaan offline-tilassa tai sovellus kaatuu poistojen välissä (SEC-098-6) | Low | Koodari / PM | Avoin. Torjunta SR-35 ja SR-36, jäännös SR-42 (poisto konsolista pyynnöstä). |
 | R-23 | Asiaton sisältö, toisen henkilötiedot tai esiintyminen toisena nimimerkillä julkisissa pakoissa ilman moderointia (SEC-098-5) | Low | PM / käyttäjä | Avoin. Torjunta SR-38 ja SR-42. Ilmiantotoiminto K-P10. |
+| R-24 | Tulosloki (T-122) on yksi enintään 900 kt:n dokumentti, joka luetaan jokaisessa fullSyncissä ja kirjoitetaan kokonaan jokaisen kirjauksen jälkeen. Suuri loki kuluttaa Sparkin luku- ja kirjoituskaistaa enemmän kuin muut dokumentit. | Low (saatavuus) | Koodari / PM | Avoin. Torjunta: kokorajat (SR-43, SR-45) ja synkan nykyiset viiveet. Arvioidaan uudelleen, jos lokit kasvavat lähelle rajaa. |
 
 ## 10. Hyväksytyt riskit
 
@@ -360,6 +361,9 @@ Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-
 | 2026-10-02 | Katselmointi `reports/SEC-010-t015-vienti-tuonti.md`: SR-18 ja SR-19 täyttyvät (kokoraja ennen lukemista, JSON.parse ilman reviveriä, format/version, `__proto__`-testi, uusi id, tiedostonimen suodatus, .txt-injektio estetty, Blob + revoke). CSP ei muuttunut. R-13 suljettu, SEC-021 varmistettu. Löydökset SEC-026 (Low) ja SEC-027 (Info). | T-015 |
 | 2026-10-03 | Uhkamalli `reports/SEC-011-t054-uhkamalli.md` (T-054, D-016, D-017): luku 17, turvavaatimukset SR-21–SR-29, sääntöluonnos liitteenä, riskit R-18–R-20, R-14 päivitetty. Löydökset SEC-028 ja SEC-030 (Medium), SEC-029, SEC-031, SEC-032 (Low), SEC-033, SEC-034 (Info). | T-054 |
 | 2026-10-03 | Katselmointi `reports/SEC-012-t054a0-testiprojekti.md`: testisivusto projektiin `cyberdeck-tcg-dev`, tuotannon salaisuus pois PR- ja test-workflowista, oikeudet ja `persist-credentials: false` ennallaan, palvelutilin roolit (Hosting Admin + API Keys Viewer) vahvistettu. R-4 laskettu Low:ksi. R-18 poistuu, kun uusi testisivusto toimii. Löydökset SEC-035 (Low), SEC-036 ja SEC-037 (Info). | T-054a0 |
+| 2026-10-10 | Uhkamalli T-122 (tulosseuranta, D-030): luku 19, turvavaatimukset SR-43–SR-49 tehtäväkortissa, riski R-24. PRIVACY.md luku 13. | T-122 |
+| 2026-10-10 | Katselmointi T-122 (kortin luku "Digiturva · Katselmointi"): SR-43–SR-49 täyttyvät, ja säännöt ovat valmiit vietäviksi deviin. Löydökset SEC-122-1 (Medium: virheellinen pilviloki ylikirjoittuu seuraavassa pushissa, sama malli kuin kokoelmassa), SEC-122-2 ja SEC-122-3 (Low) sekä SEC-122-4–6 (Info: deploy-järjestys koskee myös lukua ja tilin poistoa, kiintiö, staattinen sääntötesti). Ei vetoa. | T-122 |
+| 2026-10-10 | Varmistus T-122: SEC-122-1, SEC-122-2 ja SEC-122-3 korjattu (267aa66) ja varmistettu. Uusi SEC-122-7 (Low): virheellisen pilven aikana lisätty rivi katoaa, kun pilvi taas kelpaa (pohjaan tallentuu yhdistetty arvo). Ei vetoa. | T-122 |
 
 ## 14. T-026: korttidata buildissa (D-013)
 
@@ -412,3 +416,24 @@ Korvaa luvun 12 ennakoidut vaatimukset MVP2-2, MVP2-3, MVP2-5–MVP2-9 kirjautum
 - **STRIDE:** raportin taulukko (S1–S2, T1–T4, R1, I1–I4, D1–D4, E1–E3).
 - **Turvavaatimukset (ehdotus, PM hyväksyy):** SR-30 omistajuus uid-sidotulla tiivisteellä ilman julkista uid:tä, SR-31 kenttärajat, SR-32 sisältö = jakolinkki, SR-33 listaus ja kiintiöt, SR-34 kirjoitustahti, SR-35 yksityiseksi ja poisto, SR-36 tilin poisto, SR-37 renderöinti, SR-38 julkaisun käyttöliittymä, SR-39 Tallenna omaksi, SR-40 sääntöjen rajaus ja deploy, SR-41 noindex, SR-42 ylläpitäjän poistoreitti.
 - **Riskit:** uudet R-21, R-22, R-23. Käyttäjän päätökset K-P9–K-P12.
+
+## 19. T-122: pakan tulosseuranta (D-030)
+- **Järjestelmän muutos:** uusi aggregaatti `GameLog` tallennetaan paikallisesti (`cyberdeck:games`, `cyberdeck:u:{uid}:games`) ja Firestoreen polkuun `users/{uid}/games/log`. Synkka toimii samalla mallilla kuin want-listassa (D-018). Aggregaatissa on ensimmäistä kertaa vapaata tekstiä **kolmannesta henkilöstä** (vastustajan nimi) sekä vapaa muistiinpano (enintään 500 merkkiä).
+- **Luottamusrajat:** samat kuin luvussa 17. Pilvi, varmuuskopio ja toinen välilehti ovat epäluotettavia lähteitä (SR-23). Uusia ulkoisia palveluita, riippuvuuksia, CSP-muutoksia tai julkisia polkuja ei tule.
+- **STRIDE:**
+
+| | Uhka | Todennäköisyys / vaikutus | Torjunta |
+|---|---|---|---|
+| **S** | Toinen käyttäjä lukee tai kirjoittaa toisen käyttäjän tulosdokumenttia | Pieni / Keskisuuri | `isOwner` ja vain `docId == 'log'` (SR-43) |
+| **T** | Muokattu tai rikkinäinen dokumentti (ylimääräiset kentät, toistuvat tunnisteet, `__proto__`, ylipitkät rivit) | Keskisuuri / Pieni | Säännöt toimivat kattona (SR-43), ja asiakas validoi kaiken luetun (SR-44). Virheellinen dokumentti ei tarkoita poistoa. |
+| **T** | Vanhat säännöt hylkäävät uuden dokumentin, jolloin koko synkan batch kaatuu | Keskisuuri / Keskisuuri | Deploy-järjestys (SR-43) |
+| **R** | Kuka kirjasi pelin? | Pieni / Pieni | Ei tarvita, koska vain omistaja kirjoittaa omaa dataansa. |
+| **I** | Tulokset ja vastustajien nimet vuotavat julkiseen pakkaan, jakolinkkiin, vientiin tai konsoliin | Pieni / Keskisuuri | SR-47 |
+| **I** | Vastustajan nimessä tai muistiinpanossa on kolmannen henkilön (mahdollisesti alaikäisen) henkilötietoja | Keskisuuri / Pieni | Minimointi ja vihje (SR-49), poisto (SR-48), K-P13 |
+| **I** | Tulokset jäävät jaetulle koneelle uloskirjautumisen jälkeen | Keskisuuri / Pieni | SR-26, SR-48, R-20 |
+| **D** | Dokumentti ylittää 1 MiB:n rajan, tai iso loki kuluttaa kiintiötä | Pieni / Keskisuuri | 1 000 riviä ja 900 000 tavua (SR-45), R-24 |
+| **E** | Vapaa teksti renderöidään HTML:nä (XSS), tai suuntamerkit harhauttavat käyttäjää | Pieni / Suuri | SR-46 ja ohjausmerkkien poisto (SR-44) |
+
+- **Turvavaatimukset (ehdotus, PM hyväksyy):** SR-43 Firestore-säännöt ja deploy-järjestys, SR-44 luetun datan validointi, SR-45 kirjoituksen rajat, SR-46 vapaan tekstin näyttäminen, SR-47 ei vuotoa, SR-48 elinkaari ja poisto, SR-49 tietosuoja ja minimointi. Vaatimukset on kirjattu kokonaisuudessaan tiedostoon `tasks/T-122-tulosseuranta.md`.
+- **Riskit:** uusi R-24. Tietosuojakysymys K-P13 (PRIVACY.md luku 13).
+- **Katselmointi 2026-10-10:** SR-43–SR-49 täyttyvät. SEC-122-1 (Medium), SEC-122-2 ja SEC-122-3 (Low) on korjattu ja varmistettu. Avoimina ovat SEC-122-7 (Low) sekä SEC-122-4–6 (Info), ja ne on kirjattu tehtäväkorttiin. **Deploy:** säännöt deviin ennen testiin yhdistämistä ja tuotantoon ennen julkaisua, koska vanhoilla säännöillä myös `readAll` ja `deleteAll` epäonnistuvat (SEC-122-4).

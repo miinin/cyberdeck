@@ -110,6 +110,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 | 2026-10-06 | Katselmointi SEC-102: proxy-tulostusjono lisätty inventaarioon (rivi 1c). Jono on paikallinen, sitä ei synkronoida, eikä se ole henkilötieto. | T-102 |
 | 2026-10-08 | Luku 12: korttien skannaus kameralla (D-027). Kuva käsitellään vain laitteella, ei tallenneta eikä lähetetä. Permissions-Policy sallii kameran omalle originille. | T-106 |
 | 2026-10-09 | Katselmointi T-120: oma kansio lisätty inventaarioon (rivi 1d). Asettelu tallennetaan tilikohtaiseen avaimeen kuten proxy-jono (korjattu katselmoinnissa). | T-120 |
+| 2026-10-10 | Luku 13: pakan tulosseuranta (T-122). Uudet rivit 1e ja 13c, säilytys ja poisto sekä avoin kysymys K-P13 kolmansien henkilöiden tiedoista. Ei evästeitä eikä kolmansia osapuolia. | T-122 |
 
 ## 10. MVP-2: kirjautuminen ja pilvitallennus (T-054, LUONNOS)
 
@@ -225,3 +226,16 @@ Tietosuojaselosteeseen lisätään kappale julkisista pakoista: mitä näkyy, ke
 - **Kuva:** kameran kuvasta kopioidaan kortin kehyksen alue muistissa olevalle canvasille, ja siitä lasketaan pieni tiiviste. Kuvaa ei tallenneta (ei localStorageen eikä muualle), eikä sitä lähetetä minnekään. Tunnistus tapahtuu kokonaan laitteella eikä käytä ulkoisia palveluita.
 - **Tallennettava tieto:** vain kokoelmaan lisätty kortti, kuten muussakin lisäyksessä. Uusia tallennusavaimia tai henkilötietoja ei synny.
 - **Tekninen rajaus:** `Permissions-Policy` sallii kameran vain omalle originille (`camera=(self)`), muut ominaisuudet pysyvät estettyinä.
+
+## 13. Pakan tulosseuranta (T-122, D-030, LUONNOS)
+- **Tietoinventaario (lisäys lukuihin 2 ja 10.2):**
+
+| # | Tieto | Missä | Henkilötieto? | Minimointi |
+|---|---|---|---|---|
+| 1e | Pelitulokset: pakan id, päivä, luontiaika, tulos, aloittaja, sideboard, vastustajan Legendit sekä vapaat tekstit vastustajan nimi (enintään 60 merkkiä), tapahtuma (enintään 60) ja muistiinpano (enintään 500) | localStorage `cyberdeck:games`, varmuuskopiot `cyberdeck:backup:games:<aika>` (enintään 3) | **Mahdollisesti, myös kolmannen henkilön:** vastustajan nimi ja muistiinpano voivat yksilöidä toisen ihmisen | Kaikki kentät paitsi tulos ovat valinnaisia. Vihje "Käytä lempinimeä tai pakan kuvausta" (SR-49). Ei vastustajan tunnisteita, yhteystietoja eikä kuvia. |
+| 13c | Pelitulokset pilvessä (kuten 1e) | Firestore `…/{uid}/games/log` (sama tietokanta ja alue kuin muulla tilin datalla, luku 10.3) ja tilin kopio `cyberdeck:u:{uid}:games` sekä synkan pohja | Kuten 1e, ja tieto liittyy uid:hen | Ei koskaan julkiseen pakkaan, jakolinkkiin, vaihtolinkkiin eikä vientiin (SR-47). |
+
+- **Säilytys ja poisto:** tulokset säilyvät, kunnes käyttäjä poistaa pelin tai pakan (pakan poisto poistaa myös sen tulokset). "Poista tilin tiedot" poistaa `games/log`-dokumentin pilvestä, ja paikallinen tilin poisto poistaa tilin kopion (SR-26, SR-48). Kirjautumattoman käyttäjän tulokset poistuvat sovelluksen poistotoiminnoilla tai selaimen asetuksesta.
+- **Evästeet ja kolmannet osapuolet:** ei muutoksia.
+- **Seloste ja kirjautumisdialogi:** mainitaan, että myös pelitulokset ja niihin kirjatut vastustajien nimet ja muistiinpanot tallennetaan tilille (SR-29).
+- **K-P13 (käyttäjälle PM:n kautta, ei oikeudellinen kannanotto):** käyttäjät voivat kirjata pilveen kolmansien henkilöiden nimiä, joista osa voi olla alaikäisiä, sekä vapaata tekstiä, johon voi päätyä mitä tahansa, myös erityisiin henkilötietoryhmiin kuuluvaa tietoa. Riittääkö minimointi (valinnaiset kentät, lempinimivihje, ei vientiä eikä julkaisua) ja maininta selosteessa? Kuka on rekisterinpitäjä tälle pilveen tallennetulle tiedolle (vrt. kotitalouspoikkeus ja palvelun ylläpitäjän rooli)? **Käyttäjän vastaus 2026-10-10:** minimointi ja maininta selosteessa riittävät. Rekisterinpitäjäkysymys ratkaistaan yhdessä K-P1:n kanssa ennen kuin käyttäjiä kutsutaan.

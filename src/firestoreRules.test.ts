@@ -37,20 +37,21 @@ describe('firestore.rules', () => {
       '/users/{uid}',
       '/decks/{deckId}',
       '/collection/{docId}',
+      '/games/{docId}',
       '/publicDecks/{pubId}',
     ]);
   });
 
   it('requires a Google-signed-in owner in every allow rule under users', () => {
     const allows = [...code.matchAll(/allow\s+[^:]+:\s*if\s+([^;]+);/g)].map((m) => m[1] ?? '');
-    expect(allows).toHaveLength(10);
+    expect(allows).toHaveLength(13);
     for (const condition of allows) expect(condition.trimStart()).toMatch(/^isOwner\(uid\)/);
     expect(fullCode).toContain("request.auth.token.firebase.sign_in_provider == 'google.com'");
     expect(code).toContain('request.auth.uid == uid');
   });
 
   it('allows exactly the collection documents main and want, in get, write and delete (D-018)', () => {
-    const block = code.slice(code.indexOf('match /collection/{docId}'));
+    const block = code.slice(code.indexOf('match /collection/{docId}'), code.indexOf('match /games/{docId}'));
     expect(block).toContain("allow get: if isOwner(uid) && docId in ['main', 'want'];");
     expect(block).toMatch(
       /allow create, update: if isOwner\(uid\)\s+&& docId in \['main', 'want'\]\s+&& isCollectionDoc\(request\.resource\.data\);/,
@@ -62,7 +63,28 @@ describe('firestore.rules', () => {
       "['main', 'want']",
       "['main', 'want']",
     ]);
-    expect(code).not.toMatch(/docId\s*==/);
+    expect(block.slice(0, block.indexOf('match /games/{docId}'))).not.toMatch(/docId\s*==/);
+  });
+
+  it('allows exactly the games/log document for the owner, with a bounded list (T-122, SR-43)', () => {
+    const block = code.slice(code.indexOf('match /games/{docId}'));
+    expect(block).toContain("allow get: if isOwner(uid) && docId == 'log';");
+    expect(block).toMatch(
+      /allow create, update: if isOwner\(uid\)\s+&& docId == 'log'\s+&& isGamesDoc\(request\.resource\.data\);/,
+    );
+    expect(block).toContain("allow delete: if isOwner(uid) && docId == 'log';");
+    // No list rule and no other document id.
+    expect(block).not.toMatch(/allow\s+(list|read|write)\b/);
+    expect([...block.matchAll(/docId\s*(==|in)\s*([^;&)]+)/g)].map((m) => (m[2] ?? '').trim())).toEqual([
+      "'log'",
+      "'log'",
+      "'log'",
+    ]);
+    const fn = code.slice(code.indexOf('function isGamesDoc'), code.indexOf('match /users/{uid}'));
+    expect(fn).toContain('isEnvelope(d)');
+    expect(fn).toContain("hasExactly(d.data, ['games'])");
+    expect(fn).toContain('d.data.games is list');
+    expect(fn).toContain('d.data.games.size() <= 1000');
   });
 
   it('lets deck documents carry only the optional visibility and nickname fields (SR-35)', () => {
