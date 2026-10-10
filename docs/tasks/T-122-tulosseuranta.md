@@ -110,7 +110,63 @@ Tulokset ovat **oma aggregaattinsa, yksi dokumentti**, samalla mallilla kuin wan
 - [ ] `npm test`, `npm run lint`, `npm run build` läpi.
 
 ## Digiturvan vaatimukset
-_(lisätään uhkamallin jälkeen)_
+Digiturva 2026-10-10. Nämä ovat ehdotuksia hyväksymiskriteereiksi, ja PM hyväksyy ne. Uhkamalli on SECURITY.md:n luvussa 19 ja tietosuoja PRIVACY.md:n luvussa 13. Olemassa olevat SR-11, SR-22, SR-23, SR-26 ja SR-27 koskevat myös tuloksia.
+
+**SR-43 · Firestore-säännöt `users/{uid}/games/log`**
+Lisää `firestore.rules`iin seuraava täsmälleen tässä muodossa, ja lisää polku myös tiedoston alun datamallikommenttiin:
+```
+// users/{uid}/games/log      { schemaVersion, savedAt, data: { games } }: the game results (T-122, D-030)
+function isGamesDoc(d) {
+  return isEnvelope(d)
+    && hasExactly(d.data, ['games'])
+    && d.data.games is list
+    && d.data.games.size() <= 1000;
+}
+// (inside match /users/{uid})
+match /games/{docId} {
+  allow get: if isOwner(uid) && docId == 'log';
+  allow create, update: if isOwner(uid)
+    && docId == 'log'
+    && isGamesDoc(request.resource.data);
+  allow delete: if isOwner(uid) && docId == 'log';
+}
+```
+- [ ] `src/firestoreRules.test.ts` todentaa, että omistaja voi lukea, luoda, päivittää ja poistaa `games/log`-dokumentin. Kaikki seuraavat kielletään: toinen uid, kirjautumaton käyttäjä, muu kuin Google-kirjautuminen, `games/other`, `list`-kysely kokoelmaan `games`, ylimääräinen avain kääreessä tai `data`ssa, `games` muuna kuin listana, 1 001 riviä ja virheellinen `schemaVersion`.
+- [ ] Deploy-järjestys: vanhat säännöt hylkäävät `games/log`-kirjoituksen, jolloin koko batch kaatuu ja myös pakkojen synkka pysähtyy. Siksi säännöt viedään deviin ennen yhdistämistä testiin ja tuotantoon ennen kuin sovelluskoodi julkaistaan (D-029). Kirjaa deploy luovutukseen.
+
+**SR-44 · Luetun datan validointi (`parseGameLog`, SR-23)**
+- [ ] Sama jäsennin käsittelee localStoragen, varmuuskopion, synkan pohjan ja pilven datan. Oliot rakennetaan kenttä kerrallaan, eikä luettua oliota levitetä (`...`). Testi: rivi, jossa on avain `__proto__`, `constructor` tai jokin tuntematon kenttä, hylätään, eikä `Object.prototype` muutu.
+- [ ] `id` ja `deckId` täyttävät ehdon `^[A-Za-z0-9_-]{1,64}$`. `playedOn` on muotoa `^\d{4}-\d{2}-\d{2}$` ja on todellinen kalenteripäivä. `createdAt` on merkkijono, jonka pituus on 1–40 ja jonka voi jäsentää päiväksi. `result` ja `turn` ovat sallitusta joukosta. `sideboard` on boolean. `opponentLegends` on lista, jossa on 0–3 eri merkkijonoa, ja jokainen on kortin avaimen muotoinen ja enintään 64 merkkiä.
+- [ ] Tekstikentistä poistetaan ohjausmerkit C0 ja C1 (U+0000–U+001F ja U+007F–U+009F) sekä suunta- ja näkymättömät merkit (U+200E, U+200F, U+061C, U+202A–U+202E, U+2066–U+2069, U+2028, U+2029, U+FEFF) käyttäen olemassa olevaa `UNSAFE_CHARACTERS`-lauseketta (`src/domain/validate.ts`, R-15). Sen jälkeen teksti trimmataan, ja pituusraja tarkistetaan vasta siivouksen jälkeen. Tyhjä teksti muuttuu arvoksi `null`. Testi: RLO-merkki ja rivinvaihto vastustajan nimessä.
+- [ ] Saman `id`:n toistuessa säilytetään ensimmäinen rivi ja muut hylätään (testi). Muuten `mergeGames` ja poistojen tunnistus voisivat käyttäytyä väärin.
+- [ ] Virheellinen pilvidokumentti tai yli 1 000 riviä ei ole poisto, eikä sitä ylikirjoiteta automaattisesti (`null`, SR-23 kohta 3). Virheellinen paikallinen data varmuuskopioidaan ennen korjausta (SR-11).
+
+**SR-45 · Kirjoituksen rajat**
+- [ ] Lomakkeen tallennus ja synkan push käyttävät samaa validointia kuin luku. Kentän `maxLength` on vain käyttöliittymän apu, eikä tarkistus luota siihen.
+- [ ] `MAX_GAMES = 1000` ja 900 000 tavun raja (UTF-8, `TextEncoder`) tarkistetaan domainissa ennen tallennusta ja synkassa ennen pushia. Ylitys estää lisäyksen (`logFull`) tai johtaa synkassa tilaan `Stop('error')`. Osittaista kirjoitusta ei tehdä (testi: 999 riviä, joissa on 500 merkin muistiinpano, ja tavuraja).
+- [ ] `games/log` kirjoitetaan samassa batchissa kuin meta (`rev` +1), ja batchin operaatiolaskuri sisältää sen (`cloudCodec`).
+
+**SR-46 · Vapaan tekstin näyttäminen**
+- [ ] Vastustajan nimi, tapahtuma ja muistiinpano näytetään vain React-tekstinä tai propseina (`title`, `aria-label`, `<option value>`). `dangerouslySetInnerHTML`, `innerHTML`, linkitys, `href` ja markdown ovat kiellettyjä.
+- [ ] Ryhmittelyt (vastustajat, tapahtumat, värit, datalist) tehdään `Map`illa eikä tavallisen olion avaimilla. Testi: vastustajat nimeltä `__proto__`, `constructor` ja `toString` ryhmittyvät oikein.
+- [ ] Pitkä teksti ilman välilyöntejä rivittyy (`overflow-wrap: anywhere`), eikä se leviä 320 px:n näkymän yli.
+
+**SR-47 · Tulokset eivät vuoda**
+- [ ] Tuloksia ei ole julkisessa pakassa (`publicDecks`), pakan jakolinkissä, vaihtolinkissä (`#/vaihto`), .txt- tai .json-viennissä, proxytulosteessa eikä leikepöydälle kopioitavassa tekstissä. Testi: kun pakalla on tuloksia, julkisen kopion, jakolinkin ja viennin tuloste on täsmälleen sama kuin ilman tuloksia.
+- [ ] Tulosten sisältöä ei kirjoiteta konsoliin (SR-27). `no-console` koskee myös uutta domain- ja tallennuskoodia.
+
+**SR-48 · Elinkaari ja poisto (SR-26)**
+- [ ] Kirjautumattoman käyttäjän avain on `cyberdeck:games`, ja varmuuskopioita on enintään 3 (`cyberdeck:backup:games:<aika>`). Tilillä avain on `cyberdeck:u:{uid}:games`, ja tulokset ovat myös synkan pohjassa.
+- [ ] `backupAll` ja `clear()` (siirron jälkeen) käsittelevät myös tulokset. `eraseAccount` poistaa avaimen ja pohjan, koska se poistaa etuliitteen mukaan (testi).
+- [ ] `deleteAll` poistaa `games/log`-dokumentin. Onnistumisen tarkistus ja muistipilven testi kattavat myös sen.
+- [ ] Uloskirjautuneena tilin tulokset eivät näy (testi).
+- [ ] Siirto tilille säilyttää `deckId`-linkin, joten tulokset löytyvät siirretylle pakalle (testi).
+- [ ] Pakan poisto poistaa sen tulokset samassa tallennuksessa, ja orvot rivit siivotaan kortin mukaan.
+
+**SR-49 · Tietosuoja ja minimointi (PRIVACY.md luku 13)**
+- [ ] Tallennetaan vain kortin `GameRecord`-kentät. Vastustajan tilitunnistetta, yhteystietoja tai kuvaa ei tallenneta, eikä vastustajan nimeä käytetä mihinkään muuhun kuin oman lokin ryhmittelyyn ja ehdotuksiin.
+- [ ] Lomakkeessa on vastustajan ja muistiinpanon kohdalla lyhyt vihje. Ehdotus: fi "Käytä lempinimeä tai pakan kuvausta. Älä kirjaa muiden henkilötietoja." / en "Use a nickname or describe the deck. Don't record other people's personal details." Lisäksi ehdotan, että placeholder ei sisältäisi etunimeä: fi "Esim. sininen aggro", en "E.g. blue aggro". Sisällön muotoilu ja lopullinen päätös kuuluvat PM:lle.
+- [ ] Kirjautumisdialogin tai selosteen tietosuojateksti mainitsee, että myös pelitulokset tallennetaan tilille (SR-29).
 
 ## Rajaukset
 - Ei uusia riippuvuuksia. Ei kaavioita tuloksista (myöhemmin IDEAS). Ei matchup-tietoa julkisiin pakkoihin eikä vertailua muiden pelaajien tuloksiin.
