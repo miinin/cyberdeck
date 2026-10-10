@@ -129,3 +129,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-123 | Galleria-tila (pelkkä kuvitus, kelluva ohjauspalkki, katselin) ja "Muokkaa kokoelmaa" -kytkimen tilalle "Merkitse omat kortit" ja tilapalkki | 1 | Should | Koodari | Done | PM esikatselu ✓ |
 | T-125 | Kevyempi Kortit-sivun yläosa: järjestys ja Kaikki versiot suodatinpaneeliin, yksi kevyt työkalurivi, yksirivinen merkintäpalkki | 1 | Should | Koodari | Done | PM esikatselu |
 | T-126 | Kortit-sivu ei pompi: kuvakoko ja Kaikki versiot himmenevät listanäkymässä; "Merkitse omat korttisi", vihreä checkmark-ikoni | 1 | Should | PM | Done | PM |
+| T-127 | Kortit-sivun kevyt ja pieni ilme kaikille sivuille, tiiviimpi kelluva merkintäpalkki | 1 | Should | PM | Done | PM |
