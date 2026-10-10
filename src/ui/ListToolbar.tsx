@@ -1,4 +1,5 @@
 import type { CatalogViewMode, DefaultEdition } from '../storage';
+import { MarkOwnButton } from './MarkOwnBanner';
 import { SegmentedChoice } from './SegmentedChoice';
 import { texts } from './texts';
 
@@ -43,7 +44,16 @@ const EDITION_OPTIONS: readonly (readonly [DefaultEdition, string])[] = [
   ['retail', texts.editionRetail],
 ];
 
-/** One switch style for the whole app (T-115): the "Muokkaa kokoelmaa" look. */
+/** Four corners (expand) around a card: opens the gallery (T-123). */
+function GalleryIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+      <path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** One switch style for the whole app (T-115). */
 export function SwitchButton({ checked, label, onChange }: { checked: boolean; label: string; onChange: (next: boolean) => void }) {
   return (
     <button type="button" role="switch" aria-checked={checked} className="edit-switch" onClick={() => onChange(!checked)}>
@@ -56,8 +66,9 @@ export function SwitchButton({ checked, label, onChange }: { checked: boolean; l
 }
 
 /**
- * Above the list (T-040): the view selector and the "Muokkaa kokoelmaa" switch.
- * `editable` undefined leaves the switch out (the collection is not ready, so nothing can be edited).
+ * Above the list (T-040): the view selector, the gallery button (T-123) and the "Merkitse omat kortit" button.
+ * `editable` undefined leaves the button out (the collection is not ready, so nothing can be edited);
+ * while marking (`editable` true) the banner below the toolbar replaces it (T-123).
  * `imageSize` undefined leaves the image size selector out (T-050a: it only applies to the grid).
  */
 export function ListToolbar({
@@ -65,6 +76,8 @@ export function ListToolbar({
   onViewChange,
   editable,
   onEditChange,
+  collectionEmpty = false,
+  onGalleryOpen,
   hideEditSwitch = false,
   imageSize,
   onImageSizeChange,
@@ -77,6 +90,10 @@ export function ListToolbar({
   onViewChange: (next: CatalogViewMode) => void;
   editable: boolean | undefined;
   onEditChange: (next: boolean) => void;
+  /** The collection has no cards: the marking button gets a reminder beside it (T-123). */
+  collectionEmpty?: boolean;
+  /** Opens the gallery (T-123); undefined leaves the button out. */
+  onGalleryOpen?: () => void;
   /** The edit switch is left out and editing is always on (the Collection page's own cards, T-112). */
   hideEditSwitch?: boolean;
   imageSize?: ImageSize;
@@ -94,7 +111,13 @@ export function ListToolbar({
       {imageSize !== undefined && (
         <ImageSizeSelect name="image-size" value={imageSize} onChange={(next) => onImageSizeChange?.(next)} />
       )}
-      {editable === true && edition !== undefined && (
+      {onGalleryOpen !== undefined && (
+        <button type="button" id="gallery-open" className="button-secondary gallery-open" onClick={onGalleryOpen}>
+          <GalleryIcon />
+          {texts.galleryOpen}
+        </button>
+      )}
+      {editable === true && hideEditSwitch && edition !== undefined && (
         <SegmentedChoice
           className="edition-select"
           legend={texts.editionLegend}
@@ -109,9 +132,9 @@ export function ListToolbar({
           </p>
         </SegmentedChoice>
       )}
-      {((editable !== undefined && !hideEditSwitch) || allArts !== undefined) && (
+      {((editable === false && !hideEditSwitch) || allArts !== undefined) && (
         <div className="toolbar-switches">
-          {editable !== undefined && !hideEditSwitch && <SwitchButton checked={editable} label={texts.editSwitchLabel} onChange={onEditChange} />}
+          {editable === false && !hideEditSwitch && <MarkOwnButton onStart={() => onEditChange(true)} collectionEmpty={collectionEmpty} />}
           {allArts !== undefined && (
             <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={(next) => onAllArtsChange?.(next)} />
           )}

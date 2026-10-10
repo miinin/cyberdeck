@@ -37,10 +37,10 @@ async function renderCatalog(initial: Record<string, string>) {
   return repositories;
 }
 
-/** Turns on "Muokkaa kokoelmaa" (the button is a tool of editing mode), presses the button and confirms in the dialog. */
+/** Starts "Merkitse omat kortit" (the button is a tool of marking mode), presses the button and confirms in the dialog. */
 async function addFromList(user: ReturnType<typeof userEvent.setup>) {
-  const edit = await screen.findByRole('switch', { name: 'Muokkaa kokoelmaa' });
-  if (edit.getAttribute('aria-checked') !== 'true') await user.click(edit);
+  const start = screen.queryByRole('button', { name: 'Merkitse omat kortit' });
+  if (start !== null) await user.click(start);
   await user.click(await screen.findByRole('button', { name: 'Lisää puuttuvat wantiin' }));
   const dialog = await screen.findByRole('dialog', { name: /Lisätäänkö/ });
   await user.click(within(dialog).getByRole('button', { name: 'Lisää' }));
@@ -50,10 +50,10 @@ describe('Add missing to wants in the card list (T-066)', () => {
   it('is only offered while editing the collection, and asks first what will happen', async () => {
     const user = userEvent.setup();
     const repositories = await renderCatalog(storedCollection([['l1', 1], ['u0', 1]]));
-    const edit = await screen.findByRole('switch', { name: 'Muokkaa kokoelmaa' });
-    if (edit.getAttribute('aria-checked') === 'true') await user.click(edit);
+    const done = screen.queryByRole('button', { name: 'Valmis' });
+    if (done !== null) await user.click(done);
     expect(screen.queryByRole('button', { name: 'Lisää puuttuvat wantiin' })).toBeNull();
-    await user.click(edit);
+    await user.click(await screen.findByRole('button', { name: 'Merkitse omat kortit' }));
     await user.click(await screen.findByRole('button', { name: 'Lisää puuttuvat wantiin' }));
     const dialog = await screen.findByRole('dialog', { name: 'Lisätäänkö 3 korttia want-listalle?' });
     expect(dialog).toHaveTextContent('Lisätään want-listalle 3 korttia (yhteensä 8 kappaletta)');

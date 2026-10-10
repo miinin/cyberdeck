@@ -38,6 +38,7 @@ import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
 import type { CardSort } from '../domain/cardSort';
 import { CardTable } from './CardTable';
 import { ListToolbar } from './ListToolbar';
+import { MARK_DONE_ID, MARK_OPEN_ID, MarkOwnBanner } from './MarkOwnBanner';
 import type { ImageSize } from './ListToolbar';
 import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import { useCardHoverPreview } from './CardHoverPreview';
@@ -191,6 +192,7 @@ function CatalogBody({
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
   const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [editMode, setEditMode] = useState<boolean | null>(null);
+  const markFocusRef = useRef<string | null>(null);
   // The edition the + adds to (D-022); saved like the other view settings.
   const [editionState, setEdition] = useState<DefaultEdition>('beta');
   const edition = editionState;
@@ -252,9 +254,16 @@ function CatalogBody({
   };
   const handleEditChange = (next: boolean) => {
     userChose.current.edit = true;
+    // T-123: the button that was pressed disappears, so focus moves to its counterpart.
+    markFocusRef.current = next ? MARK_DONE_ID : MARK_OPEN_ID;
     setEditMode(next);
     savePreference(repositories.preferences.saveEditMode(next));
   };
+  useEffect(() => {
+    if (markFocusRef.current === null) return;
+    document.getElementById(markFocusRef.current)?.focus();
+    markFocusRef.current = null;
+  }, [editMode]);
 
   // The filter exists only while counts can be changed; a locked collection turns it off (UX.md 6.6).
   if (collectionChoice !== baseFilter && (collection.phase === 'locked' || collection.phase === 'unavailable')) {
@@ -769,6 +778,7 @@ function CatalogBody({
             onViewChange={handleViewChange}
             editable={collection.phase === 'ready' ? editable : undefined}
             onEditChange={handleEditChange}
+            collectionEmpty={collection.phase === 'ready' && allCards.every((card) => countIn(collection, card.key) === 0)}
             hideEditSwitch={locked}
             imageSize={view === 'grid' ? imageSize : undefined}
             onImageSizeChange={setImageSize}
@@ -777,6 +787,9 @@ function CatalogBody({
             edition={edition}
             onEditionChange={handleEditionChange}
           />
+          {!locked && collection.phase === 'ready' && editable && (
+            <MarkOwnBanner edition={edition} onEditionChange={handleEditionChange} onDone={() => handleEditChange(false)} />
+          )}
           <div className="sort-row">
             <SortSelect sort={sort} onChange={setSort} />
             {!locked && <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} preferences={repositories.preferences} />}

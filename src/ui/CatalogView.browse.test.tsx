@@ -33,43 +33,95 @@ async function renderView(repositories: Repositories) {
   await settle();
 }
 
-const editSwitch = () => screen.getByRole('switch', { name: 'Muokkaa kokoelmaa' });
+const markButton = () => screen.queryByRole('button', { name: 'Merkitse omat kortit' });
+const banner = () => screen.queryByRole('region', { name: 'Merkitset omia korttejasi.' });
+const done = () => screen.getByRole('button', { name: 'Valmis' });
 const stepButtons = () => screen.queryAllByRole('button', { name: /^(Vähennä|Lisää) yksi kappale/ });
 
-describe('CatalogView: edit switch (T-040)', () => {
-  it('is off by default when the collection has cards: counts show, buttons do not', async () => {
+describe('CatalogView: marking own cards (T-040, T-123)', () => {
+  it('is off by default when the collection has cards: counts show, buttons and banner do not', async () => {
     await renderView(withOwned([{ card: 'alpha', count: 2 }]));
-    expect(editSwitch()).toHaveAttribute('aria-checked', 'false');
+    expect(markButton()).toBeInTheDocument();
+    expect(banner()).toBeNull();
+    expect(screen.queryByRole('switch', { name: 'Muokkaa kokoelmaa' })).toBeNull();
     expect(stepButtons()).toHaveLength(0);
     expect(screen.getByText(/Kokoelmassa/, { selector: '.visually-hidden' })).toBeInTheDocument();
+    // No reminder for a collection that has cards.
+    expect(screen.queryByText('Kokoelmasi on tyhjä. Aloita merkitsemällä omat korttisi.')).toBeNull();
+  });
+
+  it('explains the button with its title and description', async () => {
+    await renderView(withOwned([{ card: 'alpha', count: 2 }]));
+    const hint = 'Näyttää jokaisen kortin alla + ja −, joilla kirjaat, montako kappaletta omistat.';
+    expect(markButton()).toHaveAttribute('title', hint);
+    expect(markButton()).toHaveAccessibleDescription(hint);
   });
 
   it('is on by default for an empty collection and stays on after the first card is added', async () => {
     const user = userEvent.setup();
     await renderView(createMemoryRepositories());
-    expect(editSwitch()).toHaveAttribute('aria-checked', 'true');
+    expect(banner()).toBeInTheDocument();
+    expect(markButton()).toBeNull();
     await user.click(screen.getAllByRole('button', { name: /^Lisää/ }).at(0) as HTMLElement);
     await settle();
-    expect(editSwitch()).toHaveAttribute('aria-checked', 'true');
+    expect(banner()).toBeInTheDocument();
     expect(stepButtons().length).toBeGreaterThan(0);
   });
 
-  it('shows the buttons when switched on and remembers the choice', async () => {
+  it('reminds an empty collection with the mode off', async () => {
+    const repositories = createMemoryRepositories();
+    await repositories.preferences.saveEditMode(false);
+    await renderView(repositories);
+    expect(markButton()).toBeInTheDocument();
+    expect(screen.getByText('Kokoelmasi on tyhjä. Aloita merkitsemällä omat korttisi.')).toBeInTheDocument();
+  });
+
+  it('shows the banner and the buttons when started, remembers the choice and leaves with Valmis', async () => {
     const user = userEvent.setup();
     const repositories = withOwned([{ card: 'alpha', count: 1 }]);
     await renderView(repositories);
-    await user.click(editSwitch());
-    expect(editSwitch()).toHaveAttribute('aria-checked', 'true');
+    await user.click(markButton() as HTMLElement);
+    expect(banner()).toBeInTheDocument();
+    expect(within(banner() as HTMLElement).getByText(/Kirjaa omistamasi määrä/)).toBeInTheDocument();
+    expect(markButton()).toBeNull();
     expect(stepButtons()).toHaveLength(4);
+    expect(done()).toHaveFocus();
     expect(await repositories.preferences.loadEditMode()).toBe(true);
+
+    await user.click(done());
+    expect(banner()).toBeNull();
+    expect(stepButtons()).toHaveLength(0);
+    expect(markButton()).toHaveFocus();
+    expect(await repositories.preferences.loadEditMode()).toBe(false);
+  });
+
+  it('keeps the edition choice in the banner and saves it', async () => {
+    const user = userEvent.setup();
+    const repositories = withOwned([{ card: 'alpha', count: 1 }]);
+    await renderView(repositories);
+    expect(screen.queryByRole('radio', { name: 'Retail' })).toBeNull();
+    await user.click(markButton() as HTMLElement);
+    const choice = within(banner() as HTMLElement).getByRole('radio', { name: 'Retail' });
+    await user.click(choice);
+    expect(choice).toBeChecked();
+    expect(await repositories.preferences.loadDefaultEdition()).toBe('retail');
   });
 
   it('uses the saved choice, also "off" for an empty collection', async () => {
     const repositories = createMemoryRepositories();
     await repositories.preferences.saveEditMode(false);
     await renderView(repositories);
-    expect(editSwitch()).toHaveAttribute('aria-checked', 'false');
+    expect(banner()).toBeNull();
+    expect(markButton()).toBeInTheDocument();
     expect(stepButtons()).toHaveLength(0);
+  });
+
+  it('uses the saved choice "on" for a collection with cards', async () => {
+    const repositories = withOwned([{ card: 'alpha', count: 1 }]);
+    await repositories.preferences.saveEditMode(true);
+    await renderView(repositories);
+    expect(banner()).toBeInTheDocument();
+    expect(stepButtons()).toHaveLength(4);
   });
 });
 
@@ -130,7 +182,7 @@ describe('CatalogView: view selector and table (T-040)', () => {
     expect(screen.getAllByRole('row')).toHaveLength(2);
     expect(screen.getByRole('table', { name: 'Hakua vastaavat kortit' })).toBeInTheDocument();
 
-    await user.click(editSwitch());
+    await user.click(markButton() as HTMLElement);
     expect(stepButtons()).toHaveLength(2);
     await user.click(screen.getByRole('button', { name: 'Beta' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
