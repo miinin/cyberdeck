@@ -1,6 +1,6 @@
 # T-121 · Pakka omilla korteilla
 
-**Tila:** Ready. **Päättäjä:** käyttäjä (2026-10-10: IDEAS "kokoelmatietoinen korvaus", vaihtoehto A), PM (määrittely).
+**Tila:** Review. **Päättäjä:** käyttäjä (2026-10-10: IDEAS "kokoelmatietoinen korvaus", vaihtoehto A), PM (määrittely).
 
 ## Tavoite
 T-075 näyttää pakan puuttuvalle kortille yhden omistetun korvaajan (`src/domain/substitutes.ts`, `MissingCards`). Nyt käyttäjä näkee, kuinka pelattava pakka on heti omilla korteilla, ja saa yhdellä painalluksella pakasta kopion, jossa puuttuvat kopiot on korvattu omilla korteilla.
@@ -26,3 +26,11 @@ T-075 näyttää pakan puuttuvalle kortille yhden omistetun korvaajan (`src/doma
 - Ei uusia riippuvuuksia, ei tietomalli-, tallennus- tai synkronointimuutoksia (pakka luodaan olemassa olevalla polulla). Ei Digiturvaa.
 
 ## Luovutus
+
+### Koodari (2026-10-10)
+- `findSubstitutes` kattaa rivin koko puuttuvan määrän (`Map<CardKey, Substitute[]>`, kentät `card/copies/owned`); playset-raja huomioi pakan kopiot ja jo otetut korvaajat. Uudet puhtaat funktiot `applySubstitutes` ja `playability` samassa `substitutes.ts`:ssä. Omat kopiot menevät pääpakalle ensin, sideboard saa loput; Legendit eivät kuulu lukuun eivätkä korvaukseen.
+- `MissingCards`: rivillä "Korvaajat: 2× A (omistat 3), 1× B (…)", pelattavuusluku ("Omilla korteilla 44 / 50 · korvaajilla 49 / 50") ja painike "Tee kopio omilla korteilla" (näkyy vain jos korvaus lisää pelattavuutta). Kopio luodaan `repository.create`:lla, nimi `copyDeckName(..., ' (omat kortit)')` (en: ' (my cards)'), avautuu editoriin (`onOpenDeck`, App ohjaa reitin). Julkaisematon, alkuperäinen ei muutu.
+- Testit: domain (usean kopion korvaus, playset-raja, ei tuplakäyttöä, apply, playability) ja `DeckEditor.ownCards.test.tsx` (kopio, alkuperäinen ennallaan, avautuu, ei nappia kun ei korvaajaa).
+- npm test 1607 läpi, lint ja build läpi. Ei visuaalista 320 px -tarkistusta selaimessa (käytetty olemassa olevia luokkia `hint`, `missing-add`, `button-secondary`).
+- Huom: RAM-rajat eivät oteta korvauksessa huomioon (kuten kortti määrittelee, vain kopiorajat).
+- Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (virhetoast kopion luontiin on yleinen, ei eriteltyä virhettä).

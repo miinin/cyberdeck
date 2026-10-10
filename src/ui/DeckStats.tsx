@@ -6,7 +6,7 @@ import type { MissingCard } from '../domain/deckExport';
 import { GroupOdds } from './GroupOdds';
 import { MissingCards } from './MissingCards';
 import type { CardKey } from '../domain/cardKey';
-import type { Substitute } from '../domain/substitutes';
+import type { Playability, Substitute } from '../domain/substitutes';
 import type { WantsHandle } from './MissingCards';
 import {
   COST_CURVE_LAST,
@@ -77,6 +77,8 @@ export function DeckStats({
   missingCards,
   wants,
   substitutes,
+  playability,
+  onCopyWithOwn,
   rng = Math.random,
 }: {
   deck: DeckContent;
@@ -94,7 +96,11 @@ export function DeckStats({
   /** The want list: adds an "add missing to wants" button to the missing list (T-061b). */
   wants?: WantsHandle;
   /** Owned stand-ins for the missing cards (T-075). */
-  substitutes?: ReadonlyMap<CardKey, Substitute>;
+  substitutes?: ReadonlyMap<CardKey, readonly Substitute[]>;
+  /** Playability of the main deck with the collection and with stand-ins (T-121). */
+  playability?: Playability;
+  /** Makes a copy of the deck with the stand-ins in place (T-121). */
+  onCopyWithOwn?: () => void;
   /** Random source of the test hand; tests pass a seeded one. */
   rng?: Rng;
 }) {
@@ -276,7 +282,7 @@ export function DeckStats({
       {(missingText !== '' || (missingCards?.length ?? 0) > 0) && (
         <div className="panel">
           {missingText !== '' && <p>{missingText}</p>}
-          <MissingCards rows={missingCards ?? []} deckName={deck.name} wants={wants} substitutes={substitutes} />
+          <MissingCards rows={missingCards ?? []} deckName={deck.name} wants={wants} substitutes={substitutes} playability={playability} onCopyWithOwn={onCopyWithOwn} />
         </div>
       )}
 

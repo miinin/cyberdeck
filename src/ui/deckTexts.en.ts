@@ -277,7 +277,12 @@ export const deckTextsEn: typeof deckTextsFi = {
   groupOddsCaption: 'Chance to see at least one or two cards of the group by each turn',
   groupOddsTurn: 'Turn',
   groupOddsAtLeast: (n: number) => `At least ${n}`,
-  substituteRow: (name: string, owned: number) => `Substitute: ${name} (you own ${owned})`,
+  substituteRow: (parts: readonly { name: string; copies: number; owned: number }[]) => `Substitutes: ${parts.map((p) => `${p.copies}× ${p.name} (you own ${p.owned})`).join(', ')}`,
+  playability: (own: number, total: number, withSubstitutes: number) =>
+    `With your cards ${own} / ${total}${withSubstitutes > own ? ` · with substitutes ${withSubstitutes} / ${total}` : ''}`,
+  copyWithOwnCards: 'Make a copy with my cards',
+  copyOwnSuffix: ' (my cards)',
+  copyOwnFailed: 'Could not create the copy.',
   oddsCaption: 'Chance to draw at least one copy',
   oddsCard: 'Card',
   oddsCopies: 'Qty',

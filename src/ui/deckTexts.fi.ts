@@ -290,7 +290,12 @@ export const deckTextsFi = {
   groupOddsCaption: 'Yhden tai kahden ryhmän kortin nostotodennäköisyys vuoroon mennessä',
   groupOddsTurn: 'Vuoro',
   groupOddsAtLeast: (n: number) => `Vähintään ${n}`,
-  substituteRow: (name: string, owned: number) => `Korvaaja: ${name} (omistat ${owned})`,
+  substituteRow: (parts: readonly { name: string; copies: number; owned: number }[]) => `Korvaajat: ${parts.map((p) => `${p.copies}× ${p.name} (omistat ${p.owned})`).join(', ')}`,
+  playability: (own: number, total: number, withSubstitutes: number) =>
+    `Omilla korteilla ${own} / ${total}${withSubstitutes > own ? ` · korvaajilla ${withSubstitutes} / ${total}` : ''}`,
+  copyWithOwnCards: 'Tee kopio omilla korteilla',
+  copyOwnSuffix: ' (omat kortit)',
+  copyOwnFailed: 'Kopion luonti ei onnistunut.',
   oddsCaption: 'Todennäköisyys nostaa vähintään yksi kopio',
   oddsCard: 'Kortti',
   oddsCopies: 'Kpl',
