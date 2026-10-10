@@ -10000,7 +10000,7 @@ html[data-gallery='on'] main {
   cursor: not-allowed;
 }
 
-/* T-126: a muted green checkmark: says "mark the owned ones" without reading as a close button. */
-.mark-open .mark-icon {
+/* T-126: a muted green checkmark on the card: says "mark the owned ones" without reading as a close button. */
+.mark-open .mark-icon-check {
   color: color-mix(in srgb, var(--color-success) 65%, var(--color-text-muted, currentColor));
 }
