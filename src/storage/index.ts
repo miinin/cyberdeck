@@ -2,17 +2,20 @@
  * Public API of the storage layer. The UI imports only from here (ARCHITECTURE.md 4 and 12, SR-12).
  */
 import type { Collection } from '../domain/collection';
+import type { GameLog } from '../domain/games';
+import { parseGameLog } from '../domain/games';
 import { parseCollection } from '../domain/validate';
 import type { EnvelopeSpec } from './envelope';
-import { COLLECTION_SCHEMA_VERSION, WANTS_SCHEMA_VERSION } from './keys';
+import { COLLECTION_SCHEMA_VERSION, GAMES_SCHEMA_VERSION, WANTS_SCHEMA_VERSION } from './keys';
 import { createMemoryStore, openBrowserStore, subscribeToBrowserStorage } from './keyValueStore';
-import { COLLECTION_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
+import { COLLECTION_MIGRATIONS, GAMES_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
 import { createRepositories } from './repositories';
 import type { Repositories } from './types';
 
 export type {
   CollectionRepository,
   DeckRepository,
+  GameLogRepository,
   Loaded,
   LoadNotice,
   PreferencesRepository,
@@ -52,6 +55,13 @@ export const WANTS_ENVELOPE_SPEC: EnvelopeSpec<Collection> = {
   currentVersion: WANTS_SCHEMA_VERSION,
   migrations: WANTS_MIGRATIONS,
   parse: parseCollection,
+};
+
+/** The game log's envelope schema, shared by localStorage and the cloud copy (T-122, D-030). */
+export const GAMES_ENVELOPE_SPEC: EnvelopeSpec<GameLog> = {
+  currentVersion: GAMES_SCHEMA_VERSION,
+  migrations: GAMES_MIGRATIONS,
+  parse: parseGameLog,
 };
 
 /** localStorage when it works, otherwise an in-memory store with `persistent: false` (SR-13). */

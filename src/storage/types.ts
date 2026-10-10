@@ -3,6 +3,7 @@ import type { CardKey } from '../domain/cardKey';
 import type { Collection } from '../domain/collection';
 import type { PrintingKey } from '../domain/printing';
 import type { Deck, DeckContent, DeckId, DeckPublish } from '../domain/deck';
+import type { GameInput, GameLog, GameRecord } from '../domain/games';
 
 export type LoadNotice =
   /** Some rows were dropped, the rest was kept. */
@@ -49,6 +50,21 @@ export interface DeckRepository {
   setPublish(id: DeckId, publish: DeckPublish | undefined): Promise<Deck>;
   /** Unknown id is not an error. */
   remove(id: DeckId): Promise<void>;
+  subscribe(listener: () => void): () => void;
+}
+
+/**
+ * The game results of all decks (T-122, D-030). Every change reads fresh state, validates and saves in one go.
+ * Limits (1 000 games, 900 000 bytes) → StorageError('limit-reached'); a bad input → 'invalid-input'.
+ */
+export interface GameLogRepository {
+  load(): Promise<Loaded<GameLog>>;
+  /** New id and timestamp; never uses an id from the caller. Resolves with the saved row. */
+  add(input: GameInput): Promise<GameRecord>;
+  /** Replaces the user's fields of a game and keeps its id and createdAt. Unknown id → StorageError('not-found'). */
+  update(id: string, input: GameInput): Promise<GameRecord>;
+  /** Unknown id is not an error. */
+  remove(id: string): Promise<void>;
   subscribe(listener: () => void): () => void;
 }
 
@@ -121,6 +137,8 @@ export interface LocalData {
   collection: Collection;
   /** The want list (D-018), same shape as the collection. */
   wants: Collection;
+  /** The game results (T-122, D-030). */
+  games: GameLog;
 }
 
 /** The state both sides had at the last successful sync: the base of the three-way merge (D-017 kohta 6). */
@@ -129,6 +147,7 @@ export interface SyncBase {
   decks: readonly { id: DeckId; updatedAt: string }[];
   collection: Collection;
   wants: Collection;
+  games: GameLog;
 }
 
 /** Local data access for the sync engine and the first sign-in. Never throws except `apply`. */
@@ -142,12 +161,12 @@ export interface SyncStorage {
   apply(expected: LocalData, next: LocalData): boolean;
   loadBase(): SyncBase | null;
   saveBase(base: SyncBase | null): void;
-  /** Copies the raw decks, collection and wants to backup keys (SR-11). */
+  /** Copies the raw decks, collection, wants and games to backup keys (SR-11). */
   backupAll(): void;
-  /** Removes the decks, collection and wants keys (after a successful transfer). */
+  /** Removes the decks, collection, wants and games keys (after a successful transfer). */
   clear(): void;
   /**
-   * Removes everything the account has in this browser: decks, collection, wants, sync base and backups. Only for
+   * Removes everything the account has in this browser: decks, collection, wants, games, sync base and backups. Only for
    * account repositories; the signed-out data is never erased this way. Throws StorageError.
    */
   eraseAccount(): void;
@@ -161,6 +180,8 @@ export interface Repositories {
   wants: CollectionRepository;
   /** The proxy print queue (T-102): the collection's interface and rules, local only (not synced). */
   proxy: CollectionRepository;
+  /** The game results (T-122, D-030). */
+  games: GameLogRepository;
   decks: DeckRepository;
   preferences: PreferencesRepository;
   /** false = browser storage is not in use and data lives only in memory (the UI shows a notice, SR-13). */

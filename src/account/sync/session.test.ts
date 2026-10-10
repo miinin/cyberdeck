@@ -4,7 +4,7 @@ import { createMemoryCloud, createMemoryPublicDecks } from '../memory';
 import type { MemoryPublicDecks } from '../memory';
 import { publicDeckId } from '../../domain/publicDeck';
 import type { MemoryCloud } from '../memory';
-import { createAccountSession } from './session';
+import { copySignedOutData, createAccountSession } from './session';
 
 const UID = 'user123';
 const CONTENT = { name: 'Pakka', sections: [{ name: '', cards: [{ card: 'detonate', count: 2 }] }] };
@@ -286,6 +286,92 @@ describe('account deletion and public decks (T-098, SR-36)', () => {
     await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
     expect(await session.deleteAccountData()).toBe(true);
     expect(order).toEqual(['before', 'removeMany']);
+    session.dispose();
+  });
+});
+
+describe('game results and the account (T-122)', () => {
+  const GAME = {
+    deckId: 'deck1',
+    playedOn: '2026-10-05',
+    result: 'win',
+    opponentName: null,
+    opponentLegends: [],
+    turn: null,
+    event: null,
+    sideboard: false,
+    note: null,
+  } as const;
+
+  it('moves the signed-out games with their decks to an empty account and clears them after the sync', async () => {
+    const b = browser();
+    const deck = await b.anonymous.decks.create(CONTENT);
+    const added = await b.anonymous.games.add({ ...GAME, deckId: deck.id });
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    await settle();
+    expect((await b.account.decks.list()).value.map((d) => d.id)).toEqual([deck.id]);
+    expect((await b.account.games.load()).value.games).toEqual([added]);
+    expect(cloud.paths()).toContain('games/log');
+    expect((await b.anonymous.games.load()).value.games).toEqual([]);
+    session.dispose();
+  });
+
+  it('asks when the cloud has only a game log and the browser has data', async () => {
+    const other = browser();
+    await other.account.games.add(GAME);
+    const first = open(other, cloud);
+    await vi.waitFor(() => expect(first.status().sync.lastSyncedAt).not.toBeNull());
+    first.dispose();
+
+    const b = browser();
+    await b.anonymous.games.add(GAME);
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().phase).toBe('choose'));
+    session.dispose();
+  });
+
+  it('merges the signed-out and the account games when the user chooses to', async () => {
+    const other = browser();
+    await other.account.games.add({ ...GAME, result: 'loss' });
+    const first = open(other, cloud);
+    await vi.waitFor(() => expect(first.status().sync.lastSyncedAt).not.toBeNull());
+    first.dispose();
+
+    const b = browser();
+    await b.anonymous.games.add(GAME);
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().phase).toBe('choose'));
+    session.choose('merge');
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    await settle();
+    expect((await b.account.games.load()).value.games.map((g) => g.result).sort()).toEqual(['loss', 'win']);
+    session.dispose();
+  });
+
+  it('keeps the signed-out games where they are when both logs together would not fit', async () => {
+    const rows = (prefix: string) =>
+      Array.from({ length: 600 }, (_, i) => ({ ...GAME, id: `${prefix}${i}`, createdAt: '2026-10-05T10:00:00.000Z' }));
+    const envelope = (prefix: string) =>
+      JSON.stringify({ schemaVersion: 1, savedAt: '2026-10-05T10:00:00.000Z', data: { games: rows(prefix) } });
+    const b = browser({ 'cyberdeck:games': envelope('a'), [`cyberdeck:u:${UID}:games`]: envelope('b') });
+    expect(copySignedOutData(b.anonymous.sync, b.account.sync)).toBe(false);
+    expect((await b.account.games.load()).value.games).toHaveLength(600);
+    expect((await b.anonymous.games.load()).value.games).toHaveLength(600);
+  });
+
+  it('deletes the cloud log and the account log in the browser with the account data', async () => {
+    const b = browser();
+    await b.account.games.add(GAME);
+    const session = open(b, cloud);
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    expect(cloud.paths()).toContain('games/log');
+    await b.anonymous.games.add(GAME);
+
+    expect(await session.deleteAccountData()).toBe(true);
+    expect(cloud.paths()).toEqual([]);
+    expect((await b.account.games.load()).value.games).toEqual([]);
+    expect((await b.anonymous.games.load()).value.games).toHaveLength(1);
     session.dispose();
   });
 });

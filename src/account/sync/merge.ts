@@ -6,6 +6,8 @@
 import { compareCardKeys } from '../../domain/collection';
 import type { Collection, CollectionEntry, Versions } from '../../domain/collection';
 import type { Deck, DeckId } from '../../domain/deck';
+import { compareGames, sameGame, sameGameLog } from '../../domain/games';
+import type { GameLog, GameRecord } from '../../domain/games';
 
 export interface DeckMerge {
   /** The decks the device should have after the sync, in stored order. */
@@ -141,4 +143,34 @@ export function sameCollection(a: Collection, b: Collection): boolean {
       return entry.card === other?.card && entry.count === other.count && sameVersions(entry.versions, other.versions);
     })
   );
+}
+
+export interface GameLogMerge {
+  log: GameLog;
+  /** The cloud copy differs from the result and must be written. */
+  writeCloud: boolean;
+}
+
+/**
+ * Per game id (T-122, D-030), the collection's rule: only one side changed since the base → that side (a deletion
+ * is a change); both changed → the local row. A row the other side lacks but the base had is deleted. Rows are
+ * compared by every field. A cloud log that is invalid (`cloud` null) is never overwritten: the result is the
+ * local log and nothing is written.
+ */
+export function mergeGames(local: GameLog, cloud: GameLog | null, base: GameLog): GameLogMerge {
+  if (cloud === null) return { log: local, writeCloud: false };
+  const mine = new Map(local.games.map((game) => [game.id, game]));
+  const theirs = new Map(cloud.games.map((game) => [game.id, game]));
+  const before = new Map(base.games.map((game) => [game.id, game]));
+  const ids = new Set([...mine.keys(), ...theirs.keys(), ...before.keys()]);
+  const games: GameRecord[] = [];
+  for (const id of ids) {
+    const m = mine.get(id);
+    const t = theirs.get(id);
+    const picked = sameGame(m, before.get(id)) ? t : m;
+    if (picked !== undefined) games.push(picked);
+  }
+  games.sort(compareGames);
+  const merged: GameLog = { games };
+  return { log: merged, writeCloud: !sameGameLog(merged, cloud) };
 }

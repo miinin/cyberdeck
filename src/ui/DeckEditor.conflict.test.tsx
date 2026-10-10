@@ -27,6 +27,7 @@ describe('Deck editor: the deck changes elsewhere', () => {
       decks: [{ ...deck, ...content('Muualla muutettu'), updatedAt: '2030-01-01T00:00:00.000Z' }],
       collection: local.collection,
       wants: local.wants,
+      games: local.games,
     });
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Muualla muutettu' })).toBeInTheDocument();

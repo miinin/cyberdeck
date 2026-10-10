@@ -15,6 +15,7 @@ import {
   decodeMeta,
   encodeCollectionDoc,
   encodeDeckDoc,
+  encodeGamesDoc,
   encodeWantsDoc,
   META_SCHEMA_VERSION,
 } from '../cloudCodec';
@@ -68,6 +69,7 @@ export function createFirestoreCloudStore(options: {
   const deckRef = ({ fs, db }: Session, id: string) => fs.doc(db, CLOUD_ROOT, uid, 'decks', id);
   const collectionRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'collection', 'main');
   const wantsRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'collection', 'want');
+  const gamesRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'games', 'log');
 
   return {
     readMeta: () =>
@@ -79,25 +81,27 @@ export function createFirestoreCloudStore(options: {
     readAll: () =>
       guard(async (s) => {
         const { fs, db } = s;
-        const [meta, decks, collection, wants] = await Promise.all([
+        const [meta, decks, collection, wants, games] = await Promise.all([
           fs.getDoc(metaRef(s)),
           // SR-23 kohta 5: one more than allowed, so too many decks is noticed instead of cut silently.
           fs.getDocs(fs.query(fs.collection(db, CLOUD_ROOT, uid, 'decks'), fs.limit(MAX_DECKS + 1))),
           fs.getDoc(collectionRef(s)),
           fs.getDoc(wantsRef(s)),
+          fs.getDoc(gamesRef(s)),
         ]);
         return buildSnapshot(
           meta.exists() ? decodeMeta(meta.data()) : null,
           decks.docs.map((doc) => ({ id: doc.id, data: doc.data() })),
           collection.exists() ? collection.data() : undefined,
           wants.exists() ? wants.data() : undefined,
+          games.exists() ? games.data() : undefined,
         );
       }),
 
     deleteAll: () =>
       guard(async (s) => {
         const { fs, db } = s;
-        // Decks in batches of 400 (a transaction takes 500 writes), then the collection, the want list and the meta document.
+        // Decks in batches of 400 (a transaction takes 500 writes), then the collection, the want list, the game log and the meta document.
         for (let round = 0; round < 10; round += 1) {
           const decks = await fs.getDocs(fs.query(fs.collection(db, CLOUD_ROOT, uid, 'decks'), fs.limit(400)));
           if (decks.docs.length === 0) break;
@@ -114,6 +118,7 @@ export function createFirestoreCloudStore(options: {
         await fs.runTransaction(db, async (tx) => {
           tx.delete(collectionRef(s));
           tx.delete(wantsRef(s));
+          tx.delete(gamesRef(s));
           tx.delete(metaRef(s));
         });
       }),
@@ -135,6 +140,7 @@ export function createFirestoreCloudStore(options: {
           for (const id of change.deleteDecks) tx.delete(deckRef(s, id));
           if (change.collection !== undefined) tx.set(collectionRef(s), encodeCollectionDoc(change.collection, savedAt));
           if (change.wants !== undefined) tx.set(wantsRef(s), encodeWantsDoc(change.wants, savedAt));
+          if (change.games !== undefined) tx.set(gamesRef(s), encodeGamesDoc(change.games, savedAt));
           // The rules accept exactly these keys, rev + 1 and the server time (SR-22).
           tx.set(metaRef(s), { schemaVersion: META_SCHEMA_VERSION, rev: rev + 1, updatedAt: s.fs.serverTimestamp() });
           return rev + 1;

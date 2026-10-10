@@ -6,14 +6,20 @@
  */
 import { EMPTY_COLLECTION } from '../../domain/collection';
 import type { Collection } from '../../domain/collection';
+import { EMPTY_GAME_LOG, gameLogFits } from '../../domain/games';
+import type { GameLog } from '../../domain/games';
 import type { LocalData, Repositories, SyncStorage } from '../../storage';
 import type { CloudDoc, CloudStore, PublicDeckStore } from '../types';
-import { mergeCollection, mergeDecks } from './merge';
+import { mergeCollection, mergeDecks, mergeGames } from './merge';
 import { createSyncEngine } from './syncEngine';
 import type { SyncStatus } from './syncEngine';
 
 function isEmptyDoc(doc: CloudDoc<Collection>) {
   return doc.kind === 'missing' || (doc.kind === 'ok' && doc.value.entries.length === 0);
+}
+
+function isEmptyGamesDoc(doc: CloudDoc<GameLog>) {
+  return doc.kind === 'missing' || (doc.kind === 'ok' && doc.value.games.length === 0);
 }
 
 export type SessionPhase = 'starting' | 'choose' | 'running';
@@ -43,7 +49,7 @@ export interface AccountSession {
 }
 
 function isEmptyData(data: LocalData) {
-  return data.decks.length === 0 && data.collection.entries.length === 0 && data.wants.entries.length === 0;
+  return data.decks.length === 0 && data.collection.entries.length === 0 && data.wants.entries.length === 0 && data.games.games.length === 0;
 }
 
 /**
@@ -59,7 +65,15 @@ export function copySignedOutData(anonymous: SyncStorage, account: SyncStorage):
   const decks = mergeDecks(from.decks, into.decks, []);
   const collection = mergeCollection(from.collection, into.collection, EMPTY_COLLECTION);
   const wants = mergeCollection(from.wants, into.wants, EMPTY_COLLECTION);
-  return account.apply(into, { decks: decks.decks, collection: collection.collection, wants: wants.collection });
+  const games = mergeGames(from.games, into.games, EMPTY_GAME_LOG);
+  // Both logs together would not fit: nothing is copied, and the signed-out data stays where it is.
+  if (!gameLogFits(games.log)) return false;
+  return account.apply(into, {
+    decks: decks.decks,
+    collection: collection.collection,
+    wants: wants.collection,
+    games: games.log,
+  });
 }
 
 export function createAccountSession(options: {
@@ -137,7 +151,8 @@ export function createAccountSession(options: {
         snapshot.decks.length === 0 &&
         snapshot.invalidDeckIds.length === 0 &&
         isEmptyDoc(snapshot.collection) &&
-        isEmptyDoc(snapshot.wants);
+        isEmptyDoc(snapshot.wants) &&
+        isEmptyGamesDoc(snapshot.games);
       if (cloudEmpty) {
         if (copySignedOutData(anonymous.sync, account.sync)) return await run(true);
         return await run(false);
