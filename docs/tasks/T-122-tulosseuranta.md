@@ -194,3 +194,55 @@ Toteutettu haarassa `t-122-tulosseuranta` (commitit `T-122: …`, ei PR:ää). R
   6. Pakan jakolinkin/viennin/julkisen kopion testi on rakenteellinen (funktiot saavat vain pakan sisällön; pakan dokumentti ei muutu pelin lisäyksestä).
 - **Deploy-järjestys (SR-43):** säännöt on vietävä deviin ennen kuin tämä yhdistetään testiin, ja tuotantoon ennen sovelluskoodin julkaisua (vanhat säännöt hylkäisivät `games/log`-kirjoituksen, jolloin koko batch ja pakkojen synkka kaatuisi). Ei tehty.
 - Luovutus: PM (esikatselu ja sääntöjen vienti deviin), sen jälkeen Digiturva (katselmointi ennen yhdistämistä: uusi pilvidokumentti ja sääntömuutos, vapaa teksti, tietosuoja).
+
+### Digiturva (2026-10-10) · Katselmointi
+Katselmoitu `git diff test...t-122-tulosseuranta` (5 commitia) SR-43–SR-49:ää vasten. Löydökset: Critical 0, High 0, Medium 1, Low 2, Info 3. **Veto: ei** (ei Critical- eikä High-löydöstä). Säännöt ovat valmiita vietäviksi deviin.
+
+**Tarkistetut alueet, joista ei löytynyt mitään:**
+- **SR-43:** `firestore.rules` vastaa korttia täsmälleen (datamallikommentti, `isGamesDoc`, get/create/update/delete vain `isOwner(uid) && docId == 'log'`, ei list-sääntöä). `isOwner` sisältää Google-ehdon ja `isEnvelope` tarkat avaimet ja `schemaVersion`in. Sääntötesti on staattinen kuten muutkin (SEC-122-6).
+- **SR-44:** `parseGameRecord` rakentaa rivin kenttä kerrallaan, hylkää tuntemattoman avaimen (myös `__proto__` ja `constructor`), puuttuvan kentän ja väärän tyypin. Id-, päivä-, `createdAt`-, Legend- ja enum-ehdot täyttyvät. Ohjausmerkit poistetaan `UNSAFE_CHARACTERS`illa (g-lippu) ennen trimmausta ja pituusrajaa, ja tyhjä muuttuu `null`iksi. Toistuva id: ensimmäinen säilyy. Yli 1 000 riviä → `null`. Sama jäsennin palvelee localStoragea, varmuuskopiota, synkan pohjaa (`parseSyncBase` hylkää pohjan, jos rivejä pudotetaan) ja pilveä (`GAMES_ENVELOPE_SPEC`).
+- **SR-45:** lomake (`validGame` → `parseGameRecord`), `checkedLog` (`gameLogFits`: rivit ja UTF-8-tavut), synkan push (`gameLogFits` → `Stop('error')`), fullSync ja `checkChange` (uudelleenjäsennys, `dropped > 0` hylätään, raja) käyttävät samaa validointia. `games/log` kirjoitetaan samassa transaktiossa kuin meta (`rev + 1`), ja se on mukana operaatiolaskurissa. `encodeGamesDoc` rakentaa rivit kenttä kerrallaan.
+- **SR-46:** uusissa UI-tiedostoissa ei ole `dangerouslySetInnerHTML`ia, `innerHTML`ia, vapaasta tekstistä tehtyä `href`iä, linkitystä eikä markdownia. Ryhmittely ja ehdotukset tehdään `Map`illa (`gameStats.ts`).
+- **SR-47:** tuloksia käytetään vain `DeckResults`issa (oma pakkaeditori), Pakat-sivun ennätyksessä ja poistovahvistuksessa. Jako-, vienti- ja julkisen kopion polut eivät viittaa lokiin (grep ja `gameResults.leak.test.ts`). Uudessa koodissa ei ole `console`-kutsuja.
+- **SR-48:** avaimet ovat `cyberdeck:games` ja `cyberdeck:u:{uid}:games`, ja loki on mukana synkan pohjassa, `readLocal`issa, `apply`ssa, `backupAll`issa, `clear`issa, `onChange`ssa ja `eraseAccount`issa (etuliite). `deleteAll` poistaa `games/log`in samassa transaktiossa kuin kokoelman, want-listan ja metan (Firestore ja muisti). Siirto tilille säilyttää `deckId`n, eikä se kopioi mitään, jos yhdistetty loki ei mahdu rajoihin.
+- **SR-49:** `GameRecord` sisältää vain kortin kentät. Vihje näkyy vastustajan ja muistiinpanon kohdalla, ja tilin tietosuojatekstit mainitsevat tulokset. K-P13:een on vastattu (PRIVACY.md luku 13).
+- **Riippuvuudet, firebase.json ja workflowt:** ei muutoksia, joten `npm audit`ia ei tarvittu. **Salaisuudet:** haaran commitit käytiin läpi (API-avaimet, yksityiset avaimet, tokenit ja salasanat), eikä mitään löytynyt.
+- **Testit:** T-122:n testitiedostot ja `src/account` ajettiin uudelleen (13 tiedostoa, 327 testiä läpi).
+
+### SEC-122-1 · Virheellinen pilviloki ylikirjoitetaan seuraavassa pushissa · Medium
+**Sijainti:** `src/account/sync/syncEngine.ts:121` (`push`) ja `:151` (`fullSync`, `baseOf(merged, rev)`) · **Tehtävä:** T-122
+**Toistaminen:** 1) Laite synkkaa lokin. 2) Pilveen kirjoitetaan virheellinen `games/log` (esim. `{ garbage: true }` tai 1 001 riviä), ja metan `rev` muuttuu. 3) fullSync säilyttää pilven (testi "keeps the local log and the cloud document…" menee läpi), mutta tallentaa pohjaksi paikallisen lokin ja uuden `rev`in. 4) Käyttäjä kirjaa pelin. 5) Seuraavalla kierroksella `rev === base.rev`, joten tehdään `push`, joka kirjoittaa paikallisen lokin virheellisen dokumentin päälle. Todennettu väliaikaisella testillä (ei commitoitu): toisen synkan jälkeen `games/log` oli korvattu.
+**Odotettu:** virheellistä pilvidokumenttia ei ylikirjoiteta automaattisesti (SR-44 viimeinen kohta, SR-23 kohta 3). · **Havaittu:** dokumentti säilyy vain siihen asti, kunnes paikallinen loki muuttuu.
+**Vaikutus:** rivit, jotka toinen laite tai virheellinen versio kirjoitti ja joita tämä laite ei osaa lukea, katoavat pilvestä hiljaa. Hyökkääjää ei ole, koska vain omistaja voi kirjoittaa dokumenttiin. Riski on oman datan menetys bugin tai skeemavirheen seurauksena. Sama malli on käytössä jo kokoelmassa ja want-listassa (`cloudValue` → `null`), joten löydös ei ole T-122:n oma regressio. Tulosloki kuitenkin muuttuu useammin.
+**Korjausehdotus:** kun pilven osa on `invalid`, älä tallenna sitä pohjaan synkattuna. Vaihtoehdot: (a) `fullSync` palauttaa tiedon, ja `push` ohittaa `games`-osan (sekä kokoelman ja want-listan), kunnes fullSync näkee kelvollisen dokumentin, tai (b) fullSync pakotetaan aina, kun edellinen kierros näki virheellisen osan (esim. lippu pohjassa). Lisää testi: virheellinen pilvi → paikallinen muutos → synkka → pilvi ennallaan. PM päättää, korjataanko nyt vai kirjataanko velaksi koko mallille.
+**Tila:** Avoin
+
+### SEC-122-2 · Pilvilokin yksittäinen virheellinen rivi tulkitaan poistoksi · Low
+**Sijainti:** `src/account/cloudCodec.ts` (`decodeGamesDoc`: `ok` + `dropped`) ja `src/account/sync/merge.ts:160` (`mergeGames`) · **Tehtävä:** T-122
+**Toistaminen:** 1) Pohjassa ja paikallisesti on rivi X. 2) Pilven rivi X on vioittunut (esim. tuntematon kenttä), jolloin `parseGameLog` pudottaa sen ja dokumentti on `ok`. 3) `mergeGames`: paikallinen X on sama kuin pohjan, ja pilvestä X puuttuu, joten X poistetaan paikallisesti ja pilvi kirjoitetaan uudelleen ilman sitä.
+**Odotettu:** virheellinen ≠ poistettu (SR-23 kohta 3). · **Havaittu:** pudotettu rivi käsitellään toisen laitteen poistona, ja käyttäjä näkee vain `dropped`-varoituksen.
+**Vaikutus:** yksittäinen peli katoaa kaikilta laitteilta bugin tai skeemavirheen seurauksena. Sama käytös on kokoelman riveillä.
+**Korjausehdotus:** jos pilvidokumentissa on `dropped > 0`, käsittele koko loki kuten `invalid` (`null`, ei ylikirjoitusta), tai välitä pudotettujen rivien id:t `mergeGames`ille samaan tapaan kuin `invalidDeckIds` pakoille (vaatii, että id luetaan myös virheellisestä rivistä).
+**Tila:** Avoin
+
+### SEC-122-3 · Pakan poisto voi poistaa sellaisten pakkojen tuloksia, joita laitteella ei ole · Low
+**Sijainti:** `src/storage/repositories.ts:560` (`decks.remove` → `withoutOrphans`) · **Tehtävä:** T-122
+**Toistaminen:** 1) Pilvessä on pakka P, jonka dokumentti on virheellinen (`invalidDeckIds`), joten laite B ei saa sitä, mutta P:n pelit tulevat B:lle lokin mukana. 2) B:llä poistetaan jokin muu pakka. 3) `withoutOrphans` poistaa myös P:n pelit, ja synkka vie poiston pilveen.
+**Vaikutus:** pakan P tulokset katoavat, vaikka P on yhä olemassa (rikkinäisenä) pilvessä. Tilanne on harvinainen ja koskee omaa dataa.
+**Korjausehdotus:** siivoa vain poistetun pakan rivit (`withoutDeck`). Orvot kannattaa siivota vain silloin, kun synkka on juuri nähnyt koko pakkajoukon kelvollisena (ei `invalidDeckIds`ejä). Toinen vaihtoehto on jättää siivous kokonaan pois, koska orvot eivät näy missään.
+**Tila:** Avoin
+
+### SEC-122-4 · Deploy-järjestys: vanhat säännöt kaatavat myös lukemisen ja tilin poiston · Info
+**Sijainti:** `src/account/firebase/firestoreCloudStore.ts:90` (`readAll`), `:121` (`deleteAll`), `:143` (`commit`)
+**Havainto:** SR-43:n riski on laajempi kuin pelkkä kirjoitus. Vanhat säännöt hylkäävät `getDoc(games/log)`-kutsun, joten `readAll` ja koko fullSync epäonnistuvat kaikilla kirjautuneilla, myös niillä, joilla ei ole tuloksia. Lisäksi `deleteAll`in viimeinen transaktio kaatuu, jolloin "Poista tilin tiedot" ei toimi (GDPR-poisto). D-029:n suoran julkaisun vuoksi säännöt on vietävä **deviin ennen testiin yhdistämistä ja tuotantoon ennen julkaisu-PR:n yhdistämistä**. Kirjaa deploy luovutukseen (komento ja aika).
+**Tila:** Avoin (toimenpide, ei koodivirhe)
+
+### SEC-122-5 · localStorage-kiintiö täysillä lokeilla · Info
+**Havainto:** täysi loki on noin 900 kt, ja varmuuskopioita on enintään 3. Kirjautuneen käyttäjän selaimessa myös uloskirjautuneen nimiavaruudessa voi olla loki. Pahimmillaan pelkät tulokset vievät noin 4–7 Mt, mikä voi ylittää selaimen origin-kiintiön ja estää muiden tietojen tallennuksen. Tästä seuraa `write`-virhe mutta ei datan menetystä, koska mutaatio tehdään kokonaan tai ei ollenkaan. Täydentää R-24:ää.
+**Ehdotus:** ei toimenpiteitä nyt. Arvioidaan uudelleen R-24:n yhteydessä (esim. varmuuskopioiden määrä suurille aggregaateille).
+**Tila:** Avoin (seuranta)
+
+### SEC-122-6 · Sääntötesti on staattinen · Info
+**Havainto:** `src/firestoreRules.test.ts` todentaa sääntöjen tekstin mutta ei kortin listaamia kieltoja ajossa (toinen uid, kirjautumaton käyttäjä, 1 001 riviä jne.). Tämä noudattaa projektin nykyistä käytäntöä (ei emulaattoria). Testin `block` ulottuu lisäksi tiedoston loppuun asti (myös `publicDecks`), mutta se ei heikennä nykyisiä tarkistuksia.
+**Ehdotus:** dev-viennin jälkeen PM tarkistaa käsin tai Rules Playgroundissa yhden kielletyn tapauksen (esim. `games/other`) ja yhden sallitun.
+**Tila:** Avoin (seuranta)
