@@ -86,7 +86,8 @@ describe('CatalogView', () => {
 
     expect(statusLine(container)).toHaveTextContent(/^3 korttia$/);
     expect(screen.getByRole('status')).toHaveTextContent('3 korttia ladattu.');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    // Only the gallery button (T-123): nothing to count with before the collection is ready.
+    expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual(['Galleria']);
   });
 
   it('uses the singular for one card', () => {

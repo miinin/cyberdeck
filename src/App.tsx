@@ -100,11 +100,13 @@ export function App({
   // T-055: the persistent browser storage button is no longer shown (cloud sync replaces it).
   const headerSlot: HTMLElement | null = null;
   const { route, navigate } = useHashRoute();
+  // T-123: the gallery shows only the card art, so the header (with the mobile bottom bar) and the footer step aside.
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const proxyCount = useProxyCount(openRepositories.proxy, route.name);
 
   return (
     <PublicDecksContext.Provider value={publicApi}>
-      <header className="site-header">
+      <header className="site-header" hidden={galleryOpen}>
         <div className="container">
           <a className="brand" href="#/">
             <img src={logoUrl} alt="Cyberdeck TCG" width={400} height={99} />
@@ -158,7 +160,7 @@ export function App({
         </div>
       </header>
       {notice !== null && uid === null && (
-        <div className="container">
+        <div className="container" hidden={galleryOpen}>
           <p className="notice" role="status">
             {notice === 'deleted' ? texts.accountDeletedNotice : texts.accountSignedOutNotice}{' '}
             <button type="button" className="button-secondary" onClick={() => setNotice(null)}>
@@ -175,7 +177,7 @@ export function App({
       )}
       <main className="container" key={uid ?? 'local'}>
         {(route.name === 'cards' || route.name === 'card') && (
-          <CatalogView cards={cards} routeCardKey={route.name === 'card' ? route.key : null} repositories={openRepositories} headerSlot={headerSlot} />
+          <CatalogView cards={cards} routeCardKey={route.name === 'card' ? route.key : null} repositories={openRepositories} headerSlot={headerSlot} onGalleryChange={setGalleryOpen} />
         )}
         {(route.name === 'decks' || route.name === 'publicDecks') && (
           <DecksView
@@ -221,7 +223,7 @@ export function App({
           <SharedTradeView data={route.data} cards={cards} repositories={openRepositories} />
         )}
       </main>
-      <footer className="site-footer">
+      <footer className="site-footer" hidden={galleryOpen}>
         <div className="container">
           <p>{texts.footerUnofficial}</p>
           <p>{texts.footerSource}</p>
