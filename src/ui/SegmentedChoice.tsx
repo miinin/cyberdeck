@@ -17,6 +17,7 @@ export function SegmentedChoice<T extends string | number>({
   describedBy,
   inputRef,
   children,
+  disabled,
 }: {
   legend: string;
   name: string;
@@ -32,9 +33,11 @@ export function SegmentedChoice<T extends string | number>({
   /** A ref for the radio of one option (the focus target after a reset). */
   inputRef?: (option: T) => Ref<HTMLInputElement> | undefined;
   children?: ReactNode;
+  /** Greyed out but kept in place, so the row does not jump (T-126). */
+  disabled?: boolean;
 }) {
   return (
-    <fieldset className={['view-select', legendVisible ? 'has-legend' : '', className ?? ''].filter(Boolean).join(' ')}>
+    <fieldset disabled={disabled} className={['view-select', legendVisible ? 'has-legend' : '', className ?? ''].filter(Boolean).join(' ')}>
       <legend>{legend}</legend>
       <div className={fill ? 'segmented segmented--fill' : 'segmented'}>
         {options.map(([option, label]) => (

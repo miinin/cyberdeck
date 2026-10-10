@@ -716,7 +716,8 @@ function CatalogBody({
       results={{ count: filtered.length, id: 'active-filters' }}
       sort={sort}
       onSortChange={setSort}
-      allArts={view === 'grid' ? allArts : undefined}
+      allArts={allArts}
+      allArtsDisabled={view !== 'grid'}
       onAllArtsChange={setAllArts}
       {...extra}
     />
@@ -802,7 +803,8 @@ function CatalogBody({
             collectionEmpty={collection.phase === 'ready' && allCards.every((card) => countIn(collection, card.key) === 0)}
             onGalleryOpen={locked ? undefined : gallery.openGallery}
             hideEditSwitch={locked}
-            imageSize={view === 'grid' ? imageSize : undefined}
+            imageSize={imageSize}
+            imageSizeDisabled={view !== 'grid'}
             onImageSizeChange={setImageSize}
             edition={edition}
             onEditionChange={handleEditionChange}

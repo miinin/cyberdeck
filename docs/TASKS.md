@@ -128,3 +128,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-124 | [velka] SEC-122-7: kun pilviaggregaatti on virheellinen, pohjaan tallennetaan sen kohdalla edellinen pohja eikä yhdistetty arvo (kokoelma, want, tulokset), jottei myöhemmin korjattu pilvi poista paikallisia lisäyksiä | 2 | Could | Koodari | Backlog | Digiturva |
 | T-123 | Galleria-tila (pelkkä kuvitus, kelluva ohjauspalkki, katselin) ja "Muokkaa kokoelmaa" -kytkimen tilalle "Merkitse omat kortit" ja tilapalkki | 1 | Should | Koodari | Done | PM esikatselu ✓ |
 | T-125 | Kevyempi Kortit-sivun yläosa: järjestys ja Kaikki versiot suodatinpaneeliin, yksi kevyt työkalurivi, yksirivinen merkintäpalkki | 1 | Should | Koodari | Done | PM esikatselu |
+| T-126 | Kortit-sivu ei pompi: kuvakoko ja Kaikki versiot himmenevät listanäkymässä; "Merkitse omat korttisi", vihreä checkmark-ikoni | 1 | Should | PM | Done | PM |

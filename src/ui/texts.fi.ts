@@ -251,7 +251,7 @@ export const textsFi = {
   viewerDetails: 'Kortin tiedot',
   viewerClose: 'Sulje',
   viewerPosition: (i: number, n: number) => `${i} / ${n}`,
-  markOpen: 'Merkitse omat kortit',
+  markOpen: 'Merkitse omat korttisi',
   markHint: 'Näyttää jokaisen kortin alla + ja −, joilla kirjaat, montako kappaletta omistat.',
   markBannerTitle: 'Merkintätila.',
   markBannerBody: 'Kirjaa omistamasi määrä kortin alla olevilla + ja −. Tallentuu heti.',
