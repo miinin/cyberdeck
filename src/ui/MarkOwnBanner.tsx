@@ -11,11 +11,12 @@ const EDITION_OPTIONS: readonly (readonly [DefaultEdition, string])[] = [
   ['retail', texts.editionRetail],
 ];
 
-/** A checkmark (T-126): "mark the ones you own"; the earlier plus on a card read as an exit. */
+/** A card with a checkmark on it (T-126): "mark the ones you own"; the earlier plus beside the card read as an exit. */
 function MarkIcon() {
   return (
     <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false" className="mark-icon">
-      <path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="4" y="2.5" width="12" height="15" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path className="mark-icon-check" d="M7 10.2l2.2 2.3 4-4.6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
