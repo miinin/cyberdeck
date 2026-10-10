@@ -172,3 +172,19 @@ export function legendsAgainst(games: readonly GameRecord[], name: string): read
   );
   return found?.opponentLegends ?? [];
 }
+
+/** "5–3–1": wins, losses and draws. */
+export function recordText(t: Pick<Tally, 'wins' | 'losses' | 'draws'>): string {
+  return `${t.wins}–${t.losses}–${t.draws}`;
+}
+
+/** The record of every deck that has games, by deck id. */
+export function recordsByDeck(games: readonly GameRecord[]): Map<string, Tally> {
+  const groups = new Map<string, GameRecord[]>();
+  for (const game of games) {
+    const group = groups.get(game.deckId);
+    if (group === undefined) groups.set(game.deckId, [game]);
+    else group.push(game);
+  }
+  return new Map([...groups].map(([deckId, rows]) => [deckId, tally(rows)]));
+}

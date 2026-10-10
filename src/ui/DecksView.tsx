@@ -18,6 +18,8 @@ import {
   validateDeck,
 } from '../domain/deckRules';
 import type { CardsByKey, ColorShare, DeckGroups } from '../domain/deckRules';
+import { recordsByDeck, recordText } from '../domain/gameStats';
+import type { Tally } from '../domain/gameStats';
 import { buildPublicDeckInput } from '../domain/publicDeck';
 import type { MissingRow } from '../domain/wants';
 import { StorageError } from '../storage';
@@ -25,6 +27,7 @@ import type { LoadNotice, Repositories, StorageErrorKind } from '../storage';
 import { AddMissingToWantsButton } from './AddMissingToWants';
 import { countIn } from './collectionStore';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
+import { PencilIcon, TrashIcon } from './icons';
 import { DeckCardImage } from './DeckList';
 import { DeckImport } from './DeckImport';
 import { DeckActions } from './DeckImportMenu';
@@ -36,7 +39,9 @@ import { usePublicDecks } from './PublicDecksContext';
 import { forgetPublicDecks } from './publicDecksCache';
 import { routeHash } from './useHashRoute';
 import { useCollection } from './useCollection';
+import { gameTexts } from './gameTexts';
 import { useDecks } from './useDecks';
+import { useGameLog } from './useGameLog';
 import { useWants } from './useWants';
 import type { WantsHandle } from './useWants';
 
@@ -81,45 +86,13 @@ export function deckColorCode(grouped: DeckGroups, main: readonly ColorShare[]):
  * One deck as a card (T-051): the Legends' art as a banner, colours, the main deck progress, legality,
  * what is missing from the collection and when it was changed.
  */
-const ICON_PROPS = {
-  viewBox: '0 0 24 24',
-  width: 20,
-  height: 20,
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 2,
-  strokeLinecap: 'round',
-  strokeLinejoin: 'round',
-  'aria-hidden': true,
-  focusable: 'false',
-} as const;
-
-function PencilIcon() {
-  return (
-    <svg {...ICON_PROPS}>
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg {...ICON_PROPS}>
-      <path d="M3 6h18" />
-      <path d="M8 6V4h8v2" />
-      <path d="M19 6l-1 14H6L5 6" />
-      <path d="M10 11v6M14 11v6" />
-    </svg>
-  );
-}
-
 function DeckCardSummary({
   deck,
   cardsByKey,
   ownedOf,
   wants,
   nameAction,
+  record,
 }: {
   deck: Deck;
   cardsByKey: CardsByKey;
@@ -128,6 +101,8 @@ function DeckCardSummary({
   wants: WantsHandle;
   /** The rename button, shown after the deck name. */
   nameAction: ReactNode;
+  /** The deck's game record (T-122), or undefined when no games are logged. */
+  record?: Tally;
 }) {
   const totals = deckTotals(deck, cardsByKey);
   const errors = errorsOf(validateDeck(deck, cardsByKey)).length;
@@ -175,6 +150,14 @@ function DeckCardSummary({
                     {color.charAt(0).toUpperCase()}
                   </span>
                 ))}
+              </span>
+            </p>
+          )}
+          {record !== undefined && (
+            <p className="deck-record">
+              <span className="visually-hidden">{gameTexts.recordAria(record.wins, record.losses, record.draws)}</span>
+              <span aria-hidden="true" title={gameTexts.recordAria(record.wins, record.losses, record.draws)}>
+                {recordText(record)}
               </span>
             </p>
           )}
@@ -303,6 +286,8 @@ export function DecksView({
   const [importing, setImporting] = useState<'text' | 'link' | null>(null);
   const { snapshot: collection } = useCollection(repositories.collection);
   const wants = useWants(repositories.wants);
+  const gameLog = useGameLog(repositories.games);
+  const records = useMemo(() => recordsByDeck(gameLog.log.games), [gameLog.log]);
   const ownedOf = (key: string) => (collection.phase === 'ready' ? countIn(collection, key) : null);
   const [live, setLive] = useState('');
   /** Element to focus after the next render (a data attribute of a row button, or the heading). */
@@ -489,6 +474,7 @@ export function DecksView({
                       cardsByKey={cardsByKey}
                       ownedOf={ownedOf}
                       wants={wants}
+                      record={records.get(deck.id)}
                       nameAction={
                         renamingId === deck.id ? null : (
                           <button
@@ -555,7 +541,12 @@ export function DecksView({
         </>
       )}
 
-      <ConfirmDeleteDialog name={deleting?.name ?? null} onConfirm={handleDelete} onCancel={handleCancelDelete} />
+      <ConfirmDeleteDialog
+        name={deleting?.name ?? null}
+        extra={deleting !== null && records.has(deleting.id) ? gameTexts.deleteDeckGames(records.get(deleting.id)?.games ?? 0) : undefined}
+        onConfirm={handleDelete}
+        onCancel={handleCancelDelete}
+      />
     </>
   );
 }

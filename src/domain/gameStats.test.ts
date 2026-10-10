@@ -1,4 +1,4 @@
-import { byColour, byEvent, byOpponent, legendsAgainst, recentTexts, tally, textKey, turnRates } from './gameStats';
+import { byColour, byEvent, byOpponent, legendsAgainst, recentTexts, recordText, tally, textKey, turnRates } from './gameStats';
 import type { LegendInfo } from './gameStats';
 import type { GameRecord } from './games';
 
@@ -169,5 +169,11 @@ describe('suggestions', () => {
 
   it('compares texts in one form', () => {
     expect(textKey('  Blue \n Aggro ')).toBe('blue aggro');
+  });
+});
+
+describe('recordText', () => {
+  it('writes wins, losses and draws', () => {
+    expect(recordText(tally([game(), game(), game({ result: 'loss' }), game({ result: 'draw' })]))).toBe('2–1–1');
   });
 });

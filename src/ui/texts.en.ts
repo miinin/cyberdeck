@@ -42,9 +42,9 @@ export const textsEn: typeof textsFi = {
   accountDialogTitle: 'Sign in with Google',
   accountAgeLimit: 'Signing in is for people aged 16 or over.',
   accountPrivacy:
-    'Your account stores only your decks, collection and want list, plus an identifier from Google, not your name or email. The data is kept on Google servers in the EU, and you can delete it at any time.',
+    'Your account stores only your decks, collection, want list and game results, plus an identifier from Google, not your name or email. The data is kept on Google servers in the EU, and you can delete it at any time.',
   accountPrivacyGoogle:
-    'Your Google account details (name and email address) stay in Firebase Authentication, separate from your decks, collection and want list.',
+    'Your Google account details (name and email address) stay in Firebase Authentication, separate from your decks, collection, want list and game results.',
   accountPrivacyController: 'Data controller: Miika Miinin, miikamiinin@gmail.com.',
   accountContinue: 'Continue to Google',
   accountCancel: 'Cancel',
@@ -71,7 +71,7 @@ export const textsEn: typeof textsFi = {
   accountDelete: 'Delete account data',
   accountDeleteTitle: 'Delete your account data?',
   accountDeleteBody:
-    'Your decks and collection are deleted from your account and from this browser, and Google sign-in is removed from this service. This cannot be undone. Data from signed-out use of this browser is not deleted.',
+    'Your decks, collection, want list and game results are deleted from your account and from this browser, and Google sign-in is removed from this service. This cannot be undone. Data from signed-out use of this browser is not deleted.',
   accountDeleteConfirm: 'Delete data and account',
   accountDeleting: 'Deleting…',
   accountDeleteReauth: 'Going to Google to confirm your sign-in. Deletion finishes when you return to this page.',
@@ -80,7 +80,7 @@ export const textsEn: typeof textsFi = {
   accountDeletedNotice: 'Your account data and account have been deleted.',
   accountChooseTitle: 'There is data in this browser and in your account',
   accountChooseBody:
-    'You can merge this browser’s decks and collection with your account data, or use only the account data. A backup of the browser data is made, and nothing is deleted until saving to your account has succeeded.',
+    'You can merge this browser’s decks, collection and game results with your account data, or use only the account data. A backup of the browser data is made, and nothing is deleted until saving to your account has succeeded.',
   accountChooseMerge: 'Merge',
   accountChooseAccountOnly: 'Use only account data',
   accountErrors: {
