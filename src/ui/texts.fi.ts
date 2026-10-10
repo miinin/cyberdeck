@@ -141,6 +141,8 @@ export const textsFi = {
   imageLoadError: 'Kuvaa ei voitu ladata.',
   columnName: 'Nimi',
   // T-060: card order selector (session state only).
+  viewOptionsLegend: 'Järjestys ja näkymä',
+  sortChip: (label: string, direction: string) => `Järjestys: ${label}, ${direction}`,
   sortLabel: 'Järjestys',
   sortOptions: { number: 'Numero', name: 'Nimi (A–Ö)', cost: 'Cost', power: 'Power', ram: 'RAM', type: 'Tyyppi', rarity: 'Harvinaisuus' },
   sortDirectionLabel: 'Suunta',

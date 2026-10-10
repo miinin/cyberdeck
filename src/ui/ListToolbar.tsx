@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { CatalogViewMode, DefaultEdition } from '../storage';
 import { MarkOwnButton } from './MarkOwnBanner';
 import { SegmentedChoice } from './SegmentedChoice';
@@ -34,9 +35,35 @@ export function ImageSizeSelect({
   );
 }
 
-const VIEW_OPTIONS: readonly (readonly [CatalogViewMode, string])[] = [
-  ['grid', texts.viewGrid],
-  ['table', texts.viewTable],
+/** A 2x2 grid of pictures (T-125). */
+function GridIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false" className="toolbar-icon">
+      <path d="M3 3h5v5H3zM12 3h5v5h-5zM3 12h5v5H3zM12 12h5v5h-5z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Three lines with bullets (T-125). */
+function ListIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false" className="toolbar-icon">
+      <path d="M7 5h10M7 10h10M7 15h10M3 5h.01M3 10h.01M3 15h.01" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Icon always; the word only on a wide screen (the radio keeps it as its accessible name, T-125). */
+const viewLabel = (icon: ReactNode, text: string) => (
+  <>
+    {icon}
+    <span className="toolbar-label">{text}</span>
+  </>
+);
+
+const VIEW_OPTIONS: readonly (readonly [CatalogViewMode, ReactNode])[] = [
+  ['grid', viewLabel(<GridIcon />, texts.viewGrid)],
+  ['table', viewLabel(<ListIcon />, texts.viewTable)],
 ];
 
 const EDITION_OPTIONS: readonly (readonly [DefaultEdition, string])[] = [
@@ -66,7 +93,8 @@ export function SwitchButton({ checked, label, onChange }: { checked: boolean; l
 }
 
 /**
- * Above the list (T-040): the view selector, the gallery button (T-123) and the "Merkitse omat kortit" button.
+ * Above the list (T-040, T-125): one row with the view selector, the gallery button (T-123), the scan button and, at the
+ * right end, the "Merkitse omat kortit" button. "Kaikki versiot" and the order live in the filter panel.
  * `editable` undefined leaves the button out (the collection is not ready, so nothing can be edited);
  * while marking (`editable` true) the banner below the toolbar replaces it (T-123).
  * `imageSize` undefined leaves the image size selector out (T-050a: it only applies to the grid).
@@ -81,10 +109,9 @@ export function ListToolbar({
   hideEditSwitch = false,
   imageSize,
   onImageSizeChange,
-  allArts,
-  onAllArtsChange,
   edition,
   onEditionChange,
+  scanSlot,
 }: {
   view: CatalogViewMode;
   onViewChange: (next: CatalogViewMode) => void;
@@ -98,12 +125,11 @@ export function ListToolbar({
   hideEditSwitch?: boolean;
   imageSize?: ImageSize;
   onImageSizeChange?: (next: ImageSize) => void;
-  /** The "all arts" switch (D-021); undefined leaves it out. Session state, never saved. */
-  allArts?: boolean;
-  onAllArtsChange?: (next: boolean) => void;
   /** The default edition of the + and − (D-022); shown only while editing. Undefined leaves it out. */
   edition?: DefaultEdition;
   onEditionChange?: (next: DefaultEdition) => void;
+  /** The scan button (T-125): sits in the row after the gallery button. */
+  scanSlot?: ReactNode;
 }) {
   return (
     <div className="list-toolbar">
@@ -114,9 +140,10 @@ export function ListToolbar({
       {onGalleryOpen !== undefined && (
         <button type="button" id="gallery-open" className="button-secondary gallery-open" onClick={onGalleryOpen}>
           <GalleryIcon />
-          {texts.galleryOpen}
+          <span className="toolbar-label">{texts.galleryOpen}</span>
         </button>
       )}
+      {scanSlot}
       {editable === true && hideEditSwitch && edition !== undefined && (
         <SegmentedChoice
           className="edition-select"
@@ -132,13 +159,8 @@ export function ListToolbar({
           </p>
         </SegmentedChoice>
       )}
-      {((editable === false && !hideEditSwitch) || allArts !== undefined) && (
-        <div className="toolbar-switches">
-          {editable === false && !hideEditSwitch && <MarkOwnButton onStart={() => onEditChange(true)} collectionEmpty={collectionEmpty} />}
-          {allArts !== undefined && (
-            <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={(next) => onAllArtsChange?.(next)} />
-          )}
-        </div>
+      {editable === false && !hideEditSwitch && (
+        <MarkOwnButton onStart={() => onEditChange(true)} collectionEmpty={collectionEmpty} />
       )}
     </div>
   );

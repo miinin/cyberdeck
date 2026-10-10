@@ -125,6 +125,8 @@ export const textsEn: typeof textsFi = {
   playsetFull: 'Playset complete',
   imageLoadError: 'The image could not be loaded.',
   columnName: 'Name',
+  viewOptionsLegend: 'Sort and view',
+  sortChip: (label: string, direction: string) => `Sort: ${label}, ${direction}`,
   sortLabel: 'Sort by',
   sortOptions: { number: 'Number', name: 'Name (A–Z)', cost: 'Cost', power: 'Power', ram: 'RAM', type: 'Type', rarity: 'Rarity' },
   sortDirectionLabel: 'Direction',

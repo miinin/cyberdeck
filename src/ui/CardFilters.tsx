@@ -5,6 +5,9 @@ import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
 import type { CardFilterCriteria, NumberFilterGroup } from '../domain/cardSearch';
 import { NUMBER_GROUPS } from './ActiveFilters';
 import { CardColor } from './CardColor';
+import type { CardSort } from '../domain/cardSort';
+import { SortSelect } from './SortSelect';
+import { SwitchButton } from './ListToolbar';
 import { texts } from './texts';
 import { useMediaQuery } from './useMediaQuery';
 import { SegmentedChoice } from './SegmentedChoice';
@@ -57,6 +60,11 @@ export interface CardFiltersProps {
    */
   hideSearch?: boolean;
   onShowResults?: () => void;
+  /** The order of the cards and the "Kaikki versiot" switch open the panel in a "Järjestys ja näkymä" section (T-125). Undefined leaves each out. */
+  sort?: CardSort;
+  onSortChange?: (next: CardSort) => void;
+  allArts?: boolean;
+  onAllArtsChange?: (next: boolean) => void;
 }
 
 /** How many choices are selected; "Kaikki" in "Kokoelma" is not a choice (T-050a). */
@@ -105,6 +113,10 @@ export function CardFilters({
   results,
   hideSearch = false,
   onShowResults,
+  sort,
+  onSortChange,
+  allArts,
+  onAllArtsChange,
 }: CardFiltersProps) {
   // Without matchMedia (tests) the panel counts as wide: always open.
   const alwaysOpen = useMediaQuery(collapsibleBelow ?? 'all', true) || collapsibleBelow === undefined;
@@ -194,6 +206,16 @@ export function CardFilters({
       )}
 
       <div id="filter-panel" className="filter-panel" hidden={!alwaysOpen && !open}>
+        {((sort !== undefined && onSortChange !== undefined) || (allArts !== undefined && onAllArtsChange !== undefined)) && (
+          <fieldset className="view-options">
+            <legend>{texts.viewOptionsLegend}</legend>
+            {sort !== undefined && onSortChange !== undefined && <SortSelect sort={sort} onChange={onSortChange} />}
+            {allArts !== undefined && onAllArtsChange !== undefined && (
+              <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={onAllArtsChange} />
+            )}
+          </fieldset>
+        )}
+
         {collectionFilter !== undefined && (
           <SegmentedChoice
             legendVisible

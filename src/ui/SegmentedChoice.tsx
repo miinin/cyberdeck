@@ -21,7 +21,7 @@ export function SegmentedChoice<T extends string | number>({
   legend: string;
   name: string;
   value: T;
-  options: readonly (readonly [T, string])[];
+  options: readonly (readonly [T, ReactNode])[];
   onChange: (next: T) => void;
   className?: string;
   legendVisible?: boolean;

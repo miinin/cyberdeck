@@ -7,7 +7,6 @@ import { cardNameText } from './CardName';
 import { GalleryViewer } from './GalleryViewer';
 import type { GalleryItem } from './galleryItems';
 import { SegmentedChoice } from './SegmentedChoice';
-import { SwitchButton } from './ListToolbar';
 import { texts } from './texts';
 import { useBarVisibility } from './useBarVisibility';
 import type { GallerySize } from './useGallery';
@@ -80,8 +79,6 @@ export function CardGallery({
   searchInputRef,
   filterCount,
   renderFilters,
-  allArts,
-  onAllArtsChange,
   onClose,
   onClear,
   onOpenDetails,
@@ -96,8 +93,6 @@ export function CardGallery({
   filterCount: number;
   /** The filter panel; `showResults` is for its "Näytä N korttia" button. */
   renderFilters: (showResults: () => void) => ReactNode;
-  allArts: boolean;
-  onAllArtsChange: (next: boolean) => void;
   onClose: () => void;
   onClear: () => void;
   /** "Kortin tiedot": opens the details of a card; focus returns to `opener`. */
@@ -240,7 +235,6 @@ export function CardGallery({
           options={SIZE_OPTIONS}
           onChange={onSizeChange}
         />
-        {!compact && <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={onAllArtsChange} />}
         {!compact && <span className="gallery-count">{texts.galleryCount(items.length)}</span>}
         {compact && searchOpen && (
           <div id="gallery-search-row" className="gallery-search-row">
@@ -252,11 +246,6 @@ export function CardGallery({
       {filtersOpen && (
         <div id="gallery-filters" className="gallery-filters">
           {renderFilters(showResults)}
-          {compact && (
-            <div className="gallery-filters-switch">
-              <SwitchButton checked={allArts} label={texts.artsAllLabel} onChange={onAllArtsChange} />
-            </div>
-          )}
         </div>
       )}
 

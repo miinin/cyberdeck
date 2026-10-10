@@ -83,6 +83,10 @@ describe('CatalogView: marking own cards (T-040, T-123)', () => {
     await user.click(markButton() as HTMLElement);
     expect(banner()).toBeInTheDocument();
     expect(within(banner() as HTMLElement).getByText(/Kirjaa omistamasi määrä/)).toBeInTheDocument();
+    // The description is not shown (T-125): it is the banner's title and description.
+    expect(banner()).toHaveAttribute('title', expect.stringContaining('Kirjaa omistamasi määrä'));
+    expect(banner()).toHaveAccessibleDescription(/Kirjaa omistamasi määrä/);
+    expect(within(banner() as HTMLElement).getByRole('button', { name: 'Lisää puuttuvat wantiin' })).toBeInTheDocument();
     expect(markButton()).toBeNull();
     expect(stepButtons()).toHaveLength(4);
     expect(done()).toHaveFocus();
