@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-10 (PM, T-121)
+# STATUS · päivitetty 2026-10-10 (PM, ideataulukko)
 
 ## Yhdellä lauseella
 Kaikki T-121:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
@@ -9,10 +9,10 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-121 (pakka omilla korteilla) julkaistu 2026-10-10 | Seuraavaksi: ideataulukko keräilijää ja pelaajaa hyödyttävistä ominaisuuksista (uusi istunto /clearin jälkeen) |
+| – | – | Ideataulukko (IDEAS.md, I-1–I-16) valmis 2026-10-10 | Käyttäjä valitsee ideoista tehtävät. PM:n suositus: I-1 Pakanvaihto-ohje ja I-2 yhteensopivuusmatriisi |
 
 ## Avoimet
-- Preview-kanavat poistuvat nyt PR:n sulkeutuessa (preview.yml, delete_preview) ja vanhenevat 1 päivässä: varmista ensimmäisen sulkeutuvan PR:n ajosta.
+- Preview-kanavien poisto PR:n sulkeutuessa (preview.yml, delete_preview): PR #135:n sulkeutumisajo epäonnistui ennen korjausta 433eb35 (checkout ja listausvirheen näyttö). Korjaus varmistetaan seuraavan PR:n sulkeutumisajosta.
 - Skannerin tarkistus muilla kuin sinisillä korteilla oikeilla kuvilla (T-113, käyttäjä).
 - TASKS.md:n Backlog-rivit (T-002–T-008 sekä velat T-030, T-031, T-041–T-043, T-047).
 - 79 puuttuvaa versiokuvaa: käyttäjä etsii ne.
