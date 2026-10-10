@@ -3,7 +3,7 @@ import type { Card } from '../domain/card';
 import type { Deck, DeckContent, DeckPublish } from '../domain/deck';
 import { buildPublicDeckInput } from '../domain/publicDeck';
 import { MAX_DECK_DISTINCT_CARDS, MAX_DECK_NAME_LENGTH, SIDEBOARD_SIZE } from '../domain/deck';
-import { checkDeckName, distinctRows, withDeckCount, withSideboardCount } from '../domain/deckEdit';
+import { checkDeckName, copyDeckName, distinctRows, withDeckCount, withSideboardCount } from '../domain/deckEdit';
 import {
   MAX_MAIN_DECK,
   MIN_MAIN_DECK,
@@ -64,7 +64,7 @@ import { DeckStats } from './DeckStats';
 import { Sideboard } from './Sideboard';
 import { deckProblems } from './DeckProblems';
 import type { MissingCard } from '../domain/deckExport';
-import { findSubstitutes } from '../domain/substitutes';
+import { applySubstitutes, findSubstitutes, playability as playabilityOf } from '../domain/substitutes';
 import type { PickBlocker } from './DeckPickTable';
 import { countIn } from './collectionStore';
 import { deckTexts } from './deckTexts';
@@ -110,11 +110,14 @@ export function DeckEditor({
   cards,
   repositories,
   onBack,
+  onOpenDeck,
 }: {
   deckId: string;
   cards: readonly Card[];
   repositories: Repositories;
   onBack: () => void;
+  /** Opens another deck in the editor (the copy made with own cards, T-121). */
+  onOpenDeck?: (id: string) => void;
 }) {
   const repository = repositories.decks;
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
@@ -440,7 +443,7 @@ export function DeckEditor({
     () =>
       collectionReady
         ? findSubstitutes(
-            missingCards.map((row) => row.card),
+            missingCards,
             cardsByKey.values(),
             (key) => countIn(collection, key),
             (key) => allCounts.get(key) ?? 0,
@@ -448,6 +451,34 @@ export function DeckEditor({
         : undefined,
     [collectionReady, missingCards, cardsByKey, collection, allCounts],
   );
+  const playability = useMemo(
+    () =>
+      substitutes === undefined
+        ? undefined
+        : playabilityOf(content, cardsByKey, (key) => countIn(collection, key), substitutes),
+    [substitutes, content, cardsByKey, collection],
+  );
+  const canCopyWithOwn = useMemo(
+    () =>
+      substitutes !== undefined &&
+      playability !== undefined &&
+      playability.withSubstitutes > playability.own,
+    [substitutes, playability],
+  );
+  /** A private copy where the missing main-deck copies are swapped for owned stand-ins; the original stays (T-121). */
+  const handleCopyWithOwn = async () => {
+    if (substitutes === undefined) return;
+    try {
+      const swapped = applySubstitutes(contentRef.current, cardsByKey, (key) => countIn(collection, key), substitutes);
+      const listed = await repository.list();
+      const names = listed.value.map((deck) => deck.name);
+      const name = copyDeckName(contentRef.current.name, names, deckTexts.copyOwnSuffix);
+      const created = await repository.create({ name, sections: swapped.sections });
+      onOpenDeck?.(created.id);
+    } catch {
+      setToast(deckTexts.copyOwnFailed);
+    }
+  };
   const missingCopies = missingCards.reduce((sum, row) => sum + row.missing, 0);
 
   /**
@@ -1136,6 +1167,8 @@ export function DeckEditor({
             missingCards={collectionReady ? missingCards : undefined}
             wants={wants}
             substitutes={substitutes}
+            playability={playability}
+            onCopyWithOwn={canCopyWithOwn && onOpenDeck !== undefined ? () => void handleCopyWithOwn() : undefined}
             missingText={
               collectionReady
                 ? deckTexts.missingFromCollection(missingCopies)

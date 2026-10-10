@@ -1,7 +1,7 @@
 import { exportFileName, missingToText } from '../domain/deckExport';
 import type { MissingCard } from '../domain/deckExport';
 import type { CardKey } from '../domain/cardKey';
-import type { Substitute } from '../domain/substitutes';
+import type { Playability, Substitute } from '../domain/substitutes';
 import { AddMissingToWantsButton } from './AddMissingToWants';
 import { deckTexts } from './deckTexts';
 import { downloadTextFile } from './downloadFile';
@@ -18,12 +18,18 @@ export function MissingCards({
   deckName,
   wants,
   substitutes,
+  playability,
+  onCopyWithOwn,
 }: {
   rows: readonly MissingCard[];
   deckName: string;
   wants?: WantsHandle;
   /** Owned stand-ins by missing card key (T-075). */
-  substitutes?: ReadonlyMap<CardKey, Substitute>;
+  substitutes?: ReadonlyMap<CardKey, readonly Substitute[]>;
+  /** How playable the main deck is with the collection and with stand-ins (T-121). */
+  playability?: Playability;
+  /** Makes a copy of the deck with the stand-ins in place; the button shows only when this is given (T-121). */
+  onCopyWithOwn?: () => void;
 }) {
   if (rows.length === 0) return null;
 
@@ -34,18 +40,27 @@ export function MissingCards({
           <AddMissingToWantsButton rows={rows.map(({ card, missing }) => ({ card: card.key, missing }))} wants={wants} />
         </div>
       )}
+      {playability !== undefined && playability.total > 0 && (
+        <p className="hint">{deckTexts.playability(playability.own, playability.total, playability.withSubstitutes)}</p>
+      )}
+      {onCopyWithOwn !== undefined && (
+        <div className="missing-add">
+          <button type="button" className="button-secondary" onClick={onCopyWithOwn}>
+            {deckTexts.copyWithOwnCards}
+          </button>
+        </div>
+      )}
       <details className="disclosure">
         <summary>{deckTexts.missingListHeading}</summary>
         <ul>
           {rows.map(({ card, missing }) => (
             <li key={card.key}>
               {deckTexts.missingRow(card.displayName, missing)}
-              {substitutes?.get(card.key) !== undefined && (
+              {(substitutes?.get(card.key)?.length ?? 0) > 0 && (
                 <span className="hint">
                   {' '}
                   {deckTexts.substituteRow(
-                    substitutes.get(card.key)?.card.displayName ?? '',
-                    substitutes.get(card.key)?.owned ?? 0,
+                    (substitutes?.get(card.key) ?? []).map((s) => ({ name: s.card.displayName, copies: s.copies, owned: s.owned })),
                   )}
                 </span>
               )}

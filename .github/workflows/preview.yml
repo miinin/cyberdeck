@@ -1,14 +1,17 @@
 # Pull requests: each PR gets a temporary preview URL on the TEST site,
 # so production hosting never carries preview channels. The URL is posted as a PR comment.
+# When the PR closes, its channel is deleted, so the 50-channel quota of the site is not filled.
 name: Preview (pull request)
-on: pull_request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
 permissions:
   checks: write
   contents: read
   pull-requests: write
 jobs:
   build_and_preview:
-    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.action != 'closed' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,5 +32,33 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG_DEV }}
           projectId: cyberdeck-tcg-dev
           target: test
-          # 3 days (T-089): at most 50 channels per site; 14 days filled the quota and failed every PR (HTTP 429).
-          expires: 3d
+          # At most 50 channels per site: 14 days (T-089) and then 3 days filled the quota (HTTP 429).
+          # Closed PRs delete their channel (below); 1 day keeps the rest short-lived.
+          expires: 1d
+
+  delete_preview:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.action == 'closed' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Delete the preview channels of this PR
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CYBERDECK_TCG_DEV }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          printf '%s' "$SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
+          FIREBASE="npx --yes firebase-tools@15.33.0"
+          $FIREBASE hosting:channel:list --site cyberdeck-tcg-dev --project cyberdeck-tcg-dev --json > "$RUNNER_TEMP/channels.json"
+          node -e '
+            const data = require(process.argv[1]);
+            const prefix = "pr" + process.env.PR_NUMBER + "-";
+            for (const channel of data.result?.channels ?? []) {
+              const id = channel.name.split("/").pop();
+              if (id.startsWith(prefix)) console.log(id);
+            }' "$RUNNER_TEMP/channels.json" | while read -r id; do
+            $FIREBASE hosting:channel:delete "$id" --site cyberdeck-tcg-dev --project cyberdeck-tcg-dev --force
+          done
+          rm -f "$GOOGLE_APPLICATION_CREDENTIALS"

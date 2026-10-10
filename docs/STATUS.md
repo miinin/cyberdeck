@@ -1,7 +1,7 @@
-# STATUS · päivitetty 2026-10-09 (PM, T-120)
+# STATUS · päivitetty 2026-10-10 (PM, T-121)
 
 ## Yhdellä lauseella
-Kaikki T-120:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
+Kaikki T-121:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
 Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna: Testikäyttäjän ja UX:n katselmointi mobiilista sekä MVP-1:n loppukatselmoinnit (D-014).
@@ -9,10 +9,10 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-120 (oma kansio, etu- ja takakansi) julkaistu 2026-10-09 | Käyttäjä kokeilee oman kansion muokkausta puhelimella; synkronointi tilille on IDEAS.md:ssä |
+| – | – | T-121 (pakka omilla korteilla) julkaistu 2026-10-10 | Seuraavaksi: ideataulukko keräilijää ja pelaajaa hyödyttävistä ominaisuuksista (uusi istunto /clearin jälkeen) |
 
 ## Avoimet
-- Preview-kanavien kiintiö (50) täyttyy: workflow ei poista kanavaa PR:n sulkeutuessa (pysyvä korjaus odottaa käyttäjän päätöstä).
+- Preview-kanavat poistuvat nyt PR:n sulkeutuessa (preview.yml, delete_preview) ja vanhenevat 1 päivässä: varmista ensimmäisen sulkeutuvan PR:n ajosta.
 - Skannerin tarkistus muilla kuin sinisillä korteilla oikeilla kuvilla (T-113, käyttäjä).
 - TASKS.md:n Backlog-rivit (T-002–T-008 sekä velat T-030, T-031, T-041–T-043, T-047).
 - 79 puuttuvaa versiokuvaa: käyttäjä etsii ne.

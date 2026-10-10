@@ -201,6 +201,7 @@ export function App({
             cards={cards}
             repositories={openRepositories}
             onBack={() => navigate({ name: 'decks' })}
+            onOpenDeck={(id) => navigate({ name: 'deck', id })}
           />
         )}
         {route.name === 'share' && (
