@@ -215,7 +215,7 @@ Katselmoitu `git diff test...t-122-tulosseuranta` (5 commitia) SR-43–SR-49:ä�
 **Odotettu:** virheellistä pilvidokumenttia ei ylikirjoiteta automaattisesti (SR-44 viimeinen kohta, SR-23 kohta 3). · **Havaittu:** dokumentti säilyy vain siihen asti, kunnes paikallinen loki muuttuu.
 **Vaikutus:** rivit, jotka toinen laite tai virheellinen versio kirjoitti ja joita tämä laite ei osaa lukea, katoavat pilvestä hiljaa. Hyökkääjää ei ole, koska vain omistaja voi kirjoittaa dokumenttiin. Riski on oman datan menetys bugin tai skeemavirheen seurauksena. Sama malli on käytössä jo kokoelmassa ja want-listassa (`cloudValue` → `null`), joten löydös ei ole T-122:n oma regressio. Tulosloki kuitenkin muuttuu useammin.
 **Korjausehdotus:** kun pilven osa on `invalid`, älä tallenna sitä pohjaan synkattuna. Vaihtoehdot: (a) `fullSync` palauttaa tiedon, ja `push` ohittaa `games`-osan (sekä kokoelman ja want-listan), kunnes fullSync näkee kelvollisen dokumentin, tai (b) fullSync pakotetaan aina, kun edellinen kierros näki virheellisen osan (esim. lippu pohjassa). Lisää testi: virheellinen pilvi → paikallinen muutos → synkka → pilvi ennallaan. PM päättää, korjataanko nyt vai kirjataanko velaksi koko mallille.
-**Tila:** Korjattu (Koodari, odottaa Digiturvan varmistusta)
+**Tila:** Avoin → Korjattu (267aa66) → Varmistettu (Digiturva 2026-10-10). Jatkohavainto SEC-122-7.
 
 ### SEC-122-2 · Pilvilokin yksittäinen virheellinen rivi tulkitaan poistoksi · Low
 **Sijainti:** `src/account/cloudCodec.ts` (`decodeGamesDoc`: `ok` + `dropped`) ja `src/account/sync/merge.ts:160` (`mergeGames`) · **Tehtävä:** T-122
@@ -223,14 +223,14 @@ Katselmoitu `git diff test...t-122-tulosseuranta` (5 commitia) SR-43–SR-49:ä�
 **Odotettu:** virheellinen ≠ poistettu (SR-23 kohta 3). · **Havaittu:** pudotettu rivi käsitellään toisen laitteen poistona, ja käyttäjä näkee vain `dropped`-varoituksen.
 **Vaikutus:** yksittäinen peli katoaa kaikilta laitteilta bugin tai skeemavirheen seurauksena. Sama käytös on kokoelman riveillä.
 **Korjausehdotus:** jos pilvidokumentissa on `dropped > 0`, käsittele koko loki kuten `invalid` (`null`, ei ylikirjoitusta), tai välitä pudotettujen rivien id:t `mergeGames`ille samaan tapaan kuin `invalidDeckIds` pakoille (vaatii, että id luetaan myös virheellisestä rivistä).
-**Tila:** Korjattu (Koodari, odottaa Digiturvan varmistusta)
+**Tila:** Avoin → Korjattu (267aa66) → Varmistettu (Digiturva 2026-10-10)
 
 ### SEC-122-3 · Pakan poisto voi poistaa sellaisten pakkojen tuloksia, joita laitteella ei ole · Low
 **Sijainti:** `src/storage/repositories.ts:560` (`decks.remove` → `withoutOrphans`) · **Tehtävä:** T-122
 **Toistaminen:** 1) Pilvessä on pakka P, jonka dokumentti on virheellinen (`invalidDeckIds`), joten laite B ei saa sitä, mutta P:n pelit tulevat B:lle lokin mukana. 2) B:llä poistetaan jokin muu pakka. 3) `withoutOrphans` poistaa myös P:n pelit, ja synkka vie poiston pilveen.
 **Vaikutus:** pakan P tulokset katoavat, vaikka P on yhä olemassa (rikkinäisenä) pilvessä. Tilanne on harvinainen ja koskee omaa dataa.
 **Korjausehdotus:** siivoa vain poistetun pakan rivit (`withoutDeck`). Orvot kannattaa siivota vain silloin, kun synkka on juuri nähnyt koko pakkajoukon kelvollisena (ei `invalidDeckIds`ejä). Toinen vaihtoehto on jättää siivous kokonaan pois, koska orvot eivät näy missään.
-**Tila:** Korjattu (Koodari, odottaa Digiturvan varmistusta)
+**Tila:** Avoin → Korjattu (267aa66) → Varmistettu (Digiturva 2026-10-10)
 
 ### SEC-122-4 · Deploy-järjestys: vanhat säännöt kaatavat myös lukemisen ja tilin poiston · Info
 **Sijainti:** `src/account/firebase/firestoreCloudStore.ts:90` (`readAll`), `:121` (`deleteAll`), `:143` (`commit`)
@@ -251,3 +251,18 @@ Katselmoitu `git diff test...t-122-tulosseuranta` (5 commitia) SR-43–SR-49:ä�
 - **SEC-122-1:** jos fullSyn lopussa jokin pilviaggregaatti (kokoelma, want-lista tai tulokset) on virheellinen, pohja tallennetaan rev-arvolla `Number.MAX_SAFE_INTEGER`, joka ei koskaan vastaa pilven revia. Seuraava kierros tekee aina fullSyncin eikä push-oikotietä, joten virheellinen dokumentti jää koskematta. Pohjan sisältö säilyy. Testit: virheellinen pilvi → paikallinen muutos → kaksi synkkaa → pilvi ennallaan (tulokset, want-lista, kokoelma).
 - **SEC-122-2:** `decodeGamesDoc` tulkitsee koko lokin virheelliseksi, jos yksikin rivi pudotetaan (`dropped > 0`). Testit: cloudStore-sopimustesti ja syncEngine ("one row cannot be read").
 - **SEC-122-3:** `decks.remove` poistaa vain poistetun pakan rivit (`withoutDeck`). `withoutOrphans` poistettu käyttämättömänä. Kortin rakennepäätös ja hyväksymiskriteeri päivitetty. Testi: tuntemattoman pakan pelit säilyvät.
+
+### Digiturva (2026-10-10) · Korjausten varmistus
+Tarkistettu `git diff 94483d6..df8e010` (commitit 267aa66 ja df8e010). SEC-122-1, SEC-122-2 ja SEC-122-3 ovat **varmistettuja**. Testit `src/account`, `src/storage`, `games.test.ts`, `DeckResults.test.tsx` ja `gameResults.leak.test.ts` menivät läpi (21 tiedostoa, 497 testiä). Veto: ei.
+- **SEC-122-1:** fullSync tallentaa pohjan revillä `NEVER_IN_SYNC_REV = Number.MAX_SAFE_INTEGER`, jos kokoelma, want-lista tai tulokset ovat `invalid`. `parseSyncBase` hyväksyy arvon (`Number.isSafeInteger`, ≥ 0), ja se säilyy JSON-muunnoksessa tarkkana. Base.revia käytetään vain vertailussa `rev === base.rev` ja push-polun `expectedRev`inä (`syncEngine.ts:139/201`). Koska vertailu ei koskaan toteudu, push-polkua ei ajeta. Muualla arvoa ei käytetä (`session.ts:144` tarkistaa vain, onko pohja `null`). Väliaikainen todennustestini (virheellinen pilvi → uusi peli → synkka) menee nyt läpi, ja Koodarin testit kattavat kaikki kolme aggregaattia. Sivuvaikutus: niin kauan kuin pilvessä on virheellinen osa, jokainen kierros on fullSync (lisää lukuja, R-24). Tämä on hyväksyttävää.
+- **SEC-122-2:** `decodeGamesDoc` palauttaa `invalid`, jos `dropped > 0`. Testit ovat cloudStore-sopimuksessa ja syncEnginessä.
+- **SEC-122-3:** `decks.remove` käyttää `withoutDeck(current, id)`, ja `withoutOrphans` on poistettu.
+- **df8e010** (PM): vain CSS-luokka `results-games` ja asettelu. Ei vaikutusta turvallisuuteen.
+
+### SEC-122-7 · Virheellisen pilven aikana lisätty peli katoaa, kun pilvi taas kelpaa · Low
+**Sijainti:** `src/account/sync/syncEngine.ts` (fullSync: `storage.saveBase(baseOf(merged, cloudInvalid ? NEVER_IN_SYNC_REV : rev))`) · **Tehtävä:** T-122
+**Toistaminen:** 1) Laite synkkaa pelin A. 2) Pilven `games/log` muuttuu virheelliseksi. 3) Käyttäjä kirjaa pelin B, ja synkka säilyttää pilven (SEC-122-1 korjattu). Pohjaan tallentuu kuitenkin yhdistetty paikallinen loki eli A ja B. 4) Jokin asiakas kirjoittaa pilveen kelvollisen lokin, jossa on vain A. 5) fullSync: B on paikallisesti sama kuin pohjassa ja puuttuu pilvestä, joten `mergeGames` tulkitsee sen poistoksi ja B katoaa. Todennettu väliaikaisella testillä (ei commitoitu).
+**Odotettu:** peli, jota pilvi ei koskaan nähnyt, säilyy. · **Havaittu:** se poistetaan.
+**Vaikutus:** oman datan menetys harvinaisessa palautumistilanteessa. Tämän version asiakas ei kirjoita virheellisen dokumentin päälle, joten tilanne vaatii toisen version, korjatun bugin tai käsin tehdyn korjauksen. Sama koskee kokoelmaa ja want-listaa.
+**Korjausehdotus:** kun osa on `invalid`, tallenna pohjaan sen osalta edellisen pohjan arvo (`base?.games ?? EMPTY_GAME_LOG` ja vastaavasti kokoelmalle ja want-listalle) eikä yhdistettyä paikallista arvoa. Silloin pilven näkemättömät muutokset pysyvät paikallisina muutoksina. Lisää testi yllä olevista vaiheista. Korjaus ei estä Done-tilaa, ja PM päättää, tehdäänkö se nyt vai velkana.
+**Tila:** Avoin

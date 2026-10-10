@@ -363,6 +363,7 @@ Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-
 | 2026-10-03 | Katselmointi `reports/SEC-012-t054a0-testiprojekti.md`: testisivusto projektiin `cyberdeck-tcg-dev`, tuotannon salaisuus pois PR- ja test-workflowista, oikeudet ja `persist-credentials: false` ennallaan, palvelutilin roolit (Hosting Admin + API Keys Viewer) vahvistettu. R-4 laskettu Low:ksi. R-18 poistuu, kun uusi testisivusto toimii. Löydökset SEC-035 (Low), SEC-036 ja SEC-037 (Info). | T-054a0 |
 | 2026-10-10 | Uhkamalli T-122 (tulosseuranta, D-030): luku 19, turvavaatimukset SR-43–SR-49 tehtäväkortissa, riski R-24. PRIVACY.md luku 13. | T-122 |
 | 2026-10-10 | Katselmointi T-122 (kortin luku "Digiturva · Katselmointi"): SR-43–SR-49 täyttyvät, ja säännöt ovat valmiit vietäviksi deviin. Löydökset SEC-122-1 (Medium: virheellinen pilviloki ylikirjoittuu seuraavassa pushissa, sama malli kuin kokoelmassa), SEC-122-2 ja SEC-122-3 (Low) sekä SEC-122-4–6 (Info: deploy-järjestys koskee myös lukua ja tilin poistoa, kiintiö, staattinen sääntötesti). Ei vetoa. | T-122 |
+| 2026-10-10 | Varmistus T-122: SEC-122-1, SEC-122-2 ja SEC-122-3 korjattu (267aa66) ja varmistettu. Uusi SEC-122-7 (Low): virheellisen pilven aikana lisätty rivi katoaa, kun pilvi taas kelpaa (pohjaan tallentuu yhdistetty arvo). Ei vetoa. | T-122 |
 
 ## 14. T-026: korttidata buildissa (D-013)
 
@@ -435,4 +436,4 @@ Korvaa luvun 12 ennakoidut vaatimukset MVP2-2, MVP2-3, MVP2-5–MVP2-9 kirjautum
 
 - **Turvavaatimukset (ehdotus, PM hyväksyy):** SR-43 Firestore-säännöt ja deploy-järjestys, SR-44 luetun datan validointi, SR-45 kirjoituksen rajat, SR-46 vapaan tekstin näyttäminen, SR-47 ei vuotoa, SR-48 elinkaari ja poisto, SR-49 tietosuoja ja minimointi. Vaatimukset on kirjattu kokonaisuudessaan tiedostoon `tasks/T-122-tulosseuranta.md`.
 - **Riskit:** uusi R-24. Tietosuojakysymys K-P13 (PRIVACY.md luku 13).
-- **Katselmointi 2026-10-10:** SR-43–SR-49 täyttyvät. Avoimet löydökset SEC-122-1 (Medium), SEC-122-2 ja SEC-122-3 (Low) sekä SEC-122-4–6 (Info) on kirjattu tehtäväkorttiin. **Deploy:** säännöt deviin ennen testiin yhdistämistä ja tuotantoon ennen julkaisua, koska vanhoilla säännöillä myös `readAll` ja `deleteAll` epäonnistuvat (SEC-122-4).
+- **Katselmointi 2026-10-10:** SR-43–SR-49 täyttyvät. SEC-122-1 (Medium), SEC-122-2 ja SEC-122-3 (Low) on korjattu ja varmistettu. Avoimina ovat SEC-122-7 (Low) sekä SEC-122-4–6 (Info), ja ne on kirjattu tehtäväkorttiin. **Deploy:** säännöt deviin ennen testiin yhdistämistä ja tuotantoon ennen julkaisua, koska vanhoilla säännöillä myös `readAll` ja `deleteAll` epäonnistuvat (SEC-122-4).
