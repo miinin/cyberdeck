@@ -121,7 +121,8 @@ export function buildSnapshot(
     const decoded = decodeEnvelopeValue(raw, GAMES_ENVELOPE_SPEC);
     if (decoded.kind === 'ok') {
       dropped += decoded.dropped;
-      return { kind: 'ok', value: decoded.value };
+      // SEC-122-2: a row that cannot be read is not a deletion. The whole log is invalid (never overwritten).
+      return decoded.dropped > 0 ? { kind: 'invalid' } : { kind: 'ok', value: decoded.value };
     }
     if (decoded.kind === 'newer') locked = true;
     else dropped += 1;

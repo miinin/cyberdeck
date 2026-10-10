@@ -34,7 +34,7 @@ Tulokset ovat **oma aggregaattinsa, yksi dokumentti**, samalla mallilla kuin wan
 - **Firestore:** `users/{uid}/games/log` = `{ schemaVersion, savedAt, data: { games } }`. Säännöt: `isEnvelope`, `hasExactly(d.data, ['games'])`, `games is list` ja `size() <= 1000`, omistaja lukee, kirjoittaa ja poistaa. Ei listausta muille. Tulokset eivät koskaan päädy julkiseen pakkaan (`publicDecks`), pakan jakolinkkiin tai vientitiedostoon.
 - **Synkka:** `LocalData.games` ja `SyncBase.games`, `CloudChange.games`. `mergeGames(local, cloud, base)` toimii pelin `id`:n mukaan samalla säännöllä kuin `mergeCollection` kortin mukaan: jos vain toinen puoli muuttui, valitaan se; jos molemmat muuttuivat, valitaan paikallinen; jos rivi puuttuu toiselta puolelta ja oli pohjassa, se on poistettu. Rivien vertailu tehdään kaikkien kenttien mukaan. Pilven virheellinen dokumentti ei koskaan ylikirjoitu (`null` kuten `cloudValue`). Lajittelu: `playedOn` laskevasti, sitten `createdAt` laskevasti. `MAX_GAMES`-ylitys → `Stop('error')` kuten muissakin.
 - **Siirto selaimesta tilille, uloskirjautuminen ja tilin poisto:** tulokset kulkevat samoin kuin want (siirto ensimmäisessä kirjautumisessa, `deleteAll` poistaa myös `games/log`-dokumentin).
-- **Pakan poisto poistaa sen tulokset** samassa tallennuksessa. Vahvistusdialogissa lukee määrä (`deleteDeckGames`), jos tuloksia on. Toisella laitteella poistetun pakan tulokset (harvinainen kilpatilanne) jäävät lokiin, mutta niitä ei näytetä missään. Siivous tehdään seuraavan kerran, kun mikä tahansa pakka poistetaan: poista rivit, joiden `deckId` ei ole pakoissa.
+- **Pakan poisto poistaa sen tulokset** samassa tallennuksessa. Vahvistusdialogissa lukee määrä (`deleteDeckGames`), jos tuloksia on. Toisella laitteella poistetun pakan tulokset (harvinainen kilpatilanne) jäävät lokiin, mutta niitä ei näytetä missään. Orpoja ei siivota (SEC-122-3): pakan poisto poistaa vain poistetun pakan rivit (`withoutDeck`), koska laite ei tiedä, onko toisen pakan puuttuminen poisto vai virheellinen pilvidokumentti.
 - Vanha sovellusversio ei lue `games/log`-dokumenttia, joten se ei riko mitään. Se näkee vain `rev`-muutoksen ja tekee tyhjän fullSyncin.
 
 ## Näkymä
@@ -161,7 +161,7 @@ match /games/{docId} {
 - [ ] `deleteAll` poistaa `games/log`-dokumentin. Onnistumisen tarkistus ja muistipilven testi kattavat myös sen.
 - [ ] Uloskirjautuneena tilin tulokset eivät näy (testi).
 - [ ] Siirto tilille säilyttää `deckId`-linkin, joten tulokset löytyvät siirretylle pakalle (testi).
-- [ ] Pakan poisto poistaa sen tulokset samassa tallennuksessa, ja orvot rivit siivotaan kortin mukaan.
+- [ ] Pakan poisto poistaa sen tulokset samassa tallennuksessa, ja vain sen rivit (ei orpoja, SEC-122-3).
 
 **SR-49 · Tietosuoja ja minimointi (PRIVACY.md luku 13)**
 - [ ] Tallennetaan vain kortin `GameRecord`-kentät. Vastustajan tilitunnistetta, yhteystietoja tai kuvaa ei tallenneta, eikä vastustajan nimeä käytetä mihinkään muuhun kuin oman lokin ryhmittelyyn ja ehdotuksiin.
@@ -177,7 +177,7 @@ match /games/{docId} {
 
 ### Koodari (2026-10-10) · Review
 Toteutettu haarassa `t-122-tulosseuranta` (commitit `T-122: …`, ei PR:ää). Rakenne D-030:n mukaan, want-listan (T-064a) malli toistettuna kaikkiin kohtiin.
-- **Domain:** `src/domain/games.ts` (tyypit, rajat `MAX_GAMES` 1000 ja 900 000 tavua, `parseGameRecord`/`parseGameLog` kenttä kerrallaan ja kaikki kentät pakollisia, tuntematon kenttä, `__proto__`, väärä tyyppi, päivä, ≤3 eri Legendiä, ≤64 merkin avain ja ohjausmerkit pois ennen pituuden tarkistusta → rivi pois; sama `id` → ensimmäinen säilyy; yli 1 000 riviä → koko loki kelvoton; `gameLogFits`, `withGame`, `withoutOrphans`, `sameGameLog`). `src/domain/gameStats.ts` (V–T–Ta, voitto-%, aloittaja/toinen, ryhmittely `Map`illa: vastustajat nimen/Legendien/tuntemattoman mukaan, värit, tapahtumat, ehdotukset, Legendien esitäyttö, pakkakohtainen ennätys).
+- **Domain:** `src/domain/games.ts` (tyypit, rajat `MAX_GAMES` 1000 ja 900 000 tavua, `parseGameRecord`/`parseGameLog` kenttä kerrallaan ja kaikki kentät pakollisia, tuntematon kenttä, `__proto__`, väärä tyyppi, päivä, ≤3 eri Legendiä, ≤64 merkin avain ja ohjausmerkit pois ennen pituuden tarkistusta → rivi pois; sama `id` → ensimmäinen säilyy; yli 1 000 riviä → koko loki kelvoton; `gameLogFits`, `withGame`, `withoutDeck`, `sameGameLog`). `src/domain/gameStats.ts` (V–T–Ta, voitto-%, aloittaja/toinen, ryhmittely `Map`illa: vastustajat nimen/Legendien/tuntemattoman mukaan, värit, tapahtumat, ehdotukset, Legendien esitäyttö, pakkakohtainen ennätys).
 - **Tallennus:** `cyberdeck:games` (tilillä `cyberdeck:u:{uid}:games`), envelope v1, varmuuskopio (max 3), `GameLogRepository` (`load`, `add`, `update`, `remove`, `subscribe`; kortin `load/save/subscribe`-luonnoksen sijaan muutokset ovat repositoriossa, koska SR-13 vaatii read-modify-write-mutaation eikä kahden välilehden lost update ole mahdollinen). `LocalData.games`, `SyncBase.games` (vanha pohja ilman `games` = tyhjä loki), `readLocal`/`apply`/`backupAll`/`clear`/`onChange`. Pakan poisto poistaa pakan tulokset ja kaikki orvot samalla kutsulla (`decks.remove`); jos loki on lukittu tai rikki, pakka poistuu silti.
 - **Pilvi/synkka:** `users/{uid}/games/log`: `CloudSnapshot.games`, `CloudChange.games`, `encodeGamesDoc` (rivit rakennetaan kenttä kerrallaan), `checkChange` (rivi-, määrä- ja tavuraja ennen lähetystä; transaktiolaskuri), Firestore- ja muistitoteutus, `deleteAll` poistaa dokumentin. `mergeGames` (id:n mukaan, vain toinen muuttui → se, molemmat → paikallinen, poisto, kaikki kentät vertailussa, virheellinen pilvi → `null`, ei ylikirjoitusta), `syncEngine` (push ilman lukuja, fullSync, ylitys → `Stop('error')`), siirto tilille (`copySignedOutData`; jos yhdistetty loki ei mahtuisi rajoihin, mitään ei kopioida ja uloskirjautuneen data jää paikalleen).
 - **Säännöt:** `firestore.rules` SR-43:n mukaan täsmälleen kortin muodossa + datamallikommentti; `src/firestoreRules.test.ts` (staattinen, kuten muutkin). Säännöt eivät ole viety (ei `firebase deploy`).
@@ -215,7 +215,7 @@ Katselmoitu `git diff test...t-122-tulosseuranta` (5 commitia) SR-43–SR-49:ä�
 **Odotettu:** virheellistä pilvidokumenttia ei ylikirjoiteta automaattisesti (SR-44 viimeinen kohta, SR-23 kohta 3). · **Havaittu:** dokumentti säilyy vain siihen asti, kunnes paikallinen loki muuttuu.
 **Vaikutus:** rivit, jotka toinen laite tai virheellinen versio kirjoitti ja joita tämä laite ei osaa lukea, katoavat pilvestä hiljaa. Hyökkääjää ei ole, koska vain omistaja voi kirjoittaa dokumenttiin. Riski on oman datan menetys bugin tai skeemavirheen seurauksena. Sama malli on käytössä jo kokoelmassa ja want-listassa (`cloudValue` → `null`), joten löydös ei ole T-122:n oma regressio. Tulosloki kuitenkin muuttuu useammin.
 **Korjausehdotus:** kun pilven osa on `invalid`, älä tallenna sitä pohjaan synkattuna. Vaihtoehdot: (a) `fullSync` palauttaa tiedon, ja `push` ohittaa `games`-osan (sekä kokoelman ja want-listan), kunnes fullSync näkee kelvollisen dokumentin, tai (b) fullSync pakotetaan aina, kun edellinen kierros näki virheellisen osan (esim. lippu pohjassa). Lisää testi: virheellinen pilvi → paikallinen muutos → synkka → pilvi ennallaan. PM päättää, korjataanko nyt vai kirjataanko velaksi koko mallille.
-**Tila:** Avoin
+**Tila:** Korjattu (Koodari, odottaa Digiturvan varmistusta)
 
 ### SEC-122-2 · Pilvilokin yksittäinen virheellinen rivi tulkitaan poistoksi · Low
 **Sijainti:** `src/account/cloudCodec.ts` (`decodeGamesDoc`: `ok` + `dropped`) ja `src/account/sync/merge.ts:160` (`mergeGames`) · **Tehtävä:** T-122
@@ -223,14 +223,14 @@ Katselmoitu `git diff test...t-122-tulosseuranta` (5 commitia) SR-43–SR-49:ä�
 **Odotettu:** virheellinen ≠ poistettu (SR-23 kohta 3). · **Havaittu:** pudotettu rivi käsitellään toisen laitteen poistona, ja käyttäjä näkee vain `dropped`-varoituksen.
 **Vaikutus:** yksittäinen peli katoaa kaikilta laitteilta bugin tai skeemavirheen seurauksena. Sama käytös on kokoelman riveillä.
 **Korjausehdotus:** jos pilvidokumentissa on `dropped > 0`, käsittele koko loki kuten `invalid` (`null`, ei ylikirjoitusta), tai välitä pudotettujen rivien id:t `mergeGames`ille samaan tapaan kuin `invalidDeckIds` pakoille (vaatii, että id luetaan myös virheellisestä rivistä).
-**Tila:** Avoin
+**Tila:** Korjattu (Koodari, odottaa Digiturvan varmistusta)
 
 ### SEC-122-3 · Pakan poisto voi poistaa sellaisten pakkojen tuloksia, joita laitteella ei ole · Low
 **Sijainti:** `src/storage/repositories.ts:560` (`decks.remove` → `withoutOrphans`) · **Tehtävä:** T-122
 **Toistaminen:** 1) Pilvessä on pakka P, jonka dokumentti on virheellinen (`invalidDeckIds`), joten laite B ei saa sitä, mutta P:n pelit tulevat B:lle lokin mukana. 2) B:llä poistetaan jokin muu pakka. 3) `withoutOrphans` poistaa myös P:n pelit, ja synkka vie poiston pilveen.
 **Vaikutus:** pakan P tulokset katoavat, vaikka P on yhä olemassa (rikkinäisenä) pilvessä. Tilanne on harvinainen ja koskee omaa dataa.
 **Korjausehdotus:** siivoa vain poistetun pakan rivit (`withoutDeck`). Orvot kannattaa siivota vain silloin, kun synkka on juuri nähnyt koko pakkajoukon kelvollisena (ei `invalidDeckIds`ejä). Toinen vaihtoehto on jättää siivous kokonaan pois, koska orvot eivät näy missään.
-**Tila:** Avoin
+**Tila:** Korjattu (Koodari, odottaa Digiturvan varmistusta)
 
 ### SEC-122-4 · Deploy-järjestys: vanhat säännöt kaatavat myös lukemisen ja tilin poiston · Info
 **Sijainti:** `src/account/firebase/firestoreCloudStore.ts:90` (`readAll`), `:121` (`deleteAll`), `:143` (`commit`)
@@ -246,3 +246,8 @@ Katselmoitu `git diff test...t-122-tulosseuranta` (5 commitia) SR-43–SR-49:ä�
 **Havainto:** `src/firestoreRules.test.ts` todentaa sääntöjen tekstin mutta ei kortin listaamia kieltoja ajossa (toinen uid, kirjautumaton käyttäjä, 1 001 riviä jne.). Tämä noudattaa projektin nykyistä käytäntöä (ei emulaattoria). Testin `block` ulottuu lisäksi tiedoston loppuun asti (myös `publicDecks`), mutta se ei heikennä nykyisiä tarkistuksia.
 **Ehdotus:** dev-viennin jälkeen PM tarkistaa käsin tai Rules Playgroundissa yhden kielletyn tapauksen (esim. `games/other`) ja yhden sallitun.
 **Tila:** Avoin (seuranta)
+
+### Koodari (2026-10-10) · Digiturva-korjaukset
+- **SEC-122-1:** jos fullSyn lopussa jokin pilviaggregaatti (kokoelma, want-lista tai tulokset) on virheellinen, pohja tallennetaan rev-arvolla `Number.MAX_SAFE_INTEGER`, joka ei koskaan vastaa pilven revia. Seuraava kierros tekee aina fullSyncin eikä push-oikotietä, joten virheellinen dokumentti jää koskematta. Pohjan sisältö säilyy. Testit: virheellinen pilvi → paikallinen muutos → kaksi synkkaa → pilvi ennallaan (tulokset, want-lista, kokoelma).
+- **SEC-122-2:** `decodeGamesDoc` tulkitsee koko lokin virheelliseksi, jos yksikin rivi pudotetaan (`dropped > 0`). Testit: cloudStore-sopimustesti ja syncEngine ("one row cannot be read").
+- **SEC-122-3:** `decks.remove` poistaa vain poistetun pakan rivit (`withoutDeck`). `withoutOrphans` poistettu käyttämättömänä. Kortin rakennepäätös ja hyväksymiskriteeri päivitetty. Testi: tuntemattoman pakan pelit säilyvät.

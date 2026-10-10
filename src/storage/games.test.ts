@@ -190,14 +190,15 @@ describe('deleting a deck deletes its games (T-122, SR-48)', () => {
     expect((await games.load()).value.games).toEqual([keep]);
   });
 
-  it('cleans up orphans of decks that are gone, whichever deck is deleted next', async () => {
+  it('leaves the games of decks this device does not have when another deck is deleted (SEC-122-3)', async () => {
     const { games, decks } = setup();
     const a = await decks.create(CONTENT);
     const b = await decks.create({ ...CONTENT, name: 'Toinen' });
-    await games.add(input({ deckId: 'deleted-on-another-device' }));
+    const unseen = await games.add(input({ deckId: 'invalid-in-the-cloud' }));
     const keep = await games.add(input({ deckId: a.id }));
+    await games.add(input({ deckId: b.id }));
     await decks.remove(b.id);
-    expect((await games.load()).value.games).toEqual([keep]);
+    expect((await games.load()).value.games.map((g) => g.id).sort()).toEqual([unseen.id, keep.id].sort());
   });
 
   it('does not write the log when a deck without games is deleted, nor for an unknown deck', async () => {

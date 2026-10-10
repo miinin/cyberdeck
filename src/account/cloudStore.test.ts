@@ -379,10 +379,15 @@ it('writes exactly the game fields the rules expect and refuses a row with anoth
   });
 
   it('validates the game log like a stored one and locks on a newer version (SR-44)', async () => {
+    // SEC-122-2: a row that cannot be read makes the whole log invalid (a dropped row is not a deletion).
     h.setRaw('games/log', deckDoc({ games: [game('g1'), game('g1', { result: 'loss' }), { id: 'x' }, null] }));
     let snapshot = await h.store.readAll();
-    expect(snapshot.games).toEqual({ kind: 'ok', value: GAMES });
+    expect(snapshot.games).toEqual({ kind: 'invalid' });
     expect(snapshot.dropped).toBe(3);
+    h.setRaw('games/log', deckDoc({ games: [game('g1')] }));
+    snapshot = await h.store.readAll();
+    expect(snapshot.games).toEqual({ kind: 'ok', value: GAMES });
+    expect(snapshot.dropped).toBe(0);
 
     h.setRaw('games/log', deckDoc({ games: 'x' }));
     snapshot = await h.store.readAll();

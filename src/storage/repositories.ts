@@ -29,7 +29,7 @@ import {
   parseGameRecord,
   sameGameLog,
   withGame,
-  withoutOrphans,
+  withoutDeck,
 } from '../domain/games';
 import type { GameInput, GameLog, GameRecord } from '../domain/games';
 import type { PrintingKey } from '../domain/printing';
@@ -545,19 +545,18 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       });
     },
     remove: async (id: DeckId) => {
-      const remaining: { ids: Set<DeckId> | null } = { ids: null };
+      const removed = { value: false };
       mutate(decksAggregate, (current) => {
         const next = current.filter((deck) => deck.id !== id);
         if (next.length === current.length) return { next: current, result: undefined };
-        remaining.ids = new Set(next.map((deck) => deck.id));
+        removed.value = true;
         return { next, result: undefined };
       });
-      const keep = remaining.ids;
-      if (keep === null) return;
-      // The deck's games go with it, and so do the orphans of decks deleted on another device (T-122, SR-48).
-      // Failing here leaves them in the log, where nothing shows them; the next deletion cleans them up.
+      if (!removed.value) return;
+      // Only the deleted deck's games go with it (T-122, SR-48, SEC-122-3): the games of a deck this device cannot
+      // see (e.g. an invalid cloud deck) stay. Failing here leaves them in the log, where nothing shows them.
       try {
-        mutate(gamesAggregate, (current) => ({ next: withoutOrphans(current, keep), result: undefined }));
+        mutate(gamesAggregate, (current) => ({ next: withoutDeck(current, id), result: undefined }));
       } catch {
         // See above.
       }

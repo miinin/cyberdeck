@@ -12,7 +12,6 @@ import {
   sameGameLog,
   withGame,
   withoutDeck,
-  withoutOrphans,
 } from './games';
 import type { GameRecord } from './games';
 
@@ -168,7 +167,5 @@ describe('log helpers', () => {
     expect(withGame(log, game('c')).games).toHaveLength(3);
     expect(withoutDeck(log, 'deck2').games.map((g) => g.id)).toEqual(['a']);
     expect(withoutDeck(log, 'nope')).toBe(log);
-    expect(withoutOrphans(log, new Set(['deck1'])).games.map((g) => g.id)).toEqual(['a']);
-    expect(withoutOrphans(log, new Set(['deck1', 'deck2']))).toBe(log);
   });
 });

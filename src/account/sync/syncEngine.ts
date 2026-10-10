@@ -41,6 +41,12 @@ type LockManagerLike = { request(name: string, callback: () => Promise<void>): P
 
 const MAX_ROUNDS = 3;
 
+/**
+ * SEC-122-1: the base rev when the cloud had an invalid aggregate. No real rev equals it, so the next round
+ * always runs a fullSync (which keeps the invalid document) instead of a push that would overwrite it.
+ */
+const NEVER_IN_SYNC_REV = Number.MAX_SAFE_INTEGER;
+
 function baseOf(data: LocalData, rev: number): SyncBase {
   return {
     rev,
@@ -176,7 +182,9 @@ export function createSyncEngine(options: {
     const merged: LocalData = { decks: decks.decks, collection: collection.collection, wants: wants.collection, games: games.log };
     // The device data is replaced only if it is still what the merge started from.
     if (!storage.apply(local, merged)) return false;
-    storage.saveBase(baseOf(merged, rev));
+    const cloudInvalid =
+      snapshot.collection.kind === 'invalid' || snapshot.wants.kind === 'invalid' || snapshot.games.kind === 'invalid';
+    storage.saveBase(baseOf(merged, cloudInvalid ? NEVER_IN_SYNC_REV : rev));
     return true;
   }
 

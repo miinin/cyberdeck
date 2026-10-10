@@ -133,6 +133,24 @@ describe('sync engine', () => {
     await a.engine.syncNow();
     expect((await a.repos.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 2 }]);
     expect(cloud.getRaw('collection/want')).toEqual({ garbage: true });
+    // SEC-122-1: a later local change must not overwrite the invalid document either.
+    await a.repos.wants.setCount('detonate', 3);
+    await a.engine.syncNow();
+    await a.engine.syncNow();
+    expect(cloud.getRaw('collection/want')).toEqual({ garbage: true });
+    expect((await a.repos.wants.load()).value.entries).toEqual([{ card: 'detonate', count: 3 }]);
+  });
+
+  it('does not overwrite an invalid cloud collection after a later local change (SEC-122-1)', async () => {
+    const a = device(cloud);
+    await a.repos.collection.setCount('detonate', 2);
+    await a.engine.syncNow();
+    cloud.setRaw('collection/main', { garbage: true });
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    await a.engine.syncNow();
+    await a.repos.collection.setCount('detonate', 3);
+    await a.engine.syncNow();
+    expect(cloud.getRaw('collection/main')).toEqual({ garbage: true });
   });
 
   it('locks when the cloud want list has a newer schema', async () => {
@@ -399,6 +417,25 @@ describe('sync engine: game results (T-122, D-030)', () => {
     await a.engine.syncNow();
     expect((await a.repos.games.load()).value.games).toEqual([added]);
     expect(cloud.getRaw('games/log')).toEqual({ garbage: true });
+    // SEC-122-1: logging another game must not overwrite the invalid document on the next rounds.
+    await a.repos.games.add({ ...GAME, result: 'loss' });
+    await a.engine.syncNow();
+    await a.engine.syncNow();
+    expect(cloud.getRaw('games/log')).toEqual({ garbage: true });
+    expect((await a.repos.games.load()).value.games).toHaveLength(2);
+  });
+
+  it('treats the whole cloud log as invalid when one row cannot be read (SEC-122-2)', async () => {
+    const a = device(cloud);
+    const added = await a.repos.games.add(GAME);
+    await a.engine.syncNow();
+    const doc = cloud.getRaw('games/log') as { data: { games: Record<string, unknown>[] } };
+    const broken = { ...doc, data: { games: [{ ...doc.data.games[0], unexpected: 'x' }] } };
+    cloud.setRaw('games/log', broken);
+    cloud.setRaw('meta', { schemaVersion: 1, rev: 7, updatedAt: '2026-10-03T10:00:00.000Z' });
+    await a.engine.syncNow();
+    expect((await a.repos.games.load()).value.games).toEqual([added]);
+    expect(cloud.getRaw('games/log')).toEqual(broken);
   });
 
   it('keeps the cloud log when it has more than 1000 rows, and deletes nothing', async () => {

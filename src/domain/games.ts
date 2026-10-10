@@ -191,12 +191,6 @@ export function gamesOfDeck(log: GameLog, deckId: DeckId): GameRecord[] {
   return log.games.filter((game) => game.deckId === deckId);
 }
 
-/** The log without the games of decks that no longer exist (orphans of a deck deleted on another device). */
-export function withoutOrphans(log: GameLog, deckIds: ReadonlySet<DeckId>): GameLog {
-  const games = log.games.filter((game) => deckIds.has(game.deckId));
-  return games.length === log.games.length ? log : { games };
-}
-
 /** The log without the games of one deck. Same object when the deck has none. */
 export function withoutDeck(log: GameLog, deckId: DeckId): GameLog {
   const games = log.games.filter((game) => game.deckId !== deckId);
