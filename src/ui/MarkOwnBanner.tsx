@@ -48,6 +48,7 @@ export function MarkOwnButton({ onStart, collectionEmpty }: { onStart: () => voi
 }
 
 /**
+ * Floats at the bottom of the screen (T-126), so starting the mode does not push the page down.
  * The bar shown while the user marks the cards they own (T-123, T-125): one row with the mode name, the edition the + adds
  * to (it only matters for marking) and "Valmis", which leaves the mode. What the mode does is a title and a description
  * only; `extra` (the "add missing to wants" link) gets a row of its own.

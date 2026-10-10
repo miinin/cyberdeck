@@ -10004,3 +10004,26 @@ html[data-gallery='on'] main {
 .mark-open .mark-icon-check {
   color: color-mix(in srgb, var(--color-success) 65%, var(--color-text-muted, currentColor));
 }
+
+/* T-126: the marking bar floats at the bottom of the screen, so starting the mode does not push the page down. */
+.mark-banner {
+  position: fixed;
+  z-index: 20;
+  inset-inline: 0;
+  bottom: 0;
+  margin: 0;
+  padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  border-inline-start: 0;
+  border-block-start: 3px solid var(--color-brand-yellow);
+  background: var(--color-surface-raised);
+  box-shadow: 0 -0.5rem 1.5rem rgba(0, 0, 0, 0.25);
+}
+
+.mark-banner .missing-add {
+  flex-basis: 100%;
+}
+
+/* Room for the floating bar at the end of the page, so it never covers the last cards. */
+main:has(.mark-banner) {
+  padding-block-end: 9rem;
+}
