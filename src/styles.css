@@ -10194,3 +10194,28 @@ main .field input[type='text'] {
 .list-toolbar .sort-select {
   margin-block-end: 0;
 }
+
+/* T-131: an even lower floating marking bar: 32 px controls, thin padding, the link row only as high as its text. */
+.mark-banner {
+  padding-block: 0.25rem calc(0.25rem + env(safe-area-inset-bottom, 0px));
+  padding-inline: var(--space-3);
+}
+
+.mark-banner .button-secondary {
+  min-block-size: 2rem;
+  padding-inline: var(--space-2);
+}
+
+.mark-banner .segmented-option {
+  block-size: calc(2rem - 2px);
+  padding-inline: var(--space-2);
+}
+
+.mark-banner .missing-link {
+  min-block-size: 1.5rem;
+  padding-block: 0;
+}
+
+main:has(.mark-banner) {
+  padding-block-end: 5rem;
+}
