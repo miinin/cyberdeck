@@ -145,6 +145,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
                     rows={wantedCards.map((card) => ({ card: card.key, count: countIn(wants, card.key) }))}
                     queue={proxyQueue}
                     label={proxyTexts.sendAllWants}
+                    className="link-button missing-link"
                   />
                 </div>
               )}
