@@ -10104,3 +10104,38 @@ main .field input[type='text'] {
   min-block-size: 2.5rem;
   border-bottom-width: 1px;
 }
+
+/*
+ * T-128: on a phone the heading bar keeps its distance from the buttons below it, and the buttons under the heading fill
+ * the row evenly, so the right side does not stay empty.
+ */
+@media (max-width: 39.99rem) {
+  .page-head {
+    row-gap: var(--space-3);
+  }
+
+  .page-head > .page-head-actions,
+  .page-head > .deck-actions {
+    flex: 1 1 100%;
+  }
+
+  .page-head-actions > *,
+  .page-head > .deck-actions > .button-primary,
+  .page-head > .deck-actions > .button-secondary {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .page-head-actions .view-select {
+    flex-basis: 100%;
+  }
+
+  .page-head-actions .segmented {
+    display: flex;
+  }
+
+  .page-head-actions .segmented-option {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+}
