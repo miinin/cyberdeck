@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StorageError, createMemoryRepositories } from '../storage';
 import { legalCards, renderRoute, storedCollection, storedDecks } from './deckTestUtils';
@@ -45,11 +45,11 @@ describe('Deck editor', () => {
   });
 
   it('adds and removes cards, and saves automatically after a short pause', async () => {
-    const user = userEvent.setup();
     const repositories = openEditor([]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
-    await user.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: Unit 3' }));
-    await user.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: Unit 3' }));
+    // Synchronous clicks: a slow machine cannot let the pause run out between them.
+    fireEvent.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: Unit 3' }));
+    fireEvent.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: Unit 3' }));
     expect(screen.getByText('Pääpakassa on 2 korttia, vähintään 40.')).toBeInTheDocument();
     expect(screen.getByText(/Muutokset tallennetaan/)).toBeInTheDocument();
     // Not saved yet, saved after the pause: one write for both clicks.
@@ -57,8 +57,8 @@ describe('Deck editor', () => {
     await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'u3', count: 2 }]));
     expect(await screen.findByText('Tallennettu')).toBeInTheDocument();
 
-    await user.click(within(searchList()).getByRole('button', { name: 'Poista pakasta: Unit 3' }));
-    await user.click(within(searchList()).getByRole('button', { name: 'Poista pakasta: Unit 3' }));
+    fireEvent.click(within(searchList()).getByRole('button', { name: 'Poista pakasta: Unit 3' }));
+    fireEvent.click(within(searchList()).getByRole('button', { name: 'Poista pakasta: Unit 3' }));
     await waitFor(async () => expect(await savedCards(repositories)).toEqual([]));
     expect(screen.getByText('Pakka on tyhjä. Lisää kortteja hakulistasta.')).toBeInTheDocument();
   });
