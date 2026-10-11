@@ -132,3 +132,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-127 | Kortit-sivun kevyt ja pieni ilme kaikille sivuille, tiiviimpi kelluva merkintäpalkki | 1 | Should | PM | Done | PM |
 | T-128 | Mobiili: otsikon palkki irti painikkeista, otsikon alla olevat painikkeet täyttävät rivin | 1 | Should | PM | Done | PM |
 | T-129 | Kokoelman näkymävalitsin koko levyiseksi mobiilissa; Have/Want: jakolinkki linkkilaatikkoon, hillitty proxy-linkki, pienemmät järjestysvalinnat | 1 | Should | PM | Done | PM |
+| T-130 | Epävakaa DeckEditor-autosave-testi vakaaksi (synkroniset klikkaukset, ei kilpatilannetta 500 ms:n viiveen kanssa) | 1 | Should | PM | Done | PM |
