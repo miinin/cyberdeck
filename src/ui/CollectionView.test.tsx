@@ -157,4 +157,13 @@ describe('CollectionView', () => {
       expect(queue).toEqual([{ card: 'beta', count: 1 }, { card: 'gamma', count: 1 }]);
     });
   });
+  it('shows the achievements in the overview: earned badges, the closest goals and the rest behind a disclosure (T-132)', async () => {
+    await renderCollection([['alpha', 3]]);
+    const panel = (await screen.findByRole('heading', { level: 2, name: /^(Saavutukset|Achievements)$/ })).closest('section') as HTMLElement;
+    const earned = within(panel).getByRole('list', { name: /Ansaitut saavutukset|Earned achievements/ });
+    expect(within(earned).getByText(/Ensimmäinen kortti|First card/)).toBeInTheDocument();
+    expect(within(panel).getByText(/saavutettu|earned/)).toBeInTheDocument();
+    expect(within(panel).getByRole('heading', { level: 3, name: /Lähimmät tavoitteet|Closest goals/ })).toBeInTheDocument();
+    expect(within(panel).getByText(/(Avoimet saavutukset|Open achievements) \(\d+\)/)).toBeInTheDocument();
+  });
 });

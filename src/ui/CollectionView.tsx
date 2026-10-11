@@ -26,6 +26,7 @@ import { CardName } from './CardName';
 import { Ring } from './DeckCharts';
 import { RaritySymbol } from './RaritySymbol';
 import { SendToProxyButton, useProxyQueue } from './SendToProxy';
+import { AchievementsPanel } from './AchievementsPanel';
 import { collectionTexts } from './collectionTexts';
 import { formatPercent } from './deckTexts';
 import { cardCount } from './texts';
@@ -232,6 +233,8 @@ export function CollectionView({
               </dl>
             </div>
           </section>
+
+          <AchievementsPanel cards={cards} collection={saved} />
 
           <section className="panel" aria-labelledby="coll-sets">
             <h2 id="coll-sets" className="panel-title">
