@@ -1,55 +1,45 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Collection } from '../domain/collection';
 import { encodeTradeShare } from '../domain/tradeShare';
 import type { WantList } from '../domain/wants';
 import { texts } from './texts';
 
-/** Copies a trade link (collection + want list) to the clipboard; shows the link in a field when copying fails (T-062). */
+/**
+ * The trade link (collection + want list) in a link box with a copy button (T-062, T-129): the link is always visible, the
+ * button copies it to the clipboard.
+ */
 export function ShareTradeButton({ have, want }: { have: Collection; want: WantList }) {
-  const [state, setState] = useState<'copied' | 'failed' | 'too-big' | null>(null);
-  const [link, setLink] = useState('');
+  const [state, setState] = useState<'copied' | 'failed' | null>(null);
+  const data = useMemo(() => encodeTradeShare(have, want), [have, want]);
+  const link = data === null ? '' : `${window.location.origin}/#/vaihto/${data}`;
   const share = async () => {
-    const data = encodeTradeShare(have, want);
-    if (data === null) {
-      setState('too-big');
-      return;
-    }
-    const url = `${window.location.origin}/#/vaihto/${data}`;
-    setLink(url);
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(link);
       setState('copied');
     } catch {
       setState('failed');
     }
   };
+  if (data === null) return <p className="trade-share hint">{texts.tradeShareTooBig}</p>;
   return (
     <div className="trade-share">
-      <button type="button" className="button-secondary" onClick={() => void share()}>
-        {texts.tradeShareButton}
-      </button>{' '}
-      <span className="hint">{texts.tradeShareNote}</span>
-      <p role="status">
-        {state === 'too-big'
-          ? texts.tradeShareTooBig
-          : state === 'copied'
-            ? texts.tradeShareCopied
-            : state === 'failed'
-              ? texts.tradeShareCopyFailed
-              : ''}
+      <div className="trade-share-row">
+        <input
+          type="text"
+          readOnly
+          className="trade-share-link"
+          value={link}
+          aria-label={texts.tradeShareLinkLabel}
+          onFocus={(e) => e.target.select()}
+        />
+        <button type="button" className="button-secondary" onClick={() => void share()}>
+          {texts.tradeShareButton}
+        </button>
+      </div>
+      <p className="hint">{texts.tradeShareNote}</p>
+      <p role="status" className="trade-share-status">
+        {state === 'copied' ? texts.tradeShareCopied : state === 'failed' ? texts.tradeShareCopyFailed : ''}
       </p>
-      {(state === 'copied' || state === 'failed') && (
-        <p>
-          <input
-            type="text"
-            readOnly
-            className="trade-share-link"
-            value={link}
-            aria-label={texts.tradeShareLinkLabel}
-            onFocus={(e) => e.target.select()}
-          />
-        </p>
-      )}
     </div>
   );
 }

@@ -10139,3 +10139,58 @@ main .field input[type='text'] {
     justify-content: center;
   }
 }
+
+/* T-129: Kokoelma's view selector fills the phone row, not centred in it. */
+@media (max-width: 39.99rem) {
+  .page-head-actions .view-select .segmented {
+    inline-size: 100%;
+  }
+}
+
+/* T-129: the trade link in one quiet link box with its copy button. */
+.trade-share {
+  margin-block: 0 var(--space-3);
+}
+
+.trade-share-row {
+  display: flex;
+  gap: var(--space-2);
+  max-inline-size: 40rem;
+}
+
+.trade-share .trade-share-link {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  max-width: none;
+  block-size: 2.5rem;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.trade-share .button-secondary {
+  flex: none;
+}
+
+.trade-share .hint {
+  margin-block: var(--space-1) 0;
+  font-size: var(--font-size-sm);
+}
+
+.trade-share-status:empty {
+  display: none;
+}
+
+/* T-129: the order selects match the 40 px tool row; the label is the same small text. */
+.sort-select label {
+  font-size: var(--font-size-sm);
+}
+
+.sort-select select {
+  block-size: 2.5rem;
+  font-size: var(--font-size-sm);
+}
+
+.list-toolbar .sort-select {
+  margin-block-end: 0;
+}
