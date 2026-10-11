@@ -1,3 +1,4 @@
+import type { Achievement } from '../domain/achievements';
 import type { collectionTextsFi } from './collectionTexts.fi';
 
 const cards = (n: number) => (n === 1 ? '1 card' : `${n} cards`);
@@ -94,4 +95,31 @@ export const collectionTextsEn: typeof collectionTextsFi = {
   binderPickNone: 'You own no cards that match.',
   binderPickCancel: 'Cancel',
   wantNote: 'The want list gets a full playset of each card.',
+  achievementsHeading: 'Achievements',
+  achievementsEarned: (earned: number, total: number) => `${earned} of ${total} earned`,
+  achievementsNext: 'Closest goals',
+  achievementsOpen: (n: number) => `Open achievements (${n})`,
+  achievementsAllDone: 'Every achievement earned!',
+  achievementsEarnedList: 'Earned achievements',
+  achievementsOpenList: 'Open achievements',
+  achievementLabel: (item: Achievement): string => {
+    switch (item.kind) {
+      case 'distinct':
+        return item.subject === 1 ? 'First card' : `${item.subject} different cards`;
+      case 'all':
+        return 'Every card';
+      case 'copies':
+        return `${item.subject} copies`;
+      case 'playsets':
+        return 'A playset of every card';
+      case 'set':
+        return `Set complete: ${item.subject}`;
+      case 'color':
+        return `Color complete: ${item.subject}`;
+      case 'type':
+        return `Type complete: ${item.subject}`;
+      case 'rarity':
+        return `Rarity complete: ${item.subject}`;
+    }
+  },
 };

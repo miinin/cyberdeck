@@ -1,3 +1,5 @@
+import type { Achievement } from '../domain/achievements';
+
 const cards = (n: number) => (n === 1 ? '1 kortti' : `${n} korttia`);
 
 /** Texts of the Collection progress section (T-105). */
@@ -92,4 +94,31 @@ export const collectionTextsFi = {
   binderPickNone: 'Ei omistettuja kortteja tällä haulla.',
   binderPickCancel: 'Peruuta',
   wantNote: 'Want-listalle tulee kunkin kortin täysi pelisarja.',
+  achievementsHeading: 'Saavutukset',
+  achievementsEarned: (earned: number, total: number) => `${earned} / ${total} saavutettu`,
+  achievementsNext: 'Lähimmät tavoitteet',
+  achievementsOpen: (n: number) => `Avoimet saavutukset (${n})`,
+  achievementsAllDone: 'Kaikki saavutukset ansaittu!',
+  achievementsEarnedList: 'Ansaitut saavutukset',
+  achievementsOpenList: 'Avoimet saavutukset',
+  achievementLabel: (item: Achievement): string => {
+    switch (item.kind) {
+      case 'distinct':
+        return item.subject === 1 ? 'Ensimmäinen kortti' : `${item.subject} eri korttia`;
+      case 'all':
+        return 'Jokainen kortti';
+      case 'copies':
+        return `${item.subject} kappaletta`;
+      case 'playsets':
+        return 'Pelisarja jokaisesta';
+      case 'set':
+        return `Setti täynnä: ${item.subject}`;
+      case 'color':
+        return `Väri täynnä: ${item.subject}`;
+      case 'type':
+        return `Tyyppi täynnä: ${item.subject}`;
+      case 'rarity':
+        return `Harvinaisuus täynnä: ${item.subject}`;
+    }
+  },
 };

@@ -10219,3 +10219,63 @@ main .field input[type='text'] {
 main:has(.mark-banner) {
   padding-block-end: 5rem;
 }
+
+/* T-132: achievements. Earned badges are small chips with a green check; open ones are dim with their count. */
+.achievements-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.achievements-score {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.achievement-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.achievement {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: 2rem;
+  padding-inline: var(--space-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.achievement.is-done {
+  border-color: color-mix(in srgb, var(--color-success) 55%, var(--color-border));
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
+  color: var(--color-text);
+}
+
+.achievement-check {
+  flex: none;
+  color: var(--color-success);
+}
+
+.achievement-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
+.achievements .progress-row {
+  grid-template-columns: minmax(8rem, 18rem) minmax(0, 1fr) auto;
+}
+
+.achievements-all-done {
+  margin: 0;
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+}

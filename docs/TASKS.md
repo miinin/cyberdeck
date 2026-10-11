@@ -134,3 +134,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-129 | Kokoelman näkymävalitsin koko levyiseksi mobiilissa; Have/Want: jakolinkki linkkilaatikkoon, hillitty proxy-linkki, pienemmät järjestysvalinnat | 1 | Should | PM | Done | PM |
 | T-130 | Epävakaa DeckEditor-autosave-testi vakaaksi (synkroniset klikkaukset, ei kilpatilannetta 500 ms:n viiveen kanssa) | 1 | Should | PM | Done | PM |
 | T-131 | Kelluva merkintäpalkki matalammaksi (32 px kontrollit, ohut täyte) | 1 | Should | PM | Done | PM |
+| T-132 | Saavutukset (I-8): Kokoelma > Yleiskuva näyttää ansaitut merkit, lähimmät tavoitteet palkkeina ja avoimet saavutukset. Lasketaan kokoelmasta, ei tallennusta | 2 | Should | PM | Done | PM |
