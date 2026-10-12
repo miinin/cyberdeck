@@ -6,6 +6,8 @@
  */
 import { isCardKey } from '../domain/cardKey';
 import type { CardKey } from '../domain/cardKey';
+import { DEFAULT_TRADE_RULE, TRADE_KEEPS } from '../domain/tradeRule';
+import type { TradeKeep, TradeRule } from '../domain/tradeRule';
 import {
   countOf,
   EMPTY_COLLECTION,
@@ -63,6 +65,7 @@ import {
   SCAN_MODE_KEY,
   BINDER_LAYOUT_KEY,
   COLLECTION_PREFS_KEY,
+  TRADE_RULE_KEY,
   ACCOUNT_LAST_UID_KEY,
   ACCOUNT_REDIRECT_PENDING_KEY,
   ACCOUNT_DELETE_PENDING_KEY,
@@ -151,6 +154,24 @@ function specWith<T>(
  * with `v: 1` holds the collection as of schema 2; it is converted like the collection itself (D-022), so the
  * three-way merge compares like with like. `v: 2` bases are already converted. The want list is never converted.
  */
+/** Reads the saved trade rule (T-135); each field that is not valid falls back to its default. */
+function parseTradeRule(raw: string | null): TradeRule {
+  let keep: TradeKeep = DEFAULT_TRADE_RULE.keep;
+  let keepDeckCards = DEFAULT_TRADE_RULE.keepDeckCards;
+  if (raw === null) return { keep, keepDeckCards };
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (typeof value === 'object' && value !== null) {
+      const fields = value as Record<string, unknown>;
+      if (TRADE_KEEPS.includes(fields.keep as TradeKeep)) keep = fields.keep as TradeKeep;
+      if (typeof fields.keepDeckCards === 'boolean') keepDeckCards = fields.keepDeckCards;
+    }
+  } catch {
+    // Not JSON: the defaults.
+  }
+  return { keep, keepDeckCards };
+}
+
 /** Reads the saved Collection page choices; each field that is not valid falls back to its default. */
 function parseCollectionPrefs(raw: string | null): CollectionPrefs {
   const prefs = { ...DEFAULT_COLLECTION_PREFS };
@@ -712,6 +733,25 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       }
       try {
         store.setItem(COLLECTION_PREFS_KEY, JSON.stringify(valid));
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return valid;
+    },
+    loadTradeRule: async () => {
+      try {
+        return parseTradeRule(store.getItem(TRADE_RULE_KEY));
+      } catch {
+        return { ...DEFAULT_TRADE_RULE };
+      }
+    },
+    saveTradeRule: async (rule: TradeRule) => {
+      const valid = parseTradeRule(JSON.stringify(rule));
+      if (valid.keep !== rule.keep || valid.keepDeckCards !== rule.keepDeckCards) {
+        throw new StorageError('invalid-input', 'Unknown trade rule');
+      }
+      try {
+        store.setItem(TRADE_RULE_KEY, JSON.stringify(valid));
       } catch (error) {
         throw toStorageError(error, 'write');
       }

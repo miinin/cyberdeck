@@ -24,6 +24,8 @@ export interface Achievement {
 /** Steps for the number of distinct cards and of copies; a step at or above the card count is left out (the "all" badge covers it). */
 export const DISTINCT_GOALS = [1, 25, 50, 100] as const;
 export const COPY_GOALS = [100, 250, 500, 1000] as const;
+/** The one set with a "Set complete" goal. */
+export const ACHIEVEMENT_SET = 'welcome-to-night-city';
 
 function make(id: string, kind: AchievementKind, subject: string | number, owned: number, total: number): Achievement {
   const capped = Math.min(owned, total);
@@ -44,8 +46,9 @@ export function achievements(
   if (overview.total > 0) list.push(make('all', 'all', overview.total, overview.distinct, overview.total));
   for (const goal of COPY_GOALS) list.push(make(`copies-${goal}`, 'copies', goal, overview.copies, goal));
   if (overview.total > 0) list.push(make('playsets', 'playsets', overview.total, overview.playsets, overview.total));
+  // Only the main set (T-135, user's choice): promos, starter decks and tournament prints are no goals.
   for (const row of setProgress(cards, collection)) {
-    if (row.total > 0) list.push(make(`set-${row.family}`, 'set', row.label, row.owned, row.total));
+    if (row.family === ACHIEVEMENT_SET && row.total > 0) list.push(make(`set-${row.family}`, 'set', row.label, row.owned, row.total));
   }
   for (const row of colorProgress(cards, collection)) {
     if (row.value !== null && row.total > 0) list.push(make(`color-${row.value}`, 'color', row.value, row.owned, row.total));

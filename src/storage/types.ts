@@ -1,3 +1,4 @@
+import type { TradeRule } from '../domain/tradeRule';
 import type { BinderLayout } from '../domain/binderLayout';
 import type { CardKey } from '../domain/cardKey';
 import type { Collection } from '../domain/collection';
@@ -115,6 +116,10 @@ export interface PreferencesRepository {
   /** Saved Collection page choices; every missing or invalid field falls back to its default. Never rejects because of storage problems. */
   loadCollectionPrefs(): Promise<CollectionPrefs>;
   saveCollectionPrefs(prefs: CollectionPrefs): Promise<CollectionPrefs>;
+  /** Saved trade rule (T-135); every missing or invalid field falls back to its default. Never rejects because of storage problems. */
+  loadTradeRule(): Promise<TradeRule>;
+  /** Rejects with StorageError when the rule is not valid or saving fails. */
+  saveTradeRule(rule: TradeRule): Promise<TradeRule>;
   /** The saved own binder layout, or null when none or it is not valid (the caller then starts a new one). Never rejects because of storage problems. */
   loadBinderLayout(): Promise<BinderLayout | null>;
   /** Saves a valid layout (the name is trimmed and cut to its limit). Rejects with StorageError when the layout is not valid or saving fails. */

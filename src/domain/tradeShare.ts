@@ -12,23 +12,29 @@ import type { WantList } from './wants';
  * a linear regex and isCardKey, lookups use Map, and a bad line is dropped and counted instead of failing.
  */
 export const TRADE_HEADER = 'cyberdeck-vaihto 1';
+/** Version 2 (T-135): the sender's tradeable copies as "t" lines; a card without one has none to trade. */
+export const TRADE_HEADER_V2 = 'cyberdeck-vaihto 2';
 
-const LINE = /^([hw]) ([1-9][0-9]{0,2}) ([a-z0-9-]{1,100})$/;
+const LINE = /^([hwt]) ([1-9][0-9]{0,2}) ([a-z0-9-]{1,100})$/;
 const BASE64URL = /^[A-Za-z0-9_-]+$/;
 
 export interface TradeShare {
   readonly have: Collection;
   readonly want: WantList;
+  /** The sender's tradeable copies (version 2 links), or undefined for an older link (the playset rule applies). */
+  readonly tradeable?: ReadonlyMap<CardKey, number>;
   /** Lines that were left out: bad shape, bad key, or a key twice in the same list. */
   readonly dropped: number;
 }
 
 /** The link data, or null when it would not fit into a link (never a truncated link). */
-export function encodeTradeShare(have: Collection, want: WantList): string | null {
-  const lines = [TRADE_HEADER];
+export function encodeTradeShare(have: Collection, want: WantList, tradeable?: ReadonlyMap<CardKey, number>): string | null {
+  const lines = [tradeable === undefined ? TRADE_HEADER : TRADE_HEADER_V2];
+  const tradeList: Collection = { entries: [...(tradeable ?? [])].map(([card, count]) => ({ card, count })) };
   for (const [prefix, list] of [
     ['h', have],
     ['w', want],
+    ['t', tradeList],
   ] as const) {
     for (const { card, count } of list.entries) lines.push(`${prefix} ${count} ${card}`);
   }
@@ -62,17 +68,21 @@ export function decodeTradeShare(data: string): TradeShare | null {
     return null;
   }
   const lines = text.split('\n');
-  if (lines[0] !== TRADE_HEADER || lines.length > 2 * MAX_COLLECTION_ENTRIES + 1) return null;
+  const v2 = lines[0] === TRADE_HEADER_V2;
+  if ((lines[0] !== TRADE_HEADER && !v2) || lines.length > 3 * MAX_COLLECTION_ENTRIES + 1) return null;
   const lists = {
     h: new Map<CardKey, number>(),
     w: new Map<CardKey, number>(),
+    t: new Map<CardKey, number>(),
   };
   let dropped = 0;
   for (let i = 1; i < lines.length; i += 1) {
     const line = lines[i] ?? '';
     if (line === '' && i === lines.length - 1) continue;
     const match = LINE.exec(line);
-    const list = match === null ? undefined : lists[match[1] as 'h' | 'w'];
+    const prefix = match?.[1] as 'h' | 'w' | 't' | undefined;
+    // "t" lines belong to version 2 only.
+    const list = prefix === undefined || (prefix === 't' && !v2) ? undefined : lists[prefix];
     const card = match?.[3];
     const count = Number(match?.[2]);
     if (
@@ -88,5 +98,12 @@ export function decodeTradeShare(data: string): TradeShare | null {
     }
     list.set(card, count);
   }
-  return { have: toCollection(lists.h), want: toCollection(lists.w), dropped };
+  if (!v2) return { have: toCollection(lists.h), want: toCollection(lists.w), dropped };
+  // Never more tradeable copies than the shared collection has.
+  const tradeable = new Map<CardKey, number>();
+  for (const [card, count] of lists.t) {
+    const owned = lists.h.get(card) ?? 0;
+    if (owned > 0) tradeable.set(card, Math.min(count, owned));
+  }
+  return { have: toCollection(lists.h), want: toCollection(lists.w), tradeable, dropped };
 }

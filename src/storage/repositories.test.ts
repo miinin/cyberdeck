@@ -728,6 +728,19 @@ describe('preferences: scanner mode (T-108)', () => {
   });
 });
 
+describe('preferences: trade rule (T-135)', () => {
+  it('defaults to keeping a playset, remembers the rule and fixes invalid fields one by one', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadTradeRule()).toEqual({ keep: 'playset', keepDeckCards: false });
+    await preferences.saveTradeRule({ keep: 'one', keepDeckCards: true });
+    expect(await createRepositories({ store, persistent: true }).preferences.loadTradeRule()).toEqual({ keep: 'one', keepDeckCards: true });
+    await expectStorageError(preferences.saveTradeRule({ keep: 'all' as 'one', keepDeckCards: true }), 'invalid-input');
+    const odd = setup({ 'cyberdeck:trade-rule': '{"keep":"none","keepDeckCards":"yes"}' });
+    expect(await odd.preferences.loadTradeRule()).toEqual({ keep: 'none', keepDeckCards: false });
+    expect(await setup({ 'cyberdeck:trade-rule': 'not json' }).preferences.loadTradeRule()).toEqual({ keep: 'playset', keepDeckCards: false });
+  });
+});
+
 describe('preferences: collection page (T-109)', () => {
   it('defaults to the owned cards, remembers the choices and fixes invalid fields one by one', async () => {
     const { preferences, store } = setup();

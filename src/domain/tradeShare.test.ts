@@ -30,12 +30,22 @@ describe('trade share', () => {
     });
   });
 
+  it('carries the tradeable copies in a version 2 link, capped at the shared count (T-135)', () => {
+    const data = encodeTradeShare(col(['alpha', 5], ['beta', 1]), col(), new Map([['alpha', 4]]));
+    expect(decodeTradeShare(data ?? '')).toEqual({ have: col(['alpha', 5], ['beta', 1]), want: col(), tradeable: new Map([['alpha', 4]]), dropped: 0 });
+    // Nothing tradeable is still a version 2 link: the receiver must not fall back to the playset rule.
+    expect(decodeTradeShare(encodeTradeShare(col(['alpha', 5]), col(), new Map()) ?? '')?.tradeable).toEqual(new Map());
+    // A "t" line above the shared count is capped, one for a card not shared is left out, and version 1 drops "t" lines.
+    expect(decodeTradeShare(encodeText('cyberdeck-vaihto 2\nh 2 alpha\nt 9 alpha\nt 1 beta'))?.tradeable).toEqual(new Map([['alpha', 2]]));
+    expect(decodeTradeShare(encodeText('cyberdeck-vaihto 1\nh 2 alpha\nt 1 alpha'))).toEqual({ have: col(['alpha', 2]), want: col(), dropped: 1 });
+  });
+
   it('returns null instead of a truncated link when the data is too long', () => {
     const rows = Array.from({ length: 1200 }, (_, i): [string, number] => [`card-number-${i}-aaaaaaaaaaaa`, 3]);
     expect(encodeTradeShare(col(...rows), col())).toBeNull();
   });
 
-  it.each(['', '%%%', 'a b', 'AAAA', encodeText('wrong 1\nh 1 a'), encodeText('cyberdeck-vaihto 2\nh 1 a')])(
+  it.each(['', '%%%', 'a b', 'AAAA', encodeText('wrong 1\nh 1 a'), encodeText('cyberdeck-vaihto 3\nh 1 a')])(
     'rejects invalid data "%s"',
     (bad) => {
       expect(decodeTradeShare(bad)).toBeNull();
