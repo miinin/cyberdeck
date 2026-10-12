@@ -53,10 +53,19 @@ function BadgeIcon({ item }: { item: Achievement }) {
   }
 }
 
+/** The color classes of a badge (T-154): a color badge its card color, a type badge the deck chart's type color. */
+function badgeClasses(item: Achievement): string {
+  if (item.kind === 'color') return ` badge--color-${String(item.subject).toLowerCase()}`;
+  if (item.kind === 'type') return ` badge--type-${String(item.subject).toLowerCase()}`;
+  return '';
+}
+
 function Badge({ item }: { item: Achievement }) {
   const share = item.total === 0 ? 0 : item.owned / item.total;
   return (
-    <li className={`badge badge--tier-${item.tier}${item.done ? ' is-done' : ''}`}>
+    <li
+      className={`badge badge--tier-${item.tier}${badgeClasses(item)}${item.done ? ' is-done' : ''}`}
+    >
       <span className="badge-icon">
         <BadgeIcon item={item} />
       </span>
@@ -109,7 +118,10 @@ export function AchievementsPanel({
       </div>
       <div className="achievements-meter" aria-hidden="true">
         {list.map((item) => (
-          <span key={item.id} className={item.done ? 'is-on' : undefined} />
+          <span
+            key={item.id}
+            className={`badge--tier-${item.tier}${badgeClasses(item)}${item.done ? ' is-on' : ''}`}
+          />
         ))}
       </div>
       {earned.length > 0 && (
