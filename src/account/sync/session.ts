@@ -49,7 +49,7 @@ export interface AccountSession {
 }
 
 function isEmptyData(data: LocalData) {
-  return data.decks.length === 0 && data.collection.entries.length === 0 && data.wants.entries.length === 0 && data.games.games.length === 0;
+  return data.decks.length === 0 && data.collection.entries.length === 0 && data.wants.entries.length === 0 && data.games.games.length === 0 && data.haves.entries.length === 0;
 }
 
 /**
@@ -66,6 +66,7 @@ export function copySignedOutData(anonymous: SyncStorage, account: SyncStorage):
   const collection = mergeCollection(from.collection, into.collection, EMPTY_COLLECTION);
   const wants = mergeCollection(from.wants, into.wants, EMPTY_COLLECTION);
   const games = mergeGames(from.games, into.games, EMPTY_GAME_LOG);
+  const haves = mergeCollection(from.haves, into.haves, EMPTY_COLLECTION);
   // Both logs together would not fit: nothing is copied, and the signed-out data stays where it is.
   if (!gameLogFits(games.log)) return false;
   return account.apply(into, {
@@ -73,6 +74,7 @@ export function copySignedOutData(anonymous: SyncStorage, account: SyncStorage):
     collection: collection.collection,
     wants: wants.collection,
     games: games.log,
+    haves: haves.collection,
   });
 }
 
@@ -152,6 +154,7 @@ export function createAccountSession(options: {
         snapshot.invalidDeckIds.length === 0 &&
         isEmptyDoc(snapshot.collection) &&
         isEmptyDoc(snapshot.wants) &&
+        isEmptyDoc(snapshot.haves) &&
         isEmptyGamesDoc(snapshot.games);
       if (cloudEmpty) {
         if (copySignedOutData(anonymous.sync, account.sync)) return await run(true);

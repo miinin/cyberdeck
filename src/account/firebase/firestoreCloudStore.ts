@@ -17,6 +17,7 @@ import {
   encodeDeckDoc,
   encodeGamesDoc,
   encodeWantsDoc,
+  encodeHavesDoc,
   META_SCHEMA_VERSION,
 } from '../cloudCodec';
 import { CloudError, toCloudError } from '../cloudError';
@@ -70,6 +71,7 @@ export function createFirestoreCloudStore(options: {
   const collectionRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'collection', 'main');
   const wantsRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'collection', 'want');
   const gamesRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'games', 'log');
+  const havesRef = ({ fs, db }: Session) => fs.doc(db, CLOUD_ROOT, uid, 'collection', 'have');
 
   return {
     readMeta: () =>
@@ -81,13 +83,14 @@ export function createFirestoreCloudStore(options: {
     readAll: () =>
       guard(async (s) => {
         const { fs, db } = s;
-        const [meta, decks, collection, wants, games] = await Promise.all([
+        const [meta, decks, collection, wants, games, haves] = await Promise.all([
           fs.getDoc(metaRef(s)),
           // SR-23 kohta 5: one more than allowed, so too many decks is noticed instead of cut silently.
           fs.getDocs(fs.query(fs.collection(db, CLOUD_ROOT, uid, 'decks'), fs.limit(MAX_DECKS + 1))),
           fs.getDoc(collectionRef(s)),
           fs.getDoc(wantsRef(s)),
           fs.getDoc(gamesRef(s)),
+          fs.getDoc(havesRef(s)),
         ]);
         return buildSnapshot(
           meta.exists() ? decodeMeta(meta.data()) : null,
@@ -95,6 +98,7 @@ export function createFirestoreCloudStore(options: {
           collection.exists() ? collection.data() : undefined,
           wants.exists() ? wants.data() : undefined,
           games.exists() ? games.data() : undefined,
+          haves.exists() ? haves.data() : undefined,
         );
       }),
 
@@ -119,6 +123,7 @@ export function createFirestoreCloudStore(options: {
           tx.delete(collectionRef(s));
           tx.delete(wantsRef(s));
           tx.delete(gamesRef(s));
+          tx.delete(havesRef(s));
           tx.delete(metaRef(s));
         });
       }),
@@ -141,6 +146,7 @@ export function createFirestoreCloudStore(options: {
           if (change.collection !== undefined) tx.set(collectionRef(s), encodeCollectionDoc(change.collection, savedAt));
           if (change.wants !== undefined) tx.set(wantsRef(s), encodeWantsDoc(change.wants, savedAt));
           if (change.games !== undefined) tx.set(gamesRef(s), encodeGamesDoc(change.games, savedAt));
+          if (change.haves !== undefined) tx.set(havesRef(s), encodeHavesDoc(change.haves, savedAt));
           // The rules accept exactly these keys, rev + 1 and the server time (SR-22).
           tx.set(metaRef(s), { schemaVersion: META_SCHEMA_VERSION, rev: rev + 1, updatedAt: s.fs.serverTimestamp() });
           return rev + 1;

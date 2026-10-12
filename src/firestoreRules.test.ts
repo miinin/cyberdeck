@@ -50,18 +50,18 @@ describe('firestore.rules', () => {
     expect(code).toContain('request.auth.uid == uid');
   });
 
-  it('allows exactly the collection documents main and want, in get, write and delete (D-018)', () => {
+  it('allows exactly the collection documents main, want and have, in get, write and delete (D-018, T-145)', () => {
     const block = code.slice(code.indexOf('match /collection/{docId}'), code.indexOf('match /games/{docId}'));
-    expect(block).toContain("allow get: if isOwner(uid) && docId in ['main', 'want'];");
+    expect(block).toContain("allow get: if isOwner(uid) && docId in ['main', 'want', 'have'];");
     expect(block).toMatch(
-      /allow create, update: if isOwner\(uid\)\s+&& docId in \['main', 'want'\]\s+&& isCollectionDoc\(request\.resource\.data\);/,
+      /allow create, update: if isOwner\(uid\)\s+&& docId in \['main', 'want', 'have'\]\s+&& isCollectionDoc\(request\.resource\.data\);/,
     );
-    expect(block).toContain("allow delete: if isOwner(uid) && docId in ['main', 'want'];");
+    expect(block).toContain("allow delete: if isOwner(uid) && docId in ['main', 'want', 'have'];");
     // No other document id is named anywhere in the collection block, and no wildcard sibling.
     expect([...block.matchAll(/docId\s*(==|in)\s*([^;&)]+)/g)].map((m) => (m[2] ?? '').trim())).toEqual([
-      "['main', 'want']",
-      "['main', 'want']",
-      "['main', 'want']",
+      "['main', 'want', 'have']",
+      "['main', 'want', 'have']",
+      "['main', 'want', 'have']",
     ]);
     expect(block.slice(0, block.indexOf('match /games/{docId}'))).not.toMatch(/docId\s*==/);
   });

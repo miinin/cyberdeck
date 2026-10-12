@@ -28,6 +28,7 @@ describe('Deck editor: the deck changes elsewhere', () => {
       collection: local.collection,
       wants: local.wants,
       games: local.games,
+      haves: local.haves,
     });
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Muualla muutettu' })).toBeInTheDocument();

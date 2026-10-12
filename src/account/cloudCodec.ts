@@ -9,7 +9,7 @@ import type { Deck, DeckId } from '../domain/deck';
 import { gameLogFits, parseGameLog } from '../domain/games';
 import type { GameLog } from '../domain/games';
 import { isDeckId, isRecord, parseCollection, parseDeck } from '../domain/validate';
-import { COLLECTION_ENVELOPE_SPEC, decodeEnvelopeValue, GAMES_ENVELOPE_SPEC, WANTS_ENVELOPE_SPEC } from '../storage';
+import { COLLECTION_ENVELOPE_SPEC, decodeEnvelopeValue, GAMES_ENVELOPE_SPEC, HAVES_ENVELOPE_SPEC, WANTS_ENVELOPE_SPEC } from '../storage';
 import type { EnvelopeSpec } from '../storage';
 import { CloudError } from './cloudError';
 import type { CloudChange, CloudDoc, CloudMeta, CloudSnapshot } from './types';
@@ -68,7 +68,8 @@ export function decodeMeta(raw: unknown): CloudMeta {
 
 /**
  * `deckDocs` are the documents of `users/{uid}/decks` (at most MAX_DECKS + 1 are read), `collection` is
- * `users/{uid}/collection/main`, `wants` is `users/{uid}/collection/want` and `games` is `users/{uid}/games/log`
+ * `users/{uid}/collection/main`, `wants` is `users/{uid}/collection/want`, `games` is `users/{uid}/games/log` and `haves` is
+ * `users/{uid}/collection/have`
  * (undefined = missing).
  */
 export function buildSnapshot(
@@ -77,6 +78,7 @@ export function buildSnapshot(
   collection: unknown,
   wants: unknown,
   games?: unknown,
+  haves?: unknown,
 ): CloudSnapshot {
   let dropped = 0;
   let locked = meta?.newer ?? false;
@@ -114,6 +116,7 @@ export function buildSnapshot(
   }
   const collectionDoc = decodeCollectionDoc(collection, COLLECTION_ENVELOPE_SPEC);
   const wantsDoc = decodeCollectionDoc(wants, WANTS_ENVELOPE_SPEC);
+  const havesDoc = decodeCollectionDoc(haves, HAVES_ENVELOPE_SPEC);
 
   /** The game log: the same rules; more than MAX_GAMES rows make the whole document invalid, never a deletion. */
   function decodeGamesDoc(raw: unknown): CloudDoc<GameLog> {
@@ -137,6 +140,7 @@ export function buildSnapshot(
     collection: collectionDoc,
     wants: wantsDoc,
     games: gamesDoc,
+    haves: havesDoc,
     dropped,
     locked,
     limitExceeded: deckDocs.length > MAX_DECKS,
@@ -182,6 +186,10 @@ export function encodeWantsDoc(wants: Collection, savedAt: string) {
   return encodeCollectionDoc(wants, savedAt, WANTS_ENVELOPE_SPEC);
 }
 
+export function encodeHavesDoc(haves: Collection, savedAt: string) {
+  return encodeCollectionDoc(haves, savedAt, HAVES_ENVELOPE_SPEC);
+}
+
 /**
  * The game log document (T-122): every row is rebuilt field by field, so nothing extra reaches the cloud and the
  * rules' exact keys hold.
@@ -220,7 +228,7 @@ export function encodedSize(value: unknown): number {
  * Throws CloudError.
  */
 export function checkChange(change: CloudChange, maxCollectionBytes = MAX_COLLECTION_BYTES): CloudChange {
-  const writes = change.putDecks.length + change.deleteDecks.length + (change.collection === undefined ? 0 : 1) + (change.wants === undefined ? 0 : 1) + (change.games === undefined ? 0 : 1) + 1;
+  const writes = change.putDecks.length + change.deleteDecks.length + (change.collection === undefined ? 0 : 1) + (change.wants === undefined ? 0 : 1) + (change.games === undefined ? 0 : 1) + (change.haves === undefined ? 0 : 1) + 1;
   if (writes > MAX_TRANSACTION_WRITES) throw new CloudError('too-large');
 
   const putDecks = change.putDecks.map((deck) => {
@@ -245,6 +253,14 @@ export function checkChange(change: CloudChange, maxCollectionBytes = MAX_COLLEC
       throw new CloudError('too-large');
     }
     checked.wants = parsed.value;
+  }
+  if (change.haves !== undefined) {
+    const parsed = parseCollection(change.haves);
+    if (parsed === null || parsed.dropped > 0) throw new CloudError('unknown');
+    if (encodedSize(encodeHavesDoc(parsed.value, new Date(0).toISOString())) >= maxCollectionBytes) {
+      throw new CloudError('too-large');
+    }
+    checked.haves = parsed.value;
   }
   if (change.games !== undefined) {
     // SR-45: the same row, count and byte limits as the device, before anything is sent.

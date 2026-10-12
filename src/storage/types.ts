@@ -144,6 +144,8 @@ export interface LocalData {
   wants: Collection;
   /** The game results (T-122, D-030). */
   games: GameLog;
+  /** The own Have list (T-143, T-145), same shape as the collection. */
+  haves: Collection;
 }
 
 /** The state both sides had at the last successful sync: the base of the three-way merge (D-017 kohta 6). */
@@ -153,6 +155,7 @@ export interface SyncBase {
   collection: Collection;
   wants: Collection;
   games: GameLog;
+  haves: Collection;
 }
 
 /** Local data access for the sync engine and the first sign-in. Never throws except `apply`. */
@@ -185,7 +188,7 @@ export interface Repositories {
   wants: CollectionRepository;
   /** The proxy print queue (T-102): the collection's interface and rules, local only (not synced). */
   proxy: CollectionRepository;
-  /** The own Have list (T-143): the cards the user offers for trade, the want list's rules; local only (not synced yet). */
+  /** The own Have list (T-143): the cards the user offers for trade, the want list's rules; synced like the want list (T-145). */
   haves: CollectionRepository;
   /** The game results (T-122, D-030). */
   games: GameLogRepository;

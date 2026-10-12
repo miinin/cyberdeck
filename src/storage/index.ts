@@ -6,9 +6,9 @@ import type { GameLog } from '../domain/games';
 import { parseGameLog } from '../domain/games';
 import { parseCollection } from '../domain/validate';
 import type { EnvelopeSpec } from './envelope';
-import { COLLECTION_SCHEMA_VERSION, GAMES_SCHEMA_VERSION, WANTS_SCHEMA_VERSION } from './keys';
+import { COLLECTION_SCHEMA_VERSION, GAMES_SCHEMA_VERSION, HAVES_SCHEMA_VERSION, WANTS_SCHEMA_VERSION } from './keys';
 import { createMemoryStore, openBrowserStore, subscribeToBrowserStorage } from './keyValueStore';
-import { COLLECTION_MIGRATIONS, GAMES_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
+import { COLLECTION_MIGRATIONS, GAMES_MIGRATIONS, HAVES_MIGRATIONS, WANTS_MIGRATIONS } from './migrations';
 import { createRepositories } from './repositories';
 import type { Repositories } from './types';
 
@@ -54,6 +54,13 @@ export const COLLECTION_ENVELOPE_SPEC: EnvelopeSpec<Collection> = {
 export const WANTS_ENVELOPE_SPEC: EnvelopeSpec<Collection> = {
   currentVersion: WANTS_SCHEMA_VERSION,
   migrations: WANTS_MIGRATIONS,
+  parse: parseCollection,
+};
+
+/** The own Have list's envelope schema, shared by localStorage and the cloud copy (T-143, T-145). */
+export const HAVES_ENVELOPE_SPEC: EnvelopeSpec<Collection> = {
+  currentVersion: HAVES_SCHEMA_VERSION,
+  migrations: HAVES_MIGRATIONS,
   parse: parseCollection,
 };
 

@@ -200,7 +200,7 @@ function parseSyncBase(raw: string | null): SyncBase | null {
   try {
     const data: unknown = JSON.parse(raw);
     if (typeof data !== 'object' || data === null || !('v' in data) || (data.v !== 1 && data.v !== 2)) return null;
-    const { rev, decks, collection, wants, games } = data as Record<string, unknown>;
+    const { rev, decks, collection, wants, games, haves } = data as Record<string, unknown>;
     if (typeof rev !== 'number' || !Number.isSafeInteger(rev) || rev < 0 || !Array.isArray(decks)) return null;
     const parsedCollection = parseCollection(data.v === 1 ? migrateCollectionV2ToV3(collection) : collection);
     if (parsedCollection === null || parsedCollection.dropped > 0) return null;
@@ -210,6 +210,9 @@ function parseSyncBase(raw: string | null): SyncBase | null {
     // Likewise a base saved before the game results existed (T-122).
     const parsedGames = games === undefined ? { value: EMPTY_GAME_LOG, dropped: 0 } : parseGameLog(games);
     if (parsedGames === null || parsedGames.dropped > 0) return null;
+    // And a base saved before the own Have list was synced (T-145).
+    const parsedHaves = haves === undefined ? { value: EMPTY_COLLECTION, dropped: 0 } : parseCollection(haves);
+    if (parsedHaves === null || parsedHaves.dropped > 0) return null;
     const rows: { id: DeckId; updatedAt: string }[] = [];
     for (const row of decks as unknown[]) {
       if (typeof row !== 'object' || row === null) return null;
@@ -217,7 +220,7 @@ function parseSyncBase(raw: string | null): SyncBase | null {
       if (!isDeckId(id) || typeof updatedAt !== 'string') return null;
       rows.push({ id, updatedAt });
     }
-    return { rev, decks: rows, collection: parsedCollection.value, wants: parsedWants.value, games: parsedGames.value };
+    return { rev, decks: rows, collection: parsedCollection.value, wants: parsedWants.value, games: parsedGames.value, haves: parsedHaves.value };
   } catch {
     return null;
   }
@@ -279,7 +282,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     toData: (queue) => ({ entries: queue.entries }),
   };
 
-  // The own Have list (T-143): the want list's shape and rules, local to the account like the proxy queue (not synced yet).
+  // The own Have list (T-143, T-145): the want list's shape and rules, synced like the want list.
   const havesAggregate: Aggregate<Collection> = {
     name: 'haves',
     key: havesKey,
@@ -804,7 +807,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   };
 
   const serialize = (data: LocalData) =>
-    JSON.stringify([data.decks, data.collection.entries, data.wants.entries, data.games.games]);
+    JSON.stringify([data.decks, data.collection.entries, data.wants.entries, data.games.games, data.haves.entries]);
 
   function readLocal(): LocalData | null {
     const decksDecoded = decodeEnvelope(readRaw(decksKey), decksAggregate.spec);
@@ -815,11 +818,14 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     if (wantsDecoded.kind === 'newer' || wantsDecoded.kind === 'corrupt') return null;
     const gamesDecoded = decodeEnvelope(readRaw(gamesKey), gamesAggregate.spec);
     if (gamesDecoded.kind === 'newer' || gamesDecoded.kind === 'corrupt') return null;
+    const havesDecoded = decodeEnvelope(readRaw(havesKey), havesAggregate.spec);
+    if (havesDecoded.kind === 'newer' || havesDecoded.kind === 'corrupt') return null;
     return {
       decks: decksDecoded.kind === 'ok' ? decksDecoded.value : [],
       collection: collectionDecoded.kind === 'ok' ? collectionDecoded.value : EMPTY_COLLECTION,
       wants: wantsDecoded.kind === 'ok' ? wantsDecoded.value : EMPTY_COLLECTION,
       games: gamesDecoded.kind === 'ok' ? gamesDecoded.value : EMPTY_GAME_LOG,
+      haves: havesDecoded.kind === 'ok' ? havesDecoded.value : EMPTY_COLLECTION,
     };
   }
 
@@ -838,6 +844,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       mutate(decksAggregate, () => ({ next: [...next.decks], result: undefined }));
       mutate(collectionAggregate, () => ({ next: next.collection, result: undefined }));
       mutate(wantsAggregate, () => ({ next: next.wants, result: undefined }));
+      mutate(havesAggregate, () => ({ next: next.haves, result: undefined }));
       mutate(gamesAggregate, (current) => ({ next: sameGameLog(current, next.games) ? current : next.games, result: undefined }));
       callAll(uiListeners);
       return true;
@@ -854,7 +861,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     backupAll() {
       const at = now();
-      for (const aggregate of [decksAggregate, collectionAggregate, wantsAggregate, gamesAggregate]) {
+      for (const aggregate of [decksAggregate, collectionAggregate, wantsAggregate, gamesAggregate, havesAggregate]) {
         const raw = readRaw(aggregate.key);
         if (raw !== null) backup(aggregate, raw, at);
       }
@@ -865,6 +872,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         store.removeItem(collectionKey);
         store.removeItem(wantsKey);
         store.removeItem(gamesKey);
+        store.removeItem(havesKey);
       } catch (error) {
         throw toStorageError(error, 'write');
       }
@@ -884,7 +892,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     onChange(listener) {
       changeListeners.add(listener);
-      const unsubscribe = subscribeTo ? subscribeTo([decksKey, collectionKey, wantsKey, gamesKey], listener) : () => {};
+      const unsubscribe = subscribeTo ? subscribeTo([decksKey, collectionKey, wantsKey, gamesKey, havesKey], listener) : () => {};
       return () => {
         changeListeners.delete(listener);
         unsubscribe();
