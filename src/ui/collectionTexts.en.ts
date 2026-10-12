@@ -97,29 +97,55 @@ export const collectionTextsEn: typeof collectionTextsFi = {
   wantNote: 'The want list gets a full playset of each card.',
   achievementsHeading: 'Achievements',
   achievementsEarned: (earned: number, total: number) => `${earned} of ${total} earned`,
-  achievementsNext: 'Closest goals',
-  achievementsOpen: (n: number) => `Open achievements (${n})`,
+  achievementsNext: 'Next gigs',
+  achievementUnlocked: 'Unlocked',
+  achievementsOpen: (n: number) => `More locked (${n})`,
   achievementsAllDone: 'Every achievement earned!',
   achievementsEarnedList: 'Earned achievements',
   achievementsOpenList: 'Open achievements',
-  achievementLabel: (item: Achievement): string => {
+  achievementTitle: (item: Achievement): string => {
     switch (item.kind) {
       case 'distinct':
-        return item.subject === 1 ? 'First card' : `${item.subject} different cards`;
+        return 'Half the City';
       case 'all':
-        return 'Every card';
+        return 'All of Night City';
       case 'copies':
-        return `${item.subject} copies`;
+        return item.subject === 250 ? 'Pile of Chrome' : item.subject === 500 ? 'Card Vault' : 'Arasaka Archive';
       case 'playsets':
-        return 'A playset of every card';
+        return 'Full Arsenal';
       case 'set':
-        return `Set complete: ${item.subject}`;
+        return 'Welcome to Night City';
       case 'color':
-        return `Color complete: ${item.subject}`;
+        return ({ Red: 'Red Rage', Yellow: 'Neon Yellow', Green: 'Toxic Green', Blue: 'Cold Blue' } as Record<string, string>)[String(item.subject)] ?? `Color complete: ${item.subject}`;
       case 'type':
-        return `Type complete: ${item.subject}`;
+        return ({ Legend: 'City of Legends', Unit: 'Own Crew', Gear: 'Armory', Program: 'Daemon Library' } as Record<string, string>)[String(item.subject)] ?? `Type complete: ${item.subject}`;
       case 'rarity':
-        return `Rarity complete: ${item.subject}`;
+        return ({ Rare: 'Preem Stuff', 'Epic Rare': 'Epic Gig', 'Secret Rare': 'Secret Broker', 'Iconic Rare': 'Icon', 'Nova Rare': 'Supernova' } as Record<string, string>)[String(item.subject)] ?? `Rarity complete: ${item.subject}`;
     }
   },
+  achievementFlavor: (item: Achievement): string => {
+    switch (item.kind) {
+      case 'distinct':
+        return `${item.subject} different cards. Half the city's faces in your binder.`;
+      case 'all':
+        return 'Every card. Every alley.';
+      case 'copies':
+        return item.subject === 250
+          ? '250 copies. The table starts to bend.'
+          : item.subject === 500
+            ? '500 copies. You need a bigger box, choom.'
+            : '1000 copies. Arasaka would be jealous.';
+      case 'playsets':
+        return 'A playset of every card. Ready for any gig.';
+      case 'set':
+        return 'All of Welcome to Night City.';
+      case 'color':
+        return `Every ${item.subject} card.`;
+      case 'type':
+        return ({ Legend: 'Every Legend. The city remembers names.', Unit: 'Every Unit in line.', Gear: 'Every Gear on the rack.', Program: 'Every Program loaded.' } as Record<string, string>)[String(item.subject)] ?? `Every ${item.subject}.`;
+      case 'rarity':
+        return item.subject === 'Nova Rare' || item.subject === 'Iconic Rare' ? `Every ${item.subject} art.` : `Every ${item.subject} card.`;
+    }
+  },
+
 };

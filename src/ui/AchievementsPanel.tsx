@@ -1,38 +1,88 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { achievements, nextAchievements } from '../domain/achievements';
 import type { Achievement } from '../domain/achievements';
 import type { Card } from '../domain/card';
 import type { Collection } from '../domain/collection';
 import { collectionTexts } from './collectionTexts';
+import { RaritySymbol } from './RaritySymbol';
 
-/** How many of the closest open goals are shown with a bar. */
-const NEXT_COUNT = 3;
+/** Open badges shown before "the rest": the closest ones. */
+const SHOWN_OPEN = 6;
 
-function CheckIcon() {
-  return (
-    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false" className="achievement-check">
-      <path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+const svg = (children: ReactNode) => (
+  <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false">
+    {children}
+  </svg>
+);
+const line = { fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const };
+
+/** The icon of a badge (T-150): what it is about, drawn in the game's look; a rarity uses its own symbol. */
+function BadgeIcon({ item }: { item: Achievement }) {
+  switch (item.kind) {
+    case 'rarity':
+      return <RaritySymbol rarity={String(item.subject)} size={30} />;
+    case 'color':
+      return svg(<path d="M16 3l11 13-11 13L5 16z" className={`badge-color badge-color--${String(item.subject).toLowerCase()}`} />);
+    case 'distinct':
+    case 'all':
+      // A skyline.
+      return svg(<path {...line} d="M3 28h26M6 28V16h5v12M11 28V9h6v19M17 28V13h4v15M21 28V5h6v23" />);
+    case 'copies':
+      // A stack of cards.
+      return svg(<path {...line} d="M8 6h14v20H8zM11 3h14v20M5 9v20h14" />);
+    case 'playsets':
+      // Three cards fanned out.
+      return svg(<path {...line} d="M5 9l8-3 4 18-8 3zM12 6h8v20h-8M19 6l8 3-4 18" />);
+    case 'set':
+      return svg(
+        <text x="16" y="21" textAnchor="middle" fontSize="11" fontWeight="700" fill="currentColor" fontFamily="inherit">
+          WNC
+        </text>,
+      );
+    case 'type': {
+      const paths: Record<string, string> = {
+        // A crown, a figure, a wrench, a chip.
+        Legend: 'M5 24h22L25 10l-5 6-4-9-4 9-5-6z',
+        Unit: 'M16 4a5 5 0 110 10 5 5 0 010-10zM6 28c0-6 4-10 10-10s10 4 10 10',
+        Gear: 'M22 4a6 6 0 00-6 8L5 23l4 4 11-11a6 6 0 008-6l-4 3-3-3z',
+        Program: 'M9 9h14v14H9zM13 5v4M19 5v4M13 23v4M19 23v4M5 13h4M5 19h4M23 13h4M23 19h4',
+      };
+      return svg(<path {...line} d={paths[String(item.subject)] ?? paths.Program} />);
+    }
+  }
 }
 
 function Badge({ item }: { item: Achievement }) {
+  const share = item.total === 0 ? 0 : item.owned / item.total;
   return (
-    <li className={item.done ? 'achievement is-done' : 'achievement'}>
-      {item.done && <CheckIcon />}
-      <span className="achievement-label">{collectionTexts.achievementLabel(item)}</span>
-      {!item.done && (
-        <span className="achievement-count">
-          {item.owned}/{item.total}
-        </span>
-      )}
+    <li className={`badge badge--tier-${item.tier}${item.done ? ' is-done' : ''}`}>
+      <span className="badge-icon">
+        <BadgeIcon item={item} />
+      </span>
+      <span className="badge-body">
+        <strong className="badge-title">{collectionTexts.achievementTitle(item)}</strong>
+        <span className="badge-flavor">{collectionTexts.achievementFlavor(item)}</span>
+        {item.done ? (
+          <span className="badge-stamp">{collectionTexts.achievementUnlocked}</span>
+        ) : (
+          <span className="badge-progress">
+            <span className="badge-bar" aria-hidden="true">
+              <span className="badge-fill" style={{ inlineSize: `${share * 100}%` }} />
+            </span>
+            <span className="badge-count">
+              {item.owned} / {item.total}
+            </span>
+          </span>
+        )}
+      </span>
     </li>
   );
 }
 
 /**
- * Achievements (T-132, I-8): computed from the collection, so nothing is stored. The earned badges, the closest open goals
- * with a bar, and the rest of the open ones behind a disclosure (no inner scroll).
+ * Achievements (T-132, T-150): computed from the collection, so nothing is stored. A meter with one cell per badge, the
+ * earned badges (hardest first), the closest open ones, and the rest behind a disclosure (no inner scroll).
  */
 export function AchievementsPanel({
   cards,
@@ -45,9 +95,10 @@ export function AchievementsPanel({
   hasArt: (cardKey: string, rarity: string) => boolean;
 }) {
   const list = useMemo(() => achievements(cards, collection, hasArt), [cards, collection, hasArt]);
-  const earned = list.filter((item) => item.done);
-  const next = nextAchievements(list, NEXT_COUNT);
-  const open = list.filter((item) => !item.done);
+  const earned = list.filter((item) => item.done).sort((a, b) => b.tier - a.tier);
+  const open = nextAchievements(list, list.length);
+  const shown = open.slice(0, SHOWN_OPEN);
+  const rest = open.slice(SHOWN_OPEN);
   return (
     <section className="panel collection-wide achievements" aria-labelledby="coll-achievements">
       <div className="achievements-head">
@@ -56,8 +107,13 @@ export function AchievementsPanel({
         </h2>
         <span className="achievements-score">{collectionTexts.achievementsEarned(earned.length, list.length)}</span>
       </div>
+      <div className="achievements-meter" aria-hidden="true">
+        {list.map((item) => (
+          <span key={item.id} className={item.done ? 'is-on' : undefined} />
+        ))}
+      </div>
       {earned.length > 0 && (
-        <ul className="achievement-grid" aria-label={collectionTexts.achievementsEarnedList}>
+        <ul className="badge-grid" aria-label={collectionTexts.achievementsEarnedList}>
           {earned.map((item) => (
             <Badge key={item.id} item={item} />
           ))}
@@ -68,24 +124,16 @@ export function AchievementsPanel({
       ) : (
         <>
           <h3 className="progress-subtitle">{collectionTexts.achievementsNext}</h3>
-          <ul className="progress-list">
-            {next.map((item) => (
-              <li key={item.id} className="progress-row">
-                <span className="progress-label">{collectionTexts.achievementLabel(item)}</span>
-                <span className="progress-bar" aria-hidden="true">
-                  <span className="progress-fill" style={{ inlineSize: `${(item.owned / item.total) * 100}%` }} />
-                </span>
-                <span className="progress-numbers">
-                  <strong>{item.owned}</strong> / {item.total}
-                </span>
-              </li>
+          <ul className="badge-grid" aria-label={collectionTexts.achievementsOpenList}>
+            {shown.map((item) => (
+              <Badge key={item.id} item={item} />
             ))}
           </ul>
-          {open.length > next.length && (
+          {rest.length > 0 && (
             <details className="disclosure progress-more">
-              <summary>{collectionTexts.achievementsOpen(open.length)}</summary>
-              <ul className="achievement-grid" aria-label={collectionTexts.achievementsOpenList}>
-                {open.map((item) => (
+              <summary>{collectionTexts.achievementsOpen(rest.length)}</summary>
+              <ul className="badge-grid">
+                {rest.map((item) => (
                   <Badge key={item.id} item={item} />
                 ))}
               </ul>

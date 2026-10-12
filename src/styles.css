@@ -10253,41 +10253,10 @@ main:has(.mark-banner) {
   font-size: var(--font-size-sm);
 }
 
-.achievement-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0 0 var(--space-3);
-  padding: 0;
-  list-style: none;
-}
 
-.achievement {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-block-size: 2rem;
-  padding-inline: var(--space-2);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
 
-.achievement.is-done {
-  border-color: color-mix(in srgb, var(--color-success) 55%, var(--color-border));
-  background: color-mix(in srgb, var(--color-success) 10%, transparent);
-  color: var(--color-text);
-}
 
-.achievement-check {
-  flex: none;
-  color: var(--color-success);
-}
 
-.achievement-count {
-  font-variant-numeric: tabular-nums;
-  opacity: 0.8;
-}
 
 /* T-149: only where the row has room; on a phone the shared rule puts the bar on a row of its own. */
 @media (min-width: 40rem) {
@@ -10457,4 +10426,187 @@ main:has(.mark-banner) {
     white-space: normal;
     line-height: 1.2;
   }
+}
+
+/*
+ * T-150: achievements as chips in the game's look: chamfered corners, a scanline on locked ones, and a tier color that
+ * glows when earned (1 steel, 2 chrome cyan, 3 neon pink). The color diamonds use the card colors.
+ */
+.achievements {
+  --badge-cut: 0.9rem;
+}
+
+.achievements-meter {
+  display: flex;
+  gap: 3px;
+  margin-block: var(--space-2) var(--space-4);
+}
+
+.achievements-meter > span {
+  flex: 1 1 0;
+  block-size: 6px;
+  background: var(--color-border);
+  transform: skewX(-20deg);
+}
+
+.achievements-meter > span.is-on {
+  background: var(--color-accent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.badge {
+  --tier: #8a93a6;
+  position: relative;
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--tier) 16%, transparent), transparent 55%),
+    var(--color-surface-raised);
+  clip-path: polygon(0 0, calc(100% - var(--badge-cut)) 0, 100% var(--badge-cut), 100% 100%, var(--badge-cut) 100%, 0 calc(100% - var(--badge-cut)));
+}
+
+/* The frame: a 1 px tier line inside the chamfered shape. */
+.badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid color-mix(in srgb, var(--tier) 45%, transparent);
+  clip-path: inherit;
+  pointer-events: none;
+}
+
+.badge--tier-2 {
+  --tier: var(--color-glitch-b);
+}
+
+.badge--tier-3 {
+  --tier: var(--color-glitch-a);
+}
+
+.badge:not(.is-done) {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--color-text) 4%, transparent) 3px 4px),
+    var(--color-surface);
+}
+
+.badge:not(.is-done) .badge-icon {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.badge.is-done .badge-icon {
+  color: var(--tier);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--tier) 70%, transparent));
+}
+
+.badge-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 3rem;
+  block-size: 3rem;
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--tier) 10%, var(--color-bg));
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+
+.badge-color {
+  fill: var(--badge-color, currentColor);
+}
+
+.badge-color--red {
+  --badge-color: var(--color-card-red);
+}
+
+.badge-color--yellow {
+  --badge-color: var(--color-card-yellow);
+}
+
+.badge-color--green {
+  --badge-color: var(--color-card-green);
+}
+
+.badge-color--blue {
+  --badge-color: var(--color-card-blue);
+}
+
+.badge-body {
+  display: grid;
+  gap: 0.2rem;
+  min-inline-size: 0;
+}
+
+.badge-title {
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+}
+
+.badge.is-done .badge-title {
+  color: var(--tier);
+}
+
+.badge-flavor {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.35;
+}
+
+.badge-stamp {
+  justify-self: start;
+  margin-block-start: var(--space-1);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--tier);
+  color: var(--tier);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  transform: rotate(-3deg);
+}
+
+.badge-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-1);
+}
+
+.badge-bar {
+  flex: 1 1 auto;
+  block-size: 4px;
+  background: var(--color-border);
+}
+
+.badge-fill {
+  display: block;
+  block-size: 100%;
+  background: var(--tier);
+}
+
+.badge-count {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The light theme: the neon tiers are too pale on paper; their darker card colors read better. */
+:root[data-theme='light'] .badge--tier-2 {
+  --tier: var(--color-card-blue);
+}
+
+:root[data-theme='light'] .badge--tier-3 {
+  --tier: var(--color-card-red);
 }

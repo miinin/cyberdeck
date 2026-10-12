@@ -157,13 +157,17 @@ describe('CollectionView', () => {
       expect(queue).toEqual([{ card: 'beta', count: 1 }, { card: 'gamma', count: 1 }]);
     });
   });
-  it('shows the achievements in the overview: earned badges, the closest goals and the rest behind a disclosure (T-132)', async () => {
-    await renderCollection([['alpha', 3]]);
+  it('shows the achievements as badges: earned ones, the next gigs and the rest behind a disclosure (T-132, T-150)', async () => {
+    await renderCollection([['alpha', 3], ['beta', 1]]);
     const panel = (await screen.findByRole('heading', { level: 2, name: /^(Saavutukset|Achievements)$/ })).closest('section') as HTMLElement;
     const earned = within(panel).getByRole('list', { name: /Ansaitut saavutukset|Earned achievements/ });
-    expect(within(earned).getByText(/Ensimmäinen kortti|First card/)).toBeInTheDocument();
+    // Two of three cards: half the city.
+    expect(within(earned).getByText(/Puoli kaupunkia|Half the City/)).toBeInTheDocument();
+    expect(within(earned).getAllByText(/^(Avattu|Unlocked)$/).length).toBeGreaterThan(0);
     expect(within(panel).getByText(/saavutettu|earned/)).toBeInTheDocument();
-    expect(within(panel).getByRole('heading', { level: 3, name: /Lähimmät tavoitteet|Closest goals/ })).toBeInTheDocument();
-    expect(within(panel).getByText(/(Avoimet saavutukset|Open achievements) \(\d+\)/)).toBeInTheDocument();
+    expect(within(panel).getByRole('heading', { level: 3, name: /Seuraavat keikat|Next gigs/ })).toBeInTheDocument();
+    expect(within(panel).getByText(/(Lisää lukittuja|More locked) \(\d+\)/)).toBeInTheDocument();
+    // No trivial goals.
+    expect(within(panel).queryByText(/Ensimmäinen kortti|First card/)).toBeNull();
   });
 });
