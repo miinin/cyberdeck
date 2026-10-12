@@ -10610,3 +10610,43 @@ main:has(.mark-banner) {
 :root[data-theme='light'] .badge--tier-3 {
   --tier: var(--color-card-red);
 }
+
+/* T-152: the card's tags in its details, as small chips; a button shows every card with the tag. */
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.card-tag {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 1.75rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  clip-path: polygon(0 0, calc(100% - 0.4rem) 0, 100% 0.4rem, 100% 100%, 0 100%);
+}
+
+button.card-tag {
+  cursor: pointer;
+}
+
+button.card-tag:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+button.card-tag:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}

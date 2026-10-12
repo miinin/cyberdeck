@@ -47,4 +47,16 @@ describe('tag filter (T-151)', () => {
     expect(document.querySelectorAll('.card-grid > li')).toHaveLength(arasaka);
     expect(screen.getByRole('button', { name: /Tagi: Arasaka/ })).toBeInTheDocument();
   });
+
+  it('a tag in the card details shows every card with it (T-152)', { timeout: 30000 }, async () => {
+    await renderView();
+    const v = CARDS.find((card) => card.key === 'v-streetkid');
+    const tag = v?.tags?.[0];
+    if (tag === undefined) throw new Error('V has no tag in the data');
+    act(() => screen.getAllByRole('button', { name: /V, Streetkid|V — Streetkid|Streetkid/, hidden: true })[0]?.click());
+    act(() => screen.getByRole('button', { name: `Näytä kaikki ${tag}-kortit`, hidden: true }).click());
+    const count = CARDS.filter((card) => (card.tags ?? []).includes(tag)).length;
+    expect(document.querySelectorAll('.card-grid > li')).toHaveLength(count);
+    expect(screen.getByRole('button', { name: new RegExp(`Tagi: ${tag}`) })).toBeInTheDocument();
+  });
 });

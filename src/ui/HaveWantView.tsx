@@ -466,7 +466,16 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
           )}
         </section>
       </div>
-      <CardImageDialog card={openCard} onClose={closeImage} />
+      <CardImageDialog
+        card={openCard}
+        onClose={closeImage}
+        onTagClick={(tag) => {
+          closeImage();
+          setSetChoice(null);
+          setCriteria({ ...EMPTY_CRITERIA, tag });
+          searchInputRef.current?.focus();
+        }}
+      />
     </>
   );
 }

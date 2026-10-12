@@ -635,6 +635,14 @@ function CatalogBody({
     else searchInputRef.current?.focus();
   };
 
+  // T-152: a tag in the card details shows every card with it: the other search filters give way, the collection filter stays.
+  const handleTagClick = (tag: string) => {
+    handleCloseImage();
+    setSetChoice(null);
+    updateCriteria({ ...EMPTY_CRITERIA, tag }, 'now');
+    searchInputRef.current?.focus();
+  };
+
   const handleShowAll = () => {
     updateFilters(criteria, baseFilter, 'now', true);
     collectionAllRef.current?.focus();
@@ -911,7 +919,7 @@ function CatalogBody({
 
       {view === 'table' && !gallery.open && preview.preview}
       <EditionConfirmDialog card={pendingAdd?.card ?? null} onChoose={handleEditionChosen} onCancel={() => setPendingAdd(null)} />
-      <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} artUrl={shownArt} />
+      <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} artUrl={shownArt} onTagClick={handleTagClick} />
     </>
   );
 }
