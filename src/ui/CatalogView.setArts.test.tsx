@@ -34,3 +34,17 @@ describe('Kaikki versiot under a set filter (T-147)', () => {
     expect(shownSources().filter((src) => novaUrls.has(src))).toEqual([]);
   });
 });
+
+describe('tag filter (T-151)', () => {
+  it('shows the cards of the chosen tag and a chip that removes it', { timeout: 30000 }, async () => {
+    await renderView();
+    const tag = screen.getByRole('combobox', { name: 'Tagi', hidden: true });
+    act(() => {
+      fireEvent.change(tag, { target: { value: 'Arasaka' } });
+    });
+    const arasaka = CARDS.filter((card) => (card.tags ?? []).includes('Arasaka')).length;
+    expect(arasaka).toBeGreaterThan(0);
+    expect(document.querySelectorAll('.card-grid > li')).toHaveLength(arasaka);
+    expect(screen.getByRole('button', { name: /Tagi: Arasaka/ })).toBeInTheDocument();
+  });
+});

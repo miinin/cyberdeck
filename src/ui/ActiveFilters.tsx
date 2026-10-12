@@ -46,6 +46,9 @@ export function criteriaFilters(
       lang: 'en',
       onRemove: remove('rarities', rarity),
     })),
+    ...(criteria.tag != null
+      ? [{ id: `tag:${criteria.tag}`, label: `${texts.tagLegend}: ${criteria.tag}`, onRemove: () => onChange({ ...criteria, tag: null }) }]
+      : []),
     ...(criteria.sellable === true
       ? [{ id: 'sellable', label: texts.sellableChip, onRemove: () => onChange({ ...criteria, sellable: false }) }]
       : []),

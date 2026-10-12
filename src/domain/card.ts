@@ -27,6 +27,8 @@ export interface Card {
   rarity: string | null;
   /** Netdeck's "is_eddiable": the card can be sold for eddies (€$). null = unknown. Always set in the bundled data; test cards may omit it. */
   eddiable?: boolean | null;
+  /** Netdeck's "classifications" (T-151): the tags printed on the card, e.g. Arasaka, Merc, Netrunner. Test cards may omit them. */
+  tags?: readonly string[];
   /** The app's own key, cardKey(name, subname). Collections and decks refer to cards only by this (D-008). */
   key: CardKey;
   /** All printings (versions) of the card, in source order (D-020). Always set in the bundled data; test cards may omit it. */

@@ -8,6 +8,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/** At most this many tags of at most this length (T-151): the data is untrusted (SR-1). */
+const MAX_TAGS = 10;
+const MAX_TAG_LENGTH = 40;
+
+/** The card's tags: trimmed non-empty strings, without duplicates, within the limits. */
+function mapTags(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const tags: string[] = [];
+  for (const item of value) {
+    const tag = nonEmptyString(item);
+    if (tag !== null && tag.length <= MAX_TAG_LENGTH && !tags.includes(tag)) tags.push(tag);
+    if (tags.length === MAX_TAGS) break;
+  }
+  return tags;
+}
+
 function nonEmptyString(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const trimmed = value.trim();
@@ -99,6 +115,7 @@ export function mapCard(raw: unknown): Card | null {
     ram: gameValue(fields.ram),
     rarity: nonEmptyString(fields.rarity),
     eddiable: typeof fields.is_eddiable === 'boolean' ? fields.is_eddiable : null,
+    tags: mapTags(fields.classifications),
     key,
     printings: mapPrintings(fields.printings, slug),
   };

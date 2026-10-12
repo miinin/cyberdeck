@@ -17,6 +17,7 @@ import {
   toggleValue,
 } from './cardSearch';
 import type { CardFilterCriteria } from './cardSearch';
+import { tagOptions } from './cardSearch';
 
 function card(slug: string, name: string, subname: string | null, type: string, color: string | null): Card {
   return {
@@ -363,6 +364,31 @@ describe('sellable filter and short rarity names', () => {
   it('shortens the official rarity names', () => {
     expect(['Common', 'Uncommon', 'Rare', 'Epic Rare', 'Secret Rare', 'Iconic Rare', 'Nova Rare'].map(shortRarity)).toEqual([
       'Common', 'Uncommon', 'Rare', 'Epic', 'Secret', 'Iconic', 'Nova',
+    ]);
+  });
+});
+
+describe('tags (T-151)', () => {
+  const tagged: Card[] = [
+    { ...card('a', 'Saburo', null, 'Legend', 'Red'), tags: ['Arasaka', 'Corpo'] },
+    { ...card('b', 'Jackie', null, 'Legend', 'Red'), tags: ['Merc'] },
+    { ...card('c', 'Drone', null, 'Unit', 'Blue'), tags: ['Arasaka', 'Drone'] },
+  ];
+  const keys = (criteria: Partial<CardFilterCriteria>) => filterCards(tagged, { ...EMPTY_CRITERIA, ...criteria }).map((c) => c.key.replace('key-', ''));
+
+  it('filters by one tag, and the name search finds the tags too', () => {
+    expect(keys({ tag: 'Arasaka' })).toEqual(['a', 'c']);
+    expect(keys({ query: 'merc' })).toEqual(['b']);
+    expect(keys({ query: 'arasaka corpo' })).toEqual(['a']);
+    expect(isFilterActive({ ...EMPTY_CRITERIA, tag: 'Merc' })).toBe(true);
+  });
+
+  it('lists the tags with their counts in alphabetical order', () => {
+    expect(tagOptions(tagged)).toEqual([
+      { tag: 'Arasaka', count: 2 },
+      { tag: 'Corpo', count: 1 },
+      { tag: 'Drone', count: 1 },
+      { tag: 'Merc', count: 1 },
     ]);
   });
 });

@@ -14,6 +14,7 @@ import {
   numberFilterOptionsFor,
   officialRarity,
   toggleValue,
+  tagOptions,
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
@@ -81,6 +82,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   const [scope, setScope] = useState<WantScope | null>(null);
   const [view, setView] = useState<CatalogViewMode>('grid');
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
+  const tagChoices = useMemo(() => tagOptions(cards), [cards]);
   const [setChoice, setSetChoice] = useState<string | null>(null);
   const [live, setLive] = useState('');
   const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
@@ -323,6 +325,8 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
             onCollectionFilterChange={() => undefined}
             onQueryChange={(query) => setCriteria({ ...criteria, query })}
             onToggleType={(type) => setCriteria({ ...criteria, types: toggleValue(criteria.types, type) })}
+            tagOptions={tagChoices}
+            onTagChange={(tag) => setCriteria({ ...criteria, tag })}
             onToggleColor={(color) => setCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) })}
             onToggleSellable={() => setCriteria({ ...criteria, sellable: criteria.sellable !== true })}
             onToggleRarity={(rarity) => setCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) })}

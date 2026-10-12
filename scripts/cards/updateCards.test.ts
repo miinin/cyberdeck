@@ -63,7 +63,7 @@ describe('updateCards', () => {
       color: null,
       cost: null,
       power: null,
-      ram: null, rarity: null, eddiable: null,
+      ram: null, rarity: null, eddiable: null, tags: [],
       key: 'v-streetkid',
       printings: [],
     });

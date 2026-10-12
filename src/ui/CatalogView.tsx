@@ -24,6 +24,7 @@ import {
   numberFilterOptionsFor,
   isFilterActive,
   toggleValue,
+  tagOptions,
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { CardFilters, selectedFilterCount } from './CardFilters';
@@ -152,6 +153,7 @@ function CatalogBody({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
+  const tagChoices = useMemo(() => tagOptions(allCards), [allCards]);
   const collectionAllRef = useRef<HTMLInputElement>(null);
   const [collectionChoice, setCollectionFilter] = useState<CollectionFilter>(baseFilter);
   /** Rows kept visible under "Vain omistetut" after their count went to 0 (UX.md 6.6, A5). */
@@ -703,6 +705,8 @@ function CatalogBody({
         updateCriteria({ ...criteria, query }, composing ? 'never' : 'later')
       }
       onToggleType={(type) => updateCriteria({ ...criteria, types: toggleValue(criteria.types, type) }, 'later')}
+      tagOptions={tagChoices}
+      onTagChange={(tag) => updateCriteria({ ...criteria, tag }, 'later')}
       onToggleColor={(color) =>
         updateCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) }, 'later')
       }
