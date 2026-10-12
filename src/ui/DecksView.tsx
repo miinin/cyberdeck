@@ -422,7 +422,7 @@ export function DecksView({
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {live}
       </div>
-      <nav className="segmented" aria-label={deckTexts.decksTabsLabel}>
+      <nav className="segmented decks-tabs" aria-label={deckTexts.decksTabsLabel}>
         <a className="segmented-option" href={routeHash({ name: 'decks' })} aria-current={tab === 'own' ? 'page' : undefined}>
           {deckTexts.tabOwn}
         </a>

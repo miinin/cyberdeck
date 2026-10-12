@@ -19,6 +19,7 @@
     "cards:update": "node scripts/cards-update.mjs",
     "cards:images": "node scripts/cards-images.mjs",
     "cards:fingerprints": "node scripts/cards-fingerprints.mjs",
+    "cards:check": "node scripts/cards-check.mjs",
     "cards:measure-scanner": "node scripts/cards/measureScanner.mjs"
   },
   "dependencies": {

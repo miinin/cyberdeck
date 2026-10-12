@@ -10289,8 +10289,11 @@ main:has(.mark-banner) {
   opacity: 0.8;
 }
 
-.achievements .progress-row {
-  grid-template-columns: minmax(8rem, 18rem) minmax(0, 1fr) auto;
+/* T-149: only where the row has room; on a phone the shared rule puts the bar on a row of its own. */
+@media (min-width: 40rem) {
+  .achievements .progress-row {
+    grid-template-columns: minmax(8rem, 18rem) minmax(0, 1fr) auto;
+  }
 }
 
 .achievements-all-done {
@@ -10415,4 +10418,43 @@ main:has(.mark-banner) {
 .count-want-mark {
   margin-inline-end: 0.15em;
   font-size: 0.8em;
+}
+
+/* T-149: phone fixes from the mobile review. */
+@media (max-width: 39.99rem) {
+  /* The overview tiles share the row instead of a half-empty column. */
+  .kpi-tiles.collection-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+  }
+
+  /* Tabs and scope choices fill the row, as on the Collection page and in the deck editor. */
+  .hw-tabs,
+  .decks-tabs,
+  .hw-scope-row > .hw-scope {
+    inline-size: 100%;
+  }
+
+  .decks-tabs,
+  .hw-tabs .segmented,
+  .hw-scope-row > .hw-scope .segmented {
+    display: flex;
+    flex: 1 1 100%;
+  }
+
+  .decks-tabs > .segmented-option,
+  .hw-tabs .segmented-option,
+  .hw-scope-row > .hw-scope .segmented-option {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  /* A deck row shows the card name on up to two lines instead of cutting it after a few letters. */
+  .deck-tile-name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+    line-height: 1.2;
+  }
 }

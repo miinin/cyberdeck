@@ -141,7 +141,13 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
     return counts;
   }, [haveReady, cards, haves]);
   const collectionCards = collection.phase === 'ready' ? collection.saved.entries.filter((entry) => entry.count > 0).length : 0;
-  const source = haveSourceOf(rule, ownList.size, collectionCards);
+  // Without a choice of the user the source is picked once both lists have loaded, so it never jumps later (e.g. when
+  // the last card leaves the own list).
+  const [autoSource, setAutoSource] = useState<HaveSource | null>(null);
+  if (rule.source === null && autoSource === null && haveReady && collection.phase !== 'loading') {
+    setAutoSource(haveSourceOf(rule, ownList.size, collectionCards));
+  }
+  const source = rule.source ?? autoSource ?? haveSourceOf(rule, ownList.size, collectionCards);
   if (haveReady && haveScope === null) setHaveScope(ownList.size === 0 ? 'all' : 'list');
   const ownScope: WantScope = haveScope ?? (ownList.size === 0 ? 'all' : 'list');
   const ruleTradeable = useMemo(
