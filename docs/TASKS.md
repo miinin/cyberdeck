@@ -141,3 +141,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-136 | Otsikon glitch vain sivun latautuessa (12 s toisto pois) | 1 | Should | PM | Done | PM |
 | T-137 | Have/Want: suodattimet ja haku vasemmassa palstassa kuten Kortit-sivulla | 1 | Should | PM | Done | PM |
 | T-138 | Otsikon glitch nopeaksi ja teräväksi: kerran, 0,24 s, neljä vaihetta | 1 | Should | PM | Done | PM |
+| T-139 | Hover-esikatselu vähemmän häiritseväksi: avautuu vain, kun hiiri pysähtyy 450 ms (liike nollaa odotuksen); pakkalistassa vain kortin nimestä; kuva hieman pienempi | 1 | Should | PM | Done | PM |

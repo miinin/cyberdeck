@@ -168,6 +168,21 @@ describe('Deck editor result picker', () => {
     expect(document.querySelector('.card-hover-preview')).toBeNull();
   });
 
+  it('opens nothing while the mouse moves over the rows, only once it rests (T-139)', async () => {
+    await openEditor([]);
+    vi.useFakeTimers();
+    const row = rowOf('V');
+    fireEvent.pointerEnter(row, { pointerType: 'mouse', clientX: 10, clientY: 10 });
+    act(() => vi.advanceTimersByTime(PREVIEW_DELAY_MS - 100));
+    fireEvent.pointerMove(row, { pointerType: 'mouse', clientX: 40, clientY: 10 });
+    act(() => vi.advanceTimersByTime(PREVIEW_DELAY_MS - 1));
+    expect(document.querySelector('.card-hover-preview')).toBeNull();
+    // A small tremble does not restart the wait.
+    fireEvent.pointerMove(row, { pointerType: 'mouse', clientX: 42, clientY: 11 });
+    act(() => vi.advanceTimersByTime(1));
+    expect(document.querySelector('.card-hover-preview')).not.toBeNull();
+  });
+
   it('Kortit table: the same preview on a mouse hover (T-052)', async () => {
     window.location.hash = '#/';
     const repositories = createMemoryRepositories();

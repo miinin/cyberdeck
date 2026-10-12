@@ -3357,8 +3357,8 @@ h3,
 .card-hover-preview {
   position: fixed;
   z-index: 50;
-  /* 18rem on ordinary screens, up to 24rem on very wide ones (T-052). */
-  inline-size: clamp(18rem, 14vw, 24rem);
+  /* 16rem on ordinary screens, up to 22rem on very wide ones (T-052, T-139: a little smaller, less in the way). */
+  inline-size: clamp(16rem, 13vw, 22rem);
   block-size: auto;
   aspect-ratio: 733 / 1024;
   border: 1px solid var(--color-border-strong);

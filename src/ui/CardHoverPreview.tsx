@@ -5,8 +5,11 @@ import { CARD_IMAGE_ASPECT, CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/
 import { getCardImage } from '../data/cardImages';
 import { HOVER_QUERY, useMediaQuery } from './useMediaQuery';
 
-/** The mouse rests this long on a row before the bigger image appears (T-050b). */
-export const PREVIEW_DELAY_MS = 250;
+/** The mouse rests this long, still, on a row before the bigger image appears (T-050b, T-139). */
+export const PREVIEW_DELAY_MS = 450;
+
+/** Moving more than this many px restarts the wait: passing over the list never opens the image (T-139). */
+const REST_TOLERANCE = 4;
 
 /** Space between the trigger (or the pointer) and the image, in px. */
 const GAP = 12;
@@ -83,7 +86,8 @@ function CardHoverPreview({ shown }: { shown: Shown | null }) {
 }
 
 /**
- * Hover preview for result rows and deck rows (T-050b). Only a mouse that rests 250 ms opens it; leaving,
+ * Hover preview for result rows and deck rows (T-050b, T-139). Only a mouse that rests still for 450 ms opens it (moving
+ * restarts the wait, so sweeping over a list opens nothing); leaving,
  * scrolling, Esc or opening the image dialog (`hide`) closes it. Touch and keyboard never open it.
  */
 export function useCardHoverPreview() {
@@ -92,6 +96,12 @@ export function useCardHoverPreview() {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   /** Latest pointer x over the trigger: the image opens next to where the pointer rests, not where it entered. */
   const pointerX = useRef(0);
+  const restAt = useRef({ x: 0, y: 0 });
+
+  const shownRef = useRef<Shown | null>(null);
+  useEffect(() => {
+    shownRef.current = shown;
+  }, [shown]);
 
   const hide = useCallback(() => {
     clearTimeout(timer.current);
@@ -121,6 +131,7 @@ export function useCardHoverPreview() {
           if (event.pointerType !== 'mouse') return;
           const trigger = event.currentTarget;
           pointerX.current = event.clientX;
+          restAt.current = { x: event.clientX, y: event.clientY };
           clearTimeout(timer.current);
           timer.current = setTimeout(
             () => setShown({ card, rect: trigger.getBoundingClientRect(), x: pointerX.current }),
@@ -128,7 +139,19 @@ export function useCardHoverPreview() {
           );
         },
         onPointerMove: (event) => {
-          if (event.pointerType === 'mouse') pointerX.current = event.clientX;
+          if (event.pointerType !== 'mouse') return;
+          pointerX.current = event.clientX;
+          // Still waiting and the mouse moves on: wait again from here. An open image stays while the mouse is on the row.
+          const moved = Math.abs(event.clientX - restAt.current.x) + Math.abs(event.clientY - restAt.current.y);
+          if (shownRef.current === null && moved > REST_TOLERANCE) {
+            restAt.current = { x: event.clientX, y: event.clientY };
+            const trigger = event.currentTarget;
+            clearTimeout(timer.current);
+            timer.current = setTimeout(
+              () => setShown({ card, rect: trigger.getBoundingClientRect(), x: pointerX.current }),
+              PREVIEW_DELAY_MS,
+            );
+          }
         },
         onPointerLeave: hide,
       };
