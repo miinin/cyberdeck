@@ -110,7 +110,7 @@ export function SharedTradeView({
   }, [myHaves.phase, myHaves.saved, mine.phase, mine.saved, myRule, myTradeableOf]);
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
-    headingRef.current?.focus();
+    headingRef.current?.focus({ preventScroll: true });
   }, [data]);
 
   const comparison = useMemo(

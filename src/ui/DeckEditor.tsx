@@ -317,7 +317,7 @@ export function DeckEditor({
   }, [toast]);
 
   useEffect(() => {
-    if (phase !== 'loading') headingRef.current?.focus();
+    if (phase !== 'loading') headingRef.current?.focus({ preventScroll: true });
   }, [phase]);
 
   // Leaving the editor or closing the tab must not lose the last edit. The update runs its write

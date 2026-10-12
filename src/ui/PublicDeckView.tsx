@@ -47,7 +47,7 @@ export function PublicDeckView({
   }, [store, pubId, attempt]);
 
   useEffect(() => {
-    if (load.phase === 'missing' || load.phase === 'error') headingRef.current?.focus();
+    if (load.phase === 'missing' || load.phase === 'error') headingRef.current?.focus({ preventScroll: true });
   }, [load.phase]);
 
   if (load.phase === 'loading') {
