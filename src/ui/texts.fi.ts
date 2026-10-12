@@ -371,6 +371,7 @@ export const textsFi = {
   wantScopeList: 'Want-lista',
   wantScopeAll: 'Lisää kortteja',
   wantColumn: 'Wantissa',
+  wantEditing: '★ + ja − muuttavat want-listaa, eivät kokoelmaa.',
   haveColumn: 'Vaihdettavissa',
   tradeRuleLegend: 'Vaihtoon menee',
   tradeKeepPlayset: 'Yli pelisarjan',

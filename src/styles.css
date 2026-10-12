@@ -66,8 +66,8 @@
   --color-brand-yellow: #fcee09;
   --color-glitch-a: #ff2a6d;
   --color-glitch-b: #1fe0ff;
-  --heading-bar: var(--color-brand-yellow);
-  --glow-accent: 0 0 0.75rem rgba(252, 238, 9, 0.35);
+  --heading-bar: var(--section-accent);
+  --glow-accent: 0 0 0.75rem color-mix(in srgb, var(--section-accent) 35%, transparent);
   --page-glow-a: rgba(31, 224, 255, 0.1);
   --page-glow-b: rgba(252, 238, 9, 0.06);
   --scanline: rgba(255, 255, 255, 0.022);
@@ -169,7 +169,7 @@
   --color-success: #17713f;
   --color-owned-hover: var(--color-surface-raised);
   --color-swatch-edge: #0e0f14;
-  --heading-bar: linear-gradient(90deg, var(--color-text) 0 65%, var(--color-brand-yellow) 65%);
+  --heading-bar: linear-gradient(90deg, var(--color-text) 0 65%, var(--section-accent) 65%);
   --glow-accent: none;
   --page-glow-a: rgba(31, 224, 255, 0.16);
   --page-glow-b: rgba(252, 238, 9, 0.22);
@@ -1896,8 +1896,8 @@ body:has(dialog[open]) {
 .segmented-option:has(input:checked),
 .segmented-option[aria-pressed='true'],
 .segmented-option[aria-current='page'] {
-  background: var(--color-brand-yellow);
-  color: #000;
+  background: var(--section-accent);
+  color: var(--section-on-accent);
 }
 
 .segmented-option input {
@@ -2149,7 +2149,7 @@ body:has(dialog[open]) {
 }
 
 .main-nav a[aria-current='page'] {
-  border-bottom-color: var(--color-brand-yellow);
+  border-bottom-color: var(--section-nav);
 }
 
 .main-nav a:focus-visible {
@@ -10335,4 +10335,66 @@ main:has(.mark-banner) {
     flex: none;
     min-inline-size: 9rem;
   }
+}
+
+/*
+ * T-142: each section has its own accent, one of the game's four colors (Proxy, a tool, is neutral). It marks the heading
+ * bar, the current nav link and the chosen options, so the user sees where they are although the pages look alike.
+ * Buttons keep the brand yellow. On the light theme red and blue get white text for contrast.
+ */
+:root {
+  --section-accent: var(--color-brand-yellow);
+  --section-on-accent: #000;
+  --section-nav: var(--section-accent);
+}
+
+:root[data-section='collection'] {
+  --section-accent: var(--color-card-green);
+}
+
+:root[data-section='decks'] {
+  --section-accent: var(--color-card-red);
+}
+
+:root[data-section='havewant'] {
+  --section-accent: var(--color-card-blue);
+}
+
+:root[data-section='proxy'] {
+  --section-accent: var(--color-text);
+  --section-on-accent: var(--color-bg);
+  --section-nav: var(--color-header-text);
+}
+
+:root[data-theme='light'][data-section='decks'],
+:root[data-theme='light'][data-section='havewant'] {
+  --section-on-accent: #fff;
+}
+
+/* T-142: want counters are blue with a star, so they never look like the collection counters (yellow). */
+.count-control--want {
+  --color-accent: var(--color-card-blue);
+  --color-accent-edge: var(--color-card-blue);
+  --color-accent-2: color-mix(in srgb, var(--color-card-blue) 80%, #fff);
+  --color-on-accent: #000;
+}
+
+:root[data-theme='light'] .count-control--want {
+  --color-on-accent: #fff;
+}
+
+.count-control--want .count {
+  color: var(--color-card-blue);
+}
+
+.count-want-mark {
+  margin-inline-end: 0.15em;
+  font-size: 0.8em;
+}
+
+/* T-142: says what the want counters change. */
+.hw-editing {
+  margin: 0;
+  color: var(--color-card-blue);
+  font-size: var(--font-size-sm);
 }

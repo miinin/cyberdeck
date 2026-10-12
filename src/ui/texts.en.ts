@@ -348,6 +348,7 @@ export const textsEn: typeof textsFi = {
   wantScopeList: 'Want list',
   wantScopeAll: 'Add cards',
   wantColumn: 'Wanted',
+  wantEditing: '★ + and − change the want list, not the collection.',
   haveColumn: 'Tradeable',
   tradeRuleLegend: 'Up for trade',
   tradeKeepPlayset: 'Beyond a playset',

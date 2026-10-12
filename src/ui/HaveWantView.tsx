@@ -321,7 +321,8 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
                       ]}
                       onChange={setScope}
                     />
-                    {wantScope === 'list' && wantedCount > 0 && (
+                    <p className="hw-editing">{texts.wantEditing}</p>
+                  {wantScope === 'list' && wantedCount > 0 && (
                       <SendToProxyButton
                         rows={cards.filter((card) => countIn(wants, card.key) > 0).map((card) => ({ card: card.key, count: countIn(wants, card.key) }))}
                         queue={proxyQueue}

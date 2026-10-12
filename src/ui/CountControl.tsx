@@ -33,6 +33,12 @@ function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'o
   const proxy = kind === 'proxy';
   return (
     <span className="count">
+      {/* A want counter is marked with a star as well as its color (T-142): it never looks like the collection one. */}
+      {want && (
+        <span className="count-want-mark" aria-hidden="true">
+          ★
+        </span>
+      )}
       {count > 0 ? (
         <>
           <span className="visually-hidden">{proxy ? proxyTexts.countPrefix : want ? texts.wantPrefix : texts.countPrefix}</span>
@@ -95,7 +101,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
 
   if (!editable) {
     return (
-      <div className="count-control count-control--readonly">
+      <div className={kind === 'want' ? 'count-control count-control--readonly count-control--want' : 'count-control count-control--readonly'}>
         <CountValue card={card} count={count} kind={kind} />
       </div>
     );
@@ -118,7 +124,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
   };
 
   return (
-    <div className="count-control">
+    <div className={kind === 'want' ? 'count-control count-control--want' : 'count-control'}>
       <button
         type="button"
         ref={minusRef}

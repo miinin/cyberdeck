@@ -13,6 +13,32 @@ export type Route =
   // Collection progress (T-105).
   | { name: 'collection' };
 
+/**
+ * The section a route belongs to (T-142): each has its own accent, one of the game's four colors, so the user always
+ * sees where they are although the pages look alike. Proxy is a tool, not part of the game: a neutral accent.
+ */
+export type Section = 'cards' | 'collection' | 'decks' | 'havewant' | 'proxy';
+
+export function sectionOf(route: Route): Section {
+  switch (route.name) {
+    case 'collection':
+      return 'collection';
+    case 'decks':
+    case 'deck':
+    case 'share':
+    case 'publicDecks':
+    case 'publicDeck':
+      return 'decks';
+    case 'havewant':
+    case 'trade':
+      return 'havewant';
+    case 'proxy':
+      return 'proxy';
+    default:
+      return 'cards';
+  }
+}
+
 export function parseHash(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/');
   // Shared deck link (T-056): the data is validated by decodeDeckShare, not here.
