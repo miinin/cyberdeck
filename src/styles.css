@@ -10650,3 +10650,19 @@ button.card-tag:focus-visible {
   outline: var(--focus-ring);
   outline-offset: 2px;
 }
+
+/*
+ * T-153: the big card tilts toward the mouse: the side under the pointer goes back a little (useTilt sets the angles).
+ * A quick follow while moving, a slow ease back to flat; nothing with reduced motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .card-tilt {
+    transform: perspective(1400px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+  }
+
+  .card-tilt.is-tilting {
+    transition-duration: 140ms;
+  }
+}

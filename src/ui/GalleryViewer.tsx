@@ -5,6 +5,7 @@ import { Chevron } from './Chevron';
 import { CardName, cardNameText } from './CardName';
 import type { GalleryItem } from './galleryItems';
 import { texts } from './texts';
+import { useTilt } from './useTilt';
 
 /** A swipe shorter than this many pixels is a tap, not a step. */
 const SWIPE_MIN = 48;
@@ -28,6 +29,7 @@ export function GalleryViewer({
   onDetails: (index: number) => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const tilt = useTilt<HTMLImageElement>();
   const swipeStart = useRef<number | null>(null);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const item = items[index];
@@ -103,8 +105,9 @@ export function GalleryViewer({
       >
         {item.src !== null && failedSrc !== item.src ? (
           <img
+            {...tilt}
             key={item.id}
-            className="gallery-viewer-image"
+            className="gallery-viewer-image card-tilt"
             src={item.src}
             width={CARD_IMAGE_WIDTH.lg}
             height={cardImageHeight('lg')}
