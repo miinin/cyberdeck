@@ -276,6 +276,8 @@ export const textsFi = {
   setAll: 'Kaikki setit',
   tagLegend: 'Tagi',
   tagAll: 'Kaikki tagit',
+  cardTagsLabel: 'Tagit',
+  cardTagShow: (tag: string) => `Näytä kaikki ${tag}-kortit`,
   setChip: (label: string) => `Setti: ${label}`,
   setGroupSets: 'Setit',
   setGroupOther: 'Muut tuotteet',

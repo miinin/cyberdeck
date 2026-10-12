@@ -1186,7 +1186,16 @@ export function DeckEditor({
           <DeckResults deckId={deckId} repository={repositories.games} cards={cards} cardsByKey={cardsByKey} />
         </section>
       </div>
-      <CardImageDialog card={zoomCard} onClose={() => setZoomCard(null)} />
+      <CardImageDialog
+        card={zoomCard}
+        onClose={() => setZoomCard(null)}
+        onTagClick={(tag) => {
+          // T-152: the tag becomes the search of the cards to add.
+          setZoomCard(null);
+          setCriteria({ ...EMPTY_CRITERIA, tag });
+          setTab('add');
+        }}
+      />
       {preview.preview}
     </>
   );

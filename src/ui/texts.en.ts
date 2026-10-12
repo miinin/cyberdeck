@@ -255,6 +255,8 @@ export const textsEn: typeof textsFi = {
   setAll: 'All sets',
   tagLegend: 'Tag',
   tagAll: 'All tags',
+  cardTagsLabel: 'Tags',
+  cardTagShow: (tag: string) => `Show every ${tag} card`,
   setChip: (label: string) => `Set: ${label}`,
   setGroupSets: 'Sets',
   setGroupOther: 'Other products',

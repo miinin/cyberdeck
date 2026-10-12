@@ -15,6 +15,7 @@ export function CardImageDialog({
   onClose,
   details,
   artUrl = null,
+  onTagClick,
 }: {
   card: Card | null;
   onClose: () => void;
@@ -22,6 +23,8 @@ export function CardImageDialog({
   details?: ReactNode;
   /** A version's art shown instead of the card's base image. */
   artUrl?: string | null;
+  /** T-152: the card's tags are buttons that show every card with the tag; without it they are plain text. */
+  onTagClick?: (tag: string) => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [failedKey, setFailedKey] = useState<string | null>(null);
@@ -73,6 +76,30 @@ export function CardImageDialog({
               {texts.closeSymbol}
             </button>
           </div>
+          {(card.tags ?? []).length > 0 && (
+            <ul className="card-tags" aria-label={texts.cardTagsLabel}>
+              {(card.tags ?? []).map((tag) => (
+                <li key={tag}>
+                  {onTagClick === undefined ? (
+                    <span className="card-tag" lang="en">
+                      {tag}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="card-tag"
+                      lang="en"
+                      aria-label={texts.cardTagShow(tag)}
+                      title={texts.cardTagShow(tag)}
+                      onClick={() => onTagClick(tag)}
+                    >
+                      {tag}
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
           <div className="card-dialog-content">
           {imageSrc !== null && failedKey !== imageSrc ? (
             <img
