@@ -185,6 +185,8 @@ export interface Repositories {
   wants: CollectionRepository;
   /** The proxy print queue (T-102): the collection's interface and rules, local only (not synced). */
   proxy: CollectionRepository;
+  /** The own Have list (T-143): the cards the user offers for trade, the want list's rules; local only (not synced yet). */
+  haves: CollectionRepository;
   /** The game results (T-122, D-030). */
   games: GameLogRepository;
   decks: DeckRepository;

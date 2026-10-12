@@ -12,15 +12,26 @@ import type { CardsByKey } from './deckRules';
  */
 
 export type TradeKeep = 'playset' | 'one' | 'none';
+/** Where the Have list comes from (T-143): the user's own list, or the collection under the keep rule. */
+export type HaveSource = 'list' | 'collection';
 
 export interface TradeRule {
   readonly keep: TradeKeep;
   /** Keep at least the copies in the decks (summed over all decks and their sections). */
   readonly keepDeckCards: boolean;
+  /** Null until the user picks one: then an own list that has cards, else a collection that has cards, else the own list. */
+  readonly source: HaveSource | null;
 }
 
 export const TRADE_KEEPS: readonly TradeKeep[] = ['playset', 'one', 'none'];
-export const DEFAULT_TRADE_RULE: TradeRule = { keep: 'playset', keepDeckCards: false };
+export const DEFAULT_TRADE_RULE: TradeRule = { keep: 'playset', keepDeckCards: false, source: null };
+export const HAVE_SOURCES: readonly HaveSource[] = ['list', 'collection'];
+
+/** The Have source in use: the user's choice, or the one that has cards (an own list first). */
+export function haveSourceOf(rule: TradeRule, ownListCards: number, collectionCards: number): HaveSource {
+  if (rule.source !== null) return rule.source;
+  return ownListCards === 0 && collectionCards > 0 ? 'collection' : 'list';
+}
 
 /** Copies of each card in all decks together. */
 export function deckUse(decks: readonly Deck[]): Map<CardKey, number> {

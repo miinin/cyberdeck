@@ -145,3 +145,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-140 | Hover-esikatselu ei avaudu vierityksen jälkeen paikallaan olevan hiiren alle (400 ms), eikä tyhjä kehys välähdä ennen kuvan latautumista | 1 | Should | PM | Done | PM |
 | T-141 | Erikoiskuvitukset: Have/Want näyttää suodattimen mukaisen kuvituksen (esim. Nova Rare) kuten Kortit-sivu; hover-esikatselu näyttää saman kuvituksen kuin rivi | 1 | Should | PM | Done | PM |
 | T-142 | Osioiden tunnusvärit pelin neljästä väristä (Kortit keltainen, Kokoelma vihreä, Pakat punainen, Have/Want sininen, Proxy neutraali); want-laskurit sinisiä tähdellä; Want-välilehdellä teksti siitä, mitä painikkeet muuttavat | 1 | Should | PM | Done | PM |
+| T-143 | Oma Have-lista (D-032): lähde Oma lista / Kokoelmasta, Have-lista ja Lisää kortteja, ⇄-laskurit, jakolinkki vain Have+Want; tallennus laitteelle (synkka T-145) | 2 | Must | PM | Done | PM |
+| T-144 | Yksi korostusväri sivua kohden (D-032): osion väri painikkeisiin, laskureihin ja linkkeihin, rauhalliset valitut välilehdet; epävakaa ProxyView-testi korjattu (odottaa tarkistettavat rivit, pidempi aikaraja) | 1 | Should | PM | Done | PM |

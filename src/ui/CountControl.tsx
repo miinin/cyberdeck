@@ -19,8 +19,8 @@ export interface CountControlProps {
   onLimit: (card: Card) => void;
   /** false = browsing: only the count and its state are shown, no buttons (T-040). */
   editable?: boolean;
-  /** 'want' = the want list (T-064b), 'proxy' = the print queue (T-102): their own spoken texts and no playset mark. Default: the collection. */
-  kind?: 'owned' | 'want' | 'version' | 'proxy';
+  /** 'want' = the want list (T-064b), 'have' = the own Have list (T-143), 'proxy' = the print queue (T-102): their own spoken texts and no playset mark. Default: the collection. */
+  kind?: 'owned' | 'want' | 'have' | 'version' | 'proxy';
   /** The count cannot go below this (D-020: the sum of the versions). Default 0. */
   min?: number;
   /** Names the control for screen readers instead of the card name (a version row). */
@@ -28,27 +28,28 @@ export interface CountControlProps {
 }
 
 /** The count with its spoken equivalents and the playset mark (✓). */
-function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'owned' | 'want' | 'version' | 'proxy' }) {
+function CountValue({ card, count, kind }: { card: Card; count: number; kind: 'owned' | 'want' | 'have' | 'version' | 'proxy' }) {
   const want = kind === 'want';
+  const have = kind === 'have';
   const proxy = kind === 'proxy';
   return (
     <span className="count">
       {/* A want counter is marked with a star as well as its color (T-142): it never looks like the collection one. */}
-      {want && (
+      {(want || have) && (
         <span className="count-want-mark" aria-hidden="true">
-          ★
+          {want ? '★' : '⇄'}
         </span>
       )}
       {count > 0 ? (
         <>
-          <span className="visually-hidden">{proxy ? proxyTexts.countPrefix : want ? texts.wantPrefix : texts.countPrefix}</span>
+          <span className="visually-hidden">{proxy ? proxyTexts.countPrefix : want ? texts.wantPrefix : have ? texts.havePrefix : texts.countPrefix}</span>
           {count}
           <span className="visually-hidden">{copiesSuffix(count)}</span>
         </>
       ) : (
         <>
           <span aria-hidden="true">0</span>
-          <span className="visually-hidden">{proxy ? proxyTexts.notQueued : want ? texts.notWanted : texts.notOwned}</span>
+          <span className="visually-hidden">{proxy ? proxyTexts.notQueued : want ? texts.notWanted : have ? texts.notInHave : texts.notOwned}</span>
         </>
       )}
       {kind === 'owned' && count >= playsetSize(card) && (
@@ -97,11 +98,12 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
     );
   }
 
-  if (!editable && kind === 'want' && count === 0) return null;
+  if (!editable && (kind === 'want' || kind === 'have') && count === 0) return null;
+  const kindClass = kind === 'want' ? ' count-control--want' : kind === 'have' ? ' count-control--have' : '';
 
   if (!editable) {
     return (
-      <div className={kind === 'want' ? 'count-control count-control--readonly count-control--want' : 'count-control count-control--readonly'}>
+      <div className={`count-control count-control--readonly${kindClass}`}>
         <CountValue card={card} count={count} kind={kind} />
       </div>
     );
@@ -124,7 +126,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
   };
 
   return (
-    <div className={kind === 'want' ? 'count-control count-control--want' : 'count-control'}>
+    <div className={`count-control${kindClass}`}>
       <button
         type="button"
         ref={minusRef}
@@ -134,7 +136,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
         onClick={decrease}
       >
         <span className="visually-hidden">
-          {kind === 'proxy' ? proxyTexts.decreaseOne : kind === 'want' ? texts.decreaseWant : texts.decreaseOne}
+          {kind === 'proxy' ? proxyTexts.decreaseOne : kind === 'want' ? texts.decreaseWant : kind === 'have' ? texts.decreaseHave : texts.decreaseOne}
           {label ?? <CardName card={card} />}
         </span>
         <span aria-hidden="true">{texts.minusSymbol}</span>
@@ -149,7 +151,7 @@ export function CountControl({ card, count, mode, onChange, onLimit, editable = 
         onClick={increase}
       >
         <span className="visually-hidden">
-          {kind === 'proxy' ? proxyTexts.increaseOne : kind === 'want' ? texts.increaseWant : texts.increaseOne}
+          {kind === 'proxy' ? proxyTexts.increaseOne : kind === 'want' ? texts.increaseWant : kind === 'have' ? texts.increaseHave : texts.increaseOne}
           {label ?? <CardName card={card} />}
         </span>
         <span aria-hidden="true">+</span>

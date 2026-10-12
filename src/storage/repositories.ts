@@ -6,8 +6,8 @@
  */
 import { isCardKey } from '../domain/cardKey';
 import type { CardKey } from '../domain/cardKey';
-import { DEFAULT_TRADE_RULE, TRADE_KEEPS } from '../domain/tradeRule';
-import type { TradeKeep, TradeRule } from '../domain/tradeRule';
+import { DEFAULT_TRADE_RULE, HAVE_SOURCES, TRADE_KEEPS } from '../domain/tradeRule';
+import type { HaveSource, TradeKeep, TradeRule } from '../domain/tradeRule';
 import {
   countOf,
   EMPTY_COLLECTION,
@@ -56,6 +56,8 @@ import {
   WANTS_SCHEMA_VERSION,
   PROXY_KEY,
   PROXY_SCHEMA_VERSION,
+  HAVES_KEY,
+  HAVES_SCHEMA_VERSION,
   THEME_KEY,
   VIEW_KEY,
   EDIT_MODE_KEY,
@@ -77,6 +79,7 @@ import {
   GAMES_MIGRATIONS,
   migrateCollectionV2ToV3,
   PROXY_MIGRATIONS,
+  HAVES_MIGRATIONS,
   WANTS_MIGRATIONS,
 } from './migrations';
 import { DEFAULT_COLLECTION_PREFS } from './types';
@@ -115,12 +118,12 @@ export interface RepositoryOptions {
    */
   namespace?: string;
   /** Tests only; default []. */
-  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[]; games?: readonly Migration[]; proxy?: readonly Migration[] };
+  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[]; games?: readonly Migration[]; proxy?: readonly Migration[]; haves?: readonly Migration[] };
 }
 
 /** One stored entity: its key, schema and how its value is wrapped in the envelope's data. */
 interface Aggregate<T> {
-  name: 'collection' | 'decks' | 'wants' | 'games' | 'proxy';
+  name: 'collection' | 'decks' | 'wants' | 'games' | 'proxy' | 'haves';
   key: string;
   spec: EnvelopeSpec<T>;
   empty: T;
@@ -158,18 +161,20 @@ function specWith<T>(
 function parseTradeRule(raw: string | null): TradeRule {
   let keep: TradeKeep = DEFAULT_TRADE_RULE.keep;
   let keepDeckCards = DEFAULT_TRADE_RULE.keepDeckCards;
-  if (raw === null) return { keep, keepDeckCards };
+  let source: HaveSource | null = DEFAULT_TRADE_RULE.source;
+  if (raw === null) return { keep, keepDeckCards, source };
   try {
     const value: unknown = JSON.parse(raw);
     if (typeof value === 'object' && value !== null) {
       const fields = value as Record<string, unknown>;
       if (TRADE_KEEPS.includes(fields.keep as TradeKeep)) keep = fields.keep as TradeKeep;
       if (typeof fields.keepDeckCards === 'boolean') keepDeckCards = fields.keepDeckCards;
+      if (HAVE_SOURCES.includes(fields.source as HaveSource)) source = fields.source as HaveSource;
     }
   } catch {
     // Not JSON: the defaults.
   }
-  return { keep, keepDeckCards };
+  return { keep, keepDeckCards, source };
 }
 
 /** Reads the saved Collection page choices; each field that is not valid falls back to its default. */
@@ -230,6 +235,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const wantsKey = prefix === null ? WANTS_KEY : `${prefix}wants`;
   const gamesKey = prefix === null ? GAMES_KEY : `${prefix}games`;
   const proxyKey = prefix === null ? PROXY_KEY : `${prefix}proxy`;
+  const havesKey = prefix === null ? HAVES_KEY : `${prefix}haves`;
   // The own binder holds the account's cards and a free-text name, so it follows the account like the proxy queue (T-120).
   const binderLayoutKey = prefix === null ? BINDER_LAYOUT_KEY : `${prefix}binder-layout`;
   const backupPrefix = prefix === null ? BACKUP_PREFIX : `${prefix}backup:`;
@@ -271,6 +277,15 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     spec: specWith(PROXY_SCHEMA_VERSION, PROXY_MIGRATIONS, options.migrations?.proxy, parseProxyQueue),
     empty: EMPTY_COLLECTION,
     toData: (queue) => ({ entries: queue.entries }),
+  };
+
+  // The own Have list (T-143): the want list's shape and rules, local to the account like the proxy queue (not synced yet).
+  const havesAggregate: Aggregate<Collection> = {
+    name: 'haves',
+    key: havesKey,
+    spec: specWith(HAVES_SCHEMA_VERSION, HAVES_MIGRATIONS, options.migrations?.haves, parseCollection),
+    empty: EMPTY_COLLECTION,
+    toData: (haves) => ({ entries: haves.entries }),
   };
 
   const decksAggregate: Aggregate<Deck[]> = {
@@ -458,6 +473,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const collection = collectionRepository(collectionAggregate, collectionKey);
   const wants = collectionRepository(wantsAggregate, wantsKey);
   const proxy = collectionRepository(proxyAggregate, proxyKey);
+  const haves = collectionRepository(havesAggregate, havesKey);
 
   /** Builds a row from the caller's fields only and validates it like a stored one. */
   function validGame(id: string, createdAt: string, input: GameInput): GameRecord {
@@ -747,7 +763,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     saveTradeRule: async (rule: TradeRule) => {
       const valid = parseTradeRule(JSON.stringify(rule));
-      if (valid.keep !== rule.keep || valid.keepDeckCards !== rule.keepDeckCards) {
+      if (valid.keep !== rule.keep || valid.keepDeckCards !== rule.keepDeckCards || valid.source !== rule.source) {
         throw new StorageError('invalid-input', 'Unknown trade rule');
       }
       try {
@@ -880,6 +896,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     collection,
     wants,
     proxy,
+    haves,
     games,
     decks,
     preferences,

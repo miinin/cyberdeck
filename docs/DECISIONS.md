@@ -613,3 +613,11 @@ Päätöksessä on viisi osaa.
 1. Vaihtosääntö: pidä pelisarja (oletus, T-063), pidä 1 kappale tai pidä ei mitään. Lisäksi valinta "Pidä pakoissa olevat": pidetään vähintään kaikkien pakkojen yhteenlaskettu määrä.
 2. Sääntö tallennetaan laitteen asetuksiin (`cyberdeck:trade-rule`). Se ei synkronoidu eikä ole käyttäjäkohtainen samalla laitteella. Korttikohtaiset poikkeukset vaativat tietomallin muutoksen, ja ne ovat jatkoidea.
 3. Vaihtolinkin versio 2 (`cyberdeck-vaihto 2`) kuljettaa lähettäjän vaihdettavat kappaleet t-riveinä. Vastaanottaja käyttää niitä. Version 1 linkeissä pätee pelisarjasääntö. Digiturva katselmoi: ei löydöksiä.
+
+## D-032 · Oma Have-lista ja yksi korostusväri sivua kohden · 2026-10-12 · Päättäjä: käyttäjä (suunta), PM (toteutus)
+**Konteksti:** Haven sai vain kokoelmasta, joten pelkkää vaihtolistaa ei voinut tehdä. Osioiden tunnusvärit (T-142) tekivät sivuista kirjavia: punainen välilehti, vihreä palkki ja keltainen painike yhtä aikaa, ja Have/Wantin linkit olivat keltaisella alleviivattuja.
+**Päätös:**
+1. Have-lähde: **oma lista** (käsin, kuten Want) tai **kokoelmasta** säännöllä (D-031). Oletus: oma lista, jos siinä on kortteja; muuten kokoelma, jos siinä on kortteja; muuten oma lista. Valinta tallentuu vaihtosääntöön.
+2. Oma Have-lista tallentuu ensin laitteelle (tilikohtaisesti kuten proxy-jono). Pilvisynkka tulee erikseen, kun Firestore-säännöt sallivat `collection/have`-dokumentin.
+3. Omasta listasta jaettu linkki sisältää vain Have- ja Want-listan, ei kokoelmaa (v2-muoto, t = h).
+4. **Yksi korostusväri sivua kohden:** osion väri (Kortit keltainen, Kokoelma vihreä, Pakat punainen, Have/Want sininen, Proxy neutraali) hoitaa kaiken korostuksen: otsikon viivan, navigaation, valitut vaihtoehdot (sävytetty tausta ja alaviiva, ei täyttä värilaattaa), pääpainikkeet, laskurien + ja linkkien alleviivaukset. Muut värit vain merkityksen mukaan (vihreä = laillinen tai valmis, oranssi = puuttuu, punainen = virhe) ja korttien pelivärit datana. Want- ja Have-laskurit erotetaan merkeillä (★, ⇄), ei värillä.
