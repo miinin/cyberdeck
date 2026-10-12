@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-12 (PM, T-145)
+# STATUS · päivitetty 2026-10-12 (PM, T-153)
 
 ## Yhdellä lauseella
 Kaikki T-121:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-143 (oma Have-lista) ja T-144 (yksi korostusväri sivua kohden) julkaistu 2026-10-12. T-145 Have-listan pilvisynkka julkaistu 2026-10-12 | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
+| – | – | T-149–T-153 (laatukierros, saavutukset, tagit, kallistus) julkaistu 2026-10-12 | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
 
 ## Avoimet
 - Preview-kanavien poisto PR:n sulkeutuessa (preview.yml, delete_preview): PR #135:n sulkeutumisajo epäonnistui ennen korjausta 433eb35 (checkout ja listausvirheen näyttö). Korjaus varmistetaan seuraavan PR:n sulkeutumisajosta.
@@ -60,6 +60,8 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - T-136–T-142 glitch, Have/Want-asettelu, hover-esikatselu, erikoiskuvitukset, osioiden värit (2026-10-12).
 - T-143 oma Have-lista ja T-144 värimaailma (D-032, 2026-10-12).
 - T-145 Have-listan pilvisynkka (2026-10-12).
+- T-146–T-148 korttidata: setin rajaus, Beta-Iconicit ja V 005b (D-033).
+- T-149 laatukierros, T-150 saavutukset, T-151–T-152 tagit, T-153 kortin kallistus (2026-10-12).
 - T-122 Pakan tulosseuranta (2026-10-10, PR #137, D-030): pelien kirjaus, tilastot ja synkka tilille. Velka T-124 (SEC-122-7).
 - T-084–T-094 (2026-10-05–06): ei nykimistä, gitleaks (D-023), hostingin kovennus, mobiilikorjaukset 1–4 (tietonäkymä, Lista), esikatselukanavien kiintiö, sideboard-rivit ja kelluva sääntöilmoitus (T-092), pakan tilastot uusiksi (T-093), dokumentaatio (T-094).
 - T-047 Netdeck-kovennus (oma PR, valmistuu rinnakkain)

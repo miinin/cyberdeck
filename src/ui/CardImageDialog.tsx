@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useTilt } from './useTilt';
 import type { Card } from '../domain/card';
 import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
 import { getCardImage } from '../data/cardImages';
@@ -27,6 +28,7 @@ export function CardImageDialog({
   onTagClick?: (tag: string) => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const tilt = useTilt<HTMLImageElement>();
   const [failedKey, setFailedKey] = useState<string | null>(null);
   // T-091: the whole card on the whole screen (phones show it smaller beside the counts).
   const [zoomed, setZoomed] = useState(false);
@@ -103,7 +105,8 @@ export function CardImageDialog({
           <div className="card-dialog-content">
           {imageSrc !== null && failedKey !== imageSrc ? (
             <img
-              className="card-dialog-image"
+              {...tilt}
+              className="card-dialog-image card-tilt"
               src={imageSrc}
               width={CARD_IMAGE_WIDTH.lg}
               height={cardImageHeight('lg')}
