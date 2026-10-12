@@ -64,8 +64,8 @@ describe('rarityProgress and specialArtProgress', () => {
     expect(rarityProgress(cards, own({ card: 'beta', count: 1 }))).toEqual([
       { rarity: 'Common', owned: 0, total: 1 },
       { rarity: 'Epic Rare', owned: 1, total: 1 },
-      { rarity: 'Nova Rare', owned: 0, total: 1 },
     ]);
+    // gamma's own rarity is Nova Rare: a special art, counted by specialArtProgress (T-133).
   });
 
   it('counts the special arts by the printing copies', () => {

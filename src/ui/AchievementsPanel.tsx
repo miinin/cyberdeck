@@ -34,8 +34,17 @@ function Badge({ item }: { item: Achievement }) {
  * Achievements (T-132, I-8): computed from the collection, so nothing is stored. The earned badges, the closest open goals
  * with a bar, and the rest of the open ones behind a disclosure (no inner scroll).
  */
-export function AchievementsPanel({ cards, collection }: { cards: readonly Card[]; collection: Collection }) {
-  const list = useMemo(() => achievements(cards, collection), [cards, collection]);
+export function AchievementsPanel({
+  cards,
+  collection,
+  hasArt,
+}: {
+  cards: readonly Card[];
+  collection: Collection;
+  /** Whether a special art has its own picture (as in the overview's special art rows). */
+  hasArt: (cardKey: string, rarity: string) => boolean;
+}) {
+  const list = useMemo(() => achievements(cards, collection, hasArt), [cards, collection, hasArt]);
   const earned = list.filter((item) => item.done);
   const next = nextAchievements(list, NEXT_COUNT);
   const open = list.filter((item) => !item.done);

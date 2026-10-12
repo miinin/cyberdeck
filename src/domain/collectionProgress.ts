@@ -58,11 +58,15 @@ export interface RarityProgress extends Progress {
   rarity: string;
 }
 
-/** Per official rarity of the card (its first printing), in the order of KNOWN_CARD_RARITIES; unknown ones last. Cards without a rarity are left out. */
+/**
+ * Per official rarity of the card (its first printing), in the order of KNOWN_CARD_RARITIES; unknown ones last. Cards without
+ * a rarity are left out, and so are the special art rarities (T-133): a Nova Rare is an art of many cards, counted in
+ * specialArtProgress, not the one promo card whose only printing is a Nova Rare.
+ */
 export function rarityProgress(cards: readonly Card[], collection: Collection): RarityProgress[] {
   const rows = new Map<string, Progress>();
   for (const card of cards) {
-    if (card.rarity === null) continue;
+    if (card.rarity === null || SPECIAL_ART_RARITIES.includes(card.rarity)) continue;
     const rarity = officialRarity(card.rarity);
     const row = rows.get(rarity) ?? { owned: 0, total: 0 };
     row.total += 1;

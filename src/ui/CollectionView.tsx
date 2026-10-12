@@ -46,6 +46,9 @@ const COLLECTION_VIEW_OPTIONS = [
   ['binder', collectionTexts.viewBinder],
 ] as const;
 
+/** Whether a special art has its own picture (T-105); shared by the special art rows and the achievements. */
+const hasArt = (key: string, rarity: string) => variantImageUrl(key, rarity) !== null;
+
 function ProgressRow({ label, owned, total, barClass = '' }: { label: ReactNode; owned: number; total: number; barClass?: string }) {
   const share = total <= 0 ? 0 : owned / total;
   return (
@@ -116,7 +119,6 @@ export function CollectionView({
   const ready = collection.phase === 'ready';
   const saved = ready ? collection.saved : EMPTY_COLLECTION;
   const data = useMemo(() => {
-    const hasArt = (key: string, rarity: string) => variantImageUrl(key, rarity) !== null;
     return {
       overview: collectionOverview(cards, saved),
       sets: setProgress(cards, saved),
@@ -234,7 +236,7 @@ export function CollectionView({
             </div>
           </section>
 
-          <AchievementsPanel cards={cards} collection={saved} />
+          <AchievementsPanel cards={cards} collection={saved} hasArt={hasArt} />
 
           <section className="panel" aria-labelledby="coll-sets">
             <h2 id="coll-sets" className="panel-title">
