@@ -295,7 +295,7 @@ export function DecksView({
   const deleteOpenerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    headingRef.current?.focus();
+    headingRef.current?.focus({ preventScroll: true });
   }, []);
 
   // No dependencies: runs after every render and moves focus once when a target was set.

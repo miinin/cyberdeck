@@ -194,7 +194,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
   const collectionAllRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    headingRef.current?.focus();
+    headingRef.current?.focus({ preventScroll: true });
   }, []);
   // The print rules in styles.css hide the rest of the page only while this view is open.
   useEffect(() => {

@@ -95,7 +95,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const collectionAllRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    headingRef.current?.focus();
+    headingRef.current?.focus({ preventScroll: true });
   }, []);
 
   // The last saved change is announced once the saves are done, as in the card list.
