@@ -4,6 +4,8 @@ import type { Card } from '../domain/card';
 import { createMemoryRepositories } from '../storage';
 import type { Repositories } from '../storage';
 import { App } from '../App';
+import { CARDS } from '../data/cards';
+import { variantImageUrl } from '../data/variantImages';
 
 function card(slug: string, name: string): Card {
   return { id: `id-${slug}`, key: slug, slug, name, subname: null, displayName: name, type: 'Unit', color: 'Red', cost: 2, power: null, ram: null, rarity: null };
@@ -185,5 +187,20 @@ describe('Have/Want card grid (T-067)', () => {
     await user.keyboard('{Escape}');
     expect(pageTip).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByText(/Kokoa tähän kortit/)).not.toBeVisible();
+  });
+});
+
+describe('Have/Want arts (T-141)', () => {
+  it('shows the Nova Rare art of a card when the Nova Rare filter is on, as on the Cards page', async () => {
+    const card = CARDS.find((c) => c.rarity !== 'Nova Rare' && variantImageUrl(c.key, 'Nova Rare') !== null);
+    if (card === undefined) throw new Error('no card with a Nova Rare art in the data');
+    window.location.hash = '#/vaihto';
+    render(<App cards={[card]} repositories={createMemoryRepositories()} />);
+    await settle();
+    const nova = screen.getByRole('checkbox', { name: /Nova Rare/, hidden: true });
+    act(() => nova.click());
+    await settle();
+    const images = [...document.querySelectorAll('.card-grid img')].map((img) => img.getAttribute('src'));
+    expect(images).toContain(variantImageUrl(card.key, 'Nova Rare'));
   });
 });

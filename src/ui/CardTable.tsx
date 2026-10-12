@@ -69,7 +69,7 @@ export function CardTable({
   /** The rarity a row shows; default: the card's own. */
   rarityOf?: (card: Card) => string | null;
   /** Mouse hover preview of the bigger image (T-052), as in the deck editor. */
-  hoverProps?: (card: Card) => HoverPreviewProps;
+  hoverProps?: (card: Card, artUrl?: string | null) => HoverPreviewProps;
   /** Controlled sort shared with the "Järjestys" selector (T-060); without it the table keeps its own. */
   sort?: CardSort;
   onSortChange?: (next: CardSort) => void;
@@ -107,7 +107,7 @@ export function CardTable({
         </thead>
         <tbody role="rowgroup">
           {rows.map((card) => (
-            <tr key={card.id} role="row" className={collectionState(card, owned)} {...hoverProps?.(card)}>
+            <tr key={card.id} role="row" className={collectionState(card, owned)} {...hoverProps?.(card, artUrlOf?.(card) ?? null)}>
               <td role="cell" className="cell-image">
                 <CardImage card={card} onOpen={onOpenImage} artUrl={artUrlOf?.(card) ?? null} />
               </td>
