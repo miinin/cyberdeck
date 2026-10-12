@@ -126,6 +126,8 @@ export interface CloudSnapshot {
   wants: CloudDoc<Collection>;
   /** `users/{uid}/games/log` (T-122, D-030), validated with parseGameLog. */
   games: CloudDoc<GameLog>;
+  /** `users/{uid}/collection/have` (T-145), validated like the collection. */
+  haves: CloudDoc<Collection>;
   /** Invalid documents, rows and sections left out (shown as a warning, SR-23 kohta 3). */
   dropped: number;
   /** A document or the meta has a newer schema version: no writes (SR-23 kohta 4). */
@@ -144,6 +146,8 @@ export interface CloudChange {
   wants?: Collection;
   /** undefined = the game log is not written. */
   games?: GameLog;
+  /** undefined = the own Have list is not written (T-145). */
+  haves?: Collection;
 }
 
 export interface CloudStore {
@@ -154,6 +158,6 @@ export interface CloudStore {
    * Throws CloudError.
    */
   commit(change: CloudChange, expectedRev: number): Promise<number>;
-  /** Deletes every document under the account (decks, collection, wants, games and meta). Throws CloudError. */
+  /** Deletes every document under the account (decks, collection, wants, haves, games and meta). Throws CloudError. */
   deleteAll(): Promise<void>;
 }

@@ -111,6 +111,27 @@ describe('sync engine', () => {
     expect((await b.repos.wants.load()).value.entries).toEqual(expected);
   });
 
+  it('syncs the own Have list both ways in its own document, merged per card (T-145)', async () => {
+    const a = device(cloud);
+    const b = device(cloud);
+    await a.repos.haves.setCount('detonate', 2);
+    await a.engine.syncNow();
+    expect(cloud.paths()).toEqual(['collection/have', 'meta']);
+    await b.engine.syncNow();
+    expect((await b.repos.haves.load()).value.entries).toEqual([{ card: 'detonate', count: 2 }]);
+
+    await b.repos.haves.setCount('overclock', 1);
+    await b.engine.syncNow();
+    await a.engine.syncNow();
+    const expected = [
+      { card: 'detonate', count: 2 },
+      { card: 'overclock', count: 1 },
+    ];
+    expect((await a.repos.haves.load()).value.entries).toEqual(expected);
+    expect(cloud.getRaw('collection/have')).toMatchObject({ data: { entries: expected } });
+    expect(cloud.paths()).not.toContain('collection/want');
+  });
+
   it('does not touch the collection document when only the want list changes, and the reverse', async () => {
     const a = device(cloud);
     await a.repos.collection.setCount('detonate', 1);

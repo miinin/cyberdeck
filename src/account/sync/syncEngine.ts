@@ -54,6 +54,7 @@ function baseOf(data: LocalData, rev: number): SyncBase {
     collection: data.collection,
     wants: data.wants,
     games: data.games,
+    haves: data.haves,
   };
 }
 
@@ -64,6 +65,7 @@ function sameAsBase(data: LocalData, base: SyncBase): boolean {
     data.decks.every((deck) => stamps.get(deck.id) === deck.updatedAt) &&
     sameCollection(data.collection, base.collection) &&
     sameCollection(data.wants, base.wants) &&
+    sameCollection(data.haves, base.haves) &&
     sameGameLog(data.games, base.games)
   );
 }
@@ -133,6 +135,7 @@ export function createSyncEngine(options: {
       collection: sameCollection(local.collection, base.collection) ? undefined : local.collection,
       wants: sameCollection(local.wants, base.wants) ? undefined : local.wants,
       games: sameGameLog(local.games, base.games) ? undefined : local.games,
+      haves: sameCollection(local.haves, base.haves) ? undefined : local.haves,
     };
     // SR-45: a log over the limits is never sent, not even in part.
     if (change.games !== undefined && !gameLogFits(change.games)) throw new Stop('error');
@@ -155,11 +158,13 @@ export function createSyncEngine(options: {
     );
     const wants = mergeCollection(local.wants, cloudValue(snapshot.wants), base?.wants ?? EMPTY_COLLECTION);
     const games = mergeGames(local.games, cloudGames(snapshot.games), base?.games ?? EMPTY_GAME_LOG);
+    const haves = mergeCollection(local.haves, cloudValue(snapshot.haves), base?.haves ?? EMPTY_COLLECTION);
     if (
       !gameLogFits(games.log) ||
       decks.decks.length > MAX_DECKS ||
       collection.collection.entries.length > MAX_COLLECTION_ENTRIES ||
-      wants.collection.entries.length > MAX_COLLECTION_ENTRIES
+      wants.collection.entries.length > MAX_COLLECTION_ENTRIES ||
+      haves.collection.entries.length > MAX_COLLECTION_ENTRIES
     ) {
       throw new Stop('error');
     }
@@ -170,20 +175,31 @@ export function createSyncEngine(options: {
       collection: collection.writeCloud ? collection.collection : undefined,
       wants: wants.writeCloud ? wants.collection : undefined,
       games: games.writeCloud ? games.log : undefined,
+      haves: haves.writeCloud ? haves.collection : undefined,
     };
     const empty =
       change.putDecks.length === 0 &&
       change.deleteDecks.length === 0 &&
       change.collection === undefined &&
       change.wants === undefined &&
-      change.games === undefined;
+      change.games === undefined &&
+      change.haves === undefined;
     const rev = empty ? expectedRev : await cloud.commit(change, expectedRev);
 
-    const merged: LocalData = { decks: decks.decks, collection: collection.collection, wants: wants.collection, games: games.log };
+    const merged: LocalData = {
+      decks: decks.decks,
+      collection: collection.collection,
+      wants: wants.collection,
+      games: games.log,
+      haves: haves.collection,
+    };
     // The device data is replaced only if it is still what the merge started from.
     if (!storage.apply(local, merged)) return false;
     const cloudInvalid =
-      snapshot.collection.kind === 'invalid' || snapshot.wants.kind === 'invalid' || snapshot.games.kind === 'invalid';
+      snapshot.collection.kind === 'invalid' ||
+      snapshot.wants.kind === 'invalid' ||
+      snapshot.games.kind === 'invalid' ||
+      snapshot.haves.kind === 'invalid';
     storage.saveBase(baseOf(merged, cloudInvalid ? NEVER_IN_SYNC_REV : rev));
     return true;
   }

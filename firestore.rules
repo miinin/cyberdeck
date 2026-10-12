@@ -134,11 +134,11 @@ service cloud.firestore {
       }
 
       match /collection/{docId} {
-        allow get: if isOwner(uid) && docId in ['main', 'want'];
+        allow get: if isOwner(uid) && docId in ['main', 'want', 'have'];
         allow create, update: if isOwner(uid)
-          && docId in ['main', 'want']
+          && docId in ['main', 'want', 'have']
           && isCollectionDoc(request.resource.data);
-        allow delete: if isOwner(uid) && docId in ['main', 'want'];
+        allow delete: if isOwner(uid) && docId in ['main', 'want', 'have'];
       }
 
       match /games/{docId} {

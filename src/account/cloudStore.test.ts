@@ -190,6 +190,7 @@ describe.each([
       collection: { kind: 'missing' },
       wants: { kind: 'missing' },
       games: { kind: 'missing' },
+      haves: { kind: 'missing' },
       dropped: 0,
       locked: false,
       limitExceeded: false,
@@ -322,6 +323,14 @@ describe.each([
     await h.store.commit(change({ collection: { entries: [] } }), 1);
     snapshot = await h.store.readAll();
     expect(snapshot.wants).toEqual({ kind: 'ok', value: WANTS });
+  });
+
+  it('writes the own Have list to collection/have and leaves it alone when not given (T-145)', async () => {
+    await h.store.commit(change({ haves: WANTS }), 0);
+    expect((await h.store.readAll()).haves).toEqual({ kind: 'ok', value: WANTS });
+    expect(h.getRaw('collection/have')).toMatchObject({ schemaVersion: 1, data: { entries: WANTS.entries } });
+    await h.store.commit(change({ wants: WANTS }), 1);
+    expect((await h.store.readAll()).haves).toEqual({ kind: 'ok', value: WANTS });
   });
 
   it('validates the want list like the collection and locks on a newer version (D-018)', async () => {
