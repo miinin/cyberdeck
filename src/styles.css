@@ -1452,8 +1452,33 @@ body:has(dialog[open]) {
   }
 
   /* Once when the page opens; the heading stays mounted across states (UX.md 7.7). Every page's main heading (T-116). */
+  /* T-133: after the first paint (so it is not lost while the page loads), then a short jolt every 12 s. */
   main h1 {
-    animation: glitch 0.4s steps(1, end) 1;
+    animation:
+      glitch 0.45s steps(1, end) 0.3s 2,
+      glitch-again 12s steps(1, end) 1.5s infinite;
+  }
+
+  @keyframes glitch-again {
+    0%,
+    96% {
+      text-shadow: none;
+      transform: none;
+    }
+
+    97% {
+      text-shadow:
+        -2px 0 var(--color-glitch-a),
+        2px 0 var(--color-glitch-b);
+      transform: translateX(1px);
+    }
+
+    98.5% {
+      text-shadow:
+        2px 0 var(--color-glitch-a),
+        -2px 0 var(--color-glitch-b);
+      transform: translateX(-1px);
+    }
   }
 
   @keyframes glitch {
