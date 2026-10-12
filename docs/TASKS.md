@@ -156,3 +156,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-151 | Korttien tagit (Netdeckin classifications, esim. Arasaka, Merc, Netrunner): tagivalikko korttimäärineen kaikilla hakusivuilla, suodatinsiru, nimihaku osuu tageihin | 2 | Should | PM | Done | Digiturva (ei löydöksiä) |
 | T-152 | Tagit kortin tietonäkymään napsautettavina: näyttää kaikki saman tagin kortit (Kortit, Have/Want, pakkaeditorin haku) | 1 | Should | PM | Done | PM |
 | T-153 | Iso kortti kallistuu hiiren mukaan (enintään 6°, pehmeä paluu) kortin isossa kuvassa ja galleriassa; vain hiiri, ei vähennetyllä liikkeellä | 1 | Should | PM | Done | PM |
+| T-154 | Saavutusten värit selkeiksi: värimerkit korttivärillä, tyyppimerkit pakan tilastojen tyyppiväreillä, muut tason värillä (taso 1 = sivun väri); avattu täytetty, lukittu katkoviiva; osoitinpalkin lohkot merkin värillä | 1 | Should | PM | Done | PM |

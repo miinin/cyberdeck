@@ -10666,3 +10666,126 @@ button.card-tag:focus-visible {
     transition-duration: 140ms;
   }
 }
+
+/*
+ * T-154: one color per badge: a color badge uses its card color, the others their tier (1 the page accent, 2 chrome cyan,
+ * 3 neon pink). An earned badge is filled with it (frame, tint, glow); a locked one is a dim dashed outline whose bar
+ * already shows the color it will light up in.
+ */
+.badge {
+  --badge: var(--color-accent);
+  --tier: var(--badge);
+}
+
+.badge--tier-2 {
+  --badge: var(--color-glitch-b);
+}
+
+.badge--tier-3 {
+  --badge: var(--color-glitch-a);
+}
+
+.badge--color-red {
+  --badge: var(--color-card-red);
+}
+
+.badge--color-yellow {
+  --badge: var(--color-card-yellow);
+}
+
+.badge--color-green {
+  --badge: var(--color-card-green);
+}
+
+.badge--color-blue {
+  --badge: var(--color-card-blue);
+}
+
+:root[data-theme='light'] .badge--tier-2:not([class*='badge--color-']):not([class*='badge--type-']) {
+  --badge: var(--color-card-blue);
+}
+
+:root[data-theme='light'] .badge--tier-3:not([class*='badge--color-']):not([class*='badge--type-']) {
+  --badge: var(--color-card-red);
+}
+
+.badge.is-done {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--badge) 28%, transparent), color-mix(in srgb, var(--badge) 6%, transparent) 70%),
+    var(--color-surface-raised);
+}
+
+.badge.is-done::before {
+  border: 2px solid var(--badge);
+}
+
+.badge:not(.is-done)::before {
+  border: 1px dashed color-mix(in srgb, var(--color-text-muted) 45%, transparent);
+}
+
+.badge:not(.is-done) .badge-title {
+  color: var(--color-text-muted);
+}
+
+.badge.is-done .badge-icon {
+  color: var(--badge);
+  background: color-mix(in srgb, var(--badge) 18%, var(--color-bg));
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--badge) 75%, transparent));
+}
+
+.badge.is-done .badge-title,
+.badge-stamp {
+  color: var(--badge);
+}
+
+.badge-stamp {
+  border-color: var(--badge);
+  background: color-mix(in srgb, var(--badge) 14%, transparent);
+}
+
+.badge-fill {
+  background: var(--badge);
+}
+
+/* T-154: a lit meter cell has the color of its badge (the default without specificity, so the badge classes win). */
+:where(.achievements-meter > span) {
+  --badge: var(--color-accent);
+}
+
+.achievements-meter > span.is-on {
+  background: var(--badge);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--badge) 60%, transparent);
+}
+
+/* T-154: type badges use the deck chart's type colors (Unit yellow, Program cyan, Gear violet); Legend magenta. */
+.badge--type-unit {
+  --badge: #fcee09;
+}
+
+.badge--type-program {
+  --badge: #1fe0ff;
+}
+
+.badge--type-gear {
+  --badge: #9d7fd6;
+}
+
+.badge--type-legend {
+  --badge: #ff2a6d;
+}
+
+:root[data-theme='light'] .badge--type-unit {
+  --badge: #b38f00;
+}
+
+:root[data-theme='light'] .badge--type-program {
+  --badge: #00728a;
+}
+
+:root[data-theme='light'] .badge--type-gear {
+  --badge: #6d4fb0;
+}
+
+:root[data-theme='light'] .badge--type-legend {
+  --badge: #c2185b;
+}
