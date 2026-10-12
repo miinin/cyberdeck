@@ -96,29 +96,56 @@ export const collectionTextsFi = {
   wantNote: 'Want-listalle tulee kunkin kortin täysi pelisarja.',
   achievementsHeading: 'Saavutukset',
   achievementsEarned: (earned: number, total: number) => `${earned} / ${total} saavutettu`,
-  achievementsNext: 'Lähimmät tavoitteet',
-  achievementsOpen: (n: number) => `Avoimet saavutukset (${n})`,
+  achievementsNext: 'Seuraavat keikat',
+  achievementUnlocked: 'Avattu',
+  achievementsOpen: (n: number) => `Lisää lukittuja (${n})`,
   achievementsAllDone: 'Kaikki saavutukset ansaittu!',
   achievementsEarnedList: 'Ansaitut saavutukset',
   achievementsOpenList: 'Avoimet saavutukset',
-  achievementLabel: (item: Achievement): string => {
+  // T-150: names and lines with Night City attitude. The subject is the color, type or rarity (official name).
+  achievementTitle: (item: Achievement): string => {
     switch (item.kind) {
       case 'distinct':
-        return item.subject === 1 ? 'Ensimmäinen kortti' : `${item.subject} eri korttia`;
+        return 'Puoli kaupunkia';
       case 'all':
-        return 'Jokainen kortti';
+        return 'Koko Night City';
       case 'copies':
-        return `${item.subject} kappaletta`;
+        return item.subject === 250 ? 'Kasa kromia' : item.subject === 500 ? 'Korttiholvi' : 'Arasakan arkisto';
       case 'playsets':
-        return 'Pelisarja jokaisesta';
+        return 'Täysi arsenaali';
       case 'set':
-        return `Setti täynnä: ${item.subject}`;
+        return 'Tervetuloa Night Cityyn';
       case 'color':
-        return `Väri täynnä: ${item.subject}`;
+        return ({ Red: 'Punainen raivo', Yellow: 'Neonkeltainen', Green: 'Myrkynvihreä', Blue: 'Kylmä sininen' } as Record<string, string>)[String(item.subject)] ?? `Väri täynnä: ${item.subject}`;
       case 'type':
-        return `Tyyppi täynnä: ${item.subject}`;
+        return ({ Legend: 'Legendojen kaupunki', Unit: 'Oma jengi', Gear: 'Asevarasto', Program: 'Daemon-kirjasto' } as Record<string, string>)[String(item.subject)] ?? `Tyyppi täynnä: ${item.subject}`;
       case 'rarity':
-        return `Harvinaisuus täynnä: ${item.subject}`;
+        return ({ Rare: 'Preem-kamaa', 'Epic Rare': 'Eeppinen keikka', 'Secret Rare': 'Salaisuuksien välittäjä', 'Iconic Rare': 'Ikoni', 'Nova Rare': 'Supernova' } as Record<string, string>)[String(item.subject)] ?? `Harvinaisuus täynnä: ${item.subject}`;
     }
   },
+  achievementFlavor: (item: Achievement): string => {
+    switch (item.kind) {
+      case 'distinct':
+        return `${item.subject} eri korttia. Puolet kaupungin kasvoista kansiossa.`;
+      case 'all':
+        return 'Jokainen kortti. Jokainen kuja.';
+      case 'copies':
+        return item.subject === 250
+          ? '250 kappaletta. Pöytä alkaa notkua.'
+          : item.subject === 500
+            ? '500 kappaletta. Tarvitset isomman laatikon, choom.'
+            : '1000 kappaletta. Arasaka olisi kateellinen.';
+      case 'playsets':
+        return 'Pelisarja jokaisesta kortista. Valmis mihin tahansa keikkaan.';
+      case 'set':
+        return 'Welcome to Night City kokonaan kasassa.';
+      case 'color':
+        return `Jokainen ${item.subject}-kortti.`;
+      case 'type':
+        return ({ Legend: 'Jokainen Legend. Kaupunki muistaa nimet.', Unit: 'Jokainen Unit riveissä.', Gear: 'Jokainen Gear hyllyssä.', Program: 'Jokainen Program ladattuna.' } as Record<string, string>)[String(item.subject)] ?? `Jokainen ${item.subject}.`;
+      case 'rarity':
+        return item.subject === 'Nova Rare' || item.subject === 'Iconic Rare' ? `Jokainen ${item.subject} -kuvitus.` : `Jokainen ${item.subject} -kortti.`;
+    }
+  },
+
 };
