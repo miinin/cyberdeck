@@ -3,7 +3,7 @@
  * Cards view counters and the card scanner (T-106), so both add copies through the same path.
  */
 import type { Card } from '../domain/card';
-import { entryChanges, ownedPerArt, setArtCount } from '../domain/arts';
+import { entryChanges, isBaseArt, ownedPerArt, setArtCount } from '../domain/arts';
 import type { Art } from '../domain/arts';
 import type { CollectionEntry } from '../domain/collection';
 import { setCopiesByEdition, targetPrinting } from '../domain/edition';
@@ -63,7 +63,7 @@ export function addCopies(
   try {
     const start = { entries: before === undefined ? [] : [before] };
     const edited =
-      art.rarity === null && targetPrinting(card, edition) !== null
+      isBaseArt(art) && targetPrinting(card, edition) !== null
         ? setCopiesByEdition(start, card, edition, (before?.count ?? 0) + copies)
         : setArtCount(start, card, art.artId, (ownedPerArt(before, card, arts).get(art.artId) ?? 0) + copies, arts);
     writeEntry(store, card, before, edited.entries[0]);
@@ -94,7 +94,7 @@ export function removeCopies(
     const start = { entries: before === undefined ? [] : [before] };
     const owned = ownedPerArt(before, card, arts).get(art.artId) ?? 0;
     const edited =
-      art.rarity === null && targetPrinting(card, edition) !== null
+      isBaseArt(art) && targetPrinting(card, edition) !== null
         ? setCopiesByEdition(start, card, edition, Math.max(0, total - copies))
         : setArtCount(start, card, art.artId, Math.max(0, owned - copies), arts);
     writeEntry(store, card, before, edited.entries[0]);

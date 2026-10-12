@@ -621,3 +621,10 @@ Päätöksessä on viisi osaa.
 2. Oma Have-lista synkataan tilille kuten want-lista: dokumentti `users/{uid}/collection/have`, sama muoto ja validointi (T-145). Säännöt deployattiin dev- ja tuotantoprojektiin ennen koodia, ja Digiturva katselmoi muutoksen ilman löydöksiä (Low: vanhalla välimuistiversiolla tehty tilin poisto voi jättää Have-dokumentin pilveen).
 3. Omasta listasta jaettu linkki sisältää vain Have- ja Want-listan, ei kokoelmaa (v2-muoto, t = h).
 4. **Yksi korostusväri sivua kohden:** osion väri (Kortit keltainen, Kokoelma vihreä, Pakat punainen, Have/Want sininen, Proxy neutraali) hoitaa kaiken korostuksen: otsikon viivan, navigaation, valitut vaihtoehdot (sävytetty tausta ja alaviiva, ei täyttä värilaattaa), pääpainikkeet, laskurien + ja linkkien alleviivaukset. Muut värit vain merkityksen mukaan (vihreä = laillinen tai valmis, oranssi = puuttuu, punainen = virhe) ja korttien pelivärit datana. Want- ja Have-laskurit erotetaan merkeillä (★, ⇄), ei värillä.
+
+## D-033 · Kuvitus painatuksen mukaan: vaihtoehtoinen peruskuva ja Beta-erikoiskuvitus · 2026-10-12 · Päättäjä: käyttäjä (sisältö), PM (malli)
+**Konteksti:** Kuvitus oli kortin ja harvinaisuuden mukainen (D-021). V Streetkidin 005b on eri kuvitus kuin 005a, ja 16 kortin Beta-Iconic Rare on eri kuvitus kuin Retail-Iconic Rare (tarkistettu choom.gg:n kuvista).
+**Päätös:**
+1. Kuvituksella on oma kuva-nimi (`image`). Kirjaimella merkitty numero toisesta kirjaimesta alkaen (005b) on oma kuvitus "Toinen kuvitus", jos kuva `<kortti>__alt-<kirjain>.webp` on olemassa. Beta-painoksen erikoisharvinaisuus on oma kuvitus "<harvinaisuus> (Beta)", jos kuva `<kortti>__<harvinaisuus>-beta.webp` on olemassa. Ilman kuvaa painatus kuuluu entiseen kuvitukseen.
+2. Peruskuvitus ottaa edelleen versiottomat kappaleet. Muut kuvitukset lasketaan painatusten versioista. Tallennettu data ei muutu.
+3. Kuvat (V 005b ja 16 Beta-Iconicia) on haettu choom.gg:stä käyttäjän pyynnöstä, tarkistettu ilman vesileimoja ja muunnettu samaan muotoon kuin muut (720 px, WebP 80). Skannerin tunnisteet laskettiin uudelleen.

@@ -150,3 +150,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-145 | Oman Have-listan pilvisynkka: collection/have, säännöt (deploy dev + prod), koodekki, synkkamoottori, kirjautumisen siirto, tilin poisto | 2 | Must | PM | Done | Digiturva (ei löydöksiä, Low kirjattu D-032) |
 | T-146 | Korttien tarkistus choom.gg:tä vasten: settijäsenyydet, WNC-numerot, ominaisuudet ja peruskuvat täsmäävät; korjattu setin valinta: kortin versiot rajataan siihen settiin (ei Edgerunner-promokuvia WNC-haussa) | 1 | Must | PM | Done | PM |
 | T-147 | Setti on Kaikki versiot -valinnan yläpuolella: valittu setti rajaa kaikki versiot siihen settiin, ilman settiä kaikki versiot. Regressiotesti oikealla korttidatalla | 1 | Must | PM | Done | PM |
+| T-148 | V Streetkid 005b omaksi kuvitukseksi ja 16 Beta-Iconic Rarea omiksi kuvituksikseen (D-033), kuvat choom.gg:stä, skannerin tunnisteet | 2 | Must | PM | Done | PM |

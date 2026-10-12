@@ -121,6 +121,7 @@ export const textsFi = {
   versionsHeading: 'Versiot',
   otherProducts: (n: number) => `+${n} muu${n === 1 ? '' : 'ta'} tuote${n === 1 ? '' : 'tta'}`,
   artBase: 'Perus',
+  artAlt: 'Toinen kuvitus',
   artShow: (name: string) => `Näytä versio: ${name}`,
   artBreakdown: 'Näytä painokset',
   versionPrev: (card: string) => `Edellinen versio: ${card}`,

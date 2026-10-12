@@ -1,8 +1,8 @@
 import { MAX_COLLECTION_COUNT } from '../domain/collection';
 import { RaritySymbol } from './RaritySymbol';
 import type { Card } from '../domain/card';
-import { officialRarity } from '../domain/cardSearch';
-import { artsOf, ownedPerArt } from '../domain/arts';
+import { artsOf, ownedPerArt, isBaseArt, isBetaArt } from '../domain/arts';
+import { artName } from './artName';
 import { editionPrinting } from '../domain/edition';
 import type { Art } from '../domain/arts';
 import type { PrintingKey } from '../domain/printing';
@@ -78,9 +78,7 @@ export function setChips(printings: readonly Printing[]): SetChip[] {
   return [...families].map(([family, tags]) => ({ family, short: setAbbreviation(family), tags }));
 }
 
-export function artName(art: Art): string {
-  return art.rarity === null ? texts.artBase : officialRarity(art.rarity);
-}
+export { artName };
 
 /**
  * The "Versiot" section of the card details (D-021): a gallery with one tile per art (base art and each special
@@ -105,7 +103,7 @@ export function CardVersions({
 
   /** The printings in a tile's "Erittely": all but the two that have a counter of their own on the base tile. */
   const breakdown = (art: Art) =>
-    art.rarity === null && editionRows.length > 0
+    isBaseArt(art) && editionRows.length > 0
       ? art.printings.filter((p) => !editionRows.some((row) => row.printing.key === p.key))
       : art.printings;
 
@@ -117,10 +115,10 @@ export function CardVersions({
       <h3 id="card-detail-versions">{texts.versionsHeading}</h3>
       <ul className="art-gallery">
         {tiles.map((art) => {
-          const url = art.rarity === null ? base : imageUrl(card.key, art.rarity);
+          const url = art.image === null ? base : imageUrl(card.key, art.image);
           const name = artName(art);
           const n = owned.get(art.artId) ?? 0;
-          const selected = art.rarity === null ? shownArt === null : shownArt === url;
+          const selected = isBaseArt(art) ? shownArt === null : shownArt === url;
           const picture = url !== null && <img className="art-thumb" src={url} alt="" loading="lazy" />;
           return (
             <li key={art.artId} className={'art-tile' + (selected && onShowArt !== undefined ? ' is-selected' : '')}>
@@ -130,16 +128,25 @@ export function CardVersions({
                   className="art-pick"
                   aria-label={texts.artShow(name)}
                   aria-pressed={selected}
-                  onClick={() => onShowArt(art.rarity === null ? null : url)}
+                  onClick={() => onShowArt(isBaseArt(art) ? null : url)}
                 >
                   {picture}
                 </button>
               ) : (
                 picture
               )}
-              <span className="art-name">{art.rarity === null ? name : <RaritySymbol rarity={art.rarity} showName />}</span>
+              <span className="art-name">
+                {art.rarity === null ? (
+                  name
+                ) : (
+                  <>
+                    <RaritySymbol rarity={art.rarity} showName />
+                    {isBetaArt(art) && ' (Beta)'}
+                  </>
+                )}
+              </span>
               <ArtSets printings={art.printings} />
-              {art.rarity === null && editionRows.length > 0 ? (
+              {isBaseArt(art) && editionRows.length > 0 ? (
                 <div className="art-count art-count--editions">
                   {editionRows.map(({ label, printing }) => {
                     const m = versionCount(printing.key);

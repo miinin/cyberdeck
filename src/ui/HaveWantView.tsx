@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { artRarity, artsInSet, artsOf, matchedSpecialRarity } from '../domain/arts';
+import { artRarity, artsInSet, artsOf, matchedArt } from '../domain/arts';
 import type { Card } from '../domain/card';
 import { variantImageUrl } from '../data/variantImages';
 import {
@@ -173,14 +173,17 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   // As on the Cards page (D-021, T-141): a box starts on the special art a rarity or set filter matches, e.g. Nova Rare.
   const artsByCard = useMemo(() => new Map(cards.map((card) => [card.key, artsOf(card, hasArt)])), [cards]);
   const filterArtUrl = (card: Card): string | null => {
-    const rarity = matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt);
-    return rarity === null ? null : variantImageUrl(card.key, rarity);
+    const art = matchedArt(artsByCard.get(card.key) ?? [], criteria.rarities, setChoice);
+    return art?.image == null ? null : variantImageUrl(card.key, art.image);
   };
-  const rarityOf = (card: Card): string | null => matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt) ?? card.rarity;
+  const rarityOf = (card: Card): string | null => {
+    const art = matchedArt(artsByCard.get(card.key) ?? [], criteria.rarities, setChoice);
+    return art === null ? card.rarity : artRarity(card, art);
+  };
   const gridItems = shown.map((card): CardListItem => {
     const arts = artsInSet(artsByCard.get(card.key) ?? [], setChoice);
     const imageUrl = filterArtUrl(card);
-    const versionUrls = arts.map((art) => (art.rarity === null ? null : variantImageUrl(card.key, art.rarity)));
+    const versionUrls = arts.map((art) => (art.image === null ? null : variantImageUrl(card.key, art.image)));
     const versionRarities = arts.map((art) => artRarity(card, art));
     const lone = arts.length === 1 && arts[0] !== undefined ? artRarity(card, arts[0]) : undefined;
     return { card, art: null, imageUrl, artCount: arts.length, versionUrls, versionRarities, startVersion: Math.max(0, versionUrls.indexOf(imageUrl)), rarity: lone };

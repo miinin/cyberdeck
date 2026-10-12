@@ -5,6 +5,11 @@ import { setFilterId } from './printing';
 import { officialRarity } from './cardSearch';
 import type { Printing } from './printing';
 
+/** A Beta edition set (T-148). */
+const BETA_SET = /Beta/;
+/** A collector number with a letter after the first one (005b, β005b): an alternate illustration (T-148). */
+const ALT_NUMBER = /^\D*\d+([b-z])$/i;
+
 /*
  * Arts (D-021): the visual versions of a card. The base art gathers every printing with an ordinary rarity;
  * each special rarity (Iconic Legend, Iconic Other, Iconic Secret, Nova Rare) is an art of its own.
@@ -24,8 +29,13 @@ export interface Art {
   artId: string;
   /** 'base' or the special rarity. */
   label: string;
-  /** The special rarity, or null for the base art. */
+  /** The special rarity, or null for the base art and an alternate base art. */
   rarity: string | null;
+  /**
+   * The name of the art's own picture for variantImageUrl (T-148): the special rarity, "<rarity> Beta" for a Beta
+   * edition art of its own, "Alt <letter>" for an alternate base art (e.g. V 005b); null = the card's own picture.
+   */
+  image: string | null;
   printings: readonly Printing[];
   /** Where a counter adds copies: Retail in English, else the first English printing, else the first. */
   defaultPrinting: Printing | null;
@@ -58,31 +68,78 @@ export function artsOf(card: Card, hasArt: (cardKey: string, rarity: string) => 
   const printings = card.printings ?? [];
   if (printings.length === 0) return [];
   const base: Printing[] = [];
+  // Keyed by the picture name; insertion order is the order of the printings.
+  const alternates = new Map<string, Printing[]>();
   const special = new Map<string, Printing[]>();
   for (const printing of printings) {
     const rarity = printing.rarity;
-    if (isSpecialRarity(rarity) && hasArt(card.key, rarity)) special.set(rarity, [...(special.get(rarity) ?? []), printing]);
+    if (isSpecialRarity(rarity) && hasArt(card.key, rarity)) {
+      // T-148: the Beta edition of a special rarity has its own illustration when it has its own picture.
+      const beta = `${rarity} Beta`;
+      const image = BETA_SET.test(printing.setName) && hasArt(card.key, beta) ? beta : rarity;
+      special.set(image, [...(special.get(image) ?? []), printing]);
+      continue;
+    }
+    // T-148: a lettered number after the first (005b) is another illustration when it has its own picture.
+    const letter = ALT_NUMBER.exec(printing.number)?.[1]?.toLowerCase();
+    const alternate = letter === undefined ? null : `Alt ${letter}`;
+    if (alternate !== null && hasArt(card.key, alternate)) alternates.set(alternate, [...(alternates.get(alternate) ?? []), printing]);
     else base.push(printing);
   }
+  const art = (image: string | null, label: string, rarity: string | null, list: Printing[]): Art => ({
+    artId: image === null ? card.key : `${card.key}__${raritySlug(image)}`,
+    label,
+    rarity,
+    image,
+    printings: list,
+    defaultPrinting: defaultOf(list),
+  });
   // A card whose printings are all of special rarities (e.g. all Nova Rare) has no base art: an empty one would be a duplicate.
-  const arts: Art[] = base.length === 0 && special.size > 0 ? [] : [{ artId: card.key, label: 'base', rarity: null, printings: base, defaultPrinting: defaultOf(base) }];
+  const arts: Art[] = base.length === 0 && (special.size > 0 || alternates.size > 0) ? [] : [art(null, 'base', null, base)];
+  for (const [image, list] of alternates) arts.push(art(image, 'alt', null, list));
   for (const rarity of SPECIAL_ART_RARITIES) {
-    const list = special.get(rarity);
-    if (list !== undefined) {
-      arts.push({ artId: `${card.key}__${raritySlug(rarity)}`, label: rarity, rarity, printings: list, defaultPrinting: defaultOf(list) });
+    for (const image of [rarity, `${rarity} Beta`]) {
+      const list = special.get(image);
+      if (list !== undefined) arts.push(art(image, rarity, rarity, list));
     }
   }
   return arts;
 }
 
+/** A base art: the card's own picture, the one that takes the copies without a version (T-148: an alternate base art is not). */
+export function isBaseArt(art: Art): boolean {
+  return art.image === null;
+}
+
+/** A Beta edition art of its own (T-148). */
+export function isBetaArt(art: Art): boolean {
+  return art.image !== null && art.rarity !== null && art.image !== art.rarity;
+}
+
+/**
+ * The art a search result should show (D-021 kohta 4, T-148): the arts with a printing that matches the active rarity
+ * and set filters; when exactly one matches and it has a picture of its own, that one. Null without a filter, or when
+ * the base art or several arts match.
+ */
+export function matchedArt(arts: readonly Art[], rarities: readonly string[], family: string | null): Art | null {
+  if (rarities.length === 0 && family === null) return null;
+  const matching = arts.filter((a) =>
+    a.printings.some(
+      (p) => (rarities.length === 0 || (p.rarity !== null && rarities.includes(officialRarity(p.rarity)))) && (family === null || setFilterId(p) === family),
+    ),
+  );
+  const only = matching.length === 1 ? matching[0] : undefined;
+  return only !== undefined && !isBaseArt(only) ? only : null;
+}
+
 /** The art a rarity belongs to (a special one, else the base art), or undefined. */
 export function artForRarity(arts: readonly Art[], rarity: string | null): Art | undefined {
-  return arts.find((art) => art.rarity !== null && art.rarity === rarity) ?? arts.find((art) => art.rarity === null);
+  return arts.find((art) => art.rarity !== null && art.rarity === rarity) ?? arts.find(isBaseArt);
 }
 
 /** The art that takes the copies without a version: the base art, or the first art when the card has no base art. */
 function catchAll(arts: readonly Art[]): Art | undefined {
-  return arts.find((art) => art.rarity === null) ?? arts[0];
+  return arts.find(isBaseArt) ?? arts[0];
 }
 
 /**
@@ -102,15 +159,15 @@ export function ownedPerArt(entry: CollectionEntry | undefined, card: Card, arts
   const versions = entry?.versions ?? {};
   let special = 0;
   for (const art of arts) {
-    if (art.rarity === null) continue;
+    if (isBaseArt(art)) continue;
     const n = art.printings.reduce((sum, p) => sum + (versions[p.key] ?? 0), 0);
     result.set(art.artId, n);
     special += n;
   }
-  for (const art of arts) if (art.rarity === null) result.set(art.artId, Math.max(0, (entry?.count ?? 0) - special));
+  for (const art of arts) if (isBaseArt(art)) result.set(art.artId, Math.max(0, (entry?.count ?? 0) - special));
   // Without a base art the first art also takes the copies without a version.
   const first = arts[0];
-  if (first !== undefined && first.rarity !== null) result.set(first.artId, (result.get(first.artId) ?? 0) + Math.max(0, (entry?.count ?? 0) - special));
+  if (first !== undefined && !isBaseArt(first)) result.set(first.artId, (result.get(first.artId) ?? 0) + Math.max(0, (entry?.count ?? 0) - special));
   return result;
 }
 
@@ -127,7 +184,7 @@ export function setArtCount(collection: Collection, card: Card, artId: string, n
   let delta = n - current;
   let next = collection;
   if (delta > 0) {
-    if (art.rarity === null || art.defaultPrinting === null) return withCount(collection, card.key, countOf(collection, card.key) + delta);
+    if (isBaseArt(art) || art.defaultPrinting === null) return withCount(collection, card.key, countOf(collection, card.key) + delta);
     const before = versionsOf(collection, card.key)[art.defaultPrinting.key] ?? 0;
     return setVersionCount(collection, card.key, art.defaultPrinting.key, before + delta);
   }

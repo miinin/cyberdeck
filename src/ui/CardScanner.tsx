@@ -88,7 +88,7 @@ function buildTargets(cards: readonly Card[]): Map<string, Target> {
         card,
         arts,
         art,
-        imageUrl: art.rarity === null ? baseImage : variantImageUrl(card.key, art.rarity),
+        imageUrl: art.image === null ? baseImage : variantImageUrl(card.key, art.image),
         rarity: art.rarity,
       });
     }
