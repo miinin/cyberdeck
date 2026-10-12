@@ -1,6 +1,7 @@
 import type { Card } from './card';
 import type { Collection } from './collection';
-import { artsOf, ownedPerArt, setArtCount } from './arts';
+import { artsInSet, artsOf, ownedPerArt, setArtCount } from './arts';
+import { setFilterId } from './printing';
 import type { Printing } from './printing';
 
 function p(setCode: string, setName: string, number: string, rarity: string | null, language = 'en'): Printing {
@@ -20,6 +21,16 @@ const card: Card = {
 
 const key = (n: number, versions?: Record<string, number>) => ({ card: 'v', count: n, ...(versions ? { versions } : {}) });
 const col = (entry: ReturnType<typeof key>): Collection => ({ entries: [entry] });
+
+describe('artsInSet (T-146)', () => {
+  it('keeps only the arts printed in the chosen set, all arts without a set or when none is printed in it', () => {
+    const arts = artsOf(card);
+    expect(artsInSet(arts, setFilterId(legend)).map((a) => a.artId)).toEqual(['v__iconic-legend']);
+    expect(artsInSet(arts, setFilterId(retail)).map((a) => a.artId)).toEqual(['v', 'v__nova-rare']);
+    expect(artsInSet(arts, null)).toBe(arts);
+    expect(artsInSet(arts, 'no-such-set')).toBe(arts);
+  });
+});
 
 describe('artsOf', () => {
   it('has the base art first and one art per special rarity', () => {

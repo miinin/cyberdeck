@@ -31,6 +31,16 @@ export interface Art {
   defaultPrinting: Printing | null;
 }
 
+/**
+ * The arts a set filter keeps (T-146): only those with a printing in the set, so a Welcome to Night City search never
+ * offers an Edgerunner Open promo art. No set, or no art in it: all arts.
+ */
+export function artsInSet(arts: readonly Art[], family: string | null): readonly Art[] {
+  if (family === null) return arts;
+  const inSet = arts.filter((art) => art.printings.some((p) => setFilterId(p) === family));
+  return inSet.length === 0 ? arts : inSet;
+}
+
 export function isSpecialRarity(rarity: string | null): rarity is string {
   return rarity !== null && SPECIAL_ART_RARITIES.includes(rarity);
 }

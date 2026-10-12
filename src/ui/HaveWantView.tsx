@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { artRarity, artsOf, matchedSpecialRarity } from '../domain/arts';
+import { artRarity, artsInSet, artsOf, matchedSpecialRarity } from '../domain/arts';
 import type { Card } from '../domain/card';
 import { variantImageUrl } from '../data/variantImages';
 import {
@@ -178,7 +178,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   };
   const rarityOf = (card: Card): string | null => matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt) ?? card.rarity;
   const gridItems = shown.map((card): CardListItem => {
-    const arts = artsByCard.get(card.key) ?? [];
+    const arts = artsInSet(artsByCard.get(card.key) ?? [], setChoice);
     const imageUrl = filterArtUrl(card);
     const versionUrls = arts.map((art) => (art.rarity === null ? null : variantImageUrl(card.key, art.rarity)));
     const versionRarities = arts.map((art) => artRarity(card, art));

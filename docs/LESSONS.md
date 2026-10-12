@@ -42,3 +42,5 @@ Opitut virheet ja miten ne vältetään. Vain lisäyksiä (rules.md 6, liite A5)
 
 ## L-007 · 2026-10-10 · Esikatselu tehtiin liian kapeasti (T-123)
 PM tarkisti vain 320 px:n ja tyhjän kokoelman, joten puhelimen (390 px) työkalurivin hajoaminen ja raskas merkintäpalkki menivät tuotantoon. Jatkossa UI-muutos tarkistetaan 390 px:llä oikean kaltaisella datalla (täysi kokoelma), kaikissa näkymätiloissa, joihin muutos vaikuttaa (Kuvat ja Lista, tila päällä ja pois), ja kuvaa arvioidaan käyttäjän silmin, ei vain päällekkäisyyksien osalta.
+
+- **Korttidatan tarkistus (T-146, 2026-10-12):** choom.gg lataa korttinsa Supabasesta, ja datan saa headless-selaimen verkkovastauksista (cards, card_sets). Vertailu: settijäsenyys kortin perheittäin, WNC-painatukset print_number-kentällä, ominaisuudet ja peruskuvat dHash-tunnisteella (sharp). Choom.gg ei listaa myymälän pre-release-kittiä eikä demopakkoja, joten niiden puuttuminen siellä ei ole virhe meillä.
