@@ -2,7 +2,7 @@ import { createMemoryRepositories } from '../../storage';
 import type { AccountHints } from '../types';
 import { PROD_ENV, TEST_ENV } from './config';
 import type { AuthMode } from './sites';
-import { authErrorKind, createFirebaseAuthClient } from './firebaseAuthClient';
+import { authErrorKind, createFirebaseAuthClient, RESTORE_TIMEOUT_MS } from './firebaseAuthClient';
 import { loadFirebase } from './loadFirebase';
 import type { FirebaseModules } from './loadFirebase';
 
@@ -146,6 +146,25 @@ describe('createFirebaseAuthClient: when the SDK loads (SR-21 kohta 5)', () => {
     await vi.waitFor(() => expect(client.state().status).toBe('signed-out'));
     expect(client.state().error).toBeNull();
     expect(store.loadLastUid()).toBe('abc123');
+  });
+
+  it('gives way after a while when a restore never settles, so "Kirjaudu" works again (T-157)', async () => {
+    vi.useFakeTimers();
+    try {
+      const store = hints({ 'cyberdeck:account:last-uid': 'abc123', 'cyberdeck:account:redirect-pending': '1' });
+      // The SDK never loads: the restore hangs.
+      const load = vi.fn(() => new Promise<FirebaseModules>(() => undefined));
+      const client = createFirebaseAuthClient({ env: TEST_ENV, mode: POPUP, hints: store, load });
+      client.start();
+      expect(client.state().status).toBe('loading');
+      vi.advanceTimersByTime(RESTORE_TIMEOUT_MS);
+      expect(client.state()).toMatchObject({ status: 'signed-out', error: null });
+      expect(store.loadRedirectPending()).toBe(false);
+      // The account hint stays: the next start tries again.
+      expect(store.loadLastUid()).toBe('abc123');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('clears the hint when the stored session is gone', async () => {

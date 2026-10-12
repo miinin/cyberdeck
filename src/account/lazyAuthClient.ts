@@ -6,6 +6,9 @@ import type { AccountHints, AuthClient } from './types';
  * the real client is loaded together with the Firebase SDK on the first sign-in, or at startup when a
  * hint shows an earlier sign-in (SR-21 kohta 5). Mirrors the real client's state once it is loaded.
  */
+/** How long a startup load of the sign-in code may take before the button is usable again (T-157). */
+export const LOAD_TIMEOUT_MS = 10_000;
+
 export function createLazyAuthClient(options: {
   available: boolean;
   hints: AccountHints;
@@ -52,7 +55,12 @@ export function createLazyAuthClient(options: {
       started = true;
       if (hints.loadLastUid() === null && !hints.loadRedirectPending()) return;
       state.set({ status: 'loading', error: null });
+      // T-157: a load that never settles gives way, so "Kirjaudu" is not stuck in "Kirjaudutaan…".
+      const timer = setTimeout(() => {
+        if (state.get().status === 'loading') state.set({ status: 'signed-out', error: null });
+      }, LOAD_TIMEOUT_MS);
       void run((loaded) => {
+        clearTimeout(timer);
         loaded.start();
         // Never left in 'loading' if the real client had nothing to restore.
         state.set(loaded.state());

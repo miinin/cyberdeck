@@ -10789,3 +10789,20 @@ button.card-tag:focus-visible {
 :root[data-theme='light'] .badge--type-legend {
   --badge: #c2185b;
 }
+
+/*
+ * T-157: the type colors for the whole app, not only the deck statistics: the Collection page's type rows (and the
+ * achievement badges) use them too. The deck statistics still set their own, the same values.
+ */
+:root {
+  --seg-unit: var(--color-brand-yellow);
+  --seg-program: #1fe0ff;
+  --seg-gear: #9d7fd6;
+  --seg-other: var(--color-text-muted);
+}
+
+:root[data-theme='light'] {
+  --seg-unit: #b38f00;
+  --seg-program: #00728a;
+  --seg-gear: #6d4fb0;
+}
