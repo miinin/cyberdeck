@@ -234,4 +234,17 @@ describe('own Have list (T-143)', () => {
     await settle();
     expect((await repositories.preferences.loadTradeRule()).source).toBe('list');
   });
+
+  it('keeps the own list when its last card leaves, although the collection has cards (T-149)', async () => {
+    const user = userEvent.setup();
+    await renderView(
+      createMemoryRepositories({ initial: { ...stored('cyberdeck:collection', [['alpha', 5]]), ...stored('cyberdeck:haves', [['beta', 1]]) } }),
+    );
+    await user.click(screen.getByRole('radio', { name: 'Have (1)' }));
+    expect(screen.getByRole('radio', { name: 'Oma lista' })).toBeChecked();
+    await user.click(screen.getByRole('button', { name: 'Vähennä Havesta yksi kappale: Beta' }));
+    await settle();
+    expect(screen.getByRole('radio', { name: 'Oma lista' })).toBeChecked();
+    expect(screen.getByText(/Have-lista on tyhjä/)).toBeInTheDocument();
+  });
 });
