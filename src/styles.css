@@ -3365,6 +3365,12 @@ h3,
   background: var(--color-surface);
   box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.45);
   pointer-events: none;
+  /* T-140: invisible until the picture has loaded (no empty frame). */
+  visibility: hidden;
+}
+
+.card-hover-preview.is-loaded {
+  visibility: visible;
 }
 
 @media not all and (hover: hover) {

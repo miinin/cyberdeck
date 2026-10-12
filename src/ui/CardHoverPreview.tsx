@@ -11,6 +11,12 @@ export const PREVIEW_DELAY_MS = 450;
 /** Moving more than this many px restarts the wait: passing over the list never opens the image (T-139). */
 const REST_TOLERANCE = 4;
 
+/**
+ * After a scroll the rows slide under a still mouse, and the browser reports that as entering a row. Nothing opens for
+ * this long after a scroll: only a mouse the user moves opens the image (T-140).
+ */
+const AFTER_SCROLL_MS = 400;
+
 /** Space between the trigger (or the pointer) and the image, in px. */
 const GAP = 12;
 
@@ -81,6 +87,8 @@ function CardHoverPreview({ shown }: { shown: Shown | null }) {
       alt=""
       aria-hidden="true"
       decoding="async"
+      // Shown only once the picture is there, so an empty frame never flashes (T-140).
+      onLoad={(event) => event.currentTarget.classList.add('is-loaded')}
     />
   );
 }
@@ -97,6 +105,8 @@ export function useCardHoverPreview() {
   /** Latest pointer x over the trigger: the image opens next to where the pointer rests, not where it entered. */
   const pointerX = useRef(0);
   const restAt = useRef({ x: 0, y: 0 });
+  const lastScroll = useRef(Number.NEGATIVE_INFINITY);
+  const justScrolled = () => performance.now() - lastScroll.current < AFTER_SCROLL_MS;
 
   const shownRef = useRef<Shown | null>(null);
   useEffect(() => {
@@ -110,17 +120,23 @@ export function useCardHoverPreview() {
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
+  // Every scroll closes the image and stops a wait; see AFTER_SCROLL_MS.
+  useEffect(() => {
+    const onScroll = () => {
+      lastScroll.current = performance.now();
+      hide();
+    };
+    window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    return () => window.removeEventListener('scroll', onScroll, { capture: true });
+  }, [hide]);
+
   useEffect(() => {
     if (shown === null) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') hide();
     };
     document.addEventListener('keydown', onKeyDown);
-    window.addEventListener('scroll', hide, { capture: true, passive: true });
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('scroll', hide, { capture: true });
-    };
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, [shown, hide]);
 
   const bind = useCallback(
@@ -128,7 +144,7 @@ export function useCardHoverPreview() {
       if (!canHover) return {};
       return {
         onPointerEnter: (event) => {
-          if (event.pointerType !== 'mouse') return;
+          if (event.pointerType !== 'mouse' || justScrolled()) return;
           const trigger = event.currentTarget;
           pointerX.current = event.clientX;
           restAt.current = { x: event.clientX, y: event.clientY };
@@ -139,7 +155,7 @@ export function useCardHoverPreview() {
           );
         },
         onPointerMove: (event) => {
-          if (event.pointerType !== 'mouse') return;
+          if (event.pointerType !== 'mouse' || justScrolled()) return;
           pointerX.current = event.clientX;
           // Still waiting and the mouse moves on: wait again from here. An open image stays while the mouse is on the row.
           const moved = Math.abs(event.clientX - restAt.current.x) + Math.abs(event.clientY - restAt.current.y);
