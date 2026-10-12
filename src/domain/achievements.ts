@@ -1,6 +1,6 @@
 import type { Card } from './card';
 import type { Collection } from './collection';
-import { collectionOverview, colorProgress, rarityProgress, setProgress, typeProgress } from './collectionProgress';
+import { collectionOverview, colorProgress, rarityProgress, setProgress, specialArtProgress, typeProgress } from './collectionProgress';
 
 /*
  * Achievements (T-132, I-8): badges and goals computed from the collection alone, so nothing is stored. Each one
@@ -31,7 +31,11 @@ function make(id: string, kind: AchievementKind, subject: string | number, owned
 }
 
 /** All achievements in a fixed order: milestones first, then sets, colors, types and rarities. */
-export function achievements(cards: readonly Card[], collection: Collection): Achievement[] {
+export function achievements(
+  cards: readonly Card[],
+  collection: Collection,
+  hasArt: (cardKey: string, rarity: string) => boolean = () => true,
+): Achievement[] {
   const overview = collectionOverview(cards, collection);
   const list: Achievement[] = [];
   for (const goal of DISTINCT_GOALS) {
@@ -49,7 +53,8 @@ export function achievements(cards: readonly Card[], collection: Collection): Ac
   for (const row of typeProgress(cards, collection)) {
     if (row.value !== null && row.total > 0) list.push(make(`type-${row.value}`, 'type', row.value, row.owned, row.total));
   }
-  for (const row of rarityProgress(cards, collection)) {
+  // The special arts (Nova Rare, Iconic Rare) count arts, not cards (T-133).
+  for (const row of [...rarityProgress(cards, collection), ...specialArtProgress(cards, collection, hasArt)]) {
     if (row.total > 0) list.push(make(`rarity-${row.rarity}`, 'rarity', row.rarity, row.owned, row.total));
   }
   return list;
