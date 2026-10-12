@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseHash, routeHash } from './useHashRoute';
+import { parseHash, routeHash, sectionOf } from './useHashRoute';
 
 describe('card route (T-081)', () => {
   it('parses #/kortti/<key> and round-trips', () => {
@@ -30,5 +30,16 @@ describe('public deck routes (T-098)', () => {
     expect(parseHash(`#/pakat/julkinen/${pubId.toUpperCase()}`)).toEqual({ name: 'decks' });
     expect(parseHash(`#/pakat/julkinen/${pubId}/x`)).toEqual({ name: 'decks' });
     expect(parseHash('#/pakat/abc-123')).toEqual({ name: 'deck', id: 'abc-123' });
+  });
+});
+
+describe('section of a route (T-142)', () => {
+  it('groups the routes into the five sections', () => {
+    const of = (hash: string) => sectionOf(parseHash(hash));
+    expect([of('#/'), of('#/kortti/v')]).toEqual(['cards', 'cards']);
+    expect(of('#/kokoelma')).toBe('collection');
+    expect([of('#/pakat'), of('#/jaa/x')]).toEqual(['decks', 'decks']);
+    expect([of('#/vaihto'), of('#/vaihto/x')]).toEqual(['havewant', 'havewant']);
+    expect(of('#/proxy')).toBe('proxy');
   });
 });

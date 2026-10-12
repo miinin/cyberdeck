@@ -21,7 +21,7 @@ import { PublicDeckView } from './ui/PublicDeckView';
 import { PublicDecksContext } from './ui/PublicDecksContext';
 import type { PublicDecksApi } from './ui/PublicDecksContext';
 import { deckTexts } from './ui/deckTexts';
-import { useHashRoute } from './ui/useHashRoute';
+import { sectionOf, useHashRoute } from './ui/useHashRoute';
 import { texts } from './ui/texts';
 import { LanguageSwitch } from './ui/LanguageSwitch';
 import { ThemeToggle } from './ui/ThemeToggle';
@@ -100,6 +100,11 @@ export function App({
   // T-055: the persistent browser storage button is no longer shown (cloud sync replaces it).
   const headerSlot: HTMLElement | null = null;
   const { route, navigate } = useHashRoute();
+  // The accent of the section (T-142): set on <html> so the header, the heading bar and the choices all follow it.
+  const section = sectionOf(route);
+  useEffect(() => {
+    document.documentElement.dataset.section = section;
+  }, [section]);
   // T-123: the gallery shows only the card art, so the header (with the mobile bottom bar) and the footer step aside.
   const [galleryOpen, setGalleryOpen] = useState(false);
   const proxyCount = useProxyCount(openRepositories.proxy, route.name);
