@@ -183,6 +183,20 @@ describe('Deck editor result picker', () => {
     expect(document.querySelector('.card-hover-preview')).not.toBeNull();
   });
 
+  it('opens nothing when a scroll slides a row under a still mouse (T-140)', async () => {
+    await openEditor([]);
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
+    const row = rowOf('V');
+    fireEvent.scroll(window);
+    fireEvent.pointerEnter(row, { pointerType: 'mouse', clientX: 10, clientY: 10 });
+    act(() => vi.advanceTimersByTime(PREVIEW_DELAY_MS * 2));
+    expect(document.querySelector('.card-hover-preview')).toBeNull();
+    // Moving the mouse afterwards opens it as usual.
+    fireEvent.pointerMove(row, { pointerType: 'mouse', clientX: 30, clientY: 10 });
+    act(() => vi.advanceTimersByTime(PREVIEW_DELAY_MS));
+    expect(document.querySelector('.card-hover-preview')).not.toBeNull();
+  });
+
   it('Kortit table: the same preview on a mouse hover (T-052)', async () => {
     window.location.hash = '#/';
     const repositories = createMemoryRepositories();
