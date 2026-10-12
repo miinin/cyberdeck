@@ -5,7 +5,7 @@ import type { CardKey } from '../domain/cardKey';
 import { countOf, minCountOf } from '../domain/collection';
 import { editionPrinting, protectedCount, setCopiesByEdition, targetPrinting } from '../domain/edition';
 import type { CollectionEntry } from '../domain/collection';
-import { artRarity, artsOf, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
+import { artRarity, artsInSet, artsOf, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
 import type { Art } from '../domain/arts';
 import { setFilterId } from '../domain/printing';
 import { variantImageUrl } from '../data/variantImages';
@@ -478,7 +478,8 @@ function CatalogBody({
               }));
           })
         : sortedForGrid.map((card): CardListItem => {
-            const arts = artsFor(card);
+            // A set filter keeps the versions printed in that set (T-146).
+            const arts = artsInSet(artsFor(card), setChoice);
             const imageUrl = filterArtUrl(card);
             const versionUrls = arts.map((art) => (art.rarity === null ? null : variantImageUrl(card.key, art.rarity)));
             const versionRarities = arts.map((art) => artRarity(card, art));
