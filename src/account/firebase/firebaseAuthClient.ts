@@ -39,6 +39,12 @@ function toAccountUser(user: { uid: string; email: string | null } | null): Acco
   return { uid: user.uid, email: typeof user.email === 'string' ? user.email : null };
 }
 
+/**
+ * A restore at startup that has not settled by then (a browser that blocks or stalls the stored session, T-157) gives way:
+ * the user is shown signed out and can press "Kirjaudu" again instead of a button stuck in "Kirjaudutaan…".
+ */
+export const RESTORE_TIMEOUT_MS = 10_000;
+
 export function createFirebaseAuthClient(options: {
   /** The project keys; defaults to this build's project. */
   env?: FirebaseEnv;
@@ -105,6 +111,11 @@ export function createFirebaseAuthClient(options: {
   async function restore() {
     state.set({ status: 'loading', error: null });
     const redirected = hints.loadRedirectPending();
+    const timer = setTimeout(() => {
+      if (state.get().status !== 'loading') return;
+      hints.saveRedirectPending(false);
+      state.set({ status: 'signed-out', user: null, error: null });
+    }, RESTORE_TIMEOUT_MS);
     try {
       const { sdk, auth } = await open();
       if (redirected) {
@@ -125,6 +136,8 @@ export function createFirebaseAuthClient(options: {
       // Only a failed sign-in is shown. A failed silent restore (e.g. offline at startup) keeps the
       // hint, so the next startup tries again, and the user can still press "Kirjaudu".
       fail(redirected ? error : { code: 'auth/user-cancelled' }, null);
+    } finally {
+      clearTimeout(timer);
     }
   }
 

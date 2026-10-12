@@ -159,3 +159,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-154 | Saavutusten värit selkeiksi: värimerkit korttivärillä, tyyppimerkit pakan tilastojen tyyppiväreillä, muut tason värillä (taso 1 = sivun väri); avattu täytetty, lukittu katkoviiva; osoitinpalkin lohkot merkin värillä | 1 | Should | PM | Done | PM |
 | T-155 | Vanha välilehti julkaisun jälkeen: jos sovelluksen osan lataus epäonnistuu (vite:preloadError), sivu latautuu uuteen versioon (ei silmukkaa) | 1 | Must | PM | Done | PM |
 | T-156 | iOS: sivu ei enää vieri tilapalkin alle latauksessa (otsikon fokus ilman vieritystä), jolloin tilipainike pysyy painettavana | 1 | Must | PM | Done | PM |
+| T-157 | Kirjautuminen ei jää jumiin "Kirjaudutaan…"-tilaan: käynnistyksen palautukselle ja latauksella 10 s aikaraja; tyyppivärit (--seg-*) koko sovellukseen, jolloin Kokoelman tyyppipalkit näkyvät | 1 | Must | PM | Done | PM |
