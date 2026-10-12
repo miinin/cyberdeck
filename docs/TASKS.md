@@ -135,3 +135,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-130 | Epävakaa DeckEditor-autosave-testi vakaaksi (synkroniset klikkaukset, ei kilpatilannetta 500 ms:n viiveen kanssa) | 1 | Should | PM | Done | PM |
 | T-131 | Kelluva merkintäpalkki matalammaksi (32 px kontrollit, ohut täyte) | 1 | Should | PM | Done | PM |
 | T-132 | Saavutukset (I-8): Kokoelma > Yleiskuva näyttää ansaitut merkit, lähimmät tavoitteet palkkeina ja avoimet saavutukset. Lasketaan kokoelmasta, ei tallennusta | 2 | Should | PM | Done | PM |
+| T-133 | Otsikon glitch näkyväksi: viive avautumisen jälkeen, kahdesti, ja lyhyt tärähdys 12 s välein | 1 | Should | PM | Done | PM |
