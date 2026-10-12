@@ -24,6 +24,7 @@ export const DEFAULT_EDITION_KEY = 'cyberdeck:default-edition';
 export const SCAN_MODE_KEY = 'cyberdeck:scan-mode';
 /** Collection page choices (T-109): a small JSON object { view, art, showMissing }. */
 export const COLLECTION_PREFS_KEY = 'cyberdeck:collection-prefs';
+export const TRADE_RULE_KEY = 'cyberdeck:trade-rule';
 /** The own binder's layout (T-120): { v: 1, name, pockets }. Local only, never synced; signed in it is `cyberdeck:u:{uid}:binder-layout`. */
 export const BINDER_LAYOUT_KEY = 'cyberdeck:binder-layout';
 /**

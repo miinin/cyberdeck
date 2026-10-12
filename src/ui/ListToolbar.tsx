@@ -64,7 +64,7 @@ const viewLabel = (icon: ReactNode, text: string) => (
   </>
 );
 
-const VIEW_OPTIONS: readonly (readonly [CatalogViewMode, ReactNode])[] = [
+export const VIEW_OPTIONS: readonly (readonly [CatalogViewMode, ReactNode])[] = [
   ['grid', viewLabel(<GridIcon />, texts.viewGrid)],
   ['table', viewLabel(<ListIcon />, texts.viewTable)],
 ];

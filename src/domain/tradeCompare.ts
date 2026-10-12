@@ -51,9 +51,11 @@ export function compareTrade(
   theirs: Collection,
   theirWants: WantList,
   cardsByKey: CardsByKey,
+  /** Tradeable copies by the trade rules (T-135); without them the playset rule applies. */
+  tradeable: { readonly mine?: ReadonlyMap<CardKey, number>; readonly theirs?: ReadonlyMap<CardKey, number> } = {},
 ): TradeComparison {
   return {
-    iCanGive: overlap(tradeableOf(mine, cardsByKey).counts, theirWants),
-    theyCanGive: overlap(tradeableOf(theirs, cardsByKey).counts, myWants),
+    iCanGive: overlap(tradeable.mine ?? tradeableOf(mine, cardsByKey).counts, theirWants),
+    theyCanGive: overlap(tradeable.theirs ?? tradeableOf(theirs, cardsByKey).counts, myWants),
   };
 }

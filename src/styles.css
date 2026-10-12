@@ -10304,3 +10304,43 @@ main:has(.mark-banner) {
   color: var(--color-success);
   font-weight: var(--font-weight-bold);
 }
+
+/* T-135: Have/Want tabs, the want scope and the trade rule rows. */
+.hw-tabs {
+  margin-block: 0 var(--space-3);
+}
+
+.hw-tabs .segmented {
+  display: flex;
+}
+
+.hw-tabs .segmented-option {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+.hw-scope-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-block-end: var(--space-3);
+}
+
+.trade-rule .view-select.has-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .hw-tabs .segmented {
+    display: inline-flex;
+  }
+
+  .hw-tabs .segmented-option {
+    flex: none;
+    min-inline-size: 9rem;
+  }
+}

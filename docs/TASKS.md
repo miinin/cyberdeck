@@ -137,3 +137,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-132 | Saavutukset (I-8): Kokoelma > Yleiskuva näyttää ansaitut merkit, lähimmät tavoitteet palkkeina ja avoimet saavutukset. Lasketaan kokoelmasta, ei tallennusta | 2 | Should | PM | Done | PM |
 | T-133 | Otsikon glitch näkyväksi: viive avautumisen jälkeen, kahdesti, ja lyhyt tärähdys 12 s välein | 1 | Should | PM | Done | PM |
 | T-134 | Nova Rare (ja Iconic) lasketaan kuvituksista (52), ei kortin omasta harvinaisuudesta (1); sama saavutuksissa | 1 | Should | PM | Done | PM |
+| T-135 | Have/Want uudistus: Want/Have-välilehdet, samat suodattimet ja järjestys kuin muualla, kuvat/lista-näkymä, korttien lisäys Want-välilehdellä (Want-lista / Lisää kortteja), vaihtosääntö (D-031), vaihtolinkki v2. Setti-saavutuksista vain Welcome to Night City | 3 | Should | PM | Done | Digiturva (ei löydöksiä) |

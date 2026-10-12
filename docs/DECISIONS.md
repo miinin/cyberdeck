@@ -606,3 +606,10 @@ Päätöksessä on viisi osaa.
 - **C) Tulokset pakkadokumentin kenttänä.** + Poistuu pakan mukana. − Jokainen kirjaus muuttaa pakan `updatedAt`:n ja voi riitauttaa pakan muokkauksen toisella laitteella (pakka voittaa kokonaisena), ja julkaisu- ja vientipolut pitäisi suodattaa. Hylätään.
 **Päätös:** A. Pakan poisto poistaa sen tulokset. Tulokset eivät koskaan päädy julkiseen pakkaan, jakolinkkiin tai vientiin. Yksityiskohdat ovat T-122-kortissa.
 **Seuraukset:** Vastustajan nimi ja muistiinpano voivat sisältää kolmannen osapuolen tietoja (kaverin nimi), joten PRIVACY.md päivitetään (Digiturva). Kun pelejä on yli 1 000, tarvitaan arkistointi tai B-malli (IDEAS).
+
+## D-031 · Vaihtosääntö ja vaihtolinkin versio 2 · 2026-10-12 · Päättäjä: käyttäjä (suunta), PM (toteutus)
+**Konteksti:** Have näytti aina täyden pelisarjan ylittävät kappaleet. Käyttäjä halusi valita, mitkä kappaleet ovat vaihdettavissa, kuten muiden korttipelien vaihtolistoissa (esim. pidä pelisarja tai yksi kappale ja suojaa pakoissa olevat kortit).
+**Päätös:**
+1. Vaihtosääntö: pidä pelisarja (oletus, T-063), pidä 1 kappale tai pidä ei mitään. Lisäksi valinta "Pidä pakoissa olevat": pidetään vähintään kaikkien pakkojen yhteenlaskettu määrä.
+2. Sääntö tallennetaan laitteen asetuksiin (`cyberdeck:trade-rule`). Se ei synkronoidu eikä ole käyttäjäkohtainen samalla laitteella. Korttikohtaiset poikkeukset vaativat tietomallin muutoksen, ja ne ovat jatkoidea.
+3. Vaihtolinkin versio 2 (`cyberdeck-vaihto 2`) kuljettaa lähettäjän vaihdettavat kappaleet t-riveinä. Vastaanottaja käyttää niitä. Version 1 linkeissä pätee pelisarjasääntö. Digiturva katselmoi: ei löydöksiä.

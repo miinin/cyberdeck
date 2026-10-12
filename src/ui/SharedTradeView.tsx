@@ -5,6 +5,7 @@ import type { CollectionEntry } from '../domain/collection';
 import { toCardsByKey } from '../domain/deckRules';
 import { compareTrade, tradeableCount } from '../domain/tradeCompare';
 import { decodeTradeShare } from '../domain/tradeShare';
+import { useTradeRule } from './useTradeRule';
 import type { Repositories } from '../storage';
 import { CardName } from './CardName';
 import { texts } from './texts';
@@ -97,6 +98,8 @@ export function SharedTradeView({
   const { snapshot: myWants } = useWants(repositories.wants);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const shared = useMemo(() => decodeTradeShare(data), [data]);
+  // My side follows my own trade rule (T-135); theirs comes in the link (older links: the playset rule).
+  const { tradeableOf: myTradeableOf } = useTradeRule(repositories, cardsByKey);
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     headingRef.current?.focus();
@@ -105,9 +108,9 @@ export function SharedTradeView({
   const comparison = useMemo(
     () =>
       shared !== null && mine.phase === 'ready' && myWants.phase === 'ready'
-        ? compareTrade(mine.saved, myWants.saved, shared.have, shared.want, cardsByKey)
+        ? compareTrade(mine.saved, myWants.saved, shared.have, shared.want, cardsByKey, { mine: myTradeableOf(mine.saved), theirs: shared.tradeable })
         : null,
-    [shared, mine.phase, mine.saved, myWants.phase, myWants.saved, cardsByKey],
+    [shared, mine.phase, mine.saved, myWants.phase, myWants.saved, cardsByKey, myTradeableOf],
   );
 
   if (shared === null) {
@@ -176,7 +179,7 @@ export function SharedTradeView({
               cardsByKey={cardsByKey}
               caption={texts.tradeTheirHaveHeading}
               countHeading={texts.tradeColCount}
-              tradeableOf={(entry, card) => tradeableCount(entry.count, card)}
+              tradeableOf={(entry, card) => (shared.tradeable === undefined ? tradeableCount(entry.count, card) : (shared.tradeable.get(entry.card) ?? 0))}
             />
           )}
         </details>

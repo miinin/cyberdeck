@@ -36,9 +36,14 @@ const removeWant = (name: string) => screen.getByRole('button', { name: `Vähenn
 
 describe('Have/Want section (T-065)', () => {
   it('shows the heading, the empty states and the nav link as the current page', async () => {
+    const user = userEvent.setup();
     await renderView();
     expect(screen.getByRole('heading', { level: 1, name: 'Have/Want' })).toBeInTheDocument();
+    // An empty want list opens on all cards to add from.
+    expect(screen.getByRole('radio', { name: 'Lisää kortteja' })).toBeChecked();
+    await user.click(screen.getByRole('radio', { name: 'Want-lista' }));
     expect(screen.getByText(/Lista on tyhjä/)).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: 'Have (0)' }));
     expect(screen.getByText(/Ei vaihdettavia kortteja/)).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: /päävalikko|sivut|valikko/i });
     expect(within(nav).getByRole('link', { name: 'Have/Want' })).toHaveAttribute('aria-current', 'page');
@@ -54,13 +59,12 @@ describe('Have/Want section (T-065)', () => {
     expect(within(nav).getByRole('link', { name: 'Pakat' })).not.toHaveAttribute('aria-current');
   });
 
-  it('adds a card to the want list by searching its name, then edits the count separately from the collection', async () => {
+  it('adds a card to the want list from all cards with the search, then edits the count separately from the collection (T-135)', async () => {
     const user = userEvent.setup();
     const repositories = await renderView();
-    await user.type(screen.getByLabelText('Hae kortin nimellä'), 'gamma');
-    await user.click(screen.getByRole('button', { name: 'Lisää wantiin: Gamma Ray' }));
-    await settle();
-    expect(await wantEntries(repositories)).toEqual([{ card: 'gamma', count: 1 }]);
+    await user.type(screen.getByRole('searchbox'), 'gamma');
+    expect(screen.queryByRole('button', { name: 'Lisää wantiin yksi kappale: Alpha' })).toBeNull();
+    await user.click(addWant('Gamma Ray'));
     await user.click(addWant('Gamma Ray'));
     await user.click(addWant('Gamma Ray'));
     await settle();
@@ -70,20 +74,21 @@ describe('Have/Want section (T-065)', () => {
     await user.click(removeWant('Gamma Ray'));
     await settle();
     expect(await wantEntries(repositories)).toEqual([{ card: 'gamma', count: 2 }]);
+    expect(screen.getByRole('radio', { name: 'Want (1)' })).toBeChecked();
   });
 
   it('says so when the search finds nothing', async () => {
     const user = userEvent.setup();
     await renderView();
-    await user.type(screen.getByLabelText('Hae kortin nimellä'), 'zzzz');
+    await user.type(screen.getByRole('searchbox'), 'zzzz');
     expect(screen.getByText('Hakua vastaavia kortteja ei löytynyt.')).toBeInTheDocument();
   });
 
   it('lists the want list cards and drops a row, moving focus to the Want heading, when its count reaches 0', async () => {
     const user = userEvent.setup();
     const repositories = await renderView(createMemoryRepositories({ initial: stored('cyberdeck:wants', [['beta', 1]]) }));
-    const list = screen.getAllByRole('list')[0] as HTMLElement;
-    expect(within(list).getAllByText('Beta').length).toBeGreaterThan(0);
+    expect(screen.getByRole('radio', { name: 'Want-lista' })).toBeChecked();
+    expect(screen.queryByRole('button', { name: 'Lisää wantiin yksi kappale: Alpha' })).toBeNull();
     await user.click(removeWant('Beta'));
     await settle();
     expect(await wantEntries(repositories)).toEqual([]);
@@ -91,16 +96,31 @@ describe('Have/Want section (T-065)', () => {
     expect(screen.getByText(/Lista on tyhjä/)).toBeInTheDocument();
   });
 
-  it('lists only the tradeable copies of the collection, as text', async () => {
+  it('lists only the tradeable copies of the collection, as text, by the trade rule the user picks (T-135)', async () => {
+    const user = userEvent.setup();
     // Alpha: 5 owned, playset 3, so 2 free. Beta: 3 owned, 0 free.
-    await renderView(
-      createMemoryRepositories({ initial: stored('cyberdeck:collection', [['alpha', 5], ['beta', 3]]) }),
-    );
+    const repositories = await renderView(createMemoryRepositories({ initial: stored('cyberdeck:collection', [['alpha', 5], ['beta', 3]]) }));
+    await user.click(screen.getByRole('radio', { name: 'Have (1)' }));
     const section = screen.getByRole('region', { name: 'Have' });
     expect(within(section).getByText('Alpha')).toBeInTheDocument();
     expect(within(section).getByText('vaihdettavissa 2')).toBeInTheDocument();
     expect(within(section).queryByText('Beta')).toBeNull();
-    expect(within(section).getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual(['Ohje']);
+    // Keep one copy: Alpha 4 and Beta 2 are tradeable, and the rule is remembered.
+    await user.click(within(section).getByRole('radio', { name: 'Yli 1 kappaleen' }));
+    expect(within(section).getByText('vaihdettavissa 4')).toBeInTheDocument();
+    expect(within(section).getByText('vaihdettavissa 2')).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Have (2)' })).toBeChecked();
+    await settle();
+    expect(await repositories.preferences.loadTradeRule()).toEqual({ keep: 'one', keepDeckCards: false });
+  });
+
+  it('shows the cards as a list with the counts in their own column (T-135)', async () => {
+    const user = userEvent.setup();
+    await renderView(createMemoryRepositories({ initial: stored('cyberdeck:wants', [['beta', 2]]) }));
+    await user.click(screen.getByRole('radio', { name: 'Lista' }));
+    expect(screen.getByRole('columnheader', { name: 'Wantissa' })).toBeInTheDocument();
+    expect(addWant('Beta')).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Kuvakoko' })).toBeDisabled();
   });
 
   it('has the trade share button at the top', async () => {
@@ -126,6 +146,7 @@ describe('Have/Want section (T-065)', () => {
 
 describe('Have/Want card grid (T-067)', () => {
   it('shows the want and have cards as grids with a want counter and the owned count', async () => {
+    const user = userEvent.setup();
     await renderView(
       createMemoryRepositories({
         initial: { ...stored('cyberdeck:wants', [['beta', 2]]), ...stored('cyberdeck:collection', [['alpha', 5]]) },
@@ -134,6 +155,7 @@ describe('Have/Want card grid (T-067)', () => {
     const want = screen.getByRole('region', { name: 'Want' });
     expect(within(want).getByRole('list', { name: 'Want' })).toHaveClass('card-grid');
     expect(within(want).getByRole('button', { name: 'Lisää wantiin yksi kappale: Beta' })).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: 'Have (1)' }));
     const have = screen.getByRole('region', { name: 'Have' });
     expect(within(have).getByRole('list', { name: 'Have' })).toHaveClass('card-grid');
     expect(within(have).getByText('omistettu 5', { exact: false })).toBeInTheDocument();

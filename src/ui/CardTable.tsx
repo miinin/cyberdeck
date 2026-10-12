@@ -57,6 +57,7 @@ export function CardTable({
   hoverProps,
   sort: controlledSort,
   onSortChange,
+  extraColumn,
 }: {
   cards: readonly Card[];
   caption?: string;
@@ -72,6 +73,8 @@ export function CardTable({
   /** Controlled sort shared with the "Järjestys" selector (T-060); without it the table keeps its own. */
   sort?: CardSort;
   onSortChange?: (next: CardSort) => void;
+  /** A last column of the page's own (Have/Want counts, T-135). */
+  extraColumn?: { label: string; render: (card: Card) => ReactNode };
 }) {
   // Sort state is never stored. Header cycle: ascending, descending, original order.
   const [ownSort, setOwnSort] = useState<SortState>(DEFAULT_SORT);
@@ -99,6 +102,7 @@ export function CardTable({
             <SortHeader label={texts.columnPower} column="power" sort={sort} onSort={onSort} numeric />
             <SortHeader label={texts.columnRam} column="ram" sort={sort} onSort={onSort} numeric />
             {owned !== undefined && <th scope="col" role="columnheader">{texts.columnCollection}</th>}
+            {extraColumn !== undefined && <th scope="col" role="columnheader">{extraColumn.label}</th>}
           </tr>
         </thead>
         <tbody role="rowgroup">
@@ -157,6 +161,11 @@ export function CardTable({
                     editable={owned.editable}
                     min={owned.minOf?.(card)}
                   />
+                </td>
+              )}
+              {extraColumn !== undefined && (
+                <td role="cell" className="cell-collection" data-label={extraColumn.label}>
+                  {extraColumn.render(card)}
                 </td>
               )}
             </tr>
