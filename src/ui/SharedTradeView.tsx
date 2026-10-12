@@ -5,6 +5,7 @@ import type { CollectionEntry } from '../domain/collection';
 import { toCardsByKey } from '../domain/deckRules';
 import { compareTrade, tradeableCount } from '../domain/tradeCompare';
 import { decodeTradeShare } from '../domain/tradeShare';
+import { haveSourceOf } from '../domain/tradeRule';
 import { useTradeRule } from './useTradeRule';
 import type { Repositories } from '../storage';
 import { CardName } from './CardName';
@@ -99,7 +100,14 @@ export function SharedTradeView({
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const shared = useMemo(() => decodeTradeShare(data), [data]);
   // My side follows my own trade rule (T-135); theirs comes in the link (older links: the playset rule).
-  const { tradeableOf: myTradeableOf } = useTradeRule(repositories, cardsByKey);
+  const { rule: myRule, tradeableOf: myTradeableOf } = useTradeRule(repositories, cardsByKey);
+  const { snapshot: myHaves } = useCollection(repositories.haves);
+  // My offer: my own Have list or my collection under my rule, as on my Have/Want page (T-143).
+  const myOffer = useMemo(() => {
+    const own = new Map(myHaves.phase === 'ready' ? myHaves.saved.entries.map((entry) => [entry.card, entry.count] as const) : []);
+    const collectionCards = mine.phase === 'ready' ? mine.saved.entries.length : 0;
+    return haveSourceOf(myRule, own.size, collectionCards) === 'list' ? own : myTradeableOf(mine.saved);
+  }, [myHaves.phase, myHaves.saved, mine.phase, mine.saved, myRule, myTradeableOf]);
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     headingRef.current?.focus();
@@ -108,10 +116,16 @@ export function SharedTradeView({
   const comparison = useMemo(
     () =>
       shared !== null && mine.phase === 'ready' && myWants.phase === 'ready'
-        ? compareTrade(mine.saved, myWants.saved, shared.have, shared.want, cardsByKey, { mine: myTradeableOf(mine.saved), theirs: shared.tradeable })
+        ? compareTrade(mine.saved, myWants.saved, shared.have, shared.want, cardsByKey, { mine: myOffer, theirs: shared.tradeable })
         : null,
-    [shared, mine.phase, mine.saved, myWants.phase, myWants.saved, cardsByKey, myTradeableOf],
+    [shared, mine.phase, mine.saved, myWants.phase, myWants.saved, cardsByKey, myOffer],
   );
+
+  // A link from an own Have list (T-143) offers every shared copy: it is their Have list, not their collection.
+  const haveHeading =
+    shared?.tradeable !== undefined && shared.have.entries.every((entry) => shared.tradeable?.get(entry.card) === entry.count)
+      ? texts.tradeTheirHaveListHeading
+      : texts.tradeTheirHaveHeading;
 
   if (shared === null) {
     return (
@@ -168,7 +182,7 @@ export function SharedTradeView({
       <section className="panel" aria-labelledby="trade-have-heading">
         <details className="disclosure">
           <summary>
-            <span id="trade-have-heading">{texts.tradeTheirHaveHeading}</span>
+            <span id="trade-have-heading">{haveHeading}</span>
             <span className="hint"> ({shared.have.entries.length})</span>
           </summary>
           {shared.have.entries.length === 0 ? (
@@ -177,7 +191,7 @@ export function SharedTradeView({
             <CardTable
               rows={shared.have.entries}
               cardsByKey={cardsByKey}
-              caption={texts.tradeTheirHaveHeading}
+              caption={haveHeading}
               countHeading={texts.tradeColCount}
               tradeableOf={(entry, card) => (shared.tradeable === undefined ? tradeableCount(entry.count, card) : (shared.tradeable.get(entry.card) ?? 0))}
             />

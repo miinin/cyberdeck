@@ -20,7 +20,8 @@ import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
 import type { CardSort } from '../domain/cardSort';
 import { toCardsByKey } from '../domain/deckRules';
 import { hasSetPrinting, setOptions } from '../domain/setFilter';
-import type { TradeKeep } from '../domain/tradeRule';
+import { haveSourceOf } from '../domain/tradeRule';
+import type { HaveSource, TradeKeep } from '../domain/tradeRule';
 import type { CatalogViewMode, Repositories } from '../storage';
 import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import type { ActiveFilter } from './ActiveFilters';
@@ -52,6 +53,11 @@ const hasArt = (key: string, rarity: string) => variantImageUrl(key, rarity) !==
 type Tab = 'want' | 'have';
 type WantScope = 'list' | 'all';
 
+const SOURCE_OPTIONS: readonly (readonly [HaveSource, string])[] = [
+  ['list', texts.haveSourceList],
+  ['collection', texts.haveSourceCollection],
+];
+
 const KEEP_OPTIONS: readonly (readonly [TradeKeep, string])[] = [
   ['playset', texts.tradeKeepPlayset],
   ['one', texts.tradeKeepOne],
@@ -69,6 +75,8 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   const proxyQueue = useProxyQueue(repositories.proxy);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const { rule, setRule, tradeableOf } = useTradeRule(repositories, cardsByKey);
+  const { snapshot: haves, store: havesStore } = useCollection(repositories.haves);
+  const [haveScope, setHaveScope] = useState<WantScope | null>(null);
   const [tab, setTab] = useState<Tab>('want');
   const [scope, setScope] = useState<WantScope | null>(null);
   const [view, setView] = useState<CatalogViewMode>('grid');
@@ -81,6 +89,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const wantHeadingRef = useRef<HTMLHeadingElement>(null);
+  const haveHeadingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const collectionAllRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -103,6 +112,20 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
       }
     });
   }, [wantsStore, names]);
+  useEffect(() => {
+    let last: { card: string; to: number } | null = null;
+    return havesStore.onEvent((event) => {
+      if (event.type === 'saved') last = { card: event.card, to: event.to };
+      else if (event.type === 'save-failed') {
+        last = null;
+        setLive(saveErrorLive(event.kind));
+      } else if (event.type === 'idle' && last !== null) {
+        const name = names.get(last.card);
+        if (name !== undefined) setLive(texts.haveLive(name, last.to));
+        last = null;
+      }
+    });
+  }, [havesStore, names]);
 
   const wantReady = wants.phase === 'ready';
   const wantedCount = useMemo(() => (wantReady ? cards.filter((card) => countIn(wants, card.key) > 0).length : 0), [wantReady, cards, wants]);
@@ -110,10 +133,23 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   // view does not jump when the last card leaves the list; a choice of the user wins.
   if (wantReady && scope === null) setScope(wantedCount === 0 ? 'all' : 'list');
   const wantScope: WantScope = scope ?? (wantedCount === 0 ? 'all' : 'list');
-  const tradeable = useMemo(
+  // The Have list (T-143): the user's own list, or the collection under the keep rule.
+  const haveReady = haves.phase === 'ready';
+  const ownList = useMemo(() => {
+    const counts = new Map<string, number>();
+    if (haveReady) for (const card of cards) if (countIn(haves, card.key) > 0) counts.set(card.key, countIn(haves, card.key));
+    return counts;
+  }, [haveReady, cards, haves]);
+  const collectionCards = collection.phase === 'ready' ? collection.saved.entries.filter((entry) => entry.count > 0).length : 0;
+  const source = haveSourceOf(rule, ownList.size, collectionCards);
+  if (haveReady && haveScope === null) setHaveScope(ownList.size === 0 ? 'all' : 'list');
+  const ownScope: WantScope = haveScope ?? (ownList.size === 0 ? 'all' : 'list');
+  const ruleTradeable = useMemo(
     () => (collection.phase === 'ready' ? tradeableOf(collection.saved) : new Map<string, number>()),
     [collection.phase, collection.saved, tradeableOf],
   );
+  const tradeable = source === 'list' ? ownList : ruleTradeable;
+  const ownListCollection = useMemo(() => ({ entries: [...ownList].map(([card, count]) => ({ card, count })) }), [ownList]);
 
   // The search: the same filters as the Cards section; the collection filter is left out.
   const setList = useMemo(() => setOptions(cards), [cards]);
@@ -124,12 +160,14 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   const shown = useMemo(() => {
     const base =
       tab === 'have'
-        ? matching.filter((card) => tradeable.has(card.key))
+        ? source === 'list' && ownScope === 'all'
+          ? matching
+          : matching.filter((card) => tradeable.has(card.key))
         : wantScope === 'list'
           ? matching.filter((card) => countIn(wants, card.key) > 0)
           : matching;
     return sortCards(base, sort.key, sort.direction);
-  }, [tab, matching, tradeable, wantScope, wants, sort]);
+  }, [tab, matching, tradeable, source, ownScope, wantScope, wants, sort]);
   const filterActive = isFilterActive(criteria) || setChoice !== null;
 
   // As on the Cards page (D-021, T-141): a box starts on the special art a rarity or set filter matches, e.g. Nova Rare.
@@ -164,6 +202,10 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
     // In the want list the row leaves; keep focus on the page instead of letting it fall to <body>.
     if (count === 0 && wantScope === 'list') wantHeadingRef.current?.focus();
   };
+  const changeHave = (card: Card, count: number) => {
+    havesStore.setCount(card.key, count);
+    if (count === 0 && ownScope === 'list') haveHeadingRef.current?.focus();
+  };
   const openImage = (card: Card, opener: HTMLButtonElement) => {
     imageOpenerRef.current = opener;
     setOpenCard(card);
@@ -194,6 +236,9 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
       </>
     );
   };
+  const ownFoot = (card: Card) => (
+    <CountControl card={card} count={countIn(haves, card.key)} mode="ready" onChange={changeHave} onLimit={limit} editable kind="have" />
+  );
   const haveFoot = (card: Card) => (
     <p className="have-want-owned">
       {texts.haveRow(tradeable.get(card.key) ?? 0)}
@@ -241,7 +286,10 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {live}
       </div>
-      {collection.phase === 'ready' && wantReady && <ShareTradeButton have={collection.saved} want={wants.saved} tradeable={tradeable} />}
+      {wantReady &&
+        (source === 'list'
+          ? haveReady && <ShareTradeButton have={ownListCollection} want={wants.saved} tradeable={tradeable} note={texts.tradeShareNoteList} />
+          : collection.phase === 'ready' && <ShareTradeButton have={collection.saved} want={wants.saved} tradeable={tradeable} />)}
 
       <div className="catalog-layout">
         <section className="catalog-filters" aria-labelledby="hw-filters-heading">
@@ -340,9 +388,45 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
           {tab === 'have' && (
             <section aria-labelledby="have-heading">
               <div className="heading-row has-info-tip">
-                <h2 id="have-heading">{texts.haveHeading}</h2>
+                <h2 id="have-heading" ref={haveHeadingRef} tabIndex={-1}>
+                  {texts.haveHeading}
+                </h2>
                 <InfoTip>{texts.haveIntro}</InfoTip>
               </div>
+              <div className="hw-scope-row">
+                <SegmentedChoice
+                  className="hw-scope"
+                  legend={texts.haveSourceLegend}
+                  legendVisible
+                  name="have-source"
+                  value={source}
+                  options={SOURCE_OPTIONS}
+                  onChange={(next) => setRule({ ...rule, source: next })}
+                />
+              </div>
+              {source === 'list' && (
+                <>
+                  <div className="hw-scope-row">
+                    <SegmentedChoice
+                      className="hw-scope"
+                      legend={texts.wantScopeLegend}
+                      name="have-scope"
+                      value={ownScope}
+                      options={[
+                        ['list', texts.haveScopeList],
+                        ['all', texts.wantScopeAll],
+                      ]}
+                      onChange={setHaveScope}
+                    />
+                    <p className="hw-editing hw-editing--have">{texts.haveEditing}</p>
+                  </div>
+                  {haves.phase === 'loading' && <p>{texts.haveLoading}</p>}
+                  {(haves.phase === 'unavailable' || haves.phase === 'locked') && <p role="alert">{texts.haveListUnavailable}</p>}
+                  {haveReady && (shown.length === 0 ? noResults(texts.haveListEmpty) : results(texts.haveHeading, ownFoot, texts.haveListColumn))}
+                </>
+              )}
+              {source === 'collection' && (
+              <>
               <div className="hw-scope-row trade-rule">
                 <SegmentedChoice
                   className="hw-scope"
@@ -363,6 +447,8 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
               {collection.phase === 'loading' && <p>{texts.haveLoading}</p>}
               {(collection.phase === 'unavailable' || collection.phase === 'locked') && <p role="alert">{texts.haveUnavailable}</p>}
               {collection.phase === 'ready' && (shown.length === 0 ? noResults(texts.haveEmpty) : results(texts.haveHeading, haveFoot, texts.haveColumn))}
+              </>
+              )}
             </section>
           )}
         </section>

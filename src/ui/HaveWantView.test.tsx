@@ -46,7 +46,10 @@ describe('Have/Want section (T-065)', () => {
     await user.click(screen.getByRole('radio', { name: 'Want-lista' }));
     expect(screen.getByText(/Lista on tyhjä/)).toBeInTheDocument();
     await user.click(screen.getByRole('radio', { name: 'Have (0)' }));
-    expect(screen.getByText(/Ei vaihdettavia kortteja/)).toBeInTheDocument();
+    // No collection and no own list: the Have tab starts on the own list, with all cards to add from (T-143).
+    expect(screen.getByRole('radio', { name: 'Oma lista' })).toBeChecked();
+    await user.click(screen.getByRole('radio', { name: 'Have-lista' }));
+    expect(screen.getByText(/Have-lista on tyhjä/)).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: /päävalikko|sivut|valikko/i });
     expect(within(nav).getByRole('link', { name: 'Have/Want' })).toHaveAttribute('aria-current', 'page');
     expect(within(nav).getByRole('link', { name: 'Pakat' })).not.toHaveAttribute('aria-current');
@@ -113,7 +116,7 @@ describe('Have/Want section (T-065)', () => {
     expect(within(section).getByText('vaihdettavissa 2')).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'Have (2)' })).toBeChecked();
     await settle();
-    expect(await repositories.preferences.loadTradeRule()).toEqual({ keep: 'one', keepDeckCards: false });
+    expect(await repositories.preferences.loadTradeRule()).toEqual({ keep: 'one', keepDeckCards: false, source: null });
   });
 
   it('shows the cards as a list with the counts in their own column (T-135)', async () => {
@@ -202,5 +205,33 @@ describe('Have/Want arts (T-141)', () => {
     await settle();
     const images = [...document.querySelectorAll('.card-grid img')].map((img) => img.getAttribute('src'));
     expect(images).toContain(variantImageUrl(card.key, 'Nova Rare'));
+  });
+});
+
+describe('own Have list (T-143)', () => {
+  it('builds a Have list without a collection, keeps it apart from the collection and shares only it', async () => {
+    const user = userEvent.setup();
+    const repositories = await renderView();
+    await user.click(screen.getByRole('radio', { name: 'Have (0)' }));
+    await user.click(screen.getByRole('button', { name: 'Lisää Haveen yksi kappale: Beta' }));
+    await user.click(screen.getByRole('button', { name: 'Lisää Haveen yksi kappale: Beta' }));
+    await settle();
+    expect((await repositories.haves.load()).value.entries).toEqual([{ card: 'beta', count: 2 }]);
+    expect((await repositories.collection.load()).value.entries).toEqual([]);
+    expect(screen.getByRole('radio', { name: 'Have (1)' })).toBeChecked();
+    expect(screen.getByText(/ei kokoelmaasi/)).toBeInTheDocument();
+  });
+
+  it('switches to the collection rule and back, and remembers the choice', async () => {
+    const user = userEvent.setup();
+    const repositories = await renderView(createMemoryRepositories({ initial: stored('cyberdeck:collection', [['alpha', 5]]) }));
+    await user.click(screen.getByRole('radio', { name: 'Have (1)' }));
+    // A collection and no own list: from the collection.
+    expect(screen.getByRole('radio', { name: 'Kokoelmasta' })).toBeChecked();
+    expect(screen.getByText('vaihdettavissa 2')).toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: 'Oma lista' }));
+    expect(screen.getByRole('radio', { name: 'Have (0)' })).toBeChecked();
+    await settle();
+    expect((await repositories.preferences.loadTradeRule()).source).toBe('list');
   });
 });

@@ -13,11 +13,14 @@ export function ShareTradeButton({
   have,
   want,
   tradeable,
+  note = texts.tradeShareNote,
 }: {
   have: Collection;
   want: WantList;
   /** The tradeable copies under the user's trade rule (T-135); the receiver sees these instead of the playset rule. */
   tradeable?: ReadonlyMap<CardKey, number>;
+  /** What the receiver sees; default: the whole collection and the want list. */
+  note?: string;
 }) {
   const [state, setState] = useState<'copied' | 'failed' | null>(null);
   const data = useMemo(() => encodeTradeShare(have, want, tradeable), [have, want, tradeable]);
@@ -46,7 +49,7 @@ export function ShareTradeButton({
           {texts.tradeShareButton}
         </button>
       </div>
-      <p className="hint">{texts.tradeShareNote}</p>
+      <p className="hint">{note}</p>
       <p role="status" className="trade-share-status">
         {state === 'copied' ? texts.tradeShareCopied : state === 'failed' ? texts.tradeShareCopyFailed : ''}
       </p>

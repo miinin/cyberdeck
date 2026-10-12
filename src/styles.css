@@ -419,7 +419,7 @@ main {
   inset-inline-start: -1px;
   inline-size: 2.5rem;
   block-size: 2px;
-  background: var(--color-brand-yellow);
+  background: var(--color-accent);
 }
 
 .panel p {
@@ -1896,8 +1896,10 @@ body:has(dialog[open]) {
 .segmented-option:has(input:checked),
 .segmented-option[aria-pressed='true'],
 .segmented-option[aria-current='page'] {
-  background: var(--section-accent);
-  color: var(--section-on-accent);
+  /* T-144: a calm tint of the page accent and a bar under it, not a solid block of color. */
+  background: color-mix(in srgb, var(--section-accent) 22%, var(--color-surface));
+  color: var(--color-text);
+  box-shadow: inset 0 -3px 0 var(--section-accent);
 }
 
 .segmented-option input {
@@ -6058,7 +6060,7 @@ section[aria-labelledby='have-heading'] {
   align-content: start;
   gap: 2px;
   padding: var(--space-2);
-  border-inline-start: 2px solid var(--color-brand-yellow);
+  border-inline-start: 2px solid var(--color-accent);
   background: color-mix(in srgb, var(--color-bg) 55%, transparent);
 }
 
@@ -6416,7 +6418,7 @@ section[aria-labelledby='have-heading'] {
 .odds-bar-fill {
   display: block;
   block-size: 100%;
-  background: linear-gradient(90deg, var(--color-info), var(--color-brand-yellow));
+  background: linear-gradient(90deg, var(--color-info), var(--color-accent));
   transition: inline-size 0.35s ease;
 }
 
@@ -6927,7 +6929,7 @@ section[aria-labelledby='have-heading'] {
   inset-inline: 0;
   bottom: 0;
   height: 14%;
-  border: 3px solid var(--color-brand-yellow);
+  border: 3px solid var(--color-accent);
   box-shadow: 0 0 0 2px var(--color-bg);
   pointer-events: none;
 }
@@ -7219,7 +7221,7 @@ section[aria-labelledby='have-heading'] {
 /* The flash of a counter and of the new place on the sheet: colour only, no movement (also with reduced motion). */
 @keyframes proxy-flash {
   from {
-    background-color: var(--color-brand-yellow);
+    background-color: var(--color-accent);
     color: #000;
   }
 
@@ -7533,7 +7535,7 @@ section[aria-labelledby='have-heading'] {
   grid-template-columns: minmax(6rem, 10rem) minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-2);
-  --bar: var(--color-brand-yellow);
+  --bar: var(--color-accent);
 }
 
 .progress-row.seg-unit,
@@ -7606,7 +7608,7 @@ section[aria-labelledby='have-heading'] {
 
 .missing-tile:hover .card-image,
 .missing-tile:focus-visible .card-image {
-  border-color: var(--color-brand-yellow);
+  border-color: var(--color-accent);
 }
 
 .missing-tile-name {
@@ -9383,7 +9385,7 @@ button.pocket-link {
   gap: var(--space-2) var(--space-4);
   margin-block: 0 var(--space-3);
   padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
-  border-inline-start: 3px solid var(--color-brand-yellow);
+  border-inline-start: 3px solid var(--color-accent);
   background: color-mix(in srgb, var(--color-bg) 55%, var(--color-surface));
 }
 
@@ -10031,7 +10033,7 @@ html[data-gallery='on'] main {
   margin: 0;
   padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
   border-inline-start: 0;
-  border-block-start: 3px solid var(--color-brand-yellow);
+  border-block-start: 3px solid var(--color-accent);
   background: var(--color-surface-raised);
   box-shadow: 0 -0.5rem 1.5rem rgba(0, 0, 0, 0.25);
 }
@@ -10338,63 +10340,79 @@ main:has(.mark-banner) {
 }
 
 /*
- * T-142: each section has its own accent, one of the game's four colors (Proxy, a tool, is neutral). It marks the heading
- * bar, the current nav link and the chosen options, so the user sees where they are although the pages look alike.
- * Buttons keep the brand yellow. On the light theme red and blue get white text for contrast.
+ * T-142, T-144: one accent per page. Each section has its own color, one of the game's four (Proxy, a tool, is
+ * neutral), and that one color does all the accent work on the page: the heading bar, the current nav link, the chosen
+ * options (a tint), the primary buttons, the + of the counters and the link underlines. Yellow is the Cards page and
+ * the logo. Beside it only the meaning colors (green = legal or done, orange = missing, red = error) and the card data
+ * colors of the game appear. Want and Have counters are told apart by their marks (★, ⇄), not by an extra color.
  */
 :root {
-  --section-accent: var(--color-brand-yellow);
-  --section-on-accent: #000;
+  --section-accent: var(--color-accent);
   --section-nav: var(--section-accent);
 }
 
 :root[data-section='collection'] {
-  --section-accent: var(--color-card-green);
+  --color-accent: var(--color-card-green);
+  --color-accent-edge: var(--color-card-green);
 }
 
 :root[data-section='decks'] {
-  --section-accent: var(--color-card-red);
+  --color-accent: var(--color-card-red);
+  --color-accent-edge: var(--color-card-red);
 }
 
 :root[data-section='havewant'] {
-  --section-accent: var(--color-card-blue);
+  --color-accent: var(--color-card-blue);
+  --color-accent-edge: var(--color-card-blue);
 }
 
 :root[data-section='proxy'] {
-  --section-accent: var(--color-text);
-  --section-on-accent: var(--color-bg);
+  --color-accent: #f1f1ec;
+  --color-accent-edge: #f1f1ec;
   --section-nav: var(--color-header-text);
 }
 
+:root[data-section='collection'],
+:root[data-section='decks'],
+:root[data-section='havewant'],
+:root[data-section='proxy'] {
+  --color-accent-2: color-mix(in srgb, var(--color-accent) 75%, #fff);
+}
+
+/* Light theme: the edges stay dark as in yellow; red, blue and the neutral get white text. */
+:root[data-theme='light'][data-section='collection'],
 :root[data-theme='light'][data-section='decks'],
-:root[data-theme='light'][data-section='havewant'] {
-  --section-on-accent: #fff;
+:root[data-theme='light'][data-section='havewant'],
+:root[data-theme='light'][data-section='proxy'] {
+  --color-accent-edge: #0e0f14;
+  --color-accent-2: color-mix(in srgb, var(--color-accent) 80%, #000);
 }
 
-/* T-142: want counters are blue with a star, so they never look like the collection counters (yellow). */
-.count-control--want {
-  --color-accent: var(--color-card-blue);
-  --color-accent-edge: var(--color-card-blue);
-  --color-accent-2: color-mix(in srgb, var(--color-card-blue) 80%, #fff);
-  --color-on-accent: #000;
+:root[data-theme='light'][data-section='proxy'] {
+  --color-accent: #2a2d36;
 }
 
-:root[data-theme='light'] .count-control--want {
+:root[data-theme='light'][data-section='decks'],
+:root[data-theme='light'][data-section='havewant'],
+:root[data-theme='light'][data-section='proxy'] {
   --color-on-accent: #fff;
 }
 
-.count-control--want .count {
-  color: var(--color-card-blue);
+/* Links: the underline in the page accent, thinner, so a link never shouts louder than a button. */
+:where(a:not([class])),
+.text-link,
+.link-button {
+  text-decoration-thickness: 1px;
+}
+
+/* What the want and Have counters change (T-142, T-143): a quiet note, the marks repeat the counters' own marks. */
+.hw-editing {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 .count-want-mark {
   margin-inline-end: 0.15em;
   font-size: 0.8em;
-}
-
-/* T-142: says what the want counters change. */
-.hw-editing {
-  margin: 0;
-  color: var(--color-card-blue);
-  font-size: var(--font-size-sm);
 }

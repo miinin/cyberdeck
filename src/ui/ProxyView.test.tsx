@@ -240,7 +240,8 @@ describe('Sending cards to the proxy queue (T-102)', () => {
     ]);
   });
 
-  it('sends a whole deck or only its missing cards from the deck editor', async () => {
+  // Renders the whole deck editor twice: under a full parallel run it needs more than the default 5 s.
+  it('sends a whole deck or only its missing cards from the deck editor', { timeout: 20000 }, async () => {
     const user = userEvent.setup();
     const initial = {
       ...storedDecks([{ id: 'a', name: 'Oma pakka', cards: legalCards() }]),
@@ -248,7 +249,8 @@ describe('Sending cards to the proxy queue (T-102)', () => {
     };
     const repositories = renderRoute('#/pakat/a', createMemoryRepositories({ initial }));
     await user.click(await screen.findByRole('button', { name: 'Tulosta puuttuvat proxyiksi' }));
-    await waitFor(async () => expect((await queueRows(repositories)).length).toBeGreaterThan(0));
+    // The rows are saved one by one: wait for the one checked, not for any row (T-144: was flaky under load).
+    await waitFor(async () => expect((await queueRows(repositories)).find((row) => row.card === 'u1')).toEqual({ card: 'u1', count: 2 }));
     const missing = await queueRows(repositories);
     expect(missing.find((row) => row.card === 'u0')).toBeUndefined();
     expect(missing.find((row) => row.card === 'u1')).toEqual({ card: 'u1', count: 2 });
@@ -256,7 +258,7 @@ describe('Sending cards to the proxy queue (T-102)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Lähetä pakka proxy-jonoon' }));
     await waitFor(async () => expect((await queueRows(repositories)).find((row) => row.card === 'u0')).toEqual({ card: 'u0', count: 3 }));
-    expect((await queueRows(repositories)).find((row) => row.card === 'u1')).toEqual({ card: 'u1', count: 5 });
+    await waitFor(async () => expect((await queueRows(repositories)).find((row) => row.card === 'u1')).toEqual({ card: 'u1', count: 5 }));
   });
 
   it('says when the queue is full and nothing fits', async () => {
