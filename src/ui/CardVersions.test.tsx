@@ -171,8 +171,14 @@ describe('CardVersions with the bundled cards', () => {
     expect(onShowArt).toHaveBeenCalledWith(iconic);
   });
 
-  it.each(['adam-smasher-metal-over-meat', 'v-streetkid'])('shows three versions for %s', (key) => {
-    expect(renderReal(key).tiles).toHaveLength(3);
+  it.each([
+    // Base, Iconic Rare (Retail), Iconic Rare (Beta, its own art since T-148), Nova Rare.
+    ['adam-smasher-metal-over-meat', ['Perus', 'Iconic Rare', 'Iconic Rare (Beta)', 'Nova Rare']],
+    // T-148: the 005b art of its own, and the Beta Iconic Rare apart from the Retail one.
+    ['v-streetkid', ['Perus', 'Toinen kuvitus', 'Iconic Rare', 'Iconic Rare (Beta)', 'Nova Rare']],
+  ])('shows the versions of %s', (key, names) => {
+    const { tiles } = renderReal(key);
+    expect(tiles.map((tile) => tile.querySelector('.art-name')?.textContent?.trim())).toEqual(names);
   });
 
   it('shows Rebecca Having a Moment as one Nova Rare version, not an empty Base plus Nova', () => {

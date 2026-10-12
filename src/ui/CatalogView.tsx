@@ -5,7 +5,7 @@ import type { CardKey } from '../domain/cardKey';
 import { countOf, minCountOf } from '../domain/collection';
 import { editionPrinting, protectedCount, setCopiesByEdition, targetPrinting } from '../domain/edition';
 import type { CollectionEntry } from '../domain/collection';
-import { artRarity, artsInSet, artsOf, matchedSpecialRarity, ownedPerArt, setArtCount } from '../domain/arts';
+import { artRarity, artsInSet, artsOf, isBaseArt, matchedArt, ownedPerArt, setArtCount } from '../domain/arts';
 import type { Art } from '../domain/arts';
 import { setFilterId } from '../domain/printing';
 import { variantImageUrl } from '../data/variantImages';
@@ -441,7 +441,7 @@ function CatalogBody({
       const start = { entries: before === undefined ? [] : [before] };
       // D-022: the base art of a Welcome to Night City card counts by edition, like the card box.
       const edited =
-        art.rarity === null && targetPrinting(card, edition) !== null
+        isBaseArt(art) && targetPrinting(card, edition) !== null
           ? setCopiesByEdition(start, card, edition, (before?.count ?? 0) + next - (ownedPerArt(before, card, artsFor(card)).get(art.artId) ?? 0))
           : setArtCount(start, card, art.artId, next, artsFor(card));
       writeEntry(card, before, edited.entries[0]);
@@ -451,12 +451,15 @@ function CatalogBody({
   };
   /** The picture of the special art a search result matches (rarity or set filter), or null (D-021). */
   const filterArtUrl = (card: Card): string | null => {
-    const rarity = matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt);
-    return rarity === null ? null : variantImageUrl(card.key, rarity);
+    const art = matchedArt(artsFor(card), criteria.rarities, setChoice);
+    return art?.image == null ? null : variantImageUrl(card.key, art.image);
   };
 
   /** The rarity a table row shows: the special rarity a filter matches, else the card's own. */
-  const rarityOf = (card: Card): string | null => matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt) ?? card.rarity;
+  const rarityOf = (card: Card): string | null => {
+    const art = matchedArt(artsFor(card), criteria.rarities, setChoice);
+    return art === null ? card.rarity : artRarity(card, art);
+  };
 
   // One box per card, or in the "all arts" mode one per art (D-021).
   const gridItems: CardListItem[] | undefined =
@@ -473,7 +476,7 @@ function CatalogBody({
               .map((art) => ({
                 card,
                 art,
-                imageUrl: art.rarity === null ? null : variantImageUrl(card.key, art.rarity),
+                imageUrl: art.image === null ? null : variantImageUrl(card.key, art.image),
                 artCount: arts.length,
               }));
           })
@@ -481,7 +484,7 @@ function CatalogBody({
             // A set filter keeps the versions printed in that set (T-146).
             const arts = artsInSet(artsFor(card), setChoice);
             const imageUrl = filterArtUrl(card);
-            const versionUrls = arts.map((art) => (art.rarity === null ? null : variantImageUrl(card.key, art.rarity)));
+            const versionUrls = arts.map((art) => (art.image === null ? null : variantImageUrl(card.key, art.image)));
             const versionRarities = arts.map((art) => artRarity(card, art));
             const lone = arts.length === 1 && arts[0] !== undefined ? artRarity(card, arts[0]) : undefined;
             return { card, art: null, imageUrl, artCount: arts.length, versionUrls, versionRarities, startVersion: Math.max(0, versionUrls.indexOf(imageUrl)), rarity: lone };
@@ -500,7 +503,7 @@ function CatalogBody({
           artCountOf: (card, art) => ownedPerArt(entryOf(card), card, artsFor(card)).get(art.artId) ?? 0,
           onArtChange: (card, art, count) => {
             if (collectionFilter !== 'all') setKept((current) => (current.has(card.key) ? current : new Set(current).add(card.key)));
-            const adding = art.rarity === null && count > (ownedPerArt(entryOf(card), card, artsFor(card)).get(art.artId) ?? 0);
+            const adding = isBaseArt(art) && count > (ownedPerArt(entryOf(card), card, artsFor(card)).get(art.artId) ?? 0);
             guardAdd(card, adding, (ed) => handleArtChange(card, art, count, ed));
           },
           editable,
@@ -559,7 +562,7 @@ function CatalogBody({
             editable={editable}
             onChange={(printing, count) => collectionStore.setVersionCount(openCard.key, printing, count)}
             onArtChange={(art, count) =>
-              guardAdd(openCard, art.rarity === null && count > (ownedPerArt(entryOf(openCard), openCard, artsFor(openCard)).get(art.artId) ?? 0), (ed) =>
+              guardAdd(openCard, isBaseArt(art) && count > (ownedPerArt(entryOf(openCard), openCard, artsFor(openCard)).get(art.artId) ?? 0), (ed) =>
                 handleArtChange(openCard, art, count, ed),
               )
             }

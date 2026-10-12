@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { RaritySymbol } from './RaritySymbol';
 import { playsetSize } from '../domain/card';
-import { officialRarity } from '../domain/cardSearch';
 import type { Card } from '../domain/card';
 import type { Art } from '../domain/arts';
 import { artRarity } from '../domain/arts';
@@ -13,6 +12,7 @@ import { CostGem } from './DeckPickTable';
 import { CountControl } from './CountControl';
 import type { CountControlMode } from './CountControl';
 import { CardDecks } from './CardDecks';
+import { artName } from './artName';
 import { texts } from './texts';
 
 /** The collection part of each box. Left out when the collection could not be read. */
@@ -228,14 +228,14 @@ function CardBox({
           )}
           {/* The version is only a picture and a rarity symbol; screen readers get its name here. */}
           {showArtLabel && art !== null && (
-            <span className="visually-hidden"> – {art.rarity === null ? texts.artBase : officialRarity(art.rarity)}</span>
+            <span className="visually-hidden"> – {artName(art)}</span>
           )}
         </h3>
       </div>
       {/* The version's name is also shown (T-118, UX-118-27): boxes of one card differ only by the picture otherwise. */}
       {showArtLabel && art !== null && (
         <p className="card-art-label" aria-hidden="true" lang={art.rarity === null ? undefined : 'en'}>
-          {art.rarity === null ? texts.artBase : officialRarity(art.rarity)}
+          {artName(art)}
         </p>
       )}
       <div className="card-meta">
@@ -270,7 +270,7 @@ function CardBox({
               card={card}
               count={artMode ? artOwned : owned.countOf(card)}
               mode={owned.mode}
-              label={artMode && art !== null ? texts.artTileName(card.displayName, art.rarity === null ? texts.artBase : officialRarity(art.rarity)) : undefined}
+              label={artMode && art !== null ? texts.artTileName(card.displayName, artName(art)) : undefined}
               onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
               onLimit={owned.onLimit}
               editable={owned.editable}

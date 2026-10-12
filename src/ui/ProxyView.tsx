@@ -262,7 +262,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
     };
     setBump((n) => n + 1);
   };
-  const artUrlOfArt = (card: Card, art: Art) => (art.rarity === null ? null : variantImageUrl(card.key, art.rarity));
+  const artUrlOfArt = (card: Card, art: Art) => (art.image === null ? null : variantImageUrl(card.key, art.image));
   /** The art of a card that a sheet copy or a picture shows (`null` = the card's own picture). */
   const artByUrl = (card: Card, artUrl: string | null) => artsFor(card).find((art) => artUrlOfArt(card, art) === artUrl);
 
@@ -324,7 +324,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
     return (matching.length === 0 ? arts : matching).map((art) => ({
       card,
       art,
-      imageUrl: art.rarity === null ? null : variantImageUrl(card.key, art.rarity),
+      imageUrl: art.image === null ? null : variantImageUrl(card.key, art.image),
       artCount: arts.length,
       rarity: artRarity(card, art),
     }));

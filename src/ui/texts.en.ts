@@ -106,6 +106,7 @@ export const textsEn: typeof textsFi = {
   versionsHeading: 'Versions',
   otherProducts: (n: number) => `+${n} other product${n === 1 ? '' : 's'}`,
   artBase: 'Base',
+  artAlt: 'Alternate art',
   artShow: (name: string) => `Show version: ${name}`,
   artBreakdown: 'Show printings',
   versionPrev: (card: string) => `Previous version: ${card}`,

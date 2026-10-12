@@ -21,8 +21,8 @@ describe('galleryItemsOf (T-123)', () => {
 
   it('names each art of the "all arts" mode and gives every one its own id', () => {
     const items: CardListItem[] = [
-      { card: alpha, art: { artId: 'alpha#base', rarity: null, printings: [], label: 'x', defaultPrinting: null }, imageUrl: null, artCount: 2 },
-      { card: alpha, art: { artId: 'alpha#Legendary', rarity: 'Legendary', printings: [], label: 'x', defaultPrinting: null }, imageUrl: '/art/l.webp', artCount: 2 },
+      { card: alpha, art: { artId: 'alpha#base', rarity: null, image: null, printings: [], label: 'x', defaultPrinting: null }, imageUrl: null, artCount: 2 },
+      { card: alpha, art: { artId: 'alpha#Legendary', rarity: 'Legendary', image: 'Legendary', printings: [], label: 'x', defaultPrinting: null }, imageUrl: '/art/l.webp', artCount: 2 },
     ];
     const result = galleryItemsOf(items);
     expect(new Set(result.map((item) => item.id)).size).toBe(2);

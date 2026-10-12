@@ -1,9 +1,8 @@
 import type { Card } from '../domain/card';
-import { officialRarity } from '../domain/cardSearch';
 import { getCardImage } from '../data/cardImages';
 import { cardNameText } from './CardName';
 import type { CardListItem } from './CardList';
-import { texts } from './texts';
+import { artName } from './artName';
 
 /** One picture of the gallery (T-123): a card, or in the "all arts" mode one art of a card. */
 export interface GalleryItem {
@@ -22,7 +21,7 @@ export interface GalleryItem {
 /** The gallery shows the same cards, in the same order, as the grid (filters, search, order, all arts). */
 export function galleryItemsOf(items: readonly CardListItem[]): GalleryItem[] {
   return items.map((item) => {
-    const version = item.art === null ? null : item.art.rarity === null ? texts.artBase : officialRarity(item.art.rarity);
+    const version = item.art === null ? null : artName(item.art);
     const name = cardNameText(item.card);
     return {
       id: item.art === null ? item.card.id : item.art.artId,

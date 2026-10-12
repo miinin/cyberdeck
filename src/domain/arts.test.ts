@@ -22,6 +22,39 @@ const card: Card = {
 const key = (n: number, versions?: Record<string, number>) => ({ card: 'v', count: n, ...(versions ? { versions } : {}) });
 const col = (entry: ReturnType<typeof key>): Collection => ({ entries: [entry] });
 
+describe('arts of their own: an alternate base art and a Beta special art (T-148)', () => {
+  const ra = p('welcometonightcityretail', 'Welcome to Night City — Retail', '005a', 'Rare');
+  const rb = p('welcometonightcityretail', 'Welcome to Night City — Retail', '005b', 'Rare');
+  const bb = p('welcometonightcitybeta', 'Welcome to Night City — Beta', 'β005b', 'Rare');
+  const ri = p('welcometonightcityretail', 'Welcome to Night City — Retail', '144', 'Iconic Legend');
+  const bi = p('welcometonightcitybeta', 'Welcome to Night City — Beta', 'β144', 'Iconic Legend');
+  const v: Card = { ...card, printings: [ra, rb, bb, ri, bi] };
+  const pictures = new Set(['Iconic Legend', 'Iconic Legend Beta', 'Alt b']);
+  const arts = artsOf(v, (_key, name) => pictures.has(name));
+
+  it('splits 005b and the Beta Iconic into arts of their own when they have pictures', () => {
+    expect(arts.map((a) => [a.artId, a.image])).toEqual([
+      ['v', null],
+      ['v__alt-b', 'Alt b'],
+      ['v__iconic-legend', 'Iconic Legend'],
+      ['v__iconic-legend-beta', 'Iconic Legend Beta'],
+    ]);
+    expect(arts[1]?.printings).toEqual([rb, bb]);
+    expect(arts[3]?.defaultPrinting).toBe(bi);
+  });
+
+  it('keeps them in the base and the rarity art without pictures', () => {
+    expect(artsOf(v, (_key, name) => name === 'Iconic Legend').map((a) => a.artId)).toEqual(['v', 'v__iconic-legend']);
+  });
+
+  it('counts the alternate art by its printings, and the base art takes the copies without a version', () => {
+    const owned = ownedPerArt({ card: 'v', count: 5, versions: { [rb.key]: 2, [bi.key]: 1 } }, v, arts);
+    expect(Object.fromEntries(owned)).toEqual({ v: 2, 'v__alt-b': 2, 'v__iconic-legend': 0, 'v__iconic-legend-beta': 1 });
+    const added = setArtCount({ entries: [] }, v, 'v__alt-b', 1, arts);
+    expect(added.entries).toEqual([{ card: 'v', count: 1, versions: { [rb.key]: 1 } }]);
+  });
+});
+
 describe('artsInSet (T-146)', () => {
   it('keeps only the arts printed in the chosen set, all arts without a set or when none is printed in it', () => {
     const arts = artsOf(card);

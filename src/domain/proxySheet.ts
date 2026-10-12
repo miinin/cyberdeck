@@ -154,7 +154,7 @@ export function queueCopies(
     }
     const perArt = ownedPerArt(entry, card, arts);
     for (const art of arts) {
-      const url = art.rarity === null ? null : artUrlOf(card.key, art.rarity);
+      const url = art.image === null ? null : artUrlOf(card.key, art.image);
       for (let i = 0; i < (perArt.get(art.artId) ?? 0) && copies.length < MAX_PROXY_CARDS; i += 1) copies.push({ key: card.key, name: card.displayName, artUrl: url });
     }
   }

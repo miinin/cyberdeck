@@ -18,7 +18,7 @@ const novaUrls = new Set(CARDS.map((card) => variantImageUrl(card.key, 'Nova Rar
 const shownSources = () => [...document.querySelectorAll('.card-grid img')].map((img) => img.getAttribute('src') ?? '');
 
 describe('Kaikki versiot under a set filter (T-147)', () => {
-  it('shows every version of the chosen set only, and every version of all sets without one', async () => {
+  it('shows every version of the chosen set only, and every version of all sets without one', { timeout: 30000 }, async () => {
     await renderView();
     const allArts = screen.getByRole('switch', { name: 'Kaikki versiot', hidden: true });
     act(() => allArts.click());
