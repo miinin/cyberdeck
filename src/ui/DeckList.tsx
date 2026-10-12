@@ -108,7 +108,6 @@ export function DeckList({
         className={`deck-tile ${typeColorClass(card.color)}` + (missing > 0 ? ' is-missing' : '') + (problemsOf(card) !== undefined ? ' is-problem' : '')}
         onContextMenu={onContextMenu}
         onKeyDown={onKeyDown}
-        {...hoverProps(card)}
       >
         <span className="deck-tile-art" aria-hidden="true">
           <DeckCardImage card={card} className="deck-tile-img" />
@@ -123,6 +122,8 @@ export function DeckList({
           aria-label={`${texts.enlargeImage}${card.displayName}`}
           title={cardMeta(card)}
           onClick={() => onOpenImage(card)}
+          // Only the name opens the bigger image (T-139): using the stepper or the notes of the row does not.
+          {...hoverProps(card)}
         >
           <CardName card={card} muteSubname />
         </button>
