@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { artRarity, artsOf, matchedSpecialRarity } from '../domain/arts';
 import type { Card } from '../domain/card';
+import { variantImageUrl } from '../data/variantImages';
 import {
   EMPTY_CRITERIA,
   filterCards,
@@ -25,6 +27,7 @@ import type { ActiveFilter } from './ActiveFilters';
 import { CardFilters } from './CardFilters';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
+import type { CardListItem } from './CardList';
 import { cardNameText } from './CardName';
 import { CardTable } from './CardTable';
 import { ImageSizeSelect, SwitchButton, VIEW_OPTIONS } from './ListToolbar';
@@ -42,6 +45,9 @@ import { WIDE_QUERY } from './useMediaQuery';
 import { proxyTexts } from './proxyTexts';
 import { InfoTip } from './InfoTip';
 import { SendToProxyButton, useProxyQueue } from './SendToProxy';
+
+/** A special rarity is an art only when its picture exists (D-021). */
+const hasArt = (key: string, rarity: string) => variantImageUrl(key, rarity) !== null;
 
 type Tab = 'want' | 'have';
 type WantScope = 'list' | 'all';
@@ -125,6 +131,22 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
     return sortCards(base, sort.key, sort.direction);
   }, [tab, matching, tradeable, wantScope, wants, sort]);
   const filterActive = isFilterActive(criteria) || setChoice !== null;
+
+  // As on the Cards page (D-021, T-141): a box starts on the special art a rarity or set filter matches, e.g. Nova Rare.
+  const artsByCard = useMemo(() => new Map(cards.map((card) => [card.key, artsOf(card, hasArt)])), [cards]);
+  const filterArtUrl = (card: Card): string | null => {
+    const rarity = matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt);
+    return rarity === null ? null : variantImageUrl(card.key, rarity);
+  };
+  const rarityOf = (card: Card): string | null => matchedSpecialRarity(card, criteria.rarities, setChoice, hasArt) ?? card.rarity;
+  const gridItems = shown.map((card): CardListItem => {
+    const arts = artsByCard.get(card.key) ?? [];
+    const imageUrl = filterArtUrl(card);
+    const versionUrls = arts.map((art) => (art.rarity === null ? null : variantImageUrl(card.key, art.rarity)));
+    const versionRarities = arts.map((art) => artRarity(card, art));
+    const lone = arts.length === 1 && arts[0] !== undefined ? artRarity(card, arts[0]) : undefined;
+    return { card, art: null, imageUrl, artCount: arts.length, versionUrls, versionRarities, startVersion: Math.max(0, versionUrls.indexOf(imageUrl)), rarity: lone };
+  });
   const activeFilters: ActiveFilter[] = [
     ...(setChoice === null
       ? []
@@ -181,7 +203,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
 
   const results = (caption: string, foot: (card: Card) => ReactNode, columnLabel: string) =>
     view === 'grid' ? (
-      <CardList cards={shown} caption={caption} onOpenImage={openImage} renderFoot={foot} />
+      <CardList cards={shown} items={gridItems} caption={caption} onOpenImage={openImage} renderFoot={foot} />
     ) : (
       <CardTable
         cards={shown}
@@ -189,6 +211,8 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
         onOpenImage={openImage}
         sort={sort}
         onSortChange={setSort}
+        artUrlOf={filterArtUrl}
+        rarityOf={rarityOf}
         extraColumn={{ label: columnLabel, render: foot }}
       />
     );

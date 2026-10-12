@@ -143,3 +143,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-138 | Otsikon glitch nopeaksi ja teräväksi: kerran, 0,24 s, neljä vaihetta | 1 | Should | PM | Done | PM |
 | T-139 | Hover-esikatselu vähemmän häiritseväksi: avautuu vain, kun hiiri pysähtyy 450 ms (liike nollaa odotuksen); pakkalistassa vain kortin nimestä; kuva hieman pienempi | 1 | Should | PM | Done | PM |
 | T-140 | Hover-esikatselu ei avaudu vierityksen jälkeen paikallaan olevan hiiren alle (400 ms), eikä tyhjä kehys välähdä ennen kuvan latautumista | 1 | Should | PM | Done | PM |
+| T-141 | Erikoiskuvitukset: Have/Want näyttää suodattimen mukaisen kuvituksen (esim. Nova Rare) kuten Kortit-sivu; hover-esikatselu näyttää saman kuvituksen kuin rivi | 1 | Should | PM | Done | PM |

@@ -26,6 +26,8 @@ export interface Shown {
   rect: DOMRect;
   /** Pointer x, used when there is no room beside the whole trigger (a full-width row). */
   x: number;
+  /** The special art the row shows (D-021, T-141), or null for the card's own picture. */
+  artUrl?: string | null;
 }
 
 export interface HoverPreviewProps {
@@ -79,9 +81,9 @@ function CardHoverPreview({ shown }: { shown: Shown | null }) {
   return (
     <img
       ref={ref}
-      key={shown.card.key}
+      key={`${shown.card.key}:${shown.artUrl ?? ''}`}
       className="card-hover-preview"
-      src={image.large}
+      src={shown.artUrl ?? image.large}
       width={CARD_IMAGE_WIDTH.lg}
       height={cardImageHeight('lg')}
       alt=""
@@ -140,7 +142,7 @@ export function useCardHoverPreview() {
   }, [shown, hide]);
 
   const bind = useCallback(
-    (card: Card): HoverPreviewProps => {
+    (card: Card, artUrl: string | null = null): HoverPreviewProps => {
       if (!canHover) return {};
       return {
         onPointerEnter: (event) => {
@@ -150,7 +152,7 @@ export function useCardHoverPreview() {
           restAt.current = { x: event.clientX, y: event.clientY };
           clearTimeout(timer.current);
           timer.current = setTimeout(
-            () => setShown({ card, rect: trigger.getBoundingClientRect(), x: pointerX.current }),
+            () => setShown({ card, rect: trigger.getBoundingClientRect(), x: pointerX.current, artUrl }),
             PREVIEW_DELAY_MS,
           );
         },
@@ -164,7 +166,7 @@ export function useCardHoverPreview() {
             const trigger = event.currentTarget;
             clearTimeout(timer.current);
             timer.current = setTimeout(
-              () => setShown({ card, rect: trigger.getBoundingClientRect(), x: pointerX.current }),
+              () => setShown({ card, rect: trigger.getBoundingClientRect(), x: pointerX.current, artUrl }),
               PREVIEW_DELAY_MS,
             );
           }
