@@ -34,6 +34,9 @@ export interface CardFiltersProps {
   setOptions?: readonly { family: string; label: string; group: 'sets' | 'other' }[];
   setFamily?: string | null;
   onSetChange?: (family: string | null) => void;
+  /** The tags of the cards with counts (T-151); undefined or empty leaves the tag choice out. The chosen one is criteria.tag. */
+  tagOptions?: readonly { tag: string; count: number }[];
+  onTagChange?: (tag: string | null) => void;
   /** Search text changed. `composing` is true while an IME composition is in progress. */
   onQueryChange: (query: string, composing: boolean) => void;
   onToggleType: (type: string) => void;
@@ -80,6 +83,7 @@ export function selectedFilterCount(criteria: CardFilterCriteria, collectionFilt
     criteria.powers.length +
     criteria.rams.length +
     (criteria.sellable === true ? 1 : 0) +
+    (criteria.tag != null ? 1 : 0) +
     collection
   );
 }
@@ -104,6 +108,8 @@ export function CardFilters({
   setOptions = [],
   setFamily = null,
   onSetChange,
+  tagOptions = [],
+  onTagChange,
   onQueryChange,
   onToggleType,
   onToggleColor,
@@ -250,6 +256,20 @@ export function CardFilters({
                   </optgroup>
                 );
               })}
+            </select>
+          </div>
+        )}
+
+        {tagOptions.length > 0 && onTagChange !== undefined && (
+          <div className="field set-filter tag-filter">
+            <label htmlFor="tag-filter">{texts.tagLegend}</label>
+            <select id="tag-filter" value={criteria.tag ?? ''} onChange={(event) => onTagChange(event.target.value || null)}>
+              <option value="">{texts.tagAll}</option>
+              {tagOptions.map(({ tag, count }) => (
+                <option key={tag} value={tag} lang="en">
+                  {tag} ({count})
+                </option>
+              ))}
             </select>
           </div>
         )}

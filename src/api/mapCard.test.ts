@@ -16,6 +16,7 @@ describe('mapCard', () => {
       ram: null,
       rarity: 'Rare',
       eddiable: null,
+      tags: [],
       key: 'v-streetkid',
       printings: [
         {
@@ -169,5 +170,14 @@ describe('mapCard: eddiable', () => {
     expect(mapCard(rawCard(1, { is_eddiable: false }))).toMatchObject({ eddiable: false });
     expect(mapCard(rawCard(1, { is_eddiable: 'true' }))).toMatchObject({ eddiable: null });
     expect(mapCard(rawCard(1, {}))).toMatchObject({ eddiable: null });
+  });
+});
+
+describe('mapCard tags (T-151)', () => {
+  it('takes the classifications as tags: trimmed, without duplicates or empty ones, within the limits', () => {
+    const long = 'x'.repeat(41);
+    const card = mapCard({ ...realShapeCard, classifications: [' Arasaka ', 'Corpo', 'Arasaka', '', 7, long, ...Array.from({ length: 12 }, (_, i) => `T${i}`)] });
+    expect(card?.tags).toEqual(['Arasaka', 'Corpo', 'T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']);
+    expect(mapCard({ ...realShapeCard, classifications: 'Merc' })?.tags).toEqual([]);
   });
 });

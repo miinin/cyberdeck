@@ -34,6 +34,7 @@ import {
   isFilterActive,
   numberFilterOptionsFor,
   toggleValue,
+  tagOptions,
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { StorageError } from '../storage';
@@ -150,6 +151,7 @@ export function DeckEditor({
   const [pickView, setPickView] = useState<DeckPickView>('list');
   const pickViewChosen = useRef(false);
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
+  const tagChoices = useMemo(() => tagOptions(cards), [cards]);
   const [zoomCard, setZoomCard] = useState<Card | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -905,6 +907,8 @@ export function DeckEditor({
             onCollectionFilterChange={() => undefined}
             onQueryChange={(query) => setCriteria({ ...criteria, query })}
             onToggleType={(type) => setCriteria({ ...criteria, types: toggleValue(criteria.types, type) })}
+            tagOptions={tagChoices}
+            onTagChange={(tag) => setCriteria({ ...criteria, tag })}
             onToggleColor={(color) => setCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) })}
             onToggleRarity={(rarity) =>
               setCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) })

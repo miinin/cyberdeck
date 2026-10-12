@@ -36,7 +36,7 @@ export function shortRarity(official: string): string {
 export const KNOWN_CARD_COLORS: readonly string[] = ['Red', 'Yellow', 'Green', 'Blue'];
 
 export interface CardFilterCriteria {
-  /** Free text as typed by the user. Matched against name and subname. */
+  /** Free text as typed by the user. Matched against name, subname and the tags (T-151). */
   query: string;
   /** Selected types. Empty = all types. */
   types: readonly string[];
@@ -52,6 +52,8 @@ export interface CardFilterCriteria {
   rams: readonly string[];
   /** Only cards that can be sold for eddies (€$, Netdeck's is_eddiable). Default (off) = all. */
   sellable?: boolean;
+  /** One tag (T-151, e.g. "Arasaka"), or null/undefined for all. */
+  tag?: string | null;
 }
 
 /** The criteria keys of the number filters (T-052). */
@@ -66,7 +68,15 @@ export const EMPTY_CRITERIA: CardFilterCriteria = {
   powers: [],
   rams: [],
   sellable: false,
+  tag: null,
 };
+
+/** The tags of the cards (T-151) with how many cards have each, in alphabetical order. */
+export function tagOptions(cards: readonly Card[]): { tag: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const card of cards) for (const tag of card.tags ?? []) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  return [...counts].map(([tag, count]) => ({ tag, count })).sort((a, b) => a.tag.localeCompare(b.tag, 'en'));
+}
 
 /**
  * From these values up the number filters have a single "N+" option (T-052): Cost 9+, Power 10+, RAM 5+ (T-059: 5 vaatii kolme saman väristä Legendiä).
@@ -159,7 +169,7 @@ export function isFilterActive(criteria: CardFilterCriteria): boolean {
   return (
     normalizeForSearch(criteria.query) !== '' || criteria.types.length > 0 || criteria.colors.length > 0 ||
     criteria.rarities.length > 0 || criteria.costs.length > 0 || criteria.powers.length > 0 ||
-    criteria.rams.length > 0 || criteria.sellable === true
+    criteria.rams.length > 0 || criteria.sellable === true || (criteria.tag ?? null) !== null
   );
 }
 
@@ -186,11 +196,12 @@ export function filterCards(cards: readonly Card[], criteria: CardFilterCriteria
     if (colors.size > 0 && (card.color === null || !colors.has(card.color))) return false;
     if (rarities.size > 0 && !hasRarity(card, rarities)) return false;
     if (criteria.sellable === true && card.eddiable !== true) return false;
+    if (criteria.tag != null && !(card.tags ?? []).includes(criteria.tag)) return false;
     for (const [group, field] of NUMBER_FIELDS) {
       if (!matchesNumberFilter(card[field], criteria[group])) return false;
     }
     if (words.length === 0) return true;
-    const searchable = normalizeForSearch(card.subname === null ? card.name : `${card.name} ${card.subname}`);
+    const searchable = normalizeForSearch([card.name, card.subname ?? '', ...(card.tags ?? [])].join(' '));
     return words.every((word) => searchable.includes(word));
   });
 }

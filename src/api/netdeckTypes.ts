@@ -20,5 +20,6 @@ export interface NetdeckCardFields {
   ram: unknown;
   rarity: unknown;
   is_eddiable: unknown;
+  classifications: unknown;
   printings: unknown;
 }

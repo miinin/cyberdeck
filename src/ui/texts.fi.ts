@@ -274,6 +274,8 @@ export const textsFi = {
   collectionLegend: 'Kokoelma',
   setLegend: 'Setti / versio',
   setAll: 'Kaikki setit',
+  tagLegend: 'Tagi',
+  tagAll: 'Kaikki tagit',
   setChip: (label: string) => `Setti: ${label}`,
   setGroupSets: 'Setit',
   setGroupOther: 'Muut tuotteet',

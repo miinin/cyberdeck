@@ -253,6 +253,8 @@ export const textsEn: typeof textsFi = {
   collectionLegend: 'Collection',
   setLegend: 'Set / version',
   setAll: 'All sets',
+  tagLegend: 'Tag',
+  tagAll: 'All tags',
   setChip: (label: string) => `Set: ${label}`,
   setGroupSets: 'Sets',
   setGroupOther: 'Other products',

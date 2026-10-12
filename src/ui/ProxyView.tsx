@@ -15,6 +15,7 @@ import {
   numberFilterOptionsFor,
   officialRarity,
   toggleValue,
+  tagOptions,
 } from '../domain/cardSearch';
 import type { CardFilterCriteria } from '../domain/cardSearch';
 import { DEFAULT_SORT, sortCards } from '../domain/cardSort';
@@ -176,6 +177,7 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
   const pendingRef = useRef<PendingAdd | null>(null);
 
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
+  const tagChoices = useMemo(() => tagOptions(allCards), [allCards]);
   const [setChoice, setSetChoice] = useState<string | null>(null);
   const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [live, setLive] = useState('');
@@ -502,6 +504,8 @@ export function ProxyView({ cards: allCards, repositories }: { cards: readonly C
             onCollectionFilterChange={() => undefined}
             onQueryChange={(query) => setCriteria({ ...criteria, query })}
             onToggleType={(type) => setCriteria({ ...criteria, types: toggleValue(criteria.types, type) })}
+            tagOptions={tagChoices}
+            onTagChange={(tag) => setCriteria({ ...criteria, tag })}
             onToggleColor={(color) => setCriteria({ ...criteria, colors: toggleValue(criteria.colors, color) })}
             onToggleSellable={() => setCriteria({ ...criteria, sellable: criteria.sellable !== true })}
             onToggleRarity={(rarity) => setCriteria({ ...criteria, rarities: toggleValue(criteria.rarities, rarity) })}
