@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-149–T-153 (laatukierros, saavutukset, tagit, kallistus) julkaistu 2026-10-12 | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
+| – | – | T-149–T-153 (laatukierros, saavutukset, tagit, kallistus) julkaistu 2026-10-12 (T-151–T-154 julkaistu käsin: GitHub Actionsin maksu tai kulukatto estää ajot, käyttäjä korjaa) | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
 
 ## Avoimet
 - Preview-kanavien poisto PR:n sulkeutuessa (preview.yml, delete_preview): PR #135:n sulkeutumisajo epäonnistui ennen korjausta 433eb35 (checkout ja listausvirheen näyttö). Korjaus varmistetaan seuraavan PR:n sulkeutumisajosta.
