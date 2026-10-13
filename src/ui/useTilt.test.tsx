@@ -26,8 +26,17 @@ describe('useTilt (T-153)', () => {
     await nextFrame();
     expect(card.style.getPropertyValue('--tilt-x')).toBe('0.00deg');
 
-    fireEvent.pointerLeave(card, { pointerType: 'mouse' });
+    // T-162: the pointer is followed on the window against the flat card, so a move just inside it keeps the tilt...
+    fireEvent.pointerMove(window, { clientX: 99, clientY: 100 });
+    await nextFrame();
+    expect(card).toHaveClass('is-tilting');
+
+    // ...and a move outside it brings the card flat.
+    fireEvent.pointerMove(window, { clientX: 101, clientY: 100 });
     expect(card.style.getPropertyValue('--tilt-y')).toBe('0deg');
+    expect(card).not.toHaveClass('is-tilting');
+    fireEvent.pointerMove(window, { clientX: 50, clientY: 100 });
+    await nextFrame();
     expect(card).not.toHaveClass('is-tilting');
 
     fireEvent.pointerMove(card, { pointerType: 'touch', clientX: 0, clientY: 0 });
