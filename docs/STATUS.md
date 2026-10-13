@@ -1,7 +1,7 @@
-# STATUS · päivitetty 2026-10-12 (PM, T-153)
+# STATUS · päivitetty 2026-10-13 (PM)
 
 ## Yhdellä lauseella
-Kaikki T-121:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
+Kaikki T-157:ään asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
 Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna: Testikäyttäjän ja UX:n katselmointi mobiilista sekä MVP-1:n loppukatselmoinnit (D-014).
@@ -9,9 +9,10 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-149–T-153 (laatukierros, saavutukset, tagit, kallistus) julkaistu 2026-10-12 (T-151–T-154 julkaistu käsin: GitHub Actionsin maksu tai kulukatto estää ajot, käyttäjä korjaa) | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
+| – | – | T-149–T-157 julkaistu 2026-10-12. GitHub Actions toimii taas 2026-10-13: repo on julkinen, joten maksuesto ei enää koske ajoja (testijulkaisun uusinta-ajo meni läpi) | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
 
 ## Avoimet
+- `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
 - Preview-kanavien poisto PR:n sulkeutuessa (preview.yml, delete_preview): PR #135:n sulkeutumisajo epäonnistui ennen korjausta 433eb35 (checkout ja listausvirheen näyttö). Korjaus varmistetaan seuraavan PR:n sulkeutumisajosta.
 - Skannerin tarkistus muilla kuin sinisillä korteilla oikeilla kuvilla (T-113, käyttäjä).
 - TASKS.md:n Backlog-rivit (T-002–T-008 sekä velat T-030, T-031, T-041–T-043, T-047).
