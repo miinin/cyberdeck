@@ -5321,8 +5321,14 @@ section[aria-labelledby='have-heading'] {
     padding: var(--space-3);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
+    /* Header, tags (T-152), details: the tags have their own row beside the image, never one below it. */
+    grid-template-rows: auto auto minmax(0, 1fr);
     column-gap: var(--space-4);
+  }
+
+  .card-dialog.has-details .card-tags {
+    grid-column: 2;
+    grid-row: 2;
   }
 
   .card-dialog.has-details .card-dialog-header {
@@ -5344,7 +5350,7 @@ section[aria-labelledby='have-heading'] {
 
   .card-dialog.has-details .card-dialog-details {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-2) var(--space-4);
     align-content: start;
@@ -9697,6 +9703,8 @@ html[data-gallery='on'] main {
   grid-row: 2;
   display: grid;
   place-items: center;
+  /* One definite cell, so the picture's max-block-size: 100% has a height to fit (it was shown at its natural size). */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   min-inline-size: 0;
   min-block-size: 0;
   padding: var(--space-2);
@@ -10656,13 +10664,18 @@ button.card-tag:focus-visible {
  * A quick follow while moving, a slow ease back to flat; nothing with reduced motion.
  */
 @media (prefers-reduced-motion: no-preference) {
+  /*
+   * While tilting the card also moves back (--tilt-z), so its nearer corner is never bigger than the flat card:
+   * otherwise the dialog got a scrollbar and the gallery clipped the corners.
+   */
   .card-tilt {
-    transform: perspective(1400px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transform: perspective(1400px) translateZ(var(--tilt-z, 0px)) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
     transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
     will-change: transform;
   }
 
   .card-tilt.is-tilting {
+    --tilt-z: -100px;
     transition-duration: 140ms;
   }
 }
