@@ -1,7 +1,7 @@
 # STATUS · päivitetty 2026-10-13 (PM)
 
 ## Yhdellä lauseella
-Kaikki T-157:ään asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
+Kaikki T-160:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
 Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna: Testikäyttäjän ja UX:n katselmointi mobiilista sekä MVP-1:n loppukatselmoinnit (D-014).
@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-149–T-157 julkaistu 2026-10-12. GitHub Actions toimii taas 2026-10-13: repo on julkinen, joten maksuesto ei enää koske ajoja (testijulkaisun uusinta-ajo meni läpi) | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
+| – | – | T-158 Dependabot (D-034) ja T-160 Iconic-V pois WNC-settihausta julkaistu 2026-10-13 Actionsilla. Dependabotin PR:t #176, #177 ja #179 yhdistetty, TypeScript 7 odottaa (T-159) | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
@@ -47,6 +47,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-158 Dependabot, T-160 V:n Iconic-kuvitukset eivät kuulu WNC-setteihin (2026-10-13).
 - T-123 Galleria ja Merkitse omat kortit (2026-10-10).
 - T-125 Kevyempi Kortit-sivun yläosa (2026-10-10).
 - T-126 Kortit-sivu ei pompi näkymää vaihtaessa, checkmark-ikoni (2026-10-11).
