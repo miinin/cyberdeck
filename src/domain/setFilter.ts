@@ -1,7 +1,7 @@
 import type { Card } from './card';
 import type { Collection } from './collection';
 import { versionsOf } from './collection';
-import { setFamilyName, setFilterId } from './printing';
+import { NO_SET_FILTER, setFamilyName, setFilterId } from './printing';
 import type { Printing } from './printing';
 
 /** "sets" = the two Welcome to Night City sets (D-022); "other" = starter decks, promos, tournaments and the like. */
@@ -22,7 +22,7 @@ export function setOptions(cards: readonly Card[]): SetOption[] {
   for (const card of cards) {
     for (const printing of card.printings ?? []) {
       const id = setFilterId(printing);
-      if (!seen.has(id)) seen.set(id, id === SET_ORDER[1] ? `${setFamilyName(printing.setName)} (Beta)` : setFamilyName(printing.setName));
+      if (id !== NO_SET_FILTER && !seen.has(id)) seen.set(id, id === SET_ORDER[1] ? `${setFamilyName(printing.setName)} (Beta)` : setFamilyName(printing.setName));
     }
   }
   const options = [...seen].map(([family, label]): SetOption => ({ family, label, group: SET_ORDER.includes(family) ? 'sets' : 'other' }));
@@ -53,7 +53,7 @@ export function versionsBySet(cards: readonly Card[], collection: Collection): {
     const versions = versionsOf(collection, card.key);
     for (const printing of card.printings ?? []) {
       const n = versions[printing.key] ?? 0;
-      if (n > 0) totals.set(setFilterId(printing), (totals.get(setFilterId(printing)) ?? 0) + n);
+      if (n > 0 && setFilterId(printing) !== NO_SET_FILTER) totals.set(setFilterId(printing), (totals.get(setFilterId(printing)) ?? 0) + n);
     }
   }
   return setOptions(cards)

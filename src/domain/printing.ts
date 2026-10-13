@@ -66,11 +66,26 @@ export const BETA_SET_CODE = 'welcometonightcitybeta';
 export const RETAIL_SET_CODE = 'welcometonightcityretail';
 const WTNC_FAMILY = 'welcome-to-night-city';
 
+/** The filter value of a printing that belongs to no set (T-160). */
+export const NO_SET_FILTER = '';
+
+/**
+ * Printings the card data puts in Welcome to Night City although they do not come in its boosters (T-160, user
+ * 2026-10-13): the Iconic Legend arts of V Streetkid. A set search, set achievements and the Beta binder leave them out.
+ */
+const NOT_IN_SET_BOOSTERS: ReadonlySet<PrintingKey> = new Set([
+  'welcometonightcityretail:144',
+  'welcometonightcitybeta:144',
+  'welcometonightcityretail-fr:144',
+]);
+
 /**
  * The value of the "Set / Version" filter a printing belongs to (D-022): the set family, except that the Beta printings
- * of Welcome to Night City are a set of their own, apart from Retail (and FR).
+ * of Welcome to Night City are a set of their own, apart from Retail (and FR). NO_SET_FILTER for a printing that is not
+ * really in its set (T-160).
  */
-export function setFilterId(printing: Pick<Printing, 'setName'>): string {
+export function setFilterId(printing: Pick<Printing, 'setName'> & Partial<Pick<Printing, 'key'>>): string {
+  if (printing.key !== undefined && NOT_IN_SET_BOOSTERS.has(printing.key)) return NO_SET_FILTER;
   const family = setFamily(printing.setName);
   return family === WTNC_FAMILY && /\bBeta\b/.test(printing.setName) ? `${family}-beta` : family;
 }

@@ -1,3 +1,4 @@
+import { CARDS } from '../data/cards';
 import type { Card } from './card';
 import type { Collection } from './collection';
 import { artsInSet, artsOf, ownedPerArt, setArtCount } from './arts';
@@ -62,6 +63,16 @@ describe('artsInSet (T-146)', () => {
     expect(artsInSet(arts, setFilterId(retail)).map((a) => a.artId)).toEqual(['v', 'v__nova-rare']);
     expect(artsInSet(arts, null)).toBe(arts);
     expect(artsInSet(arts, 'no-such-set')).toBe(arts);
+  });
+
+  it('leaves the V Streetkid Iconic Legend arts out of Welcome to Night City and its Beta (T-160)', () => {
+    const v = CARDS.find((c) => c.key === 'v-streetkid');
+    if (v === undefined) throw new Error('V Streetkid missing from the card data');
+    const arts = artsOf(v, (_, rarity) => rarity === 'Iconic Legend' || rarity === 'Iconic Legend Beta' || rarity === 'Alt b');
+    expect(arts.map((a) => a.artId)).toContain('v-streetkid__iconic-legend');
+    for (const family of ['welcome-to-night-city', 'welcome-to-night-city-beta']) {
+      expect(artsInSet(arts, family).map((a) => a.artId)).toEqual(['v-streetkid', 'v-streetkid__alt-b']);
+    }
   });
 });
 

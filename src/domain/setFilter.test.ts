@@ -62,6 +62,20 @@ describe('set filter', () => {
     expect(hasSetPrinting(fr, 'welcome-to-night-city-beta')).toBe(false);
   });
 
+  it('leaves the V Streetkid Iconic Legend arts out of the Welcome to Night City sets (T-160)', () => {
+    const v = card('v-streetkid', [
+      printing('Welcome to Night City — Retail', 'welcometonightcityretail:005a'),
+      printing('Welcome to Night City — Retail', 'welcometonightcityretail:144'),
+      printing('Welcome to Night City — Beta', 'welcometonightcitybeta:144'),
+    ]);
+    expect(setOptions([v]).map((o) => o.family)).toEqual(['welcome-to-night-city']);
+    expect(hasSetPrinting(v, 'welcome-to-night-city-beta')).toBe(false);
+    let collection = setVersionCount(EMPTY_COLLECTION, 'v-streetkid', 'welcometonightcitybeta:144', 1);
+    expect(ownsSetVersion(v, 'welcome-to-night-city-beta', collection)).toBe(false);
+    collection = setVersionCount(collection, 'v-streetkid', 'welcometonightcityretail:005a', 2);
+    expect(versionsBySet([v], collection)).toEqual([{ label: 'Welcome to Night City', count: 2 }]);
+  });
+
   it('matches cards by any printing in the family', () => {
     expect(hasSetPrinting(a, 'welcome-to-night-city')).toBe(true);
     expect(hasSetPrinting(b, 'welcome-to-night-city')).toBe(false);
