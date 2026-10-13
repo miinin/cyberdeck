@@ -10873,6 +10873,24 @@ button.card-tag:focus-visible {
 .build-selects select {
   inline-size: 100%;
   min-inline-size: 0;
+  block-size: var(--target-min);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.build-selects select:hover {
+  border-color: var(--color-text);
+}
+
+.build-selects select:focus-visible {
+  border-color: var(--color-text);
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--color-text);
 }
 
 .build-kept {
@@ -10977,6 +10995,15 @@ button.card-tag:focus-visible {
   vertical-align: bottom;
 }
 
+/* Column names wrap to two lines before they are cut, so wide screens show the whole name. */
+.build-matrix th[scope='col'] .build-cut {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
 .build-cut {
   display: block;
   overflow: hidden;
@@ -10984,13 +11011,16 @@ button.card-tag:focus-visible {
   white-space: nowrap;
 }
 
-.build-table th[scope='row'] {
-  overflow-wrap: anywhere;
+.build-table {
+  max-inline-size: 56rem;
 }
 
-.build-table th:not([scope='row']),
-.build-table td {
-  inline-size: 4.5rem;
+.build-table th[scope='row'] {
+  overflow-wrap: break-word;
+}
+
+.build-table :is(th, td):not(:first-child) {
+  inline-size: 7rem;
 }
 
 .build-matrix .is-ok {
@@ -11012,15 +11042,24 @@ button.card-tag:focus-visible {
 }
 
 @media (max-width: 39.99rem) {
-  .build-table th:not([scope='row']),
-  .build-table td {
-    inline-size: 3.5rem;
+  .build-table thead th {
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+    padding-inline: 0;
+    overflow-wrap: normal;
+  }
+
+  .build-table tbody th {
+    font-size: 0.875rem;
+  }
+
+  .build-table :is(th, td):not(:first-child) {
+    inline-size: 3.75rem;
     padding-inline: var(--space-1);
     font-size: 0.875rem;
   }
 }
 
 .build-table th {
-  overflow-wrap: anywhere;
-  hyphens: auto;
+  overflow-wrap: break-word;
 }
