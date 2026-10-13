@@ -1722,6 +1722,28 @@ body:has(dialog[open]) {
   border-color: var(--color-info);
 }
 
+/*
+ * T-163: in the card grid the picture lifts under the mouse like a gallery card, without the blue edge.
+ * With reduced motion the blue edge above stays, since nothing moves.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .card-grid .card-image {
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .card-grid .card-image-button:hover .card-image {
+    border-color: var(--color-border);
+  }
+
+  .card-grid .card-image-button:hover .card-image,
+  .card-grid .card-image-button:focus-visible .card-image {
+    transform: translateY(-0.25rem);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.7);
+  }
+}
+
 /* "−" at count 0: visible and in place, but muted (T-035). */
 .step-minus:disabled {
   background: var(--color-border);
