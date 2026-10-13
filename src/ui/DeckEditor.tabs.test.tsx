@@ -37,7 +37,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('Deck editor tabs on a narrow screen', () => {
+// About 1 s alone, but over the 5 s default when the whole suite runs in parallel (like DeckEditor.sideboard).
+describe('Deck editor tabs on a narrow screen', { timeout: 20_000 }, () => {
   it('opens a deck with cards on the deck tab and hides the picker', async () => {
     stubWidth(false);
     openEditor(legalCards());
