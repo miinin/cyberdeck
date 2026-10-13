@@ -15,6 +15,15 @@ describe('card route (T-081)', () => {
   });
 });
 
+describe('deck building route (T-164)', () => {
+  it('parses and round-trips', () => {
+    expect(parseHash('#/pakat/kokoaminen')).toEqual({ name: 'deckBuild' });
+    expect(parseHash('#/pakat/kokoaminen/')).toEqual({ name: 'deckBuild' });
+    expect(routeHash({ name: 'deckBuild' })).toBe('#/pakat/kokoaminen');
+    expect(sectionOf({ name: 'deckBuild' })).toBe('decks');
+  });
+});
+
 describe('public deck routes (T-098)', () => {
   const pubId = 'ab'.repeat(32);
 

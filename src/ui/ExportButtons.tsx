@@ -6,6 +6,7 @@ import type { ExportFormat } from '../domain/deckExport';
 import type { CardsByKey } from '../domain/deckRules';
 import { deckTexts } from './deckTexts';
 import { downloadTextFile } from './downloadFile';
+import { QrDialog } from './QrDialog';
 
 /** Share glyph (a box with an arrow out), shared with the export menu button (T-071). */
 export function ShareIcon() {
@@ -58,6 +59,11 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
       setShared('failed');
     }
   };
+  const [qrLink, setQrLink] = useState<string | null>(null);
+  const showQr = () => {
+    close();
+    setQrLink(`${window.location.origin}/#/jaa/${encodeDeckShare(deck, cardsByKey)}`);
+  };
   return (
     <div
       className="export-menu"
@@ -105,7 +111,24 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
         >
           {deckTexts.shareButton}
         </button>
+        <button
+          type="button"
+          className="button-secondary"
+          aria-label={deckTexts.qrFor(deck.name)}
+          onClick={showQr}
+        >
+          {deckTexts.qrButton}
+        </button>
       </div>
+      <QrDialog
+        open={qrLink !== null}
+        title={deckTexts.qrFor(deck.name)}
+        link={qrLink ?? ''}
+        onClose={() => {
+          setQrLink(null);
+          toggleRef.current?.focus();
+        }}
+      />
       <span className="hint" role="status">
         {shared === 'copied' ? deckTexts.shareCopied : ''}
       </span>

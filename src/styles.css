@@ -10203,6 +10203,7 @@ main .field input[type='text'] {
 
 .trade-share-row {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   max-inline-size: 40rem;
 }
@@ -10840,4 +10841,252 @@ button.card-tag:focus-visible {
   --seg-unit: #b38f00;
   --seg-program: #00728a;
   --seg-gear: #6d4fb0;
+}
+
+/* T-164: deck building tab. Light, no heavy boxes; everything fits the width (no inner or horizontal scroll). */
+.build-view {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.build-section {
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.build-section h2,
+.build-section h3 {
+  margin: 0;
+}
+
+.build-intro {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.build-selects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: var(--space-3);
+}
+
+.build-selects select {
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: var(--target-min);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-base);
+}
+
+.build-selects select:hover {
+  border-color: var(--color-text);
+}
+
+.build-selects select:focus-visible {
+  border-color: var(--color-text);
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--color-text);
+}
+
+.build-kept {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.build-kept .options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.build-ok,
+.build-warn {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.build-ok {
+  color: var(--color-success);
+}
+
+.build-warn {
+  color: var(--color-warning);
+}
+
+.build-result {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.build-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: var(--space-4) var(--space-6);
+}
+
+.build-group {
+  min-inline-size: 0;
+  border-inline-start: 2px solid var(--color-accent);
+  padding-inline-start: var(--space-3);
+}
+
+.build-group h3 {
+  font-size: 1rem;
+  margin-block-end: var(--space-2);
+}
+
+.build-group ul,
+.build-pairs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.build-group li {
+  overflow-wrap: anywhere;
+}
+
+.build-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+}
+
+.build-note {
+  color: var(--color-text-muted);
+}
+
+.build-matrix,
+.build-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.build-matrix th,
+.build-matrix td,
+.build-table th,
+.build-table td {
+  padding: var(--space-1) var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.build-matrix th[scope='row'],
+.build-table th[scope='row'] {
+  text-align: start;
+  font-weight: var(--font-weight-normal, 400);
+}
+
+.build-matrix th[scope='row'] {
+  inline-size: 18%;
+}
+
+.build-matrix th[scope='col'] {
+  vertical-align: bottom;
+}
+
+/* Column names wrap to two lines before they are cut, so wide screens show the whole name. */
+.build-matrix th[scope='col'] .build-cut {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.build-cut {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.build-table {
+  max-inline-size: 56rem;
+}
+
+.build-table th[scope='row'] {
+  overflow-wrap: break-word;
+}
+
+.build-table :is(th, td):not(:first-child) {
+  inline-size: 7rem;
+}
+
+.build-matrix .is-ok {
+  color: var(--color-success);
+}
+
+.build-matrix .is-short,
+.build-table .is-short {
+  color: var(--color-warning);
+  font-weight: var(--font-weight-bold);
+}
+
+.build-matrix .is-own {
+  background: color-mix(in srgb, var(--color-text-muted) 14%, transparent);
+}
+
+.build-pairs li {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 39.99rem) {
+  .build-table thead th {
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+    padding-inline: 0;
+    overflow-wrap: normal;
+  }
+
+  .build-table tbody th {
+    font-size: 0.875rem;
+  }
+
+  .build-table :is(th, td):not(:first-child) {
+    inline-size: 3.75rem;
+    padding-inline: var(--space-1);
+    font-size: 0.875rem;
+  }
+}
+
+.build-table th {
+  overflow-wrap: break-word;
+}
+
+/* QR dialog (T-165): the code is always dark on light, also in the dark theme; only the page scrolls. */
+.qr-dialog-body {
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.qr-code {
+  display: block;
+  inline-size: min(90vw, 70vh, 100%);
+  aspect-ratio: 1;
+  block-size: auto;
+  max-inline-size: 100%;
+  background: #fff;
+}
+
+.qr-link {
+  margin: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  max-block-size: 6rem;
+  overflow: hidden;
+  font-size: var(--font-size-sm, 0.875rem);
 }

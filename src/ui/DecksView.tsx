@@ -25,6 +25,7 @@ import type { MissingRow } from '../domain/wants';
 import { StorageError } from '../storage';
 import type { LoadNotice, Repositories, StorageErrorKind } from '../storage';
 import { AddMissingToWantsButton } from './AddMissingToWants';
+import { DeckBuildView } from './DeckBuildView';
 import { countIn } from './collectionStore';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 import { PencilIcon, TrashIcon } from './icons';
@@ -270,7 +271,7 @@ export function DecksView({
   cards: readonly Card[];
   repositories: Repositories;
   /** "own" = the user's decks, "public" = the public decks of everyone (T-098). */
-  tab?: 'own' | 'public';
+  tab?: 'own' | 'public' | 'build';
   onOpen: (id: string) => void;
 }) {
   const repository = repositories.decks;
@@ -426,6 +427,9 @@ export function DecksView({
         <a className="segmented-option" href={routeHash({ name: 'decks' })} aria-current={tab === 'own' ? 'page' : undefined}>
           {deckTexts.tabOwn}
         </a>
+        <a className="segmented-option" href={routeHash({ name: 'deckBuild' })} aria-current={tab === 'build' ? 'page' : undefined}>
+          {deckTexts.tabBuild}
+        </a>
         <a className="segmented-option" href={routeHash({ name: 'publicDecks' })} aria-current={tab === 'public' ? 'page' : undefined}>
           {deckTexts.tabPublic}
         </a>
@@ -449,11 +453,21 @@ export function DecksView({
         </div>
       )}
 
-      {tab === 'own' && phase === 'loading' && <p className="status-line">{deckTexts.listLoading}</p>}
-      {tab === 'own' && phase === 'unavailable' && (
+      {tab !== 'public' && phase === 'loading' && <p className="status-line">{deckTexts.listLoading}</p>}
+      {tab !== 'public' && phase === 'unavailable' && (
         <div className="notice notice-danger" role="alert">
           <p>{deckTexts.listUnavailable}</p>
         </div>
+      )}
+
+      {tab === 'build' && phase === 'ready' && collection.phase === 'loading' && <p className="status-line">{deckTexts.buildCollectionLoading}</p>}
+      {tab === 'build' && phase === 'ready' && collection.phase !== 'loading' && collection.phase !== 'ready' && decks.length > 0 && (
+        <div className="notice notice-warning">
+          <p>{deckTexts.collectionNotReady}</p>
+        </div>
+      )}
+      {tab === 'build' && phase === 'ready' && (decks.length === 0 || collection.phase === 'ready') && (
+        <DeckBuildView decks={decks} cardsByKey={cardsByKey} owned={(key) => countIn(collection, key)} wants={wants} />
       )}
 
       {tab === 'own' && phase === 'ready' && (
