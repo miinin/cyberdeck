@@ -6,13 +6,34 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 permissions:
-  checks: write
   contents: read
-  pull-requests: write
 jobs:
-  build_and_preview:
-    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.action != 'closed' }}
+  # Dependabot PRs (T-158) get no repository secrets and run updated packages in npm ci,
+  # so they only run the checks, with a read-only token and no preview.
+  dependabot_checks:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.action != 'closed' && github.event.pull_request.user.login == 'dependabot[bot]' }}
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build:test
+      - run: node scripts/check-dist-env.mjs test
+
+  build_and_preview:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.action != 'closed' && github.event.pull_request.user.login != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,7 +58,8 @@ jobs:
           expires: 1d
 
   delete_preview:
-    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.action == 'closed' }}
+    # Dependabot PRs never get a preview channel (dependabot_checks), so there is nothing to delete.
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.action == 'closed' && github.event.pull_request.user.login != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     steps:
       # The Firebase CLI needs firebase.json and .firebaserc of the project.

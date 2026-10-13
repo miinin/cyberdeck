@@ -6,7 +6,7 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 |---|---|---|---|---|---|---|
 | T-000 | Projektin alustus ja julkaisuputki | 0 | Must | PM | Done | – |
 | T-001 | Kävelevä luuranko: korttilista rajapinnasta näytölle | 0 | Must | Koodari | Done | Arkkitehti, Digiturva, UX, Testikäyttäjä, Dokumentoija |
-| T-002 | [velka] GitHub Actionit lukittu commit-tunnisteeseen ja Dependabot käyttöön (R-3) | 1 | Could | Koodari | Backlog | Digiturva |
+| T-002 | [velka] GitHub Actionit lukittu commit-tunnisteeseen (R-3). Dependabot tehty T-158:ssa, joten se pitää SHA-kiinnitykset ajan tasalla | 1 | Could | Koodari | Backlog | Digiturva |
 | T-003 | ~~Korttidatan välimuisti (vaatii ADR:n)~~ → korvattu, katso T-026 (D-012) | 1 | Should | Arkkitehti → Koodari | Peruttu | – |
 | T-004 | [velka] `npm test` ja `npm run lint` PR-workflowhun, firebase.json-otsakkeiden ja CSP:n yhdenmukaisuustesti (ARCH-003) ja `persist-credentials: false` (SEC-003) | 1 | Must | Koodari | Done | Digiturva (SR-9) |
 | T-005 | [velka] ESLintin saavutettavuusliitännäinen, kun ESLint 10 -yhteensopiva versio on saatavilla | 2 | Could | Koodari | Backlog | UX |
@@ -160,3 +160,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-155 | Vanha välilehti julkaisun jälkeen: jos sovelluksen osan lataus epäonnistuu (vite:preloadError), sivu latautuu uuteen versioon (ei silmukkaa) | 1 | Must | PM | Done | PM |
 | T-156 | iOS: sivu ei enää vieri tilapalkin alle latauksessa (otsikon fokus ilman vieritystä), jolloin tilipainike pysyy painettavana | 1 | Must | PM | Done | PM |
 | T-157 | Kirjautuminen ei jää jumiin "Kirjaudutaan…"-tilaan: käynnistyksen palautukselle ja latauksella 10 s aikaraja; tyyppivärit (--seg-*) koko sovellukseen, jolloin Kokoelman tyyppipalkit näkyvät | 1 | Must | PM | Done | PM |
+| T-158 | Dependabot käyttöön (D-034): viikoittaiset npm- ja kuukausittaiset Actions-päivitykset test-haaraan, cooldown 7 pv, hälytykset ja turvapäivitykset päälle; Dependabotin PR:t ajavat vain tarkistukset lukuoikeuksin ilman esikatselua | 1 | Should | PM | Done | Digiturva (2 × Low, korjattu) |
