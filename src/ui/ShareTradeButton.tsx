@@ -3,6 +3,8 @@ import type { CardKey } from '../domain/cardKey';
 import type { Collection } from '../domain/collection';
 import { encodeTradeShare } from '../domain/tradeShare';
 import type { WantList } from '../domain/wants';
+import { deckTexts } from './deckTexts';
+import { QrButton } from './QrDialog';
 import { texts } from './texts';
 
 /**
@@ -48,6 +50,7 @@ export function ShareTradeButton({
         <button type="button" className="button-secondary" onClick={() => void share()}>
           {texts.tradeShareButton}
         </button>
+        <QrButton link={link} title={deckTexts.qrFor(texts.tradeShareLinkLabel)} name={deckTexts.qrFor(texts.tradeShareLinkLabel)} />
       </div>
       <p className="hint">{note}</p>
       <p role="status" className="trade-share-status">
