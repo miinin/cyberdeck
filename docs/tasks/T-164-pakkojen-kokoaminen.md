@@ -23,3 +23,20 @@ Pakat-sivulla näkee, voiko pakan B koota purkamatta muita, ja saa siirtolistan.
 - Testit, lint ja build läpi. 320 px:ssä ei vaakavieritystä.
 
 ## Luovutus
+
+### Luovutus (Koodari, 2026-10-13)
+**Tehty:** uusi välilehti `Kokoaminen` (reitti `#/pakat/kokoaminen`, `deckBuild`) ja näkymä `src/ui/DeckBuildView.tsx`. Laskenta `src/domain/deckBuild.ts` (`swapPlan`, `deckMissing`, `pairMissing`, `competingPairs`, `allMissing`; valinnainen `known`-suodatin ohittaa kortit, joita ei ole `cardsByKey`:ssä). Tekstit fi ja en, tyylit `styles.css`:n loppuun (`.build-*`).
+- Pakanvaihto: valinnat "Pöydällä nyt" / "Haluan pelata" / "Muut kootut pakat", ryhmät Pidä, Palauta, Ota, Puuttuu (määrät otsikoissa, nimen mukaan, "on pakassa X"), ✓-yhteenveto ja want-painike (saavutettava nimi sisältää pakan nimen, koska sivulla on kaksi painiketta).
+- Yhteensopivuus: matriisi (`table`, vähintään 48 rem ja enintään 8 pakkaa, nimet ellipsillä ja title-tekstillä, solun nimi visually-hidden-tekstinä), muuten lista kilpailevista pareista tai "Kaikki pakat voivat olla koottuina pareittain".
+- Kokoa kaikki: yhteenveto, taulukko (Kortti, Tarvitaan, Omistat, Puuttuu) ja want-painike tai ✓.
+- Tilat: ei pakkoja → ohje; pakat latautuvat → tilarivi; kokoelma latautuu → tilarivi; kokoelma ei saatavilla → varoitus.
+
+**Testit:** `deckBuild.test.ts` (jaetut kortit, proxyt, sideboard, muut kootut, tyhjä pakka, parit, kaikki), `DeckBuildView.test.tsx` (välilehti, tyhjä tila, ryhmät, puuttuvat ja want, sama pakka, matriisi/lista, ei kilpailua, kokoa kaikki), reittitesti. `npm test` 1820/1820, lint ja build läpi.
+
+**Poikkeamat / huomiot:**
+- Olemassa olevat välilehtien nimet säilytettiin (`Omat pakat`, `Julkiset pakat`), uusi on `Kokoaminen`.
+- Parilistassa luku on parin yhteenlaskettu puuttuva määrä (sama kuin matriisin solu), ei vain jakamisesta johtuva osuus.
+- Visuaalista 320/390/1440 px -tarkistusta selaimessa ei tehty (jsdom ei mittaa asettelua): PM tarkistaa esikatselusta, erityisesti 4-sarakkeinen "Kokoa kaikki" -taulukko 320 px:ssä ja matriisi 8 pakalla.
+- IDEAS-kirjaus ("yksi painallus päivittää pakat") jää PM:lle.
+
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (matriisin ja listan vaihtoraja on kiinteä 48 rem / 8 pakkaa)

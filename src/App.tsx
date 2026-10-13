@@ -130,6 +130,7 @@ export function App({
                 route.name === 'deck' ||
                 route.name === 'share' ||
                 route.name === 'publicDecks' ||
+                route.name === 'deckBuild' ||
                 route.name === 'publicDeck'
                   ? 'page'
                   : undefined
@@ -184,11 +185,11 @@ export function App({
         {(route.name === 'cards' || route.name === 'card') && (
           <CatalogView cards={cards} routeCardKey={route.name === 'card' ? route.key : null} repositories={openRepositories} headerSlot={headerSlot} onGalleryChange={setGalleryOpen} />
         )}
-        {(route.name === 'decks' || route.name === 'publicDecks') && (
+        {(route.name === 'decks' || route.name === 'publicDecks' || route.name === 'deckBuild') && (
           <DecksView
             cards={cards}
             repositories={openRepositories}
-            tab={route.name === 'publicDecks' ? 'public' : 'own'}
+            tab={route.name === 'publicDecks' ? 'public' : route.name === 'deckBuild' ? 'build' : 'own'}
             onOpen={(id) => navigate({ name: 'deck', id })}
           />
         )}

@@ -8,6 +8,8 @@ export type Route =
   | { name: 'trade'; data: string } | { name: 'havewant' }
   // Public decks (T-098): the list tab and one public deck by its pubId.
   | { name: 'publicDecks' } | { name: 'publicDeck'; id: string }
+  // Deck building tab (T-164): swap guide and compatibility of the user's decks.
+  | { name: 'deckBuild' }
   // Proxy print queue (T-102).
   | { name: 'proxy' }
   // Collection progress (T-105).
@@ -28,6 +30,7 @@ export function sectionOf(route: Route): Section {
     case 'share':
     case 'publicDecks':
     case 'publicDeck':
+    case 'deckBuild':
       return 'decks';
     case 'havewant':
     case 'trade':
@@ -62,6 +65,7 @@ export function parseHash(hash: string): Route {
   }
   if (parts[0] !== 'pakat') return { name: 'cards' };
   if (parts[1] === 'julkiset' && (parts.length === 2 || (parts.length === 3 && parts[2] === ''))) return { name: 'publicDecks' };
+  if (parts[1] === 'kokoaminen' && (parts.length === 2 || (parts.length === 3 && parts[2] === ''))) return { name: 'deckBuild' };
   if (parts[1] === 'julkinen' && parts.length === 3 && isPubId(parts[2])) return { name: 'publicDeck', id: parts[2] };
   const id = parts[1];
   if (parts.length === 2 && id !== undefined && isDeckId(id)) return { name: 'deck', id };
@@ -75,6 +79,7 @@ export function routeHash(route: Route): string {
   if (route.name === 'havewant') return '#/vaihto';
   if (route.name === 'proxy') return '#/proxy';
   if (route.name === 'collection') return '#/kokoelma';
+  if (route.name === 'deckBuild') return '#/pakat/kokoaminen';
   if (route.name === 'publicDecks') return '#/pakat/julkiset';
   if (route.name === 'publicDeck') return `#/pakat/julkinen/${route.id}`;
   if (route.name === 'trade') return `#/vaihto/${route.data}`;
