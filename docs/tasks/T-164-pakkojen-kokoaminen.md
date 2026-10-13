@@ -1,5 +1,5 @@
 # T-164 · Pakkojen kokoaminen: pakanvaihto-ohje (I-1) ja yhteensopivuus (I-2)
-**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
 **Katselmoinnit:** PM esikatselu (320 px, 390 px, 1440 px, tumma ja vaalea). Ei Digiturvaa: puhdas laskenta omista tiedoista, ainoa tallennus on olemassa oleva "Lisää puuttuvat wantiin" -polku. Ei tietomallimuutosta.
 **Riippuvuudet:** T-014 (raportti), T-061b (want-liitos), T-121.
 
@@ -40,3 +40,5 @@ Pakat-sivulla näkee, voiko pakan B koota purkamatta muita, ja saa siirtolistan.
 - IDEAS-kirjaus ("yksi painallus päivittää pakat") jää PM:lle.
 
 Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (matriisin ja listan vaihtoraja on kiinteä 48 rem / 8 pakkaa)
+
+PM (2026-10-13): esikatselu Chromella 320, 390 ja 1440 px:ssä 4 ja 8 pakalla. Vaakavieritystä ei ole. Korjattu itse: valikot saivat kenttätyylin, Kokoa kaikki -taulukon nimet eivät enää katkea kesken sanan puhelimessa, ja matriisin sarakeotsikot rivittyvät kahdelle riville ennen lyhennystä. Pakanvaihdon laskenta tarkistettiin esimerkkidatalla. I-1:n "yksi painallus päivittää pakat" jäi pois (koottu-tila puuttuu tietomallista) ja on kirjattu IDEAS:iin.

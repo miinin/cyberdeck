@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-158 Dependabot (D-034) ja T-160 Iconic-V pois WNC-settihausta julkaistu 2026-10-13 Actionsilla. Dependabotin PR:t #176, #177 ja #179 yhdistetty, TypeScript 7 odottaa (T-159) | Käyttäjä valitsee seuraavat tehtävät (IDEAS I-1–I-16) |
+| – | – | T-164 Pakkojen kokoaminen (I-1, I-2) ja T-165 QR-koodi jakolinkeille (I-6) valmiina 2026-10-13, dev ensin (uusi riippuvuus uqr) ja sitten tuotantoon | Käyttäjä skannaa QR:n puhelimella ja valitsee seuraavat ideat |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
@@ -47,6 +47,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-164 Pakkojen kokoaminen: pakanvaihto, yhteensopivuus ja Kokoa kaikki; T-165 QR-koodi jakolinkeille (2026-10-13).
 - T-158 Dependabot, T-160 V:n Iconic-kuvitukset eivät kuulu WNC-setteihin (2026-10-13).
 - T-123 Galleria ja Merkitse omat kortit (2026-10-10).
 - T-125 Kevyempi Kortit-sivun yläosa (2026-10-10).
