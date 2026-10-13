@@ -1,0 +1,41 @@
+# Dependabot (T-158): weekly update PRs into the test branch.
+# Security updates are switched on in the repository settings and also target test (the default branch).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: test
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Helsinki
+    # Wait a week before proposing a new release, so a hijacked package is usually caught first.
+    # Security updates ignore this.
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    ignore:
+      # typescript-eslint 8.71 does not accept TypeScript 7 yet (npm ci fails). Revisit in T-159.
+      - dependency-name: typescript
+        versions: [">=7"]
+    groups:
+      # Minor and patch updates in one PR; each major update gets its own PR.
+      npm-minor-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: test
+    schedule:
+      interval: monthly
+      timezone: Europe/Helsinki
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
