@@ -13,6 +13,7 @@ import { variantImageUrl } from '../data/variantImages';
 import { CountControl } from './CountControl';
 import { texts } from './texts';
 import { isMainSetPrinting } from '../domain/setFilter';
+import { artOutsideBoosters, availabilityOf } from '../domain/availability';
 
 export interface CardVersionsProps {
   card: Card;
@@ -99,6 +100,7 @@ export function CardVersions({
     { label: texts.editionRetail, printing: editionPrinting(card, 'retail') },
     { label: texts.editionBeta, printing: editionPrinting(card, 'beta') },
   ].flatMap((row) => (row.printing === null ? [] : [{ label: row.label, printing: row.printing }]));
+  const availability = availabilityOf(card.printings ?? []);
   const unknownCopies = count - Object.values(versions).reduce((sum, n) => sum + n, 0);
 
   /** The printings in a tile's "Erittely": all but the two that have a counter of their own on the base tile. */
@@ -145,7 +147,7 @@ export function CardVersions({
                   </>
                 )}
               </span>
-              <ArtSets printings={art.printings} />
+              <ArtSets printings={art.printings} notInBoosters={artOutsideBoosters(availability, art.printings)} />
               {isBaseArt(art) && editionRows.length > 0 ? (
                 <div className="art-count art-count--editions">
                   {editionRows.map(({ label, printing }) => {
@@ -266,12 +268,13 @@ function SetChipRow({ chip }: { chip: SetChip }) {
  * Where a version comes from (T-091): the actual sets (D-022) are shown; starter decks, promos and prizes only
  * when the version is in no set, otherwise behind a small "+N more" toggle.
  */
-function ArtSets({ printings }: { printings: readonly Printing[] }) {
+function ArtSets({ printings, notInBoosters }: { printings: readonly Printing[]; notInBoosters: boolean }) {
   const main = setChips(printings.filter(isMainSetPrinting));
   const other = setChips(printings.filter((printing) => !isMainSetPrinting(printing)));
   if (main.length === 0) {
     return (
       <span className="art-sets">
+        {notInBoosters && <span className="not-in-boosters">{texts.artNotInBoosters}</span>}
         {other.map((chip) => (
           <SetChipRow key={chip.family} chip={chip} />
         ))}

@@ -55,6 +55,7 @@ import { tradeableCount } from '../domain/tradeCompare';
 import { countIn, versionCountIn } from './collectionStore';
 import { entryOf as entryOfCard, writeEntry as writeCardEntry } from './collectionEntry';
 import { CardVersions } from './CardVersions';
+import { CardAvailability } from './CardAvailability';
 import { ScanCardsButton } from './CardScanner';
 import type { CollectionSnapshot } from './collectionStore';
 import { StorageReminder, persistenceResultText } from './StorageReminder';
@@ -531,6 +532,7 @@ function CatalogBody({
   const details =
     openCard === null ? undefined : (
       <>
+        <CardAvailability printings={openCard.printings ?? []} />
         {collection.phase === 'ready' && (
           <section aria-labelledby="card-detail-collection" className="detail-collection">
             <h3 id="card-detail-collection">{texts.detailCollection}</h3>
