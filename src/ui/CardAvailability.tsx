@@ -10,7 +10,11 @@ export function CardAvailability({ printings }: { printings: readonly Printing[]
     <ul className="availability-list">
       {sources.map((source) => {
         const kind = texts.availabilityKinds[source.kind];
-        return <li key={source.kind}>{`${inBoosters ? texts.availabilityAlso(kind) : kind}: ${source.names.join(', ')}`}</li>;
+        return (
+          <li key={source.kind}>
+            <span className="availability-kind">{`${inBoosters ? texts.availabilityAlso(kind) : kind}:`}</span> {source.names.join(', ')}
+          </li>
+        );
       })}
     </ul>
   );

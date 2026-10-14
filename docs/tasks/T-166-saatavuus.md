@@ -1,5 +1,5 @@
 # T-166 · Kortin saatavuus tietolaatikossa (mistä kortin saa)
-**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
 **Katselmoinnit:** PM esikatselee (tumma ja vaalea, 320 px ja työpöytä). Ei riskimuutoksia (ei dataa, tallennusta eikä riippuvuuksia), joten julkaisu suoraan (D-029).
 **Riippuvuudet:** T-091 (versioiden settisirut), T-160 (NOT_IN_SET_BOOSTERS).
 
@@ -28,3 +28,5 @@ Testit, lint ja build läpi. PM tarkistaa ulkoasun esikatselusta.
 **Koodari, 2026-10-14.** Tehty: `src/domain/availability.ts` (`availabilityOf`, `artOutsideBoosters`), `src/ui/CardAvailability.tsx` (uusi osio tietolaatikon ensimmäiseksi, näkyy kun kortilla on painoksia, ei odota kokoelmaa), kuvitusmerkki `ArtSets`issa, tekstit fi ja en, CSS (varoitusvärit tokeneista, `overflow-wrap`, ei sisäisiä vierityksiä). Lähteissä näytetään täydet setin nimet (rivittyvät), ei lyhenteitä. Testit: `availability.test.ts` ja `CatalogView.availability.test.tsx` (Viktor Vektor, Royce). `npm test` 1834/1834, lint ja build läpi (yksi satunnainen aikakatkaisu täydellä ajolla, uusinnassa kahdesti läpi).
 Huomio: puhelinasettelussa osio tulee kuvan ja laskurien alle (ruudukko), työpöydällä koko leveydelle ylimmäksi. PM tarkistaa ulkoasun esikatselusta.
 Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
+
+PM (2026-10-14): Tarkistettu esikatselusta (työpöytä 1440 px ja 320 px emuloituna). Lisätty: ryhmän nimi (esim. "Aloituspakat:") korostetaan, ja listan sisennys poistettiin. Huomio: V Streetkidin Iconic Rare -kuvituksissa näkyy "Ei boostereissa" ja WtNC-siru, mutta muuta lähdettä ei näy, koska data ei kerro sitä (T-160). Testit 1834/1834, lint ja build läpi.

@@ -18,10 +18,10 @@ describe('Card availability in the detail dialog (T-166)', () => {
     const dialog = await openDetails('viktor-vektor-sit-down-and-relax', /^Suurenna kuva: Viktor/);
     const section = within(dialog).getByRole('region', { name: 'Saatavuus' });
     expect(within(section).getByText('Ei Welcome to Night City -boostereissa')).toBeInTheDocument();
-    expect(within(section).getByText('Aloituspakat: The Heist Starter Deck')).toBeInTheDocument();
-    expect(within(section).getByText('Demopakat: Merc Demo Deck')).toBeInTheDocument();
-    expect(within(section).getByText('Promot: Box Toppers')).toBeInTheDocument();
-    expect(within(section).getByText('Turnauspalkinnot: Edgerunner Open S 1')).toBeInTheDocument();
+    expect(within(section).getByText((_, el) => el?.tagName === 'LI' && el.textContent === 'Aloituspakat: The Heist Starter Deck')).toBeInTheDocument();
+    expect(within(section).getByText((_, el) => el?.tagName === 'LI' && el.textContent === 'Demopakat: Merc Demo Deck')).toBeInTheDocument();
+    expect(within(section).getByText((_, el) => el?.tagName === 'LI' && el.textContent === 'Promot: Box Toppers')).toBeInTheDocument();
+    expect(within(section).getByText((_, el) => el?.tagName === 'LI' && el.textContent === 'Turnauspalkinnot: Edgerunner Open S 1')).toBeInTheDocument();
   });
 
   it('a booster card has no notice, and an art outside the boosters is marked', async () => {

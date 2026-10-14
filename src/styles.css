@@ -5127,7 +5127,7 @@ section[aria-labelledby='have-heading'] {
   overflow-wrap: anywhere;
 }
 
-.availability-list {
+.card-dialog-details .availability-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -5137,6 +5137,11 @@ section[aria-labelledby='have-heading'] {
   color: var(--color-text-muted);
   font-size: 0.875rem;
   overflow-wrap: anywhere;
+}
+
+.availability-kind {
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 .art-breakdown .version-row {
