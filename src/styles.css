@@ -11138,3 +11138,51 @@ button.card-tag:focus-visible {
   overflow: hidden;
   font-size: var(--font-size-sm, 0.875rem);
 }
+
+/*
+ * Card details on large screens (T-167): the image follows the viewport height, so on a wide screen the details
+ * column was left small. The box uses the whole width and the details column grows with the screen.
+ */
+@media (min-width: 100rem) {
+  .card-dialog.has-details .card-dialog-body {
+    width: 100%;
+  }
+
+  .card-dialog.has-details .card-dialog-header,
+  .card-dialog.has-details .card-tags,
+  .card-dialog.has-details .card-dialog-details {
+    zoom: 1.2;
+  }
+}
+
+@media (min-width: 125rem) {
+  .card-dialog.has-details .card-dialog-header,
+  .card-dialog.has-details .card-tags,
+  .card-dialog.has-details .card-dialog-details {
+    zoom: 1.4;
+  }
+}
+
+@media (min-width: 160rem) {
+  .card-dialog.has-details .card-dialog-header,
+  .card-dialog.has-details .card-tags,
+  .card-dialog.has-details .card-dialog-details {
+    zoom: 1.6;
+  }
+}
+
+@media (min-width: 100rem) {
+  .card-dialog-details .art-thumb {
+    height: 8rem;
+  }
+}
+
+.availability-notice {
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.card-dialog-details .availability-list {
+  font-size: var(--font-size-sm);
+}

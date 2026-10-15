@@ -1,7 +1,7 @@
-# STATUS · päivitetty 2026-10-14 (PM)
+# STATUS · päivitetty 2026-10-15 (PM)
 
 ## Yhdellä lauseella
-Kaikki T-166:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
+Kaikki T-167:ään asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
 Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna: Testikäyttäjän ja UX:n katselmointi mobiilista sekä MVP-1:n loppukatselmoinnit (D-014).
@@ -47,6 +47,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-167 Kortin tietolaatikko luettavaksi isolla näytöllä (2026-10-15).
 - T-166 Kortin saatavuus tietolaatikossa: boostereissa vai ei, muut lähteet ryhmittäin ja kuvituksen "Ei boostereissa" -merkki (2026-10-14).
 - T-164 Pakkojen kokoaminen: pakanvaihto, yhteensopivuus ja Kokoa kaikki; T-165 QR-koodi jakolinkeille (2026-10-13).
 - T-158 Dependabot, T-160 V:n Iconic-kuvitukset eivät kuulu WNC-setteihin (2026-10-13).
