@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import type { Card } from '../domain/card';
 import type { DeckContent } from '../domain/deck';
@@ -37,6 +37,7 @@ import { getCardImage } from '../data/cardImages';
 import type { Repositories } from '../storage';
 import { CardName, cardNameText } from './CardName';
 import { goldfishTexts as t } from './goldfishTexts';
+import { sealedTexts } from './sealedTexts';
 import { deckTexts } from './deckTexts';
 
 /** A card picture of the table (hand, field, Legends). The image is decorative; text around it names the card. */
@@ -85,11 +86,14 @@ export function GoldfishView({
   cardsByKey,
   rng = Math.random,
   onBack,
+  backLabel = t.back,
 }: {
   deck: DeckContent;
   cardsByKey: CardsByKey;
   rng?: Rng;
   onBack: () => void;
+  /** The text of the way back; the default leads to the deck. */
+  backLabel?: string;
 }) {
   const [game, setGame] = useState<GoldfishState | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
@@ -147,7 +151,7 @@ export function GoldfishView({
         <p className="editor-crumb">
           <button type="button" className="link-button" onClick={onBack}>
             <span aria-hidden="true">← </span>
-            {t.back}
+            {backLabel}
           </button>
         </p>
         <h1 ref={headingRef} tabIndex={-1}>
@@ -166,7 +170,7 @@ export function GoldfishView({
       <p className="editor-crumb">
         <button type="button" className="link-button" onClick={onBack}>
           <span aria-hidden="true">← </span>
-          {t.back}
+          {backLabel}
         </button>
       </p>
       <h1 ref={headingRef} tabIndex={-1}>
@@ -613,6 +617,59 @@ export function GoldfishView({
   );
 }
 
+/** Loads the deck (null = it does not exist) and shows the solo play view for it. */
+function GoldfishLoadedPage({
+  load,
+  cards,
+  onBack,
+  backLabel,
+  missingText,
+  rng,
+}: {
+  load: () => Promise<DeckContent | null>;
+  cards: readonly Card[];
+  onBack: () => void;
+  backLabel: string;
+  missingText: string;
+  rng?: Rng;
+}) {
+  const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
+  const [state, setState] = useState<{ phase: 'loading' | 'not-found' | 'unavailable' } | { phase: 'ready'; deck: DeckContent }>({
+    phase: 'loading',
+  });
+  useEffect(() => {
+    let active = true;
+    load().then(
+      (deck) => {
+        if (!active) return;
+        setState(deck === null ? { phase: 'not-found' } : { phase: 'ready', deck });
+      },
+      () => active && setState({ phase: 'unavailable' }),
+    );
+    return () => {
+      active = false;
+    };
+  }, [load]);
+
+  if (state.phase === 'ready') return <GoldfishView deck={state.deck} cardsByKey={cardsByKey} rng={rng} onBack={onBack} backLabel={backLabel} />;
+  return (
+    <section className="goldfish">
+      <h1>{state.phase === 'loading' ? t.loading : deckTexts.listHeading}</h1>
+      {state.phase !== 'loading' && (
+        <div className="notice notice-danger" role="alert">
+          <p>{state.phase === 'not-found' ? missingText : t.unavailable}</p>
+        </div>
+      )}
+      <p className="editor-crumb">
+        <button type="button" className="link-button" onClick={onBack}>
+          <span aria-hidden="true">← </span>
+          {backLabel}
+        </button>
+      </p>
+    </section>
+  );
+}
+
 /** The route page: loads the stored deck and shows the solo play view for it. */
 export function GoldfishDeckPage({
   deckId,
@@ -627,39 +684,32 @@ export function GoldfishDeckPage({
   onBack: () => void;
   rng?: Rng;
 }) {
-  const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
-  const [state, setState] = useState<{ phase: 'loading' | 'not-found' | 'unavailable' } | { phase: 'ready'; deck: DeckContent }>({
-    phase: 'loading',
-  });
-  useEffect(() => {
-    let active = true;
-    repository.get(deckId).then(
-      (deck) => {
-        if (!active) return;
-        setState(deck === null ? { phase: 'not-found' } : { phase: 'ready', deck: { name: deck.name, sections: deck.sections } });
-      },
-      () => active && setState({ phase: 'unavailable' }),
-    );
-    return () => {
-      active = false;
-    };
+  const load = useCallback(async () => {
+    const deck = await repository.get(deckId);
+    return deck === null ? null : { name: deck.name, sections: deck.sections };
   }, [repository, deckId]);
+  return <GoldfishLoadedPage load={load} cards={cards} onBack={onBack} backLabel={t.back} missingText={t.notFound} rng={rng} />;
+}
 
-  if (state.phase === 'ready') return <GoldfishView deck={state.deck} cardsByKey={cardsByKey} rng={rng} onBack={onBack} />;
-  return (
-    <section className="goldfish">
-      <h1>{state.phase === 'loading' ? t.loading : deckTexts.listHeading}</h1>
-      {state.phase !== 'loading' && (
-        <div className="notice notice-danger" role="alert">
-          <p>{state.phase === 'not-found' ? t.notFound : t.unavailable}</p>
-        </div>
-      )}
-      <p className="editor-crumb">
-        <button type="button" className="link-button" onClick={onBack}>
-          <span aria-hidden="true">← </span>
-          {t.back}
-        </button>
-      </p>
-    </section>
-  );
+/** The route page of the running sealed (T-173): the Legends and the main deck as built so far. */
+export function GoldfishSealedPage({
+  cards,
+  repository,
+  onBack,
+  rng,
+}: {
+  cards: readonly Card[];
+  repository: Repositories['sealed'];
+  onBack: () => void;
+  rng?: Rng;
+}) {
+  const load = useCallback(async () => {
+    const { value: run } = await repository.load();
+    if (run === null) return null;
+    return {
+      name: sealedTexts.soloName,
+      sections: [{ name: '', cards: [...run.legends.map((card) => ({ card, count: 1 })), ...run.main] }],
+    };
+  }, [repository]);
+  return <GoldfishLoadedPage load={load} cards={cards} onBack={onBack} backLabel={sealedTexts.soloBack} missingText={sealedTexts.soloMissing} rng={rng} />;
 }

@@ -11643,3 +11643,464 @@ button.card-tag:focus-visible {
     transition: opacity 0.15s ease-out;
   }
 }
+
+/*
+ * Sealed and virtual boosters (T-173). A pack slot keeps one size whether its card is face down or turned (the art box
+ * has a fixed shape and the text under it a minimum height), and the buttons below have a minimum width, so nothing moves
+ * when a card turns. No inner scroll: the pool and the deck grow with the page.
+ */
+.sealed {
+  --rar-common: #8b93a7;
+  --rar-uncommon: #2fbf71;
+  --rar-rare: #19b5d9;
+  --rar-epic: #a855f7;
+  --rar-iconic: #e6c800;
+  --rar-secret: #ff2a6d;
+  display: grid;
+  gap: var(--space-4);
+  min-inline-size: 0;
+  align-content: start;
+}
+
+.sealed h2,
+.sealed h3 {
+  margin: 0;
+}
+
+.sealed-step-of {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal, 400);
+}
+
+.sealed-intro,
+.sealed-rules,
+.sealed-estimate {
+  margin: 0;
+}
+
+.sealed-rules {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.sealed-start {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  .sealed-start {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+.sealed-start-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.sealed-start-card > p {
+  margin: 0;
+}
+
+.sealed-start-card > button {
+  justify-self: start;
+  min-inline-size: 12rem;
+}
+
+.sealed-single-stats {
+  display: grid;
+  align-content: start;
+  min-block-size: 3.2em;
+}
+
+/* Packs */
+.pack {
+  display: grid;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.pack-grid,
+.pool-grid {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pack-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 34rem) {
+  .pack-grid {
+    grid-template-columns: repeat(4, minmax(0, 12rem));
+    justify-content: start;
+  }
+}
+
+@media (min-width: 56rem) {
+  .pack-grid {
+    grid-template-columns: repeat(6, minmax(0, 12rem));
+  }
+}
+
+.pack-slot {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: start;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.pack-art {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  aspect-ratio: 360 / 503;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+}
+
+.pack-back {
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(135deg, var(--color-surface) 0 0.6rem, var(--color-surface-raised) 0.6rem 1.2rem);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+}
+
+.pack-back--next {
+  border-color: var(--color-accent-2);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.pack-back--next:hover {
+  border-color: var(--color-accent);
+}
+
+.pack-meta {
+  display: grid;
+  align-content: start;
+  gap: 0.125rem;
+  min-block-size: 4.6rem;
+  min-inline-size: 0;
+}
+
+.pack-face-name {
+  font-size: var(--font-size-sm);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.booster-picture {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.booster-picture-missing {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  padding: var(--space-2);
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.pack-actions,
+.sealed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.pack-actions > button,
+.sealed-actions > button {
+  min-inline-size: 13rem;
+}
+
+.pack-progress {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Rarity frames: the colour never carries the rarity alone, the symbol and name sit under the card. */
+.rarity-common { border-color: var(--rar-common); }
+.rarity-uncommon { border-color: var(--rar-uncommon); }
+.rarity-rare { border-color: var(--rar-rare); }
+.rarity-epic { border-color: var(--rar-epic); box-shadow: 0 0 0.75rem color-mix(in srgb, var(--rar-epic) 55%, transparent); }
+.rarity-iconic { border-color: var(--rar-iconic); box-shadow: 0 0 0.9rem color-mix(in srgb, var(--rar-iconic) 60%, transparent); }
+.rarity-secret { border-color: var(--rar-secret); box-shadow: 0 0 0.9rem color-mix(in srgb, var(--rar-secret) 60%, transparent); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pack-art--fresh {
+    animation: pack-turn 0.45s ease-out;
+  }
+
+  .pack-art--fresh.rarity-epic,
+  .pack-art--fresh.rarity-iconic,
+  .pack-art--fresh.rarity-secret {
+    animation: pack-turn 0.45s ease-out, pack-flash 1.1s ease-out;
+  }
+}
+
+@keyframes pack-turn {
+  from {
+    transform: perspective(40rem) rotateY(90deg);
+  }
+  to {
+    transform: perspective(40rem) rotateY(0deg);
+  }
+}
+
+@keyframes pack-flash {
+  from {
+    filter: brightness(1.8) saturate(1.4);
+  }
+  to {
+    filter: none;
+  }
+}
+
+/* Builder */
+.sealed-saved {
+  margin: 0;
+  min-block-size: 1.6em;
+}
+
+.sealed-save-note {
+  margin: 0;
+}
+
+.sealed-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.sealed-status > div {
+  display: grid;
+  align-content: start;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  min-inline-size: 0;
+}
+
+.sealed-status dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.sealed-status dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.sealed-status dd:first-of-type {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+}
+
+.sealed-status-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  min-block-size: 1.4em;
+}
+
+.sealed-issues {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-block-size: 5.5em;
+}
+
+.sealed-issues li {
+  color: var(--color-warning);
+}
+
+.sealed-issues .sealed-ok {
+  color: var(--color-success);
+}
+
+.sealed-block {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  min-inline-size: 0;
+}
+
+.sealed-block > p {
+  margin: 0;
+}
+
+.sealed-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.sealed-layout {
+  display: grid;
+  gap: var(--space-6);
+  min-inline-size: 0;
+}
+
+@media (min-width: 64rem) {
+  .sealed-layout {
+    grid-template-columns: minmax(0, 1fr) 24rem;
+    align-items: start;
+  }
+}
+
+.pool-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(7.5rem, 100%), 1fr));
+}
+
+.pool-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.pool-card-button {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  aspect-ratio: 360 / 503;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: inherit;
+  cursor: pointer;
+}
+
+.pool-card-button:hover:not(:disabled) {
+  border-color: var(--color-accent-2);
+}
+
+.pool-card-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pool-card.is-chosen .pool-card-button {
+  border-color: var(--color-accent);
+  box-shadow: var(--glow-accent);
+}
+
+.pool-card-name {
+  min-block-size: 2.6em;
+  font-size: var(--font-size-sm);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.pool-card-count {
+  min-block-size: 1.4em;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.sealed-deck-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sealed-deck-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+  padding-block: var(--space-1);
+}
+
+.sealed-deck-count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.sealed-deck-name {
+  display: grid;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.sealed-deck-meta {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* The four tabs of the Pakat page and the set choice do not fit one row on a phone: two by two, and one under another. */
+@media (max-width: 39.99rem) {
+  .decks-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .decks-tabs > .segmented-option {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .decks-tabs > .segmented-option:nth-child(2n + 1) {
+    border-inline-start: 0;
+  }
+
+  .decks-tabs > .segmented-option:nth-child(n + 3) {
+    border-block-start: 2px solid var(--color-border-strong);
+  }
+
+  .sealed-set-choice .segmented,
+  .sealed-filters .segmented {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
+    inline-size: 100%;
+  }
+
+  .sealed-set-choice .segmented-option {
+    white-space: normal;
+  }
+
+  .sealed-set-choice .segmented-option + .segmented-option {
+    border-inline-start: 0;
+    border-block-start: 2px solid var(--color-border-strong);
+  }
+
+  .sealed-set-choice .segmented {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
