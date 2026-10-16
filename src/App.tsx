@@ -23,6 +23,7 @@ import type { PublicDecksApi } from './ui/PublicDecksContext';
 import { deckTexts } from './ui/deckTexts';
 import { sectionOf, useHashRoute } from './ui/useHashRoute';
 import { texts } from './ui/texts';
+import { GoldfishDeckPage } from './ui/GoldfishView';
 import { LanguageSwitch } from './ui/LanguageSwitch';
 import { ThemeToggle } from './ui/ThemeToggle';
 import { AccountMenu } from './ui/AccountMenu';
@@ -131,6 +132,7 @@ export function App({
                 route.name === 'share' ||
                 route.name === 'publicDecks' ||
                 route.name === 'deckBuild' ||
+                route.name === 'goldfish' ||
                 route.name === 'publicDeck'
                   ? 'page'
                   : undefined
@@ -210,6 +212,15 @@ export function App({
             repositories={openRepositories}
             onBack={() => navigate({ name: 'decks' })}
             onOpenDeck={(id) => navigate({ name: 'deck', id })}
+          />
+        )}
+        {route.name === 'goldfish' && (
+          <GoldfishDeckPage
+            key={route.id}
+            deckId={route.id}
+            cards={cards}
+            repository={openRepositories.decks}
+            onBack={() => navigate({ name: 'deck', id: route.id })}
           />
         )}
         {route.name === 'share' && (
