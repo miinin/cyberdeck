@@ -163,6 +163,7 @@ export const deckTextsEn: typeof deckTextsFi = {
   owned: (have: number, need: number) => `you own ${have}/${need}`,
   missingBadge: 'missing',
   missingCount: (count: number) => `missing ${count}`,
+  ownedBadge: (count: number) => `You own ${count}`,
   inDeckBadge: (count: number) => `${count} in deck`,
   curveHeading: 'Cost curve',
   curveCaption: 'Main deck cards by Cost',

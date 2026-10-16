@@ -169,6 +169,8 @@ export const deckTextsFi = {
   owned: (have: number, need: number) => `omistat ${have}/${need}`,
   missingBadge: 'puuttuu',
   missingCount: (count: number) => `puuttuu ${count}`,
+  /** Search result: copies of the card in the collection (UX-09, T-174). */
+  ownedBadge: (count: number) => `Omistat ${count}`,
   /** Small badge on a search result: copies already in the deck. */
   inDeckBadge: (count: number) => `${count} pakassa`,
   curveHeading: 'Kustannuskäyrä',

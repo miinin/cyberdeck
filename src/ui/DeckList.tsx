@@ -152,6 +152,20 @@ export function DeckList({
     );
   };
 
+  const moveButton = (card: Card, extraClass: string) =>
+    onMoveToSideboard !== undefined && card.type !== 'Legend' ? (
+      // The same action as the list row's button: the deck column always moves a copy (T-118, UX-118-24).
+      <button
+        type="button"
+        className={`tile-action${extraClass}`}
+        aria-label={deckTexts.moveToSideboard(card.displayName)}
+        title={deckTexts.moveToSideboardTitle}
+        onClick={() => onMoveToSideboard(card)}
+      >
+        {deckTexts.moveToSideboardShort}
+      </button>
+    ) : null;
+
   /** `controls`: the stepper under the card, for the few cards shown side by side (Legends). */
   const renderStackCard = (row: DeckRow, controls = false) => {
     // In the cards view every card shows whole with its stepper under it (T-115).
@@ -184,23 +198,14 @@ export function DeckList({
           </span>
           {problemsOf(card) !== undefined && <ProblemFlag problems={problemsOf(card) ?? []} />}
         </button>
+        {/* UX-25 (T-174): the move button is on the card's own control row, or on the label strip of an overlapped card, never loose under the stack. */}
         {controls && (
           <div className="stack-card-actions">
             <Stepper name={card.displayName} count={count} showCount={false} onChange={(next) => onChange(card, next)} />
+            {moveButton(card, '')}
           </div>
         )}
-        {onMoveToSideboard !== undefined && card.type !== 'Legend' && (
-          // The same action as the list row's button: the deck column always moves a copy (T-118, UX-118-24).
-          <button
-            type="button"
-            className="tile-action"
-            aria-label={deckTexts.moveToSideboard(card.displayName)}
-            title={deckTexts.moveToSideboardTitle}
-            onClick={() => onMoveToSideboard(card)}
-          >
-            {deckTexts.moveToSideboardShort}
-          </button>
-        )}
+        {!controls && moveButton(card, ' stack-card-move')}
       </li>
     );
   };

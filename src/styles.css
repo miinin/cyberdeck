@@ -1017,6 +1017,8 @@ main {
   .card-filters .fieldsets {
     display: flex;
     flex-wrap: wrap;
+    /* UX-22 (T-174): each group starts under its own title, not stretched to the tallest one. */
+    align-items: flex-start;
     /* Row gap + the fieldset margin = --space-3, as when stacked. */
     gap: var(--space-1) var(--space-6);
   }
@@ -3251,6 +3253,40 @@ h3,
   color: var(--color-text-muted);
 }
 
+/* UX-23 (T-174): a fixed badge width, so the colour word starts in the same place in every row. */
+.pick-table .col-type .type-badge {
+  display: inline-block;
+  min-inline-size: 6.25rem;
+  text-align: center;
+}
+
+/* UX-09 (T-174): "Omistat N" on a result: the same size in every row, so nothing moves. */
+.pick-owned {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+}
+
+.pick-notes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  /* One line of 0.875rem text (line-height 1.25) stays reserved, empty or not. */
+  min-block-size: 1.1875rem;
+}
+
+.pick-notes .pick-owned,
+.pick-notes .pick-blocked {
+  display: inline;
+  margin: 0;
+}
+
+.pick-image > .pick-notes {
+  margin-block-start: var(--space-1);
+}
+
 /* Dimmed = adding breaks a rule: only the image and the name fade, buttons and text keep their contrast. */
 .pick-table tr.is-dimmed .col-image,
 .pick-table tr.is-dimmed .pick-name {
@@ -3270,10 +3306,6 @@ h3,
 
 .pick-image.is-dimmed .pick-image-button {
   opacity: 0.55;
-}
-
-.pick-image.is-dimmed .pick-blocked {
-  margin-block-start: var(--space-1);
 }
 
 .cost-gem {
@@ -3945,7 +3977,8 @@ button.legality:focus-visible {
 /* Pinot: each type a column of overlapping cards; only the top of each card shows until hovered. */
 .deck-stacks {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  /* UX-25 (T-174): wide enough for "GREEN · UNIT (33)" on one line, and the groups fill the column. */
+  grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
   gap: var(--space-4) var(--space-3);
 }
 
@@ -3985,6 +4018,22 @@ button.legality:focus-visible {
 }
 
 /* The name is at the bottom of the printed card, so each card in the stack gets a label on top. */
+/* UX-25 (T-174): "→ SB" of an overlapped card sits on its label strip, left of the count. */
+.stack-card > .stack-card-move {
+  position: absolute;
+  top: 2px;
+  right: 2.75rem;
+  z-index: 1;
+  block-size: 1.5rem;
+  min-inline-size: 0;
+  padding-inline: var(--space-1);
+  font-size: 0.75rem;
+}
+
+.stack-card:has(> .stack-card-move) .stack-card-name {
+  padding-inline-end: 5.25rem;
+}
+
 .stack-card-name {
   position: absolute;
   inset: 0 0 auto;
@@ -10509,6 +10558,29 @@ main:has(.mark-banner) {
     line-clamp: 2;
     white-space: normal;
     line-height: 1.2;
+  }
+
+  /*
+   * UX-05 (T-174): the name gets the whole row (the controls had left it about 60 px, so names broke mid-word); the
+   * count, − / + and the move button sit on a row of their own under it, with the notes on the left.
+   */
+  .deck-tile,
+  .deck-tile.is-missing,
+  .deck-tile.is-problem {
+    grid-template-areas:
+      'gem name name name name'
+      'gem miss count step move';
+    padding-block: var(--space-1);
+    row-gap: 2px;
+  }
+
+  .deck-tile .deck-tile-notes {
+    grid-area: miss;
+  }
+
+  .deck-tile-name {
+    overflow-wrap: break-word;
+    word-break: normal;
   }
 }
 

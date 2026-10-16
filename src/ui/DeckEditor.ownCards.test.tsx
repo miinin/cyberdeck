@@ -40,3 +40,34 @@ describe('Deck editor: a copy with own cards (T-121)', () => {
     expect(screen.queryByRole('button', { name: 'Tee kopio omilla korteilla' })).toBeNull();
   });
 });
+
+describe('Deck editor: the collection filter of the results (UX-09, T-174)', () => {
+  const setup = () =>
+    createMemoryRepositories({
+      initial: {
+        ...storedDecks([{ id: 'a', name: 'Oma pakka', cards: [['u0', 1]] }]),
+        ...storedCollection([['u1', 2], ['u2', 1]]),
+      },
+    });
+
+  it('stays on "Kaikki" by default and shows how many copies are owned on each result', async () => {
+    renderRoute('#/pakat/a', setup());
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    expect(await screen.findByRole('radio', { name: 'Kaikki' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Omistetut' })).not.toBeChecked();
+    expect((await screen.findAllByText('Omistat 2')).length).toBeGreaterThan(0);
+  });
+
+  it('shows only the owned cards with "Omistetut" and clears the choice with its chip', async () => {
+    const user = userEvent.setup();
+    renderRoute('#/pakat/a', setup());
+    await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    const total = 3 + 14 + 1;
+    expect(await screen.findByText(`${total} / ${total} korttia`)).toBeInTheDocument();
+    await user.click(await screen.findByRole('radio', { name: 'Omistetut' }));
+    expect(await screen.findByText(`2 / ${total} korttia`)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Tyhjennä haku ja suodattimet/ }));
+    expect(await screen.findByText(`${total} / ${total} korttia`)).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Kaikki' })).toBeChecked();
+  });
+});

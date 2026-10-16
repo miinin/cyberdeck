@@ -48,8 +48,11 @@ export function DeckPickTable({
   onOpenImage,
   clickAdds,
   hoverProps,
+  ownedOf,
 }: {
   cards: readonly Card[];
+  /** Copies in the collection (UX-09); null leaves the "Omistat N" line out (collection not ready). */
+  ownedOf?: (card: Card) => number | null;
   countOf: (card: Card) => number;
   blockerOf: (card: Card) => PickBlocker | null;
   onChange: (card: Card, count: number) => void;
@@ -119,11 +122,15 @@ export function DeckPickTable({
                   </span>
                 )}
                 <span className="pick-meta">{cardMeta(card)}</span>
-                {blocker !== null && (
-                  <span className="pick-blocked" aria-hidden="true" title={blocker.reason}>
-                    ⚠ {blocker.short}
-                  </span>
-                )}
+                {/* One line is always reserved, so a blocked mark does not make the row grow (UX-24, T-174). */}
+                <span className="pick-notes">
+                  {ownedOf?.(card) != null && <span className="pick-owned">{deckTexts.ownedBadge(ownedOf(card) ?? 0)}</span>}
+                  {blocker !== null && (
+                    <span className="pick-blocked" aria-hidden="true" title={blocker.reason}>
+                      ⚠ {blocker.short}
+                    </span>
+                  )}
+                </span>
               </th>
               <td className="col-type">
                 <span className={typeBadgeClass(card.color)} lang="en">

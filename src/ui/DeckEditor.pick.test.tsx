@@ -260,10 +260,10 @@ describe('Deck editor result picker', () => {
     expect(plain).not.toHaveTextContent('⚠');
   });
 
-  it('shows the image size choice only in the Kuvat view', async () => {
+  it('keeps the image size choice in place, greyed out outside the Kuvat view (UX-01, T-174)', async () => {
     await openEditor([]);
-    expect(screen.queryByRole('group', { name: 'Kuvakoko' })).not.toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Kuvakoko' })).toBeDisabled();
     fireEvent.click(screen.getByRole('radio', { name: 'Kuvat' }));
-    expect(screen.getByRole('group', { name: 'Kuvakoko' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Kuvakoko' })).toBeEnabled();
   });
 });
