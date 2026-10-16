@@ -131,6 +131,19 @@ describe('Sealed tab (T-173)', () => {
     });
   });
 
+  it('groups the pool by type under a heading with the number of copies (T-174)', async () => {
+    const { user } = renderView();
+    await openAllPacks(user);
+    const pool = screen.getByRole('region', { name: 'Pooli' });
+    const headings = within(pool).getAllByRole('heading', { level: 4 }).map((heading) => heading.textContent ?? '');
+    expect(headings.length).toBeGreaterThan(0);
+    expect(headings.every((text) => /^(Unit|Gear|Program) \(\d+\)$/.test(text))).toBe(true);
+    const copies = headings.reduce((sum, text) => sum + Number(/\((\d+)\)/.exec(text)?.[1] ?? 0), 0);
+    // 6 boosters of 12 cards; the Legends (also from boosters) have their own section.
+    expect(copies).toBeGreaterThan(40);
+    expect(copies).toBeLessThanOrEqual(72);
+  });
+
   it('never moves more copies into the deck than the pool holds', async () => {
     const { user, repositories } = renderView();
     await openAllPacks(user);

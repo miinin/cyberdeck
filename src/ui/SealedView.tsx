@@ -456,28 +456,40 @@ function SealedBuilder({
           {visible.length === 0 ? (
             <p>{t.poolEmpty}</p>
           ) : (
-            <ul className="pool-grid">
-              {visible.map(({ entry, card, count }) => {
-                const free = freeCopies(run, card.key);
-                return (
-                  <li key={card.key} className={free < 1 ? 'pool-card is-used' : 'pool-card'}>
-                    <button
-                      type="button"
-                      className="pool-card-button"
-                      disabled={free < 1}
-                      onClick={() => change((current) => addToMain(current, card.key, false))}
-                    >
-                      <BoosterPicture entry={entry} card={card} />
-                      <span className="visually-hidden">{t.addToDeck(cardNameText(card))}</span>
-                    </button>
-                    <span className="pool-card-name" aria-hidden="true">
-                      <CardName card={card} />
-                    </span>
-                    <span className="pool-card-count">{t.poolLeft(free, count)}</span>
-                  </li>
-                );
-              })}
-            </ul>
+            // T-173 review (T-174): by type, so the pool reads as a few short lists and not one endless grid.
+            TYPES.map((groupType) => {
+              const group = visible.filter((row) => row.card.type === groupType);
+              if (group.length === 0) return null;
+              return (
+                <div key={groupType} className="pool-group">
+                  <h4 className="pool-group-title" lang="en">
+                    {groupType} ({group.reduce((sum, row) => sum + row.count, 0)})
+                  </h4>
+                  <ul className="pool-grid">
+                    {group.map(({ entry, card, count }) => {
+                      const free = freeCopies(run, card.key);
+                      return (
+                        <li key={card.key} className={free < 1 ? 'pool-card is-used' : 'pool-card'}>
+                          <button
+                            type="button"
+                            className="pool-card-button"
+                            disabled={free < 1}
+                            onClick={() => change((current) => addToMain(current, card.key, false))}
+                          >
+                            <BoosterPicture entry={entry} card={card} />
+                            <span className="visually-hidden">{t.addToDeck(cardNameText(card))}</span>
+                          </button>
+                          <span className="pool-card-name" aria-hidden="true">
+                            <CardName card={card} />
+                          </span>
+                          <span className="pool-card-count">{t.poolLeft(free, count)}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })
           )}
         </section>
 

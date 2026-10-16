@@ -3942,8 +3942,10 @@ button.legality:focus-visible {
   grid-area: gem;
 }
 
+/* UX-32c (T-174): at least 24 px high (WCAG 2.5.8). */
 .deck-tile-name {
   grid-area: name;
+  min-block-size: 1.5rem;
   min-width: 0;
   overflow: hidden;
   padding: 0;
@@ -6081,7 +6083,7 @@ section[aria-labelledby='have-heading'] {
  * inside. Type colours: Unit yellow, Program cyan, Gear magenta, other grey.
  */
 .deck-stats {
-  --seg-unit: var(--color-brand-yellow);
+  --seg-unit: #e8e8e2; /* UX-32b (T-174): not yellow, which is a card colour */
   --seg-program: var(--color-info);
   --seg-gear: var(--color-accent-2);
   --seg-other: var(--color-text-muted);
@@ -6739,7 +6741,7 @@ section[aria-labelledby='have-heading'] {
 }
 
 :root[data-theme='light'] .deck-stats {
-  --seg-unit: #b38f00;
+  --seg-unit: #2f3440;
   --seg-program: #00728a;
   --seg-gear: #6d4fb0; /* T-101 */
 }
@@ -11050,14 +11052,14 @@ button.card-tag:focus-visible {
  * achievement badges) use them too. The deck statistics still set their own, the same values.
  */
 :root {
-  --seg-unit: var(--color-brand-yellow);
+  --seg-unit: #e8e8e2; /* UX-32b (T-174): not yellow, which is a card colour */
   --seg-program: #1fe0ff;
   --seg-gear: #9d7fd6;
   --seg-other: var(--color-text-muted);
 }
 
 :root[data-theme='light'] {
-  --seg-unit: #b38f00;
+  --seg-unit: #2f3440;
   --seg-program: #00728a;
   --seg-gear: #6d4fb0;
 }
@@ -11231,8 +11233,9 @@ button.card-tag:focus-visible {
   white-space: nowrap;
 }
 
-.build-table {
-  max-inline-size: 56rem;
+/* UX-29 (T-174): as wide as the compatibility table above it, and the "Kortti" heading is aligned like the names below it. */
+.build-table th[scope='col']:first-child {
+  text-align: start;
 }
 
 .build-table th[scope='row'] {
@@ -11418,6 +11421,13 @@ button.card-tag:focus-visible {
   font-size: 1rem;
   border-bottom: 1px solid #000;
   margin-bottom: 0.25rem;
+}
+
+/* UX-28 (T-174): a long name that wraps stays beside its count (a hanging indent), not under it. */
+.tournament-group li {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  column-gap: 0.25rem;
 }
 
 .tournament-group ul {
@@ -12294,4 +12304,80 @@ body:has(.mark-banner) .site-footer {
 
 :root[data-theme='light'] .progress-row.progress-color.type-badge-yellow .progress-fill {
   box-shadow: inset 0 0 0 1px var(--color-text);
+}
+
+/*
+ * UX-27 (T-174): the order choice of the Proxy picker on a phone: the label on its own row, the two selects side by side 50/50
+ * (they used to wrap one by one, ragged).
+ */
+@media (max-width: 39.99rem) {
+  .proxy-results-bar .sort-select {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    inline-size: 100%;
+    margin-block-end: 0;
+  }
+
+  .proxy-results-bar .sort-select label {
+    grid-column: 1 / -1;
+  }
+
+  .proxy-results-bar .sort-select select {
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+}
+
+/* UX-26 (T-174): in a Proxy picker box the control is pushed to the bottom, so it is level across a row however many lines the name takes. */
+.proxy-pick .card-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.proxy-pick .card-box > .card-foot {
+  margin-block-start: auto;
+}
+
+/* UX-32d (T-174): in the card list on a phone the subtitle goes under the name instead of into a second column beside it. */
+@media (max-width: 39.99rem) {
+  .card-table .cell-name .link-button {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+}
+
+/*
+ * T-173 review (T-174): the sealed pool on a phone. Three cards across instead of two (the pool was about 9000 px long at
+ * 320 px), grouped by type under a heading, the count on one line.
+ */
+.pool-group + .pool-group {
+  margin-block-start: var(--space-4);
+}
+
+.pool-group-title {
+  margin-block: 0 var(--space-2);
+}
+
+.pool-card-count {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 39.99rem) {
+  .pool-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .pool-card-name {
+    min-block-size: 2.6em;
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+
+  .pool-card-count {
+    font-size: 0.75rem;
+  }
 }
