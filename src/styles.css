@@ -2261,6 +2261,7 @@ body:has(dialog[open]) {
 }
 
 .deck-rename input,
+.deck-name-field textarea,
 .deck-name-field input {
   width: 100%;
   block-size: var(--target-min);
@@ -2275,11 +2276,13 @@ body:has(dialog[open]) {
 }
 
 .deck-rename input:hover,
+.deck-name-field textarea:hover,
 .deck-name-field input:hover {
   border-color: var(--color-info);
 }
 
 .deck-rename input:focus-visible,
+.deck-name-field textarea:focus-visible,
 .deck-name-field input:focus-visible {
   border-color: var(--color-info);
   outline: var(--focus-ring);
@@ -2287,6 +2290,7 @@ body:has(dialog[open]) {
 }
 
 .deck-rename input[aria-invalid='true'],
+.deck-name-field textarea[aria-invalid='true'],
 .deck-name-field input[aria-invalid='true'] {
   border-color: var(--color-danger);
 }
@@ -2494,7 +2498,8 @@ h3,
 }
 
 /* The name reads as the page title and turns into a field on hover and focus. */
-.editor-name-field input {
+.editor-name-field input,
+.editor-name-field textarea {
   min-width: 0;
   padding-inline: var(--space-2);
   border-color: transparent;
@@ -2507,9 +2512,23 @@ h3,
   text-transform: uppercase;
 }
 
-.editor-name-field input:focus-visible {
+.editor-name-field input:focus-visible,
+.editor-name-field textarea:focus-visible {
   background: var(--color-surface-raised);
   text-transform: none;
+}
+
+/* UX-21 (T-174): a one-line field that wraps and grows (autosized in the editor), no ellipsis. */
+.editor-name-field textarea {
+  inline-size: 100%;
+  block-size: auto;
+  min-block-size: var(--target-min);
+  padding-block: var(--space-1);
+  overflow: hidden;
+  line-height: var(--line-height-heading);
+  overflow-wrap: anywhere;
+  resize: none;
+  text-overflow: clip;
 }
 
 .editor-tools {
@@ -9651,6 +9670,7 @@ html[data-gallery='on'] main {
   }
 }
 
+/* UX-20 (T-174): the same button text as every other secondary button: bold capitals (it was lower case). */
 .gallery-btn {
   display: inline-flex;
   align-items: center;
@@ -9663,6 +9683,9 @@ html[data-gallery='on'] main {
   background: transparent;
   color: var(--color-text);
   font: inherit;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-button);
+  text-transform: uppercase;
   cursor: pointer;
 }
 
@@ -10353,13 +10376,32 @@ main .field input[type='text'] {
 }
 
 .trade-share .trade-share-link {
-  flex: 1 1 auto;
+  flex: 1 1 12rem;
   min-inline-size: 0;
   max-width: none;
   block-size: 2.5rem;
   margin: 0;
+  padding: 0 var(--space-3);
+  /* UX-18 (T-174): the app's own field look (the browser default was Arial on grey). */
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  background: var(--color-surface-raised);
+  font: inherit;
   font-size: var(--font-size-sm);
+  text-overflow: ellipsis;
   color: var(--color-text-muted);
+}
+
+.trade-share .trade-share-link:hover,
+.trade-share .trade-share-link:focus-visible {
+  border-color: var(--color-info);
+  color: var(--color-text);
+}
+
+.trade-share .trade-share-link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .trade-share .button-secondary {

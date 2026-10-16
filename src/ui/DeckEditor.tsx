@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { Deck, DeckContent, DeckPublish } from '../domain/deck';
@@ -139,6 +139,19 @@ export function DeckEditor({
   const [content, setContent] = useState<DeckContent>({ name: '', sections: [] });
   const contentRef = useRef(content);
   const [nameText, setNameText] = useState('');
+  const nameFieldRef = useRef<HTMLTextAreaElement>(null);
+  // UX-21 (T-174): the name field grows with its text, so a long name is never cut off.
+  useLayoutEffect(() => {
+    const grow = () => {
+      const field = nameFieldRef.current;
+      if (field === null) return;
+      field.style.blockSize = 'auto';
+      field.style.blockSize = `${field.scrollHeight}px`;
+    };
+    grow();
+    window.addEventListener('resize', grow);
+    return () => window.removeEventListener('resize', grow);
+  }, [nameText]);
   // Publishing settings (T-098) live in the stored deck, not in the content the autosave writes.
   const [publish, setPublish] = useState<DeckPublish | undefined>(undefined);
   const publishRef = useRef<DeckPublish | undefined>(undefined);
@@ -634,7 +647,9 @@ export function DeckEditor({
     return { reason: deckTexts.dimmedHint(info.message), short };
   };
 
-  const handleName = (text: string) => {
+  const handleName = (rawText: string) => {
+    // A name is one line: a pasted line break becomes a space.
+    const text = rawText.replace(/\s*[\r\n]+\s*/g, ' ');
     setNameText(text);
     const result = checkDeckName(text);
     if (!result.ok) {
@@ -806,14 +821,19 @@ export function DeckEditor({
             <label htmlFor="deck-name" className="visually-hidden">
               {deckTexts.nameLabel}
             </label>
-            <input
+            <textarea
               id="deck-name"
-              type="text"
+              ref={nameFieldRef}
+              rows={1}
+              spellCheck={false}
               maxLength={MAX_DECK_NAME_LENGTH}
               value={nameText}
               aria-invalid={nameError !== null ? 'true' : undefined}
               aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
               onChange={(event) => handleName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') event.preventDefault();
+              }}
             />
             <p id="deck-name-hint" className="visually-hidden">
               {deckTexts.nameHint}
