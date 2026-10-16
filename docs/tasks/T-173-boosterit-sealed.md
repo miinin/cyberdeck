@@ -28,3 +28,6 @@
 - Digiturva katselmoi: tallennus (uusi avain, validointi luettaessa).
 - Huomio: kerran koko sarjassa vilkkui DeckEditor.conflict-testi (ei liity tähän), uusinta meni läpi.
 Koodikatselmointi: tehty · Pakollisia korjattu 2 (deck-nimen rivitys, 320 px:n välilehtien ylivuoto) · Suosituksia 1 (pooli 320 px:llä pitkä, 2 saraketta)
+
+## Digiturva · Katselmointi 2026-10-17
+Raportti `docs/reports/SEC-T172-T173.md` (kattaa myös T-172). Critical 0, High 0, Medium 0, Low 0, Info 4. Ei vetoa, ei koodikorjauksia. PRIVACY.md rivi 1f ja SECURITY.md luku 20 päivitetty.
