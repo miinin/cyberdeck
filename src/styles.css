@@ -11310,3 +11310,8 @@ button.card-tag:focus-visible {
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+
+/* Deck view choice on top of the deck column (T-171): nothing above it changes height when the view changes. */
+.deck-view-choice {
+  margin-block-end: var(--space-3);
+}

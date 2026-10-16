@@ -207,6 +207,17 @@ export function DeckList({
 
   return (
     <>
+      {/* First, above the Legends: the Legends change height with the view, so the choice never moves under the pointer. */}
+      <div className="deck-view-choice">
+        <SegmentedChoice
+          legend={deckTexts.deckViewLegend}
+          name="deck-view"
+          value={view}
+          options={DECK_VIEW_OPTIONS}
+          onChange={onViewChange}
+        />
+      </div>
+
       <div className="deck-section">
         <div className="deck-headline">
           <h2 className="deck-section-title">
@@ -248,13 +259,6 @@ export function DeckList({
             </h2>
             <SectionFlag problem={problems?.mainSection ?? null} />
           </div>
-          <SegmentedChoice
-            legend={deckTexts.deckViewLegend}
-            name="deck-view"
-            value={view}
-            options={DECK_VIEW_OPTIONS}
-            onChange={onViewChange}
-          />
         </div>
         {grouped.groups.length === 0 && grouped.unknown.length === 0 && <p className="hint">{deckTexts.deckEmpty}</p>}
         {view === 'cards' ? (
