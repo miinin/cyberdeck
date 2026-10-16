@@ -11293,3 +11293,15 @@ button.card-tag:focus-visible {
     padding: 0;
   }
 }
+
+/* Ask whether cards added to the collection come off the Want list (T-169). Wraps so 320 px never overflows. */
+.toast-slot .toast.want-cleanup {
+  flex-wrap: wrap;
+  min-inline-size: 0;
+}
+
+.want-cleanup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

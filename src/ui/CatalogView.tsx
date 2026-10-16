@@ -62,6 +62,7 @@ import { StorageReminder, persistenceResultText } from './StorageReminder';
 import type { PersistenceState } from './StorageReminder';
 import { cardCount, texts } from './texts';
 import { useCollection } from './useCollection';
+import { WantCleanupBar, useWantCleanup } from './useWantCleanup';
 import { useWants } from './useWants';
 import type { WantsHandle } from './useWants';
 import { SendToProxyButton, useProxyQueue } from './SendToProxy';
@@ -328,6 +329,7 @@ function CatalogBody({
   const listTotal = locked && collection.phase === 'ready' ? allCards.filter((card) => countIn(collection, card.key) > 0).length : allCards.length;
   const announcer = useDelayedAnnouncement(allCards, allShown.key);
   const collectionAnnouncer = useCollectionAnnouncements(announcer, collectionStore, allCards, collection.saveError);
+  const wantCleanup = useWantCleanup(collectionStore, wants, allCards);
 
   const collectionNotices = loadNotices(collection, repositories.persistent);
   useLoadNoticeAnnouncement(
@@ -920,6 +922,7 @@ function CatalogBody({
       )}
 
       {view === 'table' && !gallery.open && preview.preview}
+      <WantCleanupBar cleanup={wantCleanup} />
       <EditionConfirmDialog card={pendingAdd?.card ?? null} onChoose={handleEditionChosen} onCancel={() => setPendingAdd(null)} />
       <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} artUrl={shownArt} onTagClick={handleTagClick} />
     </>

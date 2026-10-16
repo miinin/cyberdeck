@@ -220,6 +220,11 @@ export const textsEn: typeof textsFi = {
   addedLive: (name: string, count: number) => `${name} added to your collection: ${copies(count)}.`,
   countLive: (name: string, count: number) => `${name}: ${copies(count)} in your collection.`,
   removedLive: (name: string) => `${name} removed from your collection.`,
+  wantCleanupQuestion: (names: string, more: number) =>
+    `You added cards from your Want list: ${names}${more > 0 ? ` and ${more} more` : ''}. Remove them from Want?`,
+  wantCleanupRemove: 'Remove from Want',
+  wantCleanupKeep: 'Keep',
+  wantCleanupDone: (cards: number) => `Want list reduced: ${cards} ${cards === 1 ? 'card' : 'cards'}.`,
   maxReachedLive: (name: string) => `Maximum of 999 reached: ${name}.`,
   externalChangeLive: 'The collection was updated in another tab.',
   countNotChanged: 'The card count did not change.',
