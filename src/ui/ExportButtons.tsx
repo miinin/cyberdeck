@@ -7,6 +7,7 @@ import type { CardsByKey } from '../domain/deckRules';
 import { deckTexts } from './deckTexts';
 import { downloadTextFile } from './downloadFile';
 import { QrDialog } from './QrDialog';
+import { TournamentListDialog } from './TournamentListDialog';
 
 /** Share glyph (a box with an arrow out), shared with the export menu button (T-071). */
 export function ShareIcon() {
@@ -64,6 +65,11 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
     close();
     setQrLink(`${window.location.origin}/#/jaa/${encodeDeckShare(deck, cardsByKey)}`);
   };
+  const [tlOpen, setTlOpen] = useState(false);
+  const showTournamentList = () => {
+    close();
+    setTlOpen(true);
+  };
   return (
     <div
       className="export-menu"
@@ -119,6 +125,9 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
         >
           {deckTexts.qrButton}
         </button>
+        <button type="button" className="button-secondary" aria-label={deckTexts.tlTitle(deck.name)} onClick={showTournamentList}>
+          {deckTexts.tlButton}
+        </button>
       </div>
       <QrDialog
         open={qrLink !== null}
@@ -126,6 +135,15 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
         link={qrLink ?? ''}
         onClose={() => {
           setQrLink(null);
+          toggleRef.current?.focus();
+        }}
+      />
+      <TournamentListDialog
+        open={tlOpen}
+        deck={deck}
+        cardsByKey={cardsByKey}
+        onClose={() => {
+          setTlOpen(false);
           toggleRef.current?.focus();
         }}
       />

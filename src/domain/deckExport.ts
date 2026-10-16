@@ -20,7 +20,7 @@ export type ExportFormat = 'json' | 'txt';
 const FILE_NAME_FORBIDDEN = /[/\\:*?"<>|]/g;
 
 /** Removes line breaks and control characters, so a name cannot add lines or section headings. */
-function singleLine(text: string): string {
+export function singleLine(text: string): string {
   return text.replace(UNSAFE_CHARACTERS, '').trim();
 }
 
@@ -57,7 +57,7 @@ export function deckToJson(deck: DeckContent, cardsByKey: CardsByKey): string {
 }
 
 /** "Name - Subname" as in deck lists (displayName uses a different dash). */
-function listName(card: Card): string {
+export function listName(card: Card): string {
   return card.subname === null ? card.name : `${card.name} - ${card.subname}`;
 }
 
