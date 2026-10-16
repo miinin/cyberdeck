@@ -4370,6 +4370,11 @@ button.legality:focus-visible {
   white-space: nowrap;
 }
 
+/* UX-06 (T-174): the proxy bar's text may wrap onto two lines instead of running under the button. */
+.deck-bar.proxy-screen .deck-bar-part {
+  white-space: normal;
+}
+
 .deck-bar-button {
   flex: none;
 }
@@ -4961,11 +4966,13 @@ section[aria-labelledby='have-heading'] {
 .export-menu-panel {
   position: absolute;
   inset-block-start: 100%;
-  inset-inline-start: 0;
+  /* UX-02 (T-174): anchored to the toggle's right edge: the toggles sit at the right edge of the page, so the panel opens inwards. */
+  inset-inline-end: 0;
   z-index: 20;
   display: grid;
   gap: var(--space-2);
   min-width: 12rem;
+  max-inline-size: calc(100vw - 2rem);
   margin-block-start: var(--space-1);
   padding: var(--space-2);
   border: 1px solid var(--color-border-strong);
@@ -8423,7 +8430,8 @@ button.pocket-link {
   box-sizing: border-box;
   grid-column: 1 / -1;
   justify-self: center;
-  border: 1px solid #2b303b;
+  /* An inset line, not a border: a border made the cover 2 px narrower than a page, so the book was taller on a page (UX-12, T-174). */
+  box-shadow: inset 0 0 0 1px #2b303b;
   background:
     repeating-linear-gradient(90deg, rgba(31, 224, 255, 0.06) 0 1px, transparent 1px 2rem),
     repeating-linear-gradient(0deg, rgba(31, 224, 255, 0.06) 0 1px, transparent 1px 2rem),
@@ -8482,7 +8490,11 @@ button.pocket-link {
   visibility: hidden;
 }
 
-/* One line of text, like the page number of a page. */
+/* One line of text, like the page number of a page (an h3, so the same line height: UX-12, T-174). */
+.binder-cover-sizer .binder-page-number {
+  line-height: var(--line-height-heading);
+}
+
 .binder-cover-sizer .binder-page-number::before {
   content: 'a0';
 }
@@ -10018,7 +10030,8 @@ html[data-gallery='on'] main {
     gap: 0 var(--space-3);
   }
 
-  .page-head h1 {
+  .page-head h1,
+  .proxy-head h1 {
     font-size: 1.75rem;
   }
 
@@ -10084,10 +10097,10 @@ html[data-gallery='on'] main {
 @media (max-width: 39.99rem) {
   main:has(.catalog-layout) {
     gap: var(--space-2);
-    padding-block-start: var(--space-3);
   }
 
-  .page-head h1 {
+  .page-head h1,
+  .proxy-head h1 {
     padding-block-end: var(--space-1);
     line-height: 1.1;
   }
@@ -10102,7 +10115,8 @@ html[data-gallery='on'] main {
 }
 
 @media (max-width: 39.99rem) {
-  main:has(.catalog-layout) {
+  /* UX-04 (T-174): every page starts at the same height on a phone, so the heading does not jump when the section changes. */
+  main {
     padding-block-start: var(--space-2);
   }
 
@@ -10710,7 +10724,7 @@ main:has(.mark-banner) {
 }
 
 .badge.is-done .badge-title {
-  color: var(--tier);
+  color: var(--badge-ink, var(--tier));
 }
 
 .badge-flavor {
@@ -10724,7 +10738,7 @@ main:has(.mark-banner) {
   margin-block-start: var(--space-1);
   padding: 0 var(--space-2);
   border: 1px solid var(--tier);
-  color: var(--tier);
+  color: var(--badge-ink, var(--tier));
   font-size: 0.75rem;
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--letter-spacing-caps);
@@ -10894,9 +10908,10 @@ button.card-tag:focus-visible {
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--badge) 75%, transparent));
 }
 
+/* The ink of the title and the stamp: the badge colour, darker in the light theme (UX-10, T-174). */
 .badge.is-done .badge-title,
 .badge-stamp {
-  color: var(--badge);
+  color: var(--badge-ink, var(--badge));
 }
 
 .badge-stamp {
@@ -12175,4 +12190,29 @@ button.card-tag:focus-visible {
   .sealed-set-choice .segmented {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* UX-08 (T-174): the floating marking bar never covers the footer: room for it after the last line (the bar is about 5.7 rem high). */
+body:has(.mark-banner) .site-footer {
+  margin-block-end: calc(6rem + env(safe-area-inset-bottom, 0px));
+}
+
+/*
+ * UX-10 (T-174): on paper the bright badge colours (yellow 1.6:1, green 3.0:1) are too pale for text. The title and the
+ * "Avattu" stamp use a darker mix of the badge colour; the frame, glow and icon keep the bright one.
+ */
+:root[data-theme='light'] .badge {
+  --badge-ink: color-mix(in srgb, var(--badge) 40%, #000);
+}
+
+/*
+ * UX-11 (T-174): the Yellow bar of the collection overview is yellow in the light theme too (it was drawn in the text colour,
+ * a black bar that read as something else). A thin dark edge keeps the 3:1 contrast of the bar against the paper.
+ */
+:root[data-theme='light'] .progress-row.progress-color.type-badge-yellow {
+  --bar: var(--color-card-yellow);
+}
+
+:root[data-theme='light'] .progress-row.progress-color.type-badge-yellow .progress-fill {
+  box-shadow: inset 0 0 0 1px var(--color-text);
 }
