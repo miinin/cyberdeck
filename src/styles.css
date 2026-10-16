@@ -488,14 +488,16 @@ main {
   clip-path: var(--shape-chamfer-inner-2);
 }
 
+/* Hover stays in the button's own colour: a lighter tint and a darker base line (not a jump to cyan). */
 .button-primary:hover::before,
 .step-plus:hover::before {
-  background: var(--color-accent-2);
+  background: var(--color-accent-hover);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--color-accent) 70%, #000);
 }
 
-/* Hover is never colour alone (UX.md 3.4). */
+/* Hover is never colour alone (UX.md 3.4): the button also lifts by one pixel. */
 .button-primary:hover {
-  text-decoration: underline;
+  transform: translateY(-1px);
 }
 
 .button-secondary,
@@ -1431,7 +1433,7 @@ body:has(dialog[open]) {
   .theme-toggle::before,
   .account-button,
   .account-button::before {
-    transition: background-color var(--ease), color var(--ease);
+    transition: background-color var(--ease), color var(--ease), transform var(--ease);
   }
 
   .field input[type='search'] {
@@ -10400,6 +10402,8 @@ main:has(.mark-banner) {
 :root {
   --section-accent: var(--color-accent);
   --section-nav: var(--section-accent);
+  /* Primary button hover fill: the accent a little lighter. Light theme sections darken it (white text). */
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 72%, #fff);
 }
 
 :root[data-section='collection'] {
@@ -10437,6 +10441,7 @@ main:has(.mark-banner) {
 :root[data-theme='light'][data-section='proxy'] {
   --color-accent-edge: #0e0f14;
   --color-accent-2: color-mix(in srgb, var(--color-accent) 80%, #000);
+  --color-accent-hover: var(--color-accent-2);
 }
 
 :root[data-theme='light'][data-section='proxy'] {
