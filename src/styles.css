@@ -11315,3 +11315,331 @@ button.card-tag:focus-visible {
 .deck-view-choice {
   margin-block-end: var(--space-3);
 }
+
+/*
+ * Goldfish, play a deck alone (T-172). Every block keeps its height when the state changes (fixed min heights for
+ * the reason lines and the action area), so buttons never jump. No inner scroll: the log grows with the page.
+ */
+.goldfish {
+  --gf-card: clamp(5.25rem, 8vw, 9.5rem);
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.gf-deck-name {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal, 400);
+}
+
+.gf-layout {
+  display: grid;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.gf-main {
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  align-content: start;
+}
+
+/* Legends and field side by side when there is room. */
+.gf-row {
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+@media (min-width: 56rem) {
+  .gf-row {
+    grid-template-columns: fit-content(32rem) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+@media (min-width: 64rem) {
+  .gf-layout {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+    align-items: start;
+  }
+}
+
+.gf-buttons,
+.gf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+.gf-actions {
+  align-items: flex-start;
+}
+
+.gf-action {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+}
+
+.gf-action small {
+  display: block;
+  min-block-size: 2.6em;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.gf-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.gf-status > div {
+  display: grid;
+  align-content: start;
+  gap: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  min-inline-size: 0;
+}
+
+.gf-status dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.gf-status dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.gf-status dd:first-of-type {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+}
+
+.gf-status-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  min-block-size: 1.4em;
+}
+
+.gf-line {
+  margin: 0;
+  min-block-size: 2.8em;
+}
+
+.gf-empty {
+  margin: 0;
+  min-block-size: 3em;
+  color: var(--color-text-muted);
+}
+
+.gf-dice {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+@media (max-width: 35.99rem) {
+  .gf-dice {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.gf-die {
+  min-inline-size: 0;
+  padding-inline: 0;
+}
+
+.gf-hand,
+.gf-field,
+.gf-legends {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gf-hand {
+  grid-template-columns: repeat(auto-fill, minmax(var(--gf-card), 1fr));
+}
+
+.gf-field {
+  grid-template-columns: repeat(auto-fill, minmax(max(var(--gf-card), 7rem), 1fr));
+  align-items: start;
+}
+
+.gf-legends {
+  grid-template-columns: repeat(3, minmax(0, 9.5rem));
+  align-items: start;
+}
+
+.gf-hand-item,
+.gf-slot {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-inline-size: 0;
+  max-inline-size: 12rem;
+}
+
+.gf-card {
+  position: relative;
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+
+.gf-pick {
+  cursor: pointer;
+}
+
+.gf-pick:disabled {
+  cursor: default;
+}
+
+.gf-picture {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 733 / 1024;
+  border-radius: 4.5% / 3.2%;
+  box-sizing: border-box;
+}
+
+.gf-picture-missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  border: 1px dashed var(--color-border-strong);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.gf-back {
+  border: 1px solid var(--color-border-strong);
+  background:
+    repeating-linear-gradient(135deg, var(--color-border) 0 6px, transparent 6px 12px),
+    var(--color-surface);
+}
+
+.gf-pick.is-selected .gf-picture {
+  outline: 3px solid var(--color-accent-edge);
+  outline-offset: 2px;
+  box-shadow: var(--glow-accent);
+}
+
+.gf-pick:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.gf-cap,
+.gf-state,
+.gf-gear {
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.gf-cap {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.gf-state {
+  color: var(--color-text-muted);
+  min-block-size: 2.8em;
+}
+
+.gf-gear {
+  color: var(--color-accent-2);
+}
+
+.gf-slot.is-spent .gf-picture {
+  opacity: 0.5;
+  filter: grayscale(0.7);
+}
+
+.gf-attack {
+  inline-size: 100%;
+  font-size: var(--font-size-sm);
+}
+
+.gf-selected {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-block-size: 10.5rem;
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.gf-selected-name {
+  min-block-size: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.gf-target {
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.gf-target select {
+  max-inline-size: 100%;
+  min-block-size: var(--target-min);
+}
+
+.gf-summary-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.gf-summary-list dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.gf-summary-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.gf-log-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-inline-start: var(--space-6);
+  overflow-wrap: anywhere;
+}
+
+.goldfish h1,
+.goldfish h2 {
+  scroll-margin-block-start: var(--space-8);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gf-picture {
+    transition: opacity 0.15s ease-out;
+  }
+}

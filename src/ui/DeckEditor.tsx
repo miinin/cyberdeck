@@ -1176,6 +1176,7 @@ export function DeckEditor({
             wants={wants}
             substitutes={substitutes}
             playability={playability}
+            goldfishHref={`#/pakat/${deckId}/goldfish`}
             onCopyWithOwn={canCopyWithOwn && onOpenDeck !== undefined ? () => void handleCopyWithOwn() : undefined}
             missingText={
               collectionReady

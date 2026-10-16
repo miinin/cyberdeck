@@ -43,6 +43,7 @@ import { ColorRam, CostChart, DrawOdds, EddiesPanel, Ring, TypeBar } from './Dec
 import { eddieSummary } from '../domain/eddies';
 import type { Tone } from './DeckCharts';
 import { TestHandDialog } from './TestHandDialog';
+import { goldfishTexts } from './goldfishTexts';
 import { ValueCurve } from './ValueCurve';
 import { deckTexts, formatDecimal, formatPercent } from './deckTexts';
 
@@ -80,6 +81,7 @@ export function DeckStats({
   playability,
   onCopyWithOwn,
   rng = Math.random,
+  goldfishHref,
 }: {
   deck: DeckContent;
   cardsByKey: CardsByKey;
@@ -103,6 +105,8 @@ export function DeckStats({
   onCopyWithOwn?: () => void;
   /** Random source of the test hand; tests pass a seeded one. */
   rng?: Rng;
+  /** Link of the solo play view of this deck (T-172); without it the button is not shown. */
+  goldfishHref?: string;
 }) {
   const stats = useMemo(
     () => ({
@@ -220,6 +224,11 @@ export function DeckStats({
           >
             {deckTexts.testHandOpen}
           </button>
+          {goldfishHref !== undefined && mainCount > 0 && (
+            <a className="button-secondary" href={goldfishHref}>
+              {goldfishTexts.open}
+            </a>
+          )}
           {mainCount === 0 && (
             <p id="test-hand-empty" className="hint">
               {deckTexts.testHandEmpty}

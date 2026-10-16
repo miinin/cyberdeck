@@ -44,7 +44,7 @@ export interface FieldUnit {
 export interface TurnLog {
   readonly turn: number;
   readonly drawn: Card | null;
-  readonly gig: number | null;
+  readonly gig: { readonly die: number; readonly value: number } | null;
   readonly sold: Card | null;
   readonly played: readonly { readonly card: Card; readonly cost: number }[];
   readonly invoked: Card | null;
@@ -273,7 +273,7 @@ export function chooseGig(state: GoldfishState, die: number, rng: Rng): Goldfish
         gigs: [...state.gigs, value],
         gigPending: false,
       },
-      (entry) => ({ ...entry, gig: value }),
+      (entry) => ({ ...entry, gig: { die, value } }),
     ),
   );
 }
