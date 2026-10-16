@@ -1,5 +1,5 @@
 # T-168 · Turnauksen pakkalista tulosteena (I-15)
-**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
 **Päättäjä:** käyttäjä (2026-10-16) valitsi I-15:n puolen tunnin ominaisuudeksi. Virallisen lomakkeen muotoa ei ole tarkistettu, joten tämä on yleinen pakkalista. Muoto voidaan päivittää, kun virallinen lomake löytyy.
 
 ## Määrittely

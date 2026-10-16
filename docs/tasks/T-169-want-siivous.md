@@ -1,5 +1,5 @@
 # T-169 · Kokoelmaan lisätty kortti: kysy, poistetaanko se Wantilta
-**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Päättäjä:** käyttäjä (2026-10-16): kortit jäivät Wantille, vaikka ne lisättiin kokoelmaan. Want-määrä ei edelleenkään pienene automaattisesti (D-018), vaan sovellus kysyy.
 
 ## Määrittely

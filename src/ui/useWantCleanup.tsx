@@ -24,7 +24,19 @@ export function useWantCleanup(store: CollectionStore, wants: WantsHandle, cards
     () =>
       store.onEvent((event) => {
         // Only the user's own saves; reloads and other tabs are 'external' or no 'saved' at all.
-        if (event.type !== 'saved' || event.to <= event.from) return;
+        if (event.type !== 'saved' || event.to === event.from) return;
+        if (event.to < event.from) {
+          // Taken back before answering: those copies are no longer asked about.
+          setAdded((was) => {
+            const left = (was.get(event.card) ?? 0) - (event.from - event.to);
+            if (!was.has(event.card)) return was;
+            const next = new Map(was);
+            if (left > 0) next.set(event.card, left);
+            else next.delete(event.card);
+            return next;
+          });
+          return;
+        }
         const handle = latest.current;
         if (handle.snapshot.phase !== 'ready' || countOf(handle.snapshot.saved, event.card) === 0) return;
         setAdded((was) => new Map(was).set(event.card, (was.get(event.card) ?? 0) + event.to - event.from));

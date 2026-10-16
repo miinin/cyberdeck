@@ -34,6 +34,15 @@ describe('useWantCleanup', () => {
     expect(result.current.cleanup.entries).toEqual([{ key: 'a', n: 2, name: 'Alpha' }]);
   });
 
+  it('takes back copies that were removed again before answering', async () => {
+    const { result, emit } = await setup({ a: 3 });
+    emit({ type: 'saved', card: 'a', from: 0, to: 2 });
+    emit({ type: 'saved', card: 'a', from: 2, to: 1 });
+    expect(result.current.cleanup.entries).toEqual([{ key: 'a', n: 1, name: 'Alpha' }]);
+    emit({ type: 'saved', card: 'a', from: 1, to: 0 });
+    expect(result.current.cleanup.entries).toEqual([]);
+  });
+
   it('ignores decreases, external changes and keeps nothing after Keep', async () => {
     const { result, emit } = await setup({ a: 3 });
     emit({ type: 'saved', card: 'a', from: 2, to: 1 });

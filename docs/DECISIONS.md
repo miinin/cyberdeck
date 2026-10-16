@@ -633,3 +633,8 @@ Päätöksessä on viisi osaa.
 **Konteksti:** Repo on julkinen (2026-10-13), joten GitHub Actions on ilmainen ja Dependabot saatavilla. Riippuvuuksien haavoittuvuuksia ei ole seurattu automaattisesti (R-3, T-002).
 **Päätös:** `.github/dependabot.yml`: npm viikoittain (ma 6.00) ja GitHub Actions kuukausittain, PR:t test-haaraan, minor- ja patch-päivitykset yhtenä PR:nä, major-päivitykset omina. Uusi versio ehdotetaan vasta 7 päivän päästä julkaisusta (cooldown), mutta turvapäivitykset tulevat heti. Repon asetuksissa on päällä Dependabot alerts ja security updates. Dependabotin PR:t ajavat preview.yml:ssä vain lintin, testit ja buildin lukuoikeuksin, eivät julkaise esikatselua, eivätkä saa Firebase-avainta.
 **Seuraukset:** Ei automaattista yhdistämistä: PM tai käyttäjä yhdistää Dependabotin PR:n vasta, kun tarkistukset ovat vihreät. Yhdistäminen testiin julkaisee testisivustolle. Major-päivitykset ja riippuvuusmuutokset kokeillaan devissä ennen main-julkaisua (D-029). Firebase-avainta ei lisätä Dependabot-salaisuuksiin. Ei kustannuksia.
+
+## D-035 · Want-lista ja kokoelmaan lisäys: kysytään · 2026-10-16 · Päättäjä: käyttäjä
+**Konteksti:** D-018:n mukaan want-määrä ei pienene, kun kokoelma kasvaa. Käyttäjälle jäi Wantille kortteja, jotka oli jo lisätty kokoelmaan.
+**Päätös:** Want ei edelleenkään pienene automaattisesti. Kun käyttäjä itse kasvattaa Wantilla olevan kortin määrää kokoelmassa, palkki kysyy "Vähennä Wantilta / Pidä Wantilla" (T-169). Vähennys on lisättyjen kopioiden verran, ja nolla poistaa rivin.
+**Seuraukset:** Synkka, toinen välilehti ja tuonti eivät kysy. Have/Want-näkymän oma Have-lista ei kuulu tähän.
