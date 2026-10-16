@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EMPTY_COLLECTION } from '../domain/collection';
 import { EMPTY_WANTS } from '../domain/wants';
@@ -41,5 +42,26 @@ describe('QR button placement', () => {
   it('is next to the trade link', () => {
     render(<ShareTradeButton have={EMPTY_COLLECTION} want={EMPTY_WANTS} />);
     expect(screen.getByRole('button', { name: /QR-koodi/ })).toBeInTheDocument();
+  });
+});
+
+// T-168: printable tournament list.
+describe('Tournament list', () => {
+  it('opens from the share menu and shows the groups and totals', async () => {
+    const user = userEvent.setup();
+    const cardsByKey = new Map([
+      ['l1', { key: 'l1', name: 'V', subname: 'Streetkid', type: 'Legend' }],
+      ['u1', { key: 'u1', name: 'Abe', subname: null, type: 'Unit' }],
+    ]) as unknown as ComponentProps<typeof ExportButtons>['cardsByKey'];
+    const deck = { name: 'Oma', sections: [{ name: 'Main', cards: [{ card: 'l1', count: 1 }, { card: 'u1', count: 3 }] }] };
+    render(<ExportButtons deck={deck} cardsByKey={cardsByKey} />);
+    await user.click(screen.getByRole('button', { expanded: false }));
+    await user.click(screen.getByRole('button', { name: 'Turnauslista: Oma' }));
+    expect(await screen.findByText('Legendit (1)')).toBeInTheDocument();
+    expect(screen.getByText('Unit (3)')).toBeInTheDocument();
+    expect(screen.getByText('V - Streetkid')).toBeInTheDocument();
+    expect(screen.getByText('Yhteensä: pääpakka 3, Legendit 1, sideboard 0')).toBeInTheDocument();
+    expect(screen.getByText(/Pakka ei ole turnauskelpoinen/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tulosta' })).toBeInTheDocument();
   });
 });

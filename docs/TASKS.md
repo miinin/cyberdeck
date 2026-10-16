@@ -170,3 +170,6 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-165 | QR-koodi jakolinkeille (I-6): pakan, vaihdon ja julkisen pakan linkki QR-dialogina, uusi riippuvuus uqr ladataan laiskasti | 1 | Should | Koodari | Done | Digiturva (2 × Info), PM (Chrome, dev) |
 | T-166 | Kortin saatavuus tietolaatikossa: boostereissa vai ei, muut lähteet ryhmittäin (aloituspakat, demopakat, promot, turnauspalkinnot) ja kuvituksen "Ei boostereissa" -merkki (choom.gg:n malli) | 1 | Should | Koodari | Done | PM (Chrome 320–1440 px) |
 | T-167 | Kortin tietolaatikko luettavaksi isolla näytöllä: dialogi koko leveydelle, tietosarake skaalautuu näytön mukaan, isommat versiokuvat | 1 | Must | PM | Done | PM (Chrome 320–2866 px) |
+| T-168 | Turnauksen pakkalista tulosteena (I-15): vientivalikon "Turnauslista", A4-lista ryhmittäin (Legendit, Unit, Program, Gear, Sideboard), täyttörivit pelaajalle, laillisuusvaroitus vain ruudulla | 1 | Should | Koodari | Done | PM (koodi) |
+| T-169 | Kokoelmaan lisätty Want-kortti: palkki kysyy "Vähennä Wantilta / Pidä Wantilla" (Kortit, Kokoelma, kansio, skanneri, pakkaeditori), D-035 | 1 | Must | Koodari | Done | PM (koodi) |
+| T-170 | Pääpainikkeen hover omassa värissään (vaaleampi sävy, tumma alareuna, 1 px nousu) syaanin ja alleviivauksen sijaan | 1 | Should | PM | Done | PM |

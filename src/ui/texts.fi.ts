@@ -240,6 +240,11 @@ export const textsFi = {
   addedLive: (name: string, count: number) => `${name} lisätty kokoelmaan: ${copies(count)}.`,
   countLive: (name: string, count: number) => `${name}: ${copies(count)} kokoelmassa.`,
   removedLive: (name: string) => `${name} poistettu kokoelmasta.`,
+  wantCleanupQuestion: (names: string, more: number) =>
+    `Lisäsit kokoelmaan Wantilla olevia kortteja: ${names}${more > 0 ? ` ja ${more} muuta` : ''}. Vähennetäänkö ne Wantilta?`,
+  wantCleanupRemove: 'Vähennä Wantilta',
+  wantCleanupKeep: 'Pidä Wantilla',
+  wantCleanupDone: (cards: number) => `Wantia vähennetty: ${cards} ${cards === 1 ? 'kortti' : 'korttia'}.`,
   maxReachedLive: (name: string) => `Enimmäismäärä 999 on täynnä: ${name}.`,
   externalChangeLive: 'Kokoelma päivittyi toisessa välilehdessä.',
   countNotChanged: 'Kortin määrä ei muuttunut.',

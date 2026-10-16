@@ -1,0 +1,16 @@
+# T-169 · Kokoelmaan lisätty kortti: kysy, poistetaanko se Wantilta
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Päättäjä:** käyttäjä (2026-10-16): kortit jäivät Wantille, vaikka ne lisättiin kokoelmaan. Want-määrä ei edelleenkään pienene automaattisesti (D-018), vaan sovellus kysyy.
+
+## Määrittely
+- Kun käyttäjä kasvattaa kortin määrää kokoelmassa (`collectionStore`in `saved`-tapahtuma, jossa `to > from`, myös versiomäärän kautta) ja kortti on want-listalla (määrä > 0), kortti lisätään odottavaan joukkoon: kortti → lisätyt kopiot (summa).
+- Kun joukossa on kortteja, näkyy ei-modaalinen palkki (toast-tyylinen ja `role="status"`, ei peitä sisältöä, eikä katoa itsestään): **"Lisäsit kokoelmaan Wantilla olevia kortteja: Nimi (×2), Nimi2. Vähennetäänkö ne Wantilta?"** Palkissa on painikkeet **Vähennä Wantilta** ja **Pidä Wantilla**. Kun palkki on auki, uudet osumat lisätään samaan palkkiin. Yli 3 korttia näytetään muodossa "Nimi, Nimi2, Nimi3 ja 2 muuta". Englanniksi: "You added cards from your Want list: … Remove them from Want?" sekä "Remove from Want" ja "Keep".
+- Vähennä Wantilta asettaa want-määräksi `max(0, want − lisätyt)`, jolloin määrä 0 poistaa rivin. Sen jälkeen palkki sulkeutuu, ja lyhyt ilmoitus kertoo tuloksen. Pidä tyhjentää joukon.
+- Vain käyttäjän omat tallennukset laukaisevat kysymyksen. Toisen välilehden muutos (`external`), pilvisynkka, tuonti tai lataus eivät laukaise sitä.
+- Toteutetaan yhtenä uudelleenkäytettävänä hookina ja komponenttina, jotka saavat parametreina kokoelman storen, want-listan (`useWants(repositories.wants)` tai olemassa oleva kahva) ja kortit. Ne kytketään jokaiseen näkymään, jossa kokoelman määrä voi kasvaa (Kortit, Kokoelma ja kansio, skanneri sekä Have/Want, jos siellä voi lisätä kokoelmaan). Tarkista grepillä, ettei mikään näkymä jää pois.
+- Testit: hookin logiikka (summaus, vain osumat, vähennys ei mene alle nollan, external ei laukaise) ja yksi UI-testi (Kortit-näkymässä lisäys → palkki → Vähennä → want pienenee).
+- Tekstit fi ja en. Ei uutta riippuvuutta. Mobiilissa (320 px) palkki ei saa peittää painikkeita eikä vuotaa yli.
+
+## Luovutus
+**Koodari (2026-10-16):** Toteutettu `src/ui/useWantCleanup.tsx` (hook `useWantCleanup` + `WantCleanupBar`, toast-slot-tyyli, tekstit fi/en texts-tiedostoissa, pieni CSS lopussa). Kytketty `CatalogView`iin (kattaa Kortit- ja Kokoelma-näkymät sekä skannerin, koska ne jakavat saman collectionStoren) ja `DeckEditor`iin (skanneri lisää siellä omaan storeensa). Kuuntelee vain `saved`-tapahtumia (to > from), joten `external`, lataus ja tuonti eivät laukaise. HaveWantView ja DeckImport eivät lisää kokoelmaan (Have on eri store), joten niitä ei kytketty. Palkki on `role="status"` vain sisällön ollessa näkyvissä (kiinteä status-alue rikkoi 31 olemassa olevaa testiä). Testejä ei kirjoitettu (pyydetty ilman). npm test 1837 läpi, lint ja build läpi.
+**Koodari, testit (2026-10-16):** Lisätty `useWantCleanup.test.tsx` (3 testiä: summaus, vain want-osumat, lasku ei alle nollan ja rivi poistuu nollassa, external/vähennys ei laukaise, Pidä tyhjentää) ja `CatalogView.wantCleanup.test.tsx` (Kortit-näkymä: lisäys → palkki → Vähennä Wantilta → want 3 → 2). npm test 1841 läpi, lint ja build läpi.

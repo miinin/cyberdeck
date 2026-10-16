@@ -76,6 +76,7 @@ import type { ImageSize } from './ListToolbar';
 import { Stepper } from './Stepper';
 import { texts } from './texts';
 import { useCollection } from './useCollection';
+import { WantCleanupBar, useWantCleanup } from './useWantCleanup';
 import { useWants } from './useWants';
 import { proxyTexts } from './proxyTexts';
 import { SendToProxyButton, useProxyQueue } from './SendToProxy';
@@ -129,6 +130,7 @@ export function DeckEditor({
   const [scanAtStart] = useState(() => deckScanRequested(deckId));
   useEffect(() => clearDeckScan, []);
   const wants = useWants(repositories.wants);
+  const wantCleanup = useWantCleanup(collectionStore, wants, cards);
   const proxyQueue = useProxyQueue(repositories.proxy);
 
   const [phase, setPhase] = useState<'loading' | 'ready' | 'not-found' | 'unavailable'>('loading');
@@ -775,6 +777,7 @@ export function DeckEditor({
 
   return (
     <>
+      <WantCleanupBar cleanup={wantCleanup} />
       {/* One compact header row (T-050): back link, the name as an editable title, save badge, export. */}
       <div className="editor-head">
         <p className="editor-crumb">
