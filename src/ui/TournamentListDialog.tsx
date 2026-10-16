@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { DeckContent } from '../domain/deck';
 import { validateDeck } from '../domain/deckRules';
 import type { CardsByKey } from '../domain/deckRules';
@@ -26,7 +27,8 @@ export function TournamentListDialog({ open, deck, cardsByKey, onClose }: { open
     () => (open ? validateDeck(deck, cardsByKey).filter((issue) => issue.severity === 'error').map((issue) => issue.message) : []),
     [open, deck, cardsByKey],
   );
-  return (
+  // In body itself, so the print rules can take the rest of the page out of the layout.
+  return createPortal(
     <dialog
       ref={dialogRef}
       className="confirm-dialog tournament-dialog"
@@ -84,6 +86,7 @@ export function TournamentListDialog({ open, deck, cardsByKey, onClose }: { open
           </div>
         </div>
       )}
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

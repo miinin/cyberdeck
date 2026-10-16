@@ -11267,8 +11267,9 @@ button.card-tag:focus-visible {
 }
 
 @media print {
-  body.is-tournament-list * {
-    visibility: hidden;
+  /* The dialog is a direct child of body (portal), so the rest of the page leaves the layout: no blank pages. */
+  body.is-tournament-list > :not(.tournament-dialog) {
+    display: none !important;
   }
 
   body.is-tournament-list .tournament-screen {
@@ -11287,16 +11288,7 @@ button.card-tag:focus-visible {
     overflow: visible;
   }
 
-  body.is-tournament-list .tournament-list,
-  body.is-tournament-list .tournament-list * {
-    visibility: visible;
-  }
-
   body.is-tournament-list .tournament-list {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
     border: 0;
     padding: 0;
   }
