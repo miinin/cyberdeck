@@ -33,3 +33,4 @@ export const WANTS_MIGRATIONS: readonly Migration[] = [];
 export const PROXY_MIGRATIONS: readonly Migration[] = [];
 export const HAVES_MIGRATIONS: readonly Migration[] = [];
 export const GAMES_MIGRATIONS: readonly Migration[] = [];
+export const SEALED_MIGRATIONS: readonly Migration[] = [];

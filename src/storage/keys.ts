@@ -8,6 +8,8 @@ export const GAMES_KEY = 'cyberdeck:games';
 /** Proxy print queue (T-102): the collection's shape (a count per card, the art as a breakdown), local only, never synced. */
 export const PROXY_KEY = 'cyberdeck:proxy';
 export const HAVES_KEY = 'cyberdeck:haves';
+/** The running sealed (T-173): set, pool, main deck and Legends. Local only, never synced; signed in it is `cyberdeck:u:{uid}:sealed`. */
+export const SEALED_KEY = 'cyberdeck:sealed';
 /**
  * Theme preference: the raw string 'light' or 'dark', no envelope, so public/theme-init.js can read it
  * before the first paint without parsing anything (UX.md 8.7, T-025 A2). That script repeats this key.
@@ -51,6 +53,7 @@ export const WANTS_SCHEMA_VERSION = 1;
 export const PROXY_SCHEMA_VERSION = 1;
 export const HAVES_SCHEMA_VERSION = 1;
 export const GAMES_SCHEMA_VERSION = 1;
+export const SEALED_SCHEMA_VERSION = 1;
 export const MAX_BACKUPS_PER_AGGREGATE = 3;
 /** UI language, the raw string 'fi' or 'en' (T-068, D-019). Read synchronously at startup (src/locale.ts); not personal data, never synced. */
 export const LOCALE_KEY = 'cyberdeck:locale';

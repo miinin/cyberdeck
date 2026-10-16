@@ -19,6 +19,8 @@ import {
 } from '../domain/collection';
 import { isPrintingKey } from '../domain/printing';
 import { parseProxyQueue } from '../domain/proxySheet';
+import { parseSealedData, parseSealedRun } from '../domain/sealed';
+import type { SealedRun } from '../domain/sealed';
 import { normalizeBinderLayout } from '../domain/binderLayout';
 import type { BinderLayout } from '../domain/binderLayout';
 import type { Collection } from '../domain/collection';
@@ -56,6 +58,8 @@ import {
   WANTS_SCHEMA_VERSION,
   PROXY_KEY,
   PROXY_SCHEMA_VERSION,
+  SEALED_KEY,
+  SEALED_SCHEMA_VERSION,
   HAVES_KEY,
   HAVES_SCHEMA_VERSION,
   THEME_KEY,
@@ -79,6 +83,7 @@ import {
   GAMES_MIGRATIONS,
   migrateCollectionV2ToV3,
   PROXY_MIGRATIONS,
+  SEALED_MIGRATIONS,
   HAVES_MIGRATIONS,
   WANTS_MIGRATIONS,
 } from './migrations';
@@ -94,6 +99,7 @@ import type {
   SyncStorage,
   PreferencesRepository,
   Repositories,
+  SealedRepository,
   Theme,
   CatalogViewMode,
   DeckPickView,
@@ -118,12 +124,12 @@ export interface RepositoryOptions {
    */
   namespace?: string;
   /** Tests only; default []. */
-  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[]; games?: readonly Migration[]; proxy?: readonly Migration[]; haves?: readonly Migration[] };
+  migrations?: { collection?: readonly Migration[]; decks?: readonly Migration[]; wants?: readonly Migration[]; games?: readonly Migration[]; proxy?: readonly Migration[]; sealed?: readonly Migration[]; haves?: readonly Migration[] };
 }
 
 /** One stored entity: its key, schema and how its value is wrapped in the envelope's data. */
 interface Aggregate<T> {
-  name: 'collection' | 'decks' | 'wants' | 'games' | 'proxy' | 'haves';
+  name: 'collection' | 'decks' | 'wants' | 'games' | 'proxy' | 'haves' | 'sealed';
   key: string;
   spec: EnvelopeSpec<T>;
   empty: T;
@@ -239,6 +245,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const gamesKey = prefix === null ? GAMES_KEY : `${prefix}games`;
   const proxyKey = prefix === null ? PROXY_KEY : `${prefix}proxy`;
   const havesKey = prefix === null ? HAVES_KEY : `${prefix}haves`;
+  const sealedKey = prefix === null ? SEALED_KEY : `${prefix}sealed`;
   // The own binder holds the account's cards and a free-text name, so it follows the account like the proxy queue (T-120).
   const binderLayoutKey = prefix === null ? BINDER_LAYOUT_KEY : `${prefix}binder-layout`;
   const backupPrefix = prefix === null ? BACKUP_PREFIX : `${prefix}backup:`;
@@ -280,6 +287,15 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     spec: specWith(PROXY_SCHEMA_VERSION, PROXY_MIGRATIONS, options.migrations?.proxy, parseProxyQueue),
     empty: EMPTY_COLLECTION,
     toData: (queue) => ({ entries: queue.entries }),
+  };
+
+  // The running sealed (T-173): one run or none, local only.
+  const sealedAggregate: Aggregate<SealedRun | null> = {
+    name: 'sealed',
+    key: sealedKey,
+    spec: specWith(SEALED_SCHEMA_VERSION, SEALED_MIGRATIONS, options.migrations?.sealed, parseSealedData),
+    empty: null,
+    toData: (run) => ({ run }),
   };
 
   // The own Have list (T-143, T-145): the want list's shape and rules, synced like the want list.
@@ -529,6 +545,20 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       });
     },
     subscribe: (listener) => subscribe(gamesKey, listener),
+  };
+
+  const sealed: SealedRepository = {
+    load: async () => load(sealedAggregate),
+    save: async (run: SealedRun) => {
+      // Rebuilt from the whitelisted fields: a run that is not exactly valid is refused, never partly saved (SR-23).
+      const valid = parseSealedRun(run);
+      if (valid === null) throw new StorageError('invalid-input', 'Invalid sealed run');
+      return mutate(sealedAggregate, () => ({ next: valid, result: valid }));
+    },
+    clear: async () => {
+      mutate(sealedAggregate, () => ({ next: null, result: undefined }));
+    },
+    subscribe: (listener) => subscribe(sealedKey, listener),
   };
 
   const decks: DeckRepository = {
@@ -906,6 +936,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     proxy,
     haves,
     games,
+    sealed,
     decks,
     preferences,
     persistent: options.persistent,
