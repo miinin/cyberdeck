@@ -50,6 +50,26 @@ describe('T-174 style rules', () => {
     expect(css).toMatch(/\.card-filters \.fieldsets \{[^}]*align-items:\s*flex-start/);
   });
 
+  it('UX-14: the secondary button hover takes the section colour, lifts, and has no underline or cyan', () => {
+    const hover = rule('.button-secondary:hover');
+    expect(hover).toMatch(/translateY\(-1px\)/);
+    expect(hover).not.toMatch(/underline|--color-info/);
+    expect(rule('.tile-action:hover')).not.toMatch(/underline|--color-info/);
+  });
+
+  it('UX-15: the primary hover is clearly darker in the light theme', () => {
+    expect(css).toMatch(/--color-accent-hover:\s*color-mix\(in srgb, var\(--color-accent\) 62%, #000\)/);
+  });
+
+  it('UX-16: every segmented option shows the accent bar on hover', () => {
+    expect(rule('.segmented-option:hover')).toMatch(/box-shadow:\s*inset 0 -3px 0 color-mix/);
+  });
+
+  it('UX-13: the control of a card box is always in the right column of the foot', () => {
+    expect(rule('.card-foot')).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) auto/);
+    expect(rule('.card-collection')).toMatch(/grid-column:\s*2/);
+  });
+
   it('UX-24: a note line is reserved in every search result', () => {
     expect(rule('.pick-notes')).toMatch(/min-block-size/);
   });

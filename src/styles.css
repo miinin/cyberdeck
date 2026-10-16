@@ -492,7 +492,7 @@ main {
 .button-primary:hover::before,
 .step-plus:hover::before {
   background: var(--color-accent-hover);
-  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--color-accent) 70%, #000);
+  box-shadow: inset 0 -3px 0 var(--color-accent-bar, color-mix(in srgb, var(--color-accent) 70%, #000));
 }
 
 /* Hover is never colour alone (UX.md 3.4): the button also lifts by one pixel. */
@@ -516,10 +516,17 @@ main {
   clip-path: var(--shape-chamfer-inner);
 }
 
+/*
+ * UX-14 (T-174): like the primary button, hover stays in the section's own colour: the edge takes it, the button lifts by one
+ * pixel, no underline and no jump to cyan. (.step-minus keeps the edge colour change only: it sits in a tight control.)
+ */
 .button-secondary:hover,
 .step-minus:hover {
-  background: var(--color-info);
-  text-decoration: underline;
+  background: var(--color-accent-edge);
+}
+
+.button-secondary:hover {
+  transform: translateY(-1px);
 }
 
 .button-secondary:hover::before,
@@ -1668,11 +1675,14 @@ body:has(dialog[open]) {
 }
 
 /* Bottom edge: deck count on the left, collection count or stepper on the right. */
+/*
+ * UX-13 (T-174): two columns, "Pakoissa" on the left (its place is kept when it is empty) and the control always in the right one,
+ * so the − / + sit in the same place in every box of a row, with or without the deck line.
+ */
 .card-foot {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-2);
   margin-top: auto;
   padding-top: var(--space-2);
@@ -1684,13 +1694,24 @@ body:has(dialog[open]) {
 }
 
 
+/* UX-19 (T-174): a link beside the control ("Proxy-jonoon") goes first, so the − / + stay at the right edge in every list. */
+.card-collection > .link-button {
+  order: -1;
+}
+
+.card-collection > .count-control {
+  margin-inline-start: auto;
+}
+
+/* A single child (no deck line) must still sit in the right column. */
 .card-collection {
+  grid-column: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: var(--space-1) var(--space-3);
-  margin-inline: auto;
+  margin-inline-start: auto;
 }
 
 .card-collection .count-control {
@@ -1916,6 +1937,8 @@ body:has(dialog[open]) {
 
 .segmented-option:hover {
   background: var(--color-surface-hover);
+  /* UX-16 (T-174): every segmented choice (also the Decks tabs, which are links) shows the section's bar on hover, half as strong as the chosen one. */
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--section-accent) 50%, transparent);
   text-decoration: none;
 }
 
@@ -2104,10 +2127,11 @@ body:has(dialog[open]) {
   text-underline-offset: 3px;
 }
 
+/* UX-14 (T-174): links also take the section's colour on hover (mixed with the text colour, so it stays readable on paper). */
 :where(a:not([class]):hover),
 .text-link:hover,
 .link-button:hover {
-  color: var(--color-info);
+  color: color-mix(in srgb, var(--color-accent) 60%, var(--color-text));
 }
 
 .link-button {
@@ -3043,6 +3067,7 @@ h3,
 
   .catalog-filters .card-filters .fieldsets {
     flex-direction: column;
+    align-items: stretch;
     gap: 0;
   }
 
@@ -3079,6 +3104,7 @@ h3,
 
   .editor-filters .card-filters .fieldsets {
     flex-direction: column;
+    align-items: stretch;
     gap: 0;
   }
 
@@ -5941,9 +5967,9 @@ section[aria-labelledby='have-heading'] {
   clip-path: var(--shape-chamfer-inner);
 }
 
+/* Same hover as the secondary button (UX-14, T-174). */
 .tile-action:hover {
-  background: var(--color-info);
-  text-decoration: underline;
+  background: var(--color-accent-edge);
 }
 
 .tile-action:hover::before {
@@ -8831,8 +8857,13 @@ button.pocket-link {
 .heading-row > h2 {
   margin: 0;
 }
+/* UX-04 (T-174): the 44 px info button must not make the heading row taller than the heading (the title would sit lower than on other pages). */
 .has-info-tip {
   position: relative;
+}
+
+.page-head .has-info-tip .info-tip-button {
+  margin-block: -0.5rem;
 }
 .info-tip-button {
   display: inline-grid;
@@ -10504,7 +10535,13 @@ main:has(.mark-banner) {
 :root[data-theme='light'][data-section='proxy'] {
   --color-accent-edge: #0e0f14;
   --color-accent-2: color-mix(in srgb, var(--color-accent) 80%, #000);
-  --color-accent-hover: var(--color-accent-2);
+  /* UX-15 (T-174): a clearly darker fill on hover (the 20 % darkening was barely visible on paper). */
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 62%, #000);
+}
+
+:root[data-theme='light'] {
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 80%, #000);
+  --color-accent-bar: color-mix(in srgb, var(--color-accent) 45%, #000);
 }
 
 :root[data-theme='light'][data-section='proxy'] {
