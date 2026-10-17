@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-176 | Koodari | T-171–T-175 tuotannossa (PR #188, 2026-10-17). Testaa-osio, sealedin nopea avaus ja vienti työn alla | Toteutus, Digiturva, dev ja tuotanto. Sitten T-177 (goldfish-visuaalisuus) |
+| T-176, T-177 | PM | Molemmat devissä (https://cyberdeck-tcg-dev.web.app), Digiturva T-176: 0 pakollista | Käyttäjä kokeilee devissä, sitten julkaisu-PR test → main |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
