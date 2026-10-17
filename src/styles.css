@@ -10659,7 +10659,7 @@ main:has(.mark-banner) {
    * UX-05 (T-174): the name gets the whole row (the controls had left it about 60 px, so names broke mid-word); the
    * count, − / + and the move button sit on a row of their own under it, with the notes on the left.
    */
-  .deck-tile,
+  .deck-tile:not(.is-empty),
   .deck-tile.is-missing,
   .deck-tile.is-problem {
     grid-template-areas:
