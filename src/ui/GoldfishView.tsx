@@ -36,6 +36,7 @@ import type { Rng } from '../domain/testHand';
 import { getCardImage } from '../data/cardImages';
 import type { Repositories } from '../storage';
 import { CardName, cardNameText } from './CardName';
+import { DieShape } from './DieShape';
 import { goldfishTexts as t } from './goldfishTexts';
 import { sealedTexts } from './sealedTexts';
 import { deckTexts } from './deckTexts';
@@ -182,7 +183,12 @@ export function GoldfishView({
       </p>
       <h1 ref={headingRef} tabIndex={-1}>
         {t.heading}
-        <span className="gf-deck-name"> · {deck.name}</span>
+        <span className="gf-deck-name">
+          <span className="gf-deck-sep" aria-hidden="true">
+            {' · '}
+          </span>
+          {deck.name}
+        </span>
       </h1>
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {announcement}
@@ -283,6 +289,11 @@ export function GoldfishView({
   const playReason = selected === null || over ? null : playProblem(game, selected, gearTarget);
   const invokeReason = over ? 'wrong-phase' : invokeProblem(game);
   const selectable = selectableDice(game);
+  // The latest roll of each die, so a rolled die keeps its place in the row and shows its value.
+  const rolledDice = new Map<number, { value: number; fresh: boolean }>();
+  for (const entry of game.log) {
+    if (entry.gig !== null) rolledDice.set(entry.gig.die, { value: entry.gig.value, fresh: entry.turn === game.turn && !game.gigPending });
+  }
 
   const gigLine = game.gigPending
     ? t.gigChoose + (game.dice.length > 1 && game.dice.includes(20) ? ` ${t.error('die-last')}.` : '')
@@ -292,8 +303,8 @@ export function GoldfishView({
         ? t.gigChooseNone
         : '';
 
-  const statusItems: { label: string; value: string; hint?: string }[] = [
-    { label: t.turn, value: t.turnValue(Math.min(game.turn, GOLDFISH_TURNS), GOLDFISH_TURNS) },
+  const statusItems: { label: string; value: string; hint?: string; pips?: boolean; minor?: boolean; key?: string }[] = [
+    { label: t.turn, value: t.turnValue(Math.min(game.turn, GOLDFISH_TURNS), GOLDFISH_TURNS), pips: true },
     { label: t.money, value: t.moneyValue(money), hint: t.moneyHint },
     { label: t.eddies, value: t.eddiesValue(freeEddies(game), game.eddies), hint: t.eddiesHint },
     {
@@ -301,9 +312,9 @@ export function GoldfishView({
       value: game.gigs.length === 0 ? t.gigsNone : game.gigs.join(' + '),
       hint: t.streetCred(streetCred(game)),
     },
-    { label: t.library, value: String(game.library.length) },
-    { label: t.trash, value: String(game.trash.length) },
-    { label: t.stolen, value: String(game.stolen), hint: t.stolenHint },
+    { label: t.stolen, value: String(game.stolen), hint: t.stolenHint, key: 'stolen' },
+    { label: t.library, value: String(game.library.length), minor: true },
+    { label: t.trash, value: String(game.trash.length), minor: true },
   ];
 
   return (
@@ -313,10 +324,20 @@ export function GoldfishView({
         <div className="gf-main" aria-label={t.boardLabel}>
           <dl className="gf-status" aria-label={t.statusLabel}>
             {statusItems.map((item) => (
-              <div key={item.label}>
+              <div key={item.label} title={item.hint} className={(item.minor || item.label === t.gigs ? 'is-minor ' : '') + (item.key === 'stolen' ? 'is-stolen' : '')}>
                 <dt>{item.label}</dt>
                 <dd>{item.value}</dd>
-                <dd className="gf-status-hint">{item.hint ?? ' '}</dd>
+                <dd className="gf-status-hint">
+                  {item.pips ? (
+                    <span className="gf-pips" aria-hidden="true">
+                      {Array.from({ length: GOLDFISH_TURNS }, (_, i) => (
+                        <span key={i} className={i < game.turn ? 'is-on' : ''} />
+                      ))}
+                    </span>
+                  ) : (
+                    (item.hint ?? ' ')
+                  )}
+                </dd>
               </div>
             ))}
           </dl>
@@ -367,24 +388,35 @@ export function GoldfishView({
               {t.gigTitle}
             </h2>
             <div className="gf-dice">
-              {GIG_DICE.map((die) => (
-                <button
-                  key={die}
-                  type="button"
-                  className="button-secondary gf-die"
-                  aria-label={t.gigRollLabel(die)}
-                  disabled={over || !game.gigPending || !selectable.includes(die)}
-                  onClick={() => apply(chooseGig(game, die, rng), (next) => t.announceGig(die, next.log.at(-1)?.gig?.value ?? 0), 'hand')}
-                >
-                  {t.gigRoll(die)}
-                </button>
-              ))}
+              {GIG_DICE.map((die) => {
+                const rolled = rolledDice.get(die);
+                const inFixer = game.dice.includes(die);
+                const state = rolled !== undefined && !inFixer ? 'rolled' : selectable.includes(die) && game.gigPending && !over ? 'ready' : 'waiting';
+                return (
+                  <button
+                    key={die}
+                    type="button"
+                    className={'gf-die is-' + state + (rolled?.fresh === true ? ' is-fresh' : '')}
+                    aria-label={t.gigRollLabel(die)}
+                    disabled={over || !game.gigPending || !selectable.includes(die)}
+                    onClick={() => apply(chooseGig(game, die, rng), (next) => t.announceGig(die, next.log.at(-1)?.gig?.value ?? 0), 'hand')}
+                  >
+                    <DieShape die={die} value={state === 'rolled' ? (rolled?.value ?? null) : null} />
+                    <span className="gf-die-name" aria-hidden="true">
+                      {t.gigRoll(die)}
+                    </span>
+                    <span className="gf-die-state" aria-hidden="true">
+                      {state === 'rolled' ? t.dieRolled : t.dieInFixer}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             <p className="gf-line">{gigLine}</p>
           </div>
 
-          <div className="gf-row">
-          <div className="panel">
+          <div className="gf-table">
+          <div className="panel gf-legends-panel">
             <h2 className="panel-title" ref={legendsRef} tabIndex={-1}>
               {t.legendsTitle}
             </h2>
@@ -416,7 +448,7 @@ export function GoldfishView({
             </ul>
           </div>
 
-          <div className="panel">
+          <div className="panel gf-field-panel">
             <h2 className="panel-title" ref={fieldRef} tabIndex={-1}>
               {t.fieldTitle}
             </h2>
@@ -498,7 +530,10 @@ export function GoldfishView({
                 ))}
               </ul>
             )}
-            <div className="gf-selected">
+          </div>
+
+          <div className="panel gf-bar">
+            <div className="gf-bar-card">
               {selectedCard === undefined ? (
                 <p className="gf-line">{t.selectedNone}</p>
               ) : (
@@ -509,10 +544,7 @@ export function GoldfishView({
                   {needsTarget(selectedCard) && (
                     <label className="gf-target">
                       <span>{t.gearTarget}</span>
-                      <select
-                        value={chosenTarget?.key ?? ''}
-                        onChange={(event) => setTargetChoice(event.target.value)}
-                      >
+                      <select value={chosenTarget?.key ?? ''} onChange={(event) => setTargetChoice(event.target.value)}>
                         {targets.map((entry) => (
                           <option key={entry.key} value={entry.key}>
                             {entry.label}
@@ -521,47 +553,44 @@ export function GoldfishView({
                       </select>
                     </label>
                   )}
-                  <div className="gf-actions">
-                    <div className="gf-action">
-                      <button
-                        type="button"
-                        className="button-primary"
-                        disabled={playReason !== null}
-                        onClick={() =>
-                          selected !== null &&
-                          apply(
-                            play(game, selected, gearTarget),
-                            () => t.announcePlayed(cardNameText(selectedCard), costOf(selectedCard)),
-                            'hand',
-                          )
-                        }
-                      >
-                        {t.play(costOf(selectedCard))}
-                      </button>
-                      <small>{playReason === null ? ' ' : t.error(playReason)}</small>
-                    </div>
-                    <div className="gf-action">
-                      <button
-                        type="button"
-                        className="button-secondary"
-                        disabled={sellReason !== null}
-                        onClick={() =>
-                          selected !== null &&
-                          apply(sell(game, selected), () => t.announceSold(cardNameText(selectedCard)), 'hand')
-                        }
-                      >
-                        {t.sell}
-                      </button>
-                      <small>{sellReason === null ? t.sellHint : t.error(sellReason)}</small>
-                    </div>
-                  </div>
                 </>
               )}
             </div>
-          </div>
-
-          <div className="panel">
-            <div className="gf-actions">
+            <div className="gf-actions gf-bar-actions">
+              <div className="gf-action">
+                <button
+                  type="button"
+                  className="button-primary"
+                  disabled={selectedCard === undefined || playReason !== null}
+                  onClick={() =>
+                    selected !== null &&
+                    selectedCard !== undefined &&
+                    apply(
+                      play(game, selected, gearTarget),
+                      () => t.announcePlayed(cardNameText(selectedCard), costOf(selectedCard)),
+                      'hand',
+                    )
+                  }
+                >
+                  {selectedCard === undefined ? t.playBare : t.play(costOf(selectedCard))}
+                </button>
+                <small>{selectedCard === undefined || playReason === null ? ' ' : t.error(playReason)}</small>
+              </div>
+              <div className="gf-action">
+                <button
+                  type="button"
+                  className="button-secondary"
+                  disabled={selectedCard === undefined || sellReason !== null}
+                  onClick={() =>
+                    selected !== null &&
+                    selectedCard !== undefined &&
+                    apply(sell(game, selected), () => t.announceSold(cardNameText(selectedCard)), 'hand')
+                  }
+                >
+                  {t.sell}
+                </button>
+                <small>{selectedCard === undefined ? ' ' : sellReason === null ? t.sellHint : t.error(sellReason)}</small>
+              </div>
               <div className="gf-action">
                 <button
                   type="button"
@@ -591,19 +620,20 @@ export function GoldfishView({
                 <small>{game.gigPending && !over ? t.error('gig-pending') : ' '}</small>
               </div>
             </div>
-            <div className="gf-buttons">
-              <button type="button" className="button-secondary" onClick={restart}>
-                {t.restart}
-              </button>
-              <button
-                type="button"
-                className="button-secondary"
-                disabled={over}
-                onClick={() => apply({ ok: true, state: endGame(game) }, () => t.announceOver, 'summary')}
-              >
-                {t.endGame}
-              </button>
-            </div>
+          </div>
+
+          <div className="gf-buttons">
+            <button type="button" className="button-secondary" onClick={restart}>
+              {t.restart}
+            </button>
+            <button
+              type="button"
+              className="button-secondary"
+              disabled={over}
+              onClick={() => apply({ ok: true, state: endGame(game) }, () => t.announceOver, 'summary')}
+            >
+              {t.endGame}
+            </button>
           </div>
           <p className="hint">{t.note}</p>
         </div>

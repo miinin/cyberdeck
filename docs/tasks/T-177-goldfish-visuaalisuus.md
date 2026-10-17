@@ -1,0 +1,20 @@
+# T-177 · Goldfish-näkymän visuaalinen uudistus
+**Tila:** Ready · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must · **Päätös:** D-036
+Käyttäjä: "Kortit näkyvät liian pienellä ja visuaalisuus esim. noppien osalta puuttuu kokonaan." Tavoite UX 5/5 ja koko näytön leveys.
+
+## Määrittely
+- **Kortit isommiksi:** käden ja kentän korttien on oltava luettavia ilman avaamista (työpöydällä n. 180–220 px leveitä, puhelimella 2 per rivi). Pelialue käyttää koko leveyden: kenttä ja Legendit ylhäällä pelipöytänä, käsi alhaalla. Valittu kortti nousee esiin.
+- **Nopat visuaalisiksi:** Gig-nopat piirretään muotoinaan (d4 kolmio, d6 neliö, d8, d10, d12 ja d20 omina SVG-muotoinaan) arvo keskellä. Heitossa on lyhyt pyörimisanimaatio (`prefers-reduced-motion`: ei animaatiota). Varastetut ja käytetyt nopat erottuvat selvästi.
+- **Tila näkyviin:** Eddiet, vuoro (x/7) ja varastetut Gigit selkeänä tulostauluna.
+- Saavutettavuus säilyy (aria-labelit, live-alueet, kohdistus). Ei sisäistä vieritystä, ei pomppimista.
+
+## Tarkistus
+Kuvakaappaukset ennen ja jälkeen (320, 768 ja 1440 px, vaalea ja tumma). `npm test`, `npm run lint` ja `npm run build`.
+
+## Luovutus
+
+**Koodari, valmis.** Nopat piirretään SVG-muotoinaan (uusi src/ui/DieShape.tsx: d4 kolmio, d6 neliö, d8 vinoneliö, d10 leija, d12 viisikulmio, d20 kuusikulmio). Kuusi noppaa pysyy paikallaan rivissä, heitetty noppa näyttää arvonsa keltaisena, valmis korostettuna ja odottava katkoviivalla. Heitossa pyörimisanimaatio (vain prefers-reduced-motion: no-preference). Tulostaulu: Vuoro-pylväät (x/7), Eddiet, Gigit, korostettu Varastetut Gigit, Pakassa ja Trash. Kortit 104–220 px (2 per rivi puhelimella), Legendit ja Kenttä yhteisenä pelipöytänä, käsi alla, valittu kortti nousee. Vuoroloki siirretty koko leveyteen sivun alaosaan. Uudet tekstit: dieRolled, dieInFixer (fi ja en). Pelisääntöihin ei koskettu. Ei uusia riippuvuuksia.
+Kuvakaappaukset: scratchpad before/ ja after/ (320, 768, 1440 px, vaalea ja tumma, vaiheet order, mulligan, gig, turn, turn3, summary).
+Testit 1994 läpi, lint ja build läpi.
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
+**Korjauskierros (PM:n palaute), valmis.** 1) Yläpalkissa goldfish-reitillä aktiivinen on Testaa (ei Pakat). 2) Valitun kortin toiminnot, Kutsu Legendi ja Lopeta vuoro ovat yhdessä alareunaan kiinnittyvässä palkissa (`position: sticky`, virtauksessa, ei sisäistä vieritystä); Pelaa ja Myy ovat aina näkyvissä (pois käytöstä ilman valintaa), joten mikään ei pompi. Työpöydällä tyhjä toiminta-alue poistui (palkki on yksi rivi). 3) Puhelimella tulostaulu 4 sarakkeessa, selitteet piilossa ja title-tekstinä. 4) Pakan nimi omalle rivilleen alle 40 rem leveydellä, erotin piiloon. 5) Pakan valintasivu: isommat laatat (nimi, määrä, ▶), kolme välilehteä samalle riville puhelimella. Uusi teksti playBare. Testit 1994, lint ja build läpi. Kuvat: scratchpad after2/ (myös pick-320/1440 ja 3b-viewport).

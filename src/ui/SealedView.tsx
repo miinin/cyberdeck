@@ -1,6 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { intlLocale } from '../locale';
 import {
+  BOOSTER_SIZE,
+  LEGEND_PACK_SIZE,
   openBooster,
   openLegendPack,
   sealedIssues,
@@ -13,7 +15,7 @@ import {
 } from '../domain/booster';
 import type { BoosterCard, SealedIssue, SealedSetId } from '../domain/booster';
 import type { Card } from '../domain/card';
-import { uniqueDeckName } from '../domain/deckEdit';
+import { checkDeckName, uniqueDeckName } from '../domain/deckEdit';
 import { toCardsByKey } from '../domain/deckRules';
 import {
   addToMain,
@@ -26,13 +28,14 @@ import {
   SEALED_BOOSTERS,
   SEALED_PACK_STEPS,
   toggleLegend,
+  withoutDeckId,
   withPack,
 } from '../domain/sealed';
 import type { SealedRun } from '../domain/sealed';
 import type { Rng } from '../domain/testHand';
 import { StorageError } from '../storage';
 import type { Repositories, StorageErrorKind } from '../storage';
-import { BoosterPicture, PackReveal } from './BoosterCards';
+import { BoosterPicture, PackGrid, useRevealProgress } from './BoosterCards';
 import { CardColor } from './CardColor';
 import { CardName, cardNameText } from './CardName';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
@@ -68,7 +71,61 @@ function issueText(issue: SealedIssue, nameOf: (key: string) => string): string 
   }
 }
 
-/** The Sealed tab (T-173): single boosters for fun, and a sealed run from six boosters and a Legend pack to a built deck. */
+function FailureNote({ failure }: { failure: Exclude<SealedChangeResult, null> | null }) {
+  if (failure === null) return null;
+  return (
+    <div className="notice notice-danger" role="alert">
+      <p>{failureText(failure)}</p>
+    </div>
+  );
+}
+
+/**
+ * Single boosters for fun (T-176, the Boosters tab of the Playtest section): one big button opens a booster and turns
+ * its cards, the next click opens the next one. Nothing is stored.
+ */
+export function BoostersView({ cards, rng = Math.random }: { cards: readonly Card[]; rng?: Rng }) {
+  const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
+  const [set, setSet] = useState<SealedSetId>('welcome-to-night-city');
+  const [pack, setPack] = useState<readonly BoosterCard[] | null>(null);
+  const [stats, setStats] = useState({ opened: 0, epic: 0, iconic: 0, secret: 0 });
+  const revealed = useRevealProgress(pack);
+
+  const open = () => {
+    const opened = openBooster(cards, set, rng);
+    setPack(opened);
+    setStats((before) => ({
+      opened: before.opened + 1,
+      epic: before.epic + opened.filter((entry) => entry.rarity === 'Epic').length,
+      iconic: before.iconic + opened.filter((entry) => entry.rarity === 'Iconic').length,
+      secret: before.secret + opened.filter((entry) => entry.rarity === 'Secret').length,
+    }));
+  };
+
+  return (
+    <section className="sealed">
+      <p className="sealed-intro">{t.boostersIntro}</p>
+      <SegmentedChoice legend={t.setLegend} legendVisible className="sealed-set-choice" name="booster-set" value={set} options={SET_OPTIONS} onChange={setSet} />
+      <p className="hint">{t.setHint}</p>
+      <div className="quick-open">
+        <button type="button" className="button-primary quick-open-button" onClick={open}>
+          {stats.opened === 0 ? t.openSingle : t.openNextSingle}
+        </button>
+      </div>
+      <p className="sealed-single-stats" role="status">
+        <span>{t.singleOpened(stats.opened)}</span>
+        <span>{stats.opened === 0 ? t.singleNone : t.singleHits(stats.epic, stats.iconic, stats.secret)}</span>
+      </p>
+      <PackGrid pack={pack} slots={BOOSTER_SIZE} revealed={revealed} cardsByKey={cardsByKey} title={stats.opened === 0 ? t.openSingle : t.singlePackTitle(stats.opened)} />
+      <p className="hint sealed-estimate">{t.estimateNote}</p>
+    </section>
+  );
+}
+
+/**
+ * The Sealed tab (T-173, T-176): a sealed run from six boosters and a Legend pack to a built deck. One big button opens
+ * the packs one after the other; the finished deck is saved among the user's own decks.
+ */
 export function SealedView({
   cards,
   repositories,
@@ -83,13 +140,10 @@ export function SealedView({
   const sealed = useSealed(repositories.sealed);
   const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   const [set, setSet] = useState<SealedSetId>('welcome-to-night-city');
-  /** The pack being revealed: its cards and its step (0-based) for the title. */
-  const [pack, setPack] = useState<{ cards: readonly BoosterCard[]; step: number } | null>(null);
-  /** Single boosters opened for fun (not stored). */
-  const [single, setSingle] = useState<{ opened: number; epic: number; iconic: number; secret: number }>({ opened: 0, epic: 0, iconic: 0, secret: 0 });
-  const [singlePack, setSinglePack] = useState<readonly BoosterCard[] | null>(null);
   const [failure, setFailure] = useState<Exclude<SealedChangeResult, null> | null>(null);
   const [confirming, setConfirming] = useState(false);
+  /** The opening was done on this page, so the builder takes the focus the button had. */
+  const [openedHere, setOpenedHere] = useState(false);
 
   if (sealed.phase === 'loading') return <p className="status-line">{t.loading}</p>;
   if (sealed.phase === 'unavailable') {
@@ -108,38 +162,7 @@ export function SealedView({
   }
 
   const run = sealed.run;
-  const report = (result: SealedChangeResult) => setFailure(result);
   const reset = sealed.notices.some((notice) => notice.kind === 'reset');
-
-  const startSealed = async () => {
-    report(await sealed.replace(newSealedRun(set)));
-    setPack(null);
-  };
-
-  // The pack joins the stored pool only once it is revealed (BRK-04): a reload mid-reveal opens a fresh pack, no card is lost unseen.
-  const openStep = (current: SealedRun) => {
-    const step = current.opened;
-    const opened = step < SEALED_BOOSTERS ? openBooster(cards, current.set, rng) : openLegendPack(cards, current.set, rng);
-    setPack({ cards: opened, step });
-  };
-
-  const finishPack = async (step: number, revealed: readonly BoosterCard[]) => {
-    setPack(null);
-    // Only if this step is still the next one, so a repeated click cannot add the pack twice.
-    report(await sealed.update((latest) => (latest.opened === step ? withPack(latest, revealed) : latest)));
-  };
-
-  const openSingle = () => {
-    const opened = openBooster(cards, set, rng);
-    setSinglePack(opened);
-    setSingle((before) => ({
-      opened: before.opened + 1,
-      epic: before.epic + opened.filter((entry) => entry.rarity === 'Epic').length,
-      iconic: before.iconic + opened.filter((entry) => entry.rarity === 'Iconic').length,
-      secret: before.secret + opened.filter((entry) => entry.rarity === 'Secret').length,
-    }));
-  };
-
   const notes = (
     <>
       {reset && (
@@ -147,63 +170,15 @@ export function SealedView({
           <p>{t.resetNotice}</p>
         </div>
       )}
-      {failure !== null && (
-        <div className="notice notice-danger" role="alert">
-          <p>{failureText(failure)}</p>
-        </div>
-      )}
+      <FailureNote failure={failure} />
     </>
   );
 
-  // A pack is being revealed: the sealed run's, or a single one.
-  if (run !== null && pack !== null) {
-    const title = pack.step < SEALED_BOOSTERS ? t.stepBooster(pack.step + 1, SEALED_BOOSTERS) : t.stepLegends;
-    return (
-      <section className="sealed">
-        {notes}
-        <h2 className="sealed-step">
-          {title}
-          <span className="sealed-step-of"> · {t.stepOf(pack.step + 1, SEALED_PACK_STEPS)}</span>
-        </h2>
-        <PackReveal
-          key={pack.step}
-          pack={pack.cards}
-          cardsByKey={cardsByKey}
-          title={title}
-          nextLabel={pack.step + 1 >= SEALED_PACK_STEPS ? t.toBuilder : t.nextPack}
-          onNext={() => void finishPack(pack.step, pack.cards)}
-        />
-      </section>
-    );
-  }
-
-  if (run === null && singlePack !== null) {
-    const title = t.singlePackTitle(single.opened);
-    return (
-      <section className="sealed">
-        {notes}
-        <h2 className="sealed-step">{title}</h2>
-        <PackReveal key={single.opened} pack={singlePack} cardsByKey={cardsByKey} title={title} nextLabel={t.singleNext} onNext={() => setSinglePack(null)} />
-        <p className="hint sealed-estimate">{t.estimateNote}</p>
-      </section>
-    );
-  }
-
   if (run !== null && !isSealedReady(run)) {
-    const step = run.opened;
     return (
       <section className="sealed">
         {notes}
-        <h2 className="sealed-step">
-          {step < SEALED_BOOSTERS ? t.stepBooster(step + 1, SEALED_BOOSTERS) : t.stepLegends}
-          <span className="sealed-step-of"> · {t.stepOf(step + 1, SEALED_PACK_STEPS)}</span>
-        </h2>
-        <div className="pack-actions">
-          <button type="button" className="button-primary" onClick={() => openStep(run)}>
-            {t.openPack}
-          </button>
-        </div>
-        <p className="hint sealed-estimate">{t.estimateNote}</p>
+        <SealedOpening run={run} cards={cards} cardsByKey={cardsByKey} sealed={sealed} rng={rng} onFailure={setFailure} onOpened={() => setOpenedHere(true)} />
       </section>
     );
   }
@@ -218,7 +193,8 @@ export function SealedView({
           sealed={sealed}
           repositories={repositories}
           now={now}
-          onFailure={report}
+          autoFocus={openedHere}
+          onFailure={setFailure}
           onNew={() => setConfirming(true)}
         />
         <ConfirmDeleteDialog
@@ -229,8 +205,8 @@ export function SealedView({
           onCancel={() => setConfirming(false)}
           onConfirm={() => {
             setConfirming(false);
-            setPack(null);
-            void sealed.clear().then(report);
+            setOpenedHere(false);
+            void sealed.clear().then(setFailure);
           }}
         />
       </>
@@ -243,29 +219,94 @@ export function SealedView({
       <p className="sealed-intro">{t.intro}</p>
       <SegmentedChoice legend={t.setLegend} legendVisible className="sealed-set-choice" name="sealed-set" value={set} options={SET_OPTIONS} onChange={setSet} />
       <p className="hint">{t.setHint}</p>
-      <div className="sealed-start">
-        <section className="sealed-start-card" aria-labelledby="sealed-start-heading">
-          <h2 id="sealed-start-heading">{t.startHeading}</h2>
-          <p>{t.startHint}</p>
-          <p className="sealed-rules">{t.rulesNote}</p>
-          <button type="button" className="button-primary" onClick={() => void startSealed()}>
-            {t.startSealed}
-          </button>
-        </section>
-        <section className="sealed-start-card" aria-labelledby="sealed-single-heading">
-          <h2 id="sealed-single-heading">{t.singleHeading}</h2>
-          <p>{t.singleHint}</p>
-          <p className="sealed-single-stats" role="status">
-            <span>{t.singleOpened(single.opened)}</span>
-            <span>{single.opened === 0 ? t.singleNone : t.singleHits(single.epic, single.iconic, single.secret)}</span>
-          </p>
-          <button type="button" className="button-secondary" onClick={openSingle}>
-            {t.openSingle}
-          </button>
-        </section>
-      </div>
+      <section className="sealed-start-card" aria-labelledby="sealed-start-heading">
+        <h2 id="sealed-start-heading">{t.startHeading}</h2>
+        <p>{t.startHint}</p>
+        <p className="sealed-rules">{t.rulesNote}</p>
+        <button type="button" className="button-primary" onClick={() => void sealed.replace(newSealedRun(set)).then(setFailure)}>
+          {t.startSealed}
+        </button>
+      </section>
       <p className="hint sealed-estimate">{t.estimateNote}</p>
     </section>
+  );
+}
+
+/**
+ * Opening the packs of a sealed run with one button (T-176): it opens a pack and turns its cards by themselves; the next
+ * click moves the pack into the pool and opens the next one, and after the Legend pack the builder follows. "Open all the
+ * rest" opens what is left at once. The pack joins the stored pool only once it has been shown (BRK-04): a reload
+ * mid-opening opens a fresh pack, no card is lost unseen. The buttons never move: the pack grid is always below them.
+ */
+function SealedOpening({
+  run,
+  cards,
+  cardsByKey,
+  sealed,
+  rng,
+  onFailure,
+  onOpened,
+}: {
+  run: SealedRun;
+  cards: readonly Card[];
+  cardsByKey: ReadonlyMap<string, Card>;
+  sealed: SealedHandle;
+  rng: Rng;
+  onFailure: (result: SealedChangeResult) => void;
+  onOpened: () => void;
+}) {
+  /** The pack on the table: its cards and its step (0-based). null = the next pack is not opened yet. */
+  const [pack, setPack] = useState<{ cards: readonly BoosterCard[]; step: number } | null>(null);
+  const revealed = useRevealProgress(pack?.cards ?? null);
+  const step = pack?.step ?? run.opened;
+  const isLegends = step >= SEALED_BOOSTERS;
+  const isLast = step + 1 >= SEALED_PACK_STEPS;
+
+  const packAt = (index: number) => (index < SEALED_BOOSTERS ? openBooster(cards, run.set, rng) : openLegendPack(cards, run.set, rng));
+  /** Adds shown packs to the stored pool, each only if its step is still the next one, so a repeated click cannot add a pack twice. */
+  const commit = (shown: readonly { cards: readonly BoosterCard[]; step: number }[]) =>
+    void sealed
+      .update((latest) => shown.reduce((current, item) => (current.opened === item.step ? withPack(current, item.cards) : current), latest))
+      .then(onFailure);
+
+  const advance = () => {
+    if (pack === null) {
+      setPack({ cards: packAt(run.opened), step: run.opened });
+      return;
+    }
+    commit([pack]);
+    if (isLast) {
+      setPack(null);
+      onOpened();
+    } else {
+      setPack({ cards: packAt(pack.step + 1), step: pack.step + 1 });
+    }
+  };
+
+  const openRest = () => {
+    const queue: { cards: readonly BoosterCard[]; step: number }[] = pack === null ? [] : [pack];
+    for (let next = pack === null ? run.opened : pack.step + 1; next < SEALED_PACK_STEPS; next += 1) queue.push({ cards: packAt(next), step: next });
+    commit(queue);
+    setPack(null);
+    onOpened();
+  };
+
+  const title = isLegends ? t.stepLegends : t.stepBooster(step + 1, SEALED_BOOSTERS);
+  return (
+    <>
+      <h2 className="sealed-step">{title}</h2>
+      <div className="quick-open">
+        <button type="button" className="button-primary quick-open-button" onClick={advance}>
+          {pack === null ? t.openPack : isLast ? t.toBuilder : t.nextPack}
+        </button>
+        <button type="button" className="button-secondary quick-open-rest" disabled={pack !== null && isLast} onClick={openRest}>
+          {t.openRest}
+        </button>
+      </div>
+      <PackGrid pack={pack?.cards ?? null} slots={isLegends ? LEGEND_PACK_SIZE : BOOSTER_SIZE} revealed={revealed} cardsByKey={cardsByKey} title={title} />
+      {isLegends && <p className="hint">{t.legendPackHint}</p>}
+      <p className="hint sealed-estimate">{t.estimateNote}</p>
+    </>
   );
 }
 
@@ -276,6 +317,7 @@ function SealedBuilder({
   sealed,
   repositories,
   now,
+  autoFocus,
   onFailure,
   onNew,
 }: {
@@ -284,13 +326,48 @@ function SealedBuilder({
   sealed: SealedHandle;
   repositories: Repositories;
   now: () => Date;
+  autoFocus: boolean;
   onFailure: (result: SealedChangeResult) => void;
   onNew: () => void;
 }) {
   const [color, setColor] = useState<'all' | (typeof COLORS)[number]>('all');
   const [type, setType] = useState<'all' | (typeof TYPES)[number]>('all');
-  const [saved, setSaved] = useState<{ id: string; name: string } | null>(null);
+  /** What the last save did, said once; cleared when the deck changes. */
+  const [message, setMessage] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState(() => t.deckName(new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short' }).format(now())));
+  const [nameError, setNameError] = useState(false);
+  /** The deck was edited elsewhere since this run saved it: asks before the changes replace it. */
+  const [askReplace, setAskReplace] = useState(false);
   const saving = useRef(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  // The latest handle for effects that must not run again every time the run changes.
+  const sealedRef = useRef(sealed);
+  useEffect(() => {
+    sealedRef.current = sealed;
+  });
+
+  // The button that opened the last pack is gone: the focus goes to the builder, not to the top of the page.
+  useEffect(() => {
+    if (autoFocus) headingRef.current?.focus({ preventScroll: true });
+  }, [autoFocus]);
+
+  // A run saved as a deck earlier: show that deck's name, or forget the id if the deck has been removed since.
+  const savedId = run.deckId;
+  useEffect(() => {
+    if (savedId === undefined) return;
+    let active = true;
+    repositories.decks.get(savedId).then(
+      (deck) => {
+        if (!active) return;
+        if (deck === null) void sealedRef.current.update(withoutDeckId).then(onFailure);
+        else setNameInput(deck.name);
+      },
+      () => {},
+    );
+    return () => {
+      active = false;
+    };
+  }, [savedId, repositories.decks, onFailure]);
 
   const nameOf = (key: string) => {
     const card = cardsByKey.get(key);
@@ -312,7 +389,7 @@ function SealedBuilder({
   });
 
   const change = (next: (current: SealedRun) => SealedRun) => {
-    setSaved(null);
+    setMessage(null);
     void sealed.update(next).then(onFailure);
   };
 
@@ -320,17 +397,33 @@ function SealedBuilder({
     window.location.hash = routeHash({ name: 'sealedGoldfish' });
   };
 
-  const saveAsDeck = async () => {
+  /** Saves the deck among the user's own: the deck this run was saved as before is updated, else a new one is made. */
+  const saveAsDeck = async (mode: 'check' | 'replace' | 'new' = 'check') => {
     if (saving.current) return;
+    const checked = checkDeckName(nameInput);
+    if (!checked.ok) {
+      setNameError(true);
+      return;
+    }
+    setNameError(false);
     saving.current = true;
     onFailure(null);
+    setMessage(null);
+    setAskReplace(false);
     try {
+      const found = run.deckId === undefined || mode === 'new' ? null : await repositories.decks.get(run.deckId);
+      // Edited elsewhere (the editor) after the last save here: ask first. A run without a stamp cannot tell, so it saves.
+      if (mode === 'check' && found !== null && run.deckUpdatedAt !== undefined && found.updatedAt !== run.deckUpdatedAt) {
+        setAskReplace(true);
+        return;
+      }
+      const previous = found;
       const { value: existing } = await repositories.decks.list();
       const name = uniqueDeckName(
-        existing.map((item) => item.name),
-        t.deckName(new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short' }).format(now())),
+        existing.filter((item) => item.id !== previous?.id).map((item) => item.name),
+        checked.name,
       );
-      const created = await repositories.decks.create({
+      const content = {
         name,
         sections: [
           {
@@ -341,8 +434,14 @@ function SealedBuilder({
             ],
           },
         ],
-      });
-      setSaved({ id: created.id, name: created.name });
+      };
+      const stored =
+        previous === null
+          ? await repositories.decks.create(content)
+          : await repositories.decks.update(previous.id, content, mode === 'check' && run.deckUpdatedAt !== undefined ? { expectedUpdatedAt: run.deckUpdatedAt } : undefined);
+      setNameInput(stored.name);
+      setMessage(previous === null ? t.saved(stored.name) : t.updated(stored.name));
+      onFailure(await sealed.update((current) => ({ ...current, deckId: stored.id, deckUpdatedAt: stored.updatedAt })));
     } catch (error) {
       onFailure(error instanceof StorageError ? error.kind : 'unknown');
     } finally {
@@ -350,33 +449,79 @@ function SealedBuilder({
     }
   };
 
+  const nothingToSave = stats.main + run.legends.length === 0;
   return (
     <section className="sealed sealed-builder">
-      <h2>{t.builderHeading}</h2>
+      <h2 ref={headingRef} tabIndex={-1}>
+        {t.builderHeading}
+      </h2>
+      <form
+        className="sealed-save"
+        aria-label={t.saveFormLabel}
+        onSubmit={(event) => {
+          event.preventDefault();
+          void saveAsDeck();
+        }}
+      >
+        <label className="sealed-save-name">
+          <span>{t.deckNameLabel}</span>
+          <input
+            type="text"
+            value={nameInput}
+            maxLength={100}
+            autoComplete="off"
+            aria-invalid={nameError}
+            aria-describedby={nameError ? 'sealed-name-error' : undefined}
+            onChange={(event) => {
+              setNameInput(event.target.value);
+              setNameError(false);
+            }}
+          />
+        </label>
+        <div className="sealed-save-buttons">
+          <button type="submit" className="button-primary" disabled={nothingToSave}>
+            {run.deckId === undefined ? t.save : t.saveChanges}
+          </button>
+          {run.deckId !== undefined && (
+            <a className="button-secondary" href={routeHash({ name: 'deck', id: run.deckId })}>
+              {t.openSavedDeck}
+            </a>
+          )}
+        </div>
+      </form>
+      {nameError && (
+        <p id="sealed-name-error" className="field-error" role="alert">
+          {t.deckNameError}
+        </p>
+      )}
+      {askReplace && (
+        <div className="notice notice-warning" role="alert">
+          <p>{t.replaceAsk}</p>
+          <div className="sealed-save-buttons">
+            <button type="button" className="button-primary" onClick={() => void saveAsDeck('replace')}>
+              {t.replaceYes}
+            </button>
+            <button type="button" className="button-secondary" onClick={() => void saveAsDeck('new')}>
+              {t.saveAsNew}
+            </button>
+            <button type="button" className="button-secondary" onClick={() => setAskReplace(false)}>
+              {t.replaceCancel}
+            </button>
+          </div>
+        </div>
+      )}
+      <p className="hint sealed-save-note">{t.saveNote}</p>
+      <p className="sealed-saved" role="status">
+        {message}
+      </p>
       <div className="sealed-actions" role="group" aria-label={t.actionsLabel}>
-        <button type="button" className="button-primary" disabled={stats.main + run.legends.length === 0} onClick={play}>
+        <button type="button" className="button-secondary" disabled={nothingToSave} onClick={play}>
           {t.play}
-        </button>
-        <button
-          type="button"
-          className="button-secondary"
-          disabled={stats.main + run.legends.length === 0 || saved !== null}
-          onClick={() => void saveAsDeck()}
-        >
-          {t.save}
         </button>
         <button type="button" className="button-secondary" onClick={onNew}>
           {t.newSealed}
         </button>
       </div>
-      <p className="hint sealed-save-note">{t.saveNote}</p>
-      <p className="sealed-saved" role="status">
-        {saved !== null && (
-          <>
-            {t.saved(saved.name)} <a href={routeHash({ name: 'deck', id: saved.id })}>{t.openSavedDeck}</a>
-          </>
-        )}
-      </p>
 
       <dl className="sealed-status" aria-label={t.statusLabel}>
         <div>

@@ -4,7 +4,8 @@ import { isBoosterRarity, isSealedSet, poolCounts, SEALED_LEGENDS } from './boos
 import type { BoosterCard, SealedDeck, SealedRow, SealedSetId } from './booster';
 import { MAX_DECK_CARD_COUNT } from './deck';
 import { isPrintingKey } from './printing';
-import { isRecord } from './validate';
+import { isDeckId, isRecord } from './validate';
+import type { DeckId } from './deck';
 import type { Parsed } from './validate';
 
 /*
@@ -25,6 +26,10 @@ export interface SealedRun {
   readonly pool: readonly BoosterCard[];
   readonly main: readonly SealedRow[];
   readonly legends: readonly CardKey[];
+  /** The deck this run was last saved as (T-176), so saving again updates it. Absent = not saved yet or an older run. */
+  readonly deckId?: DeckId;
+  /** The updatedAt of that deck right after this run saved it: a different one later means the deck was edited elsewhere. */
+  readonly deckUpdatedAt?: string;
 }
 
 export function newSealedRun(set: SealedSetId): SealedRun {
@@ -43,6 +48,12 @@ export function sealedDeckOf(run: SealedRun): SealedDeck {
 export function withPack(run: SealedRun, pack: readonly BoosterCard[]): SealedRun {
   if (isSealedReady(run)) return run;
   return { ...run, opened: run.opened + 1, pool: [...run.pool, ...pack] };
+}
+
+/** The run without the deck it was saved as (the deck is gone). */
+export function withoutDeckId(run: SealedRun): SealedRun {
+  if (run.deckId === undefined) return run;
+  return { set: run.set, opened: run.opened, pool: run.pool, main: run.main, legends: run.legends };
 }
 
 export function mainCountOf(run: SealedRun, card: CardKey): number {
@@ -144,7 +155,7 @@ function parseLegends(raw: unknown, counts: ReadonlyMap<CardKey, number>, main: 
 /** A stored run, or null when it is not valid. */
 export function parseSealedRun(raw: unknown): SealedRun | null {
   if (!isRecord(raw)) return null;
-  const { set, opened, pool, main, legends } = raw;
+  const { set, opened, pool, main, legends, deckId, deckUpdatedAt } = raw;
   if (!isSealedSet(set) || typeof opened !== 'number' || !Number.isInteger(opened) || opened < 0 || opened > SEALED_PACK_STEPS) return null;
   const parsedPool = parsePool(pool);
   if (parsedPool === null) return null;
@@ -153,7 +164,10 @@ export function parseSealedRun(raw: unknown): SealedRun | null {
   if (parsedMain === null) return null;
   const parsedLegends = parseLegends(legends, counts, parsedMain);
   if (parsedLegends === null) return null;
-  return { set, opened, pool: parsedPool, main: parsedMain, legends: parsedLegends };
+  // A run saved before T-176 has no deck id. The id is kept only with a valid stamp, so a run cannot overwrite a deck without the
+  // edited-elsewhere check (SEC-T176-1); otherwise both are dropped and the run itself is still read.
+  const linked = isDeckId(deckId) && typeof deckUpdatedAt === 'string' && deckUpdatedAt.length > 0 && deckUpdatedAt.length <= 40;
+  return { set, opened, pool: parsedPool, main: parsedMain, legends: parsedLegends, ...(linked ? { deckId, deckUpdatedAt } : {}) };
 }
 
 /** The envelope's data: `{ run }` where `run` is null when no sealed is going. */
