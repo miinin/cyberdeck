@@ -13,7 +13,7 @@ Kuvakaappaukset ennen ja jälkeen (320, 768 ja 1440 px, vaalea ja tumma). `npm t
 
 ## Luovutus
 
-**Koodari, valmis.** Nopat piirretään SVG-muotoinaan (uusi : d4 kolmio, d6 neliö, d8 vinoneliö, d10 leija, d12 viisikulmio, d20 kuusikulmio). Kuusi noppaa pysyy paikallaan rivissä, heitetty noppa näyttää arvonsa keltaisena, valmis korostettuna ja odottava katkoviivalla. Heitossa pyörimisanimaatio (vain ). Tulostaulu: Vuoro-pylväät (x/7), Eddiet, Gigit, korostettu Varastetut Gigit, Pakassa ja Trash. Kortit 104–220 px (2 per rivi puhelimella), Legendit ja Kenttä yhteisenä pelipöytänä, käsi alla, valittu kortti nousee. Vuoroloki siirretty koko leveyteen sivun alaosaan. Uudet tekstit: dieRolled, dieInFixer (fi ja en). Pelisääntöihin ei koskettu. Ei uusia riippuvuuksia.
+**Koodari, valmis.** Nopat piirretään SVG-muotoinaan (uusi src/ui/DieShape.tsx: d4 kolmio, d6 neliö, d8 vinoneliö, d10 leija, d12 viisikulmio, d20 kuusikulmio). Kuusi noppaa pysyy paikallaan rivissä, heitetty noppa näyttää arvonsa keltaisena, valmis korostettuna ja odottava katkoviivalla. Heitossa pyörimisanimaatio (vain prefers-reduced-motion: no-preference). Tulostaulu: Vuoro-pylväät (x/7), Eddiet, Gigit, korostettu Varastetut Gigit, Pakassa ja Trash. Kortit 104–220 px (2 per rivi puhelimella), Legendit ja Kenttä yhteisenä pelipöytänä, käsi alla, valittu kortti nousee. Vuoroloki siirretty koko leveyteen sivun alaosaan. Uudet tekstit: dieRolled, dieInFixer (fi ja en). Pelisääntöihin ei koskettu. Ei uusia riippuvuuksia.
 Kuvakaappaukset: scratchpad before/ ja after/ (320, 768, 1440 px, vaalea ja tumma, vaiheet order, mulligan, gig, turn, turn3, summary).
 Testit 1994 läpi, lint ja build läpi.
 Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 0
