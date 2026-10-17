@@ -96,6 +96,7 @@ export const goldfishTextsFi = {
   pickCard: 'Valitse kortti: ',
   selectedNone: 'Valitse kortti kädestä, niin näet sen toiminnot.',
   play: (cost: number) => `Pelaa (${cost} $)`,
+  playBare: 'Pelaa',
   sell: 'Myy',
   sellHint: 'Myyty kortti on pysyvästi 1 Eddie',
   gearTarget: 'Liitä kohteeseen',

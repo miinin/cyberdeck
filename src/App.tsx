@@ -134,7 +134,6 @@ export function App({
                 route.name === 'share' ||
                 route.name === 'publicDecks' ||
                 route.name === 'deckBuild' ||
-                route.name === 'goldfish' ||
                 route.name === 'publicDeck'
                   ? 'page'
                   : undefined
@@ -142,7 +141,7 @@ export function App({
             >
               {deckTexts.navDecks}
             </a>
-            <a href="#/testaa" aria-current={isPlaytestRoute(route) ? 'page' : undefined}>
+            <a href="#/testaa" aria-current={isPlaytestRoute(route) || route.name === 'goldfish' ? 'page' : undefined}>
               {sealedTexts.navPlaytest}
             </a>
             <a href="#/vaihto" aria-current={route.name === 'havewant' || route.name === 'trade' ? 'page' : undefined}>

@@ -96,6 +96,7 @@ export const goldfishTextsEn: typeof goldfishTextsFi = {
   pickCard: 'Select card: ',
   selectedNone: 'Select a card in your hand to see its actions.',
   play: (cost: number) => `Play (${cost} $)`,
+  playBare: 'Play',
   sell: 'Sell',
   sellHint: 'A sold card is 1 Eddie for good',
   gearTarget: 'Attach to',
