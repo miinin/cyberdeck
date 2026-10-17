@@ -638,3 +638,8 @@ Päätöksessä on viisi osaa.
 **Konteksti:** D-018:n mukaan want-määrä ei pienene, kun kokoelma kasvaa. Käyttäjälle jäi Wantille kortteja, jotka oli jo lisätty kokoelmaan.
 **Päätös:** Want ei edelleenkään pienene automaattisesti. Kun käyttäjä itse kasvattaa Wantilla olevan kortin määrää kokoelmassa, palkki kysyy "Vähennä Wantilta / Pidä Wantilla" (T-169). Vähennys on lisättyjen kopioiden verran, ja nolla poistaa rivin.
 **Seuraukset:** Synkka, toinen välilehti ja tuonti eivät kysy. Have/Want-näkymän oma Have-lista ei kuulu tähän.
+
+## D-036 · Testaa-osio yläpalkkiin, nopeampi sealed ja helppo vienti · 2026-10-17 · Päättäjä: käyttäjä
+**Konteksti:** Sealed oli piilossa Pakat-sivun välilehdellä, avaus vaati yli 20 klikkausta ja hiiren siirtelyä, ja goldfish-näkymän kortit olivat pieniä eikä nopissa ollut visuaalisuutta.
+**Päätös:** Yläpalkkiin tulee oma osio **Testaa** (en: Playtest), jossa ovat Sealed, Boosterit ja Pelaa yksin (oman pakan valinta). Sealedin avauksessa yksi iso painike pysyy samassa kohdassa (avaa, paljastaa ja siirtyy eteenpäin, myös välilyönnillä), ja "Avaa kaikki loput" vie suoraan rakentajaan. Rakentajan yläosassa on aina näkyvä nimikenttä ja "Tallenna omiin pakkoihin". Tallennuksen jälkeen näkyy "Avaa pakka", ja muutokset voi tallentaa samaan pakkaan uudelleen. Goldfish-näkymä uudistetaan visuaalisesti (T-177).
+**Seuraukset:** Vanhat `#/pakat/sealed`-osoitteet ohjataan uuteen osioon. Sealed-ajoon tallennetaan viedyn pakan id (tallennusmuutos, dev ensin).
