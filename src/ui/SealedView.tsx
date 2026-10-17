@@ -116,11 +116,17 @@ export function SealedView({
     setPack(null);
   };
 
-  const openStep = async (current: SealedRun) => {
+  // The pack joins the stored pool only once it is revealed (BRK-04): a reload mid-reveal opens a fresh pack, no card is lost unseen.
+  const openStep = (current: SealedRun) => {
     const step = current.opened;
     const opened = step < SEALED_BOOSTERS ? openBooster(cards, current.set, rng) : openLegendPack(cards, current.set, rng);
     setPack({ cards: opened, step });
-    report(await sealed.update((latest) => withPack(latest, opened)));
+  };
+
+  const finishPack = async (step: number, revealed: readonly BoosterCard[]) => {
+    setPack(null);
+    // Only if this step is still the next one, so a repeated click cannot add the pack twice.
+    report(await sealed.update((latest) => (latest.opened === step ? withPack(latest, revealed) : latest)));
   };
 
   const openSingle = () => {
@@ -165,7 +171,7 @@ export function SealedView({
           cardsByKey={cardsByKey}
           title={title}
           nextLabel={pack.step + 1 >= SEALED_PACK_STEPS ? t.toBuilder : t.nextPack}
-          onNext={() => setPack(null)}
+          onNext={() => void finishPack(pack.step, pack.cards)}
         />
       </section>
     );
@@ -193,7 +199,7 @@ export function SealedView({
           <span className="sealed-step-of"> · {t.stepOf(step + 1, SEALED_PACK_STEPS)}</span>
         </h2>
         <div className="pack-actions">
-          <button type="button" className="button-primary" onClick={() => void openStep(run)}>
+          <button type="button" className="button-primary" onClick={() => openStep(run)}>
             {t.openPack}
           </button>
         </div>
@@ -351,7 +357,12 @@ function SealedBuilder({
         <button type="button" className="button-primary" disabled={stats.main + run.legends.length === 0} onClick={play}>
           {t.play}
         </button>
-        <button type="button" className="button-secondary" disabled={stats.main + run.legends.length === 0} onClick={() => void saveAsDeck()}>
+        <button
+          type="button"
+          className="button-secondary"
+          disabled={stats.main + run.legends.length === 0 || saved !== null}
+          onClick={() => void saveAsDeck()}
+        >
           {t.save}
         </button>
         <button type="button" className="button-secondary" onClick={onNew}>

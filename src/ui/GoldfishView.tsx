@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { RefObject } from 'react';
 import type { Card } from '../domain/card';
 import type { DeckContent } from '../domain/deck';
-import { OPENING_HAND, mainDeckSize } from '../domain/deckStats';
+import { mainDeckSize } from '../domain/deckStats';
 import { toCardsByKey } from '../domain/deckRules';
 import type { CardsByKey } from '../domain/deckRules';
 import {
@@ -78,7 +78,7 @@ function logText(entry: TurnLog): string {
   });
 }
 
-type FocusTarget = 'hand' | 'gig' | 'field' | 'legends' | 'summary';
+type FocusTarget = 'hand' | 'gig' | 'field' | 'legends' | 'summary' | 'heading';
 
 /** The deck as a table: set-up, mulligan, seven turns and a summary. Nothing is stored (T-172). */
 export function GoldfishView({
@@ -120,6 +120,7 @@ export function GoldfishView({
       field: fieldRef,
       legends: legendsRef,
       summary: summaryRef,
+      heading: headingRef,
     };
     refs[target].current?.focus({ preventScroll: true });
   });
@@ -133,7 +134,13 @@ export function GoldfishView({
     const next = start(deck, cardsByKey, rng, goFirst);
     setGame(next);
     setSelected(null);
+    pendingFocus.current = 'hand';
     setAnnouncement(t.announceNew(next.hand.map(cardNameText)));
+  };
+
+  const restart = () => {
+    pendingFocus.current = 'heading';
+    setGame(null);
   };
 
   /** Applies an action: a refusal leaves the state as it is (the buttons show why beforehand). */
@@ -215,7 +222,7 @@ export function GoldfishView({
           <h2 className="panel-title" ref={handRef} tabIndex={-1}>
             {t.openingTitle}
           </h2>
-          <p className="hint">{t.openingHint(OPENING_HAND)}</p>
+          <p className="hint">{t.openingHint(game.hand.length)}</p>
           <ul className="gf-hand" aria-label={t.handList(game.hand.length)}>
             {game.hand.map((card, index) => (
               <li key={`${index}-${card.key}`} className="gf-hand-item">
@@ -348,7 +355,7 @@ export function GoldfishView({
                 <button type="button" className="button-primary" onClick={() => begin(lastGoFirst.current)}>
                   {t.playAgain}
                 </button>
-                <button type="button" className="button-secondary" onClick={() => setGame(null)}>
+                <button type="button" className="button-secondary" onClick={restart}>
                   {t.restart}
                 </button>
               </div>
@@ -381,6 +388,7 @@ export function GoldfishView({
             <h2 className="panel-title" ref={legendsRef} tabIndex={-1}>
               {t.legendsTitle}
             </h2>
+            {game.legends.length === 0 && <p className="hint">{t.legendsNone}</p>}
             <ul className="gf-legends">
               {game.legends.map((slot, index) => (
                 <li key={`${index}-${slot.card.key}`} className={'gf-slot' + (slot.spent ? ' is-spent' : '')}>
@@ -584,7 +592,7 @@ export function GoldfishView({
               </div>
             </div>
             <div className="gf-buttons">
-              <button type="button" className="button-secondary" onClick={() => setGame(null)}>
+              <button type="button" className="button-secondary" onClick={restart}>
                 {t.restart}
               </button>
               <button

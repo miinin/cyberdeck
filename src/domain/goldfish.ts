@@ -94,12 +94,14 @@ export type GoldfishError =
   | 'already-sold'
   | 'not-enough'
   | 'needs-target'
+  | 'no-target'
   | 'bad-target'
   | 'no-such-unit'
   | 'unit-lag'
   | 'unit-spent'
   | 'already-invoked'
   | 'no-face-down-legend'
+  | 'no-legends'
   | 'die-unavailable'
   | 'die-last';
 
@@ -314,13 +316,16 @@ export function sell(state: GoldfishState, handIndex: number): GoldfishResult {
 /** Whether a Gear needs a target when played (always, it is attached to a Unit or Legend). */
 export const needsTarget = (card: Card): boolean => card.type === 'Gear';
 
-/** Why the hand card cannot be played now (the target is checked only when given), or null. */
+/** Why the hand card cannot be played now (a Gear needs a target), or null. */
 export function playProblem(state: GoldfishState, handIndex: number, target?: GearTarget): GoldfishError | null {
   const blocked = mainPhase(state);
   if (blocked !== null) return blocked;
   const card = state.hand[handIndex];
   if (card === undefined) return 'no-such-card';
   if (costOf(card) > availableMoney(state)) return 'not-enough';
+  if (needsTarget(card) && target === undefined) {
+    return state.field.length + state.legends.length === 0 ? 'no-target' : 'needs-target';
+  }
   if (needsTarget(card) && target !== undefined) {
     if (target.kind === 'unit' && !state.field.some((unit) => unit.id === target.id)) return 'bad-target';
     if (target.kind === 'legend' && state.legends[target.index] === undefined) return 'bad-target';
@@ -336,7 +341,6 @@ export function play(state: GoldfishState, handIndex: number, target?: GearTarge
   const problem = playProblem(state, handIndex, target);
   if (problem !== null) return fail(problem);
   const card = state.hand[handIndex] as Card;
-  if (needsTarget(card) && target === undefined) return fail('needs-target');
   const paid = spend(state, costOf(card));
   if (paid === null) return fail('not-enough');
   let next: GoldfishState = {
@@ -366,6 +370,7 @@ export function play(state: GoldfishState, handIndex: number, target?: GearTarge
 export function invokeProblem(state: GoldfishState): GoldfishError | null {
   const blocked = mainPhase(state);
   if (blocked !== null) return blocked;
+  if (state.legends.length === 0) return 'no-legends';
   if (state.invoked) return 'already-invoked';
   if (!state.legends.some((slot) => !slot.faceUp)) return 'no-face-down-legend';
   return availableMoney(state) >= 1 ? null : 'not-enough';

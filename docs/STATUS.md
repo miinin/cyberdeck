@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | PM | T-171–T-174 valmiina test-haarassa, rikkomistestaus ja julkaisu käynnissä | Rikkomistestauksen pakolliset korjataan, dev ja sitten tuotanto |
+| T-175 | PM | T-171–T-175 valmiina test-haarassa, rikkomistestauksen löydökset korjattu (BRK-01–06) | Dev-tarkistus (sealed-tallennus), sitten julkaisu-PR test → main |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.

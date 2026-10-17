@@ -12,9 +12,11 @@ import {
   freeEddies,
   gigsStolen,
   invokeLegend,
+  invokeProblem,
   keepHand,
   mulligan,
   play,
+  playProblem,
   sell,
   selectableDice,
   start,
@@ -357,5 +359,22 @@ describe('end of turn and game', () => {
     expect(over.end).toBe('quit');
     expect(over.wasted).toBe(3);
     expect(endGame(over)).toBe(over);
+  });
+});
+
+describe('break-test fixes (BRK-01, BRK-06)', () => {
+  it('reports a Gear without any possible target as no-target, not as a missing choice', () => {
+    const gear = card('g', { type: 'Gear', cost: 0 });
+    const base = ok(chooseGig(playing([gear]), 4, () => 0));
+    expect(playProblem(base, 0)).toBe('needs-target');
+    const bare = { ...base, legends: [], field: [] };
+    expect(playProblem(bare, 0)).toBe('no-target');
+    expect(reason(play(bare, 0))).toBe('no-target');
+  });
+
+  it('says there are no Legends to invoke when the deck has none', () => {
+    const state = ok(chooseGig(playing([card('u', { cost: 0 })]), 4, () => 0));
+    expect(invokeProblem({ ...state, legends: [] })).toBe('no-legends');
+    expect(invokeProblem(state)).toBeNull();
   });
 });
