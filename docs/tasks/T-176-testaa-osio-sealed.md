@@ -35,4 +35,4 @@ Kuvakaappaukset: scratchpad `out/`.
 | Yläpalkki mobiilissa: 2 riviä (3+3), tasaleveät, 12 px | Valmis | 320, 375 ja 768 px, vaalea ja tumma: ei vaakavieritystä, ei leikkautuneita eikä päällekkäisiä linkkejä, linkin korkeus 44 px, fontti 12 px (768 px: yksi rivi, 18 px) |
 | Tallenna muutokset: kysytään, jos pakkaa on muokattu muualla | Valmis | Tunniste: pakan `updatedAt` tallennetaan sealed-ajon kenttään `deckUpdatedAt` (valinnainen, enintään 40 merkkiä) jokaisen tallennuksen jälkeen. Eri arvo → kysely "Korvaa / Tallenna uutena / Peruuta", ennen vastausta ei kirjoiteta. Ilman leimaa (vanha ajo) tallennetaan suoraan. Päivitys käyttää lisäksi `expectedUpdatedAt`-suojaa. Testit: kysely, peruutus, uutena, korvaus, suora tallennus, kentän luku |
 | Siivous | Valmis | Poistettu tekstit revealAll, revealCard, stepOf ja CSS .sealed-start, .sealed-step-of, .pack-back--next |
-Testit 1996/1996 ovat läpi, lint ja build läpi. Kuvakaappaukset: scratchpad `out/nav-{320,375,768}-{light,dark}.png`.
+Testit 1994/1994 ovat läpi, lint ja build läpi. Kuvakaappaukset: scratchpad `out/nav-{320,375,768}-{light,dark}.png`.
