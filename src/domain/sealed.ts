@@ -164,8 +164,10 @@ export function parseSealedRun(raw: unknown): SealedRun | null {
   if (parsedMain === null) return null;
   const parsedLegends = parseLegends(legends, counts, parsedMain);
   if (parsedLegends === null) return null;
-  // A run saved before T-176 has no deck id; one that is not a deck id is dropped, the run itself is still read.
-  return { set, opened, pool: parsedPool, main: parsedMain, legends: parsedLegends, ...(isDeckId(deckId) ? { deckId, ...(typeof deckUpdatedAt === 'string' && deckUpdatedAt.length <= 40 ? { deckUpdatedAt } : {}) } : {}) };
+  // A run saved before T-176 has no deck id. The id is kept only with a valid stamp, so a run cannot overwrite a deck without the
+  // edited-elsewhere check (SEC-T176-1); otherwise both are dropped and the run itself is still read.
+  const linked = isDeckId(deckId) && typeof deckUpdatedAt === 'string' && deckUpdatedAt.length > 0 && deckUpdatedAt.length <= 40;
+  return { set, opened, pool: parsedPool, main: parsedMain, legends: parsedLegends, ...(linked ? { deckId, deckUpdatedAt } : {}) };
 }
 
 /** The envelope's data: `{ run }` where `run` is null when no sealed is going. */

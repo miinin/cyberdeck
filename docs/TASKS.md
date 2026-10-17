@@ -178,5 +178,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-173 | Virtuaaliboosterit ja sealed: boosterien avaus (yhteisön jakaumat), sealed 6 + Legend-pakkaus, rakentaja, Pelaa yksin, Tallenna pakaksi, tallennus laitteelle | 1 | Should | Koodari | Done | Digiturva (4 × Info), rikkomistestaus |
 | T-174 | MVP-1:n UX-loppukatselmoinnin korjaukset: 13 pakollista ja 19 suositusta (pomppiminen, ylivuodot, kontrasti, hoverit, Omistetut-suodatin editoriin) | 1 | Must | Koodari | Done | PM (testit, kuvakaappaukset Koodarilta) |
 | T-175 | Rikkomistestauksen BREAK-T172-T173 korjaukset (BRK-01–06: Gear ilman kohdetta, kädenkoko, kohdistus, pakkaus pooliin vasta paljastuksen jälkeen, tuplatallennus, ei Legendejä) | 1 | Must | PM | Done | dev ennen tuotantoa (sealed-tallennus) |
-| T-176 | Testaa-osio yläpalkkiin (Sealed, Boosterit, Pelaa yksin), sealedin yhden painikkeen avaus ja vienti omiin pakkoihin (D-036) | 1 | Must | Koodari | In progress | Digiturva (tallennus), dev ensin |
+| T-176 | Testaa-osio yläpalkkiin (Sealed, Boosterit, Pelaa yksin), sealedin yhden painikkeen avaus ja vienti omiin pakkoihin (D-036) | 1 | Must | Koodari | Done | Digiturva (tallennus), dev ensin |
 | T-177 | Goldfish-näkymän visuaalinen uudistus: isommat kortit, nopat muotoinaan, tulostaulu (D-036) | 1 | Must | Koodari | Ready | PM (kuvakaappaukset) |

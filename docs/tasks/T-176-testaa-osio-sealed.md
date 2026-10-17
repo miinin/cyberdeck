@@ -36,3 +36,9 @@ Kuvakaappaukset: scratchpad `out/`.
 | Tallenna muutokset: kysytään, jos pakkaa on muokattu muualla | Valmis | Tunniste: pakan `updatedAt` tallennetaan sealed-ajon kenttään `deckUpdatedAt` (valinnainen, enintään 40 merkkiä) jokaisen tallennuksen jälkeen. Eri arvo → kysely "Korvaa / Tallenna uutena / Peruuta", ennen vastausta ei kirjoiteta. Ilman leimaa (vanha ajo) tallennetaan suoraan. Päivitys käyttää lisäksi `expectedUpdatedAt`-suojaa. Testit: kysely, peruutus, uutena, korvaus, suora tallennus, kentän luku |
 | Siivous | Valmis | Poistettu tekstit revealAll, revealCard, stepOf ja CSS .sealed-start, .sealed-step-of, .pack-back--next |
 Testit 1994/1994 ovat läpi, lint ja build läpi. Kuvakaappaukset: scratchpad `out/nav-{320,375,768}-{light,dark}.png`.
+
+### Digiturva-katselmointi
+Digiturva 2026-10-17, `git diff 2796f9b..HEAD`. Raportti `docs/reports/SEC-T176.md`: Pakollinen 0, Suositus 1, Info 3. **Ei vetoa.** Suositus SEC-T176-1: jos ajossa on `deckId` mutta ei kelvollista `deckUpdatedAt`-leimaa (syntyy vain muokatusta tai rikkoutuneesta tallennuksesta), tallennus ylikirjoittaa pakan kysymättä ja ilman `expectedUpdatedAt`-suojaa. Korjaus: pudota id, jos leimaa ei ole, tai kysy aina. Riippuvuudet, firebase.json ja workflowt eivät muuttuneet, eikä salaisuuksia löytynyt. SECURITY.md:n luku 20 ja PRIVACY.md:n rivi 1f on päivitetty.
+
+### PM · 2026-10-17 · Tila: valmis, dev
+SEC-T176-1 korjattu: `parseSealedRun` säilyttää `deckId`:n vain yhdessä kelvollisen `deckUpdatedAt`-leiman kanssa, joten ajo ei voi ylikirjoittaa pakkaa ohi tarkistuksen. Testi lisätty. `npm test` 1994/1994, lint ja build läpi.

@@ -107,14 +107,16 @@ describe('reading a stored run (SR-23)', () => {
   });
 
   it('reads a run saved as a deck (T-176) and an older run without the id', () => {
-    expect(parseSealedRun({ ...valid, deckId: 'abc-123' })).toEqual({ ...valid, deckId: 'abc-123' });
+    expect(parseSealedRun({ ...valid, deckId: 'abc-123', deckUpdatedAt: '2026-10-17T10:00:00.000Z' })).toEqual({ ...valid, deckId: 'abc-123', deckUpdatedAt: '2026-10-17T10:00:00.000Z' });
     expect(parseSealedRun(valid)).not.toHaveProperty('deckId');
   });
 
-  it('reads the stamp of the saved deck only with a deck id', () => {
+  it('keeps the deck id only together with a valid stamp (SEC-T176-1)', () => {
     expect(parseSealedRun({ ...valid, deckId: 'abc', deckUpdatedAt: '2026-10-17T10:00:00.000Z' })).toMatchObject({ deckUpdatedAt: '2026-10-17T10:00:00.000Z' });
     expect(parseSealedRun({ ...valid, deckUpdatedAt: '2026-10-17T10:00:00.000Z' })).toEqual(valid);
-    expect(parseSealedRun({ ...valid, deckId: 'abc', deckUpdatedAt: 'x'.repeat(41) })).toEqual({ ...valid, deckId: 'abc' });
+    expect(parseSealedRun({ ...valid, deckId: 'abc', deckUpdatedAt: 'x'.repeat(41) })).toEqual(valid);
+    expect(parseSealedRun({ ...valid, deckId: 'abc' })).toEqual(valid);
+    expect(parseSealedRun({ ...valid, deckId: 'abc', deckUpdatedAt: '' })).toEqual(valid);
   });
 
   it.each([['wrong characters', 'a b/c'], ['too long', 'a'.repeat(65)], ['not text', 42], ['empty', '']])(
