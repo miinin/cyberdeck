@@ -336,6 +336,8 @@ function SealedBuilder({
   const [message, setMessage] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState(() => t.deckName(new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short' }).format(now())));
   const [nameError, setNameError] = useState(false);
+  /** The deck was edited elsewhere since this run saved it: asks before the changes replace it. */
+  const [askReplace, setAskReplace] = useState(false);
   const saving = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   // The latest handle for effects that must not run again every time the run changes.
@@ -396,7 +398,7 @@ function SealedBuilder({
   };
 
   /** Saves the deck among the user's own: the deck this run was saved as before is updated, else a new one is made. */
-  const saveAsDeck = async () => {
+  const saveAsDeck = async (mode: 'check' | 'replace' | 'new' = 'check') => {
     if (saving.current) return;
     const checked = checkDeckName(nameInput);
     if (!checked.ok) {
@@ -407,8 +409,15 @@ function SealedBuilder({
     saving.current = true;
     onFailure(null);
     setMessage(null);
+    setAskReplace(false);
     try {
-      const previous = run.deckId === undefined ? null : await repositories.decks.get(run.deckId);
+      const found = run.deckId === undefined || mode === 'new' ? null : await repositories.decks.get(run.deckId);
+      // Edited elsewhere (the editor) after the last save here: ask first. A run without a stamp cannot tell, so it saves.
+      if (mode === 'check' && found !== null && run.deckUpdatedAt !== undefined && found.updatedAt !== run.deckUpdatedAt) {
+        setAskReplace(true);
+        return;
+      }
+      const previous = found;
       const { value: existing } = await repositories.decks.list();
       const name = uniqueDeckName(
         existing.filter((item) => item.id !== previous?.id).map((item) => item.name),
@@ -426,10 +435,13 @@ function SealedBuilder({
           },
         ],
       };
-      const stored = previous === null ? await repositories.decks.create(content) : await repositories.decks.update(previous.id, content);
+      const stored =
+        previous === null
+          ? await repositories.decks.create(content)
+          : await repositories.decks.update(previous.id, content, mode === 'check' && run.deckUpdatedAt !== undefined ? { expectedUpdatedAt: run.deckUpdatedAt } : undefined);
       setNameInput(stored.name);
       setMessage(previous === null ? t.saved(stored.name) : t.updated(stored.name));
-      if (run.deckId !== stored.id) onFailure(await sealed.update((current) => ({ ...current, deckId: stored.id })));
+      onFailure(await sealed.update((current) => ({ ...current, deckId: stored.id, deckUpdatedAt: stored.updatedAt })));
     } catch (error) {
       onFailure(error instanceof StorageError ? error.kind : 'unknown');
     } finally {
@@ -481,6 +493,22 @@ function SealedBuilder({
         <p id="sealed-name-error" className="field-error" role="alert">
           {t.deckNameError}
         </p>
+      )}
+      {askReplace && (
+        <div className="notice notice-warning" role="alert">
+          <p>{t.replaceAsk}</p>
+          <div className="sealed-save-buttons">
+            <button type="button" className="button-primary" onClick={() => void saveAsDeck('replace')}>
+              {t.replaceYes}
+            </button>
+            <button type="button" className="button-secondary" onClick={() => void saveAsDeck('new')}>
+              {t.saveAsNew}
+            </button>
+            <button type="button" className="button-secondary" onClick={() => setAskReplace(false)}>
+              {t.replaceCancel}
+            </button>
+          </div>
+        </div>
       )}
       <p className="hint sealed-save-note">{t.saveNote}</p>
       <p className="sealed-saved" role="status">

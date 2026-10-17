@@ -28,6 +28,8 @@ export interface SealedRun {
   readonly legends: readonly CardKey[];
   /** The deck this run was last saved as (T-176), so saving again updates it. Absent = not saved yet or an older run. */
   readonly deckId?: DeckId;
+  /** The updatedAt of that deck right after this run saved it: a different one later means the deck was edited elsewhere. */
+  readonly deckUpdatedAt?: string;
 }
 
 export function newSealedRun(set: SealedSetId): SealedRun {
@@ -153,7 +155,7 @@ function parseLegends(raw: unknown, counts: ReadonlyMap<CardKey, number>, main: 
 /** A stored run, or null when it is not valid. */
 export function parseSealedRun(raw: unknown): SealedRun | null {
   if (!isRecord(raw)) return null;
-  const { set, opened, pool, main, legends, deckId } = raw;
+  const { set, opened, pool, main, legends, deckId, deckUpdatedAt } = raw;
   if (!isSealedSet(set) || typeof opened !== 'number' || !Number.isInteger(opened) || opened < 0 || opened > SEALED_PACK_STEPS) return null;
   const parsedPool = parsePool(pool);
   if (parsedPool === null) return null;
@@ -163,7 +165,7 @@ export function parseSealedRun(raw: unknown): SealedRun | null {
   const parsedLegends = parseLegends(legends, counts, parsedMain);
   if (parsedLegends === null) return null;
   // A run saved before T-176 has no deck id; one that is not a deck id is dropped, the run itself is still read.
-  return { set, opened, pool: parsedPool, main: parsedMain, legends: parsedLegends, ...(isDeckId(deckId) ? { deckId } : {}) };
+  return { set, opened, pool: parsedPool, main: parsedMain, legends: parsedLegends, ...(isDeckId(deckId) ? { deckId, ...(typeof deckUpdatedAt === 'string' && deckUpdatedAt.length <= 40 ? { deckUpdatedAt } : {}) } : {}) };
 }
 
 /** The envelope's data: `{ run }` where `run` is null when no sealed is going. */

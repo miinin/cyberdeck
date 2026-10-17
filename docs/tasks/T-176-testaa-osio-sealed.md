@@ -28,3 +28,11 @@ Koodari, test-haara, ei pushattu. Testit 1991/1991, lint ja build läpi.
 | Ylivuoto ja sisäinen vieritys | Ei löydöksiä | 320 ja 1280, vaalea ja tumma: scrollWidth = leveys, ei ylivuotavia elementtejä, ei sisäisiä vierityksiä |
 Koodikatselmointi: tehty · Pakollisia korjattu 2 (ref renderöinnin aikana, painikkeen korkeus) · Suosituksia 2: käyttämättömät tekstit (revealAll, revealCard, stepOf) ja CSS (.sealed-start, pack-back--next) voi siivota. Tallennus on riskialtis: Digiturva katselmoi ja deviin ennen tuotantoa. Päivitys korvaa pakan sisällön (myös sivupakan), jos käyttäjä on muokannut sitä editorissa.
 Kuvakaappaukset: scratchpad `out/`.
+
+### Korjauskierros
+| Kohta | Tila | Mitattu |
+|---|---|---|
+| Yläpalkki mobiilissa: 2 riviä (3+3), tasaleveät, 12 px | Valmis | 320, 375 ja 768 px, vaalea ja tumma: ei vaakavieritystä, ei leikkautuneita eikä päällekkäisiä linkkejä, linkin korkeus 44 px, fontti 12 px (768 px: yksi rivi, 18 px) |
+| Tallenna muutokset: kysytään, jos pakkaa on muokattu muualla | Valmis | Tunniste: pakan `updatedAt` tallennetaan sealed-ajon kenttään `deckUpdatedAt` (valinnainen, enintään 40 merkkiä) jokaisen tallennuksen jälkeen. Eri arvo → kysely "Korvaa / Tallenna uutena / Peruuta", ennen vastausta ei kirjoiteta. Ilman leimaa (vanha ajo) tallennetaan suoraan. Päivitys käyttää lisäksi `expectedUpdatedAt`-suojaa. Testit: kysely, peruutus, uutena, korvaus, suora tallennus, kentän luku |
+| Siivous | Valmis | Poistettu tekstit revealAll, revealCard, stepOf ja CSS .sealed-start, .sealed-step-of, .pack-back--next |
+Testit 1996/1996 ovat läpi, lint ja build läpi. Kuvakaappaukset: scratchpad `out/nav-{320,375,768}-{light,dark}.png`.

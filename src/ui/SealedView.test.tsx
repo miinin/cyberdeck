@@ -301,6 +301,47 @@ describe('Sealed tab (T-173, T-176)', () => {
     expect(decks[0]?.sections[0]?.cards.reduce((sum, row) => sum + row.count, 0)).toBe(2);
   });
 
+  it('asks before replacing a deck that was edited elsewhere, and replaces it or saves a new one', async () => {
+    const { user, repositories } = renderView();
+    await openAllPacks(user);
+    await addFirstCard(user);
+    await user.click(screen.getByRole('button', { name: 'Tallenna omiin pakkoihin' }));
+    await screen.findByRole('button', { name: 'Tallenna muutokset' });
+    const [saved] = (await repositories.decks.list()).value;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await repositories.decks.update(saved?.id ?? '', { name: 'Editorissa muokattu', sections: [{ name: '', cards: [] }] });
+
+    await user.click(screen.getByRole('button', { name: 'Tallenna muutokset' }));
+    expect(await screen.findByText('Pakkaa on muokattu editorissa. Korvataanko se sealed-pakalla?')).toBeInTheDocument();
+    // Nothing is overwritten before the answer, and Cancel keeps it so.
+    expect((await repositories.decks.list()).value[0]?.name).toBe('Editorissa muokattu');
+    await user.click(screen.getByRole('button', { name: 'Peruuta' }));
+    expect(screen.queryByText(/Pakkaa on muokattu editorissa/)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Tallenna muutokset' }));
+    await user.click(await screen.findByRole('button', { name: 'Tallenna uutena' }));
+    await waitFor(async () => expect((await repositories.decks.list()).value).toHaveLength(2));
+    expect((await repositories.decks.get(saved?.id ?? ''))?.name).toBe('Editorissa muokattu');
+
+    // The new deck is the saved one now; edit it and replace.
+    const [, created] = (await repositories.decks.list()).value;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await repositories.decks.update(created?.id ?? '', { name: 'Taas muokattu', sections: [{ name: '', cards: [] }] });
+    await user.click(await screen.findByRole('button', { name: 'Tallenna muutokset' }));
+    await user.click(await screen.findByRole('button', { name: 'Korvaa' }));
+    await waitFor(async () => expect((await repositories.decks.get(created?.id ?? ''))?.sections[0]?.cards.length).toBeGreaterThan(0));
+  });
+
+  it('saves straight away when the deck was not edited elsewhere', async () => {
+    const { user } = renderView();
+    await openAllPacks(user);
+    await addFirstCard(user);
+    await user.click(screen.getByRole('button', { name: 'Tallenna omiin pakkoihin' }));
+    await user.click(await screen.findByRole('button', { name: 'Tallenna muutokset' }));
+    expect(await screen.findByText(/^Muutokset tallennettu pakkaan/)).toBeInTheDocument();
+    expect(screen.queryByText(/Pakkaa on muokattu editorissa/)).not.toBeInTheDocument();
+  });
+
   it('makes a new deck when the saved one has been removed', async () => {
     const { user, repositories } = renderView();
     await openAllPacks(user);

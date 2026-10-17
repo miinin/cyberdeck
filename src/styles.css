@@ -11843,11 +11843,6 @@ button.card-tag:focus-visible {
   margin: 0;
 }
 
-.sealed-step-of {
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-normal, 400);
-}
-
 .sealed-intro,
 .sealed-rules,
 .sealed-estimate {
@@ -11857,18 +11852,6 @@ button.card-tag:focus-visible {
 .sealed-rules {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-}
-
-.sealed-start {
-  display: grid;
-  gap: var(--space-4);
-}
-
-@media (min-width: 48rem) {
-  .sealed-start {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
-  }
 }
 
 .sealed-start-card {
@@ -11958,16 +11941,6 @@ button.card-tag:focus-visible {
   color: var(--color-text-muted);
   font-family: var(--font-mono);
   font-size: var(--font-size-lg);
-}
-
-.pack-back--next {
-  border-color: var(--color-accent-2);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.pack-back--next:hover {
-  border-color: var(--color-accent);
 }
 
 .pack-meta {
@@ -12464,17 +12437,17 @@ body:has(.mark-banner) .site-footer {
   font-size: var(--font-size-sm);
 }
 
-/* Six items in the mobile navigation (Testaa joined the five): a little tighter so that they fit 320 px in one row. */
+/* Six items in the mobile navigation (Testaa joined the five): two rows of three, equal width, 44 px high, 12 px text. */
 @media (max-width: 39.99rem) {
-  .site-header .main-nav a {
-    font-size: 0.625rem;
-    letter-spacing: 0;
+  .site-header .main-nav {
+    flex-wrap: wrap;
   }
-}
 
-@media (max-width: 23.99rem) {
   .site-header .main-nav a {
-    font-size: 0.5625rem;
-    padding-inline: 1px;
+    flex: 1 1 33.333%;
+    min-block-size: 44px;
+    padding-inline: 2px;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
   }
 }
