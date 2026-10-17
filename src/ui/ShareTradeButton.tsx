@@ -25,9 +25,12 @@ export function ShareTradeButton({
   note?: string;
 }) {
   const [state, setState] = useState<'copied' | 'failed' | null>(null);
+  /** UX-18 (T-174): the link field appears only after "Jaa", as a copyable field (not always, with a long raw URL). */
+  const [revealed, setRevealed] = useState(false);
   const data = useMemo(() => encodeTradeShare(have, want, tradeable), [have, want, tradeable]);
   const link = data === null ? '' : `${window.location.origin}/#/vaihto/${data}`;
   const share = async () => {
+    setRevealed(true);
     try {
       await navigator.clipboard.writeText(link);
       setState('copied');
@@ -39,14 +42,16 @@ export function ShareTradeButton({
   return (
     <div className="trade-share">
       <div className="trade-share-row">
-        <input
-          type="text"
-          readOnly
-          className="trade-share-link"
-          value={link}
-          aria-label={texts.tradeShareLinkLabel}
-          onFocus={(e) => e.target.select()}
-        />
+        {revealed && (
+          <input
+            type="text"
+            readOnly
+            className="trade-share-link"
+            value={link}
+            aria-label={texts.tradeShareLinkLabel}
+            onFocus={(e) => e.target.select()}
+          />
+        )}
         <button type="button" className="button-secondary" onClick={() => void share()}>
           {texts.tradeShareButton}
         </button>

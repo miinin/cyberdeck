@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { parseHash, routeHash, sectionOf } from './useHashRoute';
 
+describe('goldfish route (T-172)', () => {
+  it('parses #/pakat/<id>/goldfish and round-trips', () => {
+    expect(parseHash('#/pakat/a/goldfish')).toEqual({ name: 'goldfish', id: 'a' });
+    expect(routeHash({ name: 'goldfish', id: 'a' })).toBe('#/pakat/a/goldfish');
+    expect(sectionOf({ name: 'goldfish', id: 'a' })).toBe('decks');
+  });
+
+  it('falls back to the deck list for a bad id or extra parts', () => {
+    expect(parseHash('#/pakat/a/goldfish/x')).toEqual({ name: 'decks' });
+    expect(parseHash('#/pakat/a/other')).toEqual({ name: 'decks' });
+    expect(parseHash('#/pakat/bad id/goldfish')).toEqual({ name: 'decks' });
+  });
+});
+
 describe('card route (T-081)', () => {
   it('parses #/kortti/<key> and round-trips', () => {
     expect(parseHash('#/kortti/welcome-to-night-city')).toEqual({ name: 'card', key: 'welcome-to-night-city' });

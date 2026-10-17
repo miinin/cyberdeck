@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { Deck, DeckContent, DeckPublish } from '../domain/deck';
 import { buildPublicDeckInput } from '../domain/publicDeck';
@@ -41,6 +42,7 @@ import { StorageError } from '../storage';
 import type { DeckListView, DeckPickView, Repositories, StorageErrorKind } from '../storage';
 import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import { CardFilters } from './CardFilters';
+import type { CollectionFilter } from './CardFilters';
 import { useCardHoverPreview } from './CardHoverPreview';
 import { CardImageDialog } from './CardImageDialog';
 import { cardNameText } from './CardName';
@@ -137,6 +139,19 @@ export function DeckEditor({
   const [content, setContent] = useState<DeckContent>({ name: '', sections: [] });
   const contentRef = useRef(content);
   const [nameText, setNameText] = useState('');
+  const nameFieldRef = useRef<HTMLTextAreaElement>(null);
+  // UX-21 (T-174): the name field grows with its text, so a long name is never cut off.
+  useLayoutEffect(() => {
+    const grow = () => {
+      const field = nameFieldRef.current;
+      if (field === null) return;
+      field.style.blockSize = 'auto';
+      field.style.blockSize = `${field.scrollHeight}px`;
+    };
+    grow();
+    window.addEventListener('resize', grow);
+    return () => window.removeEventListener('resize', grow);
+  }, [nameText]);
   // Publishing settings (T-098) live in the stored deck, not in the content the autosave writes.
   const [publish, setPublish] = useState<DeckPublish | undefined>(undefined);
   const publishRef = useRef<DeckPublish | undefined>(undefined);
@@ -153,6 +168,8 @@ export function DeckEditor({
   const [pickView, setPickView] = useState<DeckPickView>('list');
   const pickViewChosen = useRef(false);
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
+  /** UX-09 (T-174): the "Kokoelma" choice of the results. The default stays "Kaikki" (changing it is a product decision). */
+  const [collectionChoice, setCollectionChoice] = useState<CollectionFilter>('all');
   const tagChoices = useMemo(() => tagOptions(cards), [cards]);
   const [zoomCard, setZoomCard] = useState<Card | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -630,7 +647,9 @@ export function DeckEditor({
     return { reason: deckTexts.dimmedHint(info.message), short };
   };
 
-  const handleName = (text: string) => {
+  const handleName = (rawText: string) => {
+    // A name is one line: a pasted line break becomes a space.
+    const text = rawText.replace(/\s*[\r\n]+\s*/g, ' ');
     setNameText(text);
     const result = checkDeckName(text);
     if (!result.ok) {
@@ -683,7 +702,15 @@ export function DeckEditor({
     flush();
   };
 
-  const filtered = useMemo(() => filterCards(cards, criteria), [cards, criteria]);
+  const collectionFilter: CollectionFilter = collectionReady ? collectionChoice : 'all';
+  const filtered = useMemo(() => {
+    const matching = filterCards(cards, criteria);
+    if (collectionFilter === 'all') return matching;
+    return matching.filter((card) => {
+      const owned = countIn(collection, card.key);
+      return collectionFilter === 'owned' ? owned > 0 : owned < playsetSize(card);
+    });
+  }, [cards, criteria, collectionFilter, collection]);
   const colors = useMemo(() => colorDistribution(content, cardsByKey), [content, cardsByKey]);
   const legendsCount = totals.legends;
 
@@ -794,14 +821,19 @@ export function DeckEditor({
             <label htmlFor="deck-name" className="visually-hidden">
               {deckTexts.nameLabel}
             </label>
-            <input
+            <textarea
               id="deck-name"
-              type="text"
+              ref={nameFieldRef}
+              rows={1}
+              spellCheck={false}
               maxLength={MAX_DECK_NAME_LENGTH}
               value={nameText}
               aria-invalid={nameError !== null ? 'true' : undefined}
               aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
               onChange={(event) => handleName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') event.preventDefault();
+              }}
             />
             <p id="deck-name-hint" className="visually-hidden">
               {deckTexts.nameHint}
@@ -907,7 +939,8 @@ export function DeckEditor({
             numberOptions={numberFilterOptionsFor(cards, criteria)}
             searchInputRef={searchInputRef}
             collectionAllRef={collectionAllRef}
-            onCollectionFilterChange={() => undefined}
+            collectionFilter={collectionReady ? collectionFilter : undefined}
+            onCollectionFilterChange={setCollectionChoice}
             onQueryChange={(query) => setCriteria({ ...criteria, query })}
             onToggleType={(type) => setCriteria({ ...criteria, types: toggleValue(criteria.types, type) })}
             tagOptions={tagChoices}
@@ -938,13 +971,25 @@ export function DeckEditor({
               options={PICK_VIEW_OPTIONS}
               onChange={handlePickView}
             />
-            {pickView === 'images' && <ImageSizeSelect name="deck-image-size" value={imageSize} onChange={setImageSize} />}
+            <ImageSizeSelect name="deck-image-size" value={imageSize} onChange={setImageSize} disabled={pickView !== 'images'} />
           </div>
           <ActiveFilters
-            filters={criteriaFilters(criteria, setCriteria)}
-            showClear={isFilterActive(criteria)}
+            filters={[
+              ...(collectionFilter === 'all'
+                ? []
+                : [
+                    {
+                      id: 'collection',
+                      label: collectionFilter === 'owned' ? texts.collectionOwned : texts.collectionMissing,
+                      onRemove: () => setCollectionChoice('all'),
+                    },
+                  ]),
+              ...criteriaFilters(criteria, setCriteria),
+            ]}
+            showClear={isFilterActive(criteria) || collectionFilter !== 'all'}
             onClear={() => {
               setCriteria(EMPTY_CRITERIA);
+              setCollectionChoice('all');
               searchInputRef.current?.focus();
             }}
             searchInputRef={searchInputRef}
@@ -979,6 +1024,7 @@ export function DeckEditor({
                       dimmed={blocker !== null}
                       title={blocker?.reason}
                       badge={count > 0 ? deckTexts.inDeckBadge(count) : null}
+                      owned={collectionReady ? countIn(collection, card.key) : null}
                       hoverProps={imageSize === 'small' ? preview.bind(card) : undefined}
                       hint={
                         blocker !== null && (
@@ -1027,6 +1073,7 @@ export function DeckEditor({
                 onOpenImage={openImage}
                 clickAdds={clickAdds}
                 hoverProps={preview.bind}
+                ownedOf={(card) => (collectionReady ? countIn(collection, card.key) : null)}
               />
             </div>
           )}
@@ -1176,6 +1223,7 @@ export function DeckEditor({
             wants={wants}
             substitutes={substitutes}
             playability={playability}
+            goldfishHref={`#/pakat/${deckId}/goldfish`}
             onCopyWithOwn={canCopyWithOwn && onOpenDeck !== undefined ? () => void handleCopyWithOwn() : undefined}
             missingText={
               collectionReady

@@ -211,13 +211,13 @@ describe('Gallery (T-123): filters, search and order', () => {
     expect(within(screen.getByRole('search')).getByRole('combobox', { name: 'Järjestys' })).toBeInTheDocument();
     expect(screen.getByRole('switch', { name: 'Kaikki versiot' })).toHaveAttribute('aria-checked', 'false');
     expect(grid()).toHaveAttribute('data-size', 'normal');
-    await user.click(screen.getByRole('radio', { name: 'Valtava' }));
+    await user.click(screen.getByRole('radio', { name: 'Iso' }));
     expect(grid()).toHaveAttribute('data-size', 'huge');
     await user.click(screen.getByRole('button', { name: 'Sulje galleria' }));
     await waitFor(() => expect(grid()).toBeNull());
     await user.click(galleryButton());
     expect(grid()).toHaveAttribute('data-size', 'huge');
-    expect(screen.getByRole('radio', { name: 'Valtava' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Iso' })).toBeChecked();
   });
 });
 

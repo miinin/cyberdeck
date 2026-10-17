@@ -21,6 +21,7 @@ export function DeckPickImage({
   title,
   hint,
   badge,
+  owned,
   hoverProps,
   children,
 }: {
@@ -32,6 +33,8 @@ export function DeckPickImage({
   hint: ReactNode;
   /** Short visible mark, e.g. "3 pakassa". */
   badge?: string | null;
+  /** Copies in the collection (UX-09): "Omistat N" under the name; null/undefined leaves it out. */
+  owned?: number | null;
   /** Full text of the reason, for the hover title. */
   title?: string;
   hoverProps?: HoverPreviewProps;
@@ -87,7 +90,11 @@ export function DeckPickImage({
         </span>
         {children}
       </div>
-      {hint}
+      {/* One line is always reserved, so a blocked mark does not make the card (and its grid row) grow (UX-24, T-174). */}
+      <div className="pick-notes">
+        {owned != null && <span className="pick-owned">{deckTexts.ownedBadge(owned)}</span>}
+        {hint}
+      </div>
     </li>
   );
 }

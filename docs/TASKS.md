@@ -173,3 +173,8 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-168 | Turnauksen pakkalista tulosteena (I-15): vientivalikon "Turnauslista", A4-lista ryhmittäin (Legendit, Unit, Program, Gear, Sideboard), täyttörivit pelaajalle, laillisuusvaroitus vain ruudulla | 1 | Should | Koodari | Done | PM (koodi) |
 | T-169 | Kokoelmaan lisätty Want-kortti: palkki kysyy "Vähennä Wantilta / Pidä Wantilla" (Kortit, Kokoelma, kansio, skanneri, pakkaeditori), D-035 | 1 | Must | Koodari | Done | PM (koodi) |
 | T-170 | Pääpainikkeen hover omassa värissään (vaaleampi sävy, tumma alareuna, 1 px nousu) syaanin ja alleviivauksen sijaan | 1 | Should | PM | Done | PM |
+| T-171 | Pakkaeditorin näkymävalitsin Legendien yläpuolelle, ei pompi näkymää vaihdettaessa | 1 | Must | PM | Done | PM |
+| T-172 | Goldfish-simulaattori "Pelaa yksin": pakan pelaaminen yksin virallisilla säännöillä (myynti, Eddiet, Legendit, Gig-nopat, Lag, hyökkäys), vuoroloki ja yhteenveto | 1 | Should | Koodari | Done | Digiturva (4 × Info), rikkomistestaus |
+| T-173 | Virtuaaliboosterit ja sealed: boosterien avaus (yhteisön jakaumat), sealed 6 + Legend-pakkaus, rakentaja, Pelaa yksin, Tallenna pakaksi, tallennus laitteelle | 1 | Should | Koodari | Done | Digiturva (4 × Info), rikkomistestaus |
+| T-174 | MVP-1:n UX-loppukatselmoinnin korjaukset: 13 pakollista ja 19 suositusta (pomppiminen, ylivuodot, kontrasti, hoverit, Omistetut-suodatin editoriin) | 1 | Must | Koodari | Done | PM (testit, kuvakaappaukset Koodarilta) |
+| T-175 | Rikkomistestauksen BREAK-T172-T173 korjaukset (BRK-01–06: Gear ilman kohdetta, kädenkoko, kohdistus, pakkaus pooliin vasta paljastuksen jälkeen, tuplatallennus, ei Legendejä) | 1 | Must | PM | Done | dev ennen tuotantoa (sealed-tallennus) |

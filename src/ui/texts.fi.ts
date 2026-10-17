@@ -257,9 +257,10 @@ export const textsFi = {
   galleryFilters: (n: number) => (n === 0 ? 'Suodattimet' : `Suodattimet (${n})`),
   galleryHideFilters: 'Piilota suodattimet',
   gallerySize: 'Koko',
-  gallerySizeNormal: 'Normaali',
-  gallerySizeLarge: 'Iso',
-  gallerySizeHuge: 'Valtava',
+  // The same names as the image size choice elsewhere (UX-20, T-174); the keys keep their old names.
+  gallerySizeNormal: 'Pieni',
+  gallerySizeLarge: 'Normaali',
+  gallerySizeHuge: 'Iso',
   galleryCount: (n: number) => `${n.toLocaleString('fi-FI')} korttia`,
   galleryEmpty: 'Yksikään kortti ei vastaa suodattimia.',
   galleryClear: 'Tyhjennä suodattimet',

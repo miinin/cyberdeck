@@ -20,6 +20,7 @@ export type {
   LoadNotice,
   PreferencesRepository,
   Repositories,
+  SealedRepository,
   Theme,
   CatalogViewMode,
   DeckPickView,

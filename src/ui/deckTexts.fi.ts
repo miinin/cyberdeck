@@ -169,6 +169,8 @@ export const deckTextsFi = {
   owned: (have: number, need: number) => `omistat ${have}/${need}`,
   missingBadge: 'puuttuu',
   missingCount: (count: number) => `puuttuu ${count}`,
+  /** Search result: copies of the card in the collection (UX-09, T-174). */
+  ownedBadge: (count: number) => `Omistat ${count}`,
   /** Small badge on a search result: copies already in the deck. */
   inDeckBadge: (count: number) => `${count} pakassa`,
   curveHeading: 'Kustannuskäyrä',
@@ -366,7 +368,7 @@ export const deckTextsFi = {
   qrClose: 'Sulje',
   tlButton: 'Turnauslista',
   tlTitle: (name: string) => `Turnauslista: ${name}`,
-  tlHeading: 'Pakkalista',
+  tlHeading: 'Turnauslista',
   tlPlayer: 'Pelaaja',
   tlEvent: 'Tapahtuma',
   tlDate: 'Päivämäärä',
@@ -492,7 +494,7 @@ export const deckTextsFi = {
   publicIntro: 'Muiden pelaajien julkaisemat pakat, uusimmat päivitykset ensin. Pakkoja voi katsoa kirjautumatta.',
   publicLoading: 'Haetaan julkisia pakkoja…',
   publicEmptyTitle: 'Ei vielä julkisia pakkoja',
-  publicEmpty: 'Voit julkaista oman pakkasi pakkaeditorin Näkyvyys-kohdasta.',
+  publicEmpty: 'Voit julkaista oman pakkasi pakkaeditorin Yksityinen/Julkinen-kytkimestä.',
   publicError: 'Julkisia pakkoja ei voitu hakea. Tarkista verkkoyhteys ja yritä uudelleen.',
   publicUnavailable: 'Julkiset pakat eivät ole juuri nyt saatavilla. Yritä myöhemmin uudelleen.',
   publicRetry: 'Yritä uudelleen',

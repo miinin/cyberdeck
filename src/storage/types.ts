@@ -5,6 +5,7 @@ import type { Collection } from '../domain/collection';
 import type { PrintingKey } from '../domain/printing';
 import type { Deck, DeckContent, DeckId, DeckPublish } from '../domain/deck';
 import type { GameInput, GameLog, GameRecord } from '../domain/games';
+import type { SealedRun } from '../domain/sealed';
 
 export type LoadNotice =
   /** Some rows were dropped, the rest was kept. */
@@ -66,6 +67,17 @@ export interface GameLogRepository {
   update(id: string, input: GameInput): Promise<GameRecord>;
   /** Unknown id is not an error. */
   remove(id: string): Promise<void>;
+  subscribe(listener: () => void): () => void;
+}
+
+/**
+ * The running sealed (T-173, local only). `load` gives null when none is going. `save` validates the whole run and
+ * rejects with StorageError('invalid-input') for one that is not valid (more copies than the pool holds and the like).
+ */
+export interface SealedRepository {
+  load(): Promise<Loaded<SealedRun | null>>;
+  save(run: SealedRun): Promise<SealedRun>;
+  clear(): Promise<void>;
   subscribe(listener: () => void): () => void;
 }
 
@@ -192,6 +204,8 @@ export interface Repositories {
   haves: CollectionRepository;
   /** The game results (T-122, D-030). */
   games: GameLogRepository;
+  /** The running sealed (T-173): local only, never synced. */
+  sealed: SealedRepository;
   decks: DeckRepository;
   preferences: PreferencesRepository;
   /** false = browser storage is not in use and data lives only in memory (the UI shows a notice, SR-13). */

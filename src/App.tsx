@@ -23,6 +23,7 @@ import type { PublicDecksApi } from './ui/PublicDecksContext';
 import { deckTexts } from './ui/deckTexts';
 import { sectionOf, useHashRoute } from './ui/useHashRoute';
 import { texts } from './ui/texts';
+import { GoldfishDeckPage, GoldfishSealedPage } from './ui/GoldfishView';
 import { LanguageSwitch } from './ui/LanguageSwitch';
 import { ThemeToggle } from './ui/ThemeToggle';
 import { AccountMenu } from './ui/AccountMenu';
@@ -131,6 +132,9 @@ export function App({
                 route.name === 'share' ||
                 route.name === 'publicDecks' ||
                 route.name === 'deckBuild' ||
+                route.name === 'goldfish' ||
+                route.name === 'sealed' ||
+                route.name === 'sealedGoldfish' ||
                 route.name === 'publicDeck'
                   ? 'page'
                   : undefined
@@ -185,11 +189,11 @@ export function App({
         {(route.name === 'cards' || route.name === 'card') && (
           <CatalogView cards={cards} routeCardKey={route.name === 'card' ? route.key : null} repositories={openRepositories} headerSlot={headerSlot} onGalleryChange={setGalleryOpen} />
         )}
-        {(route.name === 'decks' || route.name === 'publicDecks' || route.name === 'deckBuild') && (
+        {(route.name === 'decks' || route.name === 'publicDecks' || route.name === 'deckBuild' || route.name === 'sealed') && (
           <DecksView
             cards={cards}
             repositories={openRepositories}
-            tab={route.name === 'publicDecks' ? 'public' : route.name === 'deckBuild' ? 'build' : 'own'}
+            tab={route.name === 'publicDecks' ? 'public' : route.name === 'deckBuild' ? 'build' : route.name === 'sealed' ? 'sealed' : 'own'}
             onOpen={(id) => navigate({ name: 'deck', id })}
           />
         )}
@@ -211,6 +215,18 @@ export function App({
             onBack={() => navigate({ name: 'decks' })}
             onOpenDeck={(id) => navigate({ name: 'deck', id })}
           />
+        )}
+        {route.name === 'goldfish' && (
+          <GoldfishDeckPage
+            key={route.id}
+            deckId={route.id}
+            cards={cards}
+            repository={openRepositories.decks}
+            onBack={() => navigate({ name: 'deck', id: route.id })}
+          />
+        )}
+        {route.name === 'sealedGoldfish' && (
+          <GoldfishSealedPage cards={cards} repository={openRepositories.sealed} onBack={() => navigate({ name: 'sealed' })} />
         )}
         {route.name === 'share' && (
           <SharedDeckView
