@@ -1,5 +1,5 @@
 # T-174 · MVP-1:n UX-loppukatselmoinnin korjaukset
-**Tila:** Ready · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Lähde:** `docs/reports/MVP1-UX-2026-10-17.md` (32 löydöstä). Käyttäjän pysyvät toiveet: painikkeet eivät saa pompata, päällekkäisyydet ja ylivuodot korjataan aina, eikä sivulla ole sisäistä vieritystä.
 
 ## Korjataan (yksi kortti, yksi julkaisu)

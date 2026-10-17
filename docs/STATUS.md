@@ -1,15 +1,15 @@
-# STATUS · päivitetty 2026-10-16 (PM)
+# STATUS · päivitetty 2026-10-17 (PM)
 
 ## Yhdellä lauseella
-Kaikki T-170:een asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
+Kaikki T-170:een asti on tuotannossa (T-171–T-174 julkaisussa) (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
-Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna: Testikäyttäjän ja UX:n katselmointi mobiilista sekä MVP-1:n loppukatselmoinnit (D-014).
+Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyttäjä (docs/reports/MVP1-UX-2026-10-17.md, korjattu T-174), Digiturva (SEC-T172-T173) ja rikkomistestaus (BREAK-T172-T173). Avoinna: UX-17, UX-30 ja UX-31.
 
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | – | T-164 Pakkojen kokoaminen (I-1, I-2) ja T-165 QR-koodi jakolinkeille (I-6) valmiina 2026-10-13, dev ensin (uusi riippuvuus uqr) ja sitten tuotantoon | Käyttäjä skannaa QR:n puhelimella ja valitsee seuraavat ideat |
+| – | PM | T-171–T-174 valmiina test-haarassa, rikkomistestaus ja julkaisu käynnissä | Rikkomistestauksen pakolliset korjataan, dev ja sitten tuotanto |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
@@ -25,6 +25,9 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - PM:n kuvakaappausskripti (CDP, 320 px, localStorage) oli istunnon scratchpadissa. Jos sitä tarvitaan, kirjoita uudelleen `scripts/`-kansion ulkopuolelle.
 
 ## Kysymykset käyttäjälle (ei blokkaa, edetään oletuksella)
+- **UX-09 oletus:** näytetäänkö pakkaeditorin haussa uudelle pakalle oletuksena vain omistetut kortit? Oletus: Kaikki (suodatin toimii, T-174).
+- **UX-17:** korttidialogi ja mobiilin testikäsi- ja Turnauslista-dialogit vierivät omassa vierityksessään. Tehdäänkö korttidialogista oma reitti, vai kirjataanko poikkeus? Oletus: ei muutosta.
+- **T-173 bonus:** omien oikeiden avausten vertailu odotusarvoon vaatii avaushistorian (I-7).
 - R-4 Tuotantojulkaisun suojaus: katso PM:n ehdotus T-001-kortissa. Oletus: ei muutoksia ennen erillistä testiprojektia.
 - K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi: UX ja Sisällöntuottaja suosittelevat molemmat näitä, joten ne on toteutettu näin.
 - TXT-003: tarvitaanko alatunnisteeseen myös englanninkielinen fanisisältömerkintä (CD PROJEKT RED:n ohje)? Oletus: ei MVP-0:ssa.
@@ -47,6 +50,7 @@ Työn alla: MVP-1:n loppu. Kaikki MVP-1:n Must-tehtävät ovat valmiina. Avoinna
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-171 näkymävalitsin ei pompi, T-172 Goldfish "Pelaa yksin", T-173 virtuaaliboosterit ja sealed, T-174 MVP-1:n UX-korjaukset (2026-10-17).
 - T-168 Turnauksen pakkalista tulosteena, T-169 Want-kysymys kokoelmaan lisätessä (D-035), T-170 pääpainikkeen hover (2026-10-16).
 - T-167 Kortin tietolaatikko luettavaksi isolla näytöllä (2026-10-15).
 - T-166 Kortin saatavuus tietolaatikossa: boostereissa vai ei, muut lähteet ryhmittäin ja kuvituksen "Ei boostereissa" -merkki (2026-10-14).

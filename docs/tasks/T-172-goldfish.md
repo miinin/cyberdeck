@@ -1,5 +1,5 @@
 # T-172 · Goldfish-simulaattori: pelaa pakkaa yksin
-**Tila:** In Progress · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
 **Päättäjä:** käyttäjä (2026-10-17): "Pelaat pakkaa yksin ruudulla: nostat kortteja, myyt niitä Eddieiksi ja pelaat kortteja RAMin ja kustannusten mukaan. Näet heti, takkuaako pakan alku. Testikäden seuraava taso."
 
 ## Säännöt (virallinen Printable Gameplay Guide, cyberpunktcg.com/docs/printable-gameplay-guide.pdf, 2026)

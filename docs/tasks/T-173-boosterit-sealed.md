@@ -1,5 +1,5 @@
 # T-173 · Virtuaaliboosterit ja sealed-harjoittelu
-**Tila:** Ready · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Should
 **Päättäjä:** käyttäjä (2026-10-17): avataan virtuaaliboostereita oikeilla harvinaisuusjakaumilla, rakennetaan niistä sealed-pakka ja harjoitellaan turnausta varten.
 **Rajaus (PM):** Bonusta ("omat oikeat avauksesi odotusarvoon") ei tehdä, koska sovelluksessa ei ole oikeiden avausten historiaa (I-7 puuttuu). Se tehdään I-7:n yhteydessä.
 
