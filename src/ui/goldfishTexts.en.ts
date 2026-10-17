@@ -74,6 +74,8 @@ export const goldfishTextsEn: typeof goldfishTextsFi = {
   gigDone: (die: number, value: number) => `You rolled d${die}: ${value}.`,
   gigRoll: (die: number) => `d${die}`,
   gigRollLabel: (die: number) => `Roll d${die}`,
+  dieRolled: 'Rolled',
+  dieInFixer: 'In fixer area',
   legendsTitle: 'Legends',
   legendsNone: 'The deck has no Legends.',
   legendDown: 'Face down',

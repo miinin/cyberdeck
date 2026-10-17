@@ -74,6 +74,8 @@ export const goldfishTextsFi = {
   gigDone: (die: number, value: number) => `Heitit d${die}: ${value}.`,
   gigRoll: (die: number) => `d${die}`,
   gigRollLabel: (die: number) => `Heitä d${die}`,
+  dieRolled: 'Heitetty',
+  dieInFixer: 'Fixerillä',
   legendsTitle: 'Legendit',
   legendsNone: 'Pakassa ei ole Legendejä.',
   legendDown: 'Kuvapuoli alaspäin',

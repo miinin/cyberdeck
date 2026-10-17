@@ -36,6 +36,7 @@ import type { Rng } from '../domain/testHand';
 import { getCardImage } from '../data/cardImages';
 import type { Repositories } from '../storage';
 import { CardName, cardNameText } from './CardName';
+import { DieShape } from './DieShape';
 import { goldfishTexts as t } from './goldfishTexts';
 import { sealedTexts } from './sealedTexts';
 import { deckTexts } from './deckTexts';
@@ -283,6 +284,11 @@ export function GoldfishView({
   const playReason = selected === null || over ? null : playProblem(game, selected, gearTarget);
   const invokeReason = over ? 'wrong-phase' : invokeProblem(game);
   const selectable = selectableDice(game);
+  // The latest roll of each die, so a rolled die keeps its place in the row and shows its value.
+  const rolledDice = new Map<number, { value: number; fresh: boolean }>();
+  for (const entry of game.log) {
+    if (entry.gig !== null) rolledDice.set(entry.gig.die, { value: entry.gig.value, fresh: entry.turn === game.turn && !game.gigPending });
+  }
 
   const gigLine = game.gigPending
     ? t.gigChoose + (game.dice.length > 1 && game.dice.includes(20) ? ` ${t.error('die-last')}.` : '')
@@ -292,8 +298,8 @@ export function GoldfishView({
         ? t.gigChooseNone
         : '';
 
-  const statusItems: { label: string; value: string; hint?: string }[] = [
-    { label: t.turn, value: t.turnValue(Math.min(game.turn, GOLDFISH_TURNS), GOLDFISH_TURNS) },
+  const statusItems: { label: string; value: string; hint?: string; pips?: boolean; minor?: boolean; key?: string }[] = [
+    { label: t.turn, value: t.turnValue(Math.min(game.turn, GOLDFISH_TURNS), GOLDFISH_TURNS), pips: true },
     { label: t.money, value: t.moneyValue(money), hint: t.moneyHint },
     { label: t.eddies, value: t.eddiesValue(freeEddies(game), game.eddies), hint: t.eddiesHint },
     {
@@ -301,9 +307,9 @@ export function GoldfishView({
       value: game.gigs.length === 0 ? t.gigsNone : game.gigs.join(' + '),
       hint: t.streetCred(streetCred(game)),
     },
-    { label: t.library, value: String(game.library.length) },
-    { label: t.trash, value: String(game.trash.length) },
-    { label: t.stolen, value: String(game.stolen), hint: t.stolenHint },
+    { label: t.stolen, value: String(game.stolen), hint: t.stolenHint, key: 'stolen' },
+    { label: t.library, value: String(game.library.length), minor: true },
+    { label: t.trash, value: String(game.trash.length), minor: true },
   ];
 
   return (
@@ -313,10 +319,20 @@ export function GoldfishView({
         <div className="gf-main" aria-label={t.boardLabel}>
           <dl className="gf-status" aria-label={t.statusLabel}>
             {statusItems.map((item) => (
-              <div key={item.label}>
+              <div key={item.label} className={(item.minor || item.label === t.gigs ? 'is-minor ' : '') + (item.key === 'stolen' ? 'is-stolen' : '')}>
                 <dt>{item.label}</dt>
                 <dd>{item.value}</dd>
-                <dd className="gf-status-hint">{item.hint ?? ' '}</dd>
+                <dd className="gf-status-hint">
+                  {item.pips ? (
+                    <span className="gf-pips" aria-hidden="true">
+                      {Array.from({ length: GOLDFISH_TURNS }, (_, i) => (
+                        <span key={i} className={i < game.turn ? 'is-on' : ''} />
+                      ))}
+                    </span>
+                  ) : (
+                    (item.hint ?? ' ')
+                  )}
+                </dd>
               </div>
             ))}
           </dl>
@@ -367,24 +383,35 @@ export function GoldfishView({
               {t.gigTitle}
             </h2>
             <div className="gf-dice">
-              {GIG_DICE.map((die) => (
-                <button
-                  key={die}
-                  type="button"
-                  className="button-secondary gf-die"
-                  aria-label={t.gigRollLabel(die)}
-                  disabled={over || !game.gigPending || !selectable.includes(die)}
-                  onClick={() => apply(chooseGig(game, die, rng), (next) => t.announceGig(die, next.log.at(-1)?.gig?.value ?? 0), 'hand')}
-                >
-                  {t.gigRoll(die)}
-                </button>
-              ))}
+              {GIG_DICE.map((die) => {
+                const rolled = rolledDice.get(die);
+                const inFixer = game.dice.includes(die);
+                const state = rolled !== undefined && !inFixer ? 'rolled' : selectable.includes(die) && game.gigPending && !over ? 'ready' : 'waiting';
+                return (
+                  <button
+                    key={die}
+                    type="button"
+                    className={'gf-die is-' + state + (rolled?.fresh === true ? ' is-fresh' : '')}
+                    aria-label={t.gigRollLabel(die)}
+                    disabled={over || !game.gigPending || !selectable.includes(die)}
+                    onClick={() => apply(chooseGig(game, die, rng), (next) => t.announceGig(die, next.log.at(-1)?.gig?.value ?? 0), 'hand')}
+                  >
+                    <DieShape die={die} value={state === 'rolled' ? (rolled?.value ?? null) : null} />
+                    <span className="gf-die-name" aria-hidden="true">
+                      {t.gigRoll(die)}
+                    </span>
+                    <span className="gf-die-state" aria-hidden="true">
+                      {state === 'rolled' ? t.dieRolled : t.dieInFixer}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             <p className="gf-line">{gigLine}</p>
           </div>
 
-          <div className="gf-row">
-          <div className="panel">
+          <div className="gf-table">
+          <div className="panel gf-legends-panel">
             <h2 className="panel-title" ref={legendsRef} tabIndex={-1}>
               {t.legendsTitle}
             </h2>
@@ -416,7 +443,7 @@ export function GoldfishView({
             </ul>
           </div>
 
-          <div className="panel">
+          <div className="panel gf-field-panel">
             <h2 className="panel-title" ref={fieldRef} tabIndex={-1}>
               {t.fieldTitle}
             </h2>
