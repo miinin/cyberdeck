@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { isPubId } from '../domain/publicDeck';
 import { isDeckId } from '../domain/validate';
 
@@ -12,8 +12,8 @@ export type Route =
   | { name: 'deckBuild' }
   // Play a deck alone, Goldfish (T-172).
   | { name: 'goldfish'; id: string }
-  // Sealed tab (T-173): boosters and sealed practice, and the solo play of the sealed deck.
-  | { name: 'sealed' } | { name: 'sealedGoldfish' }
+  // Playtest section (T-176, D-036): sealed, single boosters, choosing a deck to play alone, and the solo play of the sealed deck.
+  | { name: 'sealed' } | { name: 'sealedGoldfish' } | { name: 'boosters' } | { name: 'soloPick' }
   // Proxy print queue (T-102).
   | { name: 'proxy' }
   // Collection progress (T-105).
@@ -38,6 +38,8 @@ export function sectionOf(route: Route): Section {
     case 'goldfish':
     case 'sealed':
     case 'sealedGoldfish':
+    case 'boosters':
+    case 'soloPick':
       return 'decks';
     case 'havewant':
     case 'trade':
@@ -70,9 +72,17 @@ export function parseHash(hash: string): Route {
       return { name: 'cards' };
     }
   }
+  // "#/testaa": the Playtest section (T-176). An unknown tab shows Sealed.
+  if (parts[0] === 'testaa') {
+    if (parts[1] === 'boosterit') return { name: 'boosters' };
+    if (parts[1] === 'pelaa') return { name: 'soloPick' };
+    if (parts[1] === 'sealed' && parts[2] === 'pelaa') return { name: 'sealedGoldfish' };
+    return { name: 'sealed' };
+  }
   if (parts[0] !== 'pakat') return { name: 'cards' };
   if (parts[1] === 'julkiset' && (parts.length === 2 || (parts.length === 3 && parts[2] === ''))) return { name: 'publicDecks' };
   if (parts[1] === 'kokoaminen' && (parts.length === 2 || (parts.length === 3 && parts[2] === ''))) return { name: 'deckBuild' };
+  // The old sealed addresses (T-173) lead to the Playtest section; useHashRoute rewrites the hash.
   if (parts[1] === 'sealed' && (parts.length === 2 || (parts.length === 3 && parts[2] === ''))) return { name: 'sealed' };
   if (parts[1] === 'sealed' && parts.length === 3 && parts[2] === 'goldfish') return { name: 'sealedGoldfish' };
   if (parts[1] === 'julkinen' && parts.length === 3 && isPubId(parts[2])) return { name: 'publicDeck', id: parts[2] };
@@ -92,11 +102,18 @@ export function routeHash(route: Route): string {
   if (route.name === 'deckBuild') return '#/pakat/kokoaminen';
   if (route.name === 'publicDecks') return '#/pakat/julkiset';
   if (route.name === 'publicDeck') return `#/pakat/julkinen/${route.id}`;
-  if (route.name === 'sealed') return '#/pakat/sealed';
-  if (route.name === 'sealedGoldfish') return '#/pakat/sealed/goldfish';
+  if (route.name === 'sealed') return '#/testaa/sealed';
+  if (route.name === 'sealedGoldfish') return '#/testaa/sealed/pelaa';
+  if (route.name === 'boosters') return '#/testaa/boosterit';
+  if (route.name === 'soloPick') return '#/testaa/pelaa';
   if (route.name === 'goldfish') return `#/pakat/${route.id}/goldfish`;
   if (route.name === 'trade') return `#/vaihto/${route.data}`;
   return route.name === 'decks' ? '#/pakat' : `#/pakat/${route.id}`;
+}
+
+/** The routes of the Playtest section (T-176): one address each. */
+export function isPlaytestRoute(route: Route): boolean {
+  return route.name === 'sealed' || route.name === 'sealedGoldfish' || route.name === 'boosters' || route.name === 'soloPick';
 }
 
 function subscribe(listener: () => void): () => void {
@@ -114,5 +131,11 @@ export function useHashRoute(): {
   const navigate = useCallback((route: Route) => {
     window.location.hash = routeHash(route);
   }, []);
-  return { route: parseHash(hash), navigate };
+  const route = parseHash(hash);
+  // An old or loose sealed address is replaced (no extra history entry) by the address of the Playtest section (T-176).
+  const canonical = isPlaytestRoute(route) ? routeHash(route) : null;
+  useEffect(() => {
+    if (canonical !== null && hash !== canonical) window.location.replace(canonical);
+  }, [hash, canonical]);
+  return { route, navigate };
 }

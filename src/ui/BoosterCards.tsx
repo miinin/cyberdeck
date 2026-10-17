@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { BoosterCard } from '../domain/booster';
 import type { Card } from '../domain/card';
 import type { CardsByKey } from '../domain/deckRules';
@@ -59,94 +59,77 @@ function PackFace({ entry, card, fresh }: { entry: BoosterCard; card: Card | und
   );
 }
 
+/** The time between two cards turning when a pack opens (T-176). */
+const TURN_STEP_MS = 70;
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 /**
- * An opened pack that is revealed one card at a time (T-173): a tap on the next card turns it, "Paljasta kaikki" turns
- * the rest. The rarest card comes last. Every slot keeps its size, so nothing moves when a card turns, and the buttons
- * stay where they are. Give the component a new `key` for each pack.
+ * How many cards of an opened pack are turned (T-176). A new pack turns by itself, one card after the other in a short
+ * animation; with reduced motion the whole pack is turned at once. null = no pack open, nothing turned.
  */
-export function PackReveal({
+export function useRevealProgress(pack: readonly BoosterCard[] | null): number {
+  const [state, setState] = useState<{ pack: readonly BoosterCard[] | null; revealed: number }>({ pack, revealed: 0 });
+  // A new pack starts again from zero (adjusted while rendering, so no frame shows the old count with the new pack).
+  let revealed = state.revealed;
+  if (state.pack !== pack) {
+    revealed = pack !== null && prefersReducedMotion() ? pack.length : 0;
+    setState({ pack, revealed });
+  }
+  useEffect(() => {
+    if (pack === null || revealed >= pack.length) return;
+    const timer = window.setTimeout(() => setState({ pack, revealed: revealed + 1 }), TURN_STEP_MS);
+    return () => window.clearTimeout(timer);
+  }, [pack, revealed]);
+  return pack === null ? 0 : Math.min(revealed, pack.length);
+}
+
+/**
+ * The cards of a pack in their slots (T-176). Every slot keeps its size whether it is empty, face down or turned, so
+ * nothing moves when a pack opens or a card turns. `pack` null = the slots wait face down.
+ */
+export function PackGrid({
   pack,
+  slots,
+  revealed,
   cardsByKey,
-  nextLabel,
-  onNext,
   title,
 }: {
-  pack: readonly BoosterCard[];
+  pack: readonly BoosterCard[] | null;
+  slots: number;
+  revealed: number;
   cardsByKey: CardsByKey;
-  /** The button that goes on to the next step; enabled once every card is turned. */
-  nextLabel: string;
-  onNext: () => void;
   title: string;
 }) {
-  const [revealed, setRevealed] = useState(0);
-  const nextCardRef = useRef<HTMLButtonElement>(null);
-  const nextRef = useRef<HTMLButtonElement>(null);
-  const moveFocus = useRef(false);
-  const done = revealed >= pack.length;
-
-  // A turned card's button disappears: hand the focus to the next card, or to the next-step button.
-  useEffect(() => {
-    if (!moveFocus.current) return;
-    moveFocus.current = false;
-    (nextCardRef.current ?? nextRef.current)?.focus({ preventScroll: true });
-  }, [revealed]);
-
-  const revealNext = () => {
-    moveFocus.current = true;
-    setRevealed((count) => Math.min(pack.length, count + 1));
-  };
-
+  const done = pack !== null && revealed >= pack.length;
   return (
     <section className="pack" aria-label={title}>
       <ul className="pack-grid">
-        {pack.map((entry, index) => {
-          const card = cardsByKey.get(entry.card);
-          const turned = index < revealed;
+        {Array.from({ length: slots }, (_, index) => {
+          const entry = pack?.[index];
+          if (entry !== undefined && index < revealed) {
+            return (
+              <li key={index} className="pack-slot">
+                <PackFace entry={entry} card={cardsByKey.get(entry.card)} fresh={index === revealed - 1} />
+              </li>
+            );
+          }
           return (
-            <li key={index} className="pack-slot" onClick={turned ? undefined : revealNext}>
-              {turned ? (
-                <PackFace entry={entry} card={card} fresh={index === revealed - 1} />
-              ) : (
-                <>
-                  {index === revealed ? (
-                    <button ref={nextCardRef} type="button" className="pack-art pack-back pack-back--next">
-                      <span className="visually-hidden">{t.revealCard(index + 1, pack.length)}</span>
-                      <span aria-hidden="true">{index + 1}</span>
-                    </button>
-                  ) : (
-                    <span className="pack-art pack-back" aria-hidden="true">
-                      {index + 1}
-                    </span>
-                  )}
-                  <div className="pack-meta" aria-hidden="true" />
-                </>
-              )}
+            <li key={index} className="pack-slot">
+              <span className="pack-art pack-back" aria-hidden="true">
+                {index + 1}
+              </span>
+              <div className="pack-meta" aria-hidden="true" />
             </li>
           );
         })}
       </ul>
+      {/* Said once the whole pack is turned, not for every card. */}
       <p className="visually-hidden" role="status" aria-live="polite">
-        {t.revealedStatus(Math.min(revealed, pack.length), pack.length)}
+        {done ? t.revealedStatus(pack.length, pack.length) : ''}
       </p>
-      <div className="pack-actions">
-        <button
-          type="button"
-          className="button-secondary"
-          disabled={done}
-          onClick={() => {
-            moveFocus.current = true;
-            setRevealed(pack.length);
-          }}
-        >
-          {t.revealAll}
-        </button>
-        <button ref={nextRef} type="button" className="button-primary" disabled={!done} onClick={onNext}>
-          {nextLabel}
-        </button>
-        <span className="pack-progress" aria-hidden="true">
-          {t.revealedStatus(Math.min(revealed, pack.length), pack.length)}
-        </span>
-      </div>
     </section>
   );
 }

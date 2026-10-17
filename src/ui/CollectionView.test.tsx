@@ -107,10 +107,10 @@ describe('CollectionView', () => {
     });
   });
 
-  it('shows the nav item between Cards and Decks', async () => {
+  it('shows the nav item between Cards and Decks (Testaa follows Decks, T-176)', async () => {
     await renderCollection([]);
     const links = within(screen.getByRole('navigation', { name: /päävalikko|main menu/i })).getAllByRole('link');
-    expect(links.map((link) => link.getAttribute('href'))).toEqual(['#/', '#/kokoelma', '#/pakat', '#/vaihto', '#/proxy']);
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['#/', '#/kokoelma', '#/pakat', '#/testaa', '#/vaihto', '#/proxy']);
     expect(links[1]).toHaveAttribute('aria-current', 'page');
   });
 

@@ -39,8 +39,6 @@ import { PublicDecksList } from './PublicDecksList';
 import { usePublicDecks } from './PublicDecksContext';
 import { forgetPublicDecks } from './publicDecksCache';
 import { routeHash } from './useHashRoute';
-import { SealedView } from './SealedView';
-import { sealedTexts } from './sealedTexts';
 import { useCollection } from './useCollection';
 import { gameTexts } from './gameTexts';
 import { useDecks } from './useDecks';
@@ -273,7 +271,7 @@ export function DecksView({
   cards: readonly Card[];
   repositories: Repositories;
   /** "own" = the user's decks, "public" = the public decks of everyone (T-098). */
-  tab?: 'own' | 'public' | 'build' | 'sealed';
+  tab?: 'own' | 'public' | 'build';
   onOpen: (id: string) => void;
 }) {
   const repository = repositories.decks;
@@ -432,9 +430,6 @@ export function DecksView({
         <a className="segmented-option" href={routeHash({ name: 'deckBuild' })} aria-current={tab === 'build' ? 'page' : undefined}>
           {deckTexts.tabBuild}
         </a>
-        <a className="segmented-option" href={routeHash({ name: 'sealed' })} aria-current={tab === 'sealed' ? 'page' : undefined}>
-          {sealedTexts.tab}
-        </a>
         <a className="segmented-option" href={routeHash({ name: 'publicDecks' })} aria-current={tab === 'public' ? 'page' : undefined}>
           {deckTexts.tabPublic}
         </a>
@@ -457,8 +452,6 @@ export function DecksView({
           </button>
         </div>
       )}
-
-      {tab === 'sealed' && <SealedView cards={cards} repositories={repositories} />}
 
       {(tab === 'own' || tab === 'build') && phase === 'loading' && <p className="status-line">{deckTexts.listLoading}</p>}
       {(tab === 'own' || tab === 'build') && phase === 'unavailable' && (

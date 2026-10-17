@@ -66,3 +66,32 @@ describe('section of a route (T-142)', () => {
     expect(of('#/proxy')).toBe('proxy');
   });
 });
+
+describe('playtest routes (T-176)', () => {
+  it('parses the tabs of the Playtest section and round-trips', () => {
+    expect(parseHash('#/testaa/sealed')).toEqual({ name: 'sealed' });
+    expect(parseHash('#/testaa/boosterit')).toEqual({ name: 'boosters' });
+    expect(parseHash('#/testaa/pelaa')).toEqual({ name: 'soloPick' });
+    expect(parseHash('#/testaa/sealed/pelaa')).toEqual({ name: 'sealedGoldfish' });
+    for (const name of ['sealed', 'boosters', 'soloPick', 'sealedGoldfish'] as const) {
+      expect(parseHash(routeHash({ name }))).toEqual({ name });
+    }
+  });
+
+  it('shows Sealed for "#/testaa" and an unknown tab', () => {
+    expect(parseHash('#/testaa')).toEqual({ name: 'sealed' });
+    expect(parseHash('#/testaa/ei-ole')).toEqual({ name: 'sealed' });
+  });
+
+  it('leads the old sealed addresses to the same routes, which have the new address', () => {
+    expect(parseHash('#/pakat/sealed')).toEqual({ name: 'sealed' });
+    expect(parseHash('#/pakat/sealed/goldfish')).toEqual({ name: 'sealedGoldfish' });
+    expect(routeHash(parseHash('#/pakat/sealed'))).toBe('#/testaa/sealed');
+    expect(routeHash(parseHash('#/pakat/sealed/goldfish'))).toBe('#/testaa/sealed/pelaa');
+  });
+
+  it('keeps the deck solo play address and puts the section under Decks colour', () => {
+    expect(parseHash('#/pakat/abc-123/goldfish')).toEqual({ name: 'goldfish', id: 'abc-123' });
+    expect(sectionOf(parseHash('#/testaa/boosterit'))).toBe('decks');
+  });
+});

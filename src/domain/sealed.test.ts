@@ -106,6 +106,18 @@ describe('reading a stored run (SR-23)', () => {
     expect(parseSealedData({ run: raw })).toBeNull();
   });
 
+  it('reads a run saved as a deck (T-176) and an older run without the id', () => {
+    expect(parseSealedRun({ ...valid, deckId: 'abc-123' })).toEqual({ ...valid, deckId: 'abc-123' });
+    expect(parseSealedRun(valid)).not.toHaveProperty('deckId');
+  });
+
+  it.each([['wrong characters', 'a b/c'], ['too long', 'a'.repeat(65)], ['not text', 42], ['empty', '']])(
+    'drops a broken deck id (%s) and still reads the run',
+    (_name, deckId) => {
+      expect(parseSealedRun({ ...valid, deckId })).toEqual(valid);
+    },
+  );
+
   it('refuses data without a run field', () => {
     expect(parseSealedData({})).toBeNull();
     expect(parseSealedData(null)).toBeNull();
