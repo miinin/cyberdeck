@@ -1547,8 +1547,10 @@ main {
   width: max-content;
   max-width: min(20rem, calc(100vw - 2 * var(--gutter)));
   padding: var(--space-4);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface);
+  border: 1px solid var(--line-strong);
+  border-block-start: 2px solid var(--section-accent);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-pop);
   color: var(--color-text);
 }
 
@@ -5353,6 +5355,10 @@ button.legality:focus-visible {
   opacity: 1;
 }
 
+.language-switch .flag-button:hover {
+  background: rgb(241 241 236 / 0.08);
+}
+
 .language-switch .flag-button[aria-pressed='true'] {
   border-bottom-color: var(--color-accent);
 }
@@ -5743,11 +5749,12 @@ section[aria-labelledby='have-heading'] {
   content: none;
 }
 
+/* T-181: hover also raises a quiet square behind the icon, so it is never colour alone. */
 .header-icon:hover,
 .header-icon[aria-expanded='true'] {
   opacity: 1;
   color: var(--color-accent-2);
-  background: none;
+  background: rgb(241 241 236 / 0.08);
   text-decoration: none;
 }
 
@@ -9290,8 +9297,9 @@ button.pocket-link {
   box-sizing: border-box;
   inline-size: min(20rem, calc(100vw - 32px));
   padding: var(--space-2) var(--space-3);
-  border: 2px solid var(--color-border-strong);
-  background: var(--color-surface-raised);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-pop);
   color: var(--color-text);
   font-size: var(--font-size-sm);
   font-weight: normal;
