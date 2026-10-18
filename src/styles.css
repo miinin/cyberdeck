@@ -1280,12 +1280,12 @@ main {
   padding-block: var(--space-2);
 }
 
-:where(input[type='search'], input[type='text'], input[type='email'], input[type='url'], input[type='date'], select, textarea):hover {
+:where(input[type='search'], input[type='text'], input[type='email'], input[type='url'], input[type='date'], select, textarea):where(:hover) {
   border-color: var(--line-accent);
   border-bottom-color: var(--section-accent);
 }
 
-:where(input[type='search'], input[type='text'], input[type='email'], input[type='url'], input[type='date'], select, textarea):focus-visible {
+:where(input[type='search'], input[type='text'], input[type='email'], input[type='url'], input[type='date'], select, textarea):where(:focus-visible) {
   clip-path: none;
   border-bottom-color: var(--section-accent);
   outline: var(--focus-ring);
