@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent, CSSProperties } from 'react';
 import { getCardImage } from '../data/cardImages';
 import { loadFingerprintIndex } from '../data/fingerprintIndex';
 import { variantImageUrl } from '../data/variantImages';
 import { artsOf } from '../domain/arts';
+import { BINDER_COLUMNS, binderAspect, binderRows } from '../domain/binderPage';
 import type { Art } from '../domain/arts';
 import type { Card } from '../domain/card';
 import { CARD_IMAGE_ASPECT } from '../domain/cardImage';
 import { frameSharpness, isConfident, queryFingerprints, rankFingerprints } from '../domain/cardFingerprint';
-import type { FingerprintMatch, IndexedFingerprint } from '../domain/cardFingerprint';
+import type { FingerprintMatch, IndexedFingerprint, PixelImage } from '../domain/cardFingerprint';
 import {
   SCAN_INTERVAL_MS,
   candidateInWindow,
@@ -19,7 +21,9 @@ import {
 } from '../domain/continuousScan';
 import type { Edition } from '../domain/edition';
 import { coverCropSource } from '../domain/scanCrop';
-import type { PreferencesRepository, ScanMode } from '../storage';
+import type { PreferencesRepository, ScanGrid, ScanMode } from '../storage';
+import { BinderPageFlow } from './BinderScan';
+import { grabPixels, readImageFile } from './binderImage';
 import { CameraIcon } from './CameraIcon';
 import { SegmentedChoice } from './SegmentedChoice';
 import { MAX_COPIES, addCopies, removeCopies } from './collectionEntry';
@@ -30,6 +34,7 @@ import { cardNameText } from './CardName';
 import { texts } from './texts';
 import { ScanDebugPanel, scanDebugRequested } from './ScanDebugPanel';
 import type { DebugReading } from './ScanDebugPanel';
+import { useScanGrid } from './useScanGrid';
 import { useScanMode } from './useScanMode';
 
 /** Width of the picture the frame is copied to; the height follows the card shape (63:88). */
@@ -39,6 +44,10 @@ const MAX_SCAN_COPIES = 99;
 const DESTINATION_OPTIONS = [
   ['deck', scannerTexts.destinationDeck],
   ['both', scannerTexts.destinationBoth],
+] as const;
+const GRID_OPTIONS = [
+  ['3x3', scannerTexts.grid3x3],
+  ['3x4', scannerTexts.grid3x4],
 ] as const;
 const PART_OPTIONS = [
   ['main', scannerTexts.partMain],
@@ -66,7 +75,7 @@ export interface ScanDeckTarget {
 type ScanDestination = 'deck' | 'both';
 
 /** One picture the scanner can recognise: a card and the art the picture shows. */
-interface Target {
+export interface Target {
   card: Card;
   arts: readonly Art[];
   /** Null for a card without arts (then the copies go to the card's total). */
@@ -100,7 +109,7 @@ function buildTargets(cards: readonly Card[]): Map<string, Target> {
   return targets;
 }
 
-type Stage = 'edition' | 'starting' | 'camera' | 'result' | 'error';
+type Stage = 'edition' | 'starting' | 'camera' | 'result' | 'binder' | 'error';
 
 interface ScanResult {
   options: Target[];
@@ -193,6 +202,8 @@ export function CardScannerDialog({
   onEditionChange,
   mode,
   onModeChange,
+  grid,
+  onGridChange,
   deck,
   onClose,
 }: {
@@ -203,6 +214,8 @@ export function CardScannerDialog({
   onEditionChange: (edition: Edition) => void;
   mode: ScanMode;
   onModeChange: (mode: ScanMode) => void;
+  grid: ScanGrid;
+  onGridChange: (grid: ScanGrid) => void;
   /** Set when the scanner fills a deck (T-119); without it the cards go to the collection only. */
   deck?: ScanDeckTarget;
   onClose: () => void;
@@ -234,6 +247,10 @@ export function CardScannerDialog({
   const flashTimer = useRef<number | undefined>(undefined);
   const nextUid = useRef(1);
   const targets = useMemo(() => buildTargets(cards), [cards]);
+  const [fileProblem, setFileProblem] = useState<string | null>(null);
+  const [binderPicture, setBinderPicture] = useState<{ image: PixelImage; fromCamera: boolean } | null>(null);
+  // A deck is filled one card at a time: the binder page mode belongs to the collection only (T-179).
+  const active: ScanMode = deck !== undefined && mode === 'binder' ? 'single' : mode;
 
   useEffect(() => {
     mounted.current = true;
@@ -266,6 +283,7 @@ export function CardScannerDialog({
       stopStream(streamRef.current);
       streamRef.current = null;
       setResult(null);
+      setBinderPicture(null);
       setStage('edition');
     };
     document.addEventListener('visibilitychange', onVisibility);
@@ -342,6 +360,49 @@ export function CardScannerDialog({
     setStage('result');
   };
 
+  const modeText = (value: ScanMode) => (value === 'single' ? scannerTexts.modeSingle : value === 'continuous' ? scannerTexts.modeContinuous : scannerTexts.modeBinder);
+  const fileInputId = useId();
+
+  /** Binder page mode: the frame area of the video at full resolution becomes the page picture (T-179). */
+  const takeBinderPhoto = () => {
+    const video = videoRef.current;
+    const viewport = viewportRef.current;
+    const frame = frameRef.current;
+    if (video === null || viewport === null || frame === null || index === null) return;
+    const box = viewport.getBoundingClientRect();
+    const rect = frame.getBoundingClientRect();
+    const crop = coverCropSource(
+      { width: video.videoWidth, height: video.videoHeight },
+      { width: box.width, height: box.height },
+      { x: rect.left - box.left, y: rect.top - box.top, width: rect.width, height: rect.height },
+    );
+    if (crop === null) return;
+    const image = grabPixels(video, crop);
+    if (image === null) {
+      fail(scannerTexts.failed);
+      return;
+    }
+    setBinderPicture({ image, fromCamera: true });
+    setStage('binder');
+  };
+
+  /** Binder page mode: a picture file from the camera app or the gallery; it is read here and never uploaded. */
+  const chooseBinderFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = '';
+    if (file === undefined) return;
+    try {
+      const image = await readImageFile(file);
+      if (!mounted.current) return;
+      setFileProblem(null);
+      setBinderPicture({ image, fromCamera: false });
+      setStage('binder');
+    } catch {
+      if (mounted.current) setFileProblem(scannerTexts.imageUnreadable);
+    }
+  };
+
   const toCollection = deck === undefined || destination === 'both';
   /** A Legend always takes the Legend slot, whatever part is chosen (the sideboard allows none). */
   const partOf = (card: Card): DeckPart => (card.type === 'Legend' ? 'main' : part);
@@ -416,7 +477,7 @@ export function CardScannerDialog({
   // Continuous mode (T-108): look at the frame a few times a second while the camera is on. The timer lives and dies
   // with the camera stage, so it stops with the stream (SEC-106): on close, on a hidden tab and on every error.
   useEffect(() => {
-    if (stage !== 'camera' || mode !== 'continuous' || index === null) return;
+    if (stage !== 'camera' || active !== 'continuous' || index === null) return;
     let state = initialContinuousState;
     let offer = initialSuggestionState;
     const measuring = scanDebugRequested();
@@ -454,7 +515,7 @@ export function CardScannerDialog({
       setHolding(false);
       setSuggestion(null);
     };
-  }, [stage, mode, index, targets]);
+  }, [stage, active, index, targets]);
 
   /** One diagnostics reading of the current frame (T-113a, only used with ?scandebug=1). */
   const measureDebug = (): DebugReading | null => {
@@ -553,19 +614,22 @@ export function CardScannerDialog({
               </>
             )}
             <div className="segmented segmented--fill" role="group" aria-label={scannerTexts.modeLabel}>
-              {(['single', 'continuous'] as const).map((option) => (
+              {(deck === undefined ? (['single', 'continuous', 'binder'] as const) : (['single', 'continuous'] as const)).map((option) => (
                 <button
                   key={option}
                   type="button"
                   className="segmented-option"
-                  aria-pressed={mode === option}
+                  aria-pressed={active === option}
                   onClick={() => onModeChange(option)}
                 >
-                  {option === 'single' ? scannerTexts.modeSingle : scannerTexts.modeContinuous}
+                  {modeText(option)}
                 </button>
               ))}
             </div>
-            <p className="hint">{scannerTexts.modeNote}</p>
+            <p className="hint">{active === 'binder' ? scannerTexts.modeNoteBinder : scannerTexts.modeNote}</p>
+            {active === 'binder' && (
+              <SegmentedChoice legend={scannerTexts.gridLabel} name="scan-grid" value={grid} options={GRID_OPTIONS} onChange={onGridChange} legendVisible fill />
+            )}
             <div className="row-actions scanner-actions scanner-actions--cancel-first">
               <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
                 {scannerTexts.cancel}
@@ -613,7 +677,7 @@ export function CardScannerDialog({
             <div className="scanner-status">
               <p className="scanner-edition">
                 {scannerTexts.modeStatus(
-                  mode === 'single' ? scannerTexts.modeSingle : scannerTexts.modeContinuous,
+                  modeText(active),
                   toCollection ? editionName : null,
                 )}
               </p>
@@ -629,14 +693,36 @@ export function CardScannerDialog({
               </button>
             </div>
             {deck !== undefined && <p className="hint scanner-deck-status">{scannerTexts.deckStatus(deck.name, partText(part))}</p>}
-            <div ref={viewportRef} className="scanner-viewport" onClick={mode === 'single' ? capture : undefined}>
+            <div
+              ref={viewportRef}
+              className={active === 'binder' ? 'scanner-viewport scanner-viewport--binder' : 'scanner-viewport'}
+              style={active === 'binder' ? ({ '--binder-aspect': binderAspect(grid) } as CSSProperties) : undefined}
+              onClick={active === 'single' ? capture : undefined}
+            >
               <video ref={videoRef} className="scanner-video" aria-label={scannerTexts.videoLabel} autoPlay muted playsInline />
-              <div ref={frameRef} className="scanner-frame" data-flash={flashName !== null || undefined} data-hold={(holding && flashName === null) || undefined} aria-hidden="true" />
-              <p className="scanner-frame-label" aria-hidden="true">
-                {flashName !== null ? scannerTexts.addedFlash(flashName) : holding ? scannerTexts.holdStill : scannerTexts.fillFrame}
-              </p>
+              <div
+                ref={frameRef}
+                className={active === 'binder' ? 'scanner-frame scanner-frame--binder' : 'scanner-frame'}
+                data-flash={flashName !== null || undefined}
+                data-hold={(holding && flashName === null) || undefined}
+                aria-hidden="true"
+              >
+                {active === 'binder' &&
+                  Array.from({ length: BINDER_COLUMNS - 1 }, (_, i) => (
+                    <span key={`c${i}`} className="binder-line binder-line--column" style={{ left: `${(100 * (i + 1)) / BINDER_COLUMNS}%` }} />
+                  ))}
+                {active === 'binder' &&
+                  Array.from({ length: binderRows(grid) - 1 }, (_, i) => (
+                    <span key={`r${i}`} className="binder-line binder-line--row" style={{ top: `${(100 * (i + 1)) / binderRows(grid)}%` }} />
+                  ))}
+              </div>
+              {active !== 'binder' && (
+                <p className="scanner-frame-label" aria-hidden="true">
+                  {flashName !== null ? scannerTexts.addedFlash(flashName) : holding ? scannerTexts.holdStill : scannerTexts.fillFrame}
+                </p>
+              )}
             </div>
-            {mode === 'continuous' && (
+            {active === 'continuous' && (
               <div className="scanner-suggest">
                 {suggestion !== null && (
                   <>
@@ -653,8 +739,13 @@ export function CardScannerDialog({
                 )}
               </div>
             )}
-            <p className="hint">{mode === 'single' ? scannerTexts.frameHint : scannerTexts.continuousHint}</p>
-            {mode === 'single' ? (
+            <p className="hint">{active === 'single' ? scannerTexts.frameHint : active === 'binder' ? scannerTexts.binderHint : scannerTexts.continuousHint}</p>
+            {active === 'binder' && fileProblem !== null && (
+              <p role="alert" className="field-error">
+                {fileProblem}
+              </p>
+            )}
+            {active === 'binder' ? null : active === 'single' ? (
               lastAdded !== null && <p role="status">{lastAdded}</p>
             ) : (
               <p role="status" className="scanner-live">
@@ -662,7 +753,7 @@ export function CardScannerDialog({
               </p>
             )}
             {debug && index !== null && <ScanDebugPanel measure={measureDebug} />}
-            {mode === 'continuous' && session.length > 0 && (
+            {active === 'continuous' && session.length > 0 && (
               <section className="scanner-session" aria-label={scannerTexts.sessionTitle}>
                 <h3 className="scanner-subtitle">{scannerTexts.cardsAdded(session.length)}</h3>
                 <ul className="scanner-session-list">
@@ -691,16 +782,57 @@ export function CardScannerDialog({
               </section>
             )}
             <div className="row-actions scanner-actions">
-              {mode === 'single' && (
+              {active === 'single' && (
                 <button type="button" className="button-primary" disabled={index === null} onClick={capture}>
                   {scannerTexts.capture}
                 </button>
               )}
-              <button type="button" className={mode === 'single' ? 'button-secondary' : 'button-primary'} onClick={() => dialogRef.current?.close()}>
+              {active === 'binder' && (
+                <>
+                  <button type="button" className="button-primary" disabled={index === null} onClick={takeBinderPhoto}>
+                    {scannerTexts.takePhoto}
+                  </button>
+                  <div className="file-input">
+                    <input
+                      id={fileInputId}
+                      className="visually-hidden"
+                      type="file"
+                      accept="image/*"
+                      disabled={index === null}
+                      onChange={(event) => void chooseBinderFile(event)}
+                    />
+                    <label htmlFor={fileInputId} className="button-secondary" aria-hidden="true">
+                      {scannerTexts.chooseImage}
+                    </label>
+                  </div>
+                </>
+              )}
+              <button type="button" className={active === 'continuous' ? 'button-primary' : 'button-secondary'} onClick={() => dialogRef.current?.close()}>
                 {scannerTexts.close}
               </button>
             </div>
           </>
+        )}
+
+        {stage === 'binder' && binderPicture !== null && index !== null && (
+          <BinderPageFlow
+            picture={binderPicture.image}
+            fromCamera={binderPicture.fromCamera}
+            grid={grid}
+            index={index}
+            cards={cards}
+            targets={targets}
+            store={store}
+            edition={edition}
+            onNextPage={() => {
+              setBinderPicture(null);
+              setStage('camera');
+            }}
+            onCancel={() => {
+              setBinderPicture(null);
+              setStage('camera');
+            }}
+          />
         )}
 
         {stage === 'result' && result !== null && (
@@ -813,6 +945,7 @@ export function ScanCardsButton(props: {
   const { variant = 'secondary', preferences, openAtStart = false, ...dialogProps } = props;
   const [open, setOpen] = useState(openAtStart);
   const [mode, setMode] = useScanMode(preferences);
+  const [grid, setGrid] = useScanGrid(preferences);
   if (!cameraSupported() || (props.deck === undefined && props.snapshot.phase !== 'ready')) return null;
   const className = `${variant === 'primary' ? 'button-primary' : 'button-secondary'} scan-open`;
   return (
@@ -826,7 +959,7 @@ export function ScanCardsButton(props: {
         <CameraIcon />
         <span className="scan-open-label">{variant === 'secondary' ? scannerTexts.openShort : scannerTexts.open}</span>
       </button>
-      {open && <CardScannerDialog {...dialogProps} mode={mode} onModeChange={setMode} onClose={() => setOpen(false)} />}
+      {open && <CardScannerDialog {...dialogProps} mode={mode} onModeChange={setMode} grid={grid} onGridChange={setGrid} onClose={() => setOpen(false)} />}
     </>
   );
 }

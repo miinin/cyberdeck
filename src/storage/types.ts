@@ -90,8 +90,10 @@ export type DeckPickView = 'list' | 'images';
 export type DeckListView = 'list' | 'stacks' | 'cards';
 /** Which Welcome to Night City edition the card boxes' + adds to (D-022). */
 export type DefaultEdition = 'beta' | 'retail';
-/** Card scanner mode (T-108): confirm every card, or add the recognised cards automatically. */
-export type ScanMode = 'single' | 'continuous';
+/** Card scanner mode (T-108, T-179): confirm every card, add the recognised cards automatically, or read a whole binder page from one picture. */
+export type ScanMode = 'single' | 'continuous' | 'binder';
+/** Pockets of the binder page the scanner reads (T-179): 3 columns, 3 or 4 rows. */
+export type ScanGrid = '3x3' | '3x4';
 /** Collection page (T-109, T-116, T-112): the owned cards list, the progress overview or the binder, and whether the binder shows missing cards. Older saved fields are ignored. */
 export interface CollectionPrefs {
   view: 'own' | 'overview' | 'binder';
@@ -128,6 +130,9 @@ export interface PreferencesRepository {
   /** Saved scanner mode, or 'single' when nothing valid is saved. Never rejects because of storage problems. */
   loadScanMode(): Promise<ScanMode>;
   saveScanMode(mode: ScanMode): Promise<ScanMode>;
+  /** Saved binder page grid of the scanner, or '3x3' when nothing valid is saved. Never rejects because of storage problems. */
+  loadScanGrid(): Promise<ScanGrid>;
+  saveScanGrid(grid: ScanGrid): Promise<ScanGrid>;
   /** Saved Collection page choices; every missing or invalid field falls back to its default. Never rejects because of storage problems. */
   loadCollectionPrefs(): Promise<CollectionPrefs>;
   saveCollectionPrefs(prefs: CollectionPrefs): Promise<CollectionPrefs>;

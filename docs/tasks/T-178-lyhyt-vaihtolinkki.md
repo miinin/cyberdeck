@@ -1,5 +1,5 @@
 # T-178 · Lyhyt Have/Want-linkki palvelimen kautta
-**Tila:** Review (Koodari valmis, katselmoitavana) · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must · **Päätös:** D-037
+**Tila:** Done (SR-59 käsitestit ohitettu käyttäjän päätöksellä 2026-10-18) · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must · **Päätös:** D-037
 **Katselmoinnit:** Digiturva ☑ (SEC-178, ei vetoa, Low-löydökset korjattu) · dev ensin (tietomalli, säännöt)
 
 ## Tavoite

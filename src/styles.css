@@ -12767,3 +12767,167 @@ body:has(.mark-banner) .site-footer {
     letter-spacing: 0.02em;
   }
 }
+
+/* Binder page scan (T-179): a frame shaped like 3 x 3 or 3 x 4 pockets, a crop editor for a chosen picture and the
+   result as a 3-column grid, also on a 320 px screen. The page scrolls; nothing inside has a scrollbar. */
+/* The viewport is no taller than the frame can use: the frame (90 % of the height, the shape of the page) must fit in
+   the width too, also on a 320 px screen. 100cqw is the width of the scanner body. */
+.scanner-body {
+  container-type: inline-size;
+}
+
+.scanner-viewport--binder {
+  block-size: min(62dvh, 34rem, calc(100cqw * 1.06 / var(--binder-aspect)));
+  cursor: default;
+}
+
+.scanner-frame--binder {
+  inset-block-start: 5%;
+  block-size: 90%;
+  aspect-ratio: var(--binder-aspect);
+}
+
+.binder-line {
+  position: absolute;
+  background: var(--color-brand-yellow);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.binder-line--column {
+  inset-block: 0;
+  inline-size: 1px;
+}
+
+.binder-line--row {
+  inset-inline: 0;
+  block-size: 1px;
+}
+
+/* The corners sit half outside the picture at the edge, so the editor has room around it. */
+.binder-crop {
+  position: relative;
+  inline-size: calc(100% - 2.75rem);
+  margin: 1.375rem;
+  touch-action: none;
+}
+
+.binder-crop-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.binder-crop-picture {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.binder-crop-rect {
+  position: absolute;
+  border: 2px solid var(--color-brand-yellow);
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.binder-handle {
+  position: absolute;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 3px solid var(--color-brand-yellow);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  touch-action: none;
+}
+
+.binder-handle:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.binder-progress {
+  inline-size: 100%;
+}
+
+.binder-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.binder-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: var(--space-1);
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.binder-cell[aria-pressed='true'] {
+  border-color: var(--color-brand-yellow);
+  box-shadow: 0 0 0 2px var(--color-brand-yellow);
+}
+
+.binder-cell-pictures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.binder-cell-pictures canvas,
+.binder-cell-pictures img,
+.binder-cell-pictures .card-image {
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 63 / 88;
+  object-fit: contain;
+}
+
+.binder-cell-name {
+  min-block-size: 2.4em;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.binder-cell-state {
+  font-weight: var(--font-weight-bold);
+}
+
+.binder-cell[data-state='sure'] .binder-cell-state {
+  color: var(--color-success);
+}
+
+.binder-cell[data-state='check'] .binder-cell-state {
+  color: var(--color-warning);
+}
+
+.binder-cell[data-state='unknown'] .binder-cell-state {
+  color: var(--color-danger);
+}
+
+.binder-cell[data-state='empty'] .binder-cell-state {
+  color: var(--color-text-muted);
+}
+
+.binder-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
