@@ -9,7 +9,7 @@ import type { Collection } from '../../domain/collection';
 import { EMPTY_GAME_LOG, gameLogFits } from '../../domain/games';
 import type { GameLog } from '../../domain/games';
 import type { LocalData, Repositories, SyncStorage } from '../../storage';
-import type { CloudDoc, CloudStore, PublicDeckStore } from '../types';
+import type { CloudDoc, CloudStore, PublicDeckStore, TradeShareStore } from '../types';
 import { mergeCollection, mergeDecks, mergeGames } from './merge';
 import { createSyncEngine } from './syncEngine';
 import type { SyncStatus } from './syncEngine';
@@ -86,6 +86,8 @@ export function createAccountSession(options: {
   cloud: CloudStore;
   /** Deletes the public copies at account deletion (T-098, SR-36). */
   publicDecks?: PublicDeckStore;
+  /** Deletes the short trade link at account deletion (T-178, SR-56). */
+  tradeShares?: TradeShareStore;
   /** Runs first in account deletion: stops pending public updates (SEC-098b-1). */
   beforeDeleteAccount?: () => Promise<void>;
   now?: () => Date;
@@ -222,6 +224,8 @@ export function createAccountSession(options: {
           const local = await account.decks.list();
           await options.publicDecks.removeMany(local.value.map((deck) => deck.id));
         }
+        // SR-56: the short trade link goes at the same point; its id comes from the uid, so a missing document is fine.
+        await options.tradeShares?.remove();
         await cloud.deleteAll();
         account.sync.eraseAccount();
         return true;

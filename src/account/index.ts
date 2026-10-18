@@ -4,7 +4,7 @@
 import { FIREBASE_SITE, selectAuthMode } from './firebase/sites';
 import { CloudError } from './cloudError';
 import { createLazyAuthClient } from './lazyAuthClient';
-import type { AccountHints, AccountServices, CloudStore, PublicDeckStore } from './types';
+import type { AccountHints, AccountServices, CloudStore, PublicDeckStore, TradeShareStore } from './types';
 
 export type {
   AccountHints,
@@ -22,14 +22,15 @@ export type {
   PublicDeckCursor,
   PublicDeckPage,
   PublicDeckStore,
+  TradeShareStore,
 } from './types';
 export { createAccountSession } from './sync/session';
 export type { AccountSession, FirstSignInChoice, SessionStatus } from './sync/session';
 export type { SyncState, SyncStatus } from './sync/syncEngine';
 export { CloudError } from './cloudError';
 export type { CloudErrorKind } from './cloudError';
-export { createFakeAuth, createMemoryCloud, createMemoryPublicDecks, FAKE_USER } from './memory';
-export type { FakeAuth, MemoryCloud, MemoryCloudPath, MemoryPublicDecks } from './memory';
+export { createFakeAuth, createMemoryCloud, createMemoryPublicDecks, createMemoryTradeShares, FAKE_USER } from './memory';
+export type { FakeAuth, MemoryCloud, MemoryCloudPath, MemoryPublicDecks, MemoryTradeShares } from './memory';
 export { watchPublicDecks } from './publicWatch';
 export { createPublicDeckPublisher } from './publicPublisher';
 export type { PublicDeckPublisher, PublishState } from './publicPublisher';
@@ -51,6 +52,7 @@ export function createBrowserAccountServices(hints: AccountHints): AccountServic
     }),
     cloud: createLazyCloudStore,
     publicDecks: createLazyPublicDecks,
+    tradeShares: createLazyTradeShares,
   };
 }
 
@@ -103,5 +105,31 @@ function createLazyPublicDecks(uid: string | null): PublicDeckStore {
     publish: async (input) => (await load()).publish(input),
     remove: async (deckId) => (await load()).remove(deckId),
     removeMany: async (deckIds) => (await load()).removeMany(deckIds),
+  };
+}
+
+/** Loads the Firestore trade link store on the first call; reading works signed out. */
+function createLazyTradeShares(uid: string | null): TradeShareStore {
+  let store: Promise<TradeShareStore> | null = null;
+  const load = () => {
+    if (store === null) {
+      const pending = import('./firebase/firestoreTradeShares').then((module) =>
+        module.createFirestoreTradeShares({ uid }),
+      );
+      store = pending;
+      pending.catch(() => {
+        if (store === pending) store = null;
+      });
+    }
+    return store.catch(() => {
+      throw new CloudError('offline');
+    });
+  };
+  return {
+    get: async (shareId) => (await load()).get(shareId),
+    ownId: async () => (await load()).ownId(),
+    publish: async (data) => (await load()).publish(data),
+    update: async (data) => (await load()).update(data),
+    remove: async () => (await load()).remove(),
   };
 }

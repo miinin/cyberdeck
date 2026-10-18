@@ -840,3 +840,31 @@ describe('preferences: own binder layout (T-120)', () => {
     await expectStorageError(preferences.saveBinderLayout({ v: 1, name: 'x', pockets: Array.from({ length: 901 }, () => null) }), 'invalid-input');
   });
 });
+
+describe('preferences: trade link shared from this device (T-178, SR-54)', () => {
+  it('is false signed out and saving does nothing there', () => {
+    const { preferences, store } = setup();
+    expect(preferences.loadTradeShared()).toBe(false);
+    preferences.saveTradeShared(true);
+    expect(preferences.loadTradeShared()).toBe(false);
+    expect(store.keys().filter((key) => key.includes('trade-shared'))).toEqual([]);
+  });
+
+  it('is kept per account, so another account on the same device does not inherit it', () => {
+    const repos = setup();
+    repos.forAccount('user123').preferences.saveTradeShared(true);
+    expect(repos.forAccount('user123').preferences.loadTradeShared()).toBe(true);
+    expect(repos.forAccount('other456').preferences.loadTradeShared()).toBe(false);
+    expect(repos.preferences.loadTradeShared()).toBe(false);
+    repos.forAccount('user123').preferences.saveTradeShared(false);
+    expect(repos.forAccount('user123').preferences.loadTradeShared()).toBe(false);
+  });
+
+  it('is removed when the account is erased', () => {
+    const repos = setup();
+    const account = repos.forAccount('user123');
+    account.preferences.saveTradeShared(true);
+    account.sync.eraseAccount();
+    expect(account.preferences.loadTradeShared()).toBe(false);
+  });
+});

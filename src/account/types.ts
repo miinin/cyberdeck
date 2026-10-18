@@ -6,6 +6,7 @@ import type { Collection } from '../domain/collection';
 import type { Deck, DeckId } from '../domain/deck';
 import type { GameLog } from '../domain/games';
 import type { PublicDeck, PublicDeckInput } from '../domain/publicDeck';
+import type { TradeShareDoc } from '../domain/tradeLink';
 
 /** The signed-in account. `email` is shown in the UI from memory only, never stored (D-017 kohta 1, SR-29). */
 export interface AccountUser {
@@ -64,6 +65,11 @@ export interface AccountServices {
    * only (works signed out). The uid is never part of anything public (SR-30).
    */
   publicDecks(uid: string | null): PublicDeckStore;
+  /**
+   * Short trade links (T-178, D-037). `uid` as in `publicDecks`. Optional so older fakes keep working; the app then
+   * offers only the long link.
+   */
+  tradeShares?(uid: string | null): TradeShareStore;
 }
 
 /** Where the next page starts. Opaque to the caller: pass back what the previous page returned. */
@@ -93,6 +99,23 @@ export interface PublicDeckStore {
   remove(deckId: DeckId): Promise<void>;
   /** Deletes the public copies of the decks (account deletion, SR-36). A missing copy is not an error. */
   removeMany(deckIds: readonly DeckId[]): Promise<void>;
+}
+
+/**
+ * `tradeShares/{shareId}` (T-178, D-037). One link per account; the id comes from the uid (SR-50). Reads work
+ * signed out; the writes need the signed-in account the store was created for. All methods throw CloudError.
+ */
+export interface TradeShareStore {
+  /** null = no such link, a malformed id (no request is made) or an invalid document (SR-53). */
+  get(shareId: string): Promise<TradeShareDoc | null>;
+  /** The id of this account's link. */
+  ownId(): Promise<string>;
+  /** The user's own share action: creates the document or replaces its data (SR-54: only this call creates). */
+  publish(data: string): Promise<void>;
+  /** Automatic refresh: updates an existing document only. false = there is none (stopped elsewhere), nothing was written. */
+  update(data: string): Promise<boolean>;
+  /** Deletes this account's link. A missing document is not an error (SR-56). */
+  remove(): Promise<void>;
 }
 
 /** Storage for the account hints; `PreferencesRepository` implements it (src/storage). */

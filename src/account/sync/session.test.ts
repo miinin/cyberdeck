@@ -1,6 +1,6 @@
 import { createMemoryRepositories } from '../../storage';
 import type { Repositories } from '../../storage';
-import { createMemoryCloud, createMemoryPublicDecks } from '../memory';
+import { createMemoryCloud, createMemoryPublicDecks, createMemoryTradeShares } from '../memory';
 import type { MemoryPublicDecks } from '../memory';
 import { publicDeckId } from '../../domain/publicDeck';
 import type { MemoryCloud } from '../memory';
@@ -372,6 +372,58 @@ describe('game results and the account (T-122)', () => {
     expect(cloud.paths()).toEqual([]);
     expect((await b.account.games.load()).value.games).toEqual([]);
     expect((await b.anonymous.games.load()).value.games).toHaveLength(1);
+    session.dispose();
+  });
+});
+
+describe('account deletion and the short trade link (T-178, SR-56)', () => {
+  async function tradeSetup() {
+    const b = browser();
+    const shares = createMemoryTradeShares({ now });
+    await b.account.decks.create(CONTENT);
+    await shares.forUser(UID).publish('QQ');
+    const session = createAccountSession({ uid: UID, ...b, cloud, tradeShares: shares.forUser(UID), now, locks: null });
+    session.start();
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    return { b, shares, session };
+  }
+
+  it('deletes the link before the private cloud data, and erases the local flag', async () => {
+    const { b, shares, session } = await tradeSetup();
+    b.account.preferences.saveTradeShared(true);
+    const seen: string[] = [];
+    const original = cloud.deleteAll;
+    cloud.deleteAll = async () => {
+      seen.push(shares.docs.size === 0 ? 'link gone' : 'link still there');
+      return original();
+    };
+    expect(await session.deleteAccountData()).toBe(true);
+    expect(seen).toEqual(['link gone']);
+    expect(b.account.preferences.loadTradeShared()).toBe(false);
+    session.dispose();
+  });
+
+  it('deletes the right id also when the document does not exist', async () => {
+    const b = browser();
+    const shares = createMemoryTradeShares({ now });
+    shares.docs.set('0123456789abcdef', { schemaVersion: 1, data: 'QQ' });
+    const removed = vi.fn(async () => undefined);
+    const session = createAccountSession({ uid: UID, ...b, cloud, tradeShares: { ...shares.forUser(UID), remove: removed }, now, locks: null });
+    session.start();
+    await vi.waitFor(() => expect(session.status().sync.lastSyncedAt).not.toBeNull());
+    expect(await session.deleteAccountData()).toBe(true);
+    expect(removed).toHaveBeenCalledTimes(1);
+    expect(shares.docs.size).toBe(1);
+    session.dispose();
+  });
+
+  it('keeps everything and reports failure when the link cannot be deleted', async () => {
+    const { b, shares, session } = await tradeSetup();
+    shares.failNext('offline');
+    expect(await session.deleteAccountData()).toBe(false);
+    expect(cloud.paths()).toContain('meta');
+    expect(shares.docs.size).toBe(1);
+    expect((await b.account.decks.list()).value).toBeDefined();
     session.dispose();
   });
 });

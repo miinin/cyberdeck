@@ -136,6 +136,13 @@ export interface PreferencesRepository {
   loadBinderLayout(): Promise<BinderLayout | null>;
   /** Saves a valid layout (the name is trimmed and cut to its limit). Rejects with StorageError when the layout is not valid or saving fails. */
   saveBinderLayout(layout: BinderLayout): Promise<BinderLayout>;
+  /**
+   * true when this account has shared its trade link from this device (T-178, SR-54). Stored under the account's own keys,
+   * so another account on the same device never inherits it; signed out it is always false. Never throws.
+   */
+  loadTradeShared(): boolean;
+  /** Signed out: does nothing. Never throws (a hint only). */
+  saveTradeShared(shared: boolean): void;
   /** Account hint (T-054a): uid of the last signed-in account, or null when none or invalid. Never throws. */
   loadLastUid(): string | null;
   /** Saves a valid uid, or removes the hint for null or an invalid uid. Never throws (a hint only). */
