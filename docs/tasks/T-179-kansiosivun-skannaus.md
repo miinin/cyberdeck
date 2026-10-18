@@ -1,6 +1,6 @@
 # T-179 · Kansiosivun skannaus yhdellä kuvalla (3×3 ja 3×4)
 **Tila:** In review · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
-**Katselmoinnit:** Digiturva ☐ (kuvatiedoston käsittely, tallennus kokoelmaan) · PM (esikatselu, kuvakaappaukset)
+**Katselmoinnit:** Digiturva ☑ SEC-179, ei vetoa (kuvatiedoston käsittely, tallennus kokoelmaan) · PM (esikatselu, kuvakaappaukset)
 **Riippuvuudet:** T-106 (sormenjäljet), T-108 (jatkuva tila), T-113
 
 ## Tavoite
@@ -40,3 +40,9 @@ Käyttäjä haluaa saada koko kansion sovellukseen illassa. Yksi kuva kansiosivu
 - Korjattu: (1) sama kortti usealla taskulla lisäsi vain yhden kopion, koska kokoelman näkymä ei päivity ennen tallennusta; lisäys ja kumoa ryhmittelevät nyt taiteen mukaan ja saman kortin eri taiteet odottavat tallennuksen (`BinderScan.tsx` `apply`). (2) Rajan ylittyessä aiemmin lisätyt perutaan. (3) Näkymän piilottaminen tyhjentää kuvan muistista.
 - Suositukset (velka): (a) `takeBinderPhoto` ja `readFrame` toistavat saman rajauslaskennan, voisi yhdistää. (b) Saman kortin toisen taiteen (nova/iconic) erottelu: Varma-sääntö voisi vaatia vahvistuksen, kun toinen sija on saman kortin toinen taide. (c) Tarkkuustesti kestää noin 25 s; voisi siirtää omaan skriptiinsä, jos sarja hidastuu.
 **Avoimet:** ei kysymyksiä. Huom. PRIVACY.md: uusi paikallinen avain (asetus, ei henkilötietoa), PM päättää tarvitseeko maininnan.
+
+## Luovutus (Digiturva, 2026-10-18)
+**Tulos:** Critical 0, High 0, Medium 0, Low 1, Info 3. **Veto: ei**, saa julkaista. Raportti: `docs/reports/SEC-179-kansiosivun-skannaus.md`.
+- Tiedostosyöte (tyyppi, 25 Mt ennen dekoodausta, `createImageBitmap`, `bitmap.close()` finallyssa, 2400 px), ei objekti-URL:eja, kuva vain muistissa ja tyhjennetään, ei verkkoliikennettä. Tallennus olemassa olevan `addCopies`/`removeCopies`-polun kautta (MAX_COPIES, D-035), pakan polku suljettu, `cyberdeck:scan-grid` validoitu. Ei riippuvuus-, CSP-, firebase.json- tai workflow-muutoksia.
+- **SEC-179-1 (Low):** osittain epäonnistunut Kumoa jättää `added`-listan kokonaiseksi, jolloin uusi Kumoa poistaa jo poistetut erät toiseen kertaan. Myöskään `addAll`:n peruutuksen tulosta ei tarkisteta. Korjaus tässä tai velkana (PM).
+- SEC-179-2 (Info, riski hyväksyttävä): pikselimittoja ei rajata ennen dekoodausta (pakkauspommi, vain paikallinen palvelunesto). SEC-179-3/4 (Info): PRIVACY.md:n luku 12 päivitetty (tiedostosyöte, avaimet `scan-mode` ja `scan-grid`). Ei henkilötietoa.

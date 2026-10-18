@@ -115,6 +115,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 | 2026-10-17 | Katselmointi T-172/T-173 (SEC-T172-T173): sealed lisätty inventaarioon (rivi 1f). Ei henkilötietoa, ei synkronoida, poistuu `eraseAccount`:lla. Goldfish ei tallenna mitään. | T-173 |
 | 2026-10-17 | Katselmointi T-176 (SEC-T176): riville 1f lisätty tallennetun pakan id ja `updatedAt`-leima. Ei henkilötietoa, ei muutoksia säilytykseen eikä poistoon. | T-176 |
 | 2026-10-18 | Luku 14 (LUONNOS): lyhyt vaihtolinkki palvelimen kautta (T-178), rivi 23. Avoimet K-T178-1 ja K-T178-2. Ei evästeitä eikä uusia kolmansia osapuolia. | T-178 |
+| 2026-10-18 | Katselmointi SEC-179: luku 12 täydennetty kansiosivun kuvatiedostolla ja asetusavaimilla `cyberdeck:scan-mode` ja `cyberdeck:scan-grid` (ei henkilötietoa). | T-179 |
 
 ## 10. MVP-2: kirjautuminen ja pilvitallennus (T-054, LUONNOS)
 
@@ -228,7 +229,8 @@ Tietosuojaselosteeseen lisätään kappale julkisista pakoista: mitä näkyy, ke
 ## 12. Korttien skannaus kameralla (T-106, D-027)
 - **Kamera:** skannaus käyttää laitteen kameraa vain, kun käyttäjä avaa skannerin ja valitsee painoksen. Selain kysyy luvan, ja kamera sammuu, kun skanneri suljetaan.
 - **Kuva:** kameran kuvasta kopioidaan kortin kehyksen alue muistissa olevalle canvasille, ja siitä lasketaan pieni tiiviste. Kuvaa ei tallenneta (ei localStorageen eikä muualle), eikä sitä lähetetä minnekään. Tunnistus tapahtuu kokonaan laitteella eikä käytä ulkoisia palveluita.
-- **Tallennettava tieto:** vain kokoelmaan lisätty kortti, kuten muussakin lisäyksessä. Uusia tallennusavaimia tai henkilötietoja ei synny.
+- **Kansiosivu (T-179):** käyttäjä voi myös valita kuvatiedoston (kameran oma kuva tai galleria, `image/*`, enintään 25 Mt). Selain lukee sen laitteella (`createImageBitmap`) ja skaalaa sen muistiin enintään 2400 px:n kokoon. Tiedostoa ei tallenneta eikä lähetetä, eikä sen metatietoja (esim. EXIF-sijaintia) lueta suuntaa lukuun ottamatta. Kuva poistuu muistista, kun käyttäjä siirtyy seuraavaan sivuun tai sulkee tai piilottaa skannerin.
+- **Tallennettava tieto:** vain kokoelmaan lisätty kortti, kuten muussakin lisäyksessä. Lisäksi skanneri muistaa asetukset avaimissa `cyberdeck:scan-mode` (`single`/`continuous`/`binder`, T-108) ja `cyberdeck:scan-grid` (`3x3`/`3x4`, T-179). Ne eivät ole henkilötietoja, eikä henkilötietoja synny.
 - **Tekninen rajaus:** `Permissions-Policy` sallii kameran vain omalle originille (`camera=(self)`), muut ominaisuudet pysyvät estettyinä.
 
 ## 13. Pakan tulosseuranta (T-122, D-030, LUONNOS)
