@@ -114,6 +114,7 @@ Kirjautuminen ja pilvitallennus muuttavat tilanteen: kehittäjä (Firebase-proje
 | 2026-10-10 | Luku 13: pakan tulosseuranta (T-122). Uudet rivit 1e ja 13c, säilytys ja poisto sekä avoin kysymys K-P13 kolmansien henkilöiden tiedoista. Ei evästeitä eikä kolmansia osapuolia. | T-122 |
 | 2026-10-17 | Katselmointi T-172/T-173 (SEC-T172-T173): sealed lisätty inventaarioon (rivi 1f). Ei henkilötietoa, ei synkronoida, poistuu `eraseAccount`:lla. Goldfish ei tallenna mitään. | T-173 |
 | 2026-10-17 | Katselmointi T-176 (SEC-T176): riville 1f lisätty tallennetun pakan id ja `updatedAt`-leima. Ei henkilötietoa, ei muutoksia säilytykseen eikä poistoon. | T-176 |
+| 2026-10-18 | Luku 14 (LUONNOS): lyhyt vaihtolinkki palvelimen kautta (T-178), rivi 23. Avoimet K-T178-1 ja K-T178-2. Ei evästeitä eikä uusia kolmansia osapuolia. | T-178 |
 
 ## 10. MVP-2: kirjautuminen ja pilvitallennus (T-054, LUONNOS)
 
@@ -242,3 +243,17 @@ Tietosuojaselosteeseen lisätään kappale julkisista pakoista: mitä näkyy, ke
 - **Evästeet ja kolmannet osapuolet:** ei muutoksia.
 - **Seloste ja kirjautumisdialogi:** mainitaan, että myös pelitulokset ja niihin kirjatut vastustajien nimet ja muistiinpanot tallennetaan tilille (SR-29).
 - **K-P13 (käyttäjälle PM:n kautta, ei oikeudellinen kannanotto):** käyttäjät voivat kirjata pilveen kolmansien henkilöiden nimiä, joista osa voi olla alaikäisiä, sekä vapaata tekstiä, johon voi päätyä mitä tahansa, myös erityisiin henkilötietoryhmiin kuuluvaa tietoa. Riittääkö minimointi (valinnaiset kentät, lempinimivihje, ei vientiä eikä julkaisua) ja maininta selosteessa? Kuka on rekisterinpitäjä tälle pilveen tallennetulle tiedolle (vrt. kotitalouspoikkeus ja palvelun ylläpitäjän rooli)? **Käyttäjän vastaus 2026-10-10:** minimointi ja maininta selosteessa riittävät. Rekisterinpitäjäkysymys ratkaistaan yhdessä K-P1:n kanssa ennen kuin käyttäjiä kutsutaan.
+
+## 14. Lyhyt vaihtolinkki (T-178, D-037, LUONNOS)
+> **Luonnos 2026-10-18, toteutus kirjattu 2026-10-18 (T-178, Koodari).** Voimaan, kun T-178 on julkaistu ja säännöt on deployattu molempiin projekteihin. Ei oikeudellinen kannanotto.
+
+| # | Tieto | Lähde | Tarkoitus | Missä | Kuka pääsee | Henkilötieto? | Minimointi |
+|---|---|---|---|---|---|---|---|
+| 23 | Jaettu vaihtolista: kokoelma, want-lista ja vaihtoon merkityt kortit (kortin avain ja määrä) sekä päivitysaika | Kirjautunut käyttäjä painaa "Jaa Have/Want" | Vaihtovertailu lyhyellä linkillä | Firestore `tradeShares/{shareId}` (tuotanto `eur3`, testi `europe-north1`) ja tilikohtainen paikallinen merkintä `cyberdeck:u:{uid}:trade-shared` (arvo `1`, ei sisältöä) siitä, että tili on jakanut tältä laitteelta | **Kuka tahansa, jolla linkki on** (ei listattavissa), projektin omistaja, Google käsittelijänä | Pseudonyymi: ei uid:tä, nimeä eikä nimimerkkiä. Tunnus on käyttäjäkohtainen vakio, joten saman käyttäjän jaot ajan mittaan yhdistyvät toisiinsa, ja kokoelma voi yhdistyä henkilöön viestikanavan kautta | Sama sisältö kuin rivillä 6b, ei vapaata tekstiä. Ilmoitus jaettaessa (SR-57) |
+
+- **Ero riviin 6b:** vanha linkki on tilannekuva eikä käy palvelimella. Uusi linkki on palvelimella ja päivittyy, kunnes jakaminen lopetetaan.
+- **Säilytys ja poisto:** jako säilyy, kunnes käyttäjä painaa "Lopeta jakaminen" tai poistaa tilin tiedot (SR-55, SR-56). Vanhenemisaikaa ei ole (K-T178-2). Uusi jakaminen palauttaa saman linkin (K-T178-1). Vastaanottajan tekemiä kopioita ei voi poistaa.
+- **Peruste (ehdotus):** käyttäjän oma pyyntö jakaa. Ikäraja 16 vuotta pätee (D-016).
+- **Evästeet ja kolmannet osapuolet:** ei muutoksia. Vastaanottajan selain ottaa yhteyden `firestore.googleapis.com`:iin kuten julkisissa pakoissa (rivi 19).
+- **Toteutus (T-178):** linkki kirjoitetaan vain käyttäjän Jaa-painalluksesta. Automaattinen päivitys (aikaisintaan 15 s muutoksen jälkeen) tekee vain päivityksen, ei koskaan luontia, ja toimii vain, kun Have/Want-sivu on auki ja tämä tili on jakanut tältä laitteelta. Jos dokumenttia ei ole, paikallinen merkintä poistetaan. Tilin tietojen poisto poistaa dokumentin julkisten pakkojen jälkeen ja ennen yksityisiä tietoja, ja paikallinen merkintä poistuu `eraseAccount`:lla. Jos poisto epäonnistuu, käyttäjälle kerrotaan, että jaettu linkki voi yhä toimia. Avattua linkkiä ei tallenneta.
+- **Seloste (SR-60, ehdotus PM:n hyväksyttäväksi):** "Jos jaat Have/Want-listasi lyhyellä linkillä, kokoelmasi, want-listasi ja vaihtoon merkityt korttisi tallennetaan palvelimelle ilman nimeäsi tai tunnistettasi, ja kuka tahansa, jolla on linkki, näkee ne. Linkki päivittyy, kun muutat listojasi, ja säilyy, kunnes painat Lopeta jakaminen tai poistat tilin tiedot. Vastaanottajan tekemiä kopioita ei voi poistaa." Kirjautumisdialogin tekstiä (accountPrivacy) ei ole muutettu, koska sanamuoto vaatii hyväksynnän.

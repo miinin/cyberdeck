@@ -643,3 +643,8 @@ Päätöksessä on viisi osaa.
 **Konteksti:** Sealed oli piilossa Pakat-sivun välilehdellä, avaus vaati yli 20 klikkausta ja hiiren siirtelyä, ja goldfish-näkymän kortit olivat pieniä eikä nopissa ollut visuaalisuutta.
 **Päätös:** Yläpalkkiin tulee oma osio **Testaa** (en: Playtest), jossa ovat Sealed, Boosterit ja Pelaa yksin (oman pakan valinta). Sealedin avauksessa yksi iso painike pysyy samassa kohdassa (avaa, paljastaa ja siirtyy eteenpäin, myös välilyönnillä), ja "Avaa kaikki loput" vie suoraan rakentajaan. Rakentajan yläosassa on aina näkyvä nimikenttä ja "Tallenna omiin pakkoihin". Tallennuksen jälkeen näkyy "Avaa pakka", ja muutokset voi tallentaa samaan pakkaan uudelleen. Goldfish-näkymä uudistetaan visuaalisesti (T-177).
 **Seuraukset:** Vanhat `#/pakat/sealed`-osoitteet ohjataan uuteen osioon. Sealed-ajoon tallennetaan viedyn pakan id (tallennusmuutos, dev ensin).
+
+## D-037 · Lyhyt Have/Want-linkki palvelimen kautta · 2026-10-18 · Päättäjä: käyttäjä (suunta, riskit), PM (toteutus)
+**Konteksti:** Vaihtolinkki kantoi koko kokoelman linkissä (jopa 16 000 merkkiä), eikä se mahtunut pikaviesteihin.
+**Päätös:** Kirjautunut käyttäjä jakaa lyhyen linkin `#/v/<tunnus>`. Data on Firestoressa (`tradeShares/{tunnus}`), ja tunnus johdetaan uid:stä (yksi linkki per käyttäjä, päivittyy). Lopeta jakaminen poistaa dokumentin. Käyttäjä hyväksyi riskit: tunnus on pysyvä (uudelleenjako herättää saman linkin, linkin vaihto I-17) eikä linkki vanhene (K-T178-1, K-T178-2). Kirjautumaton käyttäjä saa vanhan pitkän linkin, ja vanhat linkit toimivat.
+**Seuraukset:** Uusi kokoelma ja säännöt (SEC-178), tilin poisto poistaa jaon. Automaattinen päivitys vain Have/Want-sivun ollessa auki. Säännöt deployataan käsin deviin ja tuotantoon.

@@ -247,6 +247,7 @@ export function createRepositories(options: RepositoryOptions): Repositories {
   const havesKey = prefix === null ? HAVES_KEY : `${prefix}haves`;
   const sealedKey = prefix === null ? SEALED_KEY : `${prefix}sealed`;
   // The own binder holds the account's cards and a free-text name, so it follows the account like the proxy queue (T-120).
+  const tradeSharedKey = prefix === null ? null : `${prefix}trade-shared`;
   const binderLayoutKey = prefix === null ? BINDER_LAYOUT_KEY : `${prefix}binder-layout`;
   const backupPrefix = prefix === null ? BACKUP_PREFIX : `${prefix}backup:`;
   const syncBaseKey = `${prefix ?? 'cyberdeck:'}sync-base`;
@@ -823,6 +824,13 @@ export function createRepositories(options: RepositoryOptions): Repositories {
         throw toStorageError(error, 'write');
       }
       return valid;
+    },
+    loadTradeShared: () => {
+      const raw = tradeSharedKey === null ? null : readHint(tradeSharedKey);
+      return raw === 'list' || raw === 'collection' ? raw : null;
+    },
+    saveTradeShared: (source) => {
+      if (tradeSharedKey !== null) writeHint(tradeSharedKey, source);
     },
     // Account hints never throw: a failed write only means the SDK is not preloaded next time.
     loadLastUid: () => {

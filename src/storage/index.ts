@@ -31,6 +31,7 @@ export type {
   LocalData,
   SyncBase,
   SyncStorage,
+  TradeShareSource,
 } from './types';
 export { DEFAULT_COLLECTION_PREFS } from './types';
 export { StorageError } from './errors';

@@ -180,3 +180,4 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-175 | Rikkomistestauksen BREAK-T172-T173 korjaukset (BRK-01–06: Gear ilman kohdetta, kädenkoko, kohdistus, pakkaus pooliin vasta paljastuksen jälkeen, tuplatallennus, ei Legendejä) | 1 | Must | PM | Done | dev ennen tuotantoa (sealed-tallennus) |
 | T-176 | Testaa-osio yläpalkkiin (Sealed, Boosterit, Pelaa yksin), sealedin yhden painikkeen avaus ja vienti omiin pakkoihin (D-036) | 1 | Must | Koodari | Done | Digiturva (tallennus), dev ensin |
 | T-177 | Goldfish-näkymän visuaalinen uudistus: isommat kortit, nopat muotoinaan, tulostaulu (D-036) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
+| T-178 | Lyhyt Have/Want-linkki palvelimen kautta (`#/v/<tunnus>`, tradeShares, D-037) | 1 | Must | Koodari | Review | Digiturva (SEC-178), dev ensin, SR-59 käsitestit |

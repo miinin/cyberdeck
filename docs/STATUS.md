@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-17 (PM)
+# STATUS · päivitetty 2026-10-18 (PM)
 
 ## Yhdellä lauseella
 Kaikki T-177:ään asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva), want-lista ja jakolinkit, pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | PM | T-176 ja T-177 tuotannossa (PR #189, 2026-10-17) | Seuraava tehtävä priorisoinnin mukaan |
+| T-178 | PM | Lyhyt vaihtolinkki devissä (säännöt deployattu deviin 2026-10-18) | Käyttäjä tekee SR-59-käsitestit devissä, sitten tuotannon säännöt ja /julkaise |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
