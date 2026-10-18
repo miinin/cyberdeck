@@ -1,5 +1,5 @@
 # T-179 · Kansiosivun skannaus yhdellä kuvalla (3×3 ja 3×4)
-**Tila:** In review · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
+**Tila:** Done · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must
 **Katselmoinnit:** Digiturva ☑ SEC-179, ei vetoa (kuvatiedoston käsittely, tallennus kokoelmaan) · PM (esikatselu, kuvakaappaukset)
 **Riippuvuudet:** T-106 (sormenjäljet), T-108 (jatkuva tila), T-113
 
@@ -46,3 +46,6 @@ Käyttäjä haluaa saada koko kansion sovellukseen illassa. Yksi kuva kansiosivu
 - Tiedostosyöte (tyyppi, 25 Mt ennen dekoodausta, `createImageBitmap`, `bitmap.close()` finallyssa, 2400 px), ei objekti-URL:eja, kuva vain muistissa ja tyhjennetään, ei verkkoliikennettä. Tallennus olemassa olevan `addCopies`/`removeCopies`-polun kautta (MAX_COPIES, D-035), pakan polku suljettu, `cyberdeck:scan-grid` validoitu. Ei riippuvuus-, CSP-, firebase.json- tai workflow-muutoksia.
 - **SEC-179-1 (Low):** osittain epäonnistunut Kumoa jättää `added`-listan kokonaiseksi, jolloin uusi Kumoa poistaa jo poistetut erät toiseen kertaan. Myöskään `addAll`:n peruutuksen tulosta ei tarkisteta. Korjaus tässä tai velkana (PM).
 - SEC-179-2 (Info, riski hyväksyttävä): pikselimittoja ei rajata ennen dekoodausta (pakkauspommi, vain paikallinen palvelunesto). SEC-179-3/4 (Info): PRIVACY.md:n luku 12 päivitetty (tiedostosyöte, avaimet `scan-mode` ja `scan-grid`). Ei henkilötietoa.
+
+## PM · Tarkistus ja korjaukset (2026-10-18)
+Kuvakaappaukset tarkistettu (320/1280, vaalea/tumma). PM korjasi SEC-179-1:n: osittain epäonnistunut Kumoa tai peruutus jättää `added`-listaan vain poistamatta jääneet erät, joten toinen Kumoa ei poista kortteja kahdesti (ei omaa yksikkötestiä). Pitkät kortinnimet tavutetaan (`lang="en"`, `hyphens: auto`), eivätkä ne enää katkea kesken sanan ilman tavuviivaa. Testit 2091/2091, lint ja build läpi.

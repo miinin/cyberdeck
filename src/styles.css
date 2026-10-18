@@ -12903,6 +12903,7 @@ body:has(.mark-banner) .site-footer {
   min-block-size: 2.4em;
   line-height: 1.2;
   overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .binder-cell-state {

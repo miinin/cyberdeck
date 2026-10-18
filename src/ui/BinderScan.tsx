@@ -372,9 +372,11 @@ export function BinderPageFlow({
     setBusy(true);
     const result = await apply(store, edition, batches, 'add');
     if (result.failed !== null) {
-      await apply(store, edition, result.done, 'remove');
+      const back = await apply(store, edition, result.done, 'remove');
       if (mounted.current) {
         setMessage(result.failed.outcome === 'limit' ? scannerTexts.pageLimit(cardNameText(result.failed.batch.target.card)) : scannerTexts.collectionNotReady);
+        // SEC-179-1: batches the take-back could not remove stay in the collection, so Undo can still remove them.
+        if (back.failed !== null) setAdded(result.done.slice(back.done.length));
         setBusy(false);
       }
       return;
@@ -393,6 +395,8 @@ export function BinderPageFlow({
     if (!mounted.current) return;
     setBusy(false);
     if (result.failed !== null) {
+      // SEC-179-1: apply works in order, so only the batches after the removed ones are left to take back.
+      setAdded(added.slice(result.done.length));
       setMessage(scannerTexts.collectionNotReady);
       return;
     }
@@ -482,7 +486,7 @@ export function BinderPageFlow({
                   <PictureCanvas picture={pocket.picture} className="binder-cell-picture" />
                   {pocket.chosen === null ? <span className="card-image card-image--missing" /> : <CardThumb target={pocket.chosen} />}
                 </span>
-                <span className="binder-cell-name" aria-hidden="true">
+                <span className="binder-cell-name" lang="en" aria-hidden="true">
                   {name ?? ' '}
                 </span>
                 <span className="binder-cell-state" aria-hidden="true">
