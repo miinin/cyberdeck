@@ -9,12 +9,31 @@ import { isRecord } from './validate';
 export const TRADE_SHARE_SCHEMA_VERSION = 1;
 /** SR-54: an automatic update waits at least this long; the rules require 10 s between updates. */
 export const TRADE_SHARE_UPDATE_DELAY_MS = 15_000;
+/** SR-52: the rules refuse an update less than this long after the previous write of the same link. */
+export const TRADE_SHARE_MIN_GAP_MS = 10_000;
 
 const SHARE_ID = /^[0-9a-f]{16}$/;
 const BASE64URL = /^[A-Za-z0-9_-]+$/;
 
 export function isTradeShareId(value: unknown): value is string {
   return typeof value === 'string' && SHARE_ID.test(value);
+}
+
+/**
+ * BRK-07: a link copied through a chat or an email often gains a trailing mark (`/ . ) ,`), a space or capitals. The
+ * id is cleaned before the strict shape check, which stays as it is (SR-53): trim, lower case, cut a query part and
+ * drop the trailing marks. The result is still untrusted.
+ */
+export function normalizeTradeShareId(raw: string): string {
+  let value = raw;
+  try {
+    value = decodeURIComponent(raw);
+  } catch {
+    // A malformed escape stays as it is and fails the shape check.
+  }
+  const query = value.indexOf('?');
+  if (query >= 0) value = value.slice(0, query);
+  return value.trim().toLowerCase().replace(/[/.),]+$/, '');
 }
 
 /** shareId = first 16 hex characters of sha256(uid + '#trade'). '#' is not in a deckId, so it never collides with publicDeckId (SR-50). */

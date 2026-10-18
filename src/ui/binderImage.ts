@@ -1,4 +1,4 @@
-import { acceptableImageFile, limitedSize } from '../domain/binderPage';
+import { acceptableImageFile, limitedSize, usablePictureSize } from '../domain/binderPage';
 import type { PixelImage } from '../domain/cardFingerprint';
 import type { Rect } from '../domain/scanCrop';
 
@@ -15,6 +15,9 @@ export function grabPixels(source: CanvasImageSource, area: Rect): PixelImage | 
   return { data: pixels.data, width: pixels.width, height: pixels.height };
 }
 
+/** The picture is readable but too small or too thin for a binder page (BRK-08). */
+export class ImageTooSmallError extends Error {}
+
 /**
  * Reads a chosen picture file (T-179): an image of at most 25 MB, decoded by the browser with the photo's own
  * orientation and scaled down to at most 2400 px. Rejects for anything else. The file is never uploaded or stored.
@@ -23,6 +26,7 @@ export async function readImageFile(file: File): Promise<PixelImage> {
   if (!acceptableImageFile(file)) throw new Error('Unreadable image');
   const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   try {
+    if (!usablePictureSize(bitmap.width, bitmap.height)) throw new ImageTooSmallError('Image too small');
     const pixels = grabPixels(bitmap, { x: 0, y: 0, width: bitmap.width, height: bitmap.height });
     if (pixels === null) throw new Error('No canvas');
     return pixels;

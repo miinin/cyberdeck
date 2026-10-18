@@ -102,4 +102,9 @@ export const scannerTextsFi = {
   pageNothing: 'Yhtään korttia ei ole lisättävänä. Valitse tai hae kortit tunnistamattomiin taskuihin.',
   pageLimit: (name: string) => `${name}: enimmäismäärä 999 ei riitä, mitään ei lisätty.`,
   backToCamera: 'Takaisin kameraan',
+  // BRK-02, BRK-08.
+  acceptSuggestion: 'Hyväksy',
+  acceptLabel: (n: number, name: string) => `Hyväksy tasku ${n}: ${name}`,
+  toCheck: (n: number) => `${n} tarkistettavaa`,
+  imageTooSmall: 'Kuva on liian pieni tai kapea kansiosivuksi.',
 };

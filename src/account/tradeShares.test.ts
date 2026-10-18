@@ -113,7 +113,9 @@ interface Harness {
 }
 
 function memoryHarness(): Harness {
-  const memory = createMemoryTradeShares();
+  // The memory store keeps the rules' 10 s gap between writes (BRK-06); this clock lets every call be 11 s later.
+  let time = Date.parse('2026-01-01T00:00:00Z');
+  const memory = createMemoryTradeShares({ now: () => new Date((time += 11_000)) });
   return {
     forUser: memory.forUser,
     stored: () => memory.docs,

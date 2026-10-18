@@ -104,4 +104,9 @@ export const scannerTextsEn: typeof scannerTextsFi = {
   pageNothing: 'There are no cards to add. Choose or search the cards of the pockets that were not recognised.',
   pageLimit: (name: string) => `${name}: the maximum of 999 does not fit, nothing was added.`,
   backToCamera: 'Back to the camera',
+  // BRK-02, BRK-08.
+  acceptSuggestion: 'Accept',
+  acceptLabel: (n: number, name: string) => `Accept pocket ${n}: ${name}`,
+  toCheck: (n: number) => `${n} to check`,
+  imageTooSmall: 'The image is too small or narrow for a binder page.',
 };

@@ -423,6 +423,7 @@ export const textsFi = {
   tradeSharingStopped: 'Jakaminen lopetettu. Jos jaat uudelleen, sama linkki toimii taas.',
   tradeShareOtherSource: 'Jaettu sisältö on eri lähteestä. Päivitä painamalla Jaa.',
   tradeShareFailed: 'Jakaminen ei onnistunut. Yritä uudelleen.',
+  tradeShareUpdating: 'Päivitetään hetken kuluttua.',
   tradeSignInForShort: 'Kirjaudu, niin saat lyhyen linkin.',
   tradeShortWarning:
     'Linkin saaja näkee kokoelmasi, want-listasi ja vaihtoon merkityt kortit, myös myöhemmät muutokset, kunnes lopetat jakamisen.',

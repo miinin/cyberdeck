@@ -398,6 +398,7 @@ export const textsEn: typeof textsFi = {
   tradeSharingStopped: 'Sharing stopped. If you share again, the same link works again.',
   tradeShareOtherSource: 'The shared content comes from a different source. Press Share to update it.',
   tradeShareFailed: 'Sharing failed. Try again.',
+  tradeShareUpdating: 'Updating in a moment.',
   tradeSignInForShort: 'Sign in to get a short link.',
   tradeShortWarning:
     'Whoever opens the link sees your collection, your want list and the cards marked for trade, including later changes, until you stop sharing.',
