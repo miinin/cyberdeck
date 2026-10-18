@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | PM | T-178 ja T-179 julkaistaan 2026-10-18 | Seuraava tehtävä priorisoinnin mukaan |
+| – | PM | T-178 ja T-179 tuotannossa (PR #190, 2026-10-18) | Seuraava tehtävä priorisoinnin mukaan |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
