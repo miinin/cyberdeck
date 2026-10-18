@@ -6,6 +6,8 @@ import { isDeckId } from '../domain/validate';
 export type Route =
   { name: 'cards' } | { name: 'card'; key: string } | { name: 'decks' } | { name: 'deck'; id: string } | { name: 'share'; data: string }
   | { name: 'trade'; data: string } | { name: 'havewant' }
+  // Short trade link (T-178): the id is untrusted and checked by the view before any request.
+  | { name: 'tradeLink'; id: string }
   // Public decks (T-098): the list tab and one public deck by its pubId.
   | { name: 'publicDecks' } | { name: 'publicDeck'; id: string }
   // Deck building tab (T-164): swap guide and compatibility of the user's decks.
@@ -43,6 +45,7 @@ export function sectionOf(route: Route): Section {
       return 'decks';
     case 'havewant':
     case 'trade':
+    case 'tradeLink':
       return 'havewant';
     case 'proxy':
       return 'proxy';
@@ -60,6 +63,8 @@ export function parseHash(hash: string): Route {
     if (parts.length === 1 || (parts.length === 2 && parts[1] === '')) return { name: 'havewant' };
     return { name: 'trade', data: parts.length === 2 ? (parts[1] ?? '') : '' };
   }
+  // "#/v/<id>": a short trade link (T-178). Only the shape of the route is decided here; the id is validated by the view.
+  if (parts[0] === 'v') return { name: 'tradeLink', id: parts.length === 2 ? (parts[1] ?? '') : '' };
   // "#/proxy": the Proxy section (T-102).
   if (parts[0] === 'proxy') return { name: 'proxy' };
   // "#/kokoelma": the Collection progress section (T-105).
@@ -107,6 +112,7 @@ export function routeHash(route: Route): string {
   if (route.name === 'boosters') return '#/testaa/boosterit';
   if (route.name === 'soloPick') return '#/testaa/pelaa';
   if (route.name === 'goldfish') return `#/pakat/${route.id}/goldfish`;
+  if (route.name === 'tradeLink') return `#/v/${route.id}`;
   if (route.name === 'trade') return `#/vaihto/${route.data}`;
   return route.name === 'decks' ? '#/pakat' : `#/pakat/${route.id}`;
 }

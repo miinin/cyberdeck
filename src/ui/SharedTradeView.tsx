@@ -90,10 +90,13 @@ export function SharedTradeView({
   data,
   cards,
   repositories,
+  intro = texts.tradeIntro,
 }: {
   data: string;
   cards: readonly Card[];
   repositories: Repositories;
+  /** The intro line; a short link (T-178) says the lists are live, not a snapshot. */
+  intro?: string;
 }) {
   const { snapshot: mine } = useCollection(repositories.collection);
   const { snapshot: myWants } = useWants(repositories.wants);
@@ -158,7 +161,7 @@ export function SharedTradeView({
       <h1 ref={headingRef} tabIndex={-1}>
         {texts.tradeHeading}
       </h1>
-      <p>{texts.tradeIntro}</p>
+      <p>{intro}</p>
       {shared.dropped > 0 && <p role="status">{texts.tradeDropped(shared.dropped)}</p>}
       {unknown > 0 && <p role="status">{texts.tradeUnknown(unknown)}</p>}
 

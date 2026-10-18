@@ -95,3 +95,17 @@ describe('playtest routes (T-176)', () => {
     expect(sectionOf(parseHash('#/testaa/boosterit'))).toBe('decks');
   });
 });
+
+describe('short trade link route (T-178)', () => {
+  it('parses #/v/<id> and round-trips; the id is checked by the view, not here', () => {
+    expect(parseHash('#/v/0123456789abcdef')).toEqual({ name: 'tradeLink', id: '0123456789abcdef' });
+    expect(routeHash({ name: 'tradeLink', id: '0123456789abcdef' })).toBe('#/v/0123456789abcdef');
+    expect(parseHash('#/v/')).toEqual({ name: 'tradeLink', id: '' });
+    expect(parseHash('#/v/a/b')).toEqual({ name: 'tradeLink', id: '' });
+  });
+
+  it('belongs to the Have/Want section, and the long link still works', () => {
+    expect(sectionOf({ name: 'tradeLink', id: 'x' })).toBe('havewant');
+    expect(parseHash('#/vaihto/QQ')).toEqual({ name: 'trade', data: 'QQ' });
+  });
+});

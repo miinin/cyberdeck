@@ -16,6 +16,7 @@ import { ProxyView } from './ui/ProxyView';
 import { proxyTexts } from './ui/proxyTexts';
 import { useProxyCount } from './ui/SendToProxy';
 import { SharedTradeView } from './ui/SharedTradeView';
+import { TradeLinkView } from './ui/TradeLinkView';
 import { DecksView } from './ui/DecksView';
 import { PublicDeckView } from './ui/PublicDeckView';
 import { PublicDecksContext } from './ui/PublicDecksContext';
@@ -73,9 +74,10 @@ export function App({
   useEffect(() => () => publisher?.dispose(), [publisher]);
   // A deck deleted or made private on another device loses its public copy (SEC-098b-2).
   useEffect(() => (uid === null ? undefined : watchPublicDecks(openRepositories.decks, publicStore)), [uid, openRepositories, publicStore]);
+  const tradeStore = useMemo(() => accountServices.tradeShares?.(uid) ?? null, [accountServices, uid]);
   const publicApi = useMemo<PublicDecksApi>(
-    () => ({ store: publicStore, publisher, signInAvailable: accountServices.auth.available }),
-    [publicStore, publisher, accountServices],
+    () => ({ store: publicStore, publisher, tradeShares: tradeStore, ownTradeShares: uid === null ? null : tradeStore, signInAvailable: accountServices.auth.available }),
+    [publicStore, publisher, tradeStore, uid, accountServices],
   );
   // Creating the session starts nothing; the effect starts and (also in Strict Mode) stops it.
   const session = useMemo(
@@ -88,9 +90,10 @@ export function App({
             account: openRepositories,
             cloud: accountServices.cloud(uid),
             publicDecks: publicStore,
+            tradeShares: uid === null ? undefined : (tradeStore ?? undefined),
             beforeDeleteAccount: () => publisher?.drain() ?? Promise.resolve(),
           }),
-    [uid, signedOutRepositories, openRepositories, accountServices, publicStore, publisher],
+    [uid, signedOutRepositories, openRepositories, accountServices, publicStore, publisher, tradeStore],
   );
   useEffect(() => {
     session?.start();
@@ -144,7 +147,7 @@ export function App({
             <a href="#/testaa" aria-current={isPlaytestRoute(route) || route.name === 'goldfish' ? 'page' : undefined}>
               {sealedTexts.navPlaytest}
             </a>
-            <a href="#/vaihto" aria-current={route.name === 'havewant' || route.name === 'trade' ? 'page' : undefined}>
+            <a href="#/vaihto" aria-current={route.name === 'havewant' || route.name === 'trade' || route.name === 'tradeLink' ? 'page' : undefined}>
               {deckTexts.navHaveWant}
             </a>
             <a href="#/proxy" aria-current={route.name === 'proxy' ? 'page' : undefined}>
@@ -246,6 +249,7 @@ export function App({
         )}
         {route.name === 'collection' && <CollectionView cards={cards} repositories={openRepositories} headerSlot={headerSlot} />}
         {route.name === 'proxy' && <ProxyView cards={cards} repositories={openRepositories} />}
+        {route.name === 'tradeLink' && <TradeLinkView key={route.id} id={route.id} cards={cards} repositories={openRepositories} />}
         {route.name === 'trade' && (
           <SharedTradeView data={route.data} cards={cards} repositories={openRepositories} />
         )}

@@ -86,7 +86,8 @@ export const textsFi = {
   accountDeleteConfirm: 'Poista tiedot ja tili',
   accountDeleting: 'Poistetaan…',
   accountDeleteReauth: 'Siirrytään Googleen vahvistamaan kirjautuminen. Poisto valmistuu, kun palaat sivulle.',
-  accountDeleteFailedCloud: 'Tietojen poisto ei onnistunut. Tarkista yhteys ja yritä uudelleen.',
+  accountDeleteFailedCloud:
+    'Tietojen poisto ei onnistunut. Tarkista yhteys ja yritä uudelleen. Jaettu vaihtolinkki voi yhä toimia.',
   accountDeleteFailedAccount: 'Tiedot poistettiin, mutta tilin poisto ei onnistunut. Yritä uudelleen.',
   accountDeletedNotice: 'Tilin tiedot ja tili on poistettu.',
   // First sign-in with data on both sides (T-054c).
@@ -418,6 +419,19 @@ export const textsFi = {
   haveOwnedRow: (owned: number) => `omistettu ${owned}`,
   // Trade link (T-062, T-063)
   tradeShareButton: 'Jaa Have/Want',
+  tradeStopSharing: 'Lopeta jakaminen',
+  tradeSharingStopped: 'Jakaminen lopetettu.',
+  tradeShareFailed: 'Jakaminen ei onnistunut. Yritä uudelleen.',
+  tradeSignInForShort: 'Kirjaudu, niin saat lyhyen linkin.',
+  tradeShortWarning:
+    'Linkin saaja näkee kokoelmasi, want-listasi ja vaihtoon merkityt kortit, myös myöhemmät muutokset, kunnes lopetat jakamisen.',
+  tradeShortWarningList:
+    'Linkin saaja näkee Have- ja want-listasi, myös myöhemmät muutokset, kunnes lopetat jakamisen.',
+  tradeLinkNotFound: 'Linkkiä ei löytynyt. Jakaja on ehkä lopettanut jakamisen.',
+  tradeLinkNewer: 'Linkki on tehty uudemmalla sovellusversiolla. Lataa sivu uudelleen.',
+  tradeLinkError: 'Linkin lataus ei onnistunut. Tarkista yhteys ja yritä uudelleen.',
+  tradeIntroShort: 'Tämä on toisen pelaajan kokoelma ja want-lista sellaisena kuin hän on sen jakanut. Mitään ei tallenneta.',
+  tradeLinkLoading: 'Ladataan linkkiä.',
   tradeShareNote: 'Linkin saaja näkee koko kokoelmasi ja want-listasi.',
   tradeShareCopied: 'Linkki kopioitu leikepöydälle.',
   tradeShareCopyFailed: 'Kopiointi ei onnistunut. Kopioi linkki tästä:',
