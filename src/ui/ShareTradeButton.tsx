@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CardKey } from '../domain/cardKey';
 import type { Collection } from '../domain/collection';
-import { TRADE_SHARE_UPDATE_DELAY_MS } from '../domain/tradeLink';
+import { CloudError } from '../account';
+import { TRADE_SHARE_MIN_GAP_MS, TRADE_SHARE_UPDATE_DELAY_MS } from '../domain/tradeLink';
 import { encodeTradeShare } from '../domain/tradeShare';
 import type { WantList } from '../domain/wants';
 import type { PreferencesRepository, TradeShareSource } from '../storage';
@@ -13,7 +14,7 @@ import { texts } from './texts';
 /** A second press with unchanged content soon after a write only copies: the rules refuse writes less than 10 s apart. */
 const RECENT_WRITE_MS = 20_000;
 
-type Status = 'copied' | 'failed' | 'share-failed' | 'stopped' | null;
+type Status = 'copied' | 'failed' | 'share-failed' | 'stopped' | 'updating' | null;
 
 /**
  * The trade link (collection + want list) in a link box with a copy button (T-062, T-129). Signed in (T-178, D-037)
@@ -55,6 +56,13 @@ export function ShareTradeButton({
   const data = useMemo(() => encodeTradeShare(have, want, tradeable), [have, want, tradeable]);
   /** What the server holds from this device, and when this device last wrote it. */
   const synced = useRef<{ data: string | null; at: number }>({ data: null, at: 0 });
+  /** BRK-06: a share the rules refused for coming too soon is tried again by itself. */
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const latestData = useRef(data);
+  useEffect(() => {
+    latestData.current = data;
+  });
+  useEffect(() => () => clearTimeout(retryTimer.current), []);
 
   // A link shared earlier from this device is shown again (the id is computed from the uid, nothing is read).
   useEffect(() => {
@@ -135,9 +143,31 @@ export function ShareTradeButton({
     setStatus(null);
     try {
       const recent = synced.current.data === data && Date.now() - synced.current.at < RECENT_WRITE_MS;
+      let waiting = false;
       if (!recent) {
-        await store.publish(data);
-        synced.current = { data, at: Date.now() };
+        try {
+          await store.publish(data);
+          synced.current = { data, at: Date.now() };
+        } catch (error) {
+          // BRK-06: the rules allow one update per 10 s. The link is known, so it is copied now and the write is
+          // repeated when the gap has passed. A refusal of a first share (nothing shared yet) is a real failure.
+          if (!(error instanceof CloudError && error.kind === 'denied') || !shared) throw error;
+          waiting = true;
+          const since = synced.current.at === 0 ? 0 : Date.now() - synced.current.at;
+          const wait = Math.max(1_000, TRADE_SHARE_MIN_GAP_MS + 1_000 - since);
+          clearTimeout(retryTimer.current);
+          retryTimer.current = setTimeout(() => {
+            const next = latestData.current;
+            if (next === null) return;
+            store.publish(next).then(
+              () => {
+                synced.current = { data: next, at: Date.now() };
+                setStatus((current) => (current === 'updating' ? null : current));
+              },
+              () => setStatus('share-failed'),
+            );
+          }, wait);
+        }
       }
       const id = await store.ownId();
       preferences?.saveTradeShared(source);
@@ -145,6 +175,7 @@ export function ShareTradeButton({
       setShortId(id);
       setRevealed(true);
       await copy(`${window.location.origin}/#/v/${id}`);
+      if (waiting) setStatus('updating');
     } catch {
       setStatus('share-failed');
     } finally {
@@ -154,6 +185,7 @@ export function ShareTradeButton({
 
   const stop = async () => {
     if (store === null || busy) return;
+    clearTimeout(retryTimer.current);
     setBusy(true);
     setStatus(null);
     try {
@@ -183,6 +215,8 @@ export function ShareTradeButton({
         ? texts.tradeShareCopied
         : status === 'failed'
           ? texts.tradeShareCopyFailed
+          : status === 'updating'
+            ? texts.tradeShareUpdating
           : status === 'share-failed'
             ? texts.tradeShareFailed
             : status === 'stopped'

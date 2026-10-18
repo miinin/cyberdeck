@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from '../App';
 import { createFakeAuth, createMemoryCloud, createMemoryPublicDecks, createMemoryTradeShares, FAKE_USER } from '../account';
@@ -180,6 +180,29 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
       await vi.waitFor(() => expect(shares.docs.get(id)?.data).toBe(dataTwo));
     });
 
+    it('BRK-06: Share within 10 s of the last write copies the link now and writes again when the gap has passed', async () => {
+      const user = userEvent.setup();
+      const { rerender } = setup();
+      await user.click(screen.getByRole('button', { name: 'Jaa Have/Want' }));
+      await screen.findByLabelText('Vaihtolinkki');
+      const id = await tradeShareId(FAKE_USER.uid);
+      fakeTimers();
+      rerender(HAVE_TWO);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Jaa Have/Want' }));
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      await vi.waitFor(() => expect(screen.getByText('Päivitetään hetken kuluttua.')).toBeInTheDocument());
+      expect(screen.queryByText('Jakaminen ei onnistunut. Yritä uudelleen.')).toBeNull();
+      expect(await navigator.clipboard.readText()).toContain(`/#/v/${id}`);
+      expect(shares.docs.get(id)?.data).toBe(dataOne);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(11_500);
+      });
+      await vi.waitFor(() => expect(shares.docs.get(id)?.data).toBe(dataTwo));
+      expect(screen.queryByText('Päivitetään hetken kuluttua.')).toBeNull();
+    });
+
     it('never creates the document: if sharing was stopped elsewhere, the flag is dropped (SR-54)', async () => {
       fakeTimers();
       const { repositories, rerender } = setup({ tradeShared: true });
@@ -224,6 +247,8 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
       expect(repositories.preferences.loadTradeShared()).toBe('collection');
       // Pressing Share is the user's confirmation: the new source is shared and remembered.
       vi.useRealTimers();
+      // The memory store now refuses a rewrite within 10 s like the rules do (BRK-06): let the first write be old.
+      shares.docs.set(id, { ...shares.docs.get(id), updatedAt: '2000-01-01T00:00:00.000Z' });
       await user.click(screen.getByRole('button', { name: 'Jaa Have/Want' }));
       await vi.waitFor(() => expect(shares.docs.get(id)?.data).toBe(dataTwo));
       expect(repositories.preferences.loadTradeShared()).toBe('list');

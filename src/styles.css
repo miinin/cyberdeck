@@ -12869,6 +12869,11 @@ body:has(.mark-banner) .site-footer {
   list-style: none;
 }
 
+.binder-accept {
+  inline-size: 100%;
+  margin-block-start: var(--space-1);
+}
+
 .binder-cell {
   display: flex;
   flex-direction: column;

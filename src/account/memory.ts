@@ -3,7 +3,7 @@ import { createAuthState, SIGNED_OUT } from './authState';
 import { MAX_DECKS } from '../domain/deck';
 import { PUBLIC_DECK_SCHEMA_VERSION, PUBLIC_PAGE_SIZE, parsePublicDeck, publicDeckId } from '../domain/publicDeck';
 import type { PublicDeck } from '../domain/publicDeck';
-import { isTradeShareId, parseTradeShareDoc, TRADE_SHARE_SCHEMA_VERSION, tradeShareId } from '../domain/tradeLink';
+import { isTradeShareId, parseTradeShareDoc, TRADE_SHARE_MIN_GAP_MS, TRADE_SHARE_SCHEMA_VERSION, tradeShareId } from '../domain/tradeLink';
 import { isDeckId } from '../domain/validate';
 import { isUid } from '../domain/uid';
 import {
@@ -353,6 +353,11 @@ export function createMemoryTradeShares(options: { now?: () => Date } = {}): Mem
         return tradeShareId(uid);
       };
       const doc = (data: string) => ({ schemaVersion: TRADE_SHARE_SCHEMA_VERSION, data, updatedAt: now().toISOString() });
+      /** Like the rules (SR-52): replacing a document less than 10 s after its last write is refused. */
+      const checkGap = (id: string) => {
+        const stored = docs.get(id)?.updatedAt;
+        if (typeof stored === 'string' && now().getTime() - new Date(stored).getTime() < TRADE_SHARE_MIN_GAP_MS) throw new CloudError('denied');
+      };
       return {
         async get(shareId) {
           failIfAsked();
@@ -368,6 +373,7 @@ export function createMemoryTradeShares(options: { now?: () => Date } = {}): Mem
         async publish(data) {
           failIfAsked();
           const id = await idOf();
+          checkGap(id);
           writes += 1;
           docs.set(id, doc(data));
         },
@@ -375,6 +381,7 @@ export function createMemoryTradeShares(options: { now?: () => Date } = {}): Mem
           failIfAsked();
           const id = await idOf();
           if (!docs.has(id)) return false;
+          checkGap(id);
           writes += 1;
           docs.set(id, doc(data));
           return true;

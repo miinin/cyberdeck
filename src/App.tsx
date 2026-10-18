@@ -111,6 +111,38 @@ export function App({
   useEffect(() => {
     document.documentElement.dataset.section = section;
   }, [section]);
+  // BRK-H2: the tab title follows the page, so a trade link or a deck is not "Kortit" in the tab list.
+  const pageTitle = (() => {
+    switch (route.name) {
+      case 'collection':
+        return collectionTexts.navCollection;
+      case 'decks':
+      case 'deck':
+      case 'share':
+      case 'publicDecks':
+      case 'publicDeck':
+      case 'deckBuild':
+      case 'goldfish':
+        return deckTexts.navDecks;
+      case 'sealed':
+      case 'sealedGoldfish':
+      case 'boosters':
+      case 'soloPick':
+        return sealedTexts.navPlaytest;
+      case 'havewant':
+        return deckTexts.navHaveWant;
+      case 'trade':
+      case 'tradeLink':
+        return texts.tradeShareLinkLabel;
+      case 'proxy':
+        return proxyTexts.navProxy;
+      default:
+        return texts.heading;
+    }
+  })();
+  useEffect(() => {
+    document.title = `${pageTitle} · ${texts.appName}`;
+  }, [pageTitle]);
   // T-123: the gallery shows only the card art, so the header (with the mobile bottom bar) and the footer step aside.
   const [galleryOpen, setGalleryOpen] = useState(false);
   const proxyCount = useProxyCount(openRepositories.proxy, route.name);

@@ -122,6 +122,9 @@ async function takePhoto(user: ReturnType<typeof userEvent.setup>) {
   await screen.findByRole('list', { name: 'Sivun taskut' }, { timeout: 15000 });
 }
 
+/** The view that replaced another one ignores clicks for a moment (BRK-01, BRK-09): a test waits it out. */
+const afterSettling = () => act(() => new Promise<void>((resolve) => setTimeout(resolve, 350)));
+
 const collectionEntries = async (repositories: Repositories) => (await repositories.collection.load()).value.entries;
 const pocket = (n: number) => screen.getByRole('button', { name: new RegExp(`^Tasku ${n}:`) });
 
@@ -199,6 +202,7 @@ describe('Binder page scan', () => {
     await user.click(screen.getByRole('button', { name: 'Lisää kokoelmaan (8 korttia)' }));
     await settle();
     expect(screen.getByRole('status')).toHaveTextContent('Lisätty 8 korttia.');
+    await afterSettling();
     expect(await collectionEntries(repositories)).toEqual([
       { card: 'alpha', count: 3, versions: { 'welcometonightcityretail:005a': 3 } },
       { card: 'bravo', count: 3, versions: { 'welcometonightcityretail:005a': 3 } },
@@ -217,6 +221,7 @@ describe('Binder page scan', () => {
     await takePhoto(user);
     await user.click(screen.getByRole('button', { name: /^Lisää kokoelmaan/ }));
     await settle();
+    await afterSettling();
     await user.click(screen.getByRole('button', { name: 'Seuraava sivu' }));
     await settle();
     expect(screen.getByText('Sovita kansiosivu kehykseen ja ota kuva.')).toBeInTheDocument();
@@ -276,9 +281,12 @@ describe('Binder page scan', () => {
     const user = await openBinder(repositories);
     await takePhoto(user);
     expect(pocket(7)).toHaveAccessibleName(/^Tasku 7: (Tarkista|Ei tunnistettu)|^Tasku 7: \w+, Tarkista$/);
-    await user.click(screen.getByRole('button', { name: /^Lisää kokoelmaan/ }));
+    // BRK-02: the doubtful pocket is counted apart and left out of the addition.
+    expect(screen.getByText('1 tarkistettavaa')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Lisää kokoelmaan (8 korttia)' }));
     await settle();
-    expect((await collectionEntries(repositories)).length).toBeGreaterThan(0);
+    const entries = await collectionEntries(repositories);
+    expect(entries.reduce((sum, entry) => sum + entry.count, 0)).toBe(8);
   });
 
   it('adds nothing and says so when no pocket has a card', async () => {
@@ -286,7 +294,8 @@ describe('Binder page scan', () => {
     const repositories = createMemoryRepositories();
     const user = await openBinder(repositories);
     await takePhoto(user);
-    await user.click(screen.getByRole('button', { name: 'Lisää kokoelmaan (0 korttia)' }));
+    // BRK-10: the button is off and the reason is already beside it.
+    expect(screen.getByRole('button', { name: 'Lisää kokoelmaan (0 korttia)' })).toBeDisabled();
     expect(screen.getByText(/Yhtään korttia ei ole lisättävänä/)).toBeInTheDocument();
     expect(await collectionEntries(repositories)).toEqual([]);
   });
@@ -385,5 +394,103 @@ describe('A chosen picture file', () => {
     fireEvent.change(input, { target: { files: [new File(['broken'], 'broken.jpg', { type: 'image/jpeg' })] } });
     expect(await screen.findByRole('alert')).toHaveTextContent('Kuvaa ei voitu lukea.');
     await waitFor(() => expect(screen.getByRole('button', { name: 'Ota kuva' })).toBeEnabled());
+  });
+});
+
+describe('Doubtful pockets (BRK-02)', () => {
+  it('shows a suggestion with Accept, and adds it only after Accept', async () => {
+    shown = makePage(3, 3, [1, 2, 3, 1, 2, 3, 99, 1, 2]);
+    const repositories = createMemoryRepositories();
+    const user = await openBinder(repositories);
+    await takePhoto(user);
+    expect(pocket(7)).toHaveAccessibleName('Tasku 7: Bravo, Tarkista');
+    expect(screen.getByText('1 tarkistettavaa')).toBeInTheDocument();
+    // Not chosen by default: 8 of the 9 pockets are added.
+    expect(screen.getByRole('button', { name: 'Lisää kokoelmaan (8 korttia)' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Hyväksy tasku 7: Bravo' }));
+    expect(pocket(7)).toHaveAccessibleName('Tasku 7: Bravo, Varma');
+    expect(screen.queryByText(/tarkistettavaa/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Hyväksy/ })).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Lisää kokoelmaan (9 korttia)' }));
+    await settle();
+    expect((await collectionEntries(repositories)).reduce((sum, entry) => sum + entry.count, 0)).toBe(9);
+  });
+});
+
+describe('Break test fixes (T-183)', () => {
+  const bitmap = { width: PAGE.width, height: PAGE.height, close: vi.fn() };
+  const upload = (input: HTMLElement, user: ReturnType<typeof userEvent.setup>) => user.upload(input as HTMLInputElement, new File(['x'], 'page.jpg', { type: 'image/jpeg' }));
+
+  it('BRK-01: a second click on Add adds once, and a click beside the dialog does not close the binder page', async () => {
+    const repositories = createMemoryRepositories();
+    const user = await openBinder(repositories);
+    await takePhoto(user);
+    const add = screen.getByRole('button', { name: 'Lisää kokoelmaan (8 korttia)' });
+    await user.dblClick(add);
+    await settle();
+    await screen.findByText('Lisätty 8 korttia.');
+    const dialog = document.querySelector('dialog') as HTMLDialogElement;
+    fireEvent.click(dialog);
+    expect(dialog.open).toBe(true);
+    // The second click of the double click was swallowed: the page is added once and Undo is still there.
+    expect((await collectionEntries(repositories)).reduce((sum, entry) => sum + entry.count, 0)).toBe(8);
+    expect(screen.getByRole('button', { name: 'Kumoa' })).toBeInTheDocument();
+  });
+
+  it('BRK-09 and BRK-05: Undo moves the focus to Add, and a click right after it does not open a pocket', async () => {
+    const user = await openBinder(createMemoryRepositories());
+    await takePhoto(user);
+    await user.click(screen.getByRole('button', { name: 'Lisää kokoelmaan (8 korttia)' }));
+    await settle();
+    // BRK-05: the focus is on the message, not lost to the page.
+    await waitFor(() => expect(screen.getByRole('status')).toHaveFocus());
+    await afterSettling();
+    await user.click(screen.getByRole('button', { name: 'Kumoa' }));
+    await settle();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Lisää kokoelmaan (8 korttia)' })).toHaveFocus());
+    await user.click(pocket(4));
+    expect(screen.queryByRole('region', { name: 'Tasku 4' })).toBeNull();
+    await afterSettling();
+    await user.click(pocket(4));
+    expect(screen.getByRole('region', { name: 'Tasku 4' })).toBeInTheDocument();
+  });
+
+  it('BRK-03: Choose image is there at the start and after a camera error, and a chosen file works without a camera', async () => {
+    vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue(bitmap));
+    getUserMedia.mockRejectedValue(new DOMException('no', 'NotAllowedError'));
+    const repositories = createMemoryRepositories();
+    await repositories.preferences.saveScanMode('binder');
+    const user = userEvent.setup();
+    render(<Harness repositories={repositories} />);
+    await settle();
+    await user.click(screen.getByRole('button', { name: 'Skannaa kortteja' }));
+    await settle();
+    expect(screen.getByLabelText('Valitse kuva')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Skannaa Retail' }));
+    await settle();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    await upload(screen.getByLabelText('Valitse kuva'), user);
+    expect(await screen.findByRole('heading', { name: 'Rajaa kansiosivu' })).toBeInTheDocument();
+    // Without a camera there is no camera to go back to: the start view is shown.
+    await user.click(screen.getByRole('button', { name: 'Takaisin kameraan' }));
+    expect(screen.getByRole('button', { name: 'Skannaa Retail' })).toBeInTheDocument();
+  });
+
+  it('BRK-04: the file choice has an accessible name', async () => {
+    const user = await openBinder(createMemoryRepositories());
+    expect(user).toBeDefined();
+    const label = screen.getByText('Valitse kuva');
+    expect(label).not.toHaveAttribute('aria-hidden');
+    expect(screen.getByLabelText('Valitse kuva')).toHaveAttribute('type', 'file');
+  });
+
+  it('BRK-08: a tiny or thin picture is turned down with its own message', async () => {
+    const user = await openBinder(createMemoryRepositories());
+    for (const [width, height] of [[8, 8], [30000, 3], [1300, 300]] as const) {
+      vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue({ width, height, close: vi.fn() }));
+      await upload(screen.getByLabelText('Valitse kuva'), user);
+      expect(await screen.findByRole('alert')).toHaveTextContent('Kuva on liian pieni tai kapea kansiosivuksi.');
+    }
+    expect(screen.queryByRole('heading', { name: 'Rajaa kansiosivu' })).toBeNull();
   });
 });

@@ -104,6 +104,15 @@ describe('short trade link route (T-178)', () => {
     expect(parseHash('#/v/a/b')).toEqual({ name: 'tradeLink', id: '' });
   });
 
+  it('forgives capitals, a trailing slash, mark, space and query in the short id (BRK-07)', () => {
+    const id = '0123456789abcdef';
+    for (const hash of [`#/v/${id.toUpperCase()}`, `#/v/${id}/`, `#/v/${id}.`, `#/v/${id})`, `#/v/${id},`, `#/v/${id}%20`, `#/v/${id}?x=1`]) {
+      expect(parseHash(hash)).toEqual({ name: 'tradeLink', id });
+    }
+    // The strict shape is still the view's job: a short or odd id stays as it is.
+    expect(parseHash('#/v/0123%ZZ')).toEqual({ name: 'tradeLink', id: '0123%zz' });
+  });
+
   it('belongs to the Have/Want section, and the long link still works', () => {
     expect(sectionOf({ name: 'tradeLink', id: 'x' })).toBe('havewant');
     expect(parseHash('#/vaihto/QQ')).toEqual({ name: 'trade', data: 'QQ' });

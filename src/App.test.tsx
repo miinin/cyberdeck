@@ -33,6 +33,25 @@ describe('App', () => {
     window.location.hash = '';
   });
 
+  it('sets the page title by the route (BRK-H2)', async () => {
+    const titles: Array<[string, string]> = [
+      ['#/', 'Kortit · Cyberdeck'],
+      ['#/kokoelma', 'Kokoelma · Cyberdeck'],
+      ['#/pakat', 'Pakat · Cyberdeck'],
+      ['#/testaa', 'Testaa · Cyberdeck'],
+      ['#/vaihto', 'Have/Want · Cyberdeck'],
+      ['#/proxy', 'Proxy · Cyberdeck'],
+      ['#/v/0123456789abcdef', 'Vaihtolinkki · Cyberdeck'],
+    ];
+    for (const [hash, title] of titles) {
+      window.location.hash = hash;
+      const view = render(<App cards={cards} repositories={createMemoryRepositories()} />);
+      await vi.waitFor(() => expect(document.title).toBe(title));
+      view.unmount();
+    }
+    window.location.hash = '';
+  });
+
   it('has the landmarks and footer notices', () => {
     render(<App cards={cards} repositories={createMemoryRepositories()} />);
 
