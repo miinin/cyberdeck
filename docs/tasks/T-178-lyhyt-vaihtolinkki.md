@@ -1,6 +1,6 @@
 # T-178 · Lyhyt Have/Want-linkki palvelimen kautta
 **Tila:** Review (Koodari valmis, katselmoitavana) · **Omistaja:** Koodari · **MVP:** 1 · **Prioriteetti:** Must · **Päätös:** D-037
-**Katselmoinnit:** Digiturva ☐ (uhkamalli + katselmointi) · dev ensin (tietomalli, säännöt)
+**Katselmoinnit:** Digiturva ☑ (SEC-178, ei vetoa, Low-löydökset korjattu) · dev ensin (tietomalli, säännöt)
 
 ## Tavoite
 Nykyinen vaihtolinkki (`#/vaihto/<base64>`) kantaa koko kokoelman ja voi olla 16 000 merkkiä, eikä se mahdu pikaviesteihin. Uusi linkki on lyhyt: `https://cyberdeck-tcg.web.app/#/v/<tunnus>`, alle 60 merkkiä.
