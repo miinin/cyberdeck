@@ -73,4 +73,9 @@ describe('T-174 style rules', () => {
   it('UX-24: a note line is reserved in every search result', () => {
     expect(rule('.pick-notes')).toMatch(/min-block-size/);
   });
+
+  it('T-181-0: the scanner dialog keeps its width on a phone despite the container query', () => {
+    expect(rule('.scanner-dialog[open]')).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\)/);
+    expect(css).toMatch(/\.scanner-body \{\s*container-type: inline-size;\s*inline-size: min\(36rem, 100%\);/);
+  });
 });

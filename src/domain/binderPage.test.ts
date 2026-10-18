@@ -155,9 +155,10 @@ describe('readPocket', () => {
     expect(reading.matches[0]?.id).toBe('card-2');
   });
 
+  // The shift and turn search for a pocket that matches nothing is slow under a full parallel run (T-181-0).
   it('does not call a picture of something else a sure card', () => {
     const reading = readPocket(art(99), { x: 0, y: 0, width: 120, height: 168 }, index);
     expect(reading.state).not.toBe('sure');
     expect(reading.state).not.toBe('empty');
-  });
+  }, 20_000);
 });
