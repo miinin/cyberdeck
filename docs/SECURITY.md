@@ -365,6 +365,7 @@ Nämä eivät koske MVP-1:tä. Ne kirjataan nyt, jotta T-011:n rajapinta ja MVP-
 | 2026-10-10 | Katselmointi T-122 (kortin luku "Digiturva · Katselmointi"): SR-43–SR-49 täyttyvät, ja säännöt ovat valmiit vietäviksi deviin. Löydökset SEC-122-1 (Medium: virheellinen pilviloki ylikirjoittuu seuraavassa pushissa, sama malli kuin kokoelmassa), SEC-122-2 ja SEC-122-3 (Low) sekä SEC-122-4–6 (Info: deploy-järjestys koskee myös lukua ja tilin poistoa, kiintiö, staattinen sääntötesti). Ei vetoa. | T-122 |
 | 2026-10-10 | Varmistus T-122: SEC-122-1, SEC-122-2 ja SEC-122-3 korjattu (267aa66) ja varmistettu. Uusi SEC-122-7 (Low): virheellisen pilven aikana lisätty rivi katoaa, kun pilvi taas kelpaa (pohjaan tallentuu yhdistetty arvo). Ei vetoa. | T-122 |
 | 2026-10-17 | Katselmointi T-172/T-173 (`reports/SEC-T172-T173.md`, luku 20): Critical 0, High 0, Medium 0, Low 0, Info 4. Ei vetoa. PRIVACY.md rivi 1f. | T-173 |
+| 2026-10-18 | Uhkamalli T-178 (lyhyt vaihtolinkki, D-037): luku 21, turvavaatimukset SR-50–SR-60 tehtäväkortissa. Avoimet K-T178-1 ja K-T178-2. PRIVACY.md luku 14. | T-178 |
 
 ## 14. T-026: korttidata buildissa (D-013)
 
@@ -444,3 +445,25 @@ Korvaa luvun 12 ennakoidut vaatimukset MVP2-2, MVP2-3, MVP2-5–MVP2-9 kirjautum
 - **STRIDE:** T: muokattu localStorage-arvo (validoidaan `parseSealedRun`:lla, virheellinen ajo varmuuskopioidaan ja nollataan, SR-11, SR-23). D: ylisuuri pooli (enintään 100 korttia ja 100 riviä, kopiot pooliin ja `MAX_DECK_CARD_COUNT`:iin rajattuina). I: ei henkilötietoa (PRIVACY.md 1f). E: korttidata vain React-tekstinä, kuvat staattisista lähteistä (SR-1). Satunnaisuus `Math.random` riittää, koska tulos ei ole turvakriittinen.
 - **Katselmointi 2026-10-17:** `reports/SEC-T172-T173.md`. Info 4, ei vetoa.
 - **T-176 (Testaa-osio, sealed omiin pakkoihin):** ajoon tulevat kentät `deckId` (`isDeckId`) ja `deckUpdatedAt` (merkkijono, enintään 40 merkkiä). Päivitys kysyy ennen kirjoitusta, jos pakkaa on muokattu muualla, ja käyttää `expectedUpdatedAt`-suojaa. Uudet reitit ovat `#/testaa/...`, ja vanhat ohjataan `location.replace`:lla vakio-osoitteisiin. STRIDE T: väärennetty `deckId` voi kohdistua vain oman tilin pakkaan (SEC-T176-1, Suositus). Katselmointi `reports/SEC-T176.md`: Suositus 1, Info 3, ei vetoa.
+
+## 21. T-178: lyhyt vaihtolinkki palvelimen kautta (D-037)
+- **Järjestelmän muutos:** uusi juuritason kokoelma `tradeShares/{shareId}` = `{ schemaVersion, data, updatedAt }`, jossa `data` on nykyinen vaihtolinkin data (kokoelma, want ja vaihtoon merkityt, enintään 16 000 merkkiä base64url). Tunnus on 16 hex-merkkiä (sha256(uid + '#trade')), yksi per käyttäjä. Kuka tahansa voi lukea dokumentin tunnuksella ilman kirjautumista. Listaus on kielletty. Uusi reitti `#/v/<tunnus>`.
+- **Uusi luottamusraja:** toinen julkisesti luettava kokoelma (vrt. luku 18), mutta ei listattava, joten pääsy edellyttää tunnusta.
+- **STRIDE:**
+
+| | Uhka | Todennäköisyys / vaikutus | Torjunta |
+|---|---|---|---|
+| **S** | Toinen käyttäjä kirjoittaa tai poistaa toisen jaon | Pieni / Keskisuuri | Tunnus lasketaan säännöissä `request.auth.uid`:sta (SR-51) |
+| **S** | Säännön regex rakennetaan polun tunnuksesta (`.*`), jolloin yksi käyttäjä luo rajattomasti dokumentteja | Keskisuuri, jos muototarkistus puuttuu / Keskisuuri | Tarkka viipalevertailu tai muototarkistus ennen regexiä (SR-51) |
+| **T** | Muokattu dokumentti (ylimääräiset kentät, ylisuuri tai rikkinäinen data) | Pieni / Pieni | Tarkat avaimet ja rajat (SR-52), asiakas validoi luetun (SR-53) |
+| **T** | Reitin tunnus sisältää `/` ja ohjaa luvun eri polkuun | Pieni / Pieni | Muototarkistus ennen `doc()`-kutsua (SR-53) |
+| **R** | Kuka jakoi? | Pieni / Pieni | Ei tarvita, koska vain omistaja kirjoittaa omaan tunnukseensa |
+| **I** | Tunnuksen arvaaminen tai luettelointi | Hyvin pieni / Pieni | 64 bittiä, ei `list`-oikeutta (SR-50, SR-52) |
+| **I** | Jako yhdistyy saman käyttäjän julkiseen pakkaan (deckId `trade` antaisi saman tiivisteen kuin `:trade`) | Pieni / Pieni | Erotin `#` (SR-50) |
+| **I** | Toinen saman laitteen käyttäjä alkaa jakaa huomaamattaan tai lopetettu jako herää toisen laitteen automaattisesta päivityksestä | Keskisuuri / Keskisuuri | Tilikohtainen tieto ja pelkkä update automaattisessa päivityksessä (SR-54) |
+| **I** | Jakaja ei ymmärrä, että linkki päivittyy ja on voimassa toistaiseksi, eikä pysyvää tunnusta voi vaihtaa | Keskisuuri / Pieni | Ilmoitus (SR-57), lopetus (SR-55), K-T178-1 ja K-T178-2 |
+| **I** | Jako jää voimaan tilin poiston jälkeen | Pieni / Keskisuuri | SR-56 |
+| **D** | Lukujen tai kirjoitusten kiintiön kuluttaminen | Pieni / Keskisuuri | 10 s:n päivitystahti ja kokoraja (SR-52), R-21. Poisto ja uusi luonti ohittavat tahdin (hyväksyttävä jäännösriski). |
+| **E** | Data renderöidään HTML:nä | Hyvin pieni / Suuri | Ei vapaata tekstiä, `decodeTradeShare`, React-teksti (SR-53) |
+
+- **Turvavaatimukset (ehdotus, PM hyväksyy):** SR-50–SR-60, kirjattu tiedostoon `tasks/T-178-lyhyt-vaihtolinkki.md`. Avoimet käyttäjän kysymykset K-T178-1 (pysyvä tunnus) ja K-T178-2 (ei vanhenemisaikaa).
