@@ -86,14 +86,14 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
 
   function setup(props: { have?: typeof HAVE_ONE; tradeShared?: boolean } = {}) {
     const repositories = createMemoryRepositories().forAccount(FAKE_USER.uid);
-    if (props.tradeShared === true) repositories.preferences.saveTradeShared(true);
-    const view = (have: typeof HAVE_ONE) => (
+    if (props.tradeShared === true) repositories.preferences.saveTradeShared('collection');
+    const view = (have: typeof HAVE_ONE, source: 'list' | 'collection' = 'collection') => (
       <PublicDecksContext.Provider value={{ store: null, publisher: null, ownTradeShares: store, tradeShares: store, signInAvailable: true }}>
-        <ShareTradeButton have={have} want={EMPTY_WANTS} preferences={repositories.preferences} />
+        <ShareTradeButton have={have} want={EMPTY_WANTS} source={source} preferences={repositories.preferences} />
       </PublicDecksContext.Provider>
     );
     const result = render(view(props.have ?? HAVE_ONE));
-    return { repositories, rerender: (have: typeof HAVE_ONE) => result.rerender(view(have)) };
+    return { repositories, rerender: (have: typeof HAVE_ONE, source?: 'list' | 'collection') => result.rerender(view(have, source)) };
   }
 
   beforeEach(() => {
@@ -112,7 +112,7 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
     expect(field.value.length).toBeLessThan(60);
     expect(await navigator.clipboard.readText()).toBe(field.value);
     expect(shares.docs.get(id)?.data).toBe(dataOne);
-    expect(repositories.preferences.loadTradeShared()).toBe(true);
+    expect(repositories.preferences.loadTradeShared()).toBe('collection');
     expect(screen.getByText(/myös myöhemmät muutokset, kunnes lopetat jakamisen/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Lopeta jakaminen' })).toBeInTheDocument();
   });
@@ -123,9 +123,9 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
     await user.click(screen.getByRole('button', { name: 'Jaa Have/Want' }));
     await screen.findByLabelText('Vaihtolinkki');
     await user.click(screen.getByRole('button', { name: 'Lopeta jakaminen' }));
-    expect(await screen.findByText('Jakaminen lopetettu.')).toBeInTheDocument();
+    expect(await screen.findByText('Jakaminen lopetettu. Jos jaat uudelleen, sama linkki toimii taas.')).toBeInTheDocument();
     expect(shares.docs.size).toBe(0);
-    expect(repositories.preferences.loadTradeShared()).toBe(false);
+    expect(repositories.preferences.loadTradeShared()).toBeNull();
     expect(screen.queryByLabelText('Vaihtolinkki')).toBeNull();
     // Sharing again restores the same link.
     await user.click(screen.getByRole('button', { name: 'Jaa Have/Want' }));
@@ -141,7 +141,7 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
     await user.click(screen.getByRole('button', { name: 'Lopeta jakaminen' }));
     expect(await screen.findByText('Jakaminen ei onnistunut. Yritä uudelleen.')).toBeInTheDocument();
     expect(shares.docs.size).toBe(1);
-    expect(repositories.preferences.loadTradeShared()).toBe(true);
+    expect(repositories.preferences.loadTradeShared()).toBe('collection');
   });
 
   it('shows a failed share and does not remember it', async () => {
@@ -150,7 +150,7 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
     shares.failNext('denied');
     await user.click(screen.getByRole('button', { name: 'Jaa Have/Want' }));
     expect(await screen.findByText('Jakaminen ei onnistunut. Yritä uudelleen.')).toBeInTheDocument();
-    expect(repositories.preferences.loadTradeShared()).toBe(false);
+    expect(repositories.preferences.loadTradeShared()).toBeNull();
     expect(screen.queryByLabelText('Vaihtolinkki')).toBeNull();
   });
 
@@ -188,7 +188,7 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
       await act(async () => {
         await vi.advanceTimersByTimeAsync(TRADE_SHARE_UPDATE_DELAY_MS + 10);
       });
-      await vi.waitFor(() => expect(repositories.preferences.loadTradeShared()).toBe(false));
+      await vi.waitFor(() => expect(repositories.preferences.loadTradeShared()).toBeNull());
       expect(shares.docs.size).toBe(0);
       expect(shares.writes).toBe(0);
     });
@@ -204,6 +204,44 @@ describe('ShareTradeButton with an account (SR-54, SR-55, SR-57)', () => {
       // The check reads the document (its id is computed asynchronously), finds the same content and writes nothing.
       await vi.waitFor(() => expect(shares.reads).toBe(1));
       expect(shares.writes).toBe(writesBefore);
+    });
+
+    it('writes nothing when the source changed since sharing, until Share is pressed (SEC-178-1)', async () => {
+      const user = userEvent.setup();
+      const { repositories, rerender } = setup();
+      await user.click(screen.getByRole('button', { name: 'Jaa Have/Want' }));
+      await screen.findByLabelText('Vaihtolinkki');
+      const id = await tradeShareId(FAKE_USER.uid);
+      fakeTimers();
+      const writesBefore = shares.writes;
+      rerender(HAVE_TWO, 'list');
+      expect(screen.getByText('Jaettu sisältö on eri lähteestä. Päivitä painamalla Jaa.')).toBeInTheDocument();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(TRADE_SHARE_UPDATE_DELAY_MS * 2);
+      });
+      expect(shares.writes).toBe(writesBefore);
+      expect(shares.docs.get(id)?.data).toBe(dataOne);
+      expect(repositories.preferences.loadTradeShared()).toBe('collection');
+      // Pressing Share is the user's confirmation: the new source is shared and remembered.
+      vi.useRealTimers();
+      await user.click(screen.getByRole('button', { name: 'Jaa Have/Want' }));
+      await vi.waitFor(() => expect(shares.docs.get(id)?.data).toBe(dataTwo));
+      expect(repositories.preferences.loadTradeShared()).toBe('list');
+      expect(screen.queryByText('Jaettu sisältö on eri lähteestä. Päivitä painamalla Jaa.')).toBeNull();
+    });
+
+    it('never overwrites a document from a newer app version (SEC-178-3)', async () => {
+      fakeTimers();
+      shares.docs.set(await tradeShareId(FAKE_USER.uid), { schemaVersion: 9, data: dataOne, updatedAt: 'x' });
+      const { repositories, rerender } = setup({ tradeShared: true });
+      rerender(HAVE_TWO);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(TRADE_SHARE_UPDATE_DELAY_MS + 10);
+      });
+      await vi.waitFor(() => expect(shares.reads).toBe(1));
+      expect(shares.writes).toBe(0);
+      expect(shares.docs.get(await tradeShareId(FAKE_USER.uid))?.schemaVersion).toBe(9);
+      expect(repositories.preferences.loadTradeShared()).toBe('collection');
     });
 
     it('does nothing for an account that has not shared from this device', async () => {

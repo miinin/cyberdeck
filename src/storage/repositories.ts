@@ -825,9 +825,12 @@ export function createRepositories(options: RepositoryOptions): Repositories {
       }
       return valid;
     },
-    loadTradeShared: () => tradeSharedKey !== null && readHint(tradeSharedKey) === '1',
-    saveTradeShared: (shared: boolean) => {
-      if (tradeSharedKey !== null) writeHint(tradeSharedKey, shared ? '1' : null);
+    loadTradeShared: () => {
+      const raw = tradeSharedKey === null ? null : readHint(tradeSharedKey);
+      return raw === 'list' || raw === 'collection' ? raw : null;
+    },
+    saveTradeShared: (source) => {
+      if (tradeSharedKey !== null) writeHint(tradeSharedKey, source);
     },
     // Account hints never throw: a failed write only means the SDK is not preloaded next time.
     loadLastUid: () => {

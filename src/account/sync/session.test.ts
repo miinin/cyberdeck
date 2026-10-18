@@ -390,7 +390,7 @@ describe('account deletion and the short trade link (T-178, SR-56)', () => {
 
   it('deletes the link before the private cloud data, and erases the local flag', async () => {
     const { b, shares, session } = await tradeSetup();
-    b.account.preferences.saveTradeShared(true);
+    b.account.preferences.saveTradeShared('collection');
     const seen: string[] = [];
     const original = cloud.deleteAll;
     cloud.deleteAll = async () => {
@@ -399,7 +399,7 @@ describe('account deletion and the short trade link (T-178, SR-56)', () => {
     };
     expect(await session.deleteAccountData()).toBe(true);
     expect(seen).toEqual(['link gone']);
-    expect(b.account.preferences.loadTradeShared()).toBe(false);
+    expect(b.account.preferences.loadTradeShared()).toBeNull();
     session.dispose();
   });
 

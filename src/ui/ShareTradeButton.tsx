@@ -4,7 +4,7 @@ import type { Collection } from '../domain/collection';
 import { TRADE_SHARE_UPDATE_DELAY_MS } from '../domain/tradeLink';
 import { encodeTradeShare } from '../domain/tradeShare';
 import type { WantList } from '../domain/wants';
-import type { PreferencesRepository } from '../storage';
+import type { PreferencesRepository, TradeShareSource } from '../storage';
 import { deckTexts } from './deckTexts';
 import { usePublicDecks } from './PublicDecksContext';
 import { QrButton } from './QrDialog';
@@ -26,6 +26,7 @@ export function ShareTradeButton({
   tradeable,
   note = texts.tradeShareNote,
   shortNote = texts.tradeShortWarning,
+  source = 'collection',
   preferences,
 }: {
   have: Collection;
@@ -36,6 +37,8 @@ export function ShareTradeButton({
   note?: string;
   /** What the receiver of the short link sees, including that it follows later changes (SR-57). */
   shortNote?: string;
+  /** Where the Have side comes from; the automatic refresh runs only for the source that was shared (SEC-178-1). */
+  source?: TradeShareSource;
   /** Where "shared from this device" is remembered (per account, SR-54). Without it nothing is remembered. */
   preferences?: PreferencesRepository;
 }) {
@@ -43,7 +46,10 @@ export function ShareTradeButton({
   const [status, setStatus] = useState<Status>(null);
   /** UX-18 (T-174): the link field appears only after "Jaa", as a copyable field (not always, with a long raw URL). */
   const [revealed, setRevealed] = useState(false);
-  const [shared, setShared] = useState(() => store !== null && preferences?.loadTradeShared() === true);
+  const [sharedSource, setSharedSource] = useState<TradeShareSource | null>(() => (store === null ? null : (preferences?.loadTradeShared() ?? null)));
+  const shared = sharedSource !== null;
+  /** The shared link comes from the other source: nothing is written until the user presses Share (SEC-178-1). */
+  const otherSource = shared && sharedSource !== source;
   const [shortId, setShortId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const data = useMemo(() => encodeTradeShare(have, want, tradeable), [have, want, tradeable]);
@@ -65,11 +71,11 @@ export function ShareTradeButton({
 
   // SR-54: the automatic refresh only updates. A missing document means sharing was stopped elsewhere: forget it.
   useEffect(() => {
-    if (store === null || !shared || data === null || synced.current.data === data) return;
+    if (store === null || !shared || otherSource || data === null || synced.current.data === data) return;
     let active = true;
     const forget = () => {
-      preferences?.saveTradeShared(false);
-      setShared(false);
+      preferences?.saveTradeShared(null);
+      setSharedSource(null);
       setShortId(null);
     };
     const timer = setTimeout(() => {
@@ -83,7 +89,9 @@ export function ShareTradeButton({
               forget();
               return;
             }
-            if (current.kind === 'ok' && current.data === data) {
+            // SEC-178-3: a document from a newer app version is never overwritten.
+            if (current.kind === 'newer') return;
+            if (current.data === data) {
               synced.current = { data, at: synced.current.at };
               return;
             }
@@ -101,7 +109,7 @@ export function ShareTradeButton({
       active = false;
       clearTimeout(timer);
     };
-  }, [store, shared, data, preferences]);
+  }, [store, shared, otherSource, data, preferences]);
 
   const longLink = data === null ? '' : `${window.location.origin}/#/vaihto/${data}`;
   const shortLink = shortId === null ? '' : `${window.location.origin}/#/v/${shortId}`;
@@ -132,8 +140,8 @@ export function ShareTradeButton({
         synced.current = { data, at: Date.now() };
       }
       const id = await store.ownId();
-      preferences?.saveTradeShared(true);
-      setShared(true);
+      preferences?.saveTradeShared(source);
+      setSharedSource(source);
       setShortId(id);
       setRevealed(true);
       await copy(`${window.location.origin}/#/v/${id}`);
@@ -150,9 +158,9 @@ export function ShareTradeButton({
     setStatus(null);
     try {
       await store.remove();
-      preferences?.saveTradeShared(false);
+      preferences?.saveTradeShared(null);
       synced.current = { data: null, at: 0 };
-      setShared(false);
+      setSharedSource(null);
       setShortId(null);
       setRevealed(false);
       setStatus('stopped');
@@ -212,6 +220,7 @@ export function ShareTradeButton({
         {stopButton}
       </div>
       <p className="hint">{store === null ? note : shortNote}</p>
+      {otherSource && <p className="hint">{texts.tradeShareOtherSource}</p>}
       {store === null && signInAvailable && <p className="hint">{texts.tradeSignInForShort}</p>}
       {statusLine}
     </div>

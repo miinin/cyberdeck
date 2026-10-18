@@ -395,7 +395,8 @@ export const textsEn: typeof textsFi = {
   haveOwnedRow: (owned: number) => `owned: ${owned}`,
   tradeShareButton: 'Share Have/Want',
   tradeStopSharing: 'Stop sharing',
-  tradeSharingStopped: 'Sharing stopped.',
+  tradeSharingStopped: 'Sharing stopped. If you share again, the same link works again.',
+  tradeShareOtherSource: 'The shared content comes from a different source. Press Share to update it.',
   tradeShareFailed: 'Sharing failed. Try again.',
   tradeSignInForShort: 'Sign in to get a short link.',
   tradeShortWarning:

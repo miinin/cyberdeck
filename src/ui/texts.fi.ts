@@ -420,7 +420,8 @@ export const textsFi = {
   // Trade link (T-062, T-063)
   tradeShareButton: 'Jaa Have/Want',
   tradeStopSharing: 'Lopeta jakaminen',
-  tradeSharingStopped: 'Jakaminen lopetettu.',
+  tradeSharingStopped: 'Jakaminen lopetettu. Jos jaat uudelleen, sama linkki toimii taas.',
+  tradeShareOtherSource: 'Jaettu sisältö on eri lähteestä. Päivitä painamalla Jaa.',
   tradeShareFailed: 'Jakaminen ei onnistunut. Yritä uudelleen.',
   tradeSignInForShort: 'Kirjaudu, niin saat lyhyen linkin.',
   tradeShortWarning:

@@ -299,7 +299,7 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
       </div>
       {wantReady &&
         (source === 'list'
-          ? haveReady && <ShareTradeButton have={ownListCollection} want={wants.saved} tradeable={tradeable} note={texts.tradeShareNoteList} shortNote={texts.tradeShortWarningList} preferences={repositories.preferences} />
+          ? haveReady && <ShareTradeButton have={ownListCollection} want={wants.saved} tradeable={tradeable} note={texts.tradeShareNoteList} shortNote={texts.tradeShortWarningList} source="list" preferences={repositories.preferences} />
           : collection.phase === 'ready' && <ShareTradeButton have={collection.saved} want={wants.saved} tradeable={tradeable} preferences={repositories.preferences} />)}
 
       <div className="catalog-layout">
