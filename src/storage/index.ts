@@ -27,6 +27,7 @@ export type {
   DeckListView,
   DefaultEdition,
   ScanMode,
+  ScanGrid,
   CollectionPrefs,
   LocalData,
   SyncBase,

@@ -69,6 +69,7 @@ import {
   DECK_LIST_VIEW_KEY,
   DEFAULT_EDITION_KEY,
   SCAN_MODE_KEY,
+  SCAN_GRID_KEY,
   BINDER_LAYOUT_KEY,
   COLLECTION_PREFS_KEY,
   TRADE_RULE_KEY,
@@ -106,6 +107,7 @@ import type {
   DeckListView,
   DefaultEdition,
   ScanMode,
+  ScanGrid,
   CollectionPrefs,
 } from './types';
 
@@ -755,19 +757,36 @@ export function createRepositories(options: RepositoryOptions): Repositories {
     },
     loadScanMode: async () => {
       try {
-        return store.getItem(SCAN_MODE_KEY) === 'continuous' ? 'continuous' : 'single';
+        const saved = store.getItem(SCAN_MODE_KEY);
+        return saved === 'continuous' || saved === 'binder' ? saved : 'single';
       } catch {
         return 'single';
       }
     },
     saveScanMode: async (mode: ScanMode) => {
-      if (mode !== 'single' && mode !== 'continuous') throw new StorageError('invalid-input', 'Unknown scan mode');
+      if (mode !== 'single' && mode !== 'continuous' && mode !== 'binder') throw new StorageError('invalid-input', 'Unknown scan mode');
       try {
         store.setItem(SCAN_MODE_KEY, mode);
       } catch (error) {
         throw toStorageError(error, 'write');
       }
       return mode;
+    },
+    loadScanGrid: async () => {
+      try {
+        return store.getItem(SCAN_GRID_KEY) === '3x4' ? '3x4' : '3x3';
+      } catch {
+        return '3x3';
+      }
+    },
+    saveScanGrid: async (grid: ScanGrid) => {
+      if (grid !== '3x3' && grid !== '3x4') throw new StorageError('invalid-input', 'Unknown scan grid');
+      try {
+        store.setItem(SCAN_GRID_KEY, grid);
+      } catch (error) {
+        throw toStorageError(error, 'write');
+      }
+      return grid;
     },
     loadCollectionPrefs: async () => {
       try {

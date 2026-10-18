@@ -726,6 +726,21 @@ describe('preferences: scanner mode (T-108)', () => {
     const odd = setup({ 'cyberdeck:scan-mode': 'both' });
     expect(await odd.preferences.loadScanMode()).toBe('single');
   });
+
+  it('remembers the binder mode (T-179)', async () => {
+    const { preferences, store } = setup();
+    await preferences.saveScanMode('binder');
+    expect(await createRepositories({ store, persistent: true }).preferences.loadScanMode()).toBe('binder');
+  });
+
+  it('remembers the binder page grid, defaults to 3x3 and ignores unknown values (T-179)', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadScanGrid()).toBe('3x3');
+    await preferences.saveScanGrid('3x4');
+    expect(await createRepositories({ store, persistent: true }).preferences.loadScanGrid()).toBe('3x4');
+    await expectStorageError(preferences.saveScanGrid('4x4' as '3x3'), 'invalid-input');
+    expect(await setup({ 'cyberdeck:scan-grid': '9x9' }).preferences.loadScanGrid()).toBe('3x3');
+  });
 });
 
 describe('preferences: trade rule (T-135)', () => {
