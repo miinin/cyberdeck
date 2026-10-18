@@ -90,8 +90,10 @@ export type DeckPickView = 'list' | 'images';
 export type DeckListView = 'list' | 'stacks' | 'cards';
 /** Which Welcome to Night City edition the card boxes' + adds to (D-022). */
 export type DefaultEdition = 'beta' | 'retail';
-/** Card scanner mode (T-108): confirm every card, or add the recognised cards automatically. */
-export type ScanMode = 'single' | 'continuous';
+/** Card scanner mode (T-108, T-179): confirm every card, add the recognised cards automatically, or read a whole binder page from one picture. */
+export type ScanMode = 'single' | 'continuous' | 'binder';
+/** Pockets of the binder page the scanner reads (T-179): 3 columns, 3 or 4 rows. */
+export type ScanGrid = '3x3' | '3x4';
 /** Collection page (T-109, T-116, T-112): the owned cards list, the progress overview or the binder, and whether the binder shows missing cards. Older saved fields are ignored. */
 export interface CollectionPrefs {
   view: 'own' | 'overview' | 'binder';
@@ -102,6 +104,9 @@ export interface CollectionPrefs {
 export const DEFAULT_COLLECTION_PREFS: CollectionPrefs = { view: 'own', showMissing: true, binder: 'set' };
 
 /** User preferences that are not data (UX.md 8.7). Stored as raw strings, not in an envelope. */
+/** Where a shared trade link takes its Have side from. */
+export type TradeShareSource = 'list' | 'collection';
+
 export interface PreferencesRepository {
   /** Saved theme, or 'dark' when nothing valid is saved. Never rejects because of storage problems. */
   loadTheme(): Promise<Theme>;
@@ -125,6 +130,9 @@ export interface PreferencesRepository {
   /** Saved scanner mode, or 'single' when nothing valid is saved. Never rejects because of storage problems. */
   loadScanMode(): Promise<ScanMode>;
   saveScanMode(mode: ScanMode): Promise<ScanMode>;
+  /** Saved binder page grid of the scanner, or '3x3' when nothing valid is saved. Never rejects because of storage problems. */
+  loadScanGrid(): Promise<ScanGrid>;
+  saveScanGrid(grid: ScanGrid): Promise<ScanGrid>;
   /** Saved Collection page choices; every missing or invalid field falls back to its default. Never rejects because of storage problems. */
   loadCollectionPrefs(): Promise<CollectionPrefs>;
   saveCollectionPrefs(prefs: CollectionPrefs): Promise<CollectionPrefs>;
@@ -136,6 +144,13 @@ export interface PreferencesRepository {
   loadBinderLayout(): Promise<BinderLayout | null>;
   /** Saves a valid layout (the name is trimmed and cut to its limit). Rejects with StorageError when the layout is not valid or saving fails. */
   saveBinderLayout(layout: BinderLayout): Promise<BinderLayout>;
+  /**
+   * What this account shared from this device (T-178, SR-54, SEC-178-1): its own Have list or its collection; null = nothing. Stored under the account's own keys,
+   * so another account on the same device never inherits it; signed out it is always false. Never throws.
+   */
+  loadTradeShared(): TradeShareSource | null;
+  /** Signed out: does nothing. Never throws (a hint only). */
+  saveTradeShared(source: TradeShareSource | null): void;
   /** Account hint (T-054a): uid of the last signed-in account, or null when none or invalid. Never throws. */
   loadLastUid(): string | null;
   /** Saves a valid uid, or removes the hint for null or an invalid uid. Never throws (a hint only). */

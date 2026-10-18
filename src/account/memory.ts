@@ -3,6 +3,7 @@ import { createAuthState, SIGNED_OUT } from './authState';
 import { MAX_DECKS } from '../domain/deck';
 import { PUBLIC_DECK_SCHEMA_VERSION, PUBLIC_PAGE_SIZE, parsePublicDeck, publicDeckId } from '../domain/publicDeck';
 import type { PublicDeck } from '../domain/publicDeck';
+import { isTradeShareId, parseTradeShareDoc, TRADE_SHARE_SCHEMA_VERSION, tradeShareId } from '../domain/tradeLink';
 import { isDeckId } from '../domain/validate';
 import { isUid } from '../domain/uid';
 import {
@@ -27,6 +28,7 @@ import type {
   CloudStore,
   DeleteAccountResult,
   PublicDeckStore,
+  TradeShareStore,
 } from './types';
 
 export const FAKE_USER: AccountUser = { uid: 'fakeUid123', email: 'testi@example.com' };
@@ -298,6 +300,90 @@ export function createMemoryPublicDecks(options: { now?: () => Date } = {}): Mem
           const pubIds = await Promise.all(deckIds.filter(isDeckId).map(pubIdOf));
           writes += 1;
           for (const pubId of pubIds) docs.delete(pubId);
+        },
+      };
+    },
+  };
+}
+
+/** The trade links of every account in memory: one shared collection, like `tradeShares` in Firestore (T-178). */
+export type MemoryTradeShares = {
+  /** A store for the signed-in account `uid`, or for reading only (null). */
+  forUser(uid: string | null): TradeShareStore;
+  /** Stored documents by shareId (raw, as the rules would see them). */
+  readonly docs: Map<string, Record<string, unknown>>;
+  /** Writes so far (publish, update, remove). */
+  readonly writes: number;
+  /** Reads so far (get): "no request for a malformed id" tests count them. */
+  readonly reads: number;
+  /** The next call fails with this kind instead. */
+  failNext(kind: CloudErrorKind): void;
+};
+
+/** In-memory TradeShareStore with the Firestore store's contract. It does not emulate the security rules. */
+export function createMemoryTradeShares(options: { now?: () => Date } = {}): MemoryTradeShares {
+  const { now = () => new Date() } = options;
+  const docs = new Map<string, Record<string, unknown>>();
+  let writes = 0;
+  let reads = 0;
+  let nextFailure: CloudErrorKind | null = null;
+
+  function failIfAsked() {
+    if (nextFailure === null) return;
+    const kind = nextFailure;
+    nextFailure = null;
+    throw new CloudError(kind);
+  }
+
+  return {
+    docs,
+    get writes() {
+      return writes;
+    },
+    get reads() {
+      return reads;
+    },
+    failNext(kind) {
+      nextFailure = kind;
+    },
+    forUser(uid) {
+      if (uid !== null && !isUid(uid)) throw new CloudError('unknown');
+      const idOf = () => {
+        if (uid === null) throw new CloudError('denied');
+        return tradeShareId(uid);
+      };
+      const doc = (data: string) => ({ schemaVersion: TRADE_SHARE_SCHEMA_VERSION, data, updatedAt: now().toISOString() });
+      return {
+        async get(shareId) {
+          failIfAsked();
+          if (!isTradeShareId(shareId)) return null;
+          reads += 1;
+          const raw = docs.get(shareId);
+          return raw === undefined ? null : parseTradeShareDoc(structuredClone(raw));
+        },
+        ownId: async () => {
+          failIfAsked();
+          return idOf();
+        },
+        async publish(data) {
+          failIfAsked();
+          const id = await idOf();
+          writes += 1;
+          docs.set(id, doc(data));
+        },
+        async update(data) {
+          failIfAsked();
+          const id = await idOf();
+          if (!docs.has(id)) return false;
+          writes += 1;
+          docs.set(id, doc(data));
+          return true;
+        },
+        async remove() {
+          failIfAsked();
+          const id = await idOf();
+          writes += 1;
+          docs.delete(id);
         },
       };
     },

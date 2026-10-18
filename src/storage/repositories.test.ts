@@ -726,6 +726,21 @@ describe('preferences: scanner mode (T-108)', () => {
     const odd = setup({ 'cyberdeck:scan-mode': 'both' });
     expect(await odd.preferences.loadScanMode()).toBe('single');
   });
+
+  it('remembers the binder mode (T-179)', async () => {
+    const { preferences, store } = setup();
+    await preferences.saveScanMode('binder');
+    expect(await createRepositories({ store, persistent: true }).preferences.loadScanMode()).toBe('binder');
+  });
+
+  it('remembers the binder page grid, defaults to 3x3 and ignores unknown values (T-179)', async () => {
+    const { preferences, store } = setup();
+    expect(await preferences.loadScanGrid()).toBe('3x3');
+    await preferences.saveScanGrid('3x4');
+    expect(await createRepositories({ store, persistent: true }).preferences.loadScanGrid()).toBe('3x4');
+    await expectStorageError(preferences.saveScanGrid('4x4' as '3x3'), 'invalid-input');
+    expect(await setup({ 'cyberdeck:scan-grid': '9x9' }).preferences.loadScanGrid()).toBe('3x3');
+  });
 });
 
 describe('preferences: trade rule (T-135)', () => {
@@ -838,5 +853,42 @@ describe('preferences: own binder layout (T-120)', () => {
     const { preferences } = setup();
     await expectStorageError(preferences.saveBinderLayout({ v: 1, name: 'x', pockets: ['Bad Key'] }), 'invalid-input');
     await expectStorageError(preferences.saveBinderLayout({ v: 1, name: 'x', pockets: Array.from({ length: 901 }, () => null) }), 'invalid-input');
+  });
+});
+
+describe('preferences: trade link shared from this device (T-178, SR-54)', () => {
+  it('is false signed out and saving does nothing there', () => {
+    const { preferences, store } = setup();
+    expect(preferences.loadTradeShared()).toBeNull();
+    preferences.saveTradeShared('collection');
+    expect(preferences.loadTradeShared()).toBeNull();
+    expect(store.keys().filter((key) => key.includes('trade-shared'))).toEqual([]);
+  });
+
+  it('is kept per account, so another account on the same device does not inherit it', () => {
+    const repos = setup();
+    repos.forAccount('user123').preferences.saveTradeShared('collection');
+    expect(repos.forAccount('user123').preferences.loadTradeShared()).toBe('collection');
+    expect(repos.forAccount('other456').preferences.loadTradeShared()).toBeNull();
+    expect(repos.preferences.loadTradeShared()).toBeNull();
+    repos.forAccount('user123').preferences.saveTradeShared(null);
+    expect(repos.forAccount('user123').preferences.loadTradeShared()).toBeNull();
+  });
+
+  it('remembers the source, and anything else reads as nothing (SEC-178-1)', () => {
+    const repos = setup();
+    const account = repos.forAccount('user123');
+    account.preferences.saveTradeShared('list');
+    expect(account.preferences.loadTradeShared()).toBe('list');
+    repos.store.setItem('cyberdeck:u:user123:trade-shared', '1');
+    expect(account.preferences.loadTradeShared()).toBeNull();
+  });
+
+  it('is removed when the account is erased', () => {
+    const repos = setup();
+    const account = repos.forAccount('user123');
+    account.preferences.saveTradeShared('collection');
+    account.sync.eraseAccount();
+    expect(account.preferences.loadTradeShared()).toBeNull();
   });
 });

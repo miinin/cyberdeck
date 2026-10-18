@@ -14,7 +14,10 @@ const fullCode = rules
 // The users part (functions and match /users) and the public decks match are checked separately (T-098).
 const publicStart = fullCode.indexOf('match /publicDecks/{pubId}');
 const code = fullCode.slice(0, publicStart);
-const publicCode = fullCode.slice(publicStart);
+const tradeStart = fullCode.indexOf('match /tradeShares/{shareId}');
+const publicCode = fullCode.slice(publicStart, tradeStart);
+const tradeCode = fullCode.slice(tradeStart);
+const tradeFields = code.slice(code.indexOf('function tradeKey'), code.indexOf('match /users/{uid}'));
 const publicFields = code.slice(code.indexOf('function isPublicDeck'), code.indexOf('function isCollectionDoc'));
 
 describe('firestore.rules', () => {
@@ -23,11 +26,11 @@ describe('firestore.rules', () => {
     expect(indexes).toEqual({ indexes: [], fieldOverrides: [] });
   });
 
-  it('allows unconditionally only the read of one public deck and has only the users and publicDecks roots', () => {
+  it('allows unconditionally only the read of one public deck or trade link and has only the users, publicDecks and tradeShares roots', () => {
     expect(fullCode).toMatch(/^rules_version = '2';/);
     expect(code).not.toMatch(/if\s+true/);
     // The only `if true` in the file is the single-document read of a public deck (SR-33).
-    expect([...fullCode.matchAll(/allow\s+([^:]+):\s*if\s+true\s*;/g)].map((m) => m[1])).toEqual(['get']);
+    expect([...fullCode.matchAll(/allow\s+([^:]+):\s*if\s+true\s*;/g)].map((m) => m[1])).toEqual(['get', 'get']);
     // Only explicit operations (get, list, create, update, delete), never the broad read or write.
     expect(fullCode).not.toMatch(/allow\s+(read|write)\b/);
     expect(fullCode).not.toContain('test_users');
@@ -39,6 +42,7 @@ describe('firestore.rules', () => {
       '/collection/{docId}',
       '/games/{docId}',
       '/publicDecks/{pubId}',
+      '/tradeShares/{shareId}',
     ]);
   });
 
@@ -126,6 +130,39 @@ describe('firestore.rules', () => {
       expect(writes.map((m) => m[1])).toEqual(['create', 'update', 'delete']);
       for (const write of writes) expect((write[2] ?? '').trimStart()).toMatch(/^isGoogleUser\(\)/);
       expect(publicCode).toContain('(resource == null || pubId == publicKey(resource.data.deckId))');
+    });
+  });
+
+  describe('tradeShares (T-178, SR-50 - SR-52)', () => {
+    it('proves ownership with a shape check before the regex is built, from request.auth.uid (SR-51)', () => {
+      expect(tradeFields).toContain("hashing.sha256(request.auth.uid + '#trade').toHexString().lower()");
+      expect(tradeFields).toContain("shareId.matches('^[0-9a-f]{16}$')");
+      expect(tradeFields).toContain("tradeKey().matches('^' + shareId + '[0-9a-f]{48}$')");
+      // The shape check comes before the regex that contains the id.
+      expect(tradeFields.indexOf("shareId.matches('^[0-9a-f]{16}$')")).toBeLessThan(tradeFields.indexOf("tradeKey().matches('^'"));
+      // The same check guards create, update and delete.
+      expect(tradeCode.match(/ownsTradeShare\(shareId\)/g)).toHaveLength(3);
+      expect(tradeCode).not.toContain('resource.data.uid');
+    });
+
+    it('allows exactly three fields, bounded text and the server time, and no uid (SR-52)', () => {
+      const doc = tradeFields.slice(tradeFields.indexOf('function isTradeShare'));
+      expect(doc).toContain("hasExactly(d, ['schemaVersion', 'data', 'updatedAt'])");
+      expect(doc).toContain('isText(d.data, 1, 16000)');
+      expect(doc).toContain("d.data.matches('^[A-Za-z0-9_-]+$')");
+      expect(doc).toContain('d.updatedAt == request.time');
+      expect(doc).not.toMatch(/uid|nickname/i);
+    });
+
+    it('allows get to anyone, no list, google-only writes, update at most every 10 s (SR-52)', () => {
+      expect(tradeCode).toContain('allow get: if true;');
+      expect(tradeCode).not.toMatch(/allow\s+(list|read)/);
+      const writes = [...tradeCode.matchAll(/allow\s+(create|update|delete):\s*if\s+([^;]+);/g)];
+      expect(writes.map((m) => m[1])).toEqual(['create', 'update', 'delete']);
+      for (const write of writes) expect((write[2] ?? '').trimStart()).toMatch(/^isGoogleUser\(\)/);
+      expect(tradeCode).toContain("request.time > resource.data.updatedAt + duration.value(10, 's')");
+      // Delete needs no resource condition: a missing document can be deleted (SR-51).
+      expect(writes[2]?.[2]).not.toContain('resource');
     });
   });
 });

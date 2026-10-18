@@ -27,10 +27,12 @@ export type {
   DeckListView,
   DefaultEdition,
   ScanMode,
+  ScanGrid,
   CollectionPrefs,
   LocalData,
   SyncBase,
   SyncStorage,
+  TradeShareSource,
 } from './types';
 export { DEFAULT_COLLECTION_PREFS } from './types';
 export { StorageError } from './errors';

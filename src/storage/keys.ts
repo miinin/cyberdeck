@@ -25,6 +25,8 @@ export const DECK_LIST_VIEW_KEY = 'cyberdeck:deck-list-view';
 export const DEFAULT_EDITION_KEY = 'cyberdeck:default-edition';
 /** Card scanner mode (T-108): the raw string 'single' or 'continuous'. */
 export const SCAN_MODE_KEY = 'cyberdeck:scan-mode';
+/** Binder page scan grid (T-179): the raw string '3x3' or '3x4'. */
+export const SCAN_GRID_KEY = 'cyberdeck:scan-grid';
 /** Collection page choices (T-109): a small JSON object { view, art, showMissing }. */
 export const COLLECTION_PREFS_KEY = 'cyberdeck:collection-prefs';
 export const TRADE_RULE_KEY = 'cyberdeck:trade-rule';

@@ -115,6 +115,12 @@ describe('Scanning into a deck (T-119)', () => {
     expect(screen.queryByText('Skannaatko Beta- vai Retail-kortteja?')).not.toBeInTheDocument();
   });
 
+  it('does not offer the binder page mode when filling a deck (T-179)', async () => {
+    await openScanner(repositoriesWith([]));
+    expect(screen.getByRole('button', { name: 'Jatkuva' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Kansiosivu' })).not.toBeInTheDocument();
+  });
+
   it('adds scanned copies to the main deck only, not to the collection', async () => {
     const repositories = repositoriesWith([]);
     await openScanner(repositories);
