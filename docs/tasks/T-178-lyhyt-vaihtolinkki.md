@@ -68,3 +68,6 @@ Koodikatselmointi: tehty · Pakollisia korjattu 1 (lint: setState effectissä Tr
 Testit: npm test läpi, lint ja build läpi.
 
 Seuraavaksi: PM tarkistaa tekstit, sitten Digiturva katselmoi diffin ja säännöt, säännöt deviin ja SR-59-käsitestit.
+
+## Digiturva · Katselmointi (2026-10-18)
+Raportti `reports/SEC-178-lyhyt-vaihtolinkki.md`. SR-50–SR-54 ja SR-56–SR-58 sekä SR-60 täyttyvät. SR-55 täyttyy osittain (SEC-178-2), ja SR-59 on avoin (dev-käsitestit). Löydökset: Low 2 (SEC-178-1: lähteen vaihto oma lista -> kokoelma julkaisee automaattisesti koko kokoelman; SEC-178-2: uudelleenjaon käytöstä ei kerrota), Info 3 (SEC-178-3 uudemman version ylikirjoitus, SEC-178-4 IDEAS.md-merkintä puuttuu, SEC-178-5 säännöt testattu vain staattisesti). Ei vetoa: saa mennä deviin. Done edellyttää SR-59:n käsitestejä 1–7 devissä.
