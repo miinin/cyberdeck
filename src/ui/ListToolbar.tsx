@@ -129,6 +129,7 @@ export function ListToolbar({
   edition,
   onEditionChange,
   scanSlot,
+  endSlot,
   imageSizeDisabled = false,
   sort,
   onSortChange,
@@ -150,6 +151,8 @@ export function ListToolbar({
   onEditionChange?: (next: DefaultEdition) => void;
   /** The scan button (T-125): sits in the row after the gallery button. */
   scanSlot?: ReactNode;
+  /** A quiet tool at the end of the row (T-181: the Collection list's "Add missing to wants"). */
+  endSlot?: ReactNode;
   /** The image size only applies to the grid (T-050a); in the list it stays in place but greyed out (T-126). */
   imageSizeDisabled?: boolean;
   /** The order of the cards (T-181: in the tool row, not in the filter panel); undefined leaves it out. */
@@ -189,6 +192,7 @@ export function ListToolbar({
       {editable === false && !hideEditSwitch && (
         <MarkOwnButton onStart={() => onEditChange(true)} collectionEmpty={collectionEmpty} />
       )}
+      {endSlot !== undefined && <div className="toolbar-end">{endSlot}</div>}
     </div>
   );
 }

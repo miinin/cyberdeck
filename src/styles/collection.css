@@ -61,82 +61,12 @@
   margin-block-end: var(--space-1);
 }
 
-.collection-progress {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
-  gap: var(--space-4);
-  align-items: start;
-  margin-block-start: var(--space-4);
-}
-
-.collection-wide {
-  grid-column: 1 / -1;
-}
-
-.collection-kpis {
-  flex: 1;
-}
-
-.progress-list {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.progress-row {
-  display: grid;
-  grid-template-columns: minmax(6rem, 10rem) minmax(0, 1fr) auto;
+/* Missing cards: one toolbar row (filters, count, actions), then the grid at the Small size (8 rem). */
+.missing-bar {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
-  --bar: var(--color-accent);
-}
-
-.progress-row.seg-unit,
-.progress-row.seg-program,
-.progress-row.seg-gear,
-.progress-row.seg-other {
-  --bar: var(--seg);
-}
-
-.progress-row.progress-color {
-  --bar: var(--badge-color, var(--color-text-muted));
-}
-
-.progress-bar {
-  display: block;
-  block-size: 0.75rem;
-  background: var(--color-border);
-}
-
-.progress-fill {
-  display: block;
-  block-size: 100%;
-  background: var(--bar);
-}
-
-.progress-numbers {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  text-align: end;
-  white-space: nowrap;
-}
-
-.progress-pct {
-  color: var(--color-text-muted);
-}
-
-.progress-subtitle {
-  margin: var(--space-2) 0 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-caps);
-}
-
-.progress-more .progress-list {
-  margin-block-end: var(--space-2);
+  gap: var(--space-2) var(--space-4);
 }
 
 .missing-filters {
@@ -145,9 +75,18 @@
   gap: var(--space-2) var(--space-4);
 }
 
+.missing-count {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.missing-bar .missing-add {
+  margin: 0;
+}
+
 .missing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(8rem, 100%), 1fr));
   gap: var(--space-3);
   margin: 0;
   padding: 0;
@@ -169,22 +108,6 @@
 .missing-tile-name {
   font-size: var(--font-size-sm);
   line-height: 1.2;
-}
-
-@media (max-width: 39.99rem) {
-  .collection-kpis {
-      flex-basis: 100%;
-    }
-
-  .progress-row {
-      grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-  .progress-row .progress-bar {
-      grid-column: 1 / -1;
-      grid-row: 2;
-    }
-
 }
 
 .scanner-body {
@@ -308,13 +231,32 @@
 }
 
 .scan-prompt {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding-block-end: var(--space-4);
-  margin-block-end: var(--space-4);
-  border-block-end: 1px solid var(--color-border);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding-block-end: var(--space-3);
+  margin-block-end: var(--space-1);
+  border-block-end: 1px solid var(--line);
+}
+
+.scan-prompt-icon {
+  grid-row: 1;
+}
+
+.scan-prompt-title {
+  grid-row: 1;
+}
+
+.scan-prompt p,
+.scan-prompt .scan-open {
+  grid-column: 1 / -1;
+}
+
+/* The empty collection: one compact object, a title with its icon and the two actions. */
+.empty--collection {
+  inline-size: 100%;
+  max-inline-size: 44rem;
 }
 
 .scan-prompt-title,
@@ -324,10 +266,11 @@
 
 .scan-prompt-icon {
   color: var(--color-accent-edge);
+  display: grid;
 }
 
 .scan-prompt .scan-open {
-  align-self: flex-start;
+  justify-self: start;
 }
 
 .scanner-status {
@@ -991,345 +934,11 @@ button.pocket-link {
   min-inline-size: 0;
 }
 
-.kpi-tiles.collection-kpis {
-  grid-template-columns: repeat(auto-fill, minmax(min(10rem, 100%), 14rem));
-}
-
 @media (max-width: 39.99rem) {
   .confirm-dialog .scanner-actions:not(.scanner-actions--cancel-first) {
       flex-direction: column;
     }
 
-}
-
-.achievements-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-3);
-}
-
-.achievements-score {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-@media (min-width: 40rem) {
-  .achievements .progress-row {
-      grid-template-columns: minmax(8rem, 18rem) minmax(0, 1fr) auto;
-    }
-
-}
-
-.achievements-all-done {
-  margin: 0;
-  color: var(--color-success);
-  font-weight: var(--font-weight-bold);
-}
-
-@media (max-width: 39.99rem) {
-  .kpi-tiles.collection-kpis {
-      grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
-    }
-
-}
-
-.achievements {
-  --badge-cut: 0.9rem;
-}
-
-.achievements-meter {
-  display: flex;
-  gap: 3px;
-  margin-block: var(--space-2) var(--space-4);
-}
-
-.achievements-meter > span {
-  flex: 1 1 0;
-  block-size: 6px;
-  background: var(--color-border);
-  transform: skewX(-20deg);
-}
-
-.achievements-meter > span.is-on {
-  background: var(--color-accent);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--color-accent) 60%, transparent);
-}
-
-.badge-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
-  gap: var(--space-3);
-  margin: 0 0 var(--space-4);
-  padding: 0;
-  list-style: none;
-}
-
-.badge {
-  --tier: #8a93a6;
-  position: relative;
-  display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr);
-  gap: var(--space-3);
-  align-items: start;
-  padding: var(--space-3);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--tier) 16%, transparent), transparent 55%),
-    var(--color-surface-raised);
-  clip-path: polygon(0 0, calc(100% - var(--badge-cut)) 0, 100% var(--badge-cut), 100% 100%, var(--badge-cut) 100%, 0 calc(100% - var(--badge-cut)));
-}
-
-.badge::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid color-mix(in srgb, var(--tier) 45%, transparent);
-  clip-path: inherit;
-  pointer-events: none;
-}
-
-.badge--tier-2 {
-  --tier: var(--color-glitch-b);
-}
-
-.badge--tier-3 {
-  --tier: var(--color-glitch-a);
-}
-
-.badge:not(.is-done) {
-  background:
-    repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--color-text) 4%, transparent) 3px 4px),
-    var(--color-surface);
-}
-
-.badge:not(.is-done) .badge-icon {
-  opacity: 0.45;
-  filter: grayscale(1);
-}
-
-.badge.is-done .badge-icon {
-  color: var(--tier);
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--tier) 70%, transparent));
-}
-
-.badge-icon {
-  display: grid;
-  place-items: center;
-  inline-size: 3rem;
-  block-size: 3rem;
-  color: var(--color-text-muted);
-  background: color-mix(in srgb, var(--tier) 10%, var(--color-bg));
-  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
-}
-
-.badge-color {
-  fill: var(--badge-color, currentColor);
-}
-
-.badge-color--red {
-  --badge-color: var(--color-card-red);
-}
-
-.badge-color--yellow {
-  --badge-color: var(--color-card-yellow);
-}
-
-.badge-color--green {
-  --badge-color: var(--color-card-green);
-}
-
-.badge-color--blue {
-  --badge-color: var(--color-card-blue);
-}
-
-.badge-body {
-  display: grid;
-  gap: 0.2rem;
-  min-inline-size: 0;
-}
-
-.badge-title {
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--letter-spacing-caps);
-  text-transform: uppercase;
-}
-
-.badge.is-done .badge-title {
-  color: var(--badge-ink, var(--tier));
-}
-
-.badge-flavor {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  line-height: 1.35;
-}
-
-.badge-stamp {
-  justify-self: start;
-  margin-block-start: var(--space-1);
-  padding: 0 var(--space-2);
-  border: 1px solid var(--tier);
-  color: var(--badge-ink, var(--tier));
-  font-size: 0.75rem;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--letter-spacing-caps);
-  text-transform: uppercase;
-  transform: rotate(-3deg);
-}
-
-.badge-progress {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-block-start: var(--space-1);
-}
-
-.badge-bar {
-  flex: 1 1 auto;
-  block-size: 4px;
-  background: var(--color-border);
-}
-
-.badge-fill {
-  display: block;
-  block-size: 100%;
-  background: var(--tier);
-}
-
-.badge-count {
-  flex: none;
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-}
-
-:root[data-theme='light'] .badge--tier-2 {
-  --tier: var(--color-card-blue);
-}
-
-:root[data-theme='light'] .badge--tier-3 {
-  --tier: var(--color-card-red);
-}
-
-.badge {
-  --badge: var(--color-accent);
-  --tier: var(--badge);
-}
-
-.badge--tier-2 {
-  --badge: var(--color-glitch-b);
-}
-
-.badge--tier-3 {
-  --badge: var(--color-glitch-a);
-}
-
-.badge--color-red {
-  --badge: var(--color-card-red);
-}
-
-.badge--color-yellow {
-  --badge: var(--color-card-yellow);
-}
-
-.badge--color-green {
-  --badge: var(--color-card-green);
-}
-
-.badge--color-blue {
-  --badge: var(--color-card-blue);
-}
-
-:root[data-theme='light'] .badge--tier-2:not([class*='badge--color-']):not([class*='badge--type-']) {
-  --badge: var(--color-card-blue);
-}
-
-:root[data-theme='light'] .badge--tier-3:not([class*='badge--color-']):not([class*='badge--type-']) {
-  --badge: var(--color-card-red);
-}
-
-.badge.is-done {
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--badge) 28%, transparent), color-mix(in srgb, var(--badge) 6%, transparent) 70%),
-    var(--color-surface-raised);
-}
-
-.badge.is-done::before {
-  border: 2px solid var(--badge);
-}
-
-.badge:not(.is-done)::before {
-  border: 1px dashed color-mix(in srgb, var(--color-text-muted) 45%, transparent);
-}
-
-.badge:not(.is-done) .badge-title {
-  color: var(--color-text-muted);
-}
-
-.badge.is-done .badge-icon {
-  color: var(--badge);
-  background: color-mix(in srgb, var(--badge) 18%, var(--color-bg));
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--badge) 75%, transparent));
-}
-
-.badge.is-done .badge-title,
-.badge-stamp {
-  color: var(--badge-ink, var(--badge));
-}
-
-.badge-stamp {
-  border-color: var(--badge);
-  background: color-mix(in srgb, var(--badge) 14%, transparent);
-}
-
-.badge-fill {
-  background: var(--badge);
-}
-
-:where(.achievements-meter > span) {
-  --badge: var(--color-accent);
-}
-
-.achievements-meter > span.is-on {
-  background: var(--badge);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--badge) 60%, transparent);
-}
-
-.badge--type-unit {
-  --badge: #fcee09;
-}
-
-.badge--type-program {
-  --badge: #1fe0ff;
-}
-
-.badge--type-gear {
-  --badge: #9d7fd6;
-}
-
-.badge--type-legend {
-  --badge: #ff2a6d;
-}
-
-:root[data-theme='light'] .badge--type-unit {
-  --badge: #b38f00;
-}
-
-:root[data-theme='light'] .badge--type-program {
-  --badge: #00728a;
-}
-
-:root[data-theme='light'] .badge--type-gear {
-  --badge: #6d4fb0;
-}
-
-:root[data-theme='light'] .badge--type-legend {
-  --badge: #c2185b;
-}
-
-:root[data-theme='light'] .badge {
-  --badge-ink: color-mix(in srgb, var(--badge) 40%, #000);
 }
 
 :root[data-theme='light'] .progress-row.progress-color.type-badge-yellow {
@@ -1527,40 +1136,59 @@ button.pocket-link {
   align-self: center;
 }
 
+/* On a phone: the heading and the scan button (icon only, the name stays for screen readers) share a row, the view choice fills the next. */
 @media (max-width: 39.99rem) {
+  .page-head:has(> .page-head-actions) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
   .page-head-actions {
-      margin-inline-start: 0;
-      justify-content: flex-start;
-    }
-
-  .page-head > .page-head-actions {
-      flex: 1 1 100%;
-    }
-
-  .page-head-actions > * {
-      flex: 1 1 auto;
-      justify-content: center;
-    }
+    display: contents;
+  }
 
   .page-head-actions .view-select {
-      flex-basis: 100%;
-    }
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0;
+  }
+
+  .page-head-actions .scan-open {
+    grid-column: 2;
+    grid-row: 1;
+    min-inline-size: var(--control-h);
+    padding-inline: var(--space-2);
+  }
+
+  .page-head-actions .scan-open-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 
   .page-head-actions .segmented {
-      display: flex;
-    }
+    display: flex;
+  }
 
   .page-head-actions .segmented-option {
-      flex: 1 1 0;
-      justify-content: center;
-    }
+    flex: 1 1 0;
+    justify-content: center;
+  }
 
   .page-head-actions .view-select .segmented {
-      inline-size: 100%;
-    }
-
+    inline-size: 100%;
+  }
 }
 
+/* The status line belongs to the heading: closer than the page gap. */
+.page-head:has(> .page-head-actions) ~ .is-summary {
+  margin-block-start: calc(-1 * var(--space-2));
+}
 
 /* Scan button. */
 .scan-open {
@@ -1583,4 +1211,550 @@ button.pocket-link {
       transform: translateX(-1.5rem);
     }
   }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Overview (T-181 package 3): a band of four meters, three columns of rows, achievements as chips, then the missing cards.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.collection-progress {
+  display: grid;
+  gap: var(--gap-section);
+  margin-block-start: var(--space-3);
+}
+
+.collection-wide {
+  grid-column: 1 / -1;
+}
+
+.collection-progress > * {
+  min-inline-size: 0;
+}
+
+.coll-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding-block: var(--space-2);
+  border-block: 1px solid var(--line);
+}
+
+.coll-meter--ring {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.coll-band .ring--big {
+  inline-size: 6rem;
+  block-size: 6rem;
+}
+
+.coll-band .ring--big .ring-center strong {
+  font-size: 1.5rem;
+}
+
+.coll-meter--ring .label {
+  max-inline-size: 9rem;
+}
+
+/* The meters are separated by hairlines, not boxes. */
+.coll-meters {
+  display: grid;
+  flex: 1 1 18rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(8.5rem, 100%), 1fr));
+  gap: var(--space-3) 0;
+  margin: 0;
+}
+
+.coll-meters .coll-meter {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  min-inline-size: 0;
+  padding-inline: var(--space-4);
+  border-inline-start: 1px solid var(--line);
+}
+
+.coll-meter-value {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-mono);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.coll-meter-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-tight);
+}
+
+@media (max-width: 39.99rem) {
+  .coll-meters {
+    flex-basis: 100%;
+  }
+
+  .coll-meters .coll-meter {
+    padding-inline: var(--space-3);
+  }
+
+  .coll-meter-value {
+    font-size: 1.5rem;
+  }
+}
+
+/* Sets, rarities, colors and types side by side from about 64 rem. */
+.coll-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr));
+  gap: var(--gap-section) var(--space-6);
+  align-items: start;
+}
+
+.collection-wide {
+  grid-column: 1 / -1;
+}
+
+.progress-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A row: name, a 6 px bar and the numbers in mono; 28 px high. */
+.progress-row {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 46%) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 28px;
+  --bar: var(--color-accent);
+}
+
+.progress-label {
+  min-inline-size: 0;
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.progress-row.seg-unit,
+.progress-row.seg-program,
+.progress-row.seg-gear,
+.progress-row.seg-other {
+  --bar: var(--seg);
+}
+
+.progress-row.progress-color {
+  --bar: var(--badge-color, var(--color-text-muted));
+}
+
+.progress-bar {
+  display: block;
+  block-size: 6px;
+  background: var(--line-strong);
+}
+
+.progress-fill {
+  display: block;
+  block-size: 100%;
+  background: var(--bar);
+}
+
+.progress-numbers {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+/* The bar and the numbers say it; the percentage stays for screen readers only. */
+.progress-pct {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.progress-subtitle {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.progress-more .progress-list {
+  margin-block-end: var(--space-2);
+}
+
+:root[data-theme='light'] .progress-row.progress-color.type-badge-yellow .progress-fill {
+  box-shadow: inset 0 0 0 1px var(--color-text);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Achievements: earned ones are chips (32 px: icon, name and a check mark), the closest open ones a compact list.
+ * The colour of a badge: its tier (1 accent, 2 cyan, 3 pink), a card colour or a deck chart type colour.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.achievements-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+
+.achievements-head .panel-title {
+  flex: 1 1 auto;
+}
+
+.achievements-score {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+}
+
+.achievements-all-done {
+  margin: 0;
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+}
+
+.badge-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge-grid--earned {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.badge-grid--next {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  gap: var(--space-1) var(--space-6);
+}
+
+.badge {
+  --badge: var(--color-accent);
+  --badge-ink: var(--badge);
+  min-inline-size: 0;
+}
+
+.badge--tier-2 {
+  --badge: var(--color-glitch-b);
+}
+
+.badge--tier-3 {
+  --badge: var(--color-glitch-a);
+}
+
+.badge--color-red {
+  --badge: var(--color-card-red);
+}
+
+.badge--color-yellow {
+  --badge: var(--color-card-yellow);
+}
+
+.badge--color-green {
+  --badge: var(--color-card-green);
+}
+
+.badge--color-blue {
+  --badge: var(--color-card-blue);
+}
+
+.badge--type-unit {
+  --badge: #fcee09;
+}
+
+.badge--type-program {
+  --badge: #1fe0ff;
+}
+
+.badge--type-gear {
+  --badge: #9d7fd6;
+}
+
+.badge--type-legend {
+  --badge: #ff2a6d;
+}
+
+:root[data-theme='light'] .badge--tier-2:not([class*='badge--color-']):not([class*='badge--type-']) {
+  --badge: var(--color-card-blue);
+}
+
+:root[data-theme='light'] .badge--tier-3:not([class*='badge--color-']):not([class*='badge--type-']) {
+  --badge: var(--color-card-red);
+}
+
+:root[data-theme='light'] .badge--type-unit {
+  --badge: #b38f00;
+}
+
+:root[data-theme='light'] .badge--type-program {
+  --badge: #00728a;
+}
+
+:root[data-theme='light'] .badge--type-gear {
+  --badge: #6d4fb0;
+}
+
+:root[data-theme='light'] .badge--type-legend {
+  --badge: #c2185b;
+}
+
+/* On paper the bright badge colours are too pale as text: the ink is the colour darkened (UX-10). */
+:root[data-theme='light'] .badge {
+  --badge-ink: color-mix(in srgb, var(--badge) 40%, #000);
+}
+
+.badge-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  color: var(--color-text-muted);
+}
+
+.badge-icon svg {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+}
+
+.badge-color {
+  fill: var(--badge-color, currentColor);
+}
+
+.badge-color--red {
+  --badge-color: var(--color-card-red);
+}
+
+.badge-color--yellow {
+  --badge-color: var(--color-card-yellow);
+}
+
+.badge-color--green {
+  --badge-color: var(--color-card-green);
+}
+
+.badge-color--blue {
+  --badge-color: var(--color-card-blue);
+}
+
+.badge-title {
+  font-size: var(--font-size-label);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+}
+
+.badge.is-done .badge-title {
+  color: var(--badge-ink, var(--badge));
+}
+
+/* Earned: a chip with the colour of the badge, cut at one corner. */
+.badge-grid--earned .badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 32px;
+  padding-inline: var(--space-2) var(--space-3);
+  background: color-mix(in srgb, var(--badge) 14%, var(--surface-2));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--badge) 55%, transparent);
+  clip-path: var(--shape-chamfer-sm);
+}
+
+.badge-grid--earned .badge-icon {
+  color: var(--badge-ink, var(--badge));
+}
+
+.badge-grid--earned .badge-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.badge-flavor,
+.badge-stamp {
+  color: var(--color-text-muted);
+}
+
+/* The chip says it in the icon and the check mark; the flavour text and "Avattu" stay for screen readers. */
+.badge-grid--earned .badge-flavor {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.badge-stamp {
+  font-size: 0;
+}
+
+.badge-stamp::after {
+  content: '✓' / '';
+  color: var(--badge-ink, var(--badge));
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Open: icon, name, count and a thin bar; the goal as one truncated line. */
+.badge-grid--next .badge {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
+  border-block-end: 1px solid var(--line);
+}
+
+.badge-grid--next .badge-icon {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+
+.badge-grid--next .badge-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-2);
+  row-gap: 2px;
+  min-inline-size: 0;
+}
+
+.badge-grid--next .badge-title {
+  grid-column: 1;
+  grid-row: 1;
+  overflow: hidden;
+  color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge-grid--next .badge-flavor {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  overflow: hidden;
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge-grid--next .badge-progress {
+  display: contents;
+}
+
+.badge-grid--next .badge-count {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.badge-grid--next .badge-bar {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  block-size: 4px;
+  background: var(--line-strong);
+}
+
+.badge-fill {
+  display: block;
+  block-size: 100%;
+  background: var(--badge);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Binder (T-181 package 3): from 40 rem the spread is sized to the screen height (the whole spread and the position line
+ * are visible without scrolling) and the page turn buttons sit at the edges of the book. --binder-chrome is what the
+ * screen height pays for everything but the pockets: header, page head, controls, book frame, captions and position.
+ * ------------------------------------------------------------------------------------------------------------------ */
+@media (min-width: 40rem) {
+  .binder {
+    --binder-gap: clamp(0.375rem, 1.6vw, 1rem);
+    --binder-chrome: 23rem;
+    /* Page width from the free height: three rows of pockets (63:88) and their gaps, plus the page padding. */
+    --binder-page-fit: calc((100dvh - var(--binder-chrome)) / 1.4 + 2 * var(--space-2) + 2 * var(--binder-gap));
+    --binder-page-max: min(32rem, max(13rem, var(--binder-page-fit)));
+    max-inline-size: calc(var(--binder-width) + 2 * (var(--control-h) + var(--space-3)));
+  }
+
+  .binder-pockets {
+    gap: var(--binder-gap);
+  }
+
+  .binder-stage {
+    display: grid;
+    grid-template-columns: var(--control-h) minmax(0, 1fr) var(--control-h);
+    grid-template-areas:
+      'prev book next'
+      '. pos .';
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .binder-stage > .binder-book {
+    grid-area: book;
+  }
+
+  .binder-stage > .binder-empty {
+    grid-column: 2;
+  }
+
+  .binder-nav {
+    display: contents;
+  }
+
+  .binder-nav button {
+    justify-content: center;
+    padding-inline: 0;
+    inline-size: var(--control-h);
+    block-size: 4rem;
+  }
+
+  .binder-nav button:first-child {
+    grid-area: prev;
+  }
+
+  .binder-nav button:last-child {
+    grid-area: next;
+  }
+
+  .binder-nav .binder-position {
+    grid-area: pos;
+  }
+
+  .binder-nav-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* The Collection list: "Add missing to wants" ends the tool row instead of taking a row of its own. */
+.list-toolbar .toolbar-end {
+  margin-inline-start: auto;
+}
+
+.list-toolbar .toolbar-end .missing-add {
+  margin: 0;
 }
