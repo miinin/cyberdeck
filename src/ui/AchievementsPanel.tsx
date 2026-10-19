@@ -1,9 +1,6 @@
-import { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { achievements, nextAchievements } from '../domain/achievements';
+import { nextAchievements } from '../domain/achievements';
 import type { Achievement } from '../domain/achievements';
-import type { Card } from '../domain/card';
-import type { Collection } from '../domain/collection';
 import { collectionTexts } from './collectionTexts';
 import { RaritySymbol } from './RaritySymbol';
 
@@ -71,7 +68,9 @@ function Badge({ item }: { item: Achievement }) {
       </span>
       <span className="badge-body">
         <strong className="badge-title">{collectionTexts.achievementTitle(item)}</strong>
-        <span className="badge-flavor">{collectionTexts.achievementFlavor(item)}</span>
+        <span className="badge-flavor" title={collectionTexts.achievementFlavor(item)}>
+          {collectionTexts.achievementFlavor(item)}
+        </span>
         {item.done ? (
           <span className="badge-stamp">{collectionTexts.achievementUnlocked}</span>
         ) : (
@@ -90,20 +89,11 @@ function Badge({ item }: { item: Achievement }) {
 }
 
 /**
- * Achievements (T-132, T-150): computed from the collection, so nothing is stored. A meter with one cell per badge, the
- * earned badges (hardest first), the closest open ones, and the rest behind a disclosure (no inner scroll).
+ * Achievements (T-132, T-150, T-181): computed from the collection, so nothing is stored. The earned badges as chips
+ * (hardest first), the closest open ones as a compact list, and the rest behind a disclosure (no inner scroll). The count
+ * is also a meter in the overview band, so the caller computes the list once.
  */
-export function AchievementsPanel({
-  cards,
-  collection,
-  hasArt,
-}: {
-  cards: readonly Card[];
-  collection: Collection;
-  /** Whether a special art has its own picture (as in the overview's special art rows). */
-  hasArt: (cardKey: string, rarity: string) => boolean;
-}) {
-  const list = useMemo(() => achievements(cards, collection, hasArt), [cards, collection, hasArt]);
+export function AchievementsPanel({ list }: { list: readonly Achievement[] }) {
   const earned = list.filter((item) => item.done).sort((a, b) => b.tier - a.tier);
   const open = nextAchievements(list, list.length);
   const shown = open.slice(0, SHOWN_OPEN);
@@ -116,16 +106,8 @@ export function AchievementsPanel({
         </h2>
         <span className="achievements-score">{collectionTexts.achievementsEarned(earned.length, list.length)}</span>
       </div>
-      <div className="achievements-meter" aria-hidden="true">
-        {list.map((item) => (
-          <span
-            key={item.id}
-            className={`badge--tier-${item.tier}${badgeClasses(item)}${item.done ? ' is-on' : ''}`}
-          />
-        ))}
-      </div>
       {earned.length > 0 && (
-        <ul className="badge-grid" aria-label={collectionTexts.achievementsEarnedList}>
+        <ul className="badge-grid badge-grid--earned" aria-label={collectionTexts.achievementsEarnedList}>
           {earned.map((item) => (
             <Badge key={item.id} item={item} />
           ))}
@@ -136,7 +118,7 @@ export function AchievementsPanel({
       ) : (
         <>
           <h3 className="progress-subtitle">{collectionTexts.achievementsNext}</h3>
-          <ul className="badge-grid" aria-label={collectionTexts.achievementsOpenList}>
+          <ul className="badge-grid badge-grid--next" aria-label={collectionTexts.achievementsOpenList}>
             {shown.map((item) => (
               <Badge key={item.id} item={item} />
             ))}
@@ -144,7 +126,7 @@ export function AchievementsPanel({
           {rest.length > 0 && (
             <details className="disclosure progress-more">
               <summary>{collectionTexts.achievementsOpen(rest.length)}</summary>
-              <ul className="badge-grid">
+              <ul className="badge-grid badge-grid--next">
                 {rest.map((item) => (
                   <Badge key={item.id} item={item} />
                 ))}

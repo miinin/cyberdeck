@@ -2,6 +2,7 @@ import { useId, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { getCardImage } from '../data/cardImages';
 import { variantImageUrl } from '../data/variantImages';
+import { achievements } from '../domain/achievements';
 import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import { CARD_IMAGE_WIDTH, cardImageHeight } from '../domain/cardImage';
@@ -134,6 +135,8 @@ export function CollectionView({
   const missing = useMemo(() => missingCards(cards, saved, filter), [cards, saved, filter]);
   const everyMissing = ready && missing.length === 0 && filter.set === null && filter.rarity === null;
 
+  const achievementList = useMemo(() => achievements(cards, saved, hasArt), [cards, saved]);
+  const earnedCount = achievementList.filter((item) => item.done).length;
   const { overview } = data;
   const share = overview.total === 0 ? 0 : overview.distinct / overview.total;
   const mainSets = data.sets.filter((row) => row.group === 'sets');
@@ -192,7 +195,7 @@ export function CollectionView({
       )}
 
       {ready && prefs.view !== 'binder' && !showOwnList && overview.distinct === 0 && (
-        <div className="empty">
+        <div className="empty empty--collection">
           <ScanPrompt {...scanProps} />
           <h2>{collectionTexts.emptyTitle}</h2>
           <p>{collectionTexts.emptyBody}</p>
@@ -204,141 +207,150 @@ export function CollectionView({
 
       {ready && prefs.view === 'overview' && overview.distinct > 0 && (
         <div className="collection-progress">
-          <section className="panel collection-wide" aria-labelledby="coll-overview">
-            <h2 id="coll-overview" className="panel-title">
+          <section className="coll-band" aria-labelledby="coll-overview">
+            <h2 id="coll-overview" className="visually-hidden">
               {collectionTexts.overviewHeading}
             </h2>
-            <div className="overview-gauges">
-              <div className="gauge-main">
-                <Ring value={overview.distinct} max={overview.total} tone={share >= 1 ? 'ok' : 'neutral'} size="big">
-                  <strong aria-hidden="true">{formatPercent(share)}</strong>
-                  <small aria-hidden="true">
-                    {overview.distinct}/{overview.total}
-                  </small>
-                </Ring>
-                <span className="gauge-label">{collectionTexts.ownedDistinct}</span>
-                <span className="visually-hidden">{collectionTexts.ownedOf(overview.distinct, overview.total)}</span>
-              </div>
-              <dl className="kpi-tiles collection-kpis">
-                <div>
-                  <dt>{collectionTexts.copiesLabel}</dt>
-                  <dd>{overview.copies}</dd>
-                  <dd className="kpi-hint">{collectionTexts.copiesHint}</dd>
-                </div>
-                <div>
-                  <dt>{collectionTexts.playsetsLabel}</dt>
-                  <dd>
-                    {overview.playsets}/{overview.total}
-                  </dd>
-                  <dd className="kpi-hint">{collectionTexts.playsetsHint(overview.total)}</dd>
-                </div>
-              </dl>
+            <div className="coll-meter coll-meter--ring">
+              <Ring value={overview.distinct} max={overview.total} tone={share >= 1 ? 'ok' : 'neutral'} size="big">
+                <strong aria-hidden="true">{formatPercent(share)}</strong>
+                <small aria-hidden="true">
+                  {overview.distinct}/{overview.total}
+                </small>
+              </Ring>
+              <span className="label">{collectionTexts.ownedDistinct}</span>
+              <span className="visually-hidden">{collectionTexts.ownedOf(overview.distinct, overview.total)}</span>
             </div>
+            <dl className="coll-meters">
+              <div className="coll-meter">
+                <dt className="label">{collectionTexts.copiesLabel}</dt>
+                <dd className="coll-meter-value">{overview.copies}</dd>
+                <dd className="coll-meter-hint">{collectionTexts.copiesHint}</dd>
+              </div>
+              <div className="coll-meter">
+                <dt className="label">{collectionTexts.playsetsLabel}</dt>
+                <dd className="coll-meter-value">
+                  {overview.playsets}/{overview.total}
+                </dd>
+                <dd className="coll-meter-hint">{collectionTexts.playsetsHint(overview.total)}</dd>
+              </div>
+              <div className="coll-meter">
+                <dt className="label">{collectionTexts.achievementsHeading}</dt>
+                <dd className="coll-meter-value">
+                  {earnedCount}/{achievementList.length}
+                </dd>
+              </div>
+            </dl>
           </section>
 
-          <AchievementsPanel cards={cards} collection={saved} hasArt={hasArt} />
+          <div className="coll-columns">
+            <section className="panel" aria-labelledby="coll-sets">
+              <h2 id="coll-sets" className="panel-title">
+                {collectionTexts.setsHeading}
+              </h2>
+              <ul className="progress-list">{mainSets.map(setRow)}</ul>
+              {otherSets.length > 0 && (
+                <details className="disclosure progress-more">
+                  <summary>
+                    {collectionTexts.otherProducts} ({otherSets.length})
+                  </summary>
+                  <ul className="progress-list">{otherSets.map(setRow)}</ul>
+                </details>
+              )}
+              <p className="hint">{data.versions ? collectionTexts.setsHint : collectionTexts.setsNoVersions}</p>
+            </section>
 
-          <section className="panel" aria-labelledby="coll-sets">
-            <h2 id="coll-sets" className="panel-title">
-              {collectionTexts.setsHeading}
-            </h2>
-            <ul className="progress-list">{mainSets.map(setRow)}</ul>
-            {otherSets.length > 0 && (
-              <details className="disclosure progress-more">
-                <summary>
-                  {collectionTexts.otherProducts} ({otherSets.length})
-                </summary>
-                <ul className="progress-list">{otherSets.map(setRow)}</ul>
-              </details>
-            )}
-            <p className="hint">{data.versions ? collectionTexts.setsHint : collectionTexts.setsNoVersions}</p>
-          </section>
+            <section className="panel" aria-labelledby="coll-rarity">
+              <h2 id="coll-rarity" className="panel-title">
+                {collectionTexts.rarityHeading}
+              </h2>
+              <ul className="progress-list">
+                {data.rarities.map((row) => (
+                  <ProgressRow key={row.rarity} label={<RaritySymbol rarity={row.rarity} showName />} owned={row.owned} total={row.total} />
+                ))}
+              </ul>
+              {data.special.length > 0 && (
+                <>
+                  <h3 className="progress-subtitle">{collectionTexts.specialHeading}</h3>
+                  <ul className="progress-list">
+                    {data.special.map((row) => (
+                      <ProgressRow key={row.rarity} label={<RaritySymbol rarity={row.rarity} showName />} owned={row.owned} total={row.total} />
+                    ))}
+                  </ul>
+                </>
+              )}
+            </section>
 
-          <section className="panel" aria-labelledby="coll-rarity">
-            <h2 id="coll-rarity" className="panel-title">
-              {collectionTexts.rarityHeading}
-            </h2>
-            <ul className="progress-list">
-              {data.rarities.map((row) => (
-                <ProgressRow key={row.rarity} label={<RaritySymbol rarity={row.rarity} showName />} owned={row.owned} total={row.total} />
-              ))}
-            </ul>
-            {data.special.length > 0 && (
-              <>
-                <h3 className="progress-subtitle">{collectionTexts.specialHeading}</h3>
-                <ul className="progress-list">
-                  {data.special.map((row) => (
-                    <ProgressRow key={row.rarity} label={<RaritySymbol rarity={row.rarity} showName />} owned={row.owned} total={row.total} />
-                  ))}
-                </ul>
-              </>
-            )}
-          </section>
+            <section className="panel" aria-labelledby="coll-colors">
+              <h2 id="coll-colors" className="panel-title">
+                {collectionTexts.colorsTypesHeading}
+              </h2>
+              <h3 className="progress-subtitle">{collectionTexts.colorsHeading}</h3>
+              <ul className="progress-list">
+                {data.colors.map((row) => (
+                  <ProgressRow
+                    key={row.value ?? 'none'}
+                    label={row.value === null ? collectionTexts.noColor : <span lang="en">{row.value}</span>}
+                    owned={row.owned}
+                    total={row.total}
+                    barClass={`progress-color ${typeColorClass(row.value)}`}
+                  />
+                ))}
+              </ul>
+              <h3 className="progress-subtitle">{collectionTexts.typesHeading}</h3>
+              <ul className="progress-list">
+                {data.types.map((row) => (
+                  <ProgressRow
+                    key={row.value ?? 'none'}
+                    label={<span lang="en">{row.value}</span>}
+                    owned={row.owned}
+                    total={row.total}
+                    barClass={`seg-${(CHART_TYPES as readonly (string | null)[]).includes(row.value) ? String(row.value).toLowerCase() : 'other'}`}
+                  />
+                ))}
+              </ul>
+            </section>
+          </div>
 
-          <section className="panel" aria-labelledby="coll-colors">
-            <h2 id="coll-colors" className="panel-title">
-              {collectionTexts.colorsTypesHeading}
-            </h2>
-            <h3 className="progress-subtitle">{collectionTexts.colorsHeading}</h3>
-            <ul className="progress-list">
-              {data.colors.map((row) => (
-                <ProgressRow
-                  key={row.value ?? 'none'}
-                  label={row.value === null ? collectionTexts.noColor : <span lang="en">{row.value}</span>}
-                  owned={row.owned}
-                  total={row.total}
-                  barClass={`progress-color ${typeColorClass(row.value)}`}
-                />
-              ))}
-            </ul>
-            <h3 className="progress-subtitle">{collectionTexts.typesHeading}</h3>
-            <ul className="progress-list">
-              {data.types.map((row) => (
-                <ProgressRow
-                  key={row.value ?? 'none'}
-                  label={<span lang="en">{row.value}</span>}
-                  owned={row.owned}
-                  total={row.total}
-                  barClass={`seg-${(CHART_TYPES as readonly (string | null)[]).includes(row.value) ? String(row.value).toLowerCase() : 'other'}`}
-                />
-              ))}
-            </ul>
-          </section>
+          <AchievementsPanel list={achievementList} />
 
           <section className="panel collection-wide" aria-labelledby="coll-missing">
             <h2 id="coll-missing" className="panel-title">
               {collectionTexts.missingHeading}
             </h2>
-            <p className="hint">{collectionTexts.missingIntro}</p>
-            <div className="missing-filters">
-              <label className="sort-select">
-                {collectionTexts.filterSet}
-                <select value={filter.set ?? ''} onChange={(event) => setFilter({ ...filter, set: event.target.value === '' ? null : event.target.value })}>
-                  <option value="">{collectionTexts.filterAll}</option>
-                  {sets.map((option) => (
-                    <option key={option.family} value={option.family}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="sort-select">
-                {collectionTexts.filterRarity}
-                <select value={filter.rarity ?? ''} onChange={(event) => setFilter({ ...filter, rarity: event.target.value === '' ? null : event.target.value })}>
-                  <option value="">{collectionTexts.filterAll}</option>
-                  {rarityNames.map((rarity) => (
-                    <option key={rarity} value={rarity}>
-                      {rarity}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <p role="status" aria-live="polite" className="missing-count">
-              {everyMissing ? collectionTexts.allOwned : collectionTexts.missingCount(missing.length)}
+            <p className="hint">
+              {collectionTexts.missingIntro}
+              {missing.length > 0 && ` ${collectionTexts.wantNote} ${collectionTexts.proxyNote}`}
             </p>
-            {missing.length > 0 && (
-              <>
+            <div className="missing-bar">
+              <div className="missing-filters">
+                <label className="sort-select">
+                  {collectionTexts.filterSet}
+                  <select value={filter.set ?? ''} onChange={(event) => setFilter({ ...filter, set: event.target.value === '' ? null : event.target.value })}>
+                    <option value="">{collectionTexts.filterAll}</option>
+                    {sets.map((option) => (
+                      <option key={option.family} value={option.family}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="sort-select">
+                  {collectionTexts.filterRarity}
+                  <select value={filter.rarity ?? ''} onChange={(event) => setFilter({ ...filter, rarity: event.target.value === '' ? null : event.target.value })}>
+                    <option value="">{collectionTexts.filterAll}</option>
+                    {rarityNames.map((rarity) => (
+                      <option key={rarity} value={rarity}>
+                        {rarity}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <p role="status" aria-live="polite" className="missing-count">
+                {everyMissing ? collectionTexts.allOwned : collectionTexts.missingCount(missing.length)}
+              </p>
+              {missing.length > 0 && (
                 <div className="missing-add proxy-send">
                   <AddMissingToWantsButton
                     rows={missing.map((card) => ({ card: card.key, missing: playsetSize(card) }))}
@@ -352,15 +364,14 @@ export function CollectionView({
                     label={collectionTexts.proxyLabel}
                   />
                 </div>
-                <p className="hint">
-                  {collectionTexts.wantNote} {collectionTexts.proxyNote}
-                </p>
-                <ul className="missing-grid" aria-label={cardCount(missing.length)}>
-                  {missing.map((card) => (
-                    <MissingCard key={card.key} card={card} />
-                  ))}
-                </ul>
-              </>
+              )}
+            </div>
+            {missing.length > 0 && (
+              <ul className="missing-grid" aria-label={cardCount(missing.length)}>
+                {missing.map((card) => (
+                  <MissingCard key={card.key} card={card} />
+                ))}
+              </ul>
             )}
           </section>
         </div>

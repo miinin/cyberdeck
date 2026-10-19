@@ -838,6 +838,13 @@ function CatalogBody({
             onSortChange={setSort}
             edition={edition}
             onEditionChange={handleEditionChange}
+            endSlot={
+              locked && editable && collection.phase === 'ready' && wants.snapshot.phase === 'ready' ? (
+                <div className="missing-add missing-add--quiet">
+                  <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />
+                </div>
+              ) : undefined
+            }
             scanSlot={
               locked ? undefined : (
                 <ScanCardsButton cards={allCards} snapshot={collection} store={collectionStore} edition={edition} onEditionChange={handleEditionChange} preferences={repositories.preferences} />
@@ -857,11 +864,6 @@ function CatalogBody({
                 ) : undefined
               }
             />
-          )}
-          {locked && editable && collection.phase === 'ready' && wants.snapshot.phase === 'ready' && (
-            <div className="missing-add missing-add--quiet">
-              <AddMissingToWantsButton rows={missingRows} wants={wants} className="link-button missing-link" confirm />
-            </div>
           )}
 
           <ActiveFilters

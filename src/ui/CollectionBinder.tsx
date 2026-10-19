@@ -463,60 +463,62 @@ export function CollectionBinder({
         </p>
       )}
 
-      {/* The arrow keys turn the page while focus is inside the book; the buttons below do the same. */}
-      <div
-        className="binder-book"
-        role="group"
-        aria-label={collectionTexts.binderGroup}
-        aria-describedby={`${title}-help`}
-        data-columns={columns}
-        tabIndex={0}
-        onKeyDown={onKeyDown}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
-        <div className="binder-spread" key={viewIndex} data-turn={direction === 1 ? 'next' : 'prev'}>
-          {view.kind !== 'pages' && <BinderCover side={view.kind} title={coverName} status={countText} />}
-          {shownPages.map((index) => (
-            <section key={index} className="binder-page" aria-labelledby={`${title}-p${index}`}>
-              <ul className="binder-pockets">
-                {(pages[index] ?? []).map((slot, offset) => {
-                  const globalIndex = slot.index;
-                  return (
-                    <BinderPocket
-                      key={globalIndex ?? slot.pocket?.card.key ?? offset}
-                      slot={slot}
-                      slotLabel={collectionTexts.binderSlot(index + 1, offset + 1)}
-                      hideCount={custom}
-                      edit={custom && editing && globalIndex !== null ? { selected: selected === globalIndex, onActivate: (tappedAt: number) => activatePocket(globalIndex, tappedAt) } : null}
-                    />
-                  );
-                })}
-                {/* A short last page keeps the height of a full one. */}
-                {Array.from({ length: Math.max(0, POCKETS_PER_PAGE - (pages[index]?.length ?? 0)) }, (_, i) => (
-                  <li key={`filler-${i}`} className="pocket pocket--filler" aria-hidden="true" />
-                ))}
-              </ul>
-              <h3 id={`${title}-p${index}`} className="binder-page-number">
-                {collectionTexts.binderPage(index + 1)}
-              </h3>
-            </section>
-          ))}
+      <div className="binder-stage">
+        {/* The arrow keys turn the page while focus is inside the book; the arrow buttons at its edges do the same. */}
+        <div
+          className="binder-book"
+          role="group"
+          aria-label={collectionTexts.binderGroup}
+          aria-describedby={`${title}-help`}
+          data-columns={columns}
+          tabIndex={0}
+          onKeyDown={onKeyDown}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <div className="binder-spread" key={viewIndex} data-turn={direction === 1 ? 'next' : 'prev'}>
+            {view.kind !== 'pages' && <BinderCover side={view.kind} title={coverName} status={countText} />}
+            {shownPages.map((index) => (
+              <section key={index} className="binder-page" aria-labelledby={`${title}-p${index}`}>
+                <ul className="binder-pockets">
+                  {(pages[index] ?? []).map((slot, offset) => {
+                    const globalIndex = slot.index;
+                    return (
+                      <BinderPocket
+                        key={globalIndex ?? slot.pocket?.card.key ?? offset}
+                        slot={slot}
+                        slotLabel={collectionTexts.binderSlot(index + 1, offset + 1)}
+                        hideCount={custom}
+                        edit={custom && editing && globalIndex !== null ? { selected: selected === globalIndex, onActivate: (tappedAt: number) => activatePocket(globalIndex, tappedAt) } : null}
+                      />
+                    );
+                  })}
+                  {/* A short last page keeps the height of a full one. */}
+                  {Array.from({ length: Math.max(0, POCKETS_PER_PAGE - (pages[index]?.length ?? 0)) }, (_, i) => (
+                    <li key={`filler-${i}`} className="pocket pocket--filler" aria-hidden="true" />
+                  ))}
+                </ul>
+                <h3 id={`${title}-p${index}`} className="binder-page-number">
+                  {collectionTexts.binderPage(index + 1)}
+                </h3>
+              </section>
+            ))}
+          </div>
         </div>
-      </div>
-      {pageCount === 0 && !(custom && layout === null) && <p className="binder-empty">{collectionTexts.binderEmpty}</p>}
-      <div className="binder-nav">
-        <button type="button" className="button-secondary" aria-label={collectionTexts.binderPrev} aria-disabled={atStart} onClick={() => !atStart && turn(-1)}>
-          <Chevron direction="left" />
-          <span className="binder-nav-label">{collectionTexts.binderPrev}</span>
-        </button>
-        <p role="status" aria-live="polite" className="binder-position">
-          {position}
-        </p>
-        <button type="button" className="button-secondary" aria-label={collectionTexts.binderNext} aria-disabled={atEnd} onClick={() => !atEnd && turn(1)}>
-          <span className="binder-nav-label">{collectionTexts.binderNext}</span>
-          <Chevron direction="right" />
-        </button>
+        {pageCount === 0 && !(custom && layout === null) && <p className="binder-empty">{collectionTexts.binderEmpty}</p>}
+        <div className="binder-nav">
+          <button type="button" className="button-secondary" aria-label={collectionTexts.binderPrev} aria-disabled={atStart} onClick={() => !atStart && turn(-1)}>
+            <Chevron direction="left" />
+            <span className="binder-nav-label">{collectionTexts.binderPrev}</span>
+          </button>
+          <p role="status" aria-live="polite" className="binder-position">
+            {position}
+          </p>
+          <button type="button" className="button-secondary" aria-label={collectionTexts.binderNext} aria-disabled={atEnd} onClick={() => !atEnd && turn(1)}>
+            <span className="binder-nav-label">{collectionTexts.binderNext}</span>
+            <Chevron direction="right" />
+          </button>
+        </div>
       </div>
       <p id={`${title}-help`} className="hint binder-help">
         {collectionTexts.binderHelp}
