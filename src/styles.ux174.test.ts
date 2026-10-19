@@ -7,6 +7,8 @@ import { resolve } from 'node:path';
  */
 const css = readFileSync(resolve(__dirname, 'styles.css'), 'utf8');
 /** T-181 package 2: the card box rules moved to their own file. */
+/** T-181 package 3: the Collection rules (overview, achievements, binder, scanner) moved too. */
+const collectionCss = readFileSync(resolve(__dirname, 'styles/collection.css'), 'utf8');
 const cardsCss = readFileSync(resolve(__dirname, 'styles/cards.css'), 'utf8');
 
 /** The declarations of the first rule that starts with `selector` (alone, or last in a selector list). */
@@ -31,13 +33,13 @@ describe('T-174 style rules', () => {
   });
 
   it('UX-11: the Yellow bar of the collection overview keeps its colour in the light theme', () => {
-    const bar = rule(":root[data-theme='light'] .progress-row.progress-color.type-badge-yellow");
+    const bar = rule(":root[data-theme='light'] .progress-row.progress-color.type-badge-yellow", collectionCss);
     expect(bar).toMatch(/--bar:\s*var\(--color-card-yellow\)/);
   });
 
   it('UX-10: earned badges use a darker ink for the title and stamp in the light theme', () => {
-    expect(rule(":root[data-theme='light'] .badge")).toMatch(/--badge-ink:\s*color-mix\(.*#000\)/);
-    expect(rule('.badge.is-done .badge-title')).toMatch(/var\(--badge-ink/);
+    expect(rule(":root[data-theme='light'] .badge", collectionCss)).toMatch(/--badge-ink:\s*color-mix\(.*#000\)/);
+    expect(rule('.badge.is-done .badge-title', collectionCss)).toMatch(/var\(--badge-ink/);
   });
 
   it('UX-06: the proxy bar text may wrap', () => {
@@ -45,7 +47,7 @@ describe('T-174 style rules', () => {
   });
 
   it('UX-12: the binder cover has no border (it made the cover narrower than a page)', () => {
-    expect(rule('.binder-cover')).not.toMatch(/^\s*border:/m);
+    expect(rule('.binder-cover', collectionCss)).not.toMatch(/^\s*border:/m);
   });
 
   it('UX-22: the filter groups are aligned to the start of their row', () => {
@@ -78,7 +80,7 @@ describe('T-174 style rules', () => {
   });
 
   it('T-181-0: the scanner dialog keeps its width on a phone despite the container query', () => {
-    expect(rule('.scanner-dialog[open]')).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\)/);
-    expect(css).toMatch(/\.scanner-body \{\s*container-type: inline-size;\s*inline-size: min\(36rem, 100%\);/);
+    expect(rule('.scanner-dialog[open]', collectionCss)).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\)/);
+    expect(collectionCss).toMatch(/\.scanner-body \{\s*container-type: inline-size;\s*inline-size: min\(36rem, 100%\);/);
   });
 });
