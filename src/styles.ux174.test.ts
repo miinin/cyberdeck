@@ -62,7 +62,8 @@ describe('T-174 style rules', () => {
   });
 
   it('UX-16: every segmented option shows the accent bar on hover', () => {
-    expect(rule('.segmented-option:hover')).toMatch(/box-shadow:\s*inset 0 -3px 0 color-mix/);
+    // T-181: the bars are 2 px in the new design system (hover and chosen alike).
+    expect(rule('.segmented-option:hover')).toMatch(/box-shadow:\s*inset 0 -2px 0 color-mix/);
   });
 
   it('UX-13: the control of a card box is always in the right column of the foot', () => {

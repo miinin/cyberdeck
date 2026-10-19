@@ -1,0 +1,5 @@
+/*
+ * Collection: overview, achievements, binder, scanner visuals (T-181 package 3).
+ * Loaded after styles.css (src/main.tsx), so these rules win over older rules of the same specificity.
+ * Tokens and base components live in styles.css (docs/UX.md luku 3); use them, do not redefine them here.
+ */
