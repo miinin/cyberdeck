@@ -46,10 +46,11 @@ describe('CatalogView grid box (T-181)', () => {
     expect(meta.querySelector('.stat-ram dd')).toHaveTextContent('2');
   });
 
-  it('only a Legend gets the type chip', () => {
+  it('shows the type the same way for every type (T-184): no chip for a Legend', () => {
     render(<CatalogView cards={[card(1, { type: 'Legend' }), card(2)]} repositories={browserLikeRepositories()} />);
     const types = [...document.querySelectorAll('.card-type')];
-    expect(types.map((type) => type.classList.contains('card-type--legend'))).toEqual([true, false]);
+    expect(types).toHaveLength(2);
+    expect(types.some((type) => type.classList.contains('card-type--legend'))).toBe(false);
   });
 
   it('puts the collection count in the strip while browsing and the − and + in a row of their own while marking', async () => {

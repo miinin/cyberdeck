@@ -228,13 +228,8 @@ function CardBox({
     <li className={'card-box card-box--art ' + state}>
       {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
       <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} imageLabel={imageLabel} />
-      {/* The data strip (T-181 B.1): cost gem, the name on one line (the whole name in the title), deck count and collection count. */}
+      {/* Line 1 (T-184): the name on one line (the whole name in the title), deck count and collection count. */}
       <div className="card-strip">
-        <dl className="card-cost">
-          <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
-            {card.cost === null ? undefined : <CostGem card={card} />}
-          </Stat>
-        </dl>
         <h3 className="card-name" title={fullName}>
           <span lang="en">{card.name}</span>
           {card.subname !== null && (
@@ -259,8 +254,14 @@ function CardBox({
           {artName(art)}
         </p>
       )}
+      {/* Line 2 (T-184): cost gem, type and rarity; line 3: Power and RAM. One reading size for all. */}
       <div className="card-meta">
-        <p className={'card-type' + (card.type === 'Legend' ? ' card-type--legend' : '')}>
+        <dl className="card-cost">
+          <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
+            {card.cost === null ? undefined : <CostGem card={card} />}
+          </Stat>
+        </dl>
+        <p className="card-type">
           <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
             {card.type}
           </span>
@@ -268,12 +269,14 @@ function CardBox({
             , <CardColor color={card.color} />
           </span>
         </p>
+        <dl className="card-rarity-box">
+          <Stat label={texts.columnRarity} value={null} missing={texts.noRarity} className="card-rarity" hideLabel>
+            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={16} />}
+          </Stat>
+        </dl>
         <dl className="card-stats">
           <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} className="stat-chip stat-power" />
           <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip stat-ram" />
-          <Stat label={texts.columnRarity} value={null} missing={texts.noRarity} className="card-rarity" hideLabel>
-            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={14} />}
-          </Stat>
         </dl>
       </div>
       {footControl !== null && (

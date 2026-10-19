@@ -186,8 +186,8 @@ export function ListToolbar({
           </p>
         </SegmentedChoice>
       )}
-      {editable === false && !hideEditSwitch && (
-        <MarkOwnButton onStart={() => onEditChange(true)} collectionEmpty={collectionEmpty} />
+      {editable !== undefined && !hideEditSwitch && (
+        <MarkOwnButton active={editable} onToggle={() => onEditChange(!editable)} collectionEmpty={collectionEmpty} />
       )}
     </div>
   );

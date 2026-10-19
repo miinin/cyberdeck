@@ -35,7 +35,8 @@ async function renderView(repositories: Repositories) {
 
 const markButton = () => screen.queryByRole('button', { name: 'Merkitse omat korttisi' });
 const banner = () => screen.queryByRole('region', { name: 'Merkitset omia korttejasi' });
-const done = () => screen.getByRole('button', { name: 'Lopeta merkitseminen' });
+const done = () => within(banner() as HTMLElement).getByRole('button', { name: 'Lopeta merkitseminen' });
+const stopInToolbar = () => screen.getAllByRole('button', { name: 'Lopeta merkitseminen' }).find((b) => b.id === 'mark-open');
 const stepButtons = () => screen.queryAllByRole('button', { name: /^(Vähennä|Lisää) yksi kappale/ });
 
 describe('CatalogView: marking own cards (T-040, T-123)', () => {
@@ -87,9 +88,10 @@ describe('CatalogView: marking own cards (T-040, T-123)', () => {
     expect(banner()).toHaveAttribute('title', expect.stringContaining('Kirjaa omistamasi määrä'));
     expect(banner()).toHaveAccessibleDescription(/Kirjaa omistamasi määrä/);
     expect(within(banner() as HTMLElement).getByRole('button', { name: 'Lisää puuttuvat wantiin' })).toBeInTheDocument();
+    // T-184: the toolbar button stays in its place and now stops the mode; focus stays on it.
     expect(markButton()).toBeNull();
+    expect(stopInToolbar()).toHaveFocus();
     expect(stepButtons()).toHaveLength(4);
-    expect(done()).toHaveFocus();
     expect(await repositories.preferences.loadEditMode()).toBe(true);
 
     await user.click(done());
