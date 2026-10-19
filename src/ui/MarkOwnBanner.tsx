@@ -25,24 +25,33 @@ function MarkIcon() {
  * Starts the marking of the cards the user owns (T-123; replaces the "Muokkaa kokoelmaa" switch).
  * The hint says what the mode does; an empty collection also gets a dimmed reminder beside the button.
  */
-export function MarkOwnButton({ onStart, collectionEmpty }: { onStart: () => void; collectionEmpty: boolean }) {
+export function MarkOwnButton({
+  active = false,
+  onToggle,
+  collectionEmpty,
+}: {
+  /** Marking is on: the same button, in the same place, now stops it (it is one element, so focus stays). */
+  active?: boolean;
+  onToggle: () => void;
+  collectionEmpty: boolean;
+}) {
   return (
     <div className="mark-open-row">
       <button
         type="button"
         id={MARK_OPEN_ID}
-        className="button-quiet mark-open"
-        title={texts.markHint}
-        aria-describedby="mark-hint"
-        onClick={onStart}
+        className={"button-quiet mark-open" + (active ? " is-active" : "")}
+        title={active ? undefined : texts.markHint}
+        aria-describedby={active ? undefined : "mark-hint"}
+        onClick={onToggle}
       >
         <MarkIcon />
-        <span className="mark-open-label">{texts.markOpen}</span>
+        <span className="mark-open-label">{active ? texts.markDone : texts.markOpen}</span>
       </button>
       <p id="mark-hint" className="visually-hidden">
         {texts.markHint}
       </p>
-      {collectionEmpty && <p className="mark-empty-hint">{texts.markEmptyHint}</p>}
+      {collectionEmpty && !active && <p className="mark-empty-hint">{texts.markEmptyHint}</p>}
     </div>
   );
 }

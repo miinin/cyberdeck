@@ -68,9 +68,9 @@ describe('T-174 style rules', () => {
     expect(rule('.segmented-option:hover')).toMatch(/box-shadow:\s*inset 0 -2px 0 color-mix/);
   });
 
-  it('UX-13: the control of a card box is always in the right column of the foot', () => {
-    expect(rule('.card-foot', cardsCss)).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) auto/);
-    expect(rule('.card-foot .card-collection', cardsCss)).toMatch(/grid-column:\s*2/);
+  it('UX-13: the control of a card box is centred on the card in the foot (T-184)', () => {
+    expect(rule('.card-foot', cardsCss)).toMatch(/justify-content:\s*center/);
+    expect(rule('.card-foot .card-collection,\n.card-foot .count-control', cardsCss)).toMatch(/justify-content:\s*center/);
   });
 
   it('UX-24: a note line is reserved in every search result', () => {

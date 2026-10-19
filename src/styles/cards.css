@@ -556,31 +556,14 @@ body:has(.mark-banner) .site-footer {
   --color-count: var(--color-text);
 }
 
-/* The data strip: cost, name, deck count, collection count. */
+/* Line 1 of the data strip (T-184): the name is the main thing, with the deck count and the collection count at the right. */
 .card-strip {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   min-width: 0;
-  min-block-size: 2rem;
-}
-
-.card-cost {
-  flex: none;
-  margin: 0;
-}
-
-.card-cost dd {
-  margin: 0;
-  font-family: var(--font-mono);
-}
-
-/* A missing cost: a dash in the same 1.75 rem slot as the gem. */
-.card-cost .card-stat {
-  display: grid;
-  place-items: center;
-  min-inline-size: 1.75rem;
   min-block-size: 1.75rem;
+  margin-block-start: var(--space-1);
 }
 
 .card-name {
@@ -588,9 +571,9 @@ body:has(.mark-banner) .site-footer {
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  font-size: var(--font-size-control);
+  font-size: 1rem;
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
+  line-height: 1.3;
   letter-spacing: var(--letter-spacing-body);
   text-overflow: ellipsis;
   text-transform: none;
@@ -648,34 +631,72 @@ body:has(.mark-banner) .site-footer {
   min-width: 0;
 }
 
-/* Marking and Have/Want controls need room for − and +: a row of their own, the control at the right edge in every box. */
+/* Marking and Have/Want controls need room for − and +: a row of their own, centred on the card (T-184). */
 .card-foot {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-2);
+  display: flex;
+  justify-content: center;
+  margin-block-start: var(--space-1);
 }
 
-.card-foot .card-collection {
-  grid-column: 2;
-  margin-inline-start: auto;
+.card-foot .card-collection,
+.card-foot .count-control {
+  justify-content: center;
 }
 
-/* The second line: UNIT · P6 · R2 · rarity, muted mono. */
+/* Line 2 (T-184): cost gem, type and rarity at the right; line 3: Power and RAM. One reading size (0.8125 rem) and strength. */
 .card-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-1) var(--space-3);
   min-width: 0;
-  overflow: hidden;
-  color: var(--color-text-muted);
+  margin-block-end: var(--space-1);
+  color: var(--color-text);
   font-family: var(--font-mono);
-  font-size: var(--font-size-tag);
+  font-size: 0.8125rem;
   font-weight: var(--font-weight-mono);
-  letter-spacing: 0.04em;
-  line-height: 1.4;
-  text-transform: uppercase;
-  white-space: nowrap;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+}
+
+.card-cost {
+  flex: none;
+  margin: 0;
+}
+
+/* A missing cost: a dash in the same slot as the gem. */
+.card-cost .card-stat {
+  display: grid;
+  place-items: center;
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+}
+
+.card-cost dd {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+/* The cost is a bevelled square in the card colour, like on the card itself (only here; the deck lists keep their round one). */
+.card-meta .cost-gem {
+  position: relative;
+  isolation: isolate;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--badge-color);
+  clip-path: polygon(0 0, calc(100% - 0.4rem) 0, 100% 0.4rem, 100% 100%, 0 100%);
+  font-size: 0.8125rem;
+}
+
+.card-meta .cost-gem::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: var(--color-surface-raised);
+  clip-path: polygon(0 0, calc(100% - 0.33rem) 0, 100% 0.33rem, 100% 100%, 0 100%);
 }
 
 .card-type {
@@ -687,14 +708,17 @@ body:has(.mark-banner) .site-footer {
   white-space: nowrap;
 }
 
+/* The type reads the same for every type: text colour, no chip. The card colour is in the cost gem. */
 .card-meta .type-badge {
   display: inline;
   padding: 0;
   border: 0;
   background: none;
-  color: inherit;
+  color: var(--color-text);
   font-size: inherit;
-  font-weight: inherit;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   clip-path: none;
 }
 
@@ -702,18 +726,14 @@ body:has(.mark-banner) .site-footer {
   content: none;
 }
 
-/* Only a Legend is a chip, in its colour. */
-.card-meta .card-type--legend .type-badge {
-  padding: 0 0.4em;
-  border: 1px solid var(--badge-color);
-  color: var(--color-text);
-}
-
 /* A flat group, not display: contents, so the list keeps its semantics. */
 .card-stats {
   display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-1) var(--space-3);
+  min-width: 0;
   margin: 0;
 }
 
@@ -730,7 +750,7 @@ body:has(.mark-banner) .site-footer {
   font-variant-numeric: tabular-nums;
 }
 
-/* "· P6": the label is spoken in full (the dt), seen as a letter. The empty alternative text keeps it from being read twice. */
+/* "P 6", "RAM 2": the label is spoken in full (the dt), seen as the short form. The empty alternative text keeps it from being read twice. */
 .stat-chip dt {
   position: absolute;
   inline-size: 1px;
@@ -741,31 +761,36 @@ body:has(.mark-banner) .site-footer {
   white-space: nowrap;
 }
 
-.stat-chip::before {
-  content: '·';
-  content: '·' / '';
-  margin-inline-end: var(--space-1);
-}
-
 .stat-power dd::before {
   content: 'P';
   content: 'P' / '';
+  margin-inline-end: 0.35em;
+  color: var(--color-text-muted);
 }
 
 .stat-ram dd::before {
-  content: 'R';
-  content: 'R' / '';
+  content: 'RAM';
+  content: 'RAM' / '';
+  margin-inline-end: 0.35em;
+  color: var(--color-text-muted);
 }
 
-.card-rarity::before {
-  content: '·';
-  content: '·' / '';
-  margin-inline-end: var(--space-1);
+/* The rarity symbol sits on its own base with a border (WCAG 1.4.11), so it never blends into the background in either theme. */
+.card-rarity-box {
+  margin: 0 0 0 auto;
 }
 
 .card-rarity dd {
   display: inline-flex;
-  color: var(--color-text-muted);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding-inline: 0.25rem;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
   font-family: inherit;
   white-space: nowrap;
 }
@@ -1508,3 +1533,18 @@ body:has(.mark-banner) .site-footer {
   margin: 0;
   padding: 0;
 }
+
+/* The toolbar button that stops the marking is the one that started it: same place, pressed look (T-184). */
+.list-toolbar .mark-open.is-active {
+  background: var(--surface-hover);
+  box-shadow: inset 0 -2px 0 var(--section-accent);
+}
+
+/* The card colour of the cost gem (the base .cost-gem rule comes later in the cascade and would otherwise grey it out). */
+.card-meta .cost-gem.type-badge-red { --badge-color: var(--color-card-red); }
+.card-meta .cost-gem.type-badge-yellow { --badge-color: var(--color-card-yellow); }
+.card-meta .cost-gem.type-badge-green { --badge-color: var(--color-card-green); }
+.card-meta .cost-gem.type-badge-blue { --badge-color: var(--color-card-blue); }
+
+/* A yellow gem is never a thin yellow line on the light background (UX.md 3.1): the text colour there. */
+:root[data-theme='light'] .card-meta .cost-gem.type-badge-yellow { --badge-color: var(--color-text); }

@@ -42,7 +42,7 @@ import { ListToolbar } from './ListToolbar';
 import { CardGallery } from './CardGallery';
 import { galleryItemsOf } from './galleryItems';
 import { useGallery } from './useGallery';
-import { MARK_DONE_ID, MARK_OPEN_ID, MarkOwnBanner } from './MarkOwnBanner';
+import { MARK_OPEN_ID, MarkOwnBanner } from './MarkOwnBanner';
 import type { ImageSize } from './ListToolbar';
 import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import { useCardHoverPreview } from './CardHoverPreview';
@@ -270,8 +270,8 @@ function CatalogBody({
   };
   const handleEditChange = (next: boolean) => {
     userChose.current.edit = true;
-    // T-123: the button that was pressed disappears, so focus moves to its counterpart.
-    markFocusRef.current = next ? MARK_DONE_ID : MARK_OPEN_ID;
+    // T-184: the toolbar button is one element for both states; stopping from the banner moves focus to it.
+    markFocusRef.current = MARK_OPEN_ID;
     setEditMode(next);
     savePreference(repositories.preferences.saveEditMode(next));
   };

@@ -17,10 +17,10 @@ function rule(selector: string): string {
 }
 
 describe('T-181 cards (package 2)', () => {
-  it('the grid has no box: the old box rules are gone from styles.css and the strip is 32 px', () => {
+  it('the grid has no box: the old box rules are gone from styles.css and the name line is 28 px', () => {
     expect(base).not.toMatch(/\n\.card-box \{/);
     expect(rule('.card-box')).not.toMatch(/border|background/);
-    expect(rule('.card-strip')).toMatch(/min-block-size:\s*2rem/);
+    expect(rule('.card-strip')).toMatch(/min-block-size:\s*1\.75rem/);
   });
 
   it('the sizes give five boxes at 1280 px and two on the narrowest phones', () => {
