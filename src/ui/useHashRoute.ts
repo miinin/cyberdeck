@@ -26,7 +26,7 @@ export type Route =
  * The section a route belongs to (T-142): each has its own accent, one of the game's four colors, so the user always
  * sees where they are although the pages look alike. Proxy is a tool, not part of the game: a neutral accent.
  */
-export type Section = 'cards' | 'collection' | 'decks' | 'havewant' | 'proxy';
+export type Section = 'cards' | 'collection' | 'decks' | 'playtest' | 'havewant' | 'proxy';
 
 export function sectionOf(route: Route): Section {
   switch (route.name) {
@@ -38,12 +38,14 @@ export function sectionOf(route: Route): Section {
     case 'publicDecks':
     case 'publicDeck':
     case 'deckBuild':
+      return 'decks';
+    // Playtest has its own accent, so Testaa is not the same color as Pakat. Goldfish opens under Testaa in the nav.
     case 'goldfish':
     case 'sealed':
     case 'sealedGoldfish':
     case 'boosters':
     case 'soloPick':
-      return 'decks';
+      return 'playtest';
     case 'havewant':
     case 'trade':
     case 'tradeLink':

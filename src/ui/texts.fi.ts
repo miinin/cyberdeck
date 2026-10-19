@@ -119,7 +119,7 @@ export const textsFi = {
   detailCollection: 'Kokoelmassa',
   detailWant: 'Want-listalla',
   detailPlaysetMissing: (n: number) => `Pelisarjasta puuttuu ${n}`,
-  versionsHeading: 'Versiot',
+  versionsCountSummary: (versions: number, owned: number) => `${versions} ${versions === 1 ? 'versio' : 'versiota'} · omistat ${owned}`,
   availabilityHeading: 'Saatavuus',
   availabilityInBoosters: 'Welcome to Night City -boosterit',
   availabilityNotInBoosters: 'Ei Welcome to Night City -boostereissa',

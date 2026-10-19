@@ -206,17 +206,36 @@ function CardBox({
   const artMode = art !== null && owned?.artCountOf !== undefined && owned.onArtChange !== undefined;
   const artOwned = artMode ? (owned?.artCountOf?.(card, art) ?? 0) : 0;
   const state = artMode ? (owned?.mode === 'ready' && artOwned > 0 ? 'is-owned' : '') : collectionState(card, owned);
+  const fullName = card.subname === null ? card.name : `${card.name}, ${card.subname}`;
+  // Marking mode and the Have/Want controls need room for − and +, so they get a row of their own; browsing shows the count in the data strip (T-181).
+  const control =
+    owned === undefined ? null : (
+      <CountControl
+        card={card}
+        count={artMode ? artOwned : owned.countOf(card)}
+        mode={owned.mode}
+        label={artMode && art !== null ? texts.artTileName(card.displayName, artName(art)) : undefined}
+        onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
+        onLimit={owned.onLimit}
+        editable={owned.editable}
+        kind={owned.kind}
+        min={artMode ? 0 : owned.minOf?.(card)}
+      />
+    );
+  const controlInStrip = owned !== undefined && !owned.editable && renderFoot === undefined;
+  const footControl = renderFoot !== undefined ? renderFoot(card) : owned?.editable === true ? control : null;
   return (
     <li className={'card-box card-box--art ' + state}>
       {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
       <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} imageLabel={imageLabel} />
-      <div className="card-head">
+      {/* The data strip (T-181 B.1): cost gem, the name on one line (the whole name in the title), deck count and collection count. */}
+      <div className="card-strip">
         <dl className="card-cost">
           <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
             {card.cost === null ? undefined : <CostGem card={card} />}
           </Stat>
         </dl>
-        <h3 className="card-name">
+        <h3 className="card-name" title={fullName}>
           <span lang="en">{card.name}</span>
           {card.subname !== null && (
             <>
@@ -231,6 +250,8 @@ function CardBox({
             <span className="visually-hidden"> – {artName(art)}</span>
           )}
         </h3>
+        {decksOf !== undefined && <CardDecks names={decksOf(card)} compact />}
+        {controlInStrip && <div className="card-collection">{control}</div>}
       </div>
       {/* The version's name is also shown (T-118, UX-118-27): boxes of one card differ only by the picture otherwise. */}
       {showArtLabel && art !== null && (
@@ -239,7 +260,7 @@ function CardBox({
         </p>
       )}
       <div className="card-meta">
-        <p className="card-type">
+        <p className={'card-type' + (card.type === 'Legend' ? ' card-type--legend' : '')}>
           <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
             {card.type}
           </span>
@@ -248,38 +269,18 @@ function CardBox({
           </span>
         </p>
         <dl className="card-stats">
-          <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} className="stat-chip" />
-          <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip" />
-          <Stat
-            label={texts.columnRarity}
-            value={null}
-            missing={texts.noRarity}
-            className="card-rarity"
-            hideLabel
-          >
-            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={18} />}
+          <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} className="stat-chip stat-power" />
+          <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip stat-ram" />
+          <Stat label={texts.columnRarity} value={null} missing={texts.noRarity} className="card-rarity" hideLabel>
+            {shownRarity === null ? undefined : <RaritySymbol rarity={shownRarity} size={14} />}
           </Stat>
         </dl>
       </div>
-      <div className="card-foot">
-        {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
-        {renderFoot !== undefined && <div className="card-collection">{renderFoot(card)}</div>}
-        {owned !== undefined && (
-          <div className="card-collection">
-            <CountControl
-              card={card}
-              count={artMode ? artOwned : owned.countOf(card)}
-              mode={owned.mode}
-              label={artMode && art !== null ? texts.artTileName(card.displayName, artName(art)) : undefined}
-              onChange={artMode && art !== null ? (c, n) => owned.onArtChange?.(c, art, n) : owned.onChange}
-              onLimit={owned.onLimit}
-              editable={owned.editable}
-              kind={owned.kind}
-              min={artMode ? 0 : owned.minOf?.(card)}
-            />
-          </div>
-        )}
-      </div>
+      {footControl !== null && (
+        <div className="card-foot">
+          <div className="card-collection">{footControl}</div>
+        </div>
+      )}
     </li>
   );
 }

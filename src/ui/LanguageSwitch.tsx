@@ -32,7 +32,8 @@ function Flag({ option }: { option: Locale }) {
   );
 }
 
-const FLAG_NAMES: Record<Locale, string> = { fi: 'Suomi', en: 'English' };
+/** The accessible name holds the visible code (WCAG 2.5.3, label in name). */
+const FLAG_NAMES: Record<Locale, string> = { fi: 'Suomi (FI)', en: 'English (EN)' };
 
 /** Reloads the page; the hash route survives. A separate function so tests can replace it. */
 export const languageActions = {
@@ -63,6 +64,9 @@ export function LanguageSwitch() {
           onClick={() => choose(option)}
         >
           <Flag option={option} />
+          <span className="flag-code" aria-hidden="true">
+            {option.toUpperCase()}
+          </span>
         </button>
       ))}
     </div>

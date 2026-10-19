@@ -31,7 +31,7 @@ export function MarkOwnButton({ onStart, collectionEmpty }: { onStart: () => voi
       <button
         type="button"
         id={MARK_OPEN_ID}
-        className="button-secondary button-compact mark-open"
+        className="button-quiet mark-open"
         title={texts.markHint}
         aria-describedby="mark-hint"
         onClick={onStart}
@@ -84,6 +84,7 @@ export function MarkOwnBanner({
           name="default-edition"
           value={edition}
           options={EDITION_OPTIONS}
+          size="sm"
           describedBy="edition-hint"
           onChange={onEditionChange}
         >
@@ -91,7 +92,7 @@ export function MarkOwnBanner({
             {texts.editionHint}
           </p>
         </SegmentedChoice>
-        <button type="button" id={MARK_DONE_ID} className="button-secondary button-compact" onClick={onDone}>
+        <button type="button" id={MARK_DONE_ID} className="button-secondary button--sm" onClick={onDone}>
           {texts.markDone}
         </button>
       </div>

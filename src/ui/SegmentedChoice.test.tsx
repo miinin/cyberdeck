@@ -32,4 +32,12 @@ describe('SegmentedChoice (T-118, UX-118-06)', () => {
       expect(radio.closest('label')).toHaveClass('segmented-option');
     }
   });
+
+  it('has the default size unless size="sm" asks for the small one (T-181)', () => {
+    const { rerender } = render(<SegmentedChoice legend="Koko" name="size" value="grid" options={OPTIONS} onChange={() => {}} />);
+    const bar = () => screen.getByRole('group', { name: 'Koko' }).querySelector('.segmented');
+    expect(bar()).not.toHaveClass('segmented--sm');
+    rerender(<SegmentedChoice legend="Koko" name="size" value="grid" options={OPTIONS} onChange={() => {}} size="sm" fill />);
+    expect(bar()).toHaveClass('segmented', 'segmented--sm', 'segmented--fill');
+  });
 });

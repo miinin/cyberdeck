@@ -14,6 +14,7 @@ export function SegmentedChoice<T extends string | number>({
   className,
   legendVisible = false,
   fill = false,
+  size = 'md',
   describedBy,
   inputRef,
   children,
@@ -28,6 +29,8 @@ export function SegmentedChoice<T extends string | number>({
   legendVisible?: boolean;
   /** The options share the full width of the row. */
   fill?: boolean;
+  /** 'sm' is the 32 px size for tool rows (T-181); touch keeps 44 px. */
+  size?: 'md' | 'sm';
   /** Id of a text that explains the group; set on every radio. */
   describedBy?: string;
   /** A ref for the radio of one option (the focus target after a reset). */
@@ -39,7 +42,7 @@ export function SegmentedChoice<T extends string | number>({
   return (
     <fieldset disabled={disabled} className={['view-select', legendVisible ? 'has-legend' : '', className ?? ''].filter(Boolean).join(' ')}>
       <legend>{legend}</legend>
-      <div className={fill ? 'segmented segmented--fill' : 'segmented'}>
+      <div className={['segmented', fill ? 'segmented--fill' : '', size === 'sm' ? 'segmented--sm' : ''].filter(Boolean).join(' ')}>
         {options.map(([option, label]) => (
           <label key={option} className="segmented-option">
             <input

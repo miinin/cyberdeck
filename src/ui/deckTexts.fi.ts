@@ -441,8 +441,10 @@ export const deckTextsFi = {
   reportNothingRecognized: 'Yhtään korttia ei tunnistettu, joten pakkaa ei voi tallentaa. Tarkista rivit.',
 
   // Catalog
+  columnDecks: 'Pakoissa',
   inDecks: (count: number) => `Pakoissa: ${count}`,
   inDecksNames: (names: readonly string[]) => `Pakoissa: ${names.join(', ')}`,
+  inDecksCompact: (names: readonly string[]) => `${names.length} pakassa: ${names.join(', ')}`,
 
   // Public decks (T-098, D-025)
   decksTabsLabel: 'Pakkalistan näkymä',

@@ -7,6 +7,7 @@
 > Muutos 0.6 · 2026-10-02 (T-021, D-010): periaate 7 päivitetty, luku 3 (tokenit ja komponentit) uusittu Cyberpunk 2077 -henkiseen ilmeeseen (vain tumma teema, Chakra Petch ja Share Tech Mono, viistetyt kulmat, keltainen ja syaani korostus) ja uusi luku 7 (tutkimus, päätökset, kontrastilaskelmat, liike, ohje Koodarille). Referenssi: `docs/design/t021-mallisivu.html`. Toiminta, rakenne ja tekstit lukuissa 4–6 eivät muutu. (Korvattu muutoksella 0.7: vaalea ja tumma teema, Rajdhani.)
 > Muutos 0.7 · 2026-10-02 (T-021, D-011): suunta hyväksytty. Sovelluksessa on sekä vaalea että tumma Cyberpunk-teema (`prefers-color-scheme`), fontti on Rajdhani (500 ja 700, kokoja nostettu) ja Share Tech Mono säilyy luvuille ja tilariveille. Luvun 3 tokenit kahdelle teemalle, luvut 7.3, 7.4, 7.6 (kontrastit molemmille teemoille), 7.9 ja 7.10 päivitetty. Mallisivu näyttää molemmat teemat (teemapainikkeet ja rinnakkaisnäkymä).
 > Muutos 0.8 · 2026-10-02 (T-021, katselmointi UX-004): Koodarin toteutuksessa lisäämät tokenit kirjattu lukuun 3 (3.1–3.3), 7.4/7.5-ristiriita kortin nimen koosta ratkaistu (1.25rem, `--font-size-card-name`), omistetun rivin kisko 4 px molemmissa asetteluissa (7.5), 7.9:n kohta 9 päivitetty (literaalit ovat nyt tokeneita) ja uusi 7.12 (katselmoinnin havainnot ja suositukset).
+> Muutos 0.11 · 2026-10-19 (T-181 paketti 1, D-038): luku 3 kirjoitettu uudelleen design-järjestelmäksi "Night City HUD": pintatasot, hiusviivat, kaksi kontrollikokoa (R1), typografia-asteikko (R2), uudet komponentit (`.button-quiet`, `.icon-button`, `.segmented--sm`, `.object`, avoin `.panel`), tiivistetty yläpalkki (R4), `src/styles/`-tiedostot ja päivitetty sticky-sääntö (R8).
 > Tämä oli alun perin minimitason design-järjestelmä, joka riittää MVP-0:aan. MVP-1 laajentaa sitä (lomakkeet, navigaatio, haku, kokoelman merkintä). Määrittely ei sido kehykseen: tokenit ovat CSS-muuttujia, ja rakenne kuvataan semanttisena HTML:nä.
 
 ---
@@ -30,62 +31,67 @@
 - Lukumäärät taivutetaan: "1 kortti", "2 korttia", "0 korttia".
 - Laajempi sanasto ja kielitaso kuuluvat Sisällöntuottajalle (`docs/CONTENT.md`, kun se luodaan).
 
-## 3. Design-tokenit
+## 3. Design-järjestelmä
 
-> **Päivitetty 2026-10-02 (T-021, D-010, D-011; versio 0.7).** Luvun 3 tokenit ja komponentit on uusittu Cyberpunk 2077 -henkiseen ilmeeseen. Sovelluksessa on **sekä vaalea että tumma teema**, ja ne seuraavat `prefers-color-scheme`-asetusta kuten ennenkin. Perustelut, tutkimus, kontrastilaskelmat ja komponenttien visuaaliset yksityiskohdat ovat luvussa 7. Kun lukujen 4–6 tekstit mainitsevat värin, reunan tai painikkeen ulkoasun, voimassa ovat tämän luvun ja luvun 7 arvot. Lukujen 4–6 toiminta, rakenne, tekstit ja saavutettavuusvaatimukset eivät muutu.
+> **Päivitetty 2026-10-19 (T-181 paketti 1, D-038).** Luku kuvaa nykyisen design-järjestelmän "Night City HUD": tumma lasi, ohuet neonviivat ja staattinen syvyys. Pinnat ovat litteitä ja kerroksellisia, reunat hiusviivoja, ja korostus on aina osion väri. Laatikko on vain objektilla (kortti, pakka, dialogi). Osiot ovat avoimia, ja ne jäsennetään otsikkoviivalla. Kulmat viistetään (oikea alakulma, isoissa pinnoissa myös vasen yläkulma). Kaikki on staattista: ainoa liike on toiminnallinen palaute (≤ 150 ms) ja nykyinen kerran ajettava glitch. Suunnitelma ja perustelut: `docs/reports/UX-T181-kokonaiskatselmointi.md` luku A. Edelliset arvot (T-021, T-118) ovat gitin historiassa. Luvun 7 tunnelma, kontrastiperiaatteet ja glitch ovat edelleen voimassa, mutta tämän luvun arvot ovat ensisijaisia.
 
-Tokenit määritellään CSS-muuttujina `:root`-tasolla. ~~Vaalea teema on oletus, ja tumma teema otetaan käyttöön `@media (prefers-color-scheme: dark)` -kyselyllä. Erillistä teemavalitsinta ei ole. `color-scheme: light dark` asetetaan `:root`iin.~~ → 2026-10-02 (T-025, D-012, luku 8): **tumma teema on oletus** laitteen asetuksesta riippumatta, ja vaalea otetaan käyttöön `:root[data-theme='light']`-valitsimella, kun käyttäjä valitsee sen teemapainikkeella. `prefers-color-scheme`-kyselyä ei käytetä. `color-scheme` (`dark` tai `light`) asetetaan teeman mukana, jotta selaimen omat osat (vierityspalkit, lomakekentät) seuraavat teemaa. Taulukon arvot ovat ennallaan. Teemakohtaiset arvot ovat vain tässä taulukossa, ja komponenttityylit käyttävät pelkästään tokeneita, joten komponentteihin ei tarvita erillisiä teemasääntöjä.
+Tokenit ovat CSS-muuttujia `src/styles.css`:n `:root`issa. **Tumma teema on oletus** (D-012), ja vaalea otetaan käyttöön `:root[data-theme='light']`-valitsimella teemapainikkeesta (luku 8). `prefers-color-scheme`-kyselyä ei käytetä. Komponentit käyttävät vain tokeneita, joten niille ei tarvita teemakohtaisia sääntöjä. **Vanhat token-nimet ovat uusien aliaksia** (esim. `--color-surface` = `--surface-1`), joten vanha koodi toimii.
+
+**Tyylitiedostot (T-181):** `src/styles.css` sisältää tokenit ja peruskomponentit. Näkymäkohtaiset uudet säännöt kirjoitetaan omaan tiedostoonsa `src/styles/` (`cards.css`, `collection.css`, `decks.css`, `editor.css`, `playtest.css`, `havewant.css`, `proxy.css`, `premium.css`). Ne tuodaan `main.tsx`:ssä `styles.css`:n jälkeen tässä järjestyksessä, joten ne voittavat saman tarkkuuden vanhat säännöt.
 
 ### 3.1 Värit
 
-Kontrastit on laskettu WCAG 2.x -kaavalla 2026-10-02. Täydellinen parikohtainen taulukko (myös hover, fokus ja valittu, molemmat teemat): 7.6.
+**Pinnat: neljä tasoa ja hover.** Taso nousee = vaaleampi (tumma teema) tai valkoisempi (vaalea teema).
 
-| Token | Vaalea | Tumma | Käyttö |
+| Token | Tumma | Vaalea | Käyttö |
 |---|---|---|---|
-| `--color-bg` | `#f3f0e6` | `#0b0c10` | Sivun tausta (vaalea: kermanvalkoinen "paperi") |
-| `--color-surface` | `#ebe7d9` | `#13151b` | Paneelit (hakulomake, selainmuistutus, tyhjä tila), taulukon otsikkorivi |
-| `--color-surface-raised` | `#fbf9f1` | `#1b1e27` | Kentät, valintaruudut ja chipit, toissijaisen painikkeen täyttö, rivin hover |
-| `--color-surface-hover` | `#ddd8c6` | `#262a36` | Hover-tausta toissijaisille painikkeille ja valinnoille, käytöstä poistetun + -painikkeen raidoitus |
-| `--color-text` | `#0e0f14` | `#f1f1ec` | Leipäteksti, otsikot |
-| `--color-text-muted` | `#4a4f5c` | `#a9afbd` | Toissijainen teksti (alaotsikko, ohje, alatunniste, taulukon otsikot) |
-| `--color-border` | `#cfc9b5` | `#2b303b` | Koristeelliset erottimet (rivien viivat, paneelin reuna). Ei informatiivinen. |
-| `--color-border-strong` | `#5f6676` | `#7b8396` | Reunat, jotka rajaavat käyttöliittymäkomponentin (kentät, valintaruudut, toissijainen painike) |
-| `--color-accent` | `#fcee09` | `#fcee09` | Täyttöväri: ensisijaisen painikkeen ja + -painikkeen tausta, valitun valintaruudun tausta. **Ei koskaan tekstinä eikä ohuena viivana vaalealla taustalla** (kontrasti 1.06 : 1). |
-| `--color-on-accent` | `#0e0f14` | `#0b0c10` | Teksti ja ruksi keltaisen täytön päällä |
-| `--color-accent-edge` | `#0e0f14` | `#fcee09` | Keltaisen täytön reuna (painikkeet, valittu valintaruutu), omistetun rivin kisko, taulukon otsikkorivin yläviiva, alatunnisteen viiva. Vaalealla musta, jotta keltainen täyttö rajautuu (16.79 : 1). Tummalla sama kuin täyttö. |
-| `--color-accent-2` | `#1fe0ff` | `#1fe0ff` | Hover-täyttö ensisijaiselle painikkeelle (musta tai tumma teksti päällä, 12.0 : 1). Ei tekstinä vaalealla. |
-| `--color-info` | `#005f73` | `#1fe0ff` | Tieto, fokus ja hover-reunat: kokoelman yhteenveto, hover- ja valintareunat, selainmuistutuksen kisko, latauspalkki, toissijaisen painikkeen hover-reuna |
-| `--color-focus` | `= --color-info` | `= --color-info` | Fokusrengas |
-| `--color-selected-surface` | `#d4f3f8` | `#0c2a31` | Valitun suodatinvalinnan tausta |
-| `--color-danger` | `#b00030` | `#ff5a73` | Virheilmoituksen reuna, raidoitus ja otsikko |
-| `--color-danger-surface` | `#ffe3e8` | `#2a0d15` | Virheilmoituksen tausta |
-| `--color-warning` | `#8a4b00` | `#ffa726` | Varoituksen reuna, raidoitus ja otsikko |
-| `--color-warning-surface` | `#fff0d0` | `#2b1a05` | Varoituksen tausta |
-| `--color-header-bg` | `#0e0f14` | `#000000` | Otsikkopalkin tausta (musta kummassakin teemassa) |
-| `--color-header-text` | `#f1f1ec` | `#f1f1ec` | Otsikkopalkin teksti |
-| `--color-bracket` | `#0e0f14` | `#fcee09` | Paneelin HUD-kulmasulut |
-| `--color-count` | `#0e0f14` | `#fcee09` | Määrälukema korttirivillä |
-| `--color-owned` | `rgba(252,238,9,.30)` | `rgba(252,238,9,.05)` | Omistetun rivin tausta |
-| `--color-owned-hover` | `rgba(252,238,9,.45)` | `rgba(252,238,9,.09)` | Omistetun rivin tausta hoverissa tai fokuksessa |
-| `--color-swatch-edge` | `#0e0f14` | `transparent` | Korttivärin näytteen 1 px:n reuna (vaalealla, jotta vaaleat värit erottuvat) |
-| `--color-brand-yellow` | `#fcee09` | `#fcee09` | Koriste kummassakin teemassa: otsikkopalkin viiva ja merkki, alatunnisteen ja h1:n viivan keltainen osa. Ei tekstiä eikä tiedon kantajaa. (Koodari lisäsi, T-021.) |
-| `--color-glitch-a`, `--color-glitch-b` | `#ff2a6d`, `#1fe0ff` | `#ff2a6d`, `#1fe0ff` | Otsikon glitchin kaksi tilapäistä varjoväriä (7.7). Vain `no-preference`-tilassa, 0,4 s. |
-| `--heading-bar` | `linear-gradient(90deg, var(--color-text) 0 65%, var(--color-brand-yellow) 65%)` | `var(--color-brand-yellow)` | h1:n alaviiva (koriste) |
-| `--glow-accent` | `none` | `0 0 .75rem rgba(252,238,9,.35)` | Hehku h1:n alaviivassa (vain tumma) |
-| `--page-glow-a` | `rgba(31,224,255,.16)` | `rgba(31,224,255,.10)` | Taustan syaanihehku oikeassa yläkulmassa |
-| `--page-glow-b` | `rgba(252,238,9,.22)` | `rgba(252,238,9,.06)` | Taustan keltainen hehku vasemmassa yläkulmassa |
-| `--scanline` | `rgba(0,0,0,.03)` | `rgba(255,255,255,.022)` | Taustan vaakaviivapinta |
+| `--color-bg` | `#090a0e` | `#efece3` | Sivun tausta, toissijaisen painikkeen "lasi", segmentin tausta |
+| `--surface-1` (alias `--color-surface`) | `#0f1117` | `#f6f4ee` | Avoin osio, sivupalkki |
+| `--surface-2` (alias `--color-surface-raised`) | `#151821` | `#fffefb` | Objekti: korttiruutu, pakkakortti, kenttä, tyhjä tila |
+| `--surface-3` | `#1c202b` | `#ffffff` | Dialogi, valikko, popover |
+| `--surface-hover` (alias `--color-surface-hover`) | `#232836` | `#ebe7db` | Hover-tausta |
+
+**Viivat** piirretään tekstin väristä, eikä niillä ole omaa harmaata.
+
+| Token | Tumma | Vaalea | Käyttö |
+|---|---|---|---|
+| `--line` (alias `--color-border`) | `rgb(241 241 236 / .09)` | `rgb(14 15 20 / .10)` | Koristeelliset erottimet: rivit, osion otsikkoviiva, objektin hiusviiva |
+| `--line-strong` | `rgb(241 241 236 / .22)` | `rgb(14 15 20 / .24)` | Toissijaisen painikkeen ja chipin reuna, segmentin erotin |
+| `--line-accent` | osioväri 70 % | sama | Hover-reuna (painike, kenttä, chip) |
+| `--color-border-strong` | `#6f778a` | `#5f6676` | Kenttien, segmenttien ja laskurien reuna: 3 : 1 komponentin rajaukselle (WCAG 1.4.11) |
+
+**Teksti**
+
+| Token | Tumma | Vaalea | Käyttö |
+|---|---|---|---|
+| `--color-text` | `#f1f1ec` | `#0e0f14` | Leipäteksti ja otsikot |
+| `--color-text-muted` | `#a3aab9` (7.9 : 1 surface-2:lla) | `#474c58` (8.6 : 1) | Labelit, ohjeet, alanimet, tilarivit, taulukon otsikot |
+| `--color-text-faint` | `#7d8597` (4.7 : 1 bg:llä) | `#5d6270` (5.2 : 1) | Vain koriste- ja metateksti |
+
+**Aksentti ja merkitysvärit** ovat ennallaan (T-021, T-142): `--color-accent` (keltainen), `--color-on-accent`, `--color-accent-edge`, `--color-accent-2`, `--color-info`, `--color-focus`, `--color-danger(-surface)`, `--color-warning(-surface)`, `--color-success`, otsikkopalkin `--color-header-bg` ja `--color-header-text` (musta palkki kummassakin teemassa) sekä koristevärit `--color-brand-yellow` ja `--color-glitch-a/b`.
+
+**Osion väri (T-142, T-144):** jokaisella osiolla on yksi aksentti `--section-accent` (Kortit keltainen, Kokoelma vihreä, Pakat punainen, Have/Want sininen, Proxy neutraali). Se tekee kaiken korostustyön: h1:n palkki, nykyinen navigaatiolinkki, valinnan sävy ja alapalkki, ensisijainen painike, hover-reunat, osion otsikkoviivan neonsegmentti ja dialogin yläviiva. Lisäksi käytetään vain merkitysvärejä (vihreä = laillinen tai valmis, oranssi = puuttuu, punainen = virhe) ja pelin korttivärejä.
+
+**Syvyys ja tausta**
+
+| Token | Tumma | Vaalea | Käyttö |
+|---|---|---|---|
+| `--shadow-object` | yläreunan valo + pehmeä pudotusvarjo | 1–2 px:n varjo + pudotus | Objekti. Huom.: `clip-path` leikkaa ulkovarjon, joten viistetyssä objektissa näkyy vain sisäosa. |
+| `--shadow-pop` | syvä varjo | kevyempi | Dialogi, valikko |
+| `--glow-select` | 1 px aksenttireuna + hehku | 2 px reuna, ei hehkua | Valittu objekti (esim. korttiruutu) |
+| `--grid-line` | `rgb(255 255 255 / .018)` | `rgb(14 15 20 / .035)` | Taustan staattinen 2rem:n HUD-ruudukko |
+| `--page-glow-a/b`, `--scanline` | ennallaan | ennallaan | Taustan kaksi valoläikkää ja vaakaviivat |
+
+Tausta (`body`) on vain taustakuvia: kaksi valoläikkää, HUD-ruudukko ja scanlinet, `background-attachment: fixed`. Mitään ei piirretä tekstin päälle. `forced-colors`-tilassa taustakuvat poistetaan.
 
 Säännöt:
-- Tieto ei välity pelkällä värillä. Virhe- ja varoituslaatikoissa on aina otsikko tekstinä, omistettu kortti näkyy määränä ("2") ja valittu valinta ruksina. Raidoitus, kisko, hehku ja kulmasulut ovat koristeita.
-- Keltainen on **täyttöväri** ("toiminto tai valittu"), syaani tai tummansyaani (`--color-info`) "tieto, fokus ja hover", punainen "virhe". Väreille ei anneta muita merkityksiä. Vaalealla teemalla keltainen täyttö on aina mustalla reunalla (`--color-accent-edge`), ja keltaista tekstiä ei ole.
-- Otsikkopalkki on musta kummassakin teemassa (pelin musta HUD-kehys vaalean "paperin" päällä).
+- Tieto ei välity pelkällä värillä. Valittu chip näyttää ruksin, valittu segmentti alapalkin, virheessä on otsikko tekstinä.
+- Keltainen on täyttöväri: vaalealla teemalla keltaista tekstiä tai ohutta keltaista viivaa ei ole, ja keltainen täyttö on aina mustalla reunalla (`--color-accent-edge`).
 - Uusi väri lisätään tänne tokeniksi kontrastilaskelman kanssa ennen käyttöä.
-- ~~Tokenit `--color-accent: #a3004f / #ff6bb0` ja muut vanhat arvot~~ → korvattu 2026-10-02 (D-010).
 
 #### 3.1.1 Korttien värit (T-010, päivitetty T-021)
 
-Pelin neljä väriä (rajapinnan `color`, katso 5.2). Niitä käytetään **vain** koristeellisessa värinäytteessä (`.color-swatch`), joka on aina värin nimen vieressä ja `aria-hidden="true"`. Tieto välittyy tekstinä. Näytteen muoto on viistetty neliö (`clip-path`, 7.3) ja 1 px:n reuna `--color-swatch-edge`.
+Pelin neljä väriä (rajapinnan `color`, katso 5.2). Niitä käytetään koristeellisessa värinäytteessä (`.color-swatch`), joka on aina värin nimen vieressä ja `aria-hidden="true"`, sekä osion aksenttina (T-142). Tieto välittyy tekstinä. Näytteen muoto on viistetty neliö ja 1 px:n reuna `--color-swatch-edge`.
 
 | Token | Vaalea | Tumma | Kontrasti `--color-bg`-taustaa vasten (vaalea / tumma), tiedoksi |
 |---|---|---|---|
@@ -97,129 +103,118 @@ Pelin neljä väriä (rajapinnan `color`, katso 5.2). Niitä käytetään **vain
 
 Näitä tokeneita ei käytetä tekstin värinä eikä tekstin taustana.
 
-### 3.2 Typografia
+### 3.2 Typografia (R2)
 
-Fontti on Rajdhani (D-011), joka on kapea ja pienikokoisen näköinen. Siksi kaikki koot on nostettu ja leipätekstin paino on 500 (7.4).
+Fontit ovat Rajdhani (500 ja 700) ja Share Tech Mono (400), itse isännöityinä (D-011, 7.4). **Leipäteksti on vähintään 16 px, versaalilabelit ja mono-lukemat 14 px ja tagit 12 px** (D-038 R2).
+
+| Rooli | Token | Arvo | Muuta |
+|---|---|---|---|
+| h1 (sivun otsikko) | `--font-size-display` (alias `--font-size-xl`) | 2rem / 700, `.08em`, versaali | Alle 40rem: 1.625rem. Alla 2.5rem × 3 px:n palkki osion värissä. Glitch säilyy (7.7). |
+| h2 (osion otsikko) | `--font-size-lg` | 1.25rem / 700, `--letter-spacing-h2` `.06em`, versaali | |
+| Label: h3, legend, kentän label, taulukon otsikko, `.panel-title` | `--font-size-label` | 0.875rem / 700, `--letter-spacing-label` `.12em`, versaali | Labelit, legendit, taulukon otsikot ja `.panel-title` `--color-text-muted`. |
+| Leipäteksti | `--font-size-base` | 1.125rem / 500 | |
+| Ohje, alanimi, kenttien teksti | `--font-size-sm` | 1rem / 500 | Kentissä ≥ 16 px estää iOS:n zoomin. |
+| Painike, segmentti, navigaatio | `--font-size-control` | 1rem / 700, `--letter-spacing-button` `.08em`, versaali | |
+| Mono-lukema (määrät, tilarivi) | `--font-mono` | 0.875–1rem, `tabular-nums`, `.02em` | Isot luvut (tilastot) 1.75rem. |
+| Tagi, merkki | `--font-size-tag` | 0.75rem | Vain lyhyet tunnisteet (esim. Proxy-määrä navissa). |
+
+- Kaikki koot ovat `rem`-yksiköissä, jotta selaimen tekstikoko toimii.
+- Versaalit vain lyhyissä teksteissä (otsikot, labelit, painikkeet, navigaatio). Leipäteksti, ohjeet, kortin nimet ja alanimet ovat sekakirjaimisia. Versaalit tehdään CSS:llä.
+- Tekstin välistyksen muutokset (WCAG 1.4.12) eivät saa katkaista tekstiä: tekstiä sisältävillä elementeillä ei ole kiinteitä korkeuksia eikä `overflow: hidden` -sääntöä.
+
+### 3.3 Välistys, muodot ja koot
 
 | Token | Arvo | Käyttö |
 |---|---|---|
-| `--font-sans` | `'Rajdhani', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif` | Kaikki teksti: otsikot, leipäteksti, painikkeet, taulukko. Rajdhani isännöidään itse (7.4). |
-| `--font-mono` | `'Share Tech Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace` | Luvut ja koneluonteinen tieto: tilarivit ("151 korttia"), hinta, määrälukema, alatunnisteen lähdemaininta. Ei pitkiä lauseita. |
-| `--font-size-base` | `1.125rem` (18 px) | Leipäteksti, taulukko, kentät (~~1rem~~ → 1.125rem) |
-| `--font-size-sm` | `1rem` (16 px) | Alaotsikko (subname), ohjetekstit, labelit, alatunniste, taulukon otsikot. **Ei pienempää tekstiä.** (~~0.875rem~~ → 1rem) |
-| `--font-size-lg` | `1.375rem` | Sovelluksen nimi, h2, + ja − -merkit (~~1.25rem~~) |
-| `--font-size-xl` | `2.25rem` | h1 (~~1.75rem~~) |
-| `--font-size-card-name` | `1.25rem` | Kortin nimi taulukossa ja korttirivillä (ratkaisu 7.4/7.5-ristiriitaan: 7.4:n arvo on voimassa) |
-| `--line-height-body` | `1.5` | Leipäteksti |
-| `--line-height-heading` | `1.15` | Otsikot |
-| `--line-height-tight` | `1.2` | Painikkeet ja kortin nimi (useampirivinen teksti, joka ei saa aueta liikaa) |
-| `--letter-spacing-body` | `0.01em` | Leipäteksti (Rajdhanin tiivis kirjainväli avataan hieman) |
-| `--letter-spacing-caps` | `0.08em` | Versaalit otsikot (h1), labelit ja legendit |
-| `--letter-spacing-button` | `0.06em` | Painikkeet |
-| `--letter-spacing-table-head` | `0.1em` | Taulukon otsikkorivi |
-| `--letter-spacing-h2` | `0.05em` | h2 (ilmoituslaatikoiden otsikot) |
-| `--letter-spacing-brand` | `0.2em` | Sovelluksen nimi otsikkopalkissa |
-| `--font-weight-normal` | `500` | Leipäteksti (Rajdhani Medium). ~~400~~: Regular on pienikokoisena liian ohut. Share Tech Mono: 400 (ainoa paino). |
-| `--font-weight-bold` | `700` | Otsikot, kortin nimi, painikkeet, labelit |
-| `--font-weight-mono` | `400` | Share Tech Mono (ainoa paino) |
+| `--space-0` … `--space-10` | 2 px, 4, 8, 12, 16, 20, 24, 32, 40 px (`--space-0, 1, 2, 3, 4, 5, 6, 8, 10`) | 4 px:n asteikko |
+| `--gap-section` | `--space-6` | Osioiden väli sivulla |
+| `--gap-stack` | `--space-3` | Osion sisäinen väli |
+| `--pad-object` | `--space-3` | Objektin sisäväli |
+| `--pad-dialog` | `--space-5` | Dialogin sisäväli |
+| `--control-h` | 2.5rem (40 px), kosketuksella 2.75rem (44 px) | Painikkeet, kentät, segmentit, navigaatio (R1) |
+| `--control-h-sm` | 2rem (32 px), kosketuksella `--target-min` | Laskurit, chipit, rivien toiminnot, `.segmented--sm`, `.button--sm` |
+| `--target-min` | 2.5rem, kosketuksella 2.75rem | Vähimmäiskohde (sama kuin `--control-h`) |
+| `--cut` | 0.5rem | Painikkeen, kentän ja segmentin viiste (oikea alakulma) |
+| `--cut-sm` | 0.3125rem | Chip, laskuri (`--shape-chamfer-sm`) |
+| `--cut-lg` | 0.875rem | Objekti: kaksi viistettyä kulmaa (`--shape-object`, vasen ylä ja oikea ala) |
+| `--shape-chamfer`, `-inner`, `-inner-2` | monikulmiot | Ulko- ja sisämuoto (reuna ja täyttö -tekniikka) |
+| `--focus-ring`, `--focus-offset` | `3px solid var(--color-focus)`, 3 px | Fokus |
+| `--ease`, `--ease-lift` | 0.12 s ja 0.15 s, `cubic-bezier(.2,.7,.2,1)` | Vain toiminnalliset siirtymät |
+| `--gutter` | `clamp(1rem, 2vw, 3rem)` | Sivun reunaväli |
+| `--page-max-width`, `--prose-max-width` | 160rem, 44rem | Sisältö käyttää näytön leveyden; vain juokseva teksti on kapea (`.prose`, `.notice`, `.empty`) |
 
-- Kaikki koot `rem`-yksiköissä, jotta selaimen tekstikokoasetus toimii. `html`-elementin fonttikokoa ei lukita pikseleihin.
-- **Versaalit (`text-transform: uppercase`) vain lyhyissä teksteissä:** h1, h2, painikkeet, kenttien labelit ja legendit, taulukon otsikot, sovelluksen nimi. Leipäteksti, ohjeet, ilmoitusten tekstit, kortin nimet ja alaotsikot pysyvät sekakirjaimisina. Versaalit tehdään CSS:llä, jolloin ruudunlukija lukee tekstin normaalisti.
-- Numerot: hinta, määrälukema ja tilarivit Share Tech Mono -fontilla (kiinteä leveys, `tabular-nums`), jotta sarake tasautuu. Perustelu: 7.4.
-- Tekstin välistyksen muutokset (WCAG 1.4.12) eivät saa katkaista tekstiä: ei kiinteitä korkeuksia tekstiä sisältäville elementeille, ei `overflow: hidden` tekstissä.
-- `font-display: swap`. Varafontit ovat järjestelmäfontteja, joten sisältö on luettavissa ennen fonttien latautumista.
-
-### 3.3 Välistys, muodot ja asettelu
-
-| Token | Arvo |
-|---|---|
-| `--space-1` … `--space-8` | ennallaan: `0.25rem`, `0.5rem`, `0.75rem`, `1rem`, `1.5rem`, `2rem` (4, 8, 12, 16, 24, 32 px) |
-| `--content-max-width` | ~~`48rem`~~ → `56rem` (nelisarakkeinen taulukko ja hakupaneeli ovat väljemmät) |
-| `--radius` | ~~`0.375rem`~~ → ei käytössä. Kulmat ovat suorat tai viistetyt (`--cut`). |
-| `--cut` | `0.625rem` (10 px). Viistetyn kulman koko. Määräpainikkeilla `0.5rem`. |
-| `--cut-inner`, `--cut-inner-2` | `calc(var(--cut) - 1px)` ja `calc(var(--cut) - 2px)`: sisäkerroksen viiste 1 px:n (toissijainen) ja 2 px:n (ensisijainen) reunalle |
-| `--shape-chamfer` | `polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%)` |
-| `--shape-chamfer-inner`, `--shape-chamfer-inner-2` | sama monikulmio, mutta `--cut` korvattu `--cut-inner`- tai `--cut-inner-2`-arvolla |
-| `--shape-swatch` | `polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%)`: korttivärin näytteen muoto |
-| `--shape-brand` | `polygon(0 0, 100% 0, 100% 55%, 55% 100%, 0 100%)`: otsikkopalkin merkin muoto |
-| Huom. `.step` | Määräpainikkeiden `--cut: 0.5rem` ei muuta `--shape-*`-arvoja, koska ne lasketaan `:root`issa. Siksi `.step` määrittelee `--shape-chamfer`-muuttujat uudelleen itse (mallisivun virhe, korjattu toteutuksessa). |
-| `--focus-ring` | `3px solid var(--color-focus)` |
-| `--focus-offset` | `3px` |
-| `--target-min` | `2.75rem` (44 px) |
-| `--ease` | `0.12s ease-out`. Siirtymä värimuutoksille, vain `prefers-reduced-motion: no-preference` -tilassa. |
-
-- Sivun reunaväli (gutter): `--space-4` alle 40 rem:n leveydellä, `--space-6` siitä ylöspäin.
-- Sisältö keskitetään ja rajataan leveyteen `--content-max-width`.
-- Breakpoint: yksi, `40rem` (640 px), kuten ennenkin. Mediakyselyt `rem`-yksiköissä.
+Kosketuslaitteella (`@media (pointer: coarse)`) `--control-h` ja `--target-min` ovat 44 px (T-118-linja), joten kosketuskohde ei pienene.
 
 ### 3.4 Komponentit
 
-Komponenttien toiminta ja rakenne ovat ennallaan. Tässä on ulkoasun muutos. Visuaaliset yksityiskohdat: 7.5. Referenssitoteutus kummallekin teemalle: `docs/design/t021-mallisivu.html`.
+Uusi näkymä käyttää näitä luokkia, ei omaa tyyliä.
 
-**Painike (ensisijainen)**
-- Rakenne: painikkeen oma tausta on **reuna** (`--color-accent-edge`) ja `::before`-pseudoelementti (`inset: 2px`, `z-index: -1`, `isolation: isolate` painikkeessa) on **täyttö** (`--color-accent`), jolla on sisempi viistetty muoto (`--shape-chamfer-inner-2`). Tummalla teemalla reuna ja täyttö ovat samaa keltaista, vaalealla reuna on musta ja täyttö keltainen.
-- Teksti `--color-on-accent`, lihavoitu, versaalit, painikkeen ulkomuoto viistetty oikea alakulma (`clip-path: var(--shape-chamfer)`).
-- Vähimmäiskorkeus ja -leveys `--target-min`, sisäväli `--space-2` `--space-4`.
-- Hover: täyttö `--color-accent-2` **ja** `text-decoration: underline` (ei pelkkää värimuutosta). Aktiivinen (painettu): siirtyy 1 px alas.
-- Fokus: `:focus-visible` poistaa ulkomuodon viistoleikkauksen (`clip-path: none`) ja piirtää fokusrenkaan (`outline: var(--focus-ring); outline-offset: var(--focus-offset)`). Syy: `clip-path` leikkaisi renkaan.
-- Aina `<button type="button">`, ei `div` tai linkki. Ei pyöristystä.
+**Painikkeet** (`.button-primary`, `.button-secondary`, `.button-danger`, `.button-quiet`, `.icon-button`)
+- Yhteistä: korkeus `--control-h`, sisäväli `0 --space-4`, 1rem / 700 versaali `.08em`, `gap: --space-2`, viistetty oikea alakulma. Rakenne: elementin tausta on **reuna**, `::before` (`inset` 1 tai 2 px, sisempi viiste) on **täyttö**.
+- **Ensisijainen:** täysi osioväri. Hover: kirkkaampi täyttö (`--color-accent-hover`), 2 px:n tummempi alapalkki ja 1 px:n nosto. Painettu: 1 px alas ja tummempi täyttö.
+- **Toissijainen:** "lasi" (`--color-bg`) ja hiusviivareuna `--line-strong`. Hover: reuna `--line-accent`, täyttö `--surface-hover` ja 1 px:n nosto. Ei alleviivausta.
+- **Vaarallinen:** toissijaisen rakenne `--color-danger`-väreillä. Hover: punainen täyttö ja nosto.
+- **Hiljainen työkalupainike** `.button-quiet` (uusi): ei reunaa, ikoni + teksti. Työkaluriveille (Galleria, Skannaa, Merkitse). Hover: `--surface-hover` ja 2 px:n osiovärinen alapalkki; `aria-pressed="true"` pitää palkin.
+- **Ikonipainike** `.icon-button`: neliö `--control-h`, ei reunaa, hover `--surface-hover`. Dialogin sulje-painike `.dialog-close` on neliö samassa koossa.
+- **Koot:** `.button--sm` (32 px, 14 px teksti; kosketuksella 44 px) rivien toimintoihin. `.button-compact` on kapeampi sisäväli.
+- Fokus: `:focus-visible` poistaa viisteen (`clip-path: none`) ja piirtää renkaan, koska `clip-path` leikkaisi sen.
 
-**Painike (toissijainen)** (`.button-secondary`, myös − -painike `.step-minus`): reuna `--color-border-strong` (painikkeen tausta) ja täyttö `--color-surface-raised` (`::before`, `inset: 1px`, `--shape-chamfer-inner`). Teksti `--color-text`. Hover: reuna `--color-info`, täyttö `--color-surface-hover` ja alleviivaus. Fokus kuten ensisijaisella.
+**Kentät** (`input[type=search|text|email|url|date]`, `select`, `textarea`): perustyyli `:where()`-valitsimella (ei tarkkuutta, joten paikkakohtaiset tyylit voittavat). Korkeus `--control-h`, sisäväli `0 --space-3`, tausta `--surface-2`, reuna 1 px `--color-border-strong` ja alareuna `--color-text-muted`, teksti 1rem, viiste. Hover: reuna `--line-accent`, alareuna osioväri. Fokus: viiste pois, rengas (`outline-offset: 2px`) ja osiovärinen alareuna. Näkyvä label kentän yläpuolella (labeltyyli); hakukentässä label on visuaalisesti piilotettu ja placeholder "Hae nimellä…" (T-118, UX-118-29).
 
-**Ilmoituslaatikko (virhe / varoitus)**
-- Tausta `--color-danger-surface` tai `--color-warning-surface`. 1 px:n reuna ja 4 px:n vasen reuna `--color-danger` tai `--color-warning`. Yläreunassa 6 px:n vinoraidoitus (`repeating-linear-gradient(135deg, …)`), koristeena.
-- Otsikko (h2) saa saman värin kuin reuna (kontrasti ≥ 5.97 kummassakin teemassa, katso 7.6). Selitys (p) on `--color-text`.
-- Sisältö: otsikko (h2), selitys (p), tarvittaessa painike. Ikonia ei tarvita.
+**Segmentit** (`.segmented` + `.segmented-option`, React `SegmentedChoice`): yhden valinnan ohjain (radio, `aria-pressed` tai `aria-current`). 1 px:n kehys `--color-border-strong`, tausta `--color-bg`, viiste, 1 px:n erottimet `--line-strong`. Valittu: osiovärin 16 %:n sävy ja 2 px:n alapalkki. Hover: `--surface-hover` ja puolivahva alapalkki. Kaksi kokoa: oletus `--control-h` ja `.segmented--sm` (`SegmentedChoice size="sm"`, 32 px, 14 px teksti). Fokusrengas on sisäpuolella (`-4px`), ja kehyksen viiste poistuu fokuksen ajaksi.
+
+**Chipit** (`.option`, suodatinvalinnat): natiivi checkbox säilyy, ja se näkyy 16 px:n ruutuna chipin vasemmassa reunassa. Korkeus `--control-h-sm` (kosketuksella 44 px), hiusviivareuna, läpinäkyvä tausta, pieni viiste. Valittu: osiovärin 14 %:n sävy, osiovärinen reuna ja ruksi ruudussa (tila ei ole pelkkä väri). Hover: `--line-accent` ja `--surface-hover`.
+
+**Osio** (`.panel` + `.panel-title`): avoin osio ilman taustaa ja reunaa. Otsikko on label, ja sen alla kulkee hiusviiva, jonka vasemmassa päässä on 2.5rem:n neonsegmentti osion värissä. Väli `--gap-stack`.
+
+**Objekti** (`.object`): ainoa laatikko (kortti, pakka, tilastolaatta, saavutus). `--surface-2`, hiusviiva, yläreunan valo ja kaksi viistettyä kulmaa (`--shape-object`), sisäväli `--pad-object`.
+
+**Dialogit** (`.card-dialog-body`, `.confirm-dialog-body`, `.test-hand-body`): `--surface-3`, hiusviivareuna `--line-strong`, 2 px:n neonyläviiva osion värissä ja `--shadow-pop`. Laatikkoa ei viistetä, koska `clip-path` leikkaisi varjon ja laatikosta ulottuvat popoverit. Tausta (`::backdrop`) on `rgb(5 6 9 / .72)` ja staattinen `blur(3px)`. Otsikkorivi `.dialog-head`: otsikko vasemmalla, sulje-painike oikealla. Dialogikerros vierii kokonaisuutena, eikä laatikossa ole omaa vieritystä (T-080).
+
+**Taulukot:** perustyyli `:where()`-valitsimella: otsikkorivi on label-tyyliä (`--color-text-muted`), rivien erotin `--line`. Näkymän oma taulukkotyyli voittaa.
+
+**Ilmoitus** (`.notice`, `.notice-warning`): sävyn tausta, 1 px:n sävyreuna, 3 px:n vasen kisko ja yläreunan vinoraidoitus (koriste). Otsikko (h2) on label-kokoinen ja sävyn värinen.
+
+**Tyhjä tila** (`.empty`): objekti (`--surface-2`, viisteet, 2 px:n osiovärinen yläviiva), ei katkoviivaa. Otsikko h2, yksi lause ja 1–2 painiketta vasemmalla. Enintään `--prose-max-width`.
+
+**Linkit** (`a` ilman luokkaa, `.text-link`, `.link-button`): aina alleviivattu osiovärillä (vaalealla mustalla), teksti `--color-text`. Hover: teksti saa osion sävyn.
+
+**Apuluokat:** `.label` (14 px versaali-label, muted), `.mono` (mono-lukema, `tabular-nums`), `.status-line` (mono-tilarivi; `.is-summary` 14 px), `.visually-hidden`.
 
 **Fokus yleisesti**
-- Selaimen oletusfokusta ei poisteta ilman korvaavaa `--focus-ring`-tyyliä.
-- Fokusrengas on `--color-focus` (tumma teema syaani `#1fe0ff`, vaalea tummansyaani `#005f73`). Se piirretään elementin ulkopuolelle `--focus-offset`-välillä, joten sitä vasten ei tarvita kontrastia painikkeen väriin. Rengas erottuu taustasta ≥ 5.1 : 1 (7.6).
-- Mikään kiinnitetty (sticky) elementti ei saa peittää fokusoitua elementtiä (2.4.11). Sticky-elementtejä ei käytetä.
+- Selaimen oletusfokusta ei poisteta ilman korvaavaa `--focus-ring`-tyyliä. Rengas on `--color-focus` (tumma syaani `#1fe0ff`, vaalea `#005f73`), ≥ 5 : 1 taustaa vasten.
+- **Kiinnitetty (sticky tai fixed) elementti ei saa peittää fokusoitua elementtiä** (WCAG 2.4.11). Sticky-elementtejä käytetään vain alapalkeissa (merkintätila, pakkaeditorin alapalkki), ja niiden alle jätetään sivulle tilaa (D-038 R8). Kiinteää sivupalkkia ei käytetä.
 
-**Tekstikenttä** (T-010)
-- Näkyvä `<label>` kentän yläpuolella (`--font-weight-bold`, versaalit, `--font-size-sm`). Placeholderia ei käytetä labelin tai ohjeen korvikkeena. **Poikkeus (T-118, UX-118-29):** hakukentässä (Kortit, Have/Want, Proxy, pakkaeditori) label on visuaalisesti piilotettu (`.visually-hidden`, ruudunlukija kuulee sen) ja kentässä on placeholder "Hae nimellä…". Muissa kentissä label näkyy aina.
-- Ohjeteksti labelin ja kentän välissä (`--font-size-sm`, `--color-text-muted`), liitetty kenttään `aria-describedby`-attribuutilla.
-- Kenttä: korkeus **tasan** `--target-min` ulkomittana (`block-size`, T-118),  leveys 100 % (enintään `24rem`, kun leveys on ≥ 640 px), tausta `--color-surface-raised`, teksti `--color-text` (paino 500), reuna 1 px `--color-border-strong` ja alareuna 2 px, suorat kulmat, sisäväli `--space-2` `--space-3`, fonttikoko `--font-size-base` (≥ 16 px estää iOS:n automaattisen zoomauksen).
-- Hover: reuna `--color-info`. Fokus: reuna `--color-info` ja `--focus-ring` (`outline-offset: 2px`).
-
-**Valintaruutu ja valintaryhmä** (T-010)
-- Natiivi `<input type="checkbox">` labelin sisällä yhdessä tekstin kanssa, ulkoasu `appearance: none` -tyylillä (7.5). Koko label on klikattava alue: vähintään `--target-min` korkea. Ruudun koko `1.375rem`, 2 px:n reuna `--color-border-strong`, tausta `--color-surface-raised`, suorat kulmat.
-- Valittu tila: tausta `--color-accent`, reuna `--color-accent-edge`, ruksi (`--color-on-accent`) piirretään `input::after`-pseudoelementillä (`clip-path`-monikulmio). Ei kuvia eikä data-URI-resursseja, koska CSP (`default-src 'self'`) estäisi ne. Ruksi on aina näkyvissä, joten tila ei välity pelkällä värillä. Koko label saa samalla `--color-selected-surface`-taustan ja `--color-info`-reunan (`:has(input:checked)`).
-- Label on "chip": 1 px reuna `--color-border-strong`, tausta `--color-surface-raised`, sisäväli `0 --space-3`. Hover: reuna `--color-info`, tausta `--color-surface-hover`, teksti alleviivataan.
-- Fokus: `--focus-ring` ruudussa (`input:focus-visible`, `outline-offset: 2px`). Fokusrengas ei saa leikkautua (ei `overflow: hidden` eikä `clip-path` vanhemmissa).
-- Ryhmä on `<fieldset>`, jonka nimi on `<legend>` (`--font-weight-bold`, versaalit). Fieldsetin oletusreuna poistetaan, ja sisäväli on 0.
-- Vaihtoehdot rivitetään: `display: flex; flex-wrap: wrap; gap: var(--space-2)`.
-
-**Paneeli** (`.panel`, T-118, korvaa kulmasulkupaneelin ja `.stats-card`:in): tausta `--color-surface`, 1 px `--color-border` ja vasemman yläkulman 40 × 2 px keltainen tikku (`::before`). Otsikko `.panel-title` (h2 tai h3, 16 px, versaalit, `--color-text-muted`). Käytössä kokoelman ja pakan tilastokorteissa, tuontilomakkeissa ja vaihtolinkin osioissa. Vasen kisko on vain ilmoituksilla (`.notice`), tilannelaatikolla ja selainmuistutuksella (`.storage-reminder`, 3 px `--color-info`). Tyhjä tila (`.empty`): 1 px katkoviivareuna `--color-border-strong`, tausta `--color-surface`, h2 ja yksi lause, toiminnot vasemmalle (T-118).
-
-**Visuaalisesti piilotettu teksti** (`.visually-hidden`)
-- Ruudunlukijalle tarkoitettu teksti, joka ei näy. Käytetään vakiintunutta clip-toteutusta (ei `display: none` eikä `visibility: hidden`, jotka piilottavat myös ruudunlukijalta).
+**Visuaalisesti piilotettu teksti** (`.visually-hidden`): vakiintunut clip-toteutus (ei `display: none` eikä `visibility: hidden`).
 
 ### 3.5 Liike
 
-- Kaikki liike (animaatiot, siirtymät) on kirjoitettu ehdon `@media (prefers-reduced-motion: no-preference)` sisään. Ilman ehtoa tai `reduce`-tilassa ei ole liikettä. Nykyinen `reduce`-ylikirjoitus (`animation-duration: 0.01ms`, `transition-duration: 0.01ms`) säilytetään turvaverkkona.
-- Sallittu liike on lueteltu 7.7:ssä: otsikon yksi lyhyt glitch sivun avautuessa, ~~latauspalkin pyyhkäisy~~ (poistettu T-026) ja värisiirtymät (0.12 s). Mikään ei vilku yli 3 kertaa sekunnissa.
+- Vain toiminnallinen palaute: hover, press ja focus (värit, varjo, 1 px:n nosto) ≤ 150 ms (`--ease`, `--ease-lift`). **Ei uusia liikkuvia koriste-elementtejä.** Otsikon kerran ajettava glitch säilyy (7.7).
+- Kaikki liike on ehdon `@media (prefers-reduced-motion: no-preference)` sisällä. `reduce`-tilan turvaverkko (`animation-duration` ja `transition-duration` 0.01 ms) säilyy. Mikään ei vilku yli 3 kertaa sekunnissa.
 
-### 3.6 Yhtenäisyysstandardi (T-118)
+### 3.6 Sivun runko ja yhtenäisyys (T-118, T-181)
 
-Koko sivuston UI-yhtenäisyys on kirjattu auditointiraporttiin `docs/reports/UX-118-yhtenaisyys.md` (luku a). Tiivistelmä toteutetuista yhteisistä luokista (`src/styles.css`). Uusi komponentti käyttää näitä, ei omaa tyyliä:
+**Yläpalkki (R4):** musta kummassakin teemassa, ei sticky. Desktopilla (≥ 64rem) yksi 64 px:n rivi: logo, navigaatio ja työkalut (teema, FI, EN, tili 40 px:n ikoneina). Nykyisen sivun linkissä on 2 px:n alapalkki osion värissä. Alle 64rem logo ja työkalut ovat 48 px:n rivillä ja navigaatio sen alla. Puhelimella (alle 40rem) navigaatio on kaksi riviä × 3, rivi 40 px ja teksti 14 px versaalina, joten yläpalkki on noin 128 px.
+
+**Sivu:** `main` `padding-block: --space-5 --space-8`, `gap: --space-5`. **Otsikkorivi `.page-head`** on yhteinen rakenne: h1 vasemmalla ja toiminnot (`.page-head-actions`) oikealla samalla rivillä. Alle 40rem toiminnot ovat h1:n alla. Tilateksti ("151 korttia") on mono-tilarivi h1:n alla, ei erillinen kappale. Sivun yläosassa on enintään yksi tekstirivi ennen sisältöä; muut vihjeet ovat `InfoTip`-vihjeessä.
+
+**Alatunniste:** `margin-block-start: --space-8`, `padding-block: --space-4`, 1 px:n `--line`-yläviiva ja 2.5rem:n aksenttisegmentti. Kaksi tekstiä rinnakkain ≥ 64rem.
 
 | Komponentti | Luokka | Sääntö |
 |---|---|---|
-| Valinta yhdestä (Kuvat/Lista, välilehdet, tilat) | `.segmented` + `.segmented-option` (React: `SegmentedChoice`) | 44 px ulkomitta, 2 px kehys, 18 px lihavoitu, valittu = keltainen täyttö ja musta teksti. Radio, painike (`aria-pressed`) ja linkki (`aria-current`) käyttävät samaa. Yksivalinta on aina tämä, ei valintaruutu-chip. |
-| Vaarallinen toiminto | `.button-danger` | Toissijaisen rakenne `--color-danger`-väreillä. Oletusfokus on Peruuta-painikkeessa. |
-| Tiivis painike | `.button-compact` | 16 px, 44 px korkea. Painikkeissa on vain 18 px tai tämä. |
-| Määrälaskuri | `.step` 44 px, `.step--compact` 32 px | Kaksi kokoa. `.tile-action` ("→ SB") on 32 px ja sama 6 px viiste. |
-| Avattava osio | `.disclosure` | `<details>`, 44 px yhteenveto, versaalit, keltainen kolmio kääntyy auki-tilassa. |
-| Tiedostokenttä | `.file-input` | Natiivi kenttä piilossa, label on toissijainen painike, valitun tiedoston nimi himmeänä. |
-| Linkki | `a` (ilman luokkaa), `.text-link`, `.link-button` | Aina alleviivattu (keltainen viiva tummalla, musta vaaleella), teksti `--color-text`, hover `--color-info`. Ei selaimen sinistä eikä violettia. |
-| Otsikot | h1 36, h2 22, h3 16 px | Kaikki lihavoituja ja versaaleja. Pieni alkukirjain vain kortin nimellä (`.card-name`). |
-| Laskuri ×N | `.stack-card-count`, `.pocket-count` | Keltainen suorakulma kuvan päällä. Listassa pelkkä teksti. Ei pyöristyksiä (poikkeus: (i)-vihje ja kustannuskuvake). |
-| Nuolet | `Chevron` (SVG) | Yksi 2 px viivan nuoli kaikkialla (ei ◀ ▶ ‹ ›). |
+| Valinta yhdestä | `.segmented` (`SegmentedChoice`) | Ks. 3.4. Yksivalinta on aina tämä, ei chip. |
+| Vaarallinen toiminto | `.button-danger` | Oletusfokus Peruuta-painikkeessa. |
+| Määrälaskuri | `.step` (`--control-h`), `.step--compact` 32 px | Kaksi kokoa. `.tile-action` ("→ SB") 32 px. − -painike säilyttää 3 : 1-reunan. |
+| Avattava osio | `.disclosure` | `<details>`, `--control-h`:n yhteenveto, versaalit, kolmio kääntyy. |
+| Tiedostokenttä | `.file-input` | Natiivi kenttä piilossa, label on toissijainen painike. |
+| Laskuri ×N | `.stack-card-count`, `.pocket-count` | Aksenttisuorakulma kuvan päällä. |
+| Nuolet | `Chevron` (SVG) | Yksi 2 px:n viivan nuoli kaikkialla. |
 
-**Mobiilidialogit (T-118, UX-118-14, päätös 2026-10-09):** alle 40 rem leveällä isot dialogit (kortin tiedot, testikäsi, painosvarmistus) ovat koko näytön näkymiä ilman kehystä. Dialogikerros vierii kokonaisuutena kuin sivu, eikä sen sisällä ole omia vieritysalueita. Pienet vahvistukset (pakan poisto, jonon tyhjennys, ensikirjautuminen) pysyvät keskitettyinä laatikkoina. Vahvistusdialogin painikkeet ovat alle 40 rem leveällä täysleveinä pinossa, pääpainike ylhäällä ja Peruuta alimmaisena (DOM-järjestys: Peruuta ensin).
+**Mobiilidialogit (T-118, UX-118-14):** alle 40 rem leveällä isot dialogit (kortin tiedot, testikäsi, painosvarmistus) ovat koko näytön näkymiä. Dialogikerros vierii kokonaisuutena kuin sivu, eikä sen sisällä ole omia vieritysalueita. Pienet vahvistukset pysyvät keskitettyinä laatikkoina, ja niiden painikkeet ovat alle 40 rem leveällä täysleveinä pinossa, pääpainike ylhäällä ja Peruuta alimmaisena (DOM-järjestys: Peruuta ensin).
 
-**Kelluvaa painiketta ei ole (UX-118-09):** Kokoelman skannaus on aina otsikkorivin "Skannaa"-painike (`.button-secondary.scan-open`) kaikilla leveyksillä. Tyhjässä tilassa sen lisäksi on ensisijainen "Skannaa kortteja" -kehotus.
+**Kelluvaa painiketta ei ole (UX-118-09):** Kokoelman skannaus on aina otsikkorivin "Skannaa"-painike kaikilla leveyksillä. Tyhjässä tilassa sen lisäksi on ensisijainen "Skannaa kortteja" -kehotus.
+
+**Ei sisäistä vieritystä eikä vaakaylivuotoa:** vain sivu vierii, ja 320 px:n leveydellä mikään ei levennä sivua.
 
 ---
 

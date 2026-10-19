@@ -5,7 +5,7 @@ describe('goldfish route (T-172)', () => {
   it('parses #/pakat/<id>/goldfish and round-trips', () => {
     expect(parseHash('#/pakat/a/goldfish')).toEqual({ name: 'goldfish', id: 'a' });
     expect(routeHash({ name: 'goldfish', id: 'a' })).toBe('#/pakat/a/goldfish');
-    expect(sectionOf({ name: 'goldfish', id: 'a' })).toBe('decks');
+    expect(sectionOf({ name: 'goldfish', id: 'a' })).toBe('playtest');
   });
 
   it('falls back to the deck list for a bad id or extra parts', () => {
@@ -90,9 +90,10 @@ describe('playtest routes (T-176)', () => {
     expect(routeHash(parseHash('#/pakat/sealed/goldfish'))).toBe('#/testaa/sealed/pelaa');
   });
 
-  it('keeps the deck solo play address and puts the section under Decks colour', () => {
+  it('keeps the deck solo play address and gives Testaa its own section, not the Decks colour', () => {
     expect(parseHash('#/pakat/abc-123/goldfish')).toEqual({ name: 'goldfish', id: 'abc-123' });
-    expect(sectionOf(parseHash('#/testaa/boosterit'))).toBe('decks');
+    expect(sectionOf(parseHash('#/testaa/boosterit'))).toBe('playtest');
+    expect(sectionOf(parseHash('#/pakat'))).toBe('decks');
   });
 });
 

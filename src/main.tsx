@@ -3,6 +3,15 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { texts } from './ui/texts';
 import './styles.css';
+// T-181: one stylesheet per view package, after the base styles (cascade order matters; keep this order).
+import './styles/cards.css';
+import './styles/collection.css';
+import './styles/decks.css';
+import './styles/editor.css';
+import './styles/playtest.css';
+import './styles/havewant.css';
+import './styles/proxy.css';
+import './styles/premium.css';
 
 document.title = `${texts.heading} · ${texts.appName}`;
 
