@@ -10,6 +10,11 @@ Paketit (raportin luku C): 0 skannerin mobiilikorjaus (tehty, T-181-0) · **1 gl
 ### Paketti 1 (raportin luku A, luvun C rivi 1)
 Tokenit, tausta, typografia, painikkeet (+ `.button-quiet`, `.icon-button`), kentät, segmentit (+ `--sm`), chipit, osio (`.panel`) ja `.object`, dialogit, taulukon perustyyli, linkit, yläpalkki ja mobiilinavi, alatunniste, `.page-head`, tyhjä tila ja notice sekä `src/styles/`-runko. UX.md luku 3 päivitetään. Vanhat token-nimet jäävät aliaksiksi.
 
+### Paketti 2 (raportin B.1, B.2 ja luvun C rivi 2)
+Kortit ja yhteinen korttiruudukko (CardList, jota käyttävät myös Kokoelma › Omat ja Have/Want), työkalurivi, sivupalkin suodattimet (`details.disclosure`-ryhmät), listanäkymä, merkintätilan alapalkki, galleria sekä korttidialogin asettelu (B.2, ei E.3:n pakkaan lisäystä). Hakukenttään luuppi-ikoni. Uudet ja korvaavat säännöt `src/styles/cards.css`:ään, ja vanhoista `styles.css`:n selektoreista poistetaan vain omat. Hyväksymiskriteerit: B.1 ja B.2, mitataan `capture.mjs`:llä (edellisen istunnon scratchpadissa `…/0e3c5532-…/scratchpad/ux/capture.mjs`).
+**Lisäksi (B.9, PM:n oletus 2026-10-19):** lippupainikkeisiin näkyvä "FI"/"EN" (mono 0.75rem) ja saavutettava nimi "Suomi (FI)" / "English (EN)" (WCAG 2.5.3). Käyttäjä voi muuttaa tekstin.
+Haara `t-181-2-kortit` testistä. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
+
 ## Luovutus: paketti 1 (Koodari, 2026-10-19)
 Haara `t-181-1-design-jarjestelma`.
 

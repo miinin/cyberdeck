@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-181 visuaalinen uudistus | Koodari | Paketit 0 ja 1 (design-järjestelmä) testissä, T-183 tehty | Paketti 2 (Kortit). Kysymys: FI/EN-teksti lippupainikkeisiin ("Suomi (FI)")? Dependabot #192 ja #193 (firebase 13: dev ja Digiturva) |
+| T-181 visuaalinen uudistus | Koodari | Paketit 0 ja 1 (design-järjestelmä) testissä, T-183 tehty | Paketti 2 (Kortit) Koodarilla, FI/EN-lipputeksti oletuksella "Suomi (FI)" (käyttäjä voi muuttaa). Dependabot #192 ja #193 (firebase 13: dev ja Digiturva) |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
@@ -29,6 +29,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 - **UX-17:** korttidialogi ja mobiilin testikäsi- ja Turnauslista-dialogit vierivät omassa vierityksessään. Tehdäänkö korttidialogista oma reitti, vai kirjataanko poikkeus? Oletus: ei muutosta.
 - **T-173 bonus:** omien oikeiden avausten vertailu odotusarvoon vaatii avaushistorian (I-7).
 - R-4 Tuotantojulkaisun suojaus: katso PM:n ehdotus T-001-kortissa. Oletus: ei muutoksia ennen erillistä testiprojektia.
+- T-181 B.9: lippupainikkeissa näkyvä "FI"/"EN", saavutettava nimi "Suomi (FI)" / "English (EN)". Oletus, voi muuttaa.
 - K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi: UX ja Sisällöntuottaja suosittelevat molemmat näitä, joten ne on toteutettu näin.
 - TXT-003: tarvitaanko alatunnisteeseen myös englanninkielinen fanisisältömerkintä (CD PROJEKT RED:n ohje)? Oletus: ei MVP-0:ssa.
 - ~~K5~~ → ratkaistu, D-007 (korttitaso, valmius painoksille).
