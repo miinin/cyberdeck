@@ -105,6 +105,7 @@ export const textsEn: typeof textsFi = {
   detailWant: 'On want list',
   detailPlaysetMissing: (n: number) => `${n} short of a playset`,
   versionsHeading: 'Versions',
+  versionsCountSummary: (versions: number, owned: number) => `${versions} ${versions === 1 ? 'version' : 'versions'} · you own ${owned}`,
   availabilityHeading: 'Availability',
   availabilityInBoosters: 'Welcome to Night City boosters',
   availabilityNotInBoosters: 'Not in Welcome to Night City boosters',

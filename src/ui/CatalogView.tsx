@@ -47,7 +47,7 @@ import type { ImageSize } from './ListToolbar';
 import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import { useCardHoverPreview } from './CardHoverPreview';
 import type { ActiveFilter } from './ActiveFilters';
-import { WIDE_QUERY } from './useMediaQuery';
+import { WIDE_QUERY, useMediaQuery } from './useMediaQuery';
 import type { OwnedColumn } from './CardList';
 import { CollectionNotices, loadNotices } from './CollectionNotices';
 import { CountControl } from './CountControl';
@@ -71,6 +71,9 @@ import { useDecks } from './useDecks';
 import { useCollectionAnnouncements, useLoadNoticeAnnouncement } from './useCollectionAnnouncements';
 import { useDelayedAnnouncement } from './useDelayedAnnouncement';
 import type { Announcement } from './useDelayedAnnouncement';
+
+/** From this width the order sits in the tool row. */
+const TOOLBAR_SORT_QUERY = '(min-width: 40rem)';
 
 /** What the live region says about a filter result (UX.md 5.6). The key identifies state + count. */
 function describeResult(active: boolean, shown: number, all: number): Announcement {
@@ -152,6 +155,8 @@ function CatalogBody({
   const gallery = useGallery(onGalleryChange);
   /** The ownership filter a list starts with and returns to when cleared: fixed to owned cards in 'collection' mode. */
   const baseFilter: CollectionFilter = locked ? 'owned' : 'all';
+  // The order is in the tool row; on a phone the row has no room for it, so it stays in the filter panel (T-181).
+  const sortInToolbar = useMediaQuery(TOOLBAR_SORT_QUERY, true);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [criteria, setCriteria] = useState<CardFilterCriteria>(EMPTY_CRITERIA);
@@ -534,7 +539,7 @@ function CatalogBody({
   const details =
     openCard === null ? undefined : (
       <>
-        <CardAvailability printings={openCard.printings ?? []} />
+        <div className="detail-counts">
         {collection.phase === 'ready' && (
           <section aria-labelledby="card-detail-collection" className="detail-collection">
             <h3 id="card-detail-collection">{texts.detailCollection}</h3>
@@ -560,23 +565,6 @@ function CatalogBody({
             )}
           </section>
         )}
-        {collection.phase === 'ready' && (
-          <CardVersions
-            card={openCard}
-            count={countIn(collection, openCard.key)}
-            versionCount={(printing) => versionCountIn(collection, openCard.key, printing)}
-            editable={editable}
-            onChange={(printing, count) => collectionStore.setVersionCount(openCard.key, printing, count)}
-            onArtChange={(art, count) =>
-              guardAdd(openCard, isBaseArt(art) && count > (ownedPerArt(entryOf(openCard), openCard, artsFor(openCard)).get(art.artId) ?? 0), (ed) =>
-                handleArtChange(openCard, art, count, ed),
-              )
-            }
-            onLimit={collectionAnnouncer.announceLimit}
-            shownArt={shownArt}
-            onShowArt={setShownArt}
-          />
-        )}
         {wants.snapshot.phase === 'ready' && (
           <section aria-labelledby="card-detail-want" className="detail-want">
             <h3 id="card-detail-want">{texts.detailWant}</h3>
@@ -594,14 +582,17 @@ function CatalogBody({
             )}
           </section>
         )}
-        {proxyQueue.snapshot.phase === 'ready' && (
-          <div className="detail-proxy proxy-send">
-            <SendToProxyButton rows={[{ card: openCard.key, count: 1 }]} queue={proxyQueue} label={proxyTexts.addCardToQueue} />
-          </div>
-        )}
+        </div>
         {decksPhase === 'ready' && (
           <section aria-labelledby="card-detail-decks" className="detail-decks">
-            <h3 id="card-detail-decks">{texts.detailDecks}</h3>
+            <div className="detail-head">
+              <h3 id="card-detail-decks">{texts.detailDecks}</h3>
+              {proxyQueue.snapshot.phase === 'ready' && (
+                <div className="detail-proxy proxy-send">
+                  <SendToProxyButton rows={[{ card: openCard.key, count: 1 }]} queue={proxyQueue} label={proxyTexts.addCardToQueue} className="button-quiet" />
+                </div>
+              )}
+            </div>
             {(decksByCard.get(openCard.key) ?? NO_DECKS).length === 0 ? (
               <p>{texts.detailNoDecks}</p>
             ) : (
@@ -614,6 +605,23 @@ function CatalogBody({
               </ul>
             )}
           </section>
+        )}
+        {collection.phase === 'ready' && (
+          <CardVersions
+            card={openCard}
+            count={countIn(collection, openCard.key)}
+            versionCount={(printing) => versionCountIn(collection, openCard.key, printing)}
+            editable={editable}
+            onChange={(printing, count) => collectionStore.setVersionCount(openCard.key, printing, count)}
+            onArtChange={(art, count) =>
+              guardAdd(openCard, isBaseArt(art) && count > (ownedPerArt(entryOf(openCard), openCard, artsFor(openCard)).get(art.artId) ?? 0), (ed) =>
+                handleArtChange(openCard, art, count, ed),
+              )
+            }
+            onLimit={collectionAnnouncer.announceLimit}
+            shownArt={shownArt}
+            onShowArt={setShownArt}
+          />
         )}
       </>
     );
@@ -808,7 +816,7 @@ function CatalogBody({
           <h2 id="filters-heading" className="filters-heading">
             {texts.filtersHeading}
           </h2>
-          {filters({})}
+          {filters(sortInToolbar ? { sort: undefined, onSortChange: undefined } : {})}
         </section>
 
         <section className="catalog-results" aria-labelledby="results-heading" data-image-size={imageSize}>
@@ -826,6 +834,8 @@ function CatalogBody({
             imageSize={imageSize}
             imageSizeDisabled={view !== 'grid'}
             onImageSizeChange={setImageSize}
+            sort={sortInToolbar ? sort : undefined}
+            onSortChange={setSort}
             edition={edition}
             onEditionChange={handleEditionChange}
             scanSlot={
@@ -924,7 +934,7 @@ function CatalogBody({
       {view === 'table' && !gallery.open && preview.preview}
       <WantCleanupBar cleanup={wantCleanup} />
       <EditionConfirmDialog card={pendingAdd?.card ?? null} onChoose={handleEditionChosen} onCancel={() => setPendingAdd(null)} />
-      <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} artUrl={shownArt} onTagClick={handleTagClick} />
+      <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} subline={openCard === null ? undefined : <CardAvailability printings={openCard.printings ?? []} />} artUrl={shownArt} onTagClick={handleTagClick} />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { RaritySymbol, rarityTitle } from './RaritySymbol';
 import { officialRarity, shortRarity } from '../domain/cardSearch';
-import type { ChangeEvent, CompositionEvent, KeyboardEvent, Ref } from 'react';
+import type { ChangeEvent, CompositionEvent, KeyboardEvent, ReactNode, Ref } from 'react';
 import type { CardFilterCriteria, NumberFilterGroup } from '../domain/cardSearch';
 import { NUMBER_GROUPS } from './ActiveFilters';
 import { CardColor } from './CardColor';
@@ -85,6 +85,27 @@ export function selectedFilterCount(criteria: CardFilterCriteria, collectionFilt
     (criteria.sellable === true ? 1 : 0) +
     (criteria.tag != null ? 1 : 0) +
     collection
+  );
+}
+
+/**
+ * A rarely used filter group (T-181 B.1): a closed `disclosure` with the choices inside. A group that has a choice is open and the
+ * count is in the title ("COST · 2"). The legend stays for screen readers, the summary is the visible title.
+ */
+function FilterGroup({ legend, lang, count, className, children }: { legend: string; lang?: string; count: number; className?: string; children: ReactNode }) {
+  return (
+    <details className={'disclosure filter-group' + (className ? ' ' + className : '')} open={count > 0 || undefined}>
+      <summary>
+        <span lang={lang}>{legend}</span>
+        {count > 0 && <span className="filter-group-count"> · {count}</span>}
+      </summary>
+      <fieldset aria-describedby="filter-hint">
+        <legend className="visually-hidden" lang={lang}>
+          {legend}
+        </legend>
+        {children}
+      </fieldset>
+    </details>
   );
 }
 
@@ -179,6 +200,10 @@ export function CardFilters({
             <p id="card-search-hint" className="visually-hidden">
               {texts.searchHint}
             </p>
+            <svg className="search-icon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+              <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M12.7 12.7L17 17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
             <input
               ref={searchInputRef}
               id="card-search"
@@ -317,8 +342,7 @@ export function CardFilters({
             </div>
           </fieldset>
 
-          <fieldset aria-describedby="filter-hint">
-            <legend>{texts.rarityLegend}</legend>
+          <FilterGroup legend={texts.rarityLegend} count={criteria.rarities.length}>
             <div className="options options-even options-rarity">
               {rarityOptions.map((rarity) => (
                 <label key={rarity} className="option" title={rarityTitle(officialRarity(rarity))}>
@@ -336,7 +360,7 @@ export function CardFilters({
                 </label>
               ))}
             </div>
-          </fieldset>
+          </FilterGroup>
 
           {onToggleSellable !== undefined && (
             <fieldset aria-describedby="filter-hint">
@@ -352,8 +376,7 @@ export function CardFilters({
 
           {NUMBER_GROUPS.map(([group, legend]) =>
             numberOptions[group].length === 0 ? null : (
-              <fieldset key={group} aria-describedby="filter-hint" className="number-filter">
-                <legend lang="en">{legend}</legend>
+              <FilterGroup key={group} legend={legend} lang="en" count={criteria[group].length} className="number-filter">
                 <div className="options options-number">
                   {numberOptions[group].map((value) => (
                     <label key={value} className="option option-number">
@@ -368,7 +391,7 @@ export function CardFilters({
                     </label>
                   ))}
                 </div>
-              </fieldset>
+              </FilterGroup>
             ),
           )}
         </div>

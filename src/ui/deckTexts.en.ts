@@ -421,8 +421,10 @@ export const deckTextsEn: typeof deckTextsFi = {
   reportSaveButton: 'Save as a deck',
   reportNothingRecognized: 'No cards were recognized, so the deck cannot be saved. Check the lines.',
 
+  columnDecks: 'In decks',
   inDecks: (count: number) => `In decks: ${count}`,
   inDecksNames: (names: readonly string[]) => `In decks: ${names.join(', ')}`,
+  inDecksCompact: (names: readonly string[]) => `In ${names.length} ${names.length === 1 ? 'deck' : 'decks'}: ${names.join(', ')}`,
 
   // Public decks (T-098, D-025)
   decksTabsLabel: 'Deck list view',

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import type { CatalogViewMode, DefaultEdition } from '../storage';
+import type { CardSort } from '../domain/cardSort';
 import { MarkOwnButton } from './MarkOwnBanner';
+import { SortSelect } from './SortSelect';
 import { SegmentedChoice } from './SegmentedChoice';
 import { texts } from './texts';
 
@@ -28,6 +30,7 @@ export function ImageSizeSelect({
   return (
     <SegmentedChoice
       className="image-size-select"
+      size="sm"
       legend={texts.imageSizeLegend}
       name={name}
       value={value}
@@ -127,6 +130,8 @@ export function ListToolbar({
   onEditionChange,
   scanSlot,
   imageSizeDisabled = false,
+  sort,
+  onSortChange,
 }: {
   view: CatalogViewMode;
   onViewChange: (next: CatalogViewMode) => void;
@@ -147,20 +152,24 @@ export function ListToolbar({
   scanSlot?: ReactNode;
   /** The image size only applies to the grid (T-050a); in the list it stays in place but greyed out (T-126). */
   imageSizeDisabled?: boolean;
+  /** The order of the cards (T-181: in the tool row, not in the filter panel); undefined leaves it out. */
+  sort?: CardSort;
+  onSortChange?: (next: CardSort) => void;
 }) {
   return (
     <div className="list-toolbar">
-      <SegmentedChoice legend={texts.viewLegend} name="catalog-view" value={view} options={VIEW_OPTIONS} onChange={onViewChange} />
+      <SegmentedChoice size="sm" legend={texts.viewLegend} name="catalog-view" value={view} options={VIEW_OPTIONS} onChange={onViewChange} />
       {imageSize !== undefined && (
         <ImageSizeSelect name="image-size" value={imageSize} onChange={(next) => onImageSizeChange?.(next)} disabled={imageSizeDisabled} />
       )}
       {onGalleryOpen !== undefined && (
-        <button type="button" id="gallery-open" className="button-secondary gallery-open" onClick={onGalleryOpen}>
+        <button type="button" id="gallery-open" className="button-quiet gallery-open" onClick={onGalleryOpen}>
           <GalleryIcon />
           <span className="toolbar-label">{texts.galleryOpen}</span>
         </button>
       )}
       {scanSlot}
+      {sort !== undefined && onSortChange !== undefined && <SortSelect toolbar sort={sort} onChange={onSortChange} />}
       {editable === true && hideEditSwitch && edition !== undefined && (
         <SegmentedChoice
           className="edition-select"
@@ -168,6 +177,7 @@ export function ListToolbar({
           name="default-edition"
           value={edition}
           options={EDITION_OPTIONS}
+          size="sm"
           describedBy="edition-hint"
           onChange={onEditionChange ?? (() => undefined)}
         >

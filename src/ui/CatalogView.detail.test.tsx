@@ -31,7 +31,7 @@ describe('Catalog: card detail dialog (T-070)', () => {
       },
     });
     render(<CatalogView cards={[streetkid]} repositories={repositories} />);
-    await screen.findByText('Pakoissa: 1');
+    await screen.findByText('1 pakassa: Eka');
     await user.click(screen.getByRole('button', { name: /^Suurenna kuva: V/ }));
     const dialog = await screen.findByRole('dialog', { name: /Streetkid/ });
     expect(within(dialog).getByRole('heading', { level: 3, name: 'Kokoelmassa' })).toBeInTheDocument();

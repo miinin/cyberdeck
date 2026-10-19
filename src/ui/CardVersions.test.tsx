@@ -270,12 +270,12 @@ describe('CardVersions set chips', () => {
     expect(summary.tagName).toBe('SUMMARY');
     expect(summary.closest('details')).not.toHaveAttribute('open');
     expect(sets().getByText('Welcome to Night City')).toBeInTheDocument();
-    expect(sets().getByText('Set 1 Promos').closest('details')).not.toBeNull();
+    expect(sets().getByText('Set 1 Promos').closest('.art-other-sets')).not.toBeNull();
   });
 
   it('shows the products directly when the version is in no set', () => {
     render(<CardVersions card={{ ...card, printings: [promo] }} count={0} versionCount={() => 0} editable={false} onChange={vi.fn()} onLimit={vi.fn()} />);
-    expect(sets().getByText('Set 1 Promos').closest('details')).toBeNull();
+    expect(sets().getByText('Set 1 Promos').closest('.art-other-sets')).toBeNull();
     expect(sets().queryByText(/muu/)).toBeNull();
   });
 });

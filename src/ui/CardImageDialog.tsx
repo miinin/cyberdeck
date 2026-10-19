@@ -17,6 +17,7 @@ export function CardImageDialog({
   details,
   artUrl = null,
   onTagClick,
+  subline,
 }: {
   card: Card | null;
   onClose: () => void;
@@ -26,6 +27,8 @@ export function CardImageDialog({
   artUrl?: string | null;
   /** T-152: the card's tags are buttons that show every card with the tag; without it they are plain text. */
   onTagClick?: (tag: string) => void;
+  /** T-181: one line under the title beside the tags (where the card comes from). */
+  subline?: ReactNode;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const tilt = useTilt<HTMLImageElement>();
@@ -78,6 +81,7 @@ export function CardImageDialog({
               {texts.closeSymbol}
             </button>
           </div>
+          <div className="card-dialog-meta">
           {(card.tags ?? []).length > 0 && (
             <ul className="card-tags" aria-label={texts.cardTagsLabel}>
               {(card.tags ?? []).map((tag) => (
@@ -102,6 +106,8 @@ export function CardImageDialog({
               ))}
             </ul>
           )}
+          {subline}
+          </div>
           <div className="card-dialog-content">
           {imageSrc !== null && failedKey !== imageSrc ? (
             <img

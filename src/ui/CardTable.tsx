@@ -11,6 +11,7 @@ import { CardDecks } from './CardDecks';
 import { collectionState } from './CardList';
 import type { OwnedColumn } from './CardList';
 import { CountControl } from './CountControl';
+import { deckTexts } from './deckTexts';
 import { texts } from './texts';
 
 /** A missing value shows a dash and a hidden spoken equivalent, as in the grid. */
@@ -101,6 +102,11 @@ export function CardTable({
             <SortHeader label={texts.columnCost} column="cost" sort={sort} onSort={onSort} numeric />
             <SortHeader label={texts.columnPower} column="power" sort={sort} onSort={onSort} numeric />
             <SortHeader label={texts.columnRam} column="ram" sort={sort} onSort={onSort} numeric />
+            {decksOf !== undefined && (
+              <th scope="col" role="columnheader" className="cell-decks">
+                {deckTexts.columnDecks}
+              </th>
+            )}
             {owned !== undefined && <th scope="col" role="columnheader">{texts.columnCollection}</th>}
             {extraColumn !== undefined && <th scope="col" role="columnheader">{extraColumn.label}</th>}
           </tr>
@@ -128,7 +134,6 @@ export function CardTable({
                     </>
                   )}
                 </button>
-                {decksOf !== undefined && <CardDecks names={decksOf(card)} />}
               </th>
               <td role="cell" className="cell-type">
                 <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
@@ -150,6 +155,11 @@ export function CardTable({
               <td role="cell" className="cell-number" data-label={texts.columnRam}>
                 <Value value={card.ram} missing={texts.noRam} />
               </td>
+              {decksOf !== undefined && (
+                <td role="cell" className="cell-decks">
+                  <CardDecks names={decksOf(card)} />
+                </td>
+              )}
               {owned !== undefined && (
                 <td role="cell" className="cell-collection">
                   <CountControl
