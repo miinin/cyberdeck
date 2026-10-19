@@ -9598,6 +9598,12 @@ html[data-gallery='on'] main {
   --color-accent-edge: var(--color-card-red);
 }
 
+/* Testaa (playtest) is not one of the game colors: violet, so it is not the red of Pakat. */
+:root[data-section='playtest'] {
+  --color-accent: #b98aff;
+  --color-accent-edge: #b98aff;
+}
+
 :root[data-section='havewant'] {
   --color-accent: var(--color-card-blue);
   --color-accent-edge: var(--color-card-blue);
@@ -9611,6 +9617,7 @@ html[data-gallery='on'] main {
 
 :root[data-section='collection'],
 :root[data-section='decks'],
+:root[data-section='playtest'],
 :root[data-section='havewant'],
 :root[data-section='proxy'] {
   --color-accent-2: color-mix(in srgb, var(--color-accent) 75%, #fff);
@@ -9619,6 +9626,7 @@ html[data-gallery='on'] main {
 /* Light theme: the edges stay dark as in yellow; red, blue and the neutral get white text. */
 :root[data-theme='light'][data-section='collection'],
 :root[data-theme='light'][data-section='decks'],
+:root[data-theme='light'][data-section='playtest'],
 :root[data-theme='light'][data-section='havewant'],
 :root[data-theme='light'][data-section='proxy'] {
   --color-accent-edge: #0e0f14;
@@ -9632,11 +9640,16 @@ html[data-gallery='on'] main {
   --color-accent-bar: color-mix(in srgb, var(--color-accent) 45%, #000);
 }
 
+:root[data-theme='light'][data-section='playtest'] {
+  --color-accent: #7638d6;
+}
+
 :root[data-theme='light'][data-section='proxy'] {
   --color-accent: #2a2d36;
 }
 
 :root[data-theme='light'][data-section='decks'],
+:root[data-theme='light'][data-section='playtest'],
 :root[data-theme='light'][data-section='havewant'],
 :root[data-theme='light'][data-section='proxy'] {
   --color-on-accent: #fff;

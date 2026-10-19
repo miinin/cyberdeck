@@ -29,6 +29,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 - **UX-17:** korttidialogi ja mobiilin testikäsi- ja Turnauslista-dialogit vierivät omassa vierityksessään. Tehdäänkö korttidialogista oma reitti, vai kirjataanko poikkeus? Oletus: ei muutosta.
 - **T-173 bonus:** omien oikeiden avausten vertailu odotusarvoon vaatii avaushistorian (I-7).
 - R-4 Tuotantojulkaisun suojaus: katso PM:n ehdotus T-001-kortissa. Oletus: ei muutoksia ennen erillistä testiprojektia.
+- T-181: Testaa-osion väri violetti (tumma #b98aff, vaalea #7638d6), jotta se erottuu Pakkojen punaisesta. Oletus, voi muuttaa.
 - T-181 B.9: lippupainikkeissa näkyvä "FI"/"EN", saavutettava nimi "Suomi (FI)" / "English (EN)". Oletus, voi muuttaa.
 - K1 "Hinta"-sarakkeen nimi ja K2 korttityypit englanniksi: UX ja Sisällöntuottaja suosittelevat molemmat näitä, joten ne on toteutettu näin.
 - TXT-003: tarvitaanko alatunnisteeseen myös englanninkielinen fanisisältömerkintä (CD PROJEKT RED:n ohje)? Oletus: ei MVP-0:ssa.
