@@ -91,3 +91,38 @@ Kuvat: `scratchpad/ux/a4/` (vertailu `base2/`).
 Koodikatselmointi: tehty · Pakollisia korjattu 3 (suodatinpaneelin `[hidden]` kumoutui `display: flex`:llä; haku-ikoni jäi chamferatun kentän alle; dialogin Kokoelma/Want-otsikkoviivat eivät osuneet `.detail-counts`-lohkoihin) · Suosituksia 3: (1) `CardImageDialog.tsx`:n uusi `card-dialog-meta`-lohko on sisennetty väärin (lint ei vaadi); (2) `.card-table`-rivikiskot (`is-owned`/`is-playset`) ovat tilapäisesti cards.css:ssä, paketti 6 poistaa ne; (3) `.proxy-pick`-säännöt kuuluvat vielä styles.css:ään (paketti 5b).
 
 **Korjauskierros (PM:n esikatselu):** listan Pakoissa-sarake näyttää pelkän luvun (nimi "2 pakassa" säilyy), alanimi on linkin ulkopuolella muted ilman alleviivausta, 320 px:n haku saa tilaa (kompakti Suodattimet-painike), suodatinpaneelin Järjestys-label, täysleveä Kokoelma-segmentti ja yhtenäinen vasen reuna, "Kaikki versiot" ei himmene (AA), dialogin Pakoissa-otsikko ja proxy-painike samalla rivillä; `texts.versionsHeading` poistettu. Testit/lint/build läpi.
+
+## Luovutus: paketti 3 (Koodari, 2026-10-19)
+Haara `t-181-3-kokoelma`. Kokoelman säännöt `src/styles/collection.css`:ssä; `styles.css`:stä poistettu vain omat selektorit (≈ 1 450 riviä, postcss-työkalulla, ei muiden pakettien sääntöjä). Testit: `styles.ux174.test.ts` lukee Kokoelman säännöt nyt collection.css:stä (ei heikennetty), uusi `styles.t181.collection.test.ts`.
+
+**Toteutus**
+- Yleiskuva: yläkaista ilman paneelia (rengas 96 px, Kopioita, Täysiä pelisarjoja ja Saavutukset mono 1.75rem, label 14 px, pystyhiusviivat). Seteittäin, Harvinaisuuksittain ja Värit ja tyypit kolmena sarakkeena (`auto-fit`, 3 kpl ≥ ~64rem), rivit 28 px, palkki 6 px, prosentti vain ruudunlukijalle. `AchievementsPanel` saa nyt valmiin `list`-propin (lasketaan kerran `CollectionView`:ssä, myös mittarille); solumittari poistettu.
+- Saavutukset: avatut 32 px chippeinä (ikoni, nimi, ✓; "Avattu" ja kuvaus ruudunlukijalle), seuraavat 3–4-sarakkeisena listana (ikoni, nimi, `15/18`, 4 px palkki, tavoite yhdellä katkaistulla rivillä + `title`), lukitut disclosurena. Värit (tier, kortti- ja tyyppivärit, vaalean teeman ink) säilytetty.
+- Puuttuvat kortit: yksi työkalurivi (suodattimet, määrä, kaksi painiketta), ohjetekstit yhdessä kappaleessa, ruudukko Pieni (8 rem).
+- Kansio: ≥ 40rem aukeaman leveys mitoitetaan ruudun korkeudesta (`--binder-page-fit`, `--binder-chrome` 23rem), sivunvaihtonuolet reunoilla (`.binder-stage`, TSX-kääre), sijaintirivi aukeaman alla. Alle 40rem entinen asettelu.
+- Omat kortit: `Lisää puuttuvat wantiin` siirretty työkalurivin loppuun (`ListToolbar endSlot`, ei omaa riviä), tilarivi lähemmäs h1:tä; puhelimessa h1 ja Skannaa (vain ikoni, nimi säilyy) samalla rivillä, segmentti omalla täyden leveyden rivillä.
+- Tyhjä tila: `.empty--collection`, `max-inline-size: 44rem`, ikoni ja otsikko samalla rivillä. Skanneri-dialogi: Tila oli jo `segmented--fill` ja Beta/Retail kaksi isoa painiketta; ei muutosta tarvittu.
+- Reduced-motion: Kokoelman säännöissä ei ole siirtymiä tai animaatioita no-preference-ehdon ulkopuolella (testi); `.ring-fill`-siirtymä on styles.css:ssä `reduce`-säännön alla.
+
+**Mittaukset (capture-p3.mjs, tumma ja vaalea, seedattu kokoelma; kuvat `scratchpad/ux/p3/`)**
+| Kriteeri | Tulos |
+|---|---|
+| Omat 1280×800 ensimmäinen kortti ≤ 220 | 215 (oli 263 paketin 2 jälkeen) |
+| Omat 320 ensimmäinen kortti ≤ 330 | **396** (oli 451; ei saavutettu, ks. poikkeamat) |
+| Yleiskuva 1920×1080: yläosa ennen puuttuvien kuvia | puuttuvat-osion otsikko y = 918, kuvaruudukko y = 1050 (< 1080) |
+| Yleiskuva 1280×800 ≤ 1.6 ruutua (kuvaruudukon alkuun) | ruudukko alkaa y = 1181 = 1.48 ruutua (koko sivu 3.2, koska 37 puuttuvaa korttia vierii) |
+| Rivi 28 px, palkki 6 px, chip 32 px | 28 (1920), 6, 32; 1280:ssa pitkä setin nimi (Beta) rivittyy ja rivi on 43 |
+| Kansio 1280×800 aukeama ja nuolet ilman vieritystä | aukeama y 231–736, sijaintirivi päättyy y = 784 (< 800); nuolet y 452–516; 1920: 953 / 1001 |
+| Skannerin runko ≥ min(36rem, 100 % − 16 px) | 576 (1280, 1920), 306 (320) |
+| Vaakaylivuoto 320 | 0 kaikissa tiloissa |
+| Sisäinen vieritys | 0 (dialogi vierii itse kerroksena, kuten ennenkin) |
+| Kontrasti (laskettu tekstille, AA) | tumma min 4.66, vaalea min 6.91 yleiskuvassa; muissa ≥ 6.98. Mittarin väärät positiiviset: aina tumma kansi (#a9afbd sivunumero) ja gradienttitaustaiset ensisijaiset painikkeet |
+
+**Poikkeamat ja kysymykset PM:lle**
+1. Omat kortit 320: ≤ 330 ei täyty (396). Sisällön rivit (h1, segmentti, 2 riviä tilaa, haku + Suodattimet, kuvanäkymä + Beta/Retail, Lisää puuttuvat) vievät sen; 330 vaatisi jonkin poistamista (tilarivi tai want-linkki). Päätös?
+2. "1 ruutu 1920×1080" täyttyy yläosalle (kaista, sarakkeet, saavutukset, puuttuvien työkalurivi), mutta koko sivu on 1.78 ruutua, koska 37 puuttuvan kortin kuvat vierivät ("kuvat saavat vieriä").
+3. Kansion aukeama on 1280×800:ssa 713 px leveä (oli 782): kortit pienemmät, jotta sivunvaihto mahtuu ruudulle. `--binder-chrome` on mitattu arvo (23rem); jos yläpalkki tai h1 muuttuu, tarkista.
+4. Seuraavat keikat -listassa tavoitekuvaus on katkaistu yhteen riviin (spesifikaatio listasi vain ikoni, nimi, palkki, count); jos halutaan pois, `.badge-grid--next .badge-flavor { display: none }`.
+5. Kortin `CatalogView`/`ListToolbar` (paketti 2) sai pienen `endSlot`-propin Omat kortit -tilan want-linkkiä varten.
+
+Koodikatselmointi: tehty · Pakollisia korjattu 2 (testit luki siirrettyjä sääntöjä styles.css:stä; `.missing-add`-ylikirjoitus olisi vuotanut muihin näkymiin, rajattu `.missing-bar`:iin) · Suosituksia 2: (1) kansion `--binder-chrome` on kovakoodattu mitattu luku; (2) `.progress-pct` piilotettu visuaalisesti, jos prosentit halutaan takaisin, ne mahtuvat ≥ 90rem:ssä.
