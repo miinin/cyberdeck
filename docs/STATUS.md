@@ -1,4 +1,4 @@
-# STATUS · päivitetty 2026-10-18 (PM)
+# STATUS · päivitetty 2026-10-19 (PM)
 
 ## Yhdellä lauseella
 Kaikki T-179:ään asti on tuotannossa (https://cyberdeck-tcg.web.app): kokoelma, kansio ja skanneri (myös jatkuva ja kansiosivu), want-lista ja jakolinkit (lyhyt vaihtolinkki), pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| – | PM | T-178 ja T-179 tuotannossa (PR #190, 2026-10-18) | Seuraava tehtävä priorisoinnin mukaan |
+| T-181 visuaalinen uudistus | Koodari | Paketit 0 ja 1 (design-järjestelmä) testissä, T-183 tehty | Paketti 2 (Kortit). Kysymys: FI/EN-teksti lippupainikkeisiin ("Suomi (FI)")? Dependabot #192 ja #193 (firebase 13: dev ja Digiturva) |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.

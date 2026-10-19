@@ -182,3 +182,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-177 | Goldfish-näkymän visuaalinen uudistus: isommat kortit, nopat muotoinaan, tulostaulu (D-036) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-178 | Lyhyt Have/Want-linkki palvelimen kautta (`#/v/<tunnus>`, tradeShares, D-037) | 1 | Must | Koodari | Done | Digiturva (SEC-178), dev ensin, SR-59 käsitestit ohitettu käyttäjän päätöksellä 2026-10-18 |
 | T-179 | Kansiosivun skannaus yhdellä kuvalla (3×3 ja 3×4), kuvatiedosto ja rajaus | 1 | Must | Koodari | Done | Digiturva (SEC-179), PM (kuvakaappaukset, valekameratesti) |
+| T-181 | Visuaalinen uudistus: tiivis, staattinen Cyberpunk, paketit 0–6 (D-038) | 1 | Must | Koodari | In Progress (0 ja 1 tehty) | PM (kuvakaappaukset), paketti 6: dev ja Digiturva |
+| T-183 | Rikkomistestauksen korjaukset BRK-01–BRK-10 ja sivujen otsikot | 1 | Must | Koodari | Done | PM |
