@@ -342,6 +342,18 @@ export function CardFilters({
             </div>
           </fieldset>
 
+          {onToggleSellable !== undefined && (
+            <fieldset aria-describedby="filter-hint">
+              <legend>{texts.sellableLegend}</legend>
+              <div className="options">
+                <label className="option">
+                  <input type="checkbox" name="sellable" checked={criteria.sellable === true} onChange={onToggleSellable} />{' '}
+                  <span>{texts.sellableOnly}</span>
+                </label>
+              </div>
+            </fieldset>
+          )}
+
           <FilterGroup legend={texts.rarityLegend} count={criteria.rarities.length}>
             <div className="options options-even options-rarity">
               {rarityOptions.map((rarity) => (
@@ -361,18 +373,6 @@ export function CardFilters({
               ))}
             </div>
           </FilterGroup>
-
-          {onToggleSellable !== undefined && (
-            <fieldset aria-describedby="filter-hint">
-              <legend>{texts.sellableLegend}</legend>
-              <div className="options">
-                <label className="option">
-                  <input type="checkbox" name="sellable" checked={criteria.sellable === true} onChange={onToggleSellable} />{' '}
-                  <span>{texts.sellableOnly}</span>
-                </label>
-              </div>
-            </fieldset>
-          )}
 
           {NUMBER_GROUPS.map(([group, legend]) =>
             numberOptions[group].length === 0 ? null : (

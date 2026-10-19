@@ -15,6 +15,10 @@ Kortit ja yhteinen korttiruudukko (CardList, jota käyttävät myös Kokoelma �
 **Lisäksi (B.9, PM:n oletus 2026-10-19):** lippupainikkeisiin näkyvä "FI"/"EN" (mono 0.75rem) ja saavutettava nimi "Suomi (FI)" / "English (EN)" (WCAG 2.5.3). Käyttäjä voi muuttaa tekstin.
 Haara `t-181-2-kortit` testistä. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
+### Paketti 3 (raportin B.3 ja luvun C rivi 3)
+Kokoelma: Omat kortit (otsikkorivi, käyttää paketin 2 ruudukkoa), Yleiskuva (mittarikaista, kolme saraketta, saavutuschipit ja kompakti "Seuraavat keikat", lukitut disclosurena), Kansio (aukeama mahtuu ruudulle, reunojen nuolipainikkeet), skanneri- ja kansiosivudialogien visuaali (vain luokat) ja tyhjä tila. Säännöt `src/styles/collection.css`:ään. Tilastojen palkkisiirtymät `prefers-reduced-motion`-ehdon sisään. Hyväksymiskriteerit: B.3, mitataan `capture.mjs`:llä. Testaa-osio on nyt violetti (`data-section='playtest'`), ei vaikuta tähän pakettiin.
+Haara `t-181-3-kokoelma` testistä. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
+
 ## Luovutus: paketti 1 (Koodari, 2026-10-19)
 Haara `t-181-1-design-jarjestelma`.
 
