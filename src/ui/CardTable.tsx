@@ -125,15 +125,15 @@ export function CardTable({
                   onClick={(event) => onOpenImage(card, event.currentTarget)}
                 >
                   <span lang="en">{card.name}</span>
-                  {card.subname !== null && (
-                    <>
-                      <span className="visually-hidden">, </span>
-                      <span className="card-subname" lang="en">
-                        {card.subname}
-                      </span>
-                    </>
-                  )}
                 </button>
+                {card.subname !== null && (
+                  <>
+                    <span className="visually-hidden">, </span>
+                    <span className="card-subname" lang="en">
+                      {card.subname}
+                    </span>
+                  </>
+                )}
               </th>
               <td role="cell" className="cell-type">
                 <span className={typeBadgeClass(card.color)} lang="en" title={card.color ?? undefined}>
@@ -157,7 +157,7 @@ export function CardTable({
               </td>
               {decksOf !== undefined && (
                 <td role="cell" className="cell-decks">
-                  <CardDecks names={decksOf(card)} />
+                  <CardDecks names={decksOf(card)} compact="number" />
                 </td>
               )}
               {owned !== undefined && (

@@ -80,3 +80,5 @@ Kuvat: `scratchpad/ux/a4/` (vertailu `base2/`).
 - Käyttämätön teksti `texts.versionsHeading` jäi (turvallinen poistaa myöhemmin).
 
 Koodikatselmointi: tehty · Pakollisia korjattu 3 (suodatinpaneelin `[hidden]` kumoutui `display: flex`:llä; haku-ikoni jäi chamferatun kentän alle; dialogin Kokoelma/Want-otsikkoviivat eivät osuneet `.detail-counts`-lohkoihin) · Suosituksia 3: (1) `CardImageDialog.tsx`:n uusi `card-dialog-meta`-lohko on sisennetty väärin (lint ei vaadi); (2) `.card-table`-rivikiskot (`is-owned`/`is-playset`) ovat tilapäisesti cards.css:ssä, paketti 6 poistaa ne; (3) `.proxy-pick`-säännöt kuuluvat vielä styles.css:ään (paketti 5b).
+
+**Korjauskierros (PM:n esikatselu):** listan Pakoissa-sarake näyttää pelkän luvun (nimi "2 pakassa" säilyy), alanimi on linkin ulkopuolella muted ilman alleviivausta, 320 px:n haku saa tilaa (kompakti Suodattimet-painike), suodatinpaneelin Järjestys-label, täysleveä Kokoelma-segmentti ja yhtenäinen vasen reuna, "Kaikki versiot" ei himmene (AA), dialogin Pakoissa-otsikko ja proxy-painike samalla rivillä; `texts.versionsHeading` poistettu. Testit/lint/build läpi.

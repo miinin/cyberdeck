@@ -847,6 +847,7 @@ body:has(.mark-banner) .site-footer {
 
 .card-table .cell-name .card-subname {
   display: inline;
+  text-decoration: none;
   margin-inline-start: var(--space-2);
   color: var(--color-text-muted);
   font-weight: var(--font-weight-normal);
@@ -1429,4 +1430,75 @@ body:has(.mark-banner) .site-footer {
   .card-dialog.has-details .card-dialog-details {
     zoom: 1.4;
   }
+}
+
+/* The filter panel: one left edge, label-style titles, full-width segments, a readable switch. */
+.view-options .sort-select > label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.view-options .edit-switch {
+  padding-inline-start: 0;
+}
+
+.view-options .edit-switch:disabled {
+  opacity: 1;
+  color: var(--color-text-muted);
+}
+
+.card-filters .owned-only,
+.card-filters .owned-only .segmented {
+  inline-size: 100%;
+}
+
+.card-filters .owned-only .segmented-option {
+  flex: 1 1 0;
+}
+
+/* A narrow phone: the search field gets the room, the filter button is compact. */
+@media (max-width: 29.99rem) {
+  .catalog-filters .filter-toggle {
+    padding-inline: var(--space-2);
+    font-size: var(--font-size-label);
+  }
+
+  .catalog-filters .search-field input[type='search'] {
+    padding-inline-start: calc(var(--space-2) + 18px + var(--space-1));
+    padding-inline-end: var(--space-1);
+  }
+
+  .search-icon {
+    inset-inline-start: var(--space-2);
+  }
+}
+
+/* Dialog block title and its action on one line, the line under both. */
+.card-dialog-details .detail-head {
+  align-items: flex-end;
+  min-block-size: 0;
+}
+
+.card-dialog-details .detail-head h3 {
+  padding-block-end: var(--space-1);
+}
+
+.card-dialog-details .detail-head .button-quiet {
+  min-block-size: var(--control-h-sm);
+}
+
+.card-dialog-details .detail-head {
+  align-items: center;
+}
+
+.card-dialog-details .detail-head h3 {
+  padding-block-end: 0;
+}
+
+.card-dialog-details .detail-head .detail-proxy {
+  margin: 0;
+  padding: 0;
 }

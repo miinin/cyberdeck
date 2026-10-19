@@ -39,6 +39,7 @@ describe('Catalog: decks of a card', () => {
     const table = await screen.findByRole('table');
     expect(within(table).getByRole('columnheader', { name: 'Pakoissa' })).toBeInTheDocument();
     const row = within(table).getByRole('rowheader', { name: /Unit 0/ }).closest('tr') as HTMLElement;
-    expect(row).toHaveTextContent('Pakoissa: 2');
+    expect(row.querySelector('.cell-decks')).toHaveTextContent('2');
+    expect(within(row).getByText('2 pakassa: Eka, Toka')).toBeInTheDocument();
   });
 });
