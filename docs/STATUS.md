@@ -1,7 +1,7 @@
 # STATUS · päivitetty 2026-10-19 (PM)
 
 ## Yhdellä lauseella
-Kaikki T-179:ään asti sekä T-181:n paketit 0–2 (design-järjestelmä, Kortit, Testaa-osion väri) , T-183 ja T-184 (korttien infonauha) ovat tuotannossa (https://cyberdeck-tcg.web.app, julkaistu 2026-10-19, PR #194 ja #195): kokoelma, kansio ja skanneri (myös jatkuva ja kansiosivu), want-lista ja jakolinkit (lyhyt vaihtolinkki), pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
+Kaikki T-179:ään asti sekä T-181:n paketit 0–2 (design-järjestelmä, Kortit, Testaa-osion väri), T-183 ja T-184 (korttien infonauha) ovat tuotannossa (https://cyberdeck-tcg.web.app, julkaistu 2026-10-19, PR #194 ja #195): kokoelma, kansio ja skanneri (myös jatkuva ja kansiosivu), want-lista ja jakolinkit (lyhyt vaihtolinkki), pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
 Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyttäjä (docs/reports/MVP1-UX-2026-10-17.md, korjattu T-174), Digiturva (SEC-T172-T173) ja rikkomistestaus (BREAK-T172-T173). Avoinna: UX-17, UX-30 ja UX-31.
