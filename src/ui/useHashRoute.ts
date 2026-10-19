@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { isPubId } from '../domain/publicDeck';
+import { normalizeTradeShareId } from '../domain/tradeLink';
 import { isDeckId } from '../domain/validate';
 
 /** Views of the app. The route lives in the URL hash, so Back and Forward work and no router is needed. */
@@ -64,7 +65,11 @@ export function parseHash(hash: string): Route {
     return { name: 'trade', data: parts.length === 2 ? (parts[1] ?? '') : '' };
   }
   // "#/v/<id>": a short trade link (T-178). Only the shape of the route is decided here; the id is validated by the view.
-  if (parts[0] === 'v') return { name: 'tradeLink', id: parts.length === 2 ? (parts[1] ?? '') : '' };
+  // BRK-07: one trailing slash and trailing marks from a chat are forgiven; the view still checks the strict shape.
+  if (parts[0] === 'v') {
+    const single = parts.length === 2 || (parts.length === 3 && parts[2] === '');
+    return { name: 'tradeLink', id: single ? normalizeTradeShareId(parts[1] ?? '') : '' };
+  }
   // "#/proxy": the Proxy section (T-102).
   if (parts[0] === 'proxy') return { name: 'proxy' };
   // "#/kokoelma": the Collection progress section (T-105).

@@ -23,7 +23,7 @@ import type { Edition } from '../domain/edition';
 import { coverCropSource } from '../domain/scanCrop';
 import type { PreferencesRepository, ScanGrid, ScanMode } from '../storage';
 import { BinderPageFlow } from './BinderScan';
-import { grabPixels, readImageFile } from './binderImage';
+import { ImageTooSmallError, grabPixels, readImageFile } from './binderImage';
 import { CameraIcon } from './CameraIcon';
 import { SegmentedChoice } from './SegmentedChoice';
 import { MAX_COPIES, addCopies, removeCopies } from './collectionEntry';
@@ -396,11 +396,37 @@ export function CardScannerDialog({
       const image = await readImageFile(file);
       if (!mounted.current) return;
       setFileProblem(null);
+      if (stage !== 'camera') {
+        // Chosen before any camera (or after a camera error): the edition in use is the one shown as the default.
+        markEditionConfirmed();
+        onEditionChange(edition);
+      }
       setBinderPicture({ image, fromCamera: false });
       setStage('binder');
-    } catch {
-      if (mounted.current) setFileProblem(scannerTexts.imageUnreadable);
+    } catch (error) {
+      if (mounted.current) setFileProblem(error instanceof ImageTooSmallError ? scannerTexts.imageTooSmall : scannerTexts.imageUnreadable);
     }
+  };
+
+  /** BRK-03: a picture file works without a camera, so it is offered at the start and after a camera error too. */
+  const chooseImageControl = (
+    <div className="file-input">
+      <input id={fileInputId} className="visually-hidden" type="file" accept="image/*" disabled={index === null} onChange={(event) => void chooseBinderFile(event)} />
+      <label htmlFor={fileInputId} className="button-secondary">
+        {scannerTexts.chooseImage}
+      </label>
+    </div>
+  );
+  const fileProblemText =
+    active === 'binder' && fileProblem !== null ? (
+      <p role="alert" className="field-error">
+        {fileProblem}
+      </p>
+    ) : null;
+  /** Back from a binder page: to the camera if it runs, else to the start (a file was chosen without a camera). */
+  const leaveBinder = () => {
+    setBinderPicture(null);
+    setStage(streamRef.current === null ? 'edition' : 'camera');
   };
 
   const toCollection = deck === undefined || destination === 'both';
@@ -574,7 +600,8 @@ export function CardScannerDialog({
       aria-labelledby="scanner-title"
       onClose={onClose}
       onClick={(event) => {
-        if (event.target === event.currentTarget) dialogRef.current?.close();
+        // BRK-01: a binder page (results, "added") never closes on a click beside it: a fast second click must not lose Undo.
+        if (event.target === event.currentTarget && stage !== 'binder') dialogRef.current?.close();
       }}
     >
       <div className="confirm-dialog-body scanner-body">
@@ -630,10 +657,12 @@ export function CardScannerDialog({
             {active === 'binder' && (
               <SegmentedChoice legend={scannerTexts.gridLabel} name="scan-grid" value={grid} options={GRID_OPTIONS} onChange={onGridChange} legendVisible fill />
             )}
+            {fileProblemText}
             <div className="row-actions scanner-actions scanner-actions--cancel-first">
               <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
                 {scannerTexts.cancel}
               </button>
+              {active === 'binder' && chooseImageControl}
               {toCollection ? (
                 <>
                   <button type="button" className="button-primary" onClick={() => void start('beta')}>
@@ -659,12 +688,14 @@ export function CardScannerDialog({
             <p role="alert" className="field-error">
               {problem}
             </p>
+            {fileProblemText}
             <div className="row-actions scanner-actions">
               {problem !== scannerTexts.indexFailed && (
                 <button type="button" className="button-primary" onClick={() => setStage('edition')}>
                   {scannerTexts.retry}
                 </button>
               )}
+              {active === 'binder' && problem !== scannerTexts.indexFailed && chooseImageControl}
               <button type="button" className="button-secondary" onClick={() => dialogRef.current?.close()}>
                 {scannerTexts.close}
               </button>
@@ -740,11 +771,7 @@ export function CardScannerDialog({
               </div>
             )}
             <p className="hint">{active === 'single' ? scannerTexts.frameHint : active === 'binder' ? scannerTexts.binderHint : scannerTexts.continuousHint}</p>
-            {active === 'binder' && fileProblem !== null && (
-              <p role="alert" className="field-error">
-                {fileProblem}
-              </p>
-            )}
+            {fileProblemText}
             {active === 'binder' ? null : active === 'single' ? (
               lastAdded !== null && <p role="status">{lastAdded}</p>
             ) : (
@@ -792,19 +819,7 @@ export function CardScannerDialog({
                   <button type="button" className="button-primary" disabled={index === null} onClick={takeBinderPhoto}>
                     {scannerTexts.takePhoto}
                   </button>
-                  <div className="file-input">
-                    <input
-                      id={fileInputId}
-                      className="visually-hidden"
-                      type="file"
-                      accept="image/*"
-                      disabled={index === null}
-                      onChange={(event) => void chooseBinderFile(event)}
-                    />
-                    <label htmlFor={fileInputId} className="button-secondary" aria-hidden="true">
-                      {scannerTexts.chooseImage}
-                    </label>
-                  </div>
+                  {chooseImageControl}
                 </>
               )}
               <button type="button" className={active === 'continuous' ? 'button-primary' : 'button-secondary'} onClick={() => dialogRef.current?.close()}>
@@ -824,14 +839,8 @@ export function CardScannerDialog({
             targets={targets}
             store={store}
             edition={edition}
-            onNextPage={() => {
-              setBinderPicture(null);
-              setStage('camera');
-            }}
-            onCancel={() => {
-              setBinderPicture(null);
-              setStage('camera');
-            }}
+            onNextPage={leaveBinder}
+            onCancel={leaveBinder}
           />
         )}
 

@@ -19,6 +19,8 @@ import { scannerTexts } from './scannerTexts';
 const THUMB_WIDTH = 120;
 const THUMB_HEIGHT = Math.round(THUMB_WIDTH / CARD_IMAGE_ASPECT);
 const SEARCH_LIMIT = 6;
+/** How long a view ignores clicks after it replaced another one (a double click must not hit the new buttons). */
+const SETTLE_MS = 300;
 
 /** One pocket of the page after recognising. */
 interface Pocket {
@@ -26,8 +28,10 @@ interface Pocket {
   state: PocketState;
   /** The closest cards, closest first. */
   options: Target[];
-  /** What goes to the collection, or null (empty, or not recognised and not chosen yet). */
+  /** What goes to the collection, or null (empty, or not recognised, or only suggested and not accepted yet). */
   chosen: Target | null;
+  /** BRK-02: the closest card of a "check" pocket. It is only shown; one tap on Accept makes it `chosen`. */
+  suggestion: Target | null;
   /** The user chose or confirmed this pocket by hand. */
   byHand: boolean;
 }
@@ -318,6 +322,13 @@ export function BinderPageFlow({
   const [added, setAdded] = useState<Batch[] | null>(null);
   const [busy, setBusy] = useState(false);
   const mounted = useRef(true);
+  /** BRK-01, BRK-09: a click this soon after the view changed is meant for the old view; the new one ignores it. */
+  const settleUntil = useRef(0);
+  const adding = useRef(false);
+  const addedRef = useRef<HTMLParagraphElement>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  /** BRK-05: where the focus goes after the view changed (the button it was on is gone). */
+  const focusAfter = useRef<'added' | 'add' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const total = BINDER_COLUMNS * binderRows(grid);
 
@@ -343,12 +354,13 @@ export function BinderPageFlow({
         if (area === undefined) continue;
         const reading = readPocket(picture, area, index);
         const options = reading.matches.map((match) => targets.get(match.id)).filter((target): target is Target => target !== undefined);
-        const known = reading.state === 'sure' || reading.state === 'check';
         read.push({
           picture: cropResample(picture, area, THUMB_WIDTH, THUMB_HEIGHT),
           state: reading.state,
           options,
-          chosen: known ? (options[0] ?? null) : null,
+          // BRK-02: only a sure reading goes to the collection by itself; a doubtful one waits for Accept.
+          chosen: reading.state === 'sure' ? (options[0] ?? null) : null,
+          suggestion: reading.state === 'check' ? (options[0] ?? null) : null,
           byHand: false,
         });
       }
@@ -360,15 +372,28 @@ export function BinderPageFlow({
     };
   }, [step, grid, rect, picture, index, targets]);
 
+  const settled = () => Date.now() >= settleUntil.current;
+  const settle = () => {
+    settleUntil.current = Date.now() + SETTLE_MS;
+  };
+
+  useEffect(() => {
+    const target = focusAfter.current;
+    focusAfter.current = null;
+    if (target === 'added') addedRef.current?.focus();
+    else if (target === 'add') addButtonRef.current?.focus();
+  }, [added]);
+
   const chosenCount = pockets.filter((pocket) => pocket.chosen !== null).length;
+  /** Pockets with a card in them that nobody has confirmed: they are not added (BRK-02). */
+  const toCheckCount = pockets.filter((pocket) => pocket.chosen === null && (pocket.state === 'check' || pocket.state === 'unknown') && !pocket.byHand).length;
 
   /** Adds one copy per recognised pocket in one go; if any does not fit, everything added so far is taken back. */
   const addAll = async () => {
     const batches = batchesOf(pockets.flatMap((pocket) => (pocket.chosen === null ? [] : [pocket.chosen])));
-    if (batches.length === 0) {
-      setMessage(scannerTexts.pageNothing);
-      return;
-    }
+    if (batches.length === 0 || adding.current) return;
+    // BRK-01: a second click before the first has finished adds nothing.
+    adding.current = true;
     setBusy(true);
     const result = await apply(store, edition, batches, 'add');
     if (result.failed !== null) {
@@ -379,9 +404,13 @@ export function BinderPageFlow({
         if (back.failed !== null) setAdded(result.done.slice(back.done.length));
         setBusy(false);
       }
+      adding.current = false;
       return;
     }
+    adding.current = false;
     if (!mounted.current) return;
+    settle();
+    focusAfter.current = 'added';
     setAdded(result.done);
     setOpen(null);
     setMessage(null);
@@ -389,7 +418,7 @@ export function BinderPageFlow({
   };
 
   const undo = async () => {
-    if (added === null) return;
+    if (added === null || !settled()) return;
     setBusy(true);
     const result = await apply(store, edition, added, 'remove');
     if (!mounted.current) return;
@@ -400,6 +429,8 @@ export function BinderPageFlow({
       setMessage(scannerTexts.collectionNotReady);
       return;
     }
+    settle();
+    focusAfter.current = 'add';
     setAdded(null);
     setMessage(scannerTexts.pageUndone);
   };
@@ -451,12 +482,12 @@ export function BinderPageFlow({
   if (added !== null) {
     return (
       <>
-        <p role="status">{scannerTexts.pageAdded(added.reduce((sum, batch) => sum + batch.copies, 0))}</p>
+        <p role="status" ref={addedRef} tabIndex={-1}>{scannerTexts.pageAdded(added.reduce((sum, batch) => sum + batch.copies, 0))}</p>
         <div className="row-actions scanner-actions">
           <button type="button" className="button-secondary" disabled={busy} onClick={() => void undo()}>
             {scannerTexts.undo}
           </button>
-          <button type="button" className="button-primary" onClick={onNextPage}>
+          <button type="button" className="button-primary" onClick={() => settled() && onNextPage()}>
             {scannerTexts.nextPage}
           </button>
         </div>
@@ -471,7 +502,9 @@ export function BinderPageFlow({
       <ul className="binder-grid" aria-label={scannerTexts.resultsLabel}>
         {pockets.map((pocket, position) => {
           const state = stateOf(pocket);
-          const name = pocket.chosen === null ? null : cardNameText(pocket.chosen.card);
+          const shown = pocket.byHand ? pocket.chosen : (pocket.chosen ?? pocket.suggestion);
+          const suggested = !pocket.byHand && pocket.chosen === null ? pocket.suggestion : null;
+          const name = shown === null ? null : cardNameText(shown.card);
           return (
             <li key={position}>
               <button
@@ -480,11 +513,11 @@ export function BinderPageFlow({
                 data-state={state}
                 aria-pressed={open === position}
                 aria-label={scannerTexts.pocketLabel(position + 1, name, STATE_TEXT[state]())}
-                onClick={() => setOpen(open === position ? null : position)}
+                onClick={() => settled() && setOpen(open === position ? null : position)}
               >
                 <span className="binder-cell-pictures" aria-hidden="true">
                   <PictureCanvas picture={pocket.picture} className="binder-cell-picture" />
-                  {pocket.chosen === null ? <span className="card-image card-image--missing" /> : <CardThumb target={pocket.chosen} />}
+                  {shown === null ? <span className="card-image card-image--missing" /> : <CardThumb target={shown} />}
                 </span>
                 <span className="binder-cell-name" lang="en" aria-hidden="true">
                   {name ?? ' '}
@@ -493,6 +526,16 @@ export function BinderPageFlow({
                   {STATE_TEXT[state]()}
                 </span>
               </button>
+              {suggested !== null && (
+                <button
+                  type="button"
+                  className="button-secondary binder-accept"
+                  aria-label={scannerTexts.acceptLabel(position + 1, cardNameText(suggested.card))}
+                  onClick={() => settled() && change(position, { ...pocket, chosen: suggested, byHand: true })}
+                >
+                  {scannerTexts.acceptSuggestion}
+                </button>
+              )}
             </li>
           );
         })}
@@ -500,16 +543,19 @@ export function BinderPageFlow({
       {open !== null && opened !== undefined && (
         <PocketEditor key={open} number={open + 1} pocket={opened} cards={cards} targets={targets} onChange={(next) => change(open, next)} onDone={() => setOpen(null)} />
       )}
+      {/* BRK-02, BRK-10: what is not added is said next to the button; with nothing to add the reason is always shown. */}
       {message !== null && (
         <p role="status" className="hint">
           {message}
         </p>
       )}
+      {chosenCount === 0 && message === null && <p className="hint">{scannerTexts.pageNothing}</p>}
+      {toCheckCount > 0 && <p className="hint">{scannerTexts.toCheck(toCheckCount)}</p>}
       <div className="row-actions scanner-actions">
         <button type="button" className="button-secondary" onClick={onNextPage}>
           {scannerTexts.backToCamera}
         </button>
-        <button type="button" className="button-primary" disabled={busy} onClick={() => void addAll()}>
+        <button type="button" className="button-primary" ref={addButtonRef} disabled={busy || chosenCount === 0} onClick={() => void addAll()}>
           {scannerTexts.addPage(chosenCount)}
         </button>
       </div>

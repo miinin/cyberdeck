@@ -274,3 +274,15 @@ export function moveCorner(rect: Rect, corner: Corner, x: number, y: number, pic
   const nextY = top ? Math.min(fixedY - min, Math.max(0, y)) : Math.max(fixedY + min, Math.min(picture.height, y));
   return clampRect({ x: Math.min(fixedX, nextX), y: Math.min(fixedY, nextY), width: Math.abs(nextX - fixedX), height: Math.abs(nextY - fixedY) }, picture, min);
 }
+
+/** BRK-08: the shorter side of a page picture is at least this many pixels. */
+export const MIN_PICTURE_SIDE = 300;
+/** BRK-08: the longer side is at most this many times the shorter one. */
+export const MAX_PICTURE_RATIO = 4;
+
+/** Whether a picture of this size can hold a binder page: not tiny, not a thin strip. */
+export function usablePictureSize(width: number, height: number): boolean {
+  const short = Math.min(width, height);
+  const long = Math.max(width, height);
+  return short >= MIN_PICTURE_SIDE && long <= short * MAX_PICTURE_RATIO;
+}

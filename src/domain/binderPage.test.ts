@@ -6,6 +6,7 @@ import {
   MAX_FILE_BYTES,
   MAX_PICTURE_SIDE,
   acceptableImageFile,
+  usablePictureSize,
   binderAspect,
   binderRows,
   clampRect,
@@ -155,9 +156,23 @@ describe('readPocket', () => {
     expect(reading.matches[0]?.id).toBe('card-2');
   });
 
+  // The shift and turn search for a pocket that matches nothing is slow under a full parallel run (T-181-0).
   it('does not call a picture of something else a sure card', () => {
     const reading = readPocket(art(99), { x: 0, y: 0, width: 120, height: 168 }, index);
     expect(reading.state).not.toBe('sure');
     expect(reading.state).not.toBe('empty');
+  }, 20_000);
+});
+
+describe('usablePictureSize (BRK-08)', () => {
+  it('rejects tiny pictures and thin strips, accepts ordinary ones', () => {
+    expect(usablePictureSize(1, 1)).toBe(false);
+    expect(usablePictureSize(8, 8)).toBe(false);
+    expect(usablePictureSize(299, 2000)).toBe(false);
+    expect(usablePictureSize(30000, 3)).toBe(false);
+    expect(usablePictureSize(1300, 300)).toBe(false);
+    expect(usablePictureSize(1200, 300)).toBe(true);
+    expect(usablePictureSize(300, 300)).toBe(true);
+    expect(usablePictureSize(3000, 4000)).toBe(true);
   });
 });

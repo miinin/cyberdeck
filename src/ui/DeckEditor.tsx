@@ -452,6 +452,14 @@ export function DeckEditor({
   const grouped = useMemo(() => groupDeck(content, cardsByKey), [content, cardsByKey]);
 
   const collectionReady = collection.phase === 'ready';
+  // The tab shows the deck's name (the page title is set by the app; this runs after it for a deck, and again on a rename).
+  useEffect(() => {
+    if (phase !== 'ready' || content.name === '') return;
+    document.title = `${content.name} · ${texts.appName}`;
+    return () => {
+      document.title = `${deckTexts.navDecks} · ${texts.appName}`;
+    };
+  }, [phase, content.name]);
   const missingCards = useMemo(() => {
     const rows: MissingCard[] = [];
     for (const [key, count] of allCounts) {

@@ -12774,6 +12774,12 @@ body:has(.mark-banner) .site-footer {
    the width too, also on a 320 px screen. 100cqw is the width of the scanner body. */
 .scanner-body {
   container-type: inline-size;
+  inline-size: min(36rem, 100%);
+}
+
+/* T-181-0: the inline-size containment above makes the dialog's auto grid column shrink to nothing on a phone. */
+.scanner-dialog[open] {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .scanner-viewport--binder {
@@ -12861,6 +12867,11 @@ body:has(.mark-banner) .site-footer {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.binder-accept {
+  inline-size: 100%;
+  margin-block-start: var(--space-1);
 }
 
 .binder-cell {
