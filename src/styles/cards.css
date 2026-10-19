@@ -889,8 +889,14 @@ body:has(.mark-banner) .site-footer {
   inline-size: 5.5rem;
 }
 
+.card-table .cell-decks {
+  text-align: center;
+}
+
 .card-table .cell-decks .card-decks {
   margin: 0;
+  font-size: inherit;
+  font-variant-numeric: tabular-nums;
 }
 
 .card-table .cell-collection .count-control {
