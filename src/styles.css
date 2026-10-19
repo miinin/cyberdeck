@@ -1404,11 +1404,6 @@ main {
   outline-offset: 2px;
 }
 
-/* "Vain omistetut" (UX.md 6.6) */
-.owned-only {
-  margin-block-start: var(--space-2);
-}
-
 @media (min-width: 40rem) {
   .field input[type='search'] {
     max-width: 24rem;
@@ -1753,61 +1748,6 @@ main {
   min-block-size: var(--control-h);
 }
 
-/* Enlarged image (T-027 UX). */
-.card-dialog-body {
-  margin: auto;
-  width: min(30rem, 100%);
-  padding: var(--pad-dialog);
-}
-
-.card-dialog-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
-.card-dialog-header h2 {
-  margin: 0;
-  font-size: var(--font-size-card-name);
-  line-height: var(--line-height-tight);
-  overflow-wrap: anywhere;
-}
-
-.card-dialog.has-details .card-dialog-body {
-  width: min(48rem, 100%);
-}
-
-.card-dialog-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  align-items: flex-start;
-}
-
-.card-dialog-details {
-  flex: 1 1 14rem;
-  min-width: 0;
-  display: grid;
-  gap: var(--space-3);
-}
-
-.card-dialog-details h3 {
-  margin: 0 0 var(--space-1);
-}
-
-.card-dialog-details ul {
-  margin: 0;
-  padding-left: var(--space-4);
-}
-
-.card-dialog-image {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
 body:has(dialog[open]) {
   overflow: hidden;
 }
@@ -1951,211 +1891,6 @@ body:has(dialog[open]) {
   }
 }
 
-/* Card grid (T-034): image on top, then name, type and color, game values and the collection control. */
-.card-grid {
-  --card-min: 14rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), 100%), 1fr));
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.card-box {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-
-.card-box:hover,
-.card-box:focus-within {
-  background: var(--color-surface-raised);
-}
-
-/* Not owned: neutral grey count (T-035). */
-.card-box {
-  --color-count: var(--color-text-muted);
-}
-
-/* Owned card (count > 0). The count itself carries the information, not the colour (UX.md 7.5). */
-.card-box.is-owned {
-  border-color: color-mix(in srgb, var(--color-accent) 38%, var(--color-border));
-  --color-count: var(--color-accent-edge);
-}
-
-.card-box.is-playset {
-  border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border));
-  --color-count: var(--color-success);
-}
-
-.card-box.is-owned:hover,
-.card-box.is-owned:focus-within {
-  background: var(--color-owned-hover);
-}
-
-.card-name {
-  margin: 0;
-  font-size: var(--font-size-card-name);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
-  letter-spacing: var(--letter-spacing-body);
-  text-transform: none;
-  overflow-wrap: anywhere;
-}
-
-/* Cost gem beside the name, as in the deck editor (T-050). */
-.card-head {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-}
-
-.card-cost {
-  flex: none;
-  margin: 0;
-}
-
-.card-cost dd {
-  margin: 0;
-  font-family: var(--font-mono);
-}
-
-/* Missing cost: a dash in the same 1.75 rem slot as the gem. */
-.card-cost .card-stat {
-  display: grid;
-  place-items: center;
-  min-inline-size: 1.75rem;
-  min-block-size: 1.75rem;
-}
-
-.card-head .card-name {
-  min-width: 0;
-  padding-top: 0.125rem;
-}
-
-/* Type badge, Power and RAM chips and rarity on one compact row. */
-.card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
-}
-
-/* Type row and count line up across a grid row: the free space goes above them, whatever the name's length (T-084). */
-.card-box > .card-meta {
-  margin-top: auto;
-}
-
-.card-box > .card-meta ~ .card-foot {
-  margin-top: 0;
-}
-
-.card-type {
-  margin: 0;
-}
-
-.card-type .card-color {
-  display: inline;
-  white-space: nowrap;
-}
-
-/* A flex group, not display: contents, so the list keeps its semantics. */
-.card-stats {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-2);
-  margin: 0;
-}
-
-.card-stat {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
-}
-
-.card-stat dd {
-  margin: 0;
-  color: var(--color-text);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-chip {
-  padding: 0 var(--space-2);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-raised);
-  line-height: 1.6;
-}
-
-.stat-chip dt {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.stat-chip dd {
-  font-weight: var(--font-weight-bold);
-}
-
-.card-rarity dd {
-  color: var(--color-text-muted);
-  font-family: inherit;
-}
-
-/* Bottom edge: deck count on the left, collection count or stepper on the right. */
-/*
- * UX-13 (T-174): two columns, "Pakoissa" on the left (its place is kept when it is empty) and the control always in the right one,
- * so the − / + sit in the same place in every box of a row, with or without the deck line.
- */
-.card-foot {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: auto;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
-}
-
-.card-foot .card-decks {
-  margin: 0;
-}
-
-
-/* UX-19 (T-174): a link beside the control ("Proxy-jonoon") goes first, so the − / + stay at the right edge in every list. */
-.card-collection > .link-button {
-  order: -1;
-}
-
-.card-collection > .count-control {
-  margin-inline-start: auto;
-}
-
-/* A single child (no deck line) must still sit in the right column. */
-.card-collection {
-  grid-column: 2;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-1) var(--space-3);
-  margin-inline-start: auto;
-}
-
-.card-collection .count-control {
-  justify-content: center;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
 /* Card image (T-027, T-034): the button opens the enlarged image. */
 .card-image {
   display: block;
@@ -2268,19 +2003,6 @@ body:has(dialog[open]) {
 /* Yellow is never a thin line on the light background (UX.md 3.1, T-118 UX-118-33): the yellow type uses the text colour. */
 :root[data-theme='light'] .type-badge-yellow {
   --badge-color: var(--color-text);
-}
-
-/* List toolbar (T-040): view selector and the edit switch above the list. */
-.list-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-6);
-  margin-block: 0 var(--space-3);
-}
-
-.list-toolbar .edit-switch {
-  margin-inline-start: auto;
 }
 
 /*
@@ -2504,83 +2226,9 @@ body:has(dialog[open]) {
   outline-offset: 2px;
 }
 
-.card-table {
-  inline-size: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-  /* Not owned: neutral grey count, as in the grid. */
-  --color-count: var(--color-text-muted);
-}
-
-.card-table th,
-.card-table td {
-  padding: var(--space-1) var(--space-2);
-  border-bottom: 1px solid var(--color-border);
-  text-align: start;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-.card-table thead th {
-  background: var(--color-surface-raised);
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-bold);
-}
-
-.card-table .cell-name {
-  min-inline-size: 10rem;
-  font-weight: var(--font-weight-bold);
-  white-space: normal;
-}
-
-.card-table .cell-number {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-
-.card-table thead .cell-number {
-  font-family: inherit;
-}
-
-.card-table .cell-image {
-  inline-size: 2.5rem;
-  min-inline-size: 2.5rem;
-}
-
 .card-table .cell-image .card-image-button,
 .card-table .cell-image .card-image {
   inline-size: 2.5rem;
-}
-
-.card-table .cell-collection .count-control {
-  justify-content: flex-start;
-  min-width: 0;
-}
-
-.card-table .count-control--readonly {
-  min-inline-size: 3.5rem;
-}
-
-.card-table tbody tr:hover {
-  background: var(--color-surface-raised);
-}
-
-/* Row state: a 1 px-wide edge like the grid box, plus the coloured count and the check mark. */
-.card-table tr.is-owned {
-  --color-count: var(--color-accent-edge);
-}
-
-.card-table tr.is-owned > :first-child {
-  box-shadow: inset 3px 0 0 var(--color-accent-edge);
-}
-
-.card-table tr.is-playset {
-  --color-count: var(--color-success);
-}
-
-.card-table tr.is-playset > :first-child {
-  box-shadow: inset 3px 0 0 var(--color-success);
 }
 
 /*
@@ -3213,24 +2861,6 @@ h3,
   overflow-wrap: anywhere;
 }
 
-.card-table .sort-button {
-  background: none;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-
-.card-table .sort-button:hover {
-  text-decoration: underline;
-}
-
-.card-table .sort-button:focus-visible {
-  outline: 2px solid var(--color-focus, currentColor);
-  outline-offset: 2px;
-}
-
 .name-sub {
   color: var(--color-text-muted);
 }
@@ -3333,25 +2963,12 @@ h3,
   gap: var(--space-1);
 }
 
-.catalog-layout {
-  display: grid;
-  gap: var(--space-4);
-  align-items: start;
-}
-
-.catalog-filters,
-.catalog-results {
-  min-width: 0;
-}
-
-.catalog-filters,
 .editor-filters {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.catalog-filters .card-filters,
 .editor-filters .card-filters {
   margin-block-end: 0;
 }
@@ -3474,65 +3091,11 @@ h3,
   color: var(--color-text);
 }
 
-/* Image size: the smallest grid card still fits the count control. */
-.catalog-results[data-image-size='small'] .card-grid,
-.have-want-results[data-image-size='small'] .card-grid {
-  --card-min: 14rem;
-}
-
-.catalog-results[data-image-size='medium'] .card-grid,
-.have-want-results[data-image-size='medium'] .card-grid {
-  --card-min: 18rem;
-}
-
-.catalog-results[data-image-size='large'] .card-grid,
-.have-want-results[data-image-size='large'] .card-grid {
-  --card-min: 25rem;
-}
-
 @media (min-width: 64rem) {
-  .catalog-layout {
-    grid-template-columns: 17rem minmax(0, 1fr);
-    gap: var(--space-6);
-  }
 
   .page-head-status {
     align-items: flex-end;
     text-align: end;
-  }
-
-  .catalog-filters .filters-heading {
-    position: static;
-    width: auto;
-    height: auto;
-    margin: 0;
-    overflow: visible;
-    clip-path: none;
-    white-space: normal;
-  }
-
-  /* Side panel: each group stacked, the choices wrap inside it. */
-  .catalog-filters .field input[type='search'] {
-    max-width: none;
-  }
-
-  .catalog-filters .card-filters .fieldsets {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .catalog-filters .card-filters fieldset {
-    display: block;
-    margin-block-start: var(--space-4);
-  }
-
-  .catalog-filters .card-filters legend {
-    margin-block-end: var(--space-2);
-  }
-
-  .catalog-filters .owned-only .option {
-    font-weight: var(--font-weight-normal);
   }
 }
 
@@ -5347,8 +4910,10 @@ button.legality:focus-visible {
 
 .language-switch .flag-button {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1px;
   min-width: var(--target-min);
   min-height: var(--target-min);
   padding: 0;
@@ -5375,6 +4940,16 @@ button.legality:focus-visible {
 .language-switch .flag-button:focus-visible {
   outline: 2px solid var(--color-header-text);
   outline-offset: 2px;
+}
+
+/* T-181: the code is visible text (mono 0.75 rem) under the flag; the button keeps its 44 px height. */
+.language-switch .flag-code {
+  color: var(--color-header-text);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  letter-spacing: 0.04em;
 }
 
 .language-switch .flag-button svg {
@@ -5487,10 +5062,6 @@ section[aria-labelledby='have-heading'] {
   gap: var(--space-1);
 }
 
-.card-dialog-details .version-list {
-  padding-left: 0;
-}
-
 .version-row {
   display: flex;
   align-items: center;
@@ -5556,10 +5127,6 @@ section[aria-labelledby='have-heading'] {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
   gap: var(--space-2);
-}
-
-.card-dialog-details .art-gallery {
-  padding-left: 0;
 }
 
 .art-tile {
@@ -5651,10 +5218,6 @@ section[aria-labelledby='have-heading'] {
   line-height: 1.55;
 }
 
-.card-dialog-details .detail-availability {
-  grid-column: 1 / -1;
-}
-
 .availability-notice {
   margin: 0;
   padding: var(--space-1) var(--space-2);
@@ -5665,18 +5228,6 @@ section[aria-labelledby='have-heading'] {
 .availability-main {
   margin: 0;
   font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.card-dialog-details .availability-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: var(--space-1) 0 0;
-  padding: 0;
-  list-style: none;
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
   overflow-wrap: anywhere;
 }
 
@@ -5704,32 +5255,6 @@ section[aria-labelledby='have-heading'] {
 
 .card-box--art {
   position: relative;
-}
-
-/* T-077: the set filter looks like the other fields and has room above it; long rarity names span both columns. */
-.set-filter {
-  margin-block-start: var(--space-4);
-}
-
-.set-filter select {
-  block-size: var(--target-min);
-  max-width: 100%;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 0;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font: inherit;
-}
-
-.set-filter select:hover,
-.set-filter select:focus-visible {
-  border-color: var(--color-text);
-  outline: none;
-}
-
-.set-filter select:focus-visible {
-  box-shadow: inset 0 0 0 1px var(--color-text);
 }
 
 /* T-078: two-word rarity names ("Secret Rare") stay on one line in the two-column filter grid. */
@@ -5806,7 +5331,6 @@ section[aria-labelledby='have-heading'] {
   text-overflow: ellipsis;
 }
 
-.card-rarity dd,
 .options-even .option {
   white-space: nowrap;
 }
@@ -5871,18 +5395,6 @@ section[aria-labelledby='have-heading'] {
   pointer-events: none;
 }
 
-/* T-081: the card details fit the viewport height; the image never exceeds it. */
-.card-dialog-image {
-  width: auto;
-  max-width: 100%;
-  max-height: 60dvh;
-  object-fit: contain;
-}
-
-.card-dialog:not(.has-details) .card-dialog-image {
-  max-height: calc(100dvh - 9rem);
-}
-
 .art-thumb {
   height: 7rem;
   object-fit: contain;
@@ -5895,93 +5407,6 @@ section[aria-labelledby='have-heading'] {
 .art-gallery {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
   align-items: stretch;
-}
-
-.card-dialog-details .detail-collection {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
-}
-
-.card-dialog-details .detail-collection h3 {
-  flex: 1 0 100%;
-}
-
-.card-dialog-details .detail-collection p {
-  margin: 0;
-}
-
-@media (min-width: 64rem) {
-  .card-dialog.has-details .card-dialog-body {
-    box-sizing: border-box;
-    width: min(100rem, 100%);
-    min-height: calc(100dvh - 2 * var(--space-3));
-    padding: var(--space-3);
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    /* Header, tags (T-152), details: the tags have their own row beside the image, never one below it. */
-    grid-template-rows: auto auto minmax(0, 1fr);
-    column-gap: var(--space-4);
-  }
-
-  .card-dialog.has-details .card-tags {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .card-dialog.has-details .card-dialog-header {
-    grid-column: 2;
-    grid-row: 1;
-    margin-bottom: var(--space-2);
-  }
-
-  .card-dialog.has-details .card-dialog-content {
-    display: contents;
-  }
-
-  .card-dialog.has-details .card-dialog-image {
-    grid-column: 1;
-    grid-row: 1 / -1;
-    height: calc(100dvh - 4 * var(--space-3) - 2px);
-    max-height: none;
-  }
-
-  .card-dialog.has-details .card-dialog-details {
-    grid-column: 2;
-    grid-row: 3;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2) var(--space-4);
-    align-content: start;
-  }
-
-  .card-dialog.has-details .card-dialog-details > .detail-collection,
-  .card-dialog.has-details .card-dialog-details > .card-versions {
-    grid-column: 1 / -1;
-  }
-
-  .card-dialog-details .art-thumb {
-    height: 6rem;
-  }
-
-  .card-dialog-details .art-tile {
-    position: relative;
-  }
-
-  .card-dialog-details .art-pick {
-    min-height: 0;
-  }
-
-  /* The breakdown opens over the neighbours' space, so no tile changes size or moves. */
-  .card-dialog-details .art-breakdown[open] .version-list {
-    position: absolute;
-    inset-inline: 0;
-    z-index: 2;
-    padding: var(--space-1);
-    border: 1px solid var(--color-border-strong);
-    background: var(--color-bg);
-    min-width: 12rem;
-  }
 }
 
 /* D-022: the base tile counts Retail and Beta on two rows; the other tiles keep their one counter at the bottom. */
@@ -6010,16 +5435,6 @@ section[aria-labelledby='have-heading'] {
   color: var(--color-text-muted);
 }
 
-/*
- * Phone layout (T-087, T-107). Header: one row with the logo and the icon tools; the navigation is a fixed bottom bar
- * (T-107 block at the end of the file). Toolbar: the edit switch starts its own row from the left.
- */
-@media (max-width: 39.99rem) {
-  .list-toolbar .edit-switch {
-    margin-inline-start: 0;
-  }
-}
-
 /* "Näytä N korttia" at the end of the collapsed filter panel (T-087). */
 .filter-show-results {
   width: 100%;
@@ -6041,142 +5456,9 @@ section[aria-labelledby='have-heading'] {
     display: none;
   }
 
-  .card-dialog-details .art-tile:has(> .art-pick, > .art-thumb) {
-    display: grid;
-    grid-template-columns: 5.5rem minmax(0, 1fr);
-    column-gap: var(--space-3);
-    row-gap: var(--space-1);
-    align-items: start;
-  }
-
-  .card-dialog-details .art-tile > * {
-    grid-column: 2;
-  }
-
-  .card-dialog-details .art-tile > .art-pick,
-  .card-dialog-details .art-tile > .art-thumb {
-    grid-column: 1;
-    grid-row: 1 / span 6;
-  }
-
-  .card-dialog-details .art-thumb {
-    width: 100%;
-    height: auto;
-  }
-
-  .card-dialog-details .art-count:not(.art-count--editions) {
-    display: flex;
-    justify-content: flex-end;
-  }
-
   .trade-share .hint {
     display: block;
     margin-block-start: var(--space-1);
-  }
-}
-
-/*
- * Card details on phones (T-090): a full-screen view instead of a box on a backdrop. The name and the close
- * button stay at the top while the view scrolls (the view is the page; nothing scrolls inside it). The
- * image leaves room for the counts on the first screen. Every section is one row: label left, control right.
- */
-@media (max-width: 39.99rem) {
-  .card-dialog.has-details {
-    padding: 0;
-    background: var(--color-bg);
-  }
-
-  .card-dialog.has-details .card-dialog-body {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 100dvh;
-    margin: 0;
-    padding: 0 var(--space-4) var(--space-6);
-    border: 0;
-  }
-
-  .card-dialog.has-details .card-dialog-header {
-    position: sticky;
-    top: 0;
-    z-index: 3;
-    align-items: center;
-    margin: 0 calc(-1 * var(--space-4)) var(--space-3);
-    padding: var(--space-2) var(--space-4);
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-bg);
-  }
-
-  .card-dialog.has-details .card-dialog-content {
-    display: block;
-  }
-
-  .card-dialog.has-details .card-dialog-image {
-    margin-inline: auto;
-    max-height: 46dvh;
-  }
-
-  .card-dialog.has-details .card-dialog-details {
-    gap: 0;
-    margin-block-start: var(--space-3);
-  }
-
-  .card-dialog-details > section {
-    padding-block: var(--space-3);
-    border-top: 1px solid var(--color-border);
-  }
-
-  .card-dialog-details > section:not(.card-versions) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-1) var(--space-3);
-  }
-
-  .card-dialog-details > section:not(.card-versions) > h3 {
-    grid-column: 1;
-    margin: 0;
-  }
-
-  .card-dialog-details > section:not(.card-versions) > .count-control {
-    grid-column: 2;
-  }
-
-  .card-dialog-details > section:not(.card-versions) > :not(h3):not(.count-control) {
-    grid-column: 1 / -1;
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-  }
-
-  .card-dialog-details > section:not(.card-versions) > ul {
-    color: var(--color-text);
-    font-size: var(--font-size-base);
-  }
-
-  /* Versions: compact rows, a small picture, the counters at the right edge. */
-  .card-dialog-details .art-gallery {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0;
-  }
-
-  .card-dialog-details .art-tile:has(> .art-pick, > .art-thumb) {
-    grid-template-columns: 3.75rem minmax(0, 1fr);
-  }
-
-  .card-dialog-details .art-tile {
-    padding: var(--space-2) 0;
-    border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-  }
-
-  .card-dialog-details .art-tile:last-child {
-    border-bottom: 0;
-  }
-
-  .card-dialog-details .art-tile.is-selected .art-thumb {
-    outline: 2px solid var(--color-accent-2);
-    outline-offset: 1px;
   }
 }
 
@@ -6191,111 +5473,10 @@ section[aria-labelledby='have-heading'] {
     border: 0;
   }
 
-  .card-table,
-  .card-table tbody {
-    display: block;
-  }
-
-  .card-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  .card-table tbody tr {
-    display: grid;
-    grid-template-columns: 3.5rem repeat(5, auto) minmax(0, 1fr);
-    grid-template-areas:
-      'img name name name name name name'
-      'img type rarity cost power ram .'
-      'img count count count count count count';
-    align-items: center;
-    gap: var(--space-1) var(--space-2);
-    padding: var(--space-2) 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .card-table tbody th,
-  .card-table tbody td {
-    padding: 0;
-    border: 0;
-  }
-
-  .card-table .cell-image {
-    grid-area: img;
-    align-self: start;
-    inline-size: 3.5rem;
-  }
-
   .card-table .cell-image .card-image-button,
   .card-table .cell-image .card-image {
     inline-size: 3.5rem;
   }
-
-  .card-table .cell-name {
-    grid-area: name;
-    min-inline-size: 0;
-  }
-
-  .card-table .cell-type {
-    grid-area: type;
-  }
-
-  .card-table .cell-rarity {
-    grid-area: rarity;
-  }
-
-  .card-table .cell-number:nth-of-type(4) {
-    grid-area: cost;
-  }
-
-  .card-table .cell-number:nth-of-type(5) {
-    grid-area: power;
-  }
-
-  .card-table .cell-number:nth-of-type(6) {
-    grid-area: ram;
-  }
-
-  .card-table tbody .cell-number::before {
-    content: attr(data-label) ' ';
-    color: var(--color-text-muted);
-    font-family: var(--font-sans);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-  }
-
-  .card-table .cell-collection {
-    grid-area: count;
-    justify-self: end;
-  }
-
-  .card-table tr.is-owned > :first-child,
-  .card-table tr.is-playset > :first-child {
-    box-shadow: none;
-  }
-
-  .card-table tr.is-owned {
-    box-shadow: inset 3px 0 0 var(--color-accent-edge);
-    padding-inline-start: var(--space-2);
-  }
-
-  .card-table tr.is-playset {
-    box-shadow: inset 3px 0 0 var(--color-success);
-    padding-inline-start: var(--space-2);
-  }
-}
-
-/*
- * T-091: the whole card at once. Tapping the image (or "Näytä kuva koko ruudulla") shows it on the whole
- * screen; a tap or Esc returns. On phones the details start with the image and the counts side by side,
- * so the first screen holds the card and its counts without scrolling.
- */
-.card-zoom-open {
-  display: none;
 }
 
 .card-zoom {
@@ -6318,62 +5499,6 @@ section[aria-labelledby='have-heading'] {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-}
-
-.card-dialog-image {
-  cursor: zoom-in;
-}
-
-@media (max-width: 39.99rem) {
-  .card-dialog.has-details .card-dialog-content {
-    display: grid;
-    grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
-    gap: var(--space-2) var(--space-3);
-    align-items: start;
-  }
-
-  .card-dialog.has-details .card-dialog-image {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    width: 100%;
-    max-height: none;
-    margin: 0;
-  }
-
-  .card-dialog.has-details .card-zoom-open {
-    display: block;
-    grid-column: 1;
-    grid-row: 3;
-    width: 100%;
-  }
-
-  .card-dialog.has-details .card-dialog-details {
-    display: contents;
-  }
-
-  .card-dialog-details > section.detail-collection,
-  .card-dialog-details > section.detail-want {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-1);
-    grid-column: 2;
-    padding-block: 0;
-    border-top: 0;
-  }
-
-  .card-dialog-details > section.detail-collection {
-    grid-row: 1;
-  }
-
-  .card-dialog-details > section.detail-want {
-    grid-row: 2;
-  }
-
-  .card-dialog-details > section.card-versions,
-  .card-dialog-details > section.detail-decks {
-    grid-column: 1 / -1;
-  }
 }
 
 /*
@@ -7116,46 +6241,6 @@ section[aria-labelledby='have-heading'] {
 }
 
 /*
- * Phone list rows wrap (T-023): with large text the type, rarity and values move to the next line instead of
- * widening the row past the screen. The picture is pinned to the left of the row.
- */
-@media (max-width: 39.99rem) {
-  .card-table tbody tr {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    min-block-size: 5.5rem;
-    padding-inline-start: calc(3.5rem + 2 * var(--space-2));
-  }
-
-  .card-table tbody tr.is-owned,
-  .card-table tbody tr.is-playset {
-    padding-inline-start: calc(3.5rem + 2 * var(--space-2));
-  }
-
-  .card-table .cell-image {
-    position: absolute;
-    inset-block-start: var(--space-2);
-    inset-inline-start: var(--space-2);
-  }
-
-  .card-table .cell-name,
-  .card-table .cell-collection {
-    flex-basis: 100%;
-  }
-
-  .card-table .cell-collection {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .card-table .cell-number {
-    white-space: nowrap;
-  }
-}
-
-/*
  * T-096: chart colours of their own. --color-info and --color-accent-2 are the same cyan in the dark theme,
  * so Program and Gear looked alike. Unit yellow, Program cyan, Gear magenta; darker shades in the light theme.
  */
@@ -7692,7 +6777,7 @@ section[aria-labelledby='have-heading'] {
   padding: var(--space-2);
 }
 
-.proxy-pick .card-head .card-cost,
+.proxy-pick .card-strip .card-cost,
 .proxy-pick .card-meta {
   display: none;
 }
@@ -9164,11 +8249,6 @@ button.pocket-link {
   flex: none;
   margin-block-start: 0;
 }
-
-.list-toolbar {
-  gap: var(--space-2) var(--space-3);
-  margin-block-end: var(--space-2);
-}
 @media (max-width: 39.99rem) {
   /* On a phone the filters are chosen in the folded panel, which then jumps to the results: no row is kept empty (T-084 is for wide screens). */
   .active-filters:empty {
@@ -9320,11 +8400,6 @@ button.pocket-link {
 }
 .info-tip-pop[hidden] {
   display: none;
-}
-
-.detail-proxy {
-  grid-column: 1 / -1;
-  margin-block: var(--space-3);
 }
 
 /* On a phone the head actions start from the left (T-118, UX-118-09: the same compact scan button as on a desktop, no floating one). */
@@ -9887,43 +8962,6 @@ button.pocket-link {
   }
 }
 
-/* Marking own cards (T-123): a button with a hint instead of the "Muokkaa kokoelmaa" switch, and a banner while it is on. */
-.mark-open-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
-}
-
-.mark-open {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.mark-empty-hint {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.mark-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-4);
-  margin-block: 0 var(--space-3);
-  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
-  border-inline-start: 3px solid var(--color-accent);
-  background: color-mix(in srgb, var(--color-bg) 55%, var(--color-surface));
-}
-
-.mark-banner .segmented-option {
-  padding-inline: var(--space-3);
-  font-size: var(--font-size-sm);
-}
-
 /*
  * Gallery (T-123): only the card art on a dark ground, in both themes. The header and footer step aside (the app hides
  * them), the bar floats and fades, and the page itself scrolls: no scroll area inside. The palette below is the dark one,
@@ -10302,121 +9340,8 @@ html[data-gallery='on'] main {
   }
 }
 
-/* Icon and text apart, like the scan button (T-123). */
-.gallery-open {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/*
- * Lighter Cards page top (T-125). One search row, one tool row, and in marking mode one banner row: thin dim frames, no
- * chamfers, 40 px high controls. Yellow only where something is active. Below 40 rem the tool row is icons (the words stay
- * as accessible names), so it fits on one row at 320 px.
- */
-@media (max-width: 63.99rem) {
-  .catalog-layout {
-    gap: var(--space-2);
-  }
-}
-
 .page-head h1 {
   padding-block-end: var(--space-2);
-}
-
-.catalog-filters .search-row .field input[type='search'],
-.catalog-filters .filter-toggle {
-  block-size: 2.5rem;
-  min-block-size: 2.5rem;
-}
-
-.catalog-filters .search-row .field input[type='search'] {
-  border-bottom-width: 1px;
-}
-
-.catalog-filters .filter-toggle,
-.list-toolbar .button-secondary,
-.mark-banner .button-secondary {
-  min-block-size: 2.5rem;
-  padding-block: 0;
-  padding-inline: var(--space-3);
-  font-size: var(--font-size-sm);
-  clip-path: none;
-}
-
-.catalog-filters .filter-toggle::before,
-.list-toolbar .button-secondary::before,
-.mark-banner .button-secondary::before {
-  clip-path: none;
-}
-
-.list-toolbar {
-  gap: var(--space-2);
-  margin-block-end: var(--space-2);
-}
-
-.list-toolbar .segmented,
-.mark-banner .segmented {
-  border-width: 1px;
-}
-
-.list-toolbar .segmented-option,
-.mark-banner .segmented-option {
-  gap: var(--space-2);
-  block-size: calc(2.5rem - 2px);
-  padding-inline: var(--space-3);
-  font-size: var(--font-size-sm);
-}
-
-.list-toolbar .segmented-option + .segmented-option,
-.mark-banner .segmented-option + .segmented-option {
-  border-inline-start-width: 1px;
-}
-
-.toolbar-icon {
-  flex: none;
-}
-
-.list-toolbar .mark-open-row {
-  flex: none;
-  margin-inline-start: auto;
-}
-
-.view-options {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-4);
-  min-inline-size: 0;
-}
-
-.view-options .sort-select {
-  margin-block-end: 0;
-}
-
-.mark-banner {
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
-}
-
-.mark-banner-title {
-  flex: none;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-}
-
-.mark-banner-actions {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: var(--space-2);
-  margin-inline-start: auto;
-}
-
-.mark-banner .missing-add {
-  flex: 1 1 100%;
-  margin: 0;
 }
 
 @media (max-width: 39.99rem) {
@@ -10445,67 +9370,15 @@ html[data-gallery='on'] main {
   .page-head-status .status-line {
     font-size: 0.8125rem;
   }
-
-  /* The row fits at 320 px, so it never wraps; the empty-collection reminder is the one thing that gets a row below. */
-  .list-toolbar .mark-open-row {
-    display: contents;
-  }
-
-  .list-toolbar .mark-open {
-    margin-inline-start: auto;
-  }
-
-  .list-toolbar .segmented-option {
-    padding-inline: var(--space-2);
-  }
-
-  .list-toolbar .gallery-open,
-  .list-toolbar .scan-open {
-    min-inline-size: 2.5rem;
-    padding-inline: var(--space-2);
-  }
-
-  .list-toolbar .toolbar-label,
-  .list-toolbar .scan-open-label,
-  .list-toolbar .mark-open-label {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  .list-toolbar .mark-open {
-    min-inline-size: 2.5rem;
-    padding-inline: var(--space-2);
-  }
-
-  .list-toolbar .mark-empty-hint {
-    flex: 1 1 100%;
-    order: 1;
-  }
 }
 
 /* The Cards page head and results sit closer together on a phone, so the first card starts high (T-125). */
 @media (max-width: 39.99rem) {
-  main:has(.catalog-layout) {
-    gap: var(--space-2);
-  }
 
   .page-head h1,
   .proxy-head h1 {
     padding-block-end: var(--space-1);
     line-height: 1.1;
-  }
-
-  .catalog-results .mark-banner {
-    margin-block-end: var(--space-2);
-  }
-
-  .mark-banner .missing-link {
-    min-block-size: 1.75rem;
   }
 }
 
@@ -10513,36 +9386,6 @@ html[data-gallery='on'] main {
   /* UX-04 (T-174): every page starts at the same height on a phone, so the heading does not jump when the section changes. */
   main {
     padding-block-start: var(--space-2);
-  }
-
-  .catalog-results .active-filters:empty {
-    margin-block-end: 0;
-  }
-}
-
-/* The order and the switch in the filter panel: the label on its own line, both selects side by side (T-125). */
-.view-options .sort-select {
-  flex: 1 1 100%;
-}
-
-.view-options .sort-select label {
-  flex: 1 1 100%;
-}
-
-.view-options .sort-select select {
-  flex: 1 1 0;
-  min-inline-size: 0;
-}
-
-/* On a wide page the marking banner is one row: name, the link, the edition and Valmis. */
-@media (min-width: 40rem) {
-  .mark-banner .missing-add {
-    flex: 0 1 auto;
-    order: 2;
-  }
-
-  .mark-banner-actions {
-    order: 3;
   }
 }
 
@@ -10555,72 +9398,6 @@ html[data-gallery='on'] main {
 
 .view-select:disabled .segmented-option {
   cursor: not-allowed;
-}
-
-/* T-126: a muted green checkmark on the card: says "mark the owned ones" without reading as a close button. */
-.mark-open .mark-icon-check {
-  color: color-mix(in srgb, var(--color-success) 65%, var(--color-text-muted, currentColor));
-}
-
-/* T-126: the marking bar floats at the bottom of the screen, so starting the mode does not push the page down. */
-.mark-banner {
-  position: fixed;
-  z-index: 20;
-  inset-inline: 0;
-  bottom: 0;
-  margin: 0;
-  padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
-  border-inline-start: 0;
-  border-block-start: 3px solid var(--color-accent);
-  background: var(--color-surface-raised);
-  box-shadow: 0 -0.5rem 1.5rem rgba(0, 0, 0, 0.25);
-}
-
-.mark-banner .missing-add {
-  flex-basis: 100%;
-}
-
-/* Room for the floating bar at the end of the page, so it never covers the last cards. */
-main:has(.mark-banner) {
-  padding-block-end: 9rem;
-}
-
-/* T-127: a tighter floating marking bar: thin padding, 36 px controls, the title only where it fits. */
-.mark-banner {
-  row-gap: 0;
-  padding-block: var(--space-1) calc(var(--space-1) + env(safe-area-inset-bottom, 0px));
-}
-
-.mark-banner .button-secondary {
-  min-block-size: 2.25rem;
-}
-
-.mark-banner .segmented-option {
-  block-size: calc(2.25rem - 2px);
-}
-
-.mark-banner .missing-link {
-  font-size: var(--font-size-xs, 0.8125rem);
-}
-
-@media (max-width: 39.99rem) {
-  .mark-banner-title {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  .mark-banner-actions {
-    flex: 1;
-    justify-content: space-between;
-  }
-
-  main:has(.mark-banner) {
-    padding-block-end: 6rem;
-  }
 }
 
 /*
@@ -10729,35 +9506,6 @@ main:has(.mark-banner) {
   font-size: var(--font-size-sm);
 }
 
-.list-toolbar .sort-select {
-  margin-block-end: 0;
-}
-
-/* T-131: an even lower floating marking bar: 32 px controls, thin padding, the link row only as high as its text. */
-.mark-banner {
-  padding-block: 0.25rem calc(0.25rem + env(safe-area-inset-bottom, 0px));
-  padding-inline: var(--space-3);
-}
-
-.mark-banner .button-secondary {
-  min-block-size: 2rem;
-  padding-inline: var(--space-2);
-}
-
-.mark-banner .segmented-option {
-  block-size: calc(2rem - 2px);
-  padding-inline: var(--space-2);
-}
-
-.mark-banner .missing-link {
-  min-block-size: 1.5rem;
-  padding-block: 0;
-}
-
-main:has(.mark-banner) {
-  padding-block-end: 5rem;
-}
-
 /* T-132: achievements. Earned badges are small chips with a green check; open ones are dim with their count. */
 .achievements-head {
   display: flex;
@@ -10771,10 +9519,6 @@ main:has(.mark-banner) {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
-
-
-
-
 
 
 /* T-149: only where the row has room; on a phone the shared rule puts the bar on a row of its own. */
@@ -11613,52 +10357,10 @@ button.card-tag:focus-visible {
   font-size: var(--font-size-sm, 0.875rem);
 }
 
-/*
- * Card details on large screens (T-167): the image follows the viewport height, so on a wide screen the details
- * column was left small. The box uses the whole width and the details column grows with the screen.
- */
-@media (min-width: 100rem) {
-  .card-dialog.has-details .card-dialog-body {
-    width: 100%;
-  }
-
-  .card-dialog.has-details .card-dialog-header,
-  .card-dialog.has-details .card-tags,
-  .card-dialog.has-details .card-dialog-details {
-    zoom: 1.2;
-  }
-}
-
-@media (min-width: 125rem) {
-  .card-dialog.has-details .card-dialog-header,
-  .card-dialog.has-details .card-tags,
-  .card-dialog.has-details .card-dialog-details {
-    zoom: 1.4;
-  }
-}
-
-@media (min-width: 160rem) {
-  .card-dialog.has-details .card-dialog-header,
-  .card-dialog.has-details .card-tags,
-  .card-dialog.has-details .card-dialog-details {
-    zoom: 1.6;
-  }
-}
-
-@media (min-width: 100rem) {
-  .card-dialog-details .art-thumb {
-    height: 8rem;
-  }
-}
-
 .availability-notice {
   width: fit-content;
   max-width: 100%;
   box-sizing: border-box;
-}
-
-.card-dialog-details .availability-list {
-  font-size: var(--font-size-sm);
 }
 
 /* Tournament deck list (T-168): paper, fixed black on white in both themes. */
@@ -12840,11 +11542,6 @@ button.card-tag:focus-visible {
   }
 }
 
-/* UX-08 (T-174): the floating marking bar never covers the footer: room for it after the last line (the bar is about 5.7 rem high). */
-body:has(.mark-banner) .site-footer {
-  margin-block-end: calc(6rem + env(safe-area-inset-bottom, 0px));
-}
-
 /*
  * UX-10 (T-174): on paper the bright badge colours (yellow 1.6:1, green 3.0:1) are too pale for text. The title and the
  * "Avattu" stamp use a darker mix of the badge colour; the frame, glow and icon keep the bright one.
@@ -12895,15 +11592,6 @@ body:has(.mark-banner) .site-footer {
 
 .proxy-pick .card-box > .card-foot {
   margin-block-start: auto;
-}
-
-/* UX-32d (T-174): in the card list on a phone the subtitle goes under the name instead of into a second column beside it. */
-@media (max-width: 39.99rem) {
-  .card-table .cell-name .link-button {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-  }
 }
 
 /*

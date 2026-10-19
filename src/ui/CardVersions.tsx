@@ -114,7 +114,10 @@ export function CardVersions({
 
   return (
     <section aria-labelledby="card-detail-versions" className="card-versions">
-      <h3 id="card-detail-versions">{texts.versionsHeading}</h3>
+      <details className="disclosure">
+      <summary>
+        <h3 id="card-detail-versions">{texts.versionsCountSummary(arts.length, count)}</h3>
+      </summary>
       <ul className="art-gallery">
         {tiles.map((art) => {
           const url = art.image === null ? base : imageUrl(card.key, art.image);
@@ -238,6 +241,7 @@ export function CardVersions({
           );
         })}
       </ul>
+      </details>
     </section>
   );
 }

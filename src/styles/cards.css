@@ -1,5 +1,1510 @@
 /*
- * Cards page and the shared card grid, card dialog layout (T-181 package 2).
- * Loaded after styles.css (src/main.tsx), so these rules win over older rules of the same specificity.
- * Tokens and base components live in styles.css (docs/UX.md luku 3); use them, do not redefine them here.
+ * Cards (T-181 package 2): the card grid and its boxes (also used by Collection > Own and Have/Want), the tool row, the filter
+ * side panel, the list view, the marking bar and the layout of the card dialog. Loaded after styles.css; the matching old rules
+ * were removed from there. Uses the tokens of the design system only.
  */
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Page layout: filters on the left from 64 rem, results on the right.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.catalog-layout {
+  display: grid;
+  gap: var(--space-2);
+  align-items: start;
+}
+
+.catalog-filters,
+.catalog-results {
+  min-width: 0;
+}
+
+.catalog-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.catalog-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.catalog-filters .card-filters {
+  margin-block-end: 0;
+}
+
+/* The button names the panel below 64 rem; the heading is for screen readers there. */
+.catalog-filters .filters-heading {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-width: 64rem) {
+  .catalog-layout {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  .catalog-filters .filters-heading {
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
+/* The heading, the search row and the tool row sit close together, so the first card starts high. */
+main:has(.catalog-layout) {
+  gap: var(--space-3);
+}
+
+@media (max-width: 39.99rem) {
+  main:has(.catalog-layout) {
+    gap: var(--space-2);
+  }
+
+  .catalog-layout,
+  .catalog-results {
+    gap: var(--space-1);
+  }
+
+  /* The count shares the heading's row; the collection summary is one line under it (an ellipsis when it is longer). */
+  .page-head-status {
+    display: contents;
+  }
+
+  .page-head-status .is-summary {
+    flex: 1 1 100%;
+    margin: 0;
+    font-size: var(--font-size-tag);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Image size: each box is a column; 2 columns on the narrowest screens whatever the size. */
+.catalog-results[data-image-size='small'] .card-grid,
+.have-want-results[data-image-size='small'] .card-grid {
+  --card-min: 8rem;
+}
+
+.catalog-results[data-image-size='medium'] .card-grid,
+.have-want-results[data-image-size='medium'] .card-grid {
+  --card-min: 10.5rem;
+}
+
+.catalog-results[data-image-size='large'] .card-grid,
+.have-want-results[data-image-size='large'] .card-grid {
+  --card-min: 15rem;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Tool row: one 40 px row. Quiet buttons with an icon, small segments, the order as one select and an arrow.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.toolbar-icon {
+  flex: none;
+}
+
+.list-toolbar .mark-open-row {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin-inline-start: auto;
+}
+
+.list-toolbar .mark-open,
+.list-toolbar .gallery-open {
+  display: inline-flex;
+}
+
+/* The tool buttons are label-sized, so the whole row (views, size, gallery, scan, order, marking) fits in 40 px at 1280. */
+.list-toolbar .button-quiet,
+.list-toolbar .scan-open {
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-label);
+}
+
+.mark-empty-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* A muted green check on the marking icon: says "mark the owned ones" without reading as a close button (T-126). */
+.mark-open .mark-icon-check {
+  color: color-mix(in srgb, var(--color-success) 65%, var(--color-text-muted, currentColor));
+}
+
+/* The scan button belongs to the collection package and is a secondary button; in this row it looks like the quiet ones. */
+.list-toolbar .scan-open,
+.list-toolbar .scan-open:hover {
+  min-block-size: var(--control-h);
+  padding-inline: var(--space-2);
+  background: transparent;
+  box-shadow: inset 0 -1px 0 transparent;
+  clip-path: none;
+  font-size: var(--font-size-label);
+  transform: none;
+}
+
+.list-toolbar .scan-open::before {
+  content: none;
+}
+
+.list-toolbar .scan-open:hover {
+  background: var(--surface-hover);
+  box-shadow: inset 0 -2px 0 var(--section-accent);
+}
+
+.list-toolbar .view-select {
+  flex: none;
+}
+
+/* The order: a select and an arrow button side by side. */
+.sort-select--toolbar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.sort-select--toolbar select {
+  inline-size: 7.5rem;
+  font-size: var(--font-size-label);
+  block-size: var(--control-h);
+  margin: 0;
+}
+
+.sort-direction {
+  flex: none;
+}
+
+@media (max-width: 39.99rem) {
+  /* The words stay as accessible names; the row fits at 320 px. */
+  .list-toolbar .toolbar-label,
+  .list-toolbar .scan-open-label,
+  .list-toolbar .mark-open-label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .list-toolbar .gallery-open,
+  .list-toolbar .scan-open,
+  .list-toolbar .mark-open {
+    min-inline-size: var(--control-h);
+    padding-inline: var(--space-2);
+  }
+
+  .list-toolbar .mark-empty-hint {
+    flex: 1 1 100%;
+    order: 1;
+  }
+
+  .image-size-select {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Filters: search with an icon, short groups in the open, rare ones as closed disclosures.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.search-field {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  inset-block-end: calc((var(--control-h) - 18px) / 2);
+  z-index: 1;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.search-field input[type='search'] {
+  padding-inline-start: calc(var(--space-3) + 18px + var(--space-2));
+}
+
+.catalog-filters .search-row {
+  gap: var(--space-2);
+}
+
+.catalog-filters .filter-toggle {
+  margin-block-start: 0;
+  align-self: auto;
+}
+
+.card-filters .filter-panel[hidden] {
+  display: none;
+}
+
+.card-filters .filter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+
+.card-filters .filter-panel .fieldsets {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.card-filters .filter-panel fieldset {
+  display: block;
+  margin: 0;
+}
+
+.card-filters .filter-panel .set-filter {
+  margin: 0;
+}
+
+.card-filters .filter-panel legend {
+  margin-block-end: var(--space-1);
+}
+
+.card-filters .filter-panel .view-options .edit-switch {
+  min-height: var(--control-h-sm);
+}
+
+/* A group of one choice: the title and the choice on one row. */
+.card-filters .filter-panel fieldset:has(> legend + .options > .option:only-child) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.card-filters .filter-panel fieldset:has(> legend + .options > .option:only-child) > legend {
+  float: none;
+  margin: 0;
+}
+
+.card-filters .filter-panel fieldset:has(> legend + .options > .option:only-child) > .options {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.card-filters .filter-panel .option:only-child {
+  white-space: normal;
+}
+
+/* The order and the switch (the gallery keeps both in its panel; the page has the order in the tool row). */
+.view-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.view-options legend {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.view-options .sort-select {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
+.view-options .sort-select label {
+  flex: 1 1 100%;
+}
+
+.view-options .sort-select select {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+.owned-only {
+  margin: 0;
+}
+
+/* Choices in two columns; the check box and the name stay on one line. */
+.card-filters .filter-panel .options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: var(--space-1);
+}
+
+.card-filters .filter-panel .option {
+  min-block-size: var(--control-h-sm);
+  min-inline-size: 0;
+  white-space: nowrap;
+}
+
+@media (min-width: 64rem) {
+  .catalog-filters .filter-panel .options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-filters .filter-panel .options-number {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .catalog-filters .filter-panel .options-rarity {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-filters .field input[type='search'] {
+    max-width: none;
+  }
+}
+
+/* A closed group: the title row is the only thing seen; a group with a choice is open and counts its choices. */
+.filter-group {
+  border-block-start: 1px solid var(--line);
+}
+
+.filter-group > summary {
+  min-block-size: var(--control-h-sm);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--color-text-muted);
+}
+
+.filter-group[open] > summary {
+  color: var(--color-text);
+}
+
+.filter-group-count {
+  color: var(--color-accent-edge);
+  font-family: var(--font-mono);
+}
+
+:root[data-theme='light'] .filter-group-count {
+  color: var(--color-text);
+}
+
+.filter-group > fieldset {
+  padding-block: var(--space-1) var(--space-2);
+}
+
+/* Selected filters as removable chips above the results. No row is kept for them when there are none. */
+.catalog-results .active-filters {
+  min-height: 0;
+  margin: 0;
+}
+
+.catalog-results .active-filters:empty {
+  display: none;
+}
+
+#active-filters {
+  scroll-margin-top: var(--space-4);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Marking bar: a fixed bar at the bottom, 56 px, the highest surface and a 2 px line in the section colour on top.
+ * One row from 40 rem.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.mark-banner {
+  position: fixed;
+  z-index: 20;
+  inset-inline: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-block-size: 3.5rem;
+  margin: 0;
+  padding: var(--space-2) var(--gutter) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  border: 0;
+  border-block-start: 2px solid var(--section-accent);
+  background: var(--surface-3);
+  box-shadow: 0 -0.5rem 1.5rem rgb(0 0 0 / 0.35);
+}
+
+.mark-banner-title {
+  flex: none;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.mark-banner-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+  order: 3;
+}
+
+.mark-banner .missing-add {
+  flex: 0 1 auto;
+  order: 2;
+  margin: 0;
+}
+
+.mark-banner .missing-link {
+  min-block-size: var(--control-h-sm);
+  padding-block: 0;
+}
+
+main:has(.mark-banner) {
+  padding-block-end: 5rem;
+}
+
+body:has(.mark-banner) .site-footer {
+  margin-block-end: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 39.99rem) {
+  .mark-banner-title {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .mark-banner .missing-add {
+    flex: 1 1 100%;
+    order: 0;
+  }
+
+  .mark-banner-actions {
+    flex: 1;
+    justify-content: space-between;
+  }
+
+  main:has(.mark-banner) {
+    padding-block-end: 6.5rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Card grid: no box. The picture, one 32 px data strip, one mono line.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.card-grid {
+  --card-min: 10.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), 100%), 1fr));
+  gap: var(--space-4) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 29.99rem) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3) var(--space-2);
+  }
+}
+
+.card-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  /* Not owned: a neutral count. */
+  --color-count: var(--color-text-muted);
+}
+
+.card-box.is-owned {
+  --color-count: var(--color-accent-edge);
+}
+
+.card-box.is-playset {
+  --color-count: var(--color-success);
+}
+
+:root[data-theme='light'] .card-box.is-owned {
+  --color-count: var(--color-text);
+}
+
+/* The data strip: cost, name, deck count, collection count. */
+.card-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  min-block-size: 2rem;
+}
+
+.card-cost {
+  flex: none;
+  margin: 0;
+}
+
+.card-cost dd {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+/* A missing cost: a dash in the same 1.75 rem slot as the gem. */
+.card-cost .card-stat {
+  display: grid;
+  place-items: center;
+  min-inline-size: 1.75rem;
+  min-block-size: 1.75rem;
+}
+
+.card-name {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--font-size-control);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-body);
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+/* The subname is in the title of the name and in the dialog; the picture shows it already. Screen readers still get it. */
+.card-box .card-subname {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.card-decks {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.card-decks--compact {
+  flex: none;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  white-space: nowrap;
+}
+
+.card-strip .card-collection {
+  flex: none;
+  margin-inline-start: auto;
+}
+
+.card-strip .count {
+  font-size: var(--font-size-control);
+}
+
+.card-strip .playset-mark {
+  font-size: var(--font-size-label);
+}
+
+.card-collection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1) var(--space-3);
+}
+
+.card-collection .count-control {
+  justify-content: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Marking and Have/Want controls need room for − and +: a row of their own, the control at the right edge in every box. */
+.card-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.card-foot .card-collection {
+  grid-column: 2;
+  margin-inline-start: auto;
+}
+
+/* The second line: UNIT · P6 · R2 · rarity, muted mono. */
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tag);
+  font-weight: var(--font-weight-mono);
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card-type {
+  margin: 0;
+}
+
+.card-type .card-color {
+  display: inline;
+  white-space: nowrap;
+}
+
+.card-meta .type-badge {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  clip-path: none;
+}
+
+.card-meta .type-badge::after {
+  content: none;
+}
+
+/* Only a Legend is a chip, in its colour. */
+.card-meta .card-type--legend .type-badge {
+  padding: 0 0.4em;
+  border: 1px solid var(--badge-color);
+  color: var(--color-text);
+}
+
+/* A flat group, not display: contents, so the list keeps its semantics. */
+.card-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.card-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.card-stat dd {
+  margin: 0;
+  color: var(--color-text);
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+/* "· P6": the label is spoken in full (the dt), seen as a letter. The empty alternative text keeps it from being read twice. */
+.stat-chip dt {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.stat-chip::before {
+  content: '·';
+  content: '·' / '';
+  margin-inline-end: var(--space-1);
+}
+
+.stat-power dd::before {
+  content: 'P';
+  content: 'P' / '';
+}
+
+.stat-ram dd::before {
+  content: 'R';
+  content: 'R' / '';
+}
+
+.card-rarity::before {
+  content: '·';
+  content: '·' / '';
+  margin-inline-end: var(--space-1);
+}
+
+.card-rarity dd {
+  display: inline-flex;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.card-art-label {
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tag);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The picture, its version badge and the ‹ › buttons keep their rules in styles.css (T-027, T-081). */
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * List view: one 44 px row (T-181 B.1): a 28 x 39 px thumbnail, "Name Subname" (the subname muted), the values, the deck count
+ * in a narrow column of its own and the collection count.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.card-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  --color-count: var(--color-text-muted);
+}
+
+.card-table th,
+.card-table td {
+  padding: var(--space-0) var(--space-2);
+  border-bottom: 1px solid var(--line);
+  text-align: start;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.card-table tbody th,
+.card-table tbody td {
+  block-size: 2.75rem;
+}
+
+.card-table thead th {
+  padding-block: var(--space-2);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-bold);
+}
+
+.card-table .cell-image {
+  inline-size: 2.25rem;
+  padding-inline-end: 0;
+}
+
+.card-table .cell-image .card-image-button,
+.card-table .cell-image .card-image {
+  inline-size: 1.75rem;
+}
+
+.card-table .cell-image .card-image {
+  border-width: 0;
+}
+
+/* The name takes the free width; a long one ends in an ellipsis. */
+.card-table .cell-name {
+  inline-size: 100%;
+  max-inline-size: 0;
+  overflow: hidden;
+  font-weight: var(--font-weight-bold);
+  text-overflow: ellipsis;
+}
+
+.card-table .cell-name .link-button {
+  display: inline;
+  max-inline-size: 100%;
+  min-block-size: 0;
+  padding: 0;
+  text-align: start;
+}
+
+.card-table .cell-name .card-subname {
+  display: inline;
+  text-decoration: none;
+  margin-inline-start: var(--space-2);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+.card-table .cell-type {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  text-transform: uppercase;
+}
+
+.card-table .cell-type .type-badge {
+  display: inline;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  clip-path: none;
+}
+
+.card-table .cell-type .type-badge::after {
+  content: none;
+}
+
+.card-table .cell-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.card-table thead .cell-number {
+  font-family: inherit;
+}
+
+.card-table .cell-decks {
+  inline-size: 5.5rem;
+}
+
+.card-table .cell-decks {
+  text-align: center;
+}
+
+.card-table .cell-decks .card-decks {
+  margin: 0;
+  font-size: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-table .cell-collection .count-control {
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.card-table .count-control--readonly {
+  min-inline-size: 3.5rem;
+}
+
+.card-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+/* Row state (package 6 replaces these with the data bar): an edge on the first cell, the coloured count and the check. */
+.card-table tr.is-owned {
+  --color-count: var(--color-accent-edge);
+}
+
+.card-table tr.is-owned > :first-child {
+  box-shadow: inset 3px 0 0 var(--color-accent-edge);
+}
+
+.card-table tr.is-playset {
+  --color-count: var(--color-success);
+}
+
+.card-table tr.is-playset > :first-child {
+  box-shadow: inset 3px 0 0 var(--color-success);
+}
+
+.card-table .sort-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.card-table .sort-button:hover {
+  text-decoration: underline;
+}
+
+.card-table .sort-button:focus-visible {
+  outline: 2px solid var(--color-focus, currentColor);
+  outline-offset: 2px;
+}
+
+/* A phone: each row wraps (T-023); the picture is pinned to the left, no sideways scrolling. */
+@media (max-width: 39.99rem) {
+  .card-table,
+  .card-table tbody {
+    display: block;
+  }
+
+  .card-table thead {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .card-table tbody tr {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--space-3);
+    min-block-size: 4.5rem;
+    padding: var(--space-2) 0 var(--space-2) calc(3rem + var(--space-2));
+    border-bottom: 1px solid var(--line);
+  }
+
+  .card-table tbody th,
+  .card-table tbody td {
+    block-size: auto;
+    padding: 0;
+    border: 0;
+  }
+
+  .card-table tbody tr > :first-child,
+  .card-table tr.is-owned > :first-child,
+  .card-table tr.is-playset > :first-child {
+    box-shadow: none;
+  }
+
+  .card-table tr.is-owned {
+    box-shadow: inset 3px 0 0 var(--color-accent-edge);
+  }
+
+  .card-table tr.is-playset {
+    box-shadow: inset 3px 0 0 var(--color-success);
+  }
+
+  .card-table .cell-image {
+    position: absolute;
+    inset-block-start: var(--space-2);
+    inset-inline-start: var(--space-2);
+    inline-size: 2.5rem;
+  }
+
+  .card-table .cell-image .card-image-button,
+  .card-table .cell-image .card-image {
+    inline-size: 2.5rem;
+  }
+
+  .card-table .cell-name,
+  .card-table .cell-collection {
+    flex-basis: 100%;
+    inline-size: auto;
+    max-inline-size: none;
+  }
+
+  .card-table .cell-name .link-button {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .card-table .cell-name .card-subname {
+    display: block;
+    margin-inline-start: 0;
+  }
+
+  .card-table .cell-collection {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .card-table tbody .cell-number::before {
+    content: attr(data-label) ' ';
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-tag);
+    text-transform: uppercase;
+  }
+
+  .card-table .cell-number {
+    white-space: nowrap;
+  }
+
+  .card-table .cell-decks {
+    inline-size: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Card dialog (T-181 B.2): from 40 rem two columns, the picture on the left (never taller than the screen) and the details on
+ * the right in three blocks: Collection (count and Want side by side), Decks (with the proxy button) and Versions (closed).
+ * Below 40 rem it is a full-screen view that scrolls as the dialog layer.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.card-dialog-body {
+  margin: auto;
+  width: min(30rem, 100%);
+  padding: var(--pad-dialog);
+}
+
+.card-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-2);
+}
+
+.card-dialog-header h2 {
+  margin: 0;
+  font-size: var(--font-size-card-name);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.card-dialog-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.card-dialog-image {
+  display: block;
+  inline-size: auto;
+  max-inline-size: 100%;
+  block-size: auto;
+  max-block-size: 60dvh;
+  object-fit: contain;
+  cursor: zoom-in;
+}
+
+.card-dialog:not(.has-details) .card-dialog-image {
+  max-block-size: calc(100dvh - 9rem);
+}
+
+.card-zoom-open {
+  display: none;
+}
+
+/* One mono line under the title: the tags and where the card comes from. */
+.card-dialog-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  margin-block-end: var(--space-3);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+}
+
+.card-dialog-meta:empty {
+  display: none;
+}
+
+.card-dialog-meta .card-tags {
+  margin: 0;
+}
+
+.card-dialog-meta .detail-availability {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.card-dialog-meta .detail-availability h3 {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.card-dialog-meta .availability-main,
+.card-dialog-meta .availability-notice {
+  margin: 0;
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-label);
+}
+
+.card-dialog-meta .availability-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-label);
+}
+
+.card-dialog-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 14rem;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.card-dialog-details h3 {
+  margin: 0;
+}
+
+.card-dialog-details ul {
+  margin: 0;
+  padding-inline-start: var(--space-4);
+}
+
+/* A block of the details: a caps title over a hairline with a neon start, as a .panel-title. */
+.card-dialog-details .detail-counts > section > h3,
+.card-dialog-details .detail-head,
+.card-dialog-details .card-versions > .disclosure > summary {
+  padding-block-end: var(--space-2);
+  background: linear-gradient(90deg, var(--section-accent) 0 2.5rem, var(--line) 2.5rem) bottom / 100% 1px no-repeat;
+}
+
+.detail-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+}
+
+.detail-counts > section {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.detail-counts .count-control {
+  align-self: flex-start;
+  justify-content: flex-start;
+}
+
+.detail-counts p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.detail-decks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.detail-head .detail-proxy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.detail-decks p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.detail-decks ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+/* Versions: closed; the title row carries the numbers ("4 versiota · omistat 2"). */
+.card-versions > .disclosure > summary {
+  min-block-size: var(--control-h-sm);
+}
+
+.card-versions > .disclosure > summary h3 {
+  display: inline;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.card-versions > .disclosure > .art-gallery {
+  margin-block-start: var(--space-2);
+}
+
+.art-thumb {
+  height: 6rem;
+  object-fit: contain;
+}
+
+.art-tile {
+  position: relative;
+}
+
+.art-pick {
+  min-height: 0;
+}
+
+/* The breakdown opens over the neighbours' space, so no tile changes size or moves. */
+.art-breakdown[open] .version-list {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 2;
+  padding: var(--space-1);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-3);
+  min-width: 12rem;
+}
+
+@media (min-width: 40rem) {
+  /* The column of the picture follows the height of the screen (a card is 733 x 1024) and never takes more than 46 %. */
+  .card-dialog.has-details .card-dialog-body {
+    box-sizing: border-box;
+    width: min(72rem, 100%);
+    padding: var(--space-4) var(--space-5);
+    display: grid;
+    grid-template-columns: min(calc(min(100dvh - 4rem, 46rem) * 0.716), 46%) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: var(--space-6);
+  }
+
+  .card-dialog.has-details .card-dialog-header {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .card-dialog.has-details .card-dialog-meta {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .card-dialog.has-details .card-dialog-content {
+    display: contents;
+  }
+
+  .card-dialog.has-details .card-dialog-image {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    inline-size: 100%;
+    block-size: auto;
+    max-block-size: min(calc(100dvh - 4rem), 46rem);
+    align-self: start;
+  }
+
+  .card-dialog.has-details .card-dialog-details {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: start;
+  }
+}
+
+@media (max-width: 39.99rem) {
+  /* A full-screen view instead of a box on a backdrop (T-090). The name and the close button stay at the top. */
+  .card-dialog.has-details {
+    padding: 0;
+    background: var(--color-bg);
+  }
+
+  .card-dialog.has-details .card-dialog-body {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0 var(--space-4) var(--space-6);
+    border: 0;
+    box-shadow: none;
+  }
+
+  .card-dialog.has-details .card-dialog-header {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    align-items: center;
+    margin: 0 calc(-1 * var(--space-4)) var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-block-end: 1px solid var(--line);
+    background: var(--color-bg);
+  }
+
+  .card-dialog.has-details .card-dialog-content {
+    display: block;
+  }
+
+  /* 60 % of the width: the name, the picture and the Collection count are on the first screen. */
+  .card-dialog.has-details .card-dialog-image {
+    inline-size: 60%;
+    margin-inline: auto;
+    max-block-size: none;
+  }
+
+  .card-dialog.has-details .card-zoom-open {
+    display: block;
+    margin: var(--space-2) auto 0;
+  }
+
+  .card-dialog.has-details .card-dialog-details {
+    margin-block-start: var(--space-3);
+  }
+
+  .detail-counts > section {
+    flex-basis: 100%;
+  }
+
+  /* Versions: compact rows, a small picture, the counters at the right edge. */
+  .card-versions .art-gallery {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .card-versions .art-tile {
+    display: grid;
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+    column-gap: var(--space-3);
+    row-gap: var(--space-1);
+    align-items: start;
+    padding: var(--space-2) 0;
+    border: 0;
+    border-block-end: 1px solid var(--line);
+    border-radius: 0;
+  }
+
+  .card-versions .art-tile > * {
+    grid-column: 2;
+  }
+
+  .card-versions .art-tile > .art-pick,
+  .card-versions .art-tile > .art-thumb {
+    grid-column: 1;
+    grid-row: 1 / span 6;
+  }
+
+  .card-versions .art-thumb {
+    inline-size: 100%;
+    height: auto;
+  }
+
+  .card-versions .art-count:not(.art-count--editions) {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .card-versions .art-tile.is-selected .art-thumb {
+    outline: 2px solid var(--color-accent-2);
+    outline-offset: 1px;
+  }
+
+  .art-breakdown[open] .version-list {
+    position: static;
+  }
+}
+
+/* A large screen: the text of the details grows with the screen, as before (T-081). */
+@media (min-width: 100rem) {
+  .card-dialog.has-details .card-dialog-header,
+  .card-dialog.has-details .card-dialog-meta,
+  .card-dialog.has-details .card-dialog-details {
+    zoom: 1.2;
+  }
+}
+
+@media (min-width: 125rem) {
+  .card-dialog.has-details .card-dialog-header,
+  .card-dialog.has-details .card-dialog-meta,
+  .card-dialog.has-details .card-dialog-details {
+    zoom: 1.4;
+  }
+}
+
+/* The filter panel: one left edge, label-style titles, full-width segments, a readable switch. */
+.view-options .sort-select > label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.view-options .edit-switch {
+  padding-inline-start: 0;
+}
+
+.view-options .edit-switch:disabled {
+  opacity: 1;
+  color: var(--color-text-muted);
+}
+
+.card-filters .owned-only,
+.card-filters .owned-only .segmented {
+  inline-size: 100%;
+}
+
+.card-filters .owned-only .segmented-option {
+  flex: 1 1 0;
+}
+
+/* A narrow phone: the search field gets the room, the filter button is compact. */
+@media (max-width: 29.99rem) {
+  .catalog-filters .filter-toggle {
+    padding-inline: var(--space-2);
+    font-size: var(--font-size-label);
+  }
+
+  .catalog-filters .search-field input[type='search'] {
+    padding-inline-start: calc(var(--space-2) + 18px + var(--space-1));
+    padding-inline-end: var(--space-1);
+  }
+
+  .search-icon {
+    inset-inline-start: var(--space-2);
+  }
+}
+
+/* Dialog block title and its action on one line, the line under both. */
+.card-dialog-details .detail-head {
+  align-items: flex-end;
+  min-block-size: 0;
+}
+
+.card-dialog-details .detail-head h3 {
+  padding-block-end: var(--space-1);
+}
+
+.card-dialog-details .detail-head .button-quiet {
+  min-block-size: var(--control-h-sm);
+}
+
+.card-dialog-details .detail-head {
+  align-items: center;
+}
+
+.card-dialog-details .detail-head h3 {
+  padding-block-end: 0;
+}
+
+.card-dialog-details .detail-head .detail-proxy {
+  margin: 0;
+  padding: 0;
+}

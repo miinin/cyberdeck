@@ -6,16 +6,18 @@ import { resolve } from 'node:path';
  * headless Chrome; these checks only keep the rules that carry the fixes from being removed or weakened by accident.
  */
 const css = readFileSync(resolve(__dirname, 'styles.css'), 'utf8');
+/** T-181 package 2: the card box rules moved to their own file. */
+const cardsCss = readFileSync(resolve(__dirname, 'styles/cards.css'), 'utf8');
 
 /** The declarations of the first rule that starts with `selector` (alone, or last in a selector list). */
-function rule(selector: string): string {
+function rule(selector: string, source = css): string {
   for (const marker of [`
 ${selector} {`, `
 ${selector},`]) {
-    const at = css.indexOf(marker);
+    const at = source.indexOf(marker);
     if (at === -1) continue;
-    const open = css.indexOf("{", at);
-    return css.slice(open + 1, css.indexOf("}", open));
+    const open = source.indexOf("{", at);
+    return source.slice(open + 1, source.indexOf("}", open));
   }
   throw new Error(`No rule for ${selector}`);
 }
@@ -67,8 +69,8 @@ describe('T-174 style rules', () => {
   });
 
   it('UX-13: the control of a card box is always in the right column of the foot', () => {
-    expect(rule('.card-foot')).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) auto/);
-    expect(rule('.card-collection')).toMatch(/grid-column:\s*2/);
+    expect(rule('.card-foot', cardsCss)).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) auto/);
+    expect(rule('.card-foot .card-collection', cardsCss)).toMatch(/grid-column:\s*2/);
   });
 
   it('UX-24: a note line is reserved in every search result', () => {

@@ -44,3 +44,46 @@ Haara `t-181-1-design-jarjestelma`.
 **Ei tehty:** FI/EN-tekstit lippupainikkeisiin (B.9): näkyvä "FI" ei sisältyisi saavutettavaan nimeen "Suomi" (WCAG 2.5.3), joten se vaatii tekstipäätöksen (esim. nimi "Suomi (FI)"). Kysymys PM:lle. Hakukentän luuppi-ikoni kuuluu paketille 2 (CardFilters.tsx).
 
 Koodikatselmointi: tehty · Pakollisia korjattu 1 (kenttien hover- ja fokussäännöt olivat 0,1,0-tarkkuudella ja olisivat voittaneet paikkakohtaisia tyylejä) · Suosituksia 2: (1) `.theme-toggle` on yhä painikeluettelossa, vaikka komponentti käyttää `.header-icon`-tyyliä (vanhaa, harmitonta); (2) dialogien laatikot eivät ole viistettyjä, koska `clip-path` leikkaisi varjon ja popoverit.
+
+## Luovutus: paketti 2 (Koodari, 2026-10-19)
+Haara `t-181-2-kortit`. Säännöt `src/styles/cards.css`:ssä (≈ 1 350 riviä); `styles.css`:stä poistettu omat selektorit (≈ 1 300 riviä, työkalulla selektori kerrallaan, ei muiden pakettien sääntöjä).
+
+**Toteutus**
+- Korttiruudukko (B.1): ei laatikkoa. Kuva + yksi datanauha (32 px): kustannusjalokivi, nimi yhdellä rivillä (ellipsi, `title` = koko nimi, alanimi vain ruudunlukijalle), "◧ 2" (saavutettava nimi "2 pakassa: …", `CardDecks compact`) ja omistuslaskuri. Alla muted mono -rivi `UNIT · P6 · R2 · ◇` (tyyppichip vain Legendillä; `dt`-selitteet ja "P"/"R" CSS-sisältönä `content: 'P' / ''`, joten ruudunlukija ei lue niitä kahdesti). Selaustilassa laskuri on nauhassa, merkintä- ja Have/Want-tilassa − / + on omalla rivillään (`.card-foot`), jotta napit mahtuvat.
+- Koot: Pieni 8, Normaali 10.5, Iso 15 rem (kortin vähimmäisleveys). Kortin määrittelyn 9.5/12.5/17 rem antaisi 1280 px:ssä vain 4 korttia, joten kriteeri (≥ 5 / ≥ 7) ratkaisi. Alle 30 rem aina 2 saraketta.
+- Työkalurivi: `Kuvat/Lista` ja `Pieni/Normaali/Iso` `segmented--sm`, Galleria/Skannaa/Merkitse `button-quiet` (Skannaa CSS:llä, koska `CardScanner.tsx` kuuluu paketille 3), lajittelu `SortSelect toolbar` (select + nuolipainike "Suunta: Nouseva"). Alle 40 rem lajittelu pysyy suodatinpaneelissa (rivillä ei ole tilaa; `useMediaQuery`).
+- Sivupalkki 16 rem: haku luuppi-ikonilla, Kokoelma, Setti, Tagi, Tyyppi ja Väri 2 sarakkeessa, Harvinaisuus/Cost/Power/RAM suljettuina `details.disclosure`-ryhminä (`FilterGroup`; valinnan kanssa auki ja otsikossa "COST · 2"). Vanhat `.set-filter select` -tyylit poistettu, kentät saavat perustyylin. Ei sticky.
+- Listanäkymä: rivi 44 px, nimi + alanimi samalla rivillä (alanimi muted), "Pakoissa" omassa sarakkeessa (uusi `cell-decks`, otsikko `deckTexts.columnDecks`), pikkukuva 28 px. Puhelimessa rivit rivittyvät kuten ennen.
+- Merkintätilan alapalkki: 56 px, `--surface-3`, 2 px osioviiva ylhäällä, yksi rivi ≥ 40 rem.
+- Korttidialogi (B.2): ≥ 40 rem `min(72rem, 100%)` ja kaksi saraketta (kuvan sarake seuraa ruudun korkeutta, `max-block-size: min(calc(100dvh - 4rem), 46rem)`), oikealla Kokoelma (määrä ja Want-laskuri rinnakkain), Pakat (lista + "Lisää proxy-jonoon" `button-quiet` otsikkorivillä) ja Versiot (`disclosure`, kiinni, otsikko "4 versiota · omistat 2"). Tagit ja saatavuus yhdellä mono-rivillä otsikon alla (`subline`-prop). < 40 rem koko näytön näkymä: kuva 60 % leveydestä.
+- Pakkaan lisäystä (E.3), datapalkkia (E.1) ja Want-merkintää (E.2) ei tehty (paketti 6).
+- B.9: lippupainikkeisiin näkyvä "FI"/"EN" (mono 0.75 rem, lipun alla) ja nimi "Suomi (FI)" / "English (EN)" (WCAG 2.5.3). Käyttäjä voi muuttaa tekstin (`FLAG_NAMES` LanguageSwitch.tsx:ssä).
+- Proxy-sivun korttivalitsin käyttää samaa CardListiä: `.proxy-pick .card-head .card-cost` → `.card-strip .card-cost`, jotta kustannus pysyy piilossa. Muu Proxy-ulkoasu on paketin 5b.
+
+**Mittaukset (capture-p2.mjs, tumma ja vaalea, seedattu kokoelma)**
+| Kriteeri | Tulos |
+|---|---|
+| 1280×800 ensimmäinen kortti ≤ 200 | 197 (oli 253); Normaali 5 korttia/rivi, ensimmäinen rivi päättyy y = 503 (näkyy kokonaan) |
+| 1920×1080 ≥ 7 korttia | 8 |
+| 768 ≥ 3 korttia | 4 |
+| 320×640 2 korttia, ensimmäinen ≤ 300 | 2 korttia, 295 (oli 347) |
+| Lista: rivi ≤ 44, ≥ 11 riviä 1280×800 | 44 px, 12 riviä |
+| Suodatinpalkki kiinni ≤ 760 (1280) | 755 |
+| Dialogi ei vieri 1280×800 ja 1920×1080 | `scrollHeight` 800/800 ja 1080/1080 (myös 768: 1024/1024) |
+| Dialogi 320: nimi, kuva 60 %, Kokoelma-laskuri ensimmäisellä ruudulla | otsikko y 16, kuva 174 px (60 % × 288), Kokoelma y 433–517 < 644; kerros vierii |
+| Vaakaylivuoto 320 | 0 kaikissa tiloissa (Kortit, taulukko, suodattimet, merkintä, dialogi, Kokoelma › Omat, Have/Want, Proxy) |
+| Sisäisiä vieritysalueita | 0 (320 px:n dialogi on itse kerros) |
+Kuvat: `scratchpad/ux/a4/` (vertailu `base2/`).
+
+**Testit:** `npm test` 161 tiedostoa / 2129 testiä läpi, `npm run lint` ja `npm run build` läpi. Uudet: `ui/CatalogView.t181.test.tsx` (nauha, meta-rivi, Legend-chip, laskuri nauhassa/rivillä, suodatinryhmät, haku-ikoni, järjestys työkaluriviltä), `styles.t181cards.test.ts` (koot, rivi 44 px, alapalkki, dialogi, ei animaatioita). Päivitetty (ei heikennetty, sama sisältö uuteen rakenteeseen): `styles.ux174.test.ts` UX-13 lukee `cards.css`:ää, `CatalogView.decks.test.tsx` (◧ 2 ja uusi "2 pakassa: …" -nimi, Pakoissa-sarake), `CatalogView.test.tsx` (lajittelu työkalurivillä, suunta nuolipainikkeella), `CatalogView.browse.test.tsx` (sarake), `CatalogView.detail.test.tsx`, `CardVersions.test.tsx` (sisempi `details`), `LanguageSwitch.test.tsx`.
+
+**Huomioita PM:lle**
+- Aktiivisten suodattimien rivi ei varaa tilaa, kun suodattimia ei ole (T-084:n "ei hyppyä" luovuttu, jotta ensimmäinen kortti mahtuu ≤ 200 px:iin). Chipin lisääminen siirtää kortteja noin 32 px.
+- Pitkät nimet katkeavat nauhassa ellipsiin (esim. "Adam Sma…" 177 px:n kortissa); koko nimi on `title`:ssä ja dialogissa. Iso koko antaa enemmän tilaa.
+- 320 px:ssä Kokoelman yhteenveto ("Kokoelmassa 114 eri korttia…") on yksi rivi ja päättyy tarvittaessa ellipsiin, jotta ensimmäinen kortti mahtuu ≤ 300 px:iin.
+- Galleriaa (GalleryViewer/CardGallery) ei muutettu; vanha `.gallery-open`-tyyli poistui, mutta galleria käyttää omia luokkiaan. Visuaalista tarkistusta ei tehty gallerialle.
+- Käyttämätön teksti `texts.versionsHeading` jäi (turvallinen poistaa myöhemmin).
+
+Koodikatselmointi: tehty · Pakollisia korjattu 3 (suodatinpaneelin `[hidden]` kumoutui `display: flex`:llä; haku-ikoni jäi chamferatun kentän alle; dialogin Kokoelma/Want-otsikkoviivat eivät osuneet `.detail-counts`-lohkoihin) · Suosituksia 3: (1) `CardImageDialog.tsx`:n uusi `card-dialog-meta`-lohko on sisennetty väärin (lint ei vaadi); (2) `.card-table`-rivikiskot (`is-owned`/`is-playset`) ovat tilapäisesti cards.css:ssä, paketti 6 poistaa ne; (3) `.proxy-pick`-säännöt kuuluvat vielä styles.css:ään (paketti 5b).
+
+**Korjauskierros (PM:n esikatselu):** listan Pakoissa-sarake näyttää pelkän luvun (nimi "2 pakassa" säilyy), alanimi on linkin ulkopuolella muted ilman alleviivausta, 320 px:n haku saa tilaa (kompakti Suodattimet-painike), suodatinpaneelin Järjestys-label, täysleveä Kokoelma-segmentti ja yhtenäinen vasen reuna, "Kaikki versiot" ei himmene (AA), dialogin Pakoissa-otsikko ja proxy-painike samalla rivillä; `texts.versionsHeading` poistettu. Testit/lint/build läpi.

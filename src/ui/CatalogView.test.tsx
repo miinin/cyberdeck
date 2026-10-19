@@ -86,8 +86,8 @@ describe('CatalogView', () => {
 
     expect(statusLine(container)).toHaveTextContent(/^3 korttia$/);
     expect(screen.getByRole('status')).toHaveTextContent('3 korttia ladattu.');
-    // Only the gallery button (T-123): nothing to count with before the collection is ready.
-    expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual(['Galleria']);
+    // The gallery button (T-123) and the arrow of the order (T-181); nothing to count with before the collection is ready.
+    expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual(['Galleria', '']);
   });
 
   it('uses the singular for one card', () => {
@@ -181,16 +181,18 @@ describe('CatalogView card order (T-060)', () => {
     await user.selectOptions(screen.getByRole('combobox', { name: 'Järjestys' }), 'Nimi (A–Ö)');
     expect(headings()).toEqual(['Ant', 'Bee', 'Cat']);
     await user.selectOptions(screen.getByRole('combobox', { name: 'Järjestys' }), 'Cost');
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Suunta' }), 'Laskeva');
+    await user.click(screen.getByRole('button', { name: 'Suunta: Nouseva' }));
+    expect(screen.getByRole('button', { name: 'Suunta: Laskeva' })).toBeInTheDocument();
     expect(headings()).toEqual(['Bee', 'Cat', 'Ant']);
   });
 
-  it('has the order and "Kaikki versiot" in the filter panel, and a changed order is a chip that resets it (T-125)', async () => {
+  it('has the order in the tool row and "Kaikki versiot" in the filter panel, and a changed order is a chip that resets it (T-125, T-181)', async () => {
     const user = userEvent.setup();
     const named = (i: number, name: string) => card(i, { name, displayName: name, key: name.toLowerCase() });
     renderView([named(1, 'Bee'), named(2, 'Ant')]);
     const panel = screen.getByRole('search');
-    expect(within(panel).getByRole('combobox', { name: 'Järjestys' })).toBeInTheDocument();
+    expect(within(panel).queryByRole('combobox', { name: 'Järjestys' })).toBeNull();
+    expect(screen.getByRole('combobox', { name: 'Järjestys' })).toBeInTheDocument();
     expect(within(panel).getByRole('switch', { name: 'Kaikki versiot' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Poista suodatin: Järjestys/ })).toBeNull();
     await user.selectOptions(screen.getByRole('combobox', { name: 'Järjestys' }), 'Nimi (A–Ö)');
