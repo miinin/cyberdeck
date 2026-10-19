@@ -1,5 +1,5 @@
 # T-181 · Visuaalinen uudistus: tiivis, staattinen Cyberpunk (paketit 0–6)
-**Tila:** Paketit 0, 1 ja 2 Done (testissä 2026-10-19), seuraavaksi paketti 3 (Kokoelma) · **Omistaja:** Koodari (paketeittain) · **Lähde:** `docs/reports/UX-T181-kokonaiskatselmointi.md`, päätökset D-038 (R1–R9)
+**Tila:** Paketit 0–3 Done (tuotannossa 2026-10-19), seuraavaksi paketti 4a (Pakat-lista) · **Omistaja:** Koodari (paketeittain) · **Lähde:** `docs/reports/UX-T181-kokonaiskatselmointi.md`, päätökset D-038 (R1–R9)
 **Katselmoinnit:** PM esikatselusta. Paketti 1: ei riippuvuuksia, tallennusta, sääntöjä eikä workflowta, joten Digiturvaa ei tarvita. Paketti 6 tallentaa pakkoja: dev-testaus (D-029) ja Digiturvan kevyt katselmointi.
 
 ## Määrittely (PM)
@@ -126,3 +126,5 @@ Haara `t-181-3-kokoelma`. Kokoelman säännöt `src/styles/collection.css`:ssä;
 5. Kortin `CatalogView`/`ListToolbar` (paketti 2) sai pienen `endSlot`-propin Omat kortit -tilan want-linkkiä varten.
 
 Koodikatselmointi: tehty · Pakollisia korjattu 2 (testit luki siirrettyjä sääntöjä styles.css:stä; `.missing-add`-ylikirjoitus olisi vuotanut muihin näkymiin, rajattu `.missing-bar`:iin) · Suosituksia 2: (1) kansion `--binder-chrome` on kovakoodattu mitattu luku; (2) `.progress-pct` piilotettu visuaalisesti, jos prosentit halutaan takaisin, ne mahtuvat ≥ 90rem:ssä.
+
+**PM 2026-10-19 (paketti 3):** hyväksytty poikkeama: Omat kortit 320 px:ssä ensimmäinen kortti y = 396 (kriteeri ≤ 330, ennen T-181:tä 488). Sisältörivit ovat tarpeellisia; käyttäjä voi pyytää karsintaa.
