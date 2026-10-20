@@ -1707,8 +1707,8 @@ main {
 .card-dialog::backdrop,
 .confirm-dialog::backdrop,
 .test-hand-dialog::backdrop {
-  background: rgb(5 6 9 / 0.72);
-  backdrop-filter: blur(3px) saturate(0.8);
+  /* T-188: a flat veil, no backdrop-filter. The blur sampled the page behind on every frame the tilting card (a 3D layer) repainted, and the part of the screen it re-blurred flickered. */
+  background: rgb(5 6 9 / 0.84);
 }
 
 /* A dialog's title row: the title on the left, the close button (.dialog-close, an icon button) on the right. */
@@ -4759,20 +4759,12 @@ button.legality:focus-visible {
 }
 
 /* T-066: the order selects look like the other fields: a thin border, a modest focus ring. */
+/* T-188: only the size here. The look (border, surface, chamfer and its diagonal line) is the shared field base: a "background:" shorthand here wiped the diagonal line layer. */
 .sort-select select {
   block-size: var(--target-min);
   max-width: 100%;
   padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 0;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font: inherit;
   font-size: var(--font-size-base);
-}
-
-.sort-select select:hover {
-  border-color: var(--color-text);
 }
 
 /* Chrome treats a mouse-opened select as :focus-visible, so the cue is a quiet 2 px border in the text
@@ -6147,11 +6139,6 @@ section[aria-labelledby='have-heading'] {
   inline-size: 100%;
   block-size: var(--target-min);
   padding: 0 var(--space-2);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
-  font: inherit;
   font-size: var(--font-size-base);
 }
 
@@ -8723,16 +8710,7 @@ button.card-tag:focus-visible {
   min-inline-size: 0;
   block-size: var(--target-min);
   padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 0;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font: inherit;
   font-size: var(--font-size-base);
-}
-
-.build-selects select:hover {
-  border-color: var(--color-text);
 }
 
 .build-selects select:focus-visible {

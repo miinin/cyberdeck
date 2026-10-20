@@ -108,7 +108,7 @@ function Stat({
   value: number | string | null;
   missing: string;
   className?: string;
-  /** The label is only spoken (the cost gem and rarity speak for themselves visually). */
+  /** The label is only spoken (the rarity symbol speaks for itself visually). Cost, Power and RAM show their label (T-188). */
   hideLabel?: boolean;
   /** The value is drawn as the mark of the card (Power box, RAM chip, T-185). */
   mark?: boolean;
@@ -252,7 +252,7 @@ function CardBox({
       {/* Line 2 (T-184): cost gem, type and rarity; line 3: Power and RAM. One reading size for all. */}
       <div className={'card-meta ' + typeColorClass(card.color)}>
         <dl className="card-cost">
-          <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
+          <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost}>
             {card.cost === null ? undefined : <CostGem card={card} />}
           </Stat>
         </dl>

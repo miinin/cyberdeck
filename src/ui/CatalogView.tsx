@@ -31,6 +31,7 @@ import { CardFilters, selectedFilterCount } from './CardFilters';
 import type { CardFiltersProps } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { EditionConfirmDialog, editionConfirmed, markEditionConfirmed } from './EditionConfirmDialog';
+import { takeCardReturnHash } from './cardRoute';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
 import type { CardListItem } from './CardList';
@@ -636,7 +637,9 @@ function CatalogBody({
   const handleCloseImage = () => {
     if (routeCardKey !== null) {
       setDismissedKey(routeCardKey);
-      if (window.location.hash !== '#/') window.location.hash = '#/';
+      // T-188: back to the view the card was opened from (Have/Want), else Cards.
+      const back = takeCardReturnHash(routeCardKey);
+      if (window.location.hash !== back) window.location.hash = back;
     }
     setOpenCard(null);
     setShownArt(null);

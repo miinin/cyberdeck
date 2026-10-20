@@ -27,7 +27,7 @@ import type { CatalogViewMode, Repositories } from '../storage';
 import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import type { ActiveFilter } from './ActiveFilters';
 import { CardFilters } from './CardFilters';
-import { CardImageDialog } from './CardImageDialog';
+import { openCardPage } from './cardRoute';
 import { CardList } from './CardList';
 import type { CardListItem } from './CardList';
 import { cardNameText } from './CardName';
@@ -87,8 +87,6 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
   const [live, setLive] = useState('');
   const [sort, setSort] = useState<CardSort>(DEFAULT_SORT);
   const [imageSize, setImageSize] = useState<ImageSize>('medium');
-  const [openCard, setOpenCard] = useState<Card | null>(null);
-  const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const wantHeadingRef = useRef<HTMLHeadingElement>(null);
   const haveHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -217,17 +215,8 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
     havesStore.setCount(card.key, count);
     if (count === 0 && ownScope === 'list') haveHeadingRef.current?.focus();
   };
-  const openImage = (card: Card, opener: HTMLButtonElement) => {
-    imageOpenerRef.current = opener;
-    setOpenCard(card);
-  };
-  const closeImage = () => {
-    setOpenCard(null);
-    const opener = imageOpenerRef.current;
-    imageOpenerRef.current = null;
-    if (opener?.isConnected) opener.focus();
-    else wantHeadingRef.current?.focus();
-  };
+  // T-188: a card opens the card dialog (the Cards view at #/kortti/<key>); closing it returns here.
+  const openImage = (card: Card) => openCardPage(card.key);
   const limit = (card: Card) => setLive(texts.maxReachedLive(cardNameText(card)));
 
   const wantFoot = (card: Card) => {
@@ -466,16 +455,6 @@ export function HaveWantView({ cards, repositories }: { cards: readonly Card[]; 
           )}
         </section>
       </div>
-      <CardImageDialog
-        card={openCard}
-        onClose={closeImage}
-        onTagClick={(tag) => {
-          closeImage();
-          setSetChoice(null);
-          setCriteria({ ...EMPTY_CRITERIA, tag });
-          searchInputRef.current?.focus();
-        }}
-      />
     </>
   );
 }

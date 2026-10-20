@@ -40,25 +40,25 @@ describe('Catalog: card detail dialog (T-070)', () => {
   });
 });
 
-describe('Catalog: full-screen card image (T-091)', () => {
-  it('opens the whole card on the whole screen; Esc and a tap return to the details', async () => {
+describe('Catalog: the card alone from the card dialog (T-091, T-188)', () => {
+  it('opens the card alone on its own layer; Esc and the close button return to the card dialog and the picture button', async () => {
     const user = userEvent.setup();
     render(<CatalogView cards={[streetkid]} repositories={createMemoryRepositories()} />);
     await user.click(await screen.findByRole('button', { name: /^Suurenna kuva: V/ }));
     const dialog = await screen.findByRole('dialog', { name: /Streetkid/ });
 
-    const open = within(dialog).getByRole('button', { name: 'Näytä koko ruudulla' });
+    const open = within(dialog).getByRole('button', { name: 'Avaa pelkkä kortti' });
     await user.click(open);
-    const close = within(dialog).getByRole('button', { name: 'Sulje koko ruudun kuva' });
+    const close = within(dialog).getByRole('button', { name: 'Sulje pelkkä kortti' });
     expect(close).toHaveFocus();
     await user.click(close);
-    expect(within(dialog).queryByRole('button', { name: 'Sulje koko ruudun kuva' })).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole('button', { name: 'Sulje pelkkä kortti' })).not.toBeInTheDocument();
     expect(open).toHaveFocus();
 
     await user.click(open);
     // Esc on a modal dialog is a cancel event (jsdom does not map the key itself).
     fireEvent(dialog, new Event('cancel', { cancelable: true }));
-    expect(within(dialog).queryByRole('button', { name: 'Sulje koko ruudun kuva' })).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole('button', { name: 'Sulje pelkkä kortti' })).not.toBeInTheDocument();
     expect(screen.getByRole('dialog', { name: /Streetkid/ })).toBeInTheDocument();
   });
 });

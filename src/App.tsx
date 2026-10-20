@@ -176,11 +176,12 @@ export function App({
             >
               {deckTexts.navDecks}
             </a>
-            <a href="#/testaa" aria-current={isPlaytestRoute(route) || route.name === 'goldfish' ? 'page' : undefined}>
-              {sealedTexts.navPlaytest}
-            </a>
+            {/* T-188: the colours of the game first (Cards yellow, Collection green, Decks red, Have/Want blue), then Playtest and Proxy. */}
             <a href="#/vaihto" aria-current={route.name === 'havewant' || route.name === 'trade' || route.name === 'tradeLink' ? 'page' : undefined}>
               {deckTexts.navHaveWant}
+            </a>
+            <a href="#/testaa" aria-current={isPlaytestRoute(route) || route.name === 'goldfish' ? 'page' : undefined}>
+              {sealedTexts.navPlaytest}
             </a>
             <a href="#/proxy" aria-current={route.name === 'proxy' ? 'page' : undefined}>
               {proxyTexts.navProxy}
