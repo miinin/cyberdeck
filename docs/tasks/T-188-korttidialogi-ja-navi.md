@@ -1,5 +1,5 @@
 # T-188 · Korttidialogi ensin, merkkien tekstit, listan tyyppiväri, selectin viiste, välkyntä ja navin järjestys
-**Tila:** Review · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-20 T-187:n jälkeen (4 kuvaa)
+**Tila:** Done (tuotannossa 2026-10-20) · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-20 T-187:n jälkeen (4 kuvaa)
 **Katselmoinnit:** PM kuvakaappauksista. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ## Määrittely (PM)

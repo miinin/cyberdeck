@@ -187,5 +187,5 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-185 | Korttiruutu inforuuduksi: isommat koot, alanimi, korttia matkivat merkit, viisteet oikeaan yläkulmaan (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-186 | [velka] Täysi testiajo aikakatkaisee satunnaisesti 1–2 raskasta UI-testiä (5 s), erikseen ajettuina läpi (CatalogView, DeckEditor, GoldfishView, PublicDecks; toistui 2026-10-19–20) | 1 | Should | Koodari | Backlog | – |
 | T-187 | Inforuudun merkit tyylikkäiksi kortin muotojen pohjalta, pakkamäärä pois ruudukosta, viisteiden korjaus (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
-| T-188 | Korttidialogi ensin, merkkien tekstit, listan tyyppiväri, selectin viiste, välkyntä ja navin järjestys (käyttäjän palaute) | 1 | Must | Koodari | In Progress | PM (kuvakaappaukset) |
+| T-188 | Korttidialogi ensin, merkkien tekstit, listan tyyppiväri, selectin viiste, välkyntä ja navin järjestys (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-183 | Rikkomistestauksen korjaukset BRK-01–BRK-10 ja sivujen otsikot | 1 | Must | Koodari | Done | PM |
