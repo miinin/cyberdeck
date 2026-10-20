@@ -10,6 +10,10 @@ import { texts } from './texts';
 /**
  * The enlarged card image in a native modal dialog (T-027 UX). Esc, the "×" button and a click on the
  * backdrop close it; every way ends in the dialog's close event, which calls `onClose`.
+ *
+ * T-188: with a detail panel this is the card dialog (the card on the left, the details on the right). A click on its picture opens
+ * the card alone (a tilting card on its own layer inside the dialog); closing that layer returns to the picture button and the
+ * card dialog, and Esc closes only the top layer. Without a detail panel the picture opens the full-screen zoom as before.
  */
 export function CardImageDialog({
   card,
@@ -32,14 +36,22 @@ export function CardImageDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const tilt = useTilt<HTMLImageElement>();
+  const aloneTilt = useTilt<HTMLImageElement>();
   const [failedKey, setFailedKey] = useState<string | null>(null);
   // T-091: the whole card on the whole screen (phones show it smaller beside the counts).
   const [zoomed, setZoomed] = useState(false);
+  /** The named button of the picture (the picture itself is a mouse shortcut): where focus returns. */
   const zoomOpenRef = useRef<HTMLButtonElement>(null);
-  const unzoom = () => {
-    setZoomed(false);
-    zoomOpenRef.current?.focus();
-  };
+  const hasDetails = details !== undefined;
+  const openLayer = () => setZoomed(true);
+  const unzoom = () => setZoomed(false);
+  // Focus returns once the card dialog is live again (it is inert while the card alone is open).
+  const wasZoomed = useRef(false);
+  useEffect(() => {
+    if (wasZoomed.current && !zoomed) zoomOpenRef.current?.focus();
+    wasZoomed.current = zoomed;
+  }, [zoomed]);
+  const openLabel = hasDetails ? texts.cardViewOpen : texts.zoomImage;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -56,7 +68,7 @@ export function CardImageDialog({
   return (
     <dialog
       ref={dialogRef}
-      className={details === undefined ? 'card-dialog' : 'card-dialog has-details'}
+      className={hasDetails ? 'card-dialog has-details' : 'card-dialog'}
       aria-labelledby="card-dialog-title"
       onClose={onClose}
       // Esc closes the full-screen image first, then the dialog.
@@ -72,7 +84,7 @@ export function CardImageDialog({
       }}
     >
       {card !== null && (
-        <div className="card-dialog-body">
+        <div className="card-dialog-body" inert={zoomed && hasDetails ? true : undefined}>
           <div className="card-dialog-header">
             <h2 id="card-dialog-title" lang="en">
               <CardName card={card} />
@@ -120,24 +132,44 @@ export function CardImageDialog({
               lang="en"
               loading="eager"
               onError={() => setFailedKey(imageSrc)}
-              onClick={() => setZoomed(true)}
+              onClick={() => openLayer()}
             />
           ) : (
             <p role="alert">{texts.imageLoadError}</p>
           )}
             {imageSrc !== null && failedKey !== imageSrc && (
               <button type="button" ref={zoomOpenRef} className="button-secondary button-compact card-zoom-open"
-                aria-label={texts.zoomImage}
-                onClick={() => setZoomed(true)}
+                aria-label={openLabel}
+                onClick={openLayer}
               >
-                {texts.zoomImageShort}
+                {hasDetails ? texts.cardViewOpenShort : texts.zoomImageShort}
               </button>
             )}
             {details !== undefined && <div className="card-dialog-details">{details}</div>}
           </div>
         </div>
       )}
-      {card !== null && zoomed && imageSrc !== null && (
+      {card !== null && zoomed && hasDetails && imageSrc !== null && (
+        <div
+          className="card-viewer"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) unzoom();
+          }}
+        >
+          <div className="card-viewer-body" role="group" aria-labelledby="card-viewer-title">
+            <div className="card-viewer-header">
+              <h2 id="card-viewer-title" lang="en">
+                <CardName card={card} />
+              </h2>
+              <button type="button" className="button-secondary dialog-close" aria-label={texts.cardViewClose} onClick={unzoom} autoFocus>
+                {texts.closeSymbol}
+              </button>
+            </div>
+            <img {...aloneTilt} className="card-viewer-image card-tilt" src={imageSrc} width={CARD_IMAGE_WIDTH.lg} height={cardImageHeight('lg')} alt={cardNameText(card)} lang="en" />
+          </div>
+        </div>
+      )}
+      {card !== null && zoomed && !hasDetails && imageSrc !== null && (
         <button type="button" className="card-zoom" aria-label={texts.zoomClose} onClick={unzoom} autoFocus>
           <img src={imageSrc} alt={cardNameText(card)} lang="en" />
         </button>

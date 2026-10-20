@@ -699,8 +699,8 @@ body:has(.mark-banner) .site-footer {
 }
 
 .card-cost .card-stat {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
   min-inline-size: 1.875rem;
   min-block-size: 1.875rem;
 }
@@ -828,15 +828,15 @@ body:has(.mark-banner) .site-footer {
   font-variant-numeric: tabular-nums;
 }
 
-/* The label is spoken in full (the dt) and seen as the short form "P" / "RAM" before the mark. The empty alternative text keeps it from being read twice. */
+/* T-188: the meaning of each mark is printed beside it: COST, POWER, RAM, small capitals in the muted text colour (AA in both themes). Label and mark are one tight pair. */
+.card-cost dt,
 .stat-chip dt {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  margin-inline-end: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .stat-chip dd {
@@ -1038,6 +1038,19 @@ body:has(.mark-banner) .site-footer {
   content: none;
 }
 
+/*
+ * T-188: the type word of the list is in the colour of the card (red, yellow, green, blue), so the colour reads at a glance. The bright
+ * shades of the card marks on the dark theme (5.7:1 or more), deeper shades on the light theme (all 5.5:1 or more on the page).
+ */
+.card-table .cell-type .type-badge-red { color: #ff4d5e; }
+.card-table .cell-type .type-badge-yellow { color: #ffd400; }
+.card-table .cell-type .type-badge-green { color: #39e08a; }
+.card-table .cell-type .type-badge-blue { color: #4d9dff; }
+:root[data-theme='light'] .card-table .cell-type .type-badge-red { color: #b0182d; }
+:root[data-theme='light'] .card-table .cell-type .type-badge-yellow { color: #7a5c00; }
+:root[data-theme='light'] .card-table .cell-type .type-badge-green { color: #0b6b3a; }
+:root[data-theme='light'] .card-table .cell-type .type-badge-blue { color: #1a55b0; }
+
 .card-table .cell-number {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -1219,6 +1232,7 @@ body:has(.mark-banner) .site-footer {
  * Below 40 rem it is a full-screen view that scrolls as the dialog layer.
  * ------------------------------------------------------------------------------------------------------------------ */
 .card-dialog-body {
+  position: relative;
   margin: auto;
   width: min(30rem, 100%);
   padding: var(--pad-dialog);
@@ -1260,8 +1274,80 @@ body:has(.mark-banner) .site-footer {
   max-block-size: calc(100dvh - 9rem);
 }
 
+/* T-188: the named button of the picture. On a wide screen the picture itself is the mouse target, so the button is hidden visually but stays reachable by keyboard and screen reader; it shows when it has focus. */
 .card-zoom-open {
-  display: none;
+  position: absolute;
+  inset-block-end: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: 2;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.card-zoom-open:focus-visible {
+  inline-size: auto;
+  block-size: auto;
+  padding-inline: var(--space-3);
+  overflow: visible;
+  clip-path: none;
+}
+
+/*
+ * T-188: the card alone. A layer over the card dialog (inside the same modal dialog, so Esc and the focus trap stay there): a dark
+ * veil, a box with the name, the close button and the tilting card as large as the screen allows. No scrolling: the card never
+ * gets taller than the screen minus the title row. A click on the veil closes it.
+ */
+.card-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: var(--space-3) var(--space-2);
+  background: rgb(5 6 9 / 0.92);
+  cursor: zoom-out;
+}
+
+.card-viewer-body {
+  display: grid;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  padding: var(--pad-dialog);
+  border: 1px solid var(--line-strong);
+  border-block-start: 2px solid var(--section-accent);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-pop);
+  cursor: default;
+}
+
+.card-viewer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.card-viewer-header h2 {
+  margin: 0;
+  font-size: var(--font-size-card-name);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.card-viewer-image {
+  display: block;
+  justify-self: center;
+  inline-size: auto;
+  max-inline-size: 100%;
+  block-size: auto;
+  max-block-size: calc(100dvh - 9rem);
+  object-fit: contain;
 }
 
 /* One mono line under the title: the tags and where the card comes from. */
@@ -1524,7 +1610,13 @@ body:has(.mark-banner) .site-footer {
   }
 
   .card-dialog.has-details .card-zoom-open {
+    position: static;
     display: block;
+    inline-size: auto;
+    block-size: auto;
+    padding-inline: var(--space-3);
+    overflow: visible;
+    clip-path: none;
     margin: var(--space-2) auto 0;
   }
 
