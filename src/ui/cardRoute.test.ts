@@ -1,21 +1,28 @@
-import { openCardPage, takeCardReturnHash } from './cardRoute';
+import { cardOriginHash, cardOriginOpener, forgetCardOrigin, openCardPage } from './cardRoute';
 
 describe('card dialog route (T-188)', () => {
   afterEach(() => {
+    forgetCardOrigin();
     window.location.hash = '';
   });
 
-  it('goes to the card dialog and remembers the view it came from', () => {
-    window.location.hash = '#/vaihto';
+  it('goes to the card dialog and remembers the view and the clicked element', () => {
+    const button = document.createElement('button');
+    document.body.append(button);
+    button.focus();
+    window.location.hash = '#/pakat/d1';
     openCardPage('v-streetkid');
     expect(window.location.hash).toBe('#/kortti/v-streetkid');
-    expect(takeCardReturnHash('v-streetkid')).toBe('#/vaihto');
+    expect(cardOriginHash('v-streetkid')).toBe('#/pakat/d1');
+    expect(cardOriginOpener('v-streetkid')).toBe(button);
+    button.remove();
   });
 
-  it('returns to Cards for a direct link, and never uses a stale address', () => {
+  it('knows nothing of another card, a direct link or a forgotten origin', () => {
     window.location.hash = '#/vaihto';
     openCardPage('a');
-    expect(takeCardReturnHash('b')).toBe('#/');
-    expect(takeCardReturnHash('a')).toBe('#/');
+    expect(cardOriginHash('b')).toBeNull();
+    forgetCardOrigin();
+    expect(cardOriginHash('a')).toBeNull();
   });
 });

@@ -31,7 +31,7 @@ import { CardFilters, selectedFilterCount } from './CardFilters';
 import type { CardFiltersProps } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { EditionConfirmDialog, editionConfirmed, markEditionConfirmed } from './EditionConfirmDialog';
-import { takeCardReturnHash } from './cardRoute';
+import { cardOriginHash, cardOriginOpener } from './cardRoute';
 import { CardImageDialog } from './CardImageDialog';
 import { CardList } from './CardList';
 import type { CardListItem } from './CardList';
@@ -129,6 +129,8 @@ type CatalogProps = {
   shared?: SharedStores;
   /** Tells the app when the gallery is open (T-123), so it can hide its header and footer. */
   onGalleryChange?: (open: boolean) => void;
+  /** T-188: only the card dialog, over a view that stays mounted behind it (opened from Have/Want or the deck editor). */
+  dialogOnly?: boolean;
 };
 
 function OwnStoresCatalog(props: CatalogProps) {
@@ -151,6 +153,7 @@ function CatalogBody({
   mode = 'catalog',
   stores,
   onGalleryChange,
+  dialogOnly = false,
 }: CatalogProps & { stores: SharedStores }) {
   const locked = mode === 'collection';
   const gallery = useGallery(onGalleryChange);
@@ -637,9 +640,12 @@ function CatalogBody({
   const handleCloseImage = () => {
     if (routeCardKey !== null) {
       setDismissedKey(routeCardKey);
-      // T-188: back to the view the card was opened from (Have/Want), else Cards.
-      const back = takeCardReturnHash(routeCardKey);
+      // T-188: back to the view the card was opened from (Have/Want, deck editor), else Cards.
+      const back = cardOriginHash(routeCardKey) ?? '#/';
+      const from = cardOriginOpener(routeCardKey);
       if (window.location.hash !== back) window.location.hash = back;
+      // The view behind is still mounted: focus returns to the clicked card.
+      if (dialogOnly && from?.isConnected) from.focus();
     }
     setOpenCard(null);
     setShownArt(null);
@@ -912,6 +918,18 @@ function CatalogBody({
     </>
   );
 
+  const cardDialog = (
+    <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} subline={openCard === null ? undefined : <CardAvailability printings={openCard.printings ?? []} />} artUrl={shownArt} onTagClick={dialogOnly ? undefined : handleTagClick} />
+  );
+  if (dialogOnly) {
+    return (
+      <>
+        <EditionConfirmDialog card={pendingAdd?.card ?? null} onChoose={handleEditionChosen} onCancel={() => setPendingAdd(null)} />
+        {cardDialog}
+      </>
+    );
+  }
+
   return (
     <>
       {/* Stays mounted so screen readers announce each change. */}
@@ -939,7 +957,7 @@ function CatalogBody({
       {view === 'table' && !gallery.open && preview.preview}
       <WantCleanupBar cleanup={wantCleanup} />
       <EditionConfirmDialog card={pendingAdd?.card ?? null} onChoose={handleEditionChosen} onCancel={() => setPendingAdd(null)} />
-      <CardImageDialog card={openCard} onClose={handleCloseImage} details={details} subline={openCard === null ? undefined : <CardAvailability printings={openCard.printings ?? []} />} artUrl={shownArt} onTagClick={handleTagClick} />
+      {cardDialog}
     </>
   );
 }

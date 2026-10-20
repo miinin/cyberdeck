@@ -22,7 +22,8 @@ import { PublicDeckView } from './ui/PublicDeckView';
 import { PublicDecksContext } from './ui/PublicDecksContext';
 import type { PublicDecksApi } from './ui/PublicDecksContext';
 import { deckTexts } from './ui/deckTexts';
-import { isPlaytestRoute, sectionOf, useHashRoute } from './ui/useHashRoute';
+import { isPlaytestRoute, parseHash, sectionOf, useHashRoute } from './ui/useHashRoute';
+import { cardOriginHash, forgetCardOrigin } from './ui/cardRoute';
 import { PlaytestView } from './ui/PlaytestView';
 import { sealedTexts } from './ui/sealedTexts';
 import { texts } from './ui/texts';
@@ -105,7 +106,14 @@ export function App({
   );
   // T-055: the persistent browser storage button is no longer shown (cloud sync replaces it).
   const headerSlot: HTMLElement | null = null;
-  const { route, navigate } = useHashRoute();
+  const { route: realRoute, navigate } = useHashRoute();
+  // T-188: a card opened from another view (Have/Want, the deck editor) is a dialog over that view, which stays mounted behind it
+  // with its state; `route` is the view shown, `realRoute` the address.
+  const originHash = realRoute.name === 'card' ? cardOriginHash(realRoute.key) : null;
+  const route = originHash === null ? realRoute : parseHash(originHash);
+  useEffect(() => {
+    if (realRoute.name !== 'card') forgetCardOrigin();
+  }, [realRoute.name]);
   // The accent of the section (T-142): set on <html> so the header, the heading bar and the choices all follow it.
   const section = sectionOf(route);
   useEffect(() => {
@@ -224,6 +232,9 @@ export function App({
         />
       )}
       <main className="container" key={uid ?? 'local'}>
+        {originHash !== null && realRoute.name === 'card' && (
+          <CatalogView dialogOnly cards={cards} routeCardKey={realRoute.key} repositories={openRepositories} headerSlot={headerSlot} />
+        )}
         {(route.name === 'cards' || route.name === 'card') && (
           <CatalogView cards={cards} routeCardKey={route.name === 'card' ? route.key : null} repositories={openRepositories} headerSlot={headerSlot} onGalleryChange={setGalleryOpen} />
         )}

@@ -71,6 +71,24 @@ describe('Deck column', () => {
     expect(window.location.hash).toBe('#/kortti/l1');
   });
 
+  it('keeps the editor (search text, tab) and returns focus to the card when the card dialog is opened and closed (T-188)', async () => {
+    const user = userEvent.setup();
+    openEditor([['l1', 1]]);
+    await screen.findByRole('heading', { level: 2, name: 'Legendit (1/3)' });
+    await user.type(screen.getByRole('searchbox'), 'unit 1');
+    const picture = within(deckRegion()).getByRole('button', { name: 'Suurenna kuva: L1' });
+    await user.click(picture);
+    // The dialog is on top; the editor behind is the same one, not a new copy.
+    expect(window.location.hash).toBe('#/kortti/l1');
+    const dialog = await screen.findByRole('dialog');
+    expect(screen.getByRole('searchbox', { hidden: true })).toHaveValue('unit 1');
+    await user.click(within(dialog).getByRole('button', { name: 'Sulje' }));
+    await waitFor(() => expect(window.location.hash).toBe('#/pakat/a'));
+    expect(screen.getByRole('searchbox')).toHaveValue('unit 1');
+    expect(picture.isConnected).toBe(true);
+    expect(picture).toHaveFocus();
+  });
+
   it('shows a main deck tile with copies, the stepper and the missing copies', async () => {
     const user = userEvent.setup();
     openEditor([['u0', 3]], storedCollection([['u0', 1]]));
