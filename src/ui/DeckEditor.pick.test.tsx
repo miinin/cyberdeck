@@ -58,7 +58,8 @@ describe('Deck editor result picker', () => {
     expect(countIn(rowOf('V'))).toBe('Pakassa 1');
     fireEvent.click(within(rowOf('V')).getByRole('button', { name: 'Suurenna kuva: V, Streetkid' }));
     expect(countIn(rowOf('V'))).toBe('Pakassa 1');
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(window.location.hash).toContain('#/kortti/');
+    window.location.hash = '';
   });
 
   it('adds with + or = and removes with - while focus is in the row', async () => {

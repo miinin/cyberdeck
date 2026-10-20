@@ -44,7 +44,7 @@ import { ActiveFilters, criteriaFilters } from './ActiveFilters';
 import { CardFilters } from './CardFilters';
 import type { CollectionFilter } from './CardFilters';
 import { useCardHoverPreview } from './CardHoverPreview';
-import { CardImageDialog } from './CardImageDialog';
+import { openCardPage } from './cardRoute';
 import { cardNameText } from './CardName';
 import { DeckPickImage } from './DeckPickImage';
 import { DeckVisibility } from './DeckVisibility';
@@ -171,7 +171,6 @@ export function DeckEditor({
   /** UX-09 (T-174): the "Kokoelma" choice of the results. The default stays "Kaikki" (changing it is a product decision). */
   const [collectionChoice, setCollectionChoice] = useState<CollectionFilter>('all');
   const tagChoices = useMemo(() => tagOptions(cards), [cards]);
-  const [zoomCard, setZoomCard] = useState<Card | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -633,7 +632,8 @@ export function DeckEditor({
 
   const openImage = (card: Card) => {
     preview.hide();
-    setZoomCard(card);
+    // T-188: a card click always opens the card dialog (the Cards view at #/kortti/<key>); closing it returns to the deck.
+    openCardPage(card.key);
   };
 
   /**
@@ -1245,16 +1245,7 @@ export function DeckEditor({
           <DeckResults deckId={deckId} repository={repositories.games} cards={cards} cardsByKey={cardsByKey} />
         </section>
       </div>
-      <CardImageDialog
-        card={zoomCard}
-        onClose={() => setZoomCard(null)}
-        onTagClick={(tag) => {
-          // T-152: the tag becomes the search of the cards to add.
-          setZoomCard(null);
-          setCriteria({ ...EMPTY_CRITERIA, tag });
-          setTab('add');
-        }}
-      />
+
       {preview.preview}
     </>
   );

@@ -57,12 +57,18 @@ describe('Deck column', () => {
     await screen.findByRole('heading', { level: 2, name: 'Legendit (1/3)' });
     const region = deckRegion();
     expect(within(region).getAllByText('Vapaa Legend-paikka')).toHaveLength(2);
-    await user.click(within(region).getByRole('button', { name: 'Suurenna kuva: L1' }));
-    expect(await screen.findByRole('dialog')).toBeInTheDocument();
-    await user.keyboard('{Escape}');
     await user.click(within(region).getByRole('button', { name: 'Poista pakasta: L1' }));
-    expect(within(region).getAllByText('Vapaa Legend-paikka')).toHaveLength(3);
+    await waitFor(() => expect(within(region).getAllByText('Vapaa Legend-paikka')).toHaveLength(3));
     await waitFor(async () => expect(await savedCards(repositories)).toEqual([]));
+  });
+
+  it('a click on a Legend picture opens the card dialog (T-188)', async () => {
+    const user = userEvent.setup();
+    openEditor([['l1', 1]]);
+    await screen.findByRole('heading', { level: 2, name: 'Legendit (1/3)' });
+    await user.click(within(deckRegion()).getByRole('button', { name: 'Suurenna kuva: L1' }));
+    // The Cards view shows the dialog at #/kortti/<key>; it is not part of the editor.
+    expect(window.location.hash).toBe('#/kortti/l1');
   });
 
   it('shows a main deck tile with copies, the stepper and the missing copies', async () => {
