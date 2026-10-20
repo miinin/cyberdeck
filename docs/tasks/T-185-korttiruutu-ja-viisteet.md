@@ -1,5 +1,5 @@
 # T-185 · Korttiruutu inforuuduksi, isommat koot ja viisteet oikeaan yläkulmaan
-**Tila:** Review · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-20 (kuvakaappaus Kortit-sivun Iso-koosta, T-184:n jälkeen)
+**Tila:** Done (tuotannossa 2026-10-20) · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-20 (kuvakaappaus Kortit-sivun Iso-koosta, T-184:n jälkeen)
 **Katselmoinnit:** PM kuvakaappauksista. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ## Määrittely (PM)

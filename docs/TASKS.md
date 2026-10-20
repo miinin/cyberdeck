@@ -184,5 +184,6 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-179 | Kansiosivun skannaus yhdellä kuvalla (3×3 ja 3×4), kuvatiedosto ja rajaus | 1 | Must | Koodari | Done | Digiturva (SEC-179), PM (kuvakaappaukset, valekameratesti) |
 | T-181 | Visuaalinen uudistus: tiivis, staattinen Cyberpunk, paketit 0–6 (D-038) | 1 | Must | Koodari | In Progress (0–3 tehty) | PM (kuvakaappaukset), paketti 6: dev ja Digiturva |
 | T-184 | Korttiruudukon infonauha, merkintätilan lopetuspainike, keskitetyt − ja +, Myytävyys ennen avattavia suodattimia (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
-| T-185 | Korttiruutu inforuuduksi: isommat koot, alanimi, korttia matkivat merkit, viisteet oikeaan yläkulmaan (käyttäjän palaute) | 1 | Must | Koodari | In Progress | PM (kuvakaappaukset) |
+| T-185 | Korttiruutu inforuuduksi: isommat koot, alanimi, korttia matkivat merkit, viisteet oikeaan yläkulmaan (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
+| T-186 | [velka] Täysi testiajo aikakatkaisee satunnaisesti 1–2 raskasta UI-testiä (5 s), erikseen ajettuina läpi (CatalogView, DeckEditor, GoldfishView, PublicDecks; toistui 2026-10-19–20) | 1 | Should | Koodari | Backlog | – |
 | T-183 | Rikkomistestauksen korjaukset BRK-01–BRK-10 ja sivujen otsikot | 1 | Must | Koodari | Done | PM |
