@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-181 visuaalinen uudistus | Koodari | Paketit 0–3 tuotannossa, T-183 ja T-184 tehty | Paketti 4a (Pakat-lista, Kokoaminen, Julkiset, tuonti). Paketin 3 poikkeama (320 px y = 396) kortissa. Paketin 2 poikkeamat kortissa (korttikoot 8/10.5/15 rem, suodatinrivi ei varaa tilaa). Dependabot #192 ja #193 (firebase 13: dev ja Digiturva) |
+| T-181 visuaalinen uudistus | Koodari | Paketit 0–3 tuotannossa, T-183 ja T-184 tehty | T-185 (korttiruutu, koot, viisteet) Koodarilla, sitten julkaisu. Sen jälkeen paketti 4a. Paketin 3 poikkeama (320 px y = 396) kortissa. Paketin 2 poikkeamat kortissa (korttikoot 8/10.5/15 rem, suodatinrivi ei varaa tilaa). Dependabot #192 ja #193 (firebase 13: dev ja Digiturva) |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
