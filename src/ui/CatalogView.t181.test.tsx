@@ -46,6 +46,16 @@ describe('CatalogView grid box (T-181)', () => {
     expect(meta.querySelector('.stat-ram dd')).toHaveTextContent('2');
   });
 
+  it('draws the marks like the card (T-185): each has a title and the card colour class', () => {
+    render(<CatalogView cards={[card(1, { cost: 5, power: 6, ram: 2, color: 'Red' })]} repositories={browserLikeRepositories()} />);
+    const meta = document.querySelector('.card-meta') as HTMLElement;
+    expect(meta).toHaveClass('type-badge-red');
+    expect(meta.querySelector('.card-cost .card-stat')).toHaveAttribute('title', 'Cost 5');
+    expect(meta.querySelector('.stat-power')).toHaveAttribute('title', 'Power 6');
+    expect(meta.querySelector('.stat-ram')).toHaveAttribute('title', 'RAM 2');
+    expect(meta.querySelector('.stat-ram .stat-mark')).toHaveTextContent(/^2$/);
+  });
+
   it('shows the type the same way for every type (T-184): no chip for a Legend', () => {
     render(<CatalogView cards={[card(1, { type: 'Legend' }), card(2)]} repositories={browserLikeRepositories()} />);
     const types = [...document.querySelectorAll('.card-type')];
