@@ -1,7 +1,7 @@
 # STATUS · päivitetty 2026-10-19 (PM)
 
 ## Yhdellä lauseella
-Kaikki T-179:ään asti sekä T-181:n paketit 0–3 (design-järjestelmä, Kortit, Testaa-osion väri, Kokoelma), T-183, T-184 ja T-185 (korttiruutu, viisteet oikeaan yläkulmaan) ovat tuotannossa (https://cyberdeck-tcg.web.app, julkaistu 2026-10-20, PR #194–#197): kokoelma, kansio ja skanneri (myös jatkuva ja kansiosivu), want-lista ja jakolinkit (lyhyt vaihtolinkki), pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
+Kaikki T-179:ään asti sekä T-181:n paketit 0–3 (design-järjestelmä, Kortit, Testaa-osion väri, Kokoelma), T-183 ja T-184–T-187 (korttiruutu, korttia matkivat merkit, viisteet oikeaan yläkulmaan) ovat tuotannossa (https://cyberdeck-tcg.web.app, julkaistu 2026-10-20, PR #194–#198): kokoelma, kansio ja skanneri (myös jatkuva ja kansiosivu), want-lista ja jakolinkit (lyhyt vaihtolinkki), pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
 Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyttäjä (docs/reports/MVP1-UX-2026-10-17.md, korjattu T-174), Digiturva (SEC-T172-T173) ja rikkomistestaus (BREAK-T172-T173). Avoinna: UX-17, UX-30 ja UX-31.
@@ -52,6 +52,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-187 ohuet korttia matkivat merkit, pakkamäärä pois ruudukosta, viisteiden viistoviivat kiinni kehyksessä (2026-10-20).
 - T-185 korttiruutu, isommat koot, korttia matkivat merkit ja viisteet oikeaan yläkulmaan (2026-10-20).
 - T-184 korttien infonauha, merkintätilan lopetuspainike ja suodattimien järjestys (2026-10-19).
 - T-171 näkymävalitsin ei pompi, T-172 Goldfish "Pelaa yksin", T-173 virtuaaliboosterit ja sealed, T-174 MVP-1:n UX-korjaukset (2026-10-17).

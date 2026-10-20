@@ -12,31 +12,23 @@ const twoDecks = () =>
   });
 
 describe('Catalog: decks of a card', () => {
-  it('mentions how many decks a card is in as an icon and a number, and names them for screen readers and the tooltip', async () => {
+  it('does not show the deck count on the card box (T-187); the table still does', async () => {
+    const user = userEvent.setup();
     renderRoute('#/', twoDecks());
-    const mention = await screen.findAllByText('2 pakassa: Eka, Toka');
-    expect(mention).toHaveLength(1);
-    const paragraph = mention[0]?.closest('p') as HTMLElement;
-    expect(paragraph).toHaveAttribute('title', 'Pakoissa: Eka, Toka');
-    expect(paragraph).toHaveTextContent('◧ 2');
-    expect(paragraph.querySelector('[aria-hidden="true"]')).toHaveTextContent('◧ 2');
-    expect(paragraph.closest('li')).toHaveTextContent('Unit 0');
-    expect(screen.getByText('1 pakassa: Eka')).toBeInTheDocument();
-  });
-
-  it('says nothing for a card that is in no deck', async () => {
-    renderRoute('#/', twoDecks());
-    await screen.findByText('2 pakassa: Eka, Toka');
-    const card = screen.getByRole('heading', { level: 3, name: 'Unit 5' }).closest('li') as HTMLElement;
-    expect(card).not.toHaveTextContent('pakassa');
+    await screen.findByRole('heading', { level: 3, name: 'Unit 0' });
+    expect(screen.queryByText(/pakassa/)).not.toBeInTheDocument();
+    const box = screen.getByRole('heading', { level: 3, name: 'Unit 0' }).closest('li') as HTMLElement;
+    expect(box).not.toHaveTextContent('◧');
+    await user.click(screen.getByRole('radio', { name: 'Lista' }));
+    expect(await screen.findByText('2 pakassa: Eka, Toka')).toBeInTheDocument();
   });
 
   it('shows the mention in the table view too, in a column of its own', async () => {
     const user = userEvent.setup();
     renderRoute('#/', twoDecks());
-    await screen.findByText('2 pakassa: Eka, Toka');
     await user.click(screen.getByRole('radio', { name: 'Lista' }));
     const table = await screen.findByRole('table');
+    await within(table).findByText('2 pakassa: Eka, Toka');
     expect(within(table).getByRole('columnheader', { name: 'Pakoissa' })).toBeInTheDocument();
     const row = within(table).getByRole('rowheader', { name: /Unit 0/ }).closest('tr') as HTMLElement;
     expect(row.querySelector('.cell-decks')).toHaveTextContent('2');

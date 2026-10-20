@@ -11,7 +11,6 @@ import { CardImage } from './CardImage';
 import { CostGem } from './DeckPickTable';
 import { CountControl } from './CountControl';
 import type { CountControlMode } from './CountControl';
-import { CardDecks } from './CardDecks';
 import { artName } from './artName';
 import { texts } from './texts';
 
@@ -143,7 +142,6 @@ export function CardList({
   items,
   caption = texts.tableCaption,
   owned,
-  decksOf,
   onOpenImage,
   imageLabel,
   renderFoot,
@@ -153,8 +151,6 @@ export function CardList({
   items?: readonly CardListItem[];
   caption?: string;
   owned?: OwnedColumn;
-  /** Names of the decks a card is in (T-013); left out when decks could not be read. */
-  decksOf?: (card: Card) => readonly string[];
   /** Opens the enlarged image (T-027 UX); the button is where focus returns. */
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
   /** Spoken text of the picture button when it does not enlarge (Proxy adds on click). */
@@ -170,7 +166,6 @@ export function CardList({
           item={item}
           showArtLabel={items !== undefined}
           owned={owned}
-          decksOf={decksOf}
           onOpenImage={onOpenImage}
           imageLabel={imageLabel}
           renderFoot={renderFoot}
@@ -185,7 +180,6 @@ function CardBox({
   item,
   showArtLabel,
   owned,
-  decksOf,
   onOpenImage,
   imageLabel,
   renderFoot,
@@ -193,7 +187,6 @@ function CardBox({
   item: CardListItem;
   showArtLabel: boolean;
   owned?: OwnedColumn;
-  decksOf?: (card: Card) => readonly string[];
   onOpenImage: (card: Card, opener: HTMLButtonElement, artUrl?: string | null) => void;
   imageLabel?: string;
   renderFoot?: (card: Card) => ReactNode;
@@ -231,7 +224,7 @@ function CardBox({
     <li className={'card-box card-box--art ' + state}>
       {art === null && artCount > 1 && (versionUrls?.length ?? 0) < 2 && <span className="art-count-badge">{texts.artsCount(artCount)}</span>}
       <BoxPicture card={card} imageUrl={imageUrl} versionUrls={versionUrls} index={index} onStep={step} onOpenImage={onOpenImage} imageLabel={imageLabel} />
-      {/* Line 1 (T-184): the name on one line (the whole name in the title), deck count and collection count. */}
+      {/* Line 1 (T-184): the name on one line (the whole name in the title) and the collection count. The deck count is not shown here (T-187). */}
       <div className="card-strip">
         <h3 className="card-name" title={fullName}>
           <span lang="en">{card.name}</span>
@@ -248,7 +241,6 @@ function CardBox({
             <span className="visually-hidden"> – {artName(art)}</span>
           )}
         </h3>
-        {decksOf !== undefined && <CardDecks names={decksOf(card)} compact />}
         {controlInStrip && <div className="card-collection">{control}</div>}
       </div>
       {/* The version's name is also shown (T-118, UX-118-27): boxes of one card differ only by the picture otherwise. */}

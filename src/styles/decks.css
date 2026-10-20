@@ -3,3 +3,8 @@
  * Loaded after styles.css (src/main.tsx), so these rules win over older rules of the same specificity.
  * Tokens and base components live in styles.css (docs/UX.md luku 3); use them, do not redefine them here.
  */
+
+/* The game record (3–1–1) gets a row of its own under the counts, so it never runs past the tile edge at 1280 (T-187). */
+.deck-card-meta .deck-record {
+  flex-basis: 100%;
+}

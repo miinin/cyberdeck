@@ -902,7 +902,7 @@ function CatalogBody({
                 onSortChange={setSort}
               />
             ) : (
-              <CardList cards={sortedForGrid} items={gridItems} caption={listCaption} owned={owned} decksOf={decksOf} onOpenImage={handleOpenImage} />
+              <CardList cards={sortedForGrid} items={gridItems} caption={listCaption} owned={owned} onOpenImage={handleOpenImage} />
             ))}
         </section>
       </div>

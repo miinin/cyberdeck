@@ -31,13 +31,12 @@ describe('Catalog: card detail dialog (T-070)', () => {
       },
     });
     render(<CatalogView cards={[streetkid]} repositories={repositories} />);
-    await screen.findByText('1 pakassa: Eka');
-    await user.click(screen.getByRole('button', { name: /^Suurenna kuva: V/ }));
+    await user.click(await screen.findByRole('button', { name: /^Suurenna kuva: V/ }));
     const dialog = await screen.findByRole('dialog', { name: /Streetkid/ });
     expect(within(dialog).getByRole('heading', { level: 3, name: 'Kokoelmassa' })).toBeInTheDocument();
     expect(within(dialog).getByRole('heading', { level: 3, name: 'Want-listalla' })).toBeInTheDocument();
     expect(within(dialog).getByText('Pelisarja täynnä')).toBeInTheDocument();
-    expect(within(dialog).getByRole('link', { name: 'Eka' })).toHaveAttribute('href', '#/pakat/a');
+    expect(await within(dialog).findByRole('link', { name: 'Eka' })).toHaveAttribute('href', '#/pakat/a');
   });
 });
 
