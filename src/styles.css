@@ -149,38 +149,19 @@
   --control-h-sm: 2rem;
   --target-min: 2.5rem;
 
-  /* Chamfers: the bottom right corner; objects and dialogs also the top left one. */
+  /* Chamfers (T-185): the top right corner, like the tabs of the cards. Where a border is clipped away, the diagonal is drawn (inner variants, .chamfer-line). */
   --cut: 0.5rem;
   --cut-sm: 0.3125rem;
   --cut-lg: 0.875rem;
   --cut-inner: calc(var(--cut) - 1px);
   --cut-inner-2: calc(var(--cut) - 2px);
-  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
-  --shape-chamfer-inner: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - var(--cut-inner)),
-    calc(100% - var(--cut-inner)) 100%,
-    0 100%
-  );
-  --shape-chamfer-inner-2: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - var(--cut-inner-2)),
-    calc(100% - var(--cut-inner-2)) 100%,
-    0 100%
-  );
-  --shape-chamfer-sm: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%, 0 100%);
-  --shape-object: polygon(
-    var(--cut-lg) 0,
-    100% 0,
-    100% calc(100% - var(--cut-lg)),
-    calc(100% - var(--cut-lg)) 100%,
-    0 100%,
-    0 var(--cut-lg)
-  );
-  --shape-swatch: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%);
-  --shape-brand: polygon(0 0, 100% 0, 100% 55%, 55% 100%, 0 100%);
+  --shape-chamfer: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+  --shape-chamfer-inner: polygon(0 0, calc(100% - var(--cut-inner)) 0, 100% var(--cut-inner), 100% 100%, 0 100%);
+  --shape-chamfer-inner-2: polygon(0 0, calc(100% - var(--cut-inner-2)) 0, 100% var(--cut-inner-2), 100% 100%, 0 100%);
+  --shape-chamfer-sm: polygon(0 0, calc(100% - var(--cut-sm)) 0, 100% var(--cut-sm), 100% 100%, 0 100%);
+  --shape-object: polygon(0 0, calc(100% - var(--cut-lg)) 0, 100% var(--cut-lg), 100% 100%, 0 100%);
+  --shape-swatch: polygon(0 0, 40% 0, 100% 60%, 100% 100%, 0 100%);
+  --shape-brand: polygon(0 0, 45% 0, 100% 55%, 100% 100%, 0 100%);
 
   /* Depth: light on the top edge and a soft drop shadow; no glow at rest. */
   --shadow-object: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 10px 24px -14px rgb(0 0 0 / 0.8);
@@ -667,7 +648,9 @@ main {
  */
 .object {
   padding: var(--pad-object);
-  background: var(--surface-2);
+  background:
+    linear-gradient(to bottom left, transparent 50%, var(--line-strong) 50%, var(--line-strong) calc(50% + 1px), transparent calc(50% + 1px)) top right / var(--cut-lg) var(--cut-lg) no-repeat,
+    var(--surface-2);
   box-shadow: var(--shadow-object), inset 0 0 0 1px var(--line);
   clip-path: var(--shape-object);
 }
@@ -927,21 +910,9 @@ main {
   --cut: 0.5rem;
   --cut-inner: calc(var(--cut) - 1px);
   --cut-inner-2: calc(var(--cut) - 2px);
-  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
-  --shape-chamfer-inner: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - var(--cut-inner)),
-    calc(100% - var(--cut-inner)) 100%,
-    0 100%
-  );
-  --shape-chamfer-inner-2: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - var(--cut-inner-2)),
-    calc(100% - var(--cut-inner-2)) 100%,
-    0 100%
-  );
+  --shape-chamfer: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+  --shape-chamfer-inner: polygon(0 0, calc(100% - var(--cut-inner)) 0, 100% var(--cut-inner), 100% 100%, 0 100%);
+  --shape-chamfer-inner-2: polygon(0 0, calc(100% - var(--cut-inner-2)) 0, 100% var(--cut-inner-2), 100% 100%, 0 100%);
   padding: 0;
   font-size: var(--font-size-lg);
   letter-spacing: 0;
@@ -956,21 +927,9 @@ main {
   --cut: 0.375rem;
   --cut-inner: calc(var(--cut) - 1px);
   --cut-inner-2: calc(var(--cut) - 2px);
-  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
-  --shape-chamfer-inner: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - var(--cut-inner)),
-    calc(100% - var(--cut-inner)) 100%,
-    0 100%
-  );
-  --shape-chamfer-inner-2: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - var(--cut-inner-2)),
-    calc(100% - var(--cut-inner-2)) 100%,
-    0 100%
-  );
+  --shape-chamfer: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+  --shape-chamfer-inner: polygon(0 0, calc(100% - var(--cut-inner)) 0, 100% var(--cut-inner), 100% 100%, 0 100%);
+  --shape-chamfer-inner-2: polygon(0 0, calc(100% - var(--cut-inner-2)) 0, 100% var(--cut-inner-2), 100% 100%, 0 100%);
 }
 
 .step--compact {
@@ -1145,7 +1104,9 @@ main {
   gap: var(--space-3);
   padding: var(--space-5);
   border: 0;
-  background: var(--surface-2);
+  background:
+    linear-gradient(to bottom left, transparent 50%, var(--line-strong) 50%, var(--line-strong) calc(50% + 1px), transparent calc(50% + 1px)) top right / var(--cut-lg) var(--cut-lg) no-repeat,
+    var(--surface-2);
   box-shadow: inset 0 2px 0 var(--section-accent), inset 0 0 0 1px var(--line);
   clip-path: var(--shape-object);
 }
@@ -1261,10 +1222,13 @@ main {
 :where(input[type='search'], input[type='text'], input[type='email'], input[type='url'], input[type='date'], select, textarea) {
   max-width: 100%;
   padding: 0 var(--space-3);
-  border: 1px solid var(--color-border-strong);
+  --edge: var(--color-border-strong);
+  border: 1px solid var(--edge);
   border-bottom-color: var(--color-text-muted);
   border-radius: 0;
-  background: var(--surface-2);
+  background:
+    linear-gradient(to bottom left, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)) top right / var(--cut) var(--cut) no-repeat,
+    var(--surface-2);
   color: var(--color-text);
   font: inherit;
   font-size: var(--font-size-sm);
@@ -1281,7 +1245,7 @@ main {
 }
 
 :where(input[type='search'], input[type='text'], input[type='email'], input[type='url'], input[type='date'], select, textarea):where(:hover) {
-  border-color: var(--line-accent);
+  --edge: var(--line-accent);
   border-bottom-color: var(--section-accent);
 }
 
@@ -1338,8 +1302,10 @@ main {
   max-width: 100%;
   min-height: var(--control-h-sm);
   padding: 0 var(--space-2);
-  border: 1px solid var(--line-strong);
-  background: transparent;
+  --edge: var(--line-strong);
+  border: 1px solid var(--edge);
+  background: linear-gradient(to bottom left, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)) top right / var(--cut-sm) var(--cut-sm) no-repeat,
+    transparent;
   font-size: var(--font-size-sm);
   overflow-wrap: break-word;
   cursor: pointer;
@@ -1347,13 +1313,13 @@ main {
 }
 
 .option:hover {
-  border-color: var(--line-accent);
-  background: var(--surface-hover);
+  --edge: var(--line-accent);
+  background-color: var(--surface-hover);
 }
 
 .option:has(input:checked) {
-  border-color: var(--section-accent);
-  background: color-mix(in srgb, var(--section-accent) 14%, transparent);
+  --edge: var(--section-accent);
+  background-color: color-mix(in srgb, var(--section-accent) 14%, transparent);
 }
 
 .option:has(input:focus-visible) {
@@ -2061,7 +2027,8 @@ body:has(dialog[open]) {
   min-inline-size: 0;
   max-inline-size: 100%;
   border: 1px solid var(--color-border-strong);
-  background: var(--color-bg);
+  background: linear-gradient(to bottom left, transparent 50%, var(--color-border-strong) 50%, var(--color-border-strong) calc(50% + 1px), transparent calc(50% + 1px)) top right / var(--cut) var(--cut) no-repeat,
+    var(--color-bg);
   clip-path: var(--shape-chamfer);
 }
 
@@ -6916,8 +6883,8 @@ section[aria-labelledby='have-heading'] {
   /* A 28 px square with the 6 px chamfer of the small buttons; the white edge is the element, the dark fill is ::before. */
   --cut: 0.375rem;
   --cut-inner: calc(var(--cut) - 1px);
-  --shape-chamfer: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
-  --shape-chamfer-inner: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-inner)), calc(100% - var(--cut-inner)) 100%, 0 100%);
+  --shape-chamfer: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+  --shape-chamfer-inner: polygon(0 0, calc(100% - var(--cut-inner)) 0, 100% var(--cut-inner), 100% 100%, 0 100%);
   background: #fff;
   color: #fff;
   font: inherit;
@@ -8641,12 +8608,15 @@ html[data-gallery='on'] main {
 }
 
 .card-tag {
+  --cut: 0.4rem;
   display: inline-flex;
   align-items: center;
   min-block-size: 1.75rem;
   padding: 0 var(--space-2);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface-raised);
+  --edge: var(--color-border-strong);
+  border: 1px solid var(--edge);
+  background: linear-gradient(to bottom left, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)) top right / var(--cut) var(--cut) no-repeat,
+    var(--color-surface-raised);
   color: var(--color-text);
   font: inherit;
   font-size: var(--font-size-sm);
@@ -8661,7 +8631,7 @@ button.card-tag {
 }
 
 button.card-tag:hover {
-  border-color: var(--color-accent);
+  --edge: var(--color-accent);
   color: var(--color-accent);
 }
 

@@ -17,23 +17,26 @@ function rule(selector: string): string {
 }
 
 describe('T-181 cards (package 2)', () => {
-  it('the grid has no box: the old box rules are gone from styles.css and the name line is 28 px', () => {
+  it('the card and its data are one info box (T-185): the old box rules are gone from styles.css, the name plate is 40 px', () => {
     expect(base).not.toMatch(/\n\.card-box \{/);
-    expect(rule('.card-box')).not.toMatch(/border|background/);
-    expect(rule('.card-strip')).toMatch(/min-block-size:\s*1\.75rem/);
+    expect(rule('.card-box')).toMatch(/clip-path:\s*var\(--shape-chamfer\)/);
+    expect(rule('.card-box')).toMatch(/background:/);
+    expect(rule('.card-strip')).toMatch(/min-block-size:\s*2\.5rem/);
   });
 
-  it('the sizes give five boxes at 1280 px and two on the narrowest phones', () => {
-    expect(cards).toMatch(/\[data-image-size='medium'\] \.card-grid[^{]*\{\s*--card-min:\s*10\.5rem/);
-    expect(cards).toMatch(/\[data-image-size='small'\] \.card-grid[^{]*\{\s*--card-min:\s*8rem/);
-    expect(cards).toMatch(/\[data-image-size='large'\] \.card-grid[^{]*\{\s*--card-min:\s*15rem/);
+  it('the sizes (12, 16 and 22 rem) give three Normal boxes at 1280 px, five at 1920 px, and two on the narrowest phones (Large: one)', () => {
+    expect(cards).toMatch(/\[data-image-size='medium'\] \.card-grid[^{]*\{\s*--card-min:\s*16rem/);
+    expect(cards).toMatch(/\[data-image-size='small'\] \.card-grid[^{]*\{\s*--card-min:\s*12rem/);
+    expect(cards).toMatch(/\[data-image-size='large'\] \.card-grid[^{]*\{\s*--card-min:\s*22rem/);
     expect(cards).toMatch(/@media \(max-width: 29\.99rem\) \{\s*\.card-grid \{\s*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+    expect(cards).toMatch(/\[data-image-size='large'\] \.card-grid,[^{]*\{\s*grid-template-columns:\s*minmax\(0, 1fr\)/);
   });
 
-  it('the name is one line with an ellipsis', () => {
-    const name = rule('.card-name');
-    expect(name).toMatch(/white-space:\s*nowrap/);
-    expect(name).toMatch(/text-overflow:\s*ellipsis/);
+  it('the name and the subname are each one line with an ellipsis, and the subname is never hidden', () => {
+    const lines = rule('.card-name > [lang],\n.card-name > .card-subname');
+    expect(lines).toMatch(/white-space:\s*nowrap/);
+    expect(lines).toMatch(/text-overflow:\s*ellipsis/);
+    expect(rule('.card-box .card-subname')).not.toMatch(/clip-path|position:\s*absolute|display:\s*none/);
   });
 
   it('the filter side panel is 16 rem and sticky is not used', () => {
