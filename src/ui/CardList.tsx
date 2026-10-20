@@ -5,7 +5,7 @@ import { playsetSize } from '../domain/card';
 import type { Card } from '../domain/card';
 import type { Art } from '../domain/arts';
 import { artRarity } from '../domain/arts';
-import { CardColor, typeBadgeClass } from './CardColor';
+import { CardColor, typeBadgeClass, typeColorClass } from './CardColor';
 import { Chevron } from './Chevron';
 import { CardImage } from './CardImage';
 import { CostGem } from './DeckPickTable';
@@ -102,6 +102,7 @@ function Stat({
   missing,
   className = '',
   hideLabel = false,
+  mark = false,
   children,
 }: {
   label: string;
@@ -110,10 +111,12 @@ function Stat({
   className?: string;
   /** The label is only spoken (the cost gem and rarity speak for themselves visually). */
   hideLabel?: boolean;
+  /** The value is drawn as the mark of the card (Power box, RAM chip, T-185). */
+  mark?: boolean;
   /** Replaces the plain value, e.g. with the cost gem. */
   children?: ReactNode;
 }) {
-  let shown: ReactNode = value;
+  let shown: ReactNode = mark && value !== null ? <span className="stat-mark">{value}</span> : value;
   if (value === null) {
     shown = (
       <>
@@ -123,7 +126,7 @@ function Stat({
     );
   }
   return (
-    <div className={'card-stat ' + className}>
+    <div className={'card-stat ' + className} title={value === null ? undefined : `${label} ${value}`}>
       <dt className={hideLabel ? 'visually-hidden' : undefined}>{label}</dt>
       <dd>{children ?? shown}</dd>
     </div>
@@ -255,7 +258,7 @@ function CardBox({
         </p>
       )}
       {/* Line 2 (T-184): cost gem, type and rarity; line 3: Power and RAM. One reading size for all. */}
-      <div className="card-meta">
+      <div className={'card-meta ' + typeColorClass(card.color)}>
         <dl className="card-cost">
           <Stat label={texts.columnCost} value={card.cost} missing={texts.noCost} hideLabel>
             {card.cost === null ? undefined : <CostGem card={card} />}
@@ -275,8 +278,8 @@ function CardBox({
           </Stat>
         </dl>
         <dl className="card-stats">
-          <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} className="stat-chip stat-power" />
-          <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip stat-ram" />
+          <Stat label={texts.columnPower} value={card.power} missing={texts.noPower} className="stat-chip stat-power" mark />
+          <Stat label={texts.columnRam} value={card.ram} missing={texts.noRam} className="stat-chip stat-ram" mark />
         </dl>
       </div>
       {footControl !== null && (

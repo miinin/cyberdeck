@@ -1,5 +1,5 @@
 # T-185 · Korttiruutu inforuuduksi, isommat koot ja viisteet oikeaan yläkulmaan
-**Tila:** In Progress · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-20 (kuvakaappaus Kortit-sivun Iso-koosta, T-184:n jälkeen)
+**Tila:** Review · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-20 (kuvakaappaus Kortit-sivun Iso-koosta, T-184:n jälkeen)
 **Katselmoinnit:** PM kuvakaappauksista. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ## Määrittely (PM)
@@ -20,3 +20,14 @@ Käyttäjän palaute: koot ovat liian pieniä, alanimi puuttuu, nauhan merkit ei
 **Rajoitteet:** ei uusia liikkuvia koristeita, ei sisäistä vieritystä, AA-kontrasti, reduced-motion, `forced-colors` toimii (viisteet saavat hävitä siellä).
 **Testit:** päivitä vain muuttuneet kriteerit (esim. styles.t181cards.test.ts:n kortti- ja nauhakoot). Lisää testi, joka varmistaa, että `--shape-chamfer*` viistää oikean yläkulman.
 Haara `t-185-korttiruutu` testistä.
+
+## Luovutus (Koodari, 2026-10-20)
+Haara `t-185-korttiruutu`. Muutokset: `cards.css`, `styles.css`, `collection.css`, `CardList.tsx`, testit (`styles.t185.test.ts` uusi, `styles.t181cards.test.ts` ja `CatalogView.t181.test.tsx` päivitetty vain muuttuneilta osin).
+
+**Koot (kortin vähimmäisleveys):** Pieni 12, Normaali 16, Iso 22 rem. Mitattu: Normaali 1280:ssa 3 korttia, 1920:ssa 5; Pieni 1280:ssa 4. 320: 2 saraketta Pienessä ja Normaalissa, Iso 1 sarake (CSS; UI:n koonvalinta ei näy 320:ssa, joten Isoa ei kuvattu siellä). Ei vaakaylivuotoa missään kuvatussa näkymässä.
+**Inforuutu:** `.card-box` on ruutu (pinta, ohut viiva, viiste oikeassa yläkulmassa + viistoviiva), sisällä kortti, nimilappu (nimi 1 rem lihavoitu, alanimi 0.8125 rem muted, ellipsi, `title`), merkit ja − / +.
+**Merkit:** Cost = tumma laatikko kortin värisellä kehyksellä ja valkoisilla lihavilla numeroilla (ei kustannusta: viiva samassa laatikossa); tyyppi = kortin värillä täytetty viistetty tabi, valkoinen versaali (keltaisella tumma); Power = kortin värinen täyttö, valkoinen luku, näkyvä tunniste "POWER"; RAM = tumma chip kortin värisellä kehyksellä ja tekstillä "×2", tunniste "RAM". Täytteet: punainen #c8203a, vihreä #0b7a45, sininen #1f62c4 (valkoinen teksti ≥ 5.4:1), keltainen #ffd400 tumma teksti 13:1; samat molemmissa teemoissa kuten kortti. Jokaisella `title` ("Cost 5", "Power 6", "RAM 2"), dt-nimi säilyy; ×-merkki on CSS-sisältöä tyhjällä vaihtoehtoisella tekstillä. Rarity ennallaan. Huom. kuvaajan kontrastitarkistus antaa väärän positiivisen cost-laatikolle ja RAM-chipille (tausta pseudo-elementissä).
+**Viisteet:** kaikki `--shape-chamfer*`, `--shape-object`, `--shape-swatch/brand` ja paikalliset polygonit nyt oikea yläkulma. Viistoviiva: painikkeet ym. käyttävät olemassa olevaa inner-ratkaisua (peilautui automaattisesti); kentät, `.option`, `.segmented`, `.card-tag`, `.object`, `.empty`, ansiomerkit ja inforuutu piirtävät viistoviivan taustagradienttikerroksena (`--edge`-muuttuja pitää hover/valittu-värin mukana). Dialogit ovat edelleen suorakulmaisia (T-181:n päätös), joten niissä ei ole viistettä.
+Tarkistetut kuvat (tumma ja vaalea, 320/1280/1920): Kortit (Pieni, Normaali, Iso, merkintätila, lista, suodattimet, korttidialogi), Kokoelma (Omat, Yleiskuva, Kansio, skanneri), Pakat (lista, tuonti, kokoaminen, julkiset, editori, lisäys, tilastot, kirjaa peli, testikäsi, goldfish), Testaa, Have/Want, Proxy, tyhjät tilat. Kuvat: scratchpad `ux/t185/` (lähikuva `crop-info-large.png`).
+Koodikatselmointi: tehty · Pakollisia korjattu 1 (RAM-chipin "×" tuli tekstisisältöön ja rikkoi olemassa olevan testin, siirretty CSS:ään) · Suosituksia 2: (1) `.card-box` leikkaa clip-pathilla ruudun pudotusvarjon, ja `.deck-row`-laatikot ym. ovat edelleen viistämättömiä vanhoja pintoja (kuuluu myöhempään pakettiin); (2) pakkalistojen pyöreä gem on edelleen vanha.
+Testit: npm test läpi (2140; kaksi 5 s aikarajan ylitystä täydessä ajossa, DeckEditor.conflict ja GoldfishView, menivät läpi erillisajossa), lint ja build läpi.
