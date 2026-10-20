@@ -1,5 +1,5 @@
 # T-187 · Inforuudun merkit tyylikkäiksi, pakkamäärä pois ja viisteiden korjaus
-**Tila:** In Progress · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-20 T-185:n jälkeen (5 kuvaa)
+**Tila:** Done (tuotannossa 2026-10-20) · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-20 T-185:n jälkeen (5 kuvaa)
 **Katselmoinnit:** PM kuvakaappauksista. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ## Määrittely (PM)
@@ -34,3 +34,5 @@ Haara `t-187-merkit`. Muutokset: `cards.css`, `styles.css`, `collection.css`, `C
 Kuvat: scratchpad `ux/t187/` (crop-*: info-large, meta-red/yellow/green/blue, search = Hae-kenttä, seg, sel, chip, toolbar; tumma ja vaalea, 1280 ja 320; kokokuvat 320/1280/1920).
 Koodikatselmointi: tehty · Pakollisia korjattu 2 (RAM-chipin täsmällisyys peitti padding- ja ::before-säännöt; tyyppitabin oma tausta näkyi viistojen päiden takana) · Suosituksia 2: (1) `CardDecks compact={true}` -muoto on nyt käyttämätön; (2) Pakat-listan ensimmäisen laatan oikeassa reunassa "RRR 3-1-1" leikkautuu (ennestään, ei tämän tehtävän aluetta).
 Testit: npm test, lint ja build läpi (yksi ajoaikainen flaky aiemmassa ajossa, ks. T-186).
+
+**PM 2026-10-20:** lisäksi Pakat-listan pakkalaatikon tulos (3–1–1) leikkautui 1280 px:ssä laatikon reunasta. Nyt se on aina omalla rivillään (`src/styles/decks.css`).
