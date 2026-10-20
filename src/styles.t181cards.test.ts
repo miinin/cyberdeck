@@ -19,7 +19,7 @@ function rule(selector: string): string {
 describe('T-181 cards (package 2)', () => {
   it('the card and its data are one info box (T-185): the old box rules are gone from styles.css, the name plate is 40 px', () => {
     expect(base).not.toMatch(/\n\.card-box \{/);
-    expect(rule('.card-box')).toMatch(/clip-path:\s*var\(--shape-chamfer\)/);
+    expect(rule('.card-box')).toMatch(/clip-path:\s*polygon\(0 0, calc\(100% - var\(--cut\)\) 0, 100% var\(--cut\)/);
     expect(rule('.card-box')).toMatch(/background:/);
     expect(rule('.card-strip')).toMatch(/min-block-size:\s*2\.5rem/);
   });

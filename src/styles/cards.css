@@ -552,8 +552,10 @@ body:has(.mark-banner) .site-footer {
   background:
     linear-gradient(to bottom left, transparent 50%, var(--line-strong) 50%, var(--line-strong) calc(50% + 1px), transparent calc(50% + 1px)) top right / var(--cut) var(--cut) no-repeat,
     var(--surface-2);
+  background-origin: border-box;
   box-shadow: inset 0 0 0 1px var(--line);
-  clip-path: var(--shape-chamfer);
+  /* The clip follows the local --cut (the root shape variables were resolved with the root cut). */
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
   /* Not owned: a neutral count. */
   --color-count: var(--color-text-muted);
 }
@@ -660,10 +662,12 @@ body:has(.mark-banner) .site-footer {
 }
 
 /*
- * The marks (T-185) copy the ones printed on the card: cost = a dark box in a frame of the card colour with white digits (top left),
- * type = a tab filled with the card colour (top right), Power = a box filled with the card colour (bottom right), RAM = a dark chip
- * in the card colour (the "x2"). The colours are the same in both themes, like the card. White text on the fills is 5.4:1 or more,
- * dark text on yellow 13:1. The frame colours are decoration; the numbers carry the meaning and have accessible names.
+ * The marks (T-187) borrow the shapes printed on the card but stay quiet: thin 1 px lines in the card colour on a dark base, no big
+ * bright tiles. Cost = a dark square with a hairline frame, HUD corner brackets and white digits (top left). Power = a tinted dark
+ * box with a small notch on the left and a chamfer at the bottom right, white digits. Type = a dark tab with slanted ends, an outline
+ * and capitals in the card colour. RAM = a small dark chip in the card colour with a slit on the right ("x2"). The colours are the
+ * same in both themes, like the card (a dark base keeps text AA on a light page: white on #10101a 18:1, the bright card colours
+ * 5.7:1 or more). The numbers carry the meaning and have accessible names and a title.
  */
 .card-meta {
   --mark-ink: #fff;
@@ -697,8 +701,8 @@ body:has(.mark-banner) .site-footer {
 .card-cost .card-stat {
   display: grid;
   place-items: center;
-  min-inline-size: 2rem;
-  min-block-size: 2rem;
+  min-inline-size: 1.875rem;
+  min-block-size: 1.875rem;
 }
 
 .card-cost dd {
@@ -706,32 +710,31 @@ body:has(.mark-banner) .site-footer {
   font-family: var(--font-mono);
 }
 
-/* No cost: a dash in the same box. */
+/* No cost: a dash in the same box, without the corner brackets. */
 .card-cost .card-stat dd:not(:has(.cost-gem)) {
   display: grid;
   place-items: center;
-  inline-size: 2rem;
-  block-size: 2rem;
+  inline-size: 1.875rem;
+  block-size: 1.875rem;
   background: var(--mark-dark);
-  box-shadow: inset 0 0 0 2px var(--mark-bright);
+  box-shadow: inset 0 0 0 1px var(--mark-bright);
   color: var(--mark-ink-on-dark, #fff);
   font-weight: var(--font-weight-bold);
 }
 
-/* The cost box of the card: the frame is the element, the dark inside is ::before, the digits are white. */
+/* The cost box of the card: a hairline frame, four HUD corner brackets (::before) and a faint glow; the digits are white. */
 .card-meta .cost-gem {
   position: relative;
-  isolation: isolate;
   display: grid;
   place-items: center;
-  inline-size: 2rem;
-  block-size: 2rem;
-  border: 0;
+  inline-size: 1.875rem;
+  block-size: 1.875rem;
+  border: 1px solid color-mix(in srgb, var(--mark-bright) 70%, var(--mark-dark));
   border-radius: 0;
-  background: var(--mark-bright);
+  background: var(--mark-dark);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--mark-bright) 30%, transparent);
   color: #fff;
-  clip-path: polygon(0 0, calc(100% - 0.4rem) 0, 100% 0.4rem, 100% 100%, 0 100%);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: var(--font-weight-bold);
   letter-spacing: 0;
 }
@@ -740,9 +743,13 @@ body:has(.mark-banner) .site-footer {
   content: '';
   position: absolute;
   inset: 2px;
-  z-index: -1;
-  background: var(--mark-dark);
-  clip-path: polygon(0 0, calc(100% - 0.33rem) 0, 100% 0.33rem, 100% 100%, 0 100%);
+  pointer-events: none;
+  --k: linear-gradient(var(--mark-bright), var(--mark-bright));
+  background:
+    var(--k) top left / 5px 1.5px no-repeat, var(--k) top left / 1.5px 5px no-repeat,
+    var(--k) top right / 5px 1.5px no-repeat, var(--k) top right / 1.5px 5px no-repeat,
+    var(--k) bottom left / 5px 1.5px no-repeat, var(--k) bottom left / 1.5px 5px no-repeat,
+    var(--k) bottom right / 5px 1.5px no-repeat, var(--k) bottom right / 1.5px 5px no-repeat;
 }
 
 .card-type {
@@ -754,22 +761,43 @@ body:has(.mark-banner) .site-footer {
   white-space: nowrap;
 }
 
-/* The type tab: the same for every type, filled with the card colour, white capitals (dark on yellow). */
-.card-meta .type-badge {
+/* The type tab: the same for every type, a dark tab with slanted ends, a 1 px outline and capitals in the card colour. */
+.card-meta .card-type .type-badge.type-badge {
+  --slant: 0.45rem;
+  position: relative;
+  isolation: isolate;
   display: inline-block;
-  padding: 0.3em 0.75em;
+  padding: 0.3em 1.1em;
   border: 0;
-  background: var(--mark-fill);
-  color: var(--mark-ink);
-  font-size: 0.8125rem;
+  background: none;
+  color: var(--mark-bright);
+  font-size: 0.75rem;
   font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  clip-path: polygon(0 0, calc(100% - 0.5rem) 0, 100% 0.5rem, 100% 100%, 0 100%);
 }
 
-.card-meta .type-badge::after {
-  content: none;
+.card-meta .card-type .type-badge.type-badge::before,
+.card-meta .card-type .type-badge.type-badge::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* The outline: the whole tab in the card colour (::before), the dark base cut 1 px smaller on top of it (::after). */
+.card-meta .card-type .type-badge.type-badge::before {
+  inset: 0;
+  background: var(--mark-bright);
+  clip-path: polygon(var(--slant) 0, calc(100% - var(--slant)) 0, 100% 50%, calc(100% - var(--slant)) 100%, var(--slant) 100%, 0 50%);
+}
+
+.card-meta .card-type .type-badge.type-badge::after {
+  inset: 1px;
+  inline-size: auto;
+  block-size: auto;
+  background: var(--mark-dark);
+  clip-path: polygon(calc(var(--slant) - 0.5px) 0, calc(100% - var(--slant) + 0.5px) 0, 100% 50%, calc(100% - var(--slant) + 0.5px) 100%, calc(var(--slant) - 0.5px) 100%, 0 50%);
 }
 
 .card-meta .card-rarity-box {
@@ -814,65 +842,70 @@ body:has(.mark-banner) .site-footer {
 .stat-chip dd {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
 }
 
-.stat-chip dd::before {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
-}
-
-.stat-power dd::before {
-  content: 'POWER';
-  content: 'POWER' / '';
-}
-
-.stat-ram dd::before {
-  content: 'RAM';
-  content: 'RAM' / '';
-}
-
-/* The marks: Power is a box filled with the card colour, RAM a dark chip with the card colour as frame and text. */
+/* Power and RAM are told apart by their shape and the title ("Power 6", "RAM 2"), no printed label (T-187). */
 .stat-chip dd > .stat-mark {
+  --c: 0.4rem;
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-inline-size: 2rem;
-  block-size: 1.75rem;
+  min-inline-size: 1.875rem;
+  block-size: 1.625rem;
   padding-inline: 0.5rem;
-  font-size: 1rem;
+  color: #fff;
+  font-size: 0.9375rem;
   font-weight: var(--font-weight-bold);
   letter-spacing: 0;
-  clip-path: polygon(0 0, calc(100% - 0.4rem) 0, 100% 0.4rem, 100% 100%, 0 100%);
 }
 
-.stat-power .stat-mark {
-  background: var(--mark-fill);
-  color: var(--mark-ink);
+.stat-chip dd > .stat-mark::before,
+.stat-chip dd > .stat-mark::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
 }
 
-.stat-ram .stat-mark {
-  position: relative;
-  isolation: isolate;
+/* Power: a notch on the left and a chamfer at the bottom right. ::before is the outline, ::after the tinted dark fill 1 px smaller. */
+.stat-power .stat-mark::before {
+  inset: 0;
   background: var(--mark-bright);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 62%, 0.25rem 50%, 0 38%);
+}
+
+.stat-power .stat-mark::after {
+  inset: 1px;
+  background: color-mix(in srgb, var(--mark-fill) 42%, var(--mark-dark));
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--c) + 0.4px), calc(100% - var(--c) + 0.4px) 100%, 0 100%, 0 62%, calc(0.25rem - 1px) 50%, 0 38%);
+}
+
+/* RAM: a small dark chip with a hairline frame, "x2" in the card colour and a narrow slit on the right. */
+.stat-chip.stat-ram dd > .stat-mark {
+  min-inline-size: 2.5rem;
+  padding-inline: 0.5rem 1.1rem;
+  background: var(--mark-dark);
+  box-shadow: inset 0 0 0 1px var(--mark-bright);
   color: var(--mark-bright);
 }
 
-/* The "x" of the chip is decoration (the number carries the meaning): ::before; the dark inside is ::after. */
-.stat-ram .stat-mark::before {
+/* The "x" is decoration (the number carries the meaning): CSS content with an empty alternative text. */
+.stat-chip.stat-ram dd > .stat-mark::before {
   content: '×';
   content: '×' / '';
+  position: static;
+  z-index: auto;
 }
 
-.stat-ram .stat-mark::after {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  z-index: -1;
-  background: var(--mark-dark);
-  clip-path: polygon(0 0, calc(100% - 0.33rem) 0, 100% 0.33rem, 100% 100%, 0 100%);
+/* The slit: a thin vertical bar of the card colour near the right edge. */
+.stat-chip.stat-ram dd > .stat-mark::after {
+  inset-block: 4px;
+  inset-inline-end: 0.45rem;
+  inline-size: 2px;
+  background: var(--mark-bright);
+  z-index: auto;
 }
 
 /* A missing value is a plain dash, no mark. */
@@ -1645,8 +1678,8 @@ body:has(.mark-banner) .site-footer {
   box-shadow: inset 0 -2px 0 var(--section-accent);
 }
 
-/* The light theme colours the type badge text elsewhere; on the card tab the ink is the tab's own (T-185). */
+/* The light theme colours the type badge text elsewhere; on the card tab the ink is the tab's own bright colour on its dark base (T-187). */
 :root[data-theme='light'] .card-meta .type-badge,
 :root[data-theme='light'] .card-meta .type-badge-yellow {
-  color: var(--mark-ink);
+  color: var(--mark-bright);
 }
