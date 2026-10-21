@@ -386,9 +386,14 @@ h1:focus:not(:focus-visible) {
 
 /*
  * Header (T-181, R4): black in both themes (UX.md 7.5), not sticky. From 64 rem one 64 px row: logo, navigation, tools.
- * Below that the logo and tools share a 48 px row and the navigation is under them; on a phone as two rows of three
- * (40 px each), so the header is about 128 px high at 320 px. The current page has a 2 px bar in the section colour.
+ * Below that the logo and tools share a 48 px row and the navigation is under them. On a phone (under 40 rem, T-190) the header
+ * is one row and the navigation is a fixed bottom tab bar. The current page has a 2 px bar in the section colour.
  */
+:root {
+  /* The height of the phone bottom tab bar (T-190); 0 where there is none. Sticky and fixed bottom bars sit above it. */
+  --bottom-nav-h: 0px;
+}
+
 .site-header {
   --header-line: rgb(241 241 236 / 0.12);
   position: relative;
@@ -467,6 +472,12 @@ h1:focus:not(:focus-visible) {
   line-height: 1.4;
 }
 
+/* The icons, the "More" button and the sheet are the phone bottom bar's (T-190); the desktop navigation is text only. */
+.main-nav .nav-icon,
+.main-nav .nav-more {
+  display: none;
+}
+
 /* Header tools (theme, FI, EN, account): bare 40 px icons on one row (T-079). */
 .header-tools {
   display: flex;
@@ -511,20 +522,196 @@ h1:focus:not(:focus-visible) {
     height: 1.75rem;
   }
 
-  /* Six items: two rows of three, equal width, 40 px high, 14 px caps text (T-181 R4). */
-  .main-nav {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding-inline: 0;
+  /* T-190: the navigation leaves the header and becomes a fixed bottom tab bar: five slots (Playtest and Proxy are in the More sheet). */
+  :root {
+    --bottom-nav-h: calc(3.5rem + env(safe-area-inset-bottom, 0px));
   }
 
-  .main-nav a {
-    min-block-size: 2.5rem;
+  body {
+    padding-block-end: var(--bottom-nav-h);
+  }
+
+  body:has(.site-header[hidden]) {
+    padding-block-end: 0;
+  }
+
+  .main-nav {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 15;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    flex: none;
+    align-self: auto;
+    margin: 0;
+    padding: 0 0 env(safe-area-inset-bottom, 0px);
+    border-top: 1px solid var(--line-strong);
+    background: var(--surface-3);
+    box-shadow: 0 -0.5rem 1rem rgb(0 0 0 / 0.2);
+  }
+
+  .main-nav .nav-extra {
+    display: none;
+  }
+
+  .main-nav .nav-icon {
+    display: block;
+    flex: none;
+  }
+
+  .main-nav .nav-more {
+    display: flex;
+  }
+
+  .main-nav .nav-item {
+    position: relative;
+    flex-direction: column;
+    gap: 0.125rem;
     min-width: 0;
-    padding-inline: 2px;
-    font-size: var(--font-size-label);
-    letter-spacing: 0.06em;
+    min-block-size: 3.5rem;
+    padding: 0 1px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--color-text-muted);
+    font-family: inherit;
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.2;
+    text-transform: none;
     white-space: nowrap;
+    box-shadow: none;
+    cursor: pointer;
+  }
+
+  .main-nav .nav-item:hover {
+    background: none;
+    box-shadow: none;
+    color: var(--color-text);
+  }
+
+  .main-nav .nav-item[aria-current='page'],
+  .main-nav .nav-more[data-current] {
+    color: var(--section-accent);
+    box-shadow: inset 0 2px 0 var(--section-accent);
+  }
+
+  .main-nav .nav-item:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: -3px;
+  }
+
+  .main-nav .nav-more {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-label {
+    max-inline-size: 100%;
+  }
+
+  .toast-slot {
+    bottom: calc(4.75rem + var(--bottom-nav-h));
+  }
+}
+
+/* The More sheet (T-190): a bottom sheet over the page with Playtest and Proxy as 48 px rows. */
+.nav-sheet {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.nav-sheet[open] {
+  display: flex;
+  align-items: flex-end;
+}
+
+.nav-sheet::backdrop {
+  background: rgb(5 6 9 / 0.84);
+}
+
+.nav-sheet-body {
+  box-sizing: border-box;
+  inline-size: 100%;
+  padding: var(--space-2) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  border-block-start: 2px solid var(--section-accent);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-pop);
+}
+
+.nav-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: 3rem;
+}
+
+.nav-sheet-title {
+  margin: 0;
+  font-size: var(--font-size-label);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.nav-sheet-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: 3rem;
+  padding-inline: var(--space-2);
+  border-block-start: 1px solid var(--line);
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.nav-sheet-row[aria-current='page'] {
+  color: var(--section-accent);
+  box-shadow: inset 3px 0 0 var(--section-accent);
+}
+
+.nav-sheet-row:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -3px;
+}
+
+.nav-sheet-row .nav-icon {
+  flex: none;
+}
+
+.nav-sheet-row .nav-badge {
+  margin-inline-start: auto;
+  padding: 0 0.3em;
+  background: var(--color-brand-yellow);
+  color: #0b0c10;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tag);
+  line-height: 1.4;
+}
+
+@media (min-width: 40rem) {
+  .nav-sheet {
+    display: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .main-nav,
+  .nav-sheet-body {
+    border: 1px solid CanvasText;
   }
 }
 
@@ -4281,7 +4468,7 @@ button.legality:focus-visible {
 /* Mobile bottom bar (below 64rem): the deck state and a way to it. Hidden while the deck is on screen. */
 .deck-bar {
   position: sticky;
-  bottom: 0;
+  bottom: var(--bottom-nav-h);
   z-index: 10;
   display: flex;
   align-items: center;
@@ -4338,7 +4525,7 @@ button.legality:focus-visible {
 
 @media (max-width: 63.999rem) and (min-height: 30rem) {
   html:has(.deck-bar:not([hidden])) {
-    scroll-padding-bottom: 4.5rem;
+    scroll-padding-bottom: calc(4.5rem + var(--bottom-nav-h));
   }
 }
 
@@ -9550,7 +9737,7 @@ button.card-tag:focus-visible {
 /* The action bar sticks to the bottom of the screen while it is below the fold; it stays in the flow, so it never covers the last row for good. */
 .gf-bar {
   position: sticky;
-  inset-block-end: 0;
+  inset-block-end: var(--bottom-nav-h);
   z-index: 5;
   display: grid;
   gap: var(--space-2);

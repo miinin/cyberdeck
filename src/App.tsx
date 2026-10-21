@@ -22,8 +22,9 @@ import { PublicDeckView } from './ui/PublicDeckView';
 import { PublicDecksContext } from './ui/PublicDecksContext';
 import type { PublicDecksApi } from './ui/PublicDecksContext';
 import { deckTexts } from './ui/deckTexts';
-import { isPlaytestRoute, parseHash, sectionOf, useHashRoute } from './ui/useHashRoute';
+import { parseHash, sectionOf, useHashRoute } from './ui/useHashRoute';
 import { cardOriginHash, forgetCardOrigin } from './ui/cardRoute';
+import { MainNav } from './ui/MainNav';
 import { PlaytestView } from './ui/PlaytestView';
 import { sealedTexts } from './ui/sealedTexts';
 import { texts } from './ui/texts';
@@ -162,47 +163,7 @@ export function App({
           <a className="brand" href="#/">
             <img src={logoUrl} alt="Cyberdeck TCG" width={400} height={99} />
           </a>
-          <nav className="main-nav" aria-label={deckTexts.navLabel}>
-            <a href="#/" aria-current={route.name === 'cards' || route.name === 'card' ? 'page' : undefined}>
-              {deckTexts.navCards}
-            </a>
-            <a href="#/kokoelma" aria-current={route.name === 'collection' ? 'page' : undefined}>
-              {collectionTexts.navCollection}
-            </a>
-            <a
-              href="#/pakat"
-              aria-current={
-                route.name === 'decks' ||
-                route.name === 'deck' ||
-                route.name === 'share' ||
-                route.name === 'publicDecks' ||
-                route.name === 'deckBuild' ||
-                route.name === 'publicDeck'
-                  ? 'page'
-                  : undefined
-              }
-            >
-              {deckTexts.navDecks}
-            </a>
-            {/* T-188: the colours of the game first (Cards yellow, Collection green, Decks red, Have/Want blue), then Playtest and Proxy. */}
-            <a href="#/vaihto" aria-current={route.name === 'havewant' || route.name === 'trade' || route.name === 'tradeLink' ? 'page' : undefined}>
-              {deckTexts.navHaveWant}
-            </a>
-            <a href="#/testaa" aria-current={isPlaytestRoute(route) || route.name === 'goldfish' ? 'page' : undefined}>
-              {sealedTexts.navPlaytest}
-            </a>
-            <a href="#/proxy" aria-current={route.name === 'proxy' ? 'page' : undefined}>
-              {proxyTexts.navProxy}
-              {proxyCount > 0 && (
-                <>
-                  <span className="nav-badge" aria-hidden="true">
-                    {proxyCount > 99 ? '99+' : proxyCount}
-                  </span>
-                  <span className="visually-hidden">{proxyTexts.navBadgeLabel(proxyCount)}</span>
-                </>
-              )}
-            </a>
-          </nav>
+          <MainNav route={route} proxyCount={proxyCount} />
           <div className="header-tools">
           <ThemeToggle preferences={openRepositories.preferences} />
           <LanguageSwitch />
