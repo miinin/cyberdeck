@@ -36,6 +36,7 @@ export const deckTextsFi = {
   navCards: 'Kortit',
   navDecks: 'Pakat',
   navHaveWant: 'Have/Want',
+  navMore: 'Lisää',
 
   listHeading: 'Pakat',
   listEmpty: 'Rakenna pakka kortti kerrallaan, liitä valmis pakkalista tai hae julkinen pakka Netdeck.gg:stä.',

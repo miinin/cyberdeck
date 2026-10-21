@@ -54,8 +54,8 @@ describe('theme toggle', () => {
 
     expect(screen.getByRole('banner')).toContainElement(button);
     expect(button).toHaveAttribute('type', 'button');
-    // The logo link (T-080) and the main navigation links (T-065: three, T-102: four, T-105: five, T-176: six) come before the toggle; since T-055 the account button comes after it.
-    for (let i = 0; i < 8; i += 1) await user.tab();
+    // The logo link (T-080), the six main navigation links and the phone-only More button (T-190, in the DOM, hidden by CSS from 40 rem) come before the toggle; since T-055 the account button comes after it.
+    for (let i = 0; i < 9; i += 1) await user.tab();
     expect(button).toHaveFocus();
 
     await user.keyboard('{Enter}');

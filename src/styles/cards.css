@@ -438,7 +438,7 @@ main:has(.catalog-layout) {
   position: fixed;
   z-index: 20;
   inset-inline: 0;
-  bottom: 0;
+  bottom: var(--bottom-nav-h, 0px);
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
@@ -490,6 +490,15 @@ body:has(.mark-banner) .site-footer {
 }
 
 @media (max-width: 39.99rem) {
+  /* Above the bottom tab bar (T-190), which already covers the safe area. */
+  .mark-banner {
+    padding-block-end: var(--space-2);
+  }
+
+  body:has(.mark-banner) .site-footer {
+    margin-block-end: 4rem;
+  }
+
   .mark-banner-title {
     position: absolute;
     inline-size: 1px;

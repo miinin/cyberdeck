@@ -49,8 +49,9 @@ describe('T-181 design system', () => {
     expect(rule('.button--sm')).toMatch(/var\(--control-h-sm\)/);
   });
 
-  it('R4: the phone navigation is two rows of three', () => {
-    expect(css).toMatch(/\.main-nav \{\s*display:\s*grid;\s*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
+  it('T-190: the phone navigation is a fixed bottom tab bar of five slots', () => {
+    expect(css).toMatch(/\.main-nav \{\s*position:\s*fixed;[^}]*display:\s*grid;\s*grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\)/);
+    expect(css).toMatch(/--bottom-nav-h:\s*calc\(3\.5rem \+ env\(safe-area-inset-bottom/);
   });
 
   it('the motion tokens stay at most 150 ms', () => {
