@@ -1,5 +1,5 @@
 # T-189 · Mobiilin inforuutu siistiksi ja cost-laatikon kehys
-**Tila:** In Progress · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-21 (puhelinkuva tuotannosta, 2 saraketta)
+**Tila:** Review · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-21 (puhelinkuva tuotannosta, 2 saraketta)
 **Katselmoinnit:** PM kuvakaappauksista. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ## Määrittely (PM)
@@ -17,3 +17,12 @@ Puhelimessa (2 saraketta, ruutu noin 9–11rem leveä) inforuudun merkit ja tunn
 
 **Rajoitteet:** ei vaakaylivuotoa, ei sisäistä vieritystä, AA, reduced-motion, forced-colors.
 Haara `t-189-mobiilin-inforuutu` testistä.
+
+## Luovutus (Koodari, 2026-10-21)
+Haara `t-189-mobiilin-inforuutu`. Muutokset: `src/styles/cards.css`, uusi `src/styles.t189.test.ts`. Ei TSX-muutoksia.
+1. **Asettelu (kaikilla leveyksillä, ei vain kapealla):** `.card-box` on nyt `container-type: inline-size`; `.card-meta` on kolmen yhtä leveän sarakkeen ruudukko. Rivi 1: tyyppitabi (sarakkeet 1–2) vasemmalla, rarity oikealla (sarake 3). Rivi 2: cost, power ja RAM tasavälein, kukin pinottuna pariksi: tunniste (COST/POWER/RAM, muted, versaali) merkin yläpuolella keskitettynä, ei rivitystä. Kaikki merkit 1,875 rem korkeita (kapealla `clamp(1.625rem, 17cqi, 1.875rem)`), joten tunnisteet ja merkit ovat samalla linjalla. Rivi 1 (nimi, alanimi) ennallaan. Kapea ruutu (`@container (max-width: 11rem)`): merkit pienenevät ruudun mukaan, luvut 0,875 rem (vähintään), kirjainvälit tiukemmat; tunnisteita ei tarvinnut piilottaa 320 px:ssäkään (mahtuvat).
+2. **Cost-laatikko:** kulmahakaset pois; kunkin sivun keskellä 56 % pituinen viiva, kulmat tyhjinä. Hehku, tumma pohja ja ohut ulkokehys säilyvät.
+3. **Tarkistettu** 320, 375, 390, 1280, 1920 px, tumma ja vaalea: Kortit, merkintätila, Kokoelma (Omat), Have/Want. Vaakaylivuotoa ei (scrollWidth − innerWidth ≤ 0 kaikissa), ei sisäistä vieritystä, ei konsolivirheitä. Desktop: inforuutu on nyt samaa rakennetta (rarity tyypin rivillä, tunnisteet merkin päällä) eikä hajoa.
+Kuvat: scratchpad `ux/t189/` (`{dark,light}-w{320,375,390,1280,1920}-{cards,marking,collection,havewant}.png`; lähikuvat `*-w390-crop-two-boxes`, `*-w1280-crop-two-boxes`, `*-w390-crop-cost`, `*-w1280-crop-cost`).
+Koodikatselmointi: tehty · Pakollisia korjattu 1 (power/RAM-merkit olivat cost-merkkiä 4 px matalampia, joten tunnisteet eivät olleet samalla linjalla: korkeus yhtenäistetty) · Suosituksia 1: CSS-testit ovat merkkijonotarkistuksia (jsdom ei maalaa).
+Testit: npm test 2153 läpi, lint ja build läpi.
