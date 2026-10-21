@@ -1,7 +1,7 @@
 # STATUS · päivitetty 2026-10-19 (PM)
 
 ## Yhdellä lauseella
-Kaikki T-179:ään asti sekä T-181:n paketit 0–3 (design-järjestelmä, Kortit, Testaa-osion väri, Kokoelma), T-183 ja T-184–T-189 (korttiruutu ja mobiilin inforuutu, merkit tunnisteineen, viisteet, korttidialogi ensin, navin järjestys) ovat tuotannossa (https://cyberdeck-tcg.web.app, julkaistu 2026-10-21, PR #194–#200): kokoelma, kansio ja skanneri (myös jatkuva ja kansiosivu), want-lista ja jakolinkit (lyhyt vaihtolinkki), pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
+Kaikki T-179:ään asti sekä T-181:n paketit 0–3 (design-järjestelmä, Kortit, Testaa-osion väri, Kokoelma), T-183 ja T-184–T-189 sekä T-191 (korttiruutu, inforuudun luvut pelkkinä numeroina, viisteet, korttidialogi ensin, navin järjestys) ovat tuotannossa (https://cyberdeck-tcg.web.app, julkaistu 2026-10-21, PR #194–#201): kokoelma, kansio ja skanneri (myös jatkuva ja kansiosivu), want-lista ja jakolinkit (lyhyt vaihtolinkki), pakkaeditori näkymineen ja tilastoineen, julkiset pakat, proxyt, fi/en sekä mobiilinäkymä.
 
 ## MVP-taso
 Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyttäjä (docs/reports/MVP1-UX-2026-10-17.md, korjattu T-174), Digiturva (SEC-T172-T173) ja rikkomistestaus (BREAK-T172-T173). Avoinna: UX-17, UX-30 ja UX-31.
@@ -52,6 +52,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-191 inforuudun cost, power ja RAM pelkkinä numeroina tunnisteineen, RAM kortin värillä (2026-10-21, PM).
 - T-189 mobiilin inforuutu tasatuksi (tyyppi ja rarity, sitten cost, power ja RAM tunnisteineen), cost-laatikon kehys kortin tapaan (2026-10-21).
 - T-188 korttidialogi aina ensin (myös pakkaeditori ja Have/Want, tila säilyy), merkkien tekstit, listan tyyppiväri, selectin viiste, välkynnän korjaus, navin järjestys (2026-10-20).
 - T-187 ohuet korttia matkivat merkit, pakkamäärä pois ruudukosta, viisteiden viistoviivat kiinni kehyksessä (2026-10-20).
