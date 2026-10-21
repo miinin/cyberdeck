@@ -1,5 +1,5 @@
 # T-189 · Mobiilin inforuutu siistiksi ja cost-laatikon kehys
-**Tila:** Review · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-21 (puhelinkuva tuotannosta, 2 saraketta)
+**Tila:** Done (tuotannossa 2026-10-21) · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-21 (puhelinkuva tuotannosta, 2 saraketta)
 **Katselmoinnit:** PM kuvakaappauksista. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ## Määrittely (PM)
