@@ -1,5 +1,5 @@
 # T-190 · Mobiilin navigointi alapalkiksi
-**Tila:** Review · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-21: kaksirivinen mobiilinavi ei näytä hyvältä, tilalle moderni ja tyylikäs ratkaisu.
+**Tila:** Done (tuotannossa 2026-10-21) · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-21: kaksirivinen mobiilinavi ei näytä hyvältä, tilalle moderni ja tyylikäs ratkaisu.
 **Katselmoinnit:** PM kuvakaappauksista. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ## Määrittely (PM)
@@ -29,3 +29,5 @@ Haara `t-190-alapalkki` testistä.
 **Huomio:** DOM-järjestys: nav on ennen työkaluja, joten puhelimella Tab-järjestys kulkee logo, alapalkin viisi kohdetta, työkalut (visuaalinen järjestys eroaa). Hyväksyttävä, mutta mainitaan; vaihtoehto olisi nav työkalujen jälkeen DOMissa ja työpöydän järjestys CSS:llä (muuttaisi desktopin Tab-järjestystä).
 Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (Tab-järjestys, yllä)
 **Kuvat:** `C:/Users/miininmm/AppData/Local/Temp/claude/c--Users-miininmm-dev-cyberdeck/0e3c5532-fd13-44e9-8e82-81fb6bddf77c/scratchpad/ux/t190/` (`{dark|light}-w{320|375|390|1280}-{cards,marking,editor,goldfish,testaa,proxy}` ja `-end`, `more-open`, `more-open-proxy`, `card-dialog`, 390 px `crop-bar`, myös `dark-w320-en-*`).
+
+**PM 2026-10-21:** Tab-järjestys puhelimella (logo, alapalkki, työkalut) hyväksytty: navigaatio ensin on yleinen malli, eikä työpöydän järjestystä muuteta.

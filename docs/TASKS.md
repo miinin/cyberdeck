@@ -189,6 +189,6 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-187 | Inforuudun merkit tyylikkäiksi kortin muotojen pohjalta, pakkamäärä pois ruudukosta, viisteiden korjaus (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-188 | Korttidialogi ensin, merkkien tekstit, listan tyyppiväri, selectin viiste, välkyntä ja navin järjestys (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-189 | Mobiilin inforuutu siistiksi (kapea asettelu) ja cost-laatikon kehys toisinpäin (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
-| T-190 | Mobiilin navigointi alapalkiksi (Kortit, Kokoelma, Pakat, Have/Want, Lisää: Testaa ja Proxy) (käyttäjän palaute) | 1 | Must | Koodari | In Progress | PM (kuvakaappaukset) |
+| T-190 | Mobiilin navigointi alapalkiksi (Kortit, Kokoelma, Pakat, Have/Want, Lisää: Testaa ja Proxy) (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-191 | Inforuudun cost, power ja RAM pelkkinä numeroina (RAM kortin värillä), ei laatikoita (käyttäjän palaute) | 1 | Must | PM | Done | PM (kuvakaappaukset) |
 | T-183 | Rikkomistestauksen korjaukset BRK-01–BRK-10 ja sivujen otsikot | 1 | Must | Koodari | Done | PM |
