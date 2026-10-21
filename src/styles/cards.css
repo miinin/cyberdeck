@@ -1842,3 +1842,62 @@ body:has(.mark-banner) .site-footer {
 :root[data-theme='light'] .card-meta .type-badge-yellow {
   color: var(--mark-bright);
 }
+
+/*
+ * T-191 (user, less is more): cost, power and RAM are plain numbers under their labels, no boxes. Cost and power in the text
+ * colour, RAM in the card colour (the text-safe shade of each theme, as the list view type). A missing value is a plain dash.
+ */
+.card-meta {
+  --ram-ink: #ff4d5e;
+}
+
+.card-meta.type-badge-yellow { --ram-ink: #ffd400; }
+.card-meta.type-badge-green { --ram-ink: #39e08a; }
+.card-meta.type-badge-blue { --ram-ink: #4d9dff; }
+:root[data-theme='light'] .card-meta { --ram-ink: #b0182d; }
+:root[data-theme='light'] .card-meta.type-badge-yellow { --ram-ink: #7a5c00; }
+:root[data-theme='light'] .card-meta.type-badge-green { --ram-ink: #0b6b3a; }
+:root[data-theme='light'] .card-meta.type-badge-blue { --ram-ink: #1a55b0; }
+
+.card-meta .cost-gem,
+.card-meta .card-cost .card-stat dd:not(:has(.cost-gem)),
+.card-meta .stat-chip dd:has(> span[aria-hidden='true']),
+.card-meta .stat-chip dd > .stat-mark,
+.card-meta .stat-chip.stat-ram dd > .stat-mark {
+  inline-size: auto;
+  min-inline-size: 0;
+  block-size: auto;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+
+.card-meta .stat-chip.stat-ram dd > .stat-mark {
+  color: var(--ram-ink);
+}
+
+.card-meta .cost-gem::before,
+.card-meta .stat-chip dd > .stat-mark::after,
+.card-meta .stat-power .stat-mark::before {
+  content: none;
+}
+
+.card-meta .stat-chip.stat-ram dd > .stat-mark::before {
+  content: none;
+}
+
+.card-meta .stat-chip dd > span[aria-hidden='true'],
+.card-meta .card-cost .card-stat dd:not(:has(.cost-gem)) {
+  color: var(--color-text-muted);
+}
+
+@media (forced-colors: active) {
+  .card-meta .stat-chip.stat-ram dd > .stat-mark {
+    color: CanvasText;
+  }
+}
