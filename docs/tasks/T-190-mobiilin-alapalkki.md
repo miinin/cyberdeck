@@ -1,5 +1,5 @@
 # T-190 · Mobiilin navigointi alapalkiksi
-**Tila:** In Progress · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-21: kaksirivinen mobiilinavi ei näytä hyvältä, tilalle moderni ja tyylikäs ratkaisu.
+**Tila:** Done (tuotannossa 2026-10-21) · **Omistaja:** Koodari · **Lähde:** käyttäjän palaute 2026-10-21: kaksirivinen mobiilinavi ei näytä hyvältä, tilalle moderni ja tyylikäs ratkaisu.
 **Katselmoinnit:** PM kuvakaappauksista. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ## Määrittely (PM)
@@ -19,3 +19,15 @@ PM:n valinta: **kiinteä alapalkki (bottom tab bar)** alle 40rem:n leveydellä, 
 
 **Hyväksymiskriteerit:** 320, 375 ja 390 px: kaikki viisi kohdetta yhdellä rivillä ilman katkeavaa tekstiä, ei vaakaylivuotoa, sisältöä ei jää palkin alle (viimeinen elementti näkyy kokonaan sivun lopussa). h1:n yläreuna ≤ 90 px. Testit navin järjestykselle, Lisää-paneelille ja aria-current-tilalle.
 Haara `t-190-alapalkki` testistä.
+
+## Luovutus (Koodari)
+**Toteutus:** uusi `src/ui/MainNav.tsx` (App.tsx käyttää sitä), CSS `src/styles.css` (alle 40rem), `src/styles/cards.css` (merkintäpalkki), teksti `navMore` (Lisää / More) fi ja en. Sama DOM palvelee työpöytää: ikonit, Lisää-painike ja paneeli näkyvät vain alle 40rem, Testaa ja Proxy (`.nav-extra`) piilotetaan alapalkista ja ovat Lisää-paneelissa (`dialog.nav-sheet`, 48 px rivit, Proxyn jonomäärä badgena, sulkunappi, Esc ja taustan klikkaus sulkevat, sivunvaihto sulkee). Lisää on aktiivinen (`data-current`), kun Testaa tai Proxy on auki. Ei animaatioita (reduced-motion ok), forced-colors saa reunaviivat.
+**Mittaukset (h1:n yläreuna, 320/375/390 px):** ennen 138 px (Kokoelma 141), jälkeen 57 px (Kokoelma 60). Yläpalkin korkeus 130 → 49 px. Kriteeri ≤ 90 px täyttyy. Alapalkki 57 px (56 + 1 px viiva), viisi kohdetta yhdellä rivillä, tekstit mahtuvat (myös englanniksi 320 px:ssä), vaakaylivuotoa ei.
+**Muut alapalkit (valinta: nostetaan alapalkin yläpuolelle):** uusi muuttuja `--bottom-nav-h` (0 paitsi alle 40rem: 3.5rem + safe area). Merkintätilan palkki `bottom: var(--bottom-nav-h)` (safe-area-pehmuste pois, koska alapalkki kattaa sen), pakkaeditorin `.deck-bar` ja Goldfishin `.gf-bar` sticky `bottom: var(--bottom-nav-h)`, toast ja `scroll-padding-bottom` nostettu. Syy: navigointi pysyy aina tavoitettavana merkintätilassakin, eikä layout hypi piilotuksen takia. Dialogit (korttidialogi, skanneri, vahvistukset) ovat top layerissä ja peittävät alapalkin; korttikatselin ja zoom (z-index 20) peittävät sen (nav z-index 15); galleria piilottaa headerin ja samalla alapalkin sekä body-pehmusteen. `body` saa alapehmusteen `--bottom-nav-h`: sivun viimeinen elementti jää alapalkin yläpuolelle (mitattu Kortit, pakkaeditori, Goldfish, Testaa, Proxy: 320/375/390, tumma ja vaalea).
+**UX.md:** luku 3, Yläpalkki (R4): puhelinkuvaus korvattu alapalkin kuvauksella (rakenne, värit, Lisää-paneeli, muiden palkkien sijoitus, h1 138 → 57 px) ja muutosrivi 0.12.
+**Testit:** uusi `MainNav.test.tsx` (järjestys, aria-current, Lisää-aktiivisuus, paneeli ja sulkeminen, aria-haspopup ja aria-expanded). Päivitetty: `styles.t181.test.ts` (R4 viisi paikkaa), `App.theme.test.tsx` (Tab-järjestys: Lisää-painike DOMissa), `CollectionView.test.tsx` (vahvistusnappi haetaan dialogista, koska "Lisää" nimi törmäsi). npm test 2159/2159, lint ja build läpi.
+**Huomio:** DOM-järjestys: nav on ennen työkaluja, joten puhelimella Tab-järjestys kulkee logo, alapalkin viisi kohdetta, työkalut (visuaalinen järjestys eroaa). Hyväksyttävä, mutta mainitaan; vaihtoehto olisi nav työkalujen jälkeen DOMissa ja työpöydän järjestys CSS:llä (muuttaisi desktopin Tab-järjestystä).
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1 (Tab-järjestys, yllä)
+**Kuvat:** `C:/Users/miininmm/AppData/Local/Temp/claude/c--Users-miininmm-dev-cyberdeck/0e3c5532-fd13-44e9-8e82-81fb6bddf77c/scratchpad/ux/t190/` (`{dark|light}-w{320|375|390|1280}-{cards,marking,editor,goldfish,testaa,proxy}` ja `-end`, `more-open`, `more-open-proxy`, `card-dialog`, 390 px `crop-bar`, myös `dark-w320-en-*`).
+
+**PM 2026-10-21:** Tab-järjestys puhelimella (logo, alapalkki, työkalut) hyväksytty: navigaatio ensin on yleinen malli, eikä työpöydän järjestystä muuteta.

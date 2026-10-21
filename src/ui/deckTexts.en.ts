@@ -53,6 +53,7 @@ export const deckTextsEn: typeof deckTextsFi = {
   navCards: 'Cards',
   navDecks: 'Decks',
   navHaveWant: 'Have/Want',
+  navMore: 'More',
 
   listHeading: 'Decks',
   listEmpty: 'Build a deck one card at a time, paste a ready deck list or fetch a public deck from Netdeck.gg.',

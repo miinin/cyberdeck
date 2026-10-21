@@ -141,7 +141,8 @@ describe('CollectionView', () => {
     const repositories = await renderCollection([['alpha', 1]]);
     await screen.findByText(/2 korttia puuttuu|2 cards missing/);
     await userEvent.click(screen.getByRole('button', { name: /Lisää puuttuvat want-listalle|Add missing to wants/ }));
-    await userEvent.click(await screen.findByRole('button', { name: /^(Lisää|Add)$/ }));
+    // The phone navigation also has a "Lisää" button (T-190), so the confirm button is looked up in the dialog.
+    await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: /^(Lisää|Add)$/ }));
     await waitFor(async () => {
       const wants = (await repositories.wants.load()).value.entries;
       expect(wants).toEqual([{ card: 'beta', count: 3 }, { card: 'gamma', count: 1 }]);
