@@ -4,7 +4,816 @@
  * Tokens and base components live in styles.css (docs/UX.md luku 3); use them, do not redefine them here.
  */
 
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Title row: "+ New deck" and the "Import ▾" menu (scanner, deck list, Netdeck) on one row.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.deck-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.deck-actions > .button-primary,
+.deck-actions > .deck-import-toggle {
+  gap: var(--space-1);
+  padding-inline: var(--space-3);
+  white-space: nowrap;
+}
+
+.button-plus {
+  font-size: 1.25em;
+  line-height: 1;
+}
+
+.button-caret {
+  flex: none;
+  margin-inline-start: var(--space-1);
+}
+
+.deck-import-toggle[aria-expanded='true'] .button-caret {
+  transform: rotate(180deg);
+}
+
+/* The menu is a raised surface with the object chamfer; the chamfer cuts a drop shadow, so the edge is an inset line. */
+.deck-actions-panel {
+  --cut: 0.5rem;
+  inset-inline: auto 0;
+  gap: 0;
+  min-inline-size: 15rem;
+  padding: var(--space-1);
+  border: 0;
+  background:
+    linear-gradient(to bottom left, transparent 50%, var(--line-strong) 50%, var(--line-strong) calc(50% + 1px), transparent calc(50% + 1px)) top right / var(--cut) var(--cut) no-repeat,
+    var(--surface-3);
+  background-origin: border-box;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+}
+
+.deck-actions-panel > .button-quiet {
+  inline-size: 100%;
+  justify-content: flex-start;
+  padding-inline: var(--space-3);
+  text-align: start;
+}
+
+.empty .deck-actions {
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  margin-block-start: var(--space-2);
+}
+
+/* On a phone the title and both buttons share one row; they only wrap when the screen is too narrow for that. */
+@media (max-width: 39.99rem) {
+  .decks-head:has(> .deck-actions) .deck-actions {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .deck-actions > .button-primary,
+  .deck-actions > .deck-import-toggle {
+    padding-inline: var(--space-2);
+  }
+}
+
+/* Under 30rem the buttons take a row of their own (the title is above), the main one stretching. */
+@media (max-width: 29.99rem) {
+  .decks-head:has(> .deck-actions) .deck-actions {
+    flex-basis: 100%;
+  }
+
+  .deck-actions > .button-primary {
+    flex: 1 1 auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Tabs: Own | Build | Public. Short names, so the three fit one row down to 320 px.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.decks-tabs.decks-tabs--short {
+  display: flex;
+}
+
+.decks-tabs--short > .segmented-option {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.decks-tabs--short > .segmented-option + .segmented-option,
+.decks-tabs--short > .segmented-option:nth-child(2n + 1) {
+  border-block-start: 0;
+}
+
+.decks-tabs--short > .segmented-option:nth-child(n + 2) {
+  border-inline-start: 1px solid var(--line-strong);
+}
+
+@media (max-width: 39.99rem) {
+  .decks-tabs--short > .segmented-option {
+    padding-inline: var(--space-2);
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Deck tiles (own and public): an object. The whole tile is one link (the name); the buttons sit above it.
+ * The plate (::before) carries the chamfer, so the export menu can open over the next tile without being clipped.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.deck-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deck-row {
+  --cut: 0.875rem;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.deck-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--surface-2);
+  box-shadow: inset 0 2px 0 var(--section-accent), inset 0 0 0 1px var(--line);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+}
+
+/* The diagonal line of the chamfer, drawn over the banner. */
+.deck-row::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: var(--cut);
+  block-size: var(--cut);
+  pointer-events: none;
+  background: linear-gradient(to bottom left, transparent 50%, var(--line-strong) 50%, var(--line-strong) calc(50% + 1px), transparent calc(50% + 1px));
+}
+
+.deck-row:hover::before {
+  background: var(--surface-hover);
+  box-shadow: inset 0 2px 0 var(--section-accent), inset 0 0 0 1px var(--line-strong);
+}
+
+/* An open export menu lifts its tile over the next one. */
+.deck-row:focus-within,
+.deck-row:has([aria-expanded='true']) {
+  z-index: 2;
+}
+
+.deck-card-banner {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: 100%;
+  gap: 2px;
+  block-size: 6rem;
+  overflow: hidden;
+  background: var(--line-strong);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+}
+
+.deck-card-art {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-width: 0;
+  object-fit: cover;
+  object-position: center 16%;
+}
+
+.deck-card-banner .card-image--missing {
+  border: 0;
+  background: repeating-linear-gradient(135deg, var(--surface-1) 0 0.5rem, var(--surface-hover) 0.5rem 1rem);
+}
+
+.deck-card-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-2) var(--space-3) 0;
+}
+
+.deck-card-body > * {
+  margin: 0;
+}
+
+.deck-card-body :is(.deck-counts, .deck-card-facts, .deck-record) {
+  line-height: 1.3;
+}
+
+.deck-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.deck-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 1.0625rem;
+  line-height: 1.25;
+  letter-spacing: var(--letter-spacing-body);
+  text-transform: none;
+}
+
+/* The name on one line (the whole name is the link's title); the link is stretched over the tile by ::after. */
+.deck-link {
+  display: block;
+  overflow: hidden;
+  color: var(--color-text);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button.deck-link {
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.deck-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.deck-link:focus-visible {
+  outline: none;
+}
+
+.deck-link:focus-visible::after {
+  outline: var(--focus-ring);
+  outline-offset: -3px;
+}
+
+.deck-card-title .deck-color-code {
+  flex: none;
+  font-size: 1rem;
+}
+
+/* Buttons and links on the tile that must stay clickable above the stretched link. */
+.deck-card-title > .icon-button,
+.deck-card-foot-text .missing-add,
+.deck-card-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.deck-card-title > .icon-button {
+  flex: none;
+  margin: 0;
+}
+
+.deck-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+}
+
+.deck-counts,
+.deck-updated {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
 /* The game record (3–1–1) gets a row of its own under the counts, so it never runs past the tile edge at 1280 (T-187). */
 .deck-card-meta .deck-record {
   flex-basis: 100%;
+}
+
+.deck-record {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.deck-public-badge {
+  align-self: flex-start;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-accent-2);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.deck-row .deck-progress {
+  block-size: 4px;
+  margin-block: var(--space-1);
+}
+
+.deck-card-facts {
+  display: block;
+  font-size: var(--font-size-sm);
+}
+
+.deck-card-facts .legality {
+  min-block-size: 0;
+  white-space: normal;
+}
+
+.deck-card-missing {
+  color: var(--color-warning);
+  font-weight: var(--font-weight-bold);
+}
+
+.deck-card-owned {
+  color: var(--color-success);
+}
+
+/* The foot: the date at the left, the icon row (copy, export, delete) at the right. */
+.deck-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-block-start: var(--space-1);
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border-block-start: 1px solid var(--line);
+}
+
+.deck-card-foot-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.deck-card-foot-text .deck-updated {
+  margin: 0;
+  line-height: 1.3;
+}
+
+.deck-card-foot-text .missing-add {
+  align-self: flex-start;
+}
+
+.deck-card-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.deck-card-actions .icon-button,
+.deck-card-title > .icon-button {
+  inline-size: var(--control-h-sm);
+  min-inline-size: var(--control-h-sm);
+  block-size: var(--control-h-sm);
+  min-block-size: var(--control-h-sm);
+  margin: 0;
+}
+
+@media (pointer: coarse) {
+  .deck-card-actions .icon-button,
+  .deck-card-title > .icon-button {
+    inline-size: var(--target-min);
+    min-inline-size: var(--target-min);
+    block-size: var(--target-min);
+    min-block-size: var(--target-min);
+  }
+}
+
+.icon-delete:hover {
+  color: var(--color-danger);
+}
+
+.deck-card-actions .export-menu {
+  display: flex;
+}
+
+/* "Link copied" and the copy fallback float over the tile instead of growing it. */
+.deck-card-actions .export-menu > .hint {
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-end: 0;
+  z-index: 21;
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  white-space: nowrap;
+}
+
+.deck-card-actions .export-menu > .hint:empty {
+  display: none;
+}
+
+.deck-card-actions .export-menu > span:not(.hint) {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-end: 0;
+  z-index: 21;
+  inline-size: 14rem;
+  max-inline-size: calc(100vw - 2rem);
+  padding: var(--space-2);
+  background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.deck-row > .deck-rename {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+
+@media (forced-colors: active) {
+  .deck-row::before {
+    border: 1px solid CanvasText;
+  }
+
+  .deck-link:focus-visible::after {
+    outline-color: Highlight;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Public decks: no banner and no foot, the tile is the name, the Legends and one line of facts.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.public-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-2);
+}
+
+.public-head > p {
+  min-width: 0;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.public-head > .icon-button {
+  flex: none;
+  margin: 0;
+}
+
+.public-deck-row .deck-card-body {
+  padding-block: var(--space-3);
+}
+
+.public-deck-legends,
+.public-deck-by {
+  overflow-wrap: anywhere;
+}
+
+.public-deck-legends {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.public-deck-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-4);
+}
+
+/* A short empty state: the heading, the sentence and no more than one row (the Public tab has no actions). */
+.empty--row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-4);
+  max-inline-size: 44rem;
+  padding: var(--space-3) var(--space-4);
+}
+
+.empty--row > p {
+  flex: 1 1 16rem;
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Cost in deck lists: the same quiet dark box as on the cards (T-187): dark base, the card colour only on the middle of each
+ * side, white digits. Not on the card grid and the card info box, which style their own.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.cost-gem:not(.card-strip *, .card-meta *) {
+  --gem-bright: var(--color-text);
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: #10101a;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--gem-bright) 30%, transparent);
+  color: #fff;
+}
+
+.cost-gem:not(.card-strip *, .card-meta *)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --k: linear-gradient(var(--gem-bright), var(--gem-bright));
+  background:
+    var(--k) top center / 60% 2px no-repeat, var(--k) bottom center / 60% 2px no-repeat,
+    var(--k) center left / 2px 60% no-repeat, var(--k) center right / 2px 60% no-repeat;
+}
+
+.cost-gem.type-badge-red { --gem-bright: #ff4d5e; }
+.cost-gem.type-badge-yellow { --gem-bright: #ffd400; }
+.cost-gem.type-badge-green { --gem-bright: #39e08a; }
+.cost-gem.type-badge-blue { --gem-bright: #4d9dff; }
+
+@media (forced-colors: active) {
+  .cost-gem:not(.card-strip *, .card-meta *) {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * Build tab (Kokoaminen): the swap guide on one row, the summary right under it in columns, a compact compatibility matrix.
+ * ------------------------------------------------------------------------------------------------------------------ */
+.build-view {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.build-section {
+  display: grid;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.build-section + .build-section {
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--line);
+}
+
+.build-section h2,
+.build-section h3 {
+  margin: 0;
+}
+
+.build-intro {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Deck on the table now → deck I want to play. The fields take the base field style (the old select rules are gone). */
+.build-selects {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--space-2);
+  max-inline-size: 48rem;
+}
+
+.build-selects select {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.build-arrow {
+  display: grid;
+  place-items: center;
+  block-size: var(--control-h);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 35.99rem) {
+  .build-selects {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .build-arrow {
+    display: none;
+  }
+}
+
+.build-kept {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.build-kept legend {
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.build-kept .options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+.build-ok,
+.build-warn {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.build-ok {
+  color: var(--color-success);
+}
+
+.build-warn {
+  color: var(--color-warning);
+}
+
+.build-result {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.build-result .status-line {
+  margin: 0;
+}
+
+.build-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: var(--space-3) var(--space-5);
+}
+
+.build-group {
+  min-inline-size: 0;
+  padding-inline-start: var(--space-3);
+  border-inline-start: 2px solid var(--section-accent);
+}
+
+.build-group h3 {
+  margin-block-end: var(--space-1);
+}
+
+.build-group ul,
+.build-pairs {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.build-group li {
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.build-count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+}
+
+.build-note {
+  color: var(--color-text-muted);
+}
+
+.build-pairs li {
+  overflow-wrap: anywhere;
+}
+
+/* Matrix: a 32 px cell per pair, tinted by the result (green = fits, yellow = short) with the number or a check mark. */
+.build-matrix {
+  --decks: 3;
+  inline-size: min(100%, calc(12rem + var(--decks) * 6rem));
+  border-collapse: separate;
+  border-spacing: 2px;
+  table-layout: fixed;
+}
+
+.build-matrix th,
+.build-matrix td {
+  padding: 0 var(--space-1);
+  border: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.build-matrix td {
+  block-size: 2rem;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.build-matrix thead td:first-child {
+  inline-size: 12rem;
+}
+
+.build-matrix th[scope='row'] {
+  inline-size: 12rem;
+  font-weight: var(--font-weight-normal, 400);
+  text-align: start;
+}
+
+.build-matrix th[scope='col'] {
+  vertical-align: bottom;
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.build-matrix th[scope='col'] .build-cut {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.build-cut {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.build-matrix td.is-ok {
+  background: color-mix(in srgb, var(--color-success) 16%, var(--surface-2));
+  color: var(--color-success);
+}
+
+.build-matrix td.is-short {
+  background: color-mix(in srgb, var(--color-warning) 16%, var(--surface-2));
+  color: var(--color-warning);
+}
+
+/* The diagonal (a deck alone) has a frame. */
+.build-matrix td.is-own {
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+/* "Build all": a list, as wide as the matrix above it. */
+.build-table {
+  inline-size: 100%;
+  max-inline-size: 48rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.build-table th,
+.build-table td {
+  padding: var(--space-1) var(--space-2);
+  border-block-end: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+  text-align: center;
+}
+
+.build-table th[scope='col']:first-child,
+.build-table th[scope='row'] {
+  font-weight: var(--font-weight-normal, 400);
+  text-align: start;
+}
+
+.build-table th[scope='col'] {
+  font-weight: var(--font-weight-bold);
+}
+
+.build-table :is(th, td):not(:first-child) {
+  inline-size: 7rem;
+}
+
+.build-table .is-short {
+  color: var(--color-warning);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (max-width: 39.99rem) {
+  .build-table thead th {
+    padding-inline: 0;
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+    overflow-wrap: normal;
+  }
+
+  .build-table tbody th {
+    font-size: 0.875rem;
+  }
+
+  .build-table :is(th, td):not(:first-child) {
+    inline-size: 4.5rem;
+    padding-inline: var(--space-1);
+    font-size: 0.875rem;
+  }
 }

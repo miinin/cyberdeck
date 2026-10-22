@@ -429,10 +429,10 @@ export const deckTextsEn: typeof deckTextsFi = {
 
   // Public decks (T-098, D-025)
   decksTabsLabel: 'Deck list view',
-  tabOwn: 'My decks',
-  tabPublic: 'Public decks',
+  tabOwn: 'Mine',
+  tabPublic: 'Public',
   // Deck building tab (T-164)
-  tabBuild: 'Building',
+  tabBuild: 'Build',
   buildEmptyTitle: 'No decks to build',
   buildEmpty: 'Make a deck first. Here you can then see how your decks share cards and what swapping decks takes.',
   buildCollectionLoading: 'Loading the collection…',

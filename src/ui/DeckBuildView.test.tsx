@@ -58,7 +58,7 @@ describe('Kokoaminen tab (T-164)', () => {
     const link = await screen.findByRole('link', { name: 'Kokoaminen' });
     expect(link).toHaveAttribute('aria-current', 'page');
     expect(link).toHaveAttribute('href', '#/pakat/kokoaminen');
-    expect(screen.getByRole('link', { name: 'Omat pakat' })).not.toHaveAttribute('aria-current');
+    expect(screen.getByRole('link', { name: 'Omat' })).not.toHaveAttribute('aria-current');
   });
 
   it('shows a hint when there are no decks', async () => {

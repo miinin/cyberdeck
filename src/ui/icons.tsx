@@ -31,3 +31,23 @@ export function TrashIcon() {
     </svg>
   );
 }
+
+export function CopyIcon() {
+  return (
+    <svg {...ICON_PROPS}>
+      <rect x="9" y="9" width="12" height="12" rx="1" />
+      <path d="M5 15H4V4h11v1" />
+    </svg>
+  );
+}
+
+export function RefreshIcon() {
+  return (
+    <svg {...ICON_PROPS}>
+      <path d="M21 12a9 9 0 0 1-15.5 6.2" />
+      <path d="M3 12a9 9 0 0 1 15.5-6.2" />
+      <path d="M18.5 2v4h-4" />
+      <path d="M5.5 22v-4h4" />
+    </svg>
+  );
+}

@@ -254,7 +254,9 @@ describe('Scan a new deck (T-119)', () => {
     const repositories = createMemoryRepositories();
     window.location.hash = '#/pakat';
     render(<App cards={testCards} repositories={repositories} />);
-    await user.click(await screen.findByRole('button', { name: 'Skannaa uusi pakka' }));
+    // The scanner is in the import menu (T-181).
+    await user.click(await screen.findByRole('button', { name: 'Tuo' }));
+    await user.click(screen.getByRole('button', { name: 'Skannaa uusi pakka' }));
     expect(await screen.findByRole('heading', { name: 'Skannaa pakkaan: Uusi pakka' })).toBeInTheDocument();
     expect((await repositories.decks.list()).value).toHaveLength(1);
     expect(window.location.hash).toMatch(/^#\/pakat\/.+/);

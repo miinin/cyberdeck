@@ -31,8 +31,8 @@ export function ShareIcon() {
   );
 }
 
-/** One "Vie ja jaa" menu per deck: .json (T-015), .txt and a share link (T-056); T-071 folded them into one button. */
-export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsByKey: CardsByKey }) {
+/** One "Vie ja jaa" menu per deck (`iconToggle`: a quiet icon button, for the deck tile's icon row, T-181): .json (T-015), .txt and a share link (T-056); T-071 folded them into one button. */
+export function ExportButtons({ deck, cardsByKey, iconToggle = false }: { deck: DeckContent; cardsByKey: CardsByKey; iconToggle?: boolean }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -83,7 +83,7 @@ export function ExportButtons({ deck, cardsByKey }: { deck: DeckContent; cardsBy
       <button
         ref={toggleRef}
         type="button"
-        className="button-secondary export-menu-toggle"
+        className={`${iconToggle ? 'icon-button' : 'button-secondary'} export-menu-toggle`}
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={deckTexts.forDeck(deckTexts.exportAndShare, deck.name)}

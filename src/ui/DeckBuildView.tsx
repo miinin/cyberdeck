@@ -1,4 +1,5 @@
 import { useId, useState } from 'react';
+import type { CSSProperties } from 'react';
 import type { Deck } from '../domain/deck';
 import { allMissing, competingPairs, deckMissing, pairMissing, swapPlan } from '../domain/deckBuild';
 import type { SwapRow } from '../domain/deckBuild';
@@ -100,6 +101,9 @@ function SwapGuide({
             ))}
           </select>
         </div>
+        <span className="build-arrow" aria-hidden="true">
+          →
+        </span>
         <div className="field">
           <label htmlFor={ids.to}>{deckTexts.swapToLabel}</label>
           <select id={ids.to} value={to?.id ?? ''} onChange={(event) => setToId(event.target.value)}>
@@ -193,7 +197,7 @@ function Compatibility({ decks, cardsByKey, owned }: { decks: readonly Deck[]; c
       {decks.length < 2 ? (
         <p className="status-line">{deckTexts.compatOneDeck}</p>
       ) : matrixFits ? (
-        <table className="build-matrix" aria-label={deckTexts.compatMatrixLabel}>
+        <table className="build-matrix" aria-label={deckTexts.compatMatrixLabel} style={{ '--decks': decks.length } as CSSProperties}>
           <thead>
             <tr>
               <td />
