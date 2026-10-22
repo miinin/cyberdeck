@@ -182,10 +182,10 @@ Tilat: Backlog → Ready → In Progress → Review → Testing → Done (rules.
 | T-177 | Goldfish-näkymän visuaalinen uudistus: isommat kortit, nopat muotoinaan, tulostaulu (D-036) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-178 | Lyhyt Have/Want-linkki palvelimen kautta (`#/v/<tunnus>`, tradeShares, D-037) | 1 | Must | Koodari | Done | Digiturva (SEC-178), dev ensin, SR-59 käsitestit ohitettu käyttäjän päätöksellä 2026-10-18 |
 | T-179 | Kansiosivun skannaus yhdellä kuvalla (3×3 ja 3×4), kuvatiedosto ja rajaus | 1 | Must | Koodari | Done | Digiturva (SEC-179), PM (kuvakaappaukset, valekameratesti) |
-| T-181 | Visuaalinen uudistus: tiivis, staattinen Cyberpunk, paketit 0–6 (D-038) | 1 | Must | Koodari | In Progress (0–3 tehty) | PM (kuvakaappaukset), paketti 6: dev ja Digiturva |
+| T-181 | Visuaalinen uudistus: tiivis, staattinen Cyberpunk, paketit 0–6 (D-038) | 1 | Must | Koodari | In Progress (0–3, 4a ja 5a tehty) | PM (kuvakaappaukset), paketti 6: dev ja Digiturva |
 | T-184 | Korttiruudukon infonauha, merkintätilan lopetuspainike, keskitetyt − ja +, Myytävyys ennen avattavia suodattimia (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-185 | Korttiruutu inforuuduksi: isommat koot, alanimi, korttia matkivat merkit, viisteet oikeaan yläkulmaan (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
-| T-186 | [velka] Täysi testiajo aikakatkaisee satunnaisesti 1–2 raskasta UI-testiä (5 s), erikseen ajettuina läpi (CatalogView, DeckEditor, GoldfishView, PublicDecks; toistui 2026-10-19–20) | 1 | Should | Koodari | Backlog | – |
+| T-186 | [velka] Täysi testiajo aikakatkaisee satunnaisesti 1–2 raskasta UI-testiä (5 s), erikseen ajettuina läpi (CatalogView, DeckEditor, GoldfishView, PublicDecks, TradeLink CI:ssä; toistui 2026-10-19–22) | 1 | Should | Koodari | Backlog | – |
 | T-187 | Inforuudun merkit tyylikkäiksi kortin muotojen pohjalta, pakkamäärä pois ruudukosta, viisteiden korjaus (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-188 | Korttidialogi ensin, merkkien tekstit, listan tyyppiväri, selectin viiste, välkyntä ja navin järjestys (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
 | T-189 | Mobiilin inforuutu siistiksi (kapea asettelu) ja cost-laatikon kehys toisinpäin (käyttäjän palaute) | 1 | Must | Koodari | Done | PM (kuvakaappaukset) |
