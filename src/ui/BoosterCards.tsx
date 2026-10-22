@@ -87,8 +87,26 @@ export function useRevealProgress(pack: readonly BoosterCard[] | null): number {
 }
 
 /**
- * The cards of a pack in their slots (T-176). Every slot keeps its size whether it is empty, face down or turned, so
- * nothing moves when a pack opens or a card turns. `pack` null = the slots wait face down.
+ * A sealed pack as an object (T-181 package 5a): a chamfered box with the set name, the number of the pack and corner marks.
+ * It stands where the cards will appear, so there are no empty slots before a pack is opened. Decorative: the heading and
+ * the button around it say the same.
+ */
+export function ClosedPack({ title, sub }: { title: string; sub: string }) {
+  return (
+    <div className="pack-closed" aria-hidden="true">
+      <span className="pack-closed-corner pack-closed-corner--tl">CD</span>
+      <span className="pack-closed-corner pack-closed-corner--br">TCG</span>
+      <span className="pack-closed-title">
+        {title}
+      </span>
+      <span className="pack-closed-sub">{sub}</span>
+    </div>
+  );
+}
+
+/**
+ * The cards of a pack in their slots (T-176). Every slot keeps its size whether it is face down or turned, so nothing
+ * moves when a card turns. `pack` null = the pack is still closed: `closed` stands in its place (T-181 package 5a).
  */
 export function PackGrid({
   pack,
@@ -96,19 +114,29 @@ export function PackGrid({
   revealed,
   cardsByKey,
   title,
+  closed,
 }: {
   pack: readonly BoosterCard[] | null;
   slots: number;
   revealed: number;
   cardsByKey: CardsByKey;
   title: string;
+  /** The heading and the number shown on the closed pack. */
+  closed: { title: string; sub: string };
 }) {
   const done = pack !== null && revealed >= pack.length;
+  if (pack === null) {
+    return (
+      <section className="pack" aria-label={title}>
+        <ClosedPack title={closed.title} sub={closed.sub} />
+      </section>
+    );
+  }
   return (
     <section className="pack" aria-label={title}>
       <ul className="pack-grid">
         {Array.from({ length: slots }, (_, index) => {
-          const entry = pack?.[index];
+          const entry = pack[index];
           if (entry !== undefined && index < revealed) {
             return (
               <li key={index} className="pack-slot">

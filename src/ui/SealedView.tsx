@@ -35,11 +35,12 @@ import type { SealedRun } from '../domain/sealed';
 import type { Rng } from '../domain/testHand';
 import { StorageError } from '../storage';
 import type { Repositories, StorageErrorKind } from '../storage';
-import { BoosterPicture, PackGrid, useRevealProgress } from './BoosterCards';
+import { BoosterPicture, ClosedPack, PackGrid, useRevealProgress } from './BoosterCards';
 import { CardColor } from './CardColor';
 import { CardName, cardNameText } from './CardName';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 import { deckTexts } from './deckTexts';
+import { InfoTip } from './InfoTip';
 import { SegmentedChoice } from './SegmentedChoice';
 import { sealedTexts as t } from './sealedTexts';
 import { routeHash } from './useHashRoute';
@@ -50,6 +51,11 @@ const SET_OPTIONS: readonly (readonly [SealedSetId, string])[] = [
   ['welcome-to-night-city', t.setRetail],
   ['welcome-to-night-city-beta', t.setBeta],
 ];
+
+/** The name of a set, as the set choice shows it. */
+function setLabel(id: SealedSetId): string {
+  return SET_OPTIONS.find(([key]) => key === id)?.[1] ?? id;
+}
 
 const COLORS = ['Red', 'Yellow', 'Green', 'Blue'] as const;
 const TYPES = ['Unit', 'Gear', 'Program'] as const;
@@ -104,20 +110,29 @@ export function BoostersView({ cards, rng = Math.random }: { cards: readonly Car
 
   return (
     <section className="sealed">
-      <p className="sealed-intro">{t.boostersIntro}</p>
-      <SegmentedChoice legend={t.setLegend} legendVisible className="sealed-set-choice" name="booster-set" value={set} options={SET_OPTIONS} onChange={setSet} />
-      <p className="hint">{t.setHint}</p>
-      <div className="quick-open">
-        <button type="button" className="button-primary quick-open-button" onClick={open}>
+      <div className="booster-controls has-info-tip">
+        <SegmentedChoice size="sm" legend={t.setLegend} legendVisible className="sealed-set-choice" name="booster-set" value={set} options={SET_OPTIONS} onChange={setSet} />
+        <button type="button" className="button-primary booster-open" onClick={open}>
           {stats.opened === 0 ? t.openSingle : t.openNextSingle}
         </button>
+        <p className="sealed-single-stats mono" role="status">
+          <span>{t.singleOpened(stats.opened)}</span>
+          <span>{stats.opened === 0 ? t.singleNone : t.singleHits(stats.epic, stats.iconic, stats.secret)}</span>
+        </p>
+        <InfoTip>
+          <span className="info-tip-line">{t.boostersIntro}</span>
+          <span className="info-tip-line">{t.setHint}</span>
+          <span className="info-tip-line">{t.estimateNote}</span>
+        </InfoTip>
       </div>
-      <p className="sealed-single-stats" role="status">
-        <span>{t.singleOpened(stats.opened)}</span>
-        <span>{stats.opened === 0 ? t.singleNone : t.singleHits(stats.epic, stats.iconic, stats.secret)}</span>
-      </p>
-      <PackGrid pack={pack} slots={BOOSTER_SIZE} revealed={revealed} cardsByKey={cardsByKey} title={stats.opened === 0 ? t.openSingle : t.singlePackTitle(stats.opened)} />
-      <p className="hint sealed-estimate">{t.estimateNote}</p>
+      <PackGrid
+        pack={pack}
+        slots={BOOSTER_SIZE}
+        revealed={revealed}
+        cardsByKey={cardsByKey}
+        title={stats.opened === 0 ? t.openSingle : t.singlePackTitle(stats.opened)}
+        closed={{ title: setLabel(set), sub: t.singlePackTitle(stats.opened + 1) }}
+      />
     </section>
   );
 }
@@ -216,18 +231,25 @@ export function SealedView({
   return (
     <section className="sealed">
       {notes}
-      <p className="sealed-intro">{t.intro}</p>
-      <SegmentedChoice legend={t.setLegend} legendVisible className="sealed-set-choice" name="sealed-set" value={set} options={SET_OPTIONS} onChange={setSet} />
-      <p className="hint">{t.setHint}</p>
+      <div className="booster-controls has-info-tip">
+        <SegmentedChoice size="sm" legend={t.setLegend} legendVisible className="sealed-set-choice" name="sealed-set" value={set} options={SET_OPTIONS} onChange={setSet} />
+        <InfoTip>
+          <span className="info-tip-line">{t.intro}</span>
+          <span className="info-tip-line">{t.setHint}</span>
+          <span className="info-tip-line">{t.rulesNote}</span>
+          <span className="info-tip-line">{t.estimateNote}</span>
+        </InfoTip>
+      </div>
       <section className="sealed-start-card" aria-labelledby="sealed-start-heading">
-        <h2 id="sealed-start-heading">{t.startHeading}</h2>
-        <p>{t.startHint}</p>
-        <p className="sealed-rules">{t.rulesNote}</p>
-        <button type="button" className="button-primary" onClick={() => void sealed.replace(newSealedRun(set)).then(setFailure)}>
-          {t.startSealed}
-        </button>
+        <ClosedPack title={setLabel(set)} sub={t.startHeading} />
+        <div className="sealed-start-body">
+          <h2 id="sealed-start-heading">{t.startHeading}</h2>
+          <p>{t.startHint}</p>
+          <button type="button" className="button-primary" onClick={() => void sealed.replace(newSealedRun(set)).then(setFailure)}>
+            {t.startSealed}
+          </button>
+        </div>
       </section>
-      <p className="hint sealed-estimate">{t.estimateNote}</p>
     </section>
   );
 }
@@ -294,18 +316,27 @@ function SealedOpening({
   const title = isLegends ? t.stepLegends : t.stepBooster(step + 1, SEALED_BOOSTERS);
   return (
     <>
-      <h2 className="sealed-step">{title}</h2>
-      <div className="quick-open">
-        <button type="button" className="button-primary quick-open-button" onClick={advance}>
+      <div className="booster-controls has-info-tip">
+        <h2 className="sealed-step">{title}</h2>
+        <button type="button" className="button-primary booster-open" onClick={advance}>
           {pack === null ? t.openPack : isLast ? t.toBuilder : t.nextPack}
         </button>
-        <button type="button" className="button-secondary quick-open-rest" disabled={pack !== null && isLast} onClick={openRest}>
+        <button type="button" className="button-secondary" disabled={pack !== null && isLast} onClick={openRest}>
           {t.openRest}
         </button>
+        <InfoTip>
+          {isLegends && <span className="info-tip-line">{t.legendPackHint}</span>}
+          <span className="info-tip-line">{t.estimateNote}</span>
+        </InfoTip>
       </div>
-      <PackGrid pack={pack?.cards ?? null} slots={isLegends ? LEGEND_PACK_SIZE : BOOSTER_SIZE} revealed={revealed} cardsByKey={cardsByKey} title={title} />
-      {isLegends && <p className="hint">{t.legendPackHint}</p>}
-      <p className="hint sealed-estimate">{t.estimateNote}</p>
+      <PackGrid
+        pack={pack?.cards ?? null}
+        slots={isLegends ? LEGEND_PACK_SIZE : BOOSTER_SIZE}
+        revealed={revealed}
+        cardsByKey={cardsByKey}
+        title={title}
+        closed={{ title: setLabel(run.set), sub: title }}
+      />
     </>
   );
 }

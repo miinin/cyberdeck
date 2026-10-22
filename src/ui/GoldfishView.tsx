@@ -224,7 +224,7 @@ export function GoldfishView({
     return (
       <section className="goldfish">
         {header}
-        <div className="panel">
+        <div className="gf-board gf-board--opening">
           <h2 className="panel-title" ref={handRef} tabIndex={-1}>
             {t.openingTitle}
           </h2>
@@ -244,7 +244,7 @@ export function GoldfishView({
               </li>
             ))}
           </ul>
-          <div className="gf-buttons">
+          <div className="gf-buttons gf-buttons--center">
             <button type="button" className="button-primary" onClick={() => apply(keepHand(game), turnAnnouncement, 'gig')}>
               {t.keep}
             </button>
@@ -303,7 +303,7 @@ export function GoldfishView({
         ? t.gigChooseNone
         : '';
 
-  const statusItems: { label: string; value: string; hint?: string; pips?: boolean; minor?: boolean; key?: string }[] = [
+  const statusItems: { label: string; value: string; hint?: string; pips?: boolean; key?: string }[] = [
     { label: t.turn, value: t.turnValue(Math.min(game.turn, GOLDFISH_TURNS), GOLDFISH_TURNS), pips: true },
     { label: t.money, value: t.moneyValue(money), hint: t.moneyHint },
     { label: t.eddies, value: t.eddiesValue(freeEddies(game), game.eddies), hint: t.eddiesHint },
@@ -313,8 +313,6 @@ export function GoldfishView({
       hint: t.streetCred(streetCred(game)),
     },
     { label: t.stolen, value: String(game.stolen), hint: t.stolenHint, key: 'stolen' },
-    { label: t.library, value: String(game.library.length), minor: true },
-    { label: t.trash, value: String(game.trash.length), minor: true },
   ];
 
   return (
@@ -322,217 +320,242 @@ export function GoldfishView({
       {header}
       <div className="gf-layout">
         <div className="gf-main" aria-label={t.boardLabel}>
-          <dl className="gf-status" aria-label={t.statusLabel}>
-            {statusItems.map((item) => (
-              <div key={item.label} title={item.hint} className={(item.minor || item.label === t.gigs ? 'is-minor ' : '') + (item.key === 'stolen' ? 'is-stolen' : '')}>
-                <dt>{item.label}</dt>
-                <dd>{item.value}</dd>
-                <dd className="gf-status-hint">
-                  {item.pips ? (
-                    <span className="gf-pips" aria-hidden="true">
-                      {Array.from({ length: GOLDFISH_TURNS }, (_, i) => (
-                        <span key={i} className={i < game.turn ? 'is-on' : ''} />
-                      ))}
-                    </span>
-                  ) : (
-                    (item.hint ?? ' ')
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
-
-          {over && (
-            <div className="panel gf-summary">
-              <h2 className="panel-title" ref={summaryRef} tabIndex={-1}>
-                {t.summaryTitle}
-              </h2>
-              <p>{t.summaryEnd(game.end)}</p>
-              <dl className="gf-summary-list">
-                <div>
-                  <dt>{t.summaryFirstUnit}</dt>
-                  <dd>{t.summaryFirstUnitValue(game.firstUnitTurn)}</dd>
-                </div>
-                <div>
-                  <dt>{t.summaryWasted}</dt>
-                  <dd>
-                    {game.wasted} $ <span className="hint">({t.summaryWastedHint})</span>
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t.summaryStolen}</dt>
-                  <dd>{game.stolen}</dd>
-                </div>
-                <div>
-                  <dt>{t.summaryGigs}</dt>
-                  <dd>{t.summaryGigsValue(game.gigs.length, streetCred(game))}</dd>
-                </div>
-                <div>
-                  <dt>{t.summaryPlayed}</dt>
-                  <dd>{game.played.length === 0 ? t.summaryPlayedNone : game.played.map(cardNameText).join(', ')}</dd>
-                </div>
-              </dl>
-              <div className="gf-buttons">
-                <button type="button" className="button-primary" onClick={() => begin(lastGoFirst.current)}>
-                  {t.playAgain}
-                </button>
-                <button type="button" className="button-secondary" onClick={restart}>
-                  {t.restart}
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="panel gf-gig">
-            <h2 className="panel-title" ref={gigRef} tabIndex={-1}>
-              {t.gigTitle}
-            </h2>
-            <div className="gf-dice">
-              {GIG_DICE.map((die) => {
-                const rolled = rolledDice.get(die);
-                const inFixer = game.dice.includes(die);
-                const state = rolled !== undefined && !inFixer ? 'rolled' : selectable.includes(die) && game.gigPending && !over ? 'ready' : 'waiting';
-                return (
-                  <button
-                    key={die}
-                    type="button"
-                    className={'gf-die is-' + state + (rolled?.fresh === true ? ' is-fresh' : '')}
-                    aria-label={t.gigRollLabel(die)}
-                    disabled={over || !game.gigPending || !selectable.includes(die)}
-                    onClick={() => apply(chooseGig(game, die, rng), (next) => t.announceGig(die, next.log.at(-1)?.gig?.value ?? 0), 'hand')}
-                  >
-                    <DieShape die={die} value={state === 'rolled' ? (rolled?.value ?? null) : null} />
-                    <span className="gf-die-name" aria-hidden="true">
-                      {t.gigRoll(die)}
-                    </span>
-                    <span className="gf-die-state" aria-hidden="true">
-                      {state === 'rolled' ? t.dieRolled : t.dieInFixer}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="gf-line">{gigLine}</p>
-          </div>
-
-          <div className="gf-table">
-          <div className="panel gf-legends-panel">
-            <h2 className="panel-title" ref={legendsRef} tabIndex={-1}>
-              {t.legendsTitle}
-            </h2>
-            {game.legends.length === 0 && <p className="hint">{t.legendsNone}</p>}
-            <ul className="gf-legends">
-              {game.legends.map((slot, index) => (
-                <li key={`${index}-${slot.card.key}`} className={'gf-slot' + (slot.spent ? ' is-spent' : '')}>
-                  <span className="gf-card">
-                    {slot.faceUp ? <Picture card={slot.card} /> : <span className="gf-picture gf-back" aria-hidden="true" />}
-                  </span>
-                  <span className="gf-state">
-                    {slot.faceUp ? (
-                      <span lang="en">
-                        <CardName card={slot.card} />
+          <div className="gf-board">
+            <dl className="gf-status gf-hud" aria-label={t.statusLabel}>
+              {statusItems.map((item) => (
+                <div key={item.label} title={item.hint} className={(item.label === t.gigs ? 'is-gigs ' : '') + (item.key === 'stolen' ? 'is-stolen' : '')}>
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                  <dd className="gf-status-hint">
+                    {item.pips ? (
+                      <span className="gf-pips" aria-hidden="true">
+                        {Array.from({ length: GOLDFISH_TURNS }, (_, i) => (
+                          <span key={i} className={i < game.turn ? 'is-on' : ''} />
+                        ))}
                       </span>
                     ) : (
-                      t.legendDown
+                      (item.hint ?? ' ')
                     )}
-                    {' · '}
-                    {slot.spent ? t.legendSpent : t.legendReady}
-                  </span>
-                  {slot.gear.map((gear, gearIndex) => (
-                    <span key={gearIndex} className="gf-gear" lang="en">
-                      {t.gearOn(cardNameText(gear))}
-                    </span>
-                  ))}
-                </li>
+                  </dd>
+                </div>
               ))}
-            </ul>
-          </div>
+            </dl>
 
-          <div className="panel gf-field-panel">
-            <h2 className="panel-title" ref={fieldRef} tabIndex={-1}>
-              {t.fieldTitle}
-            </h2>
-            {game.field.length === 0 ? (
-              <p className="gf-empty">{t.fieldEmpty}</p>
-            ) : (
-              <ul className="gf-field">
-                {game.field.map((unit) => {
-                  const reason = over ? 'wrong-phase' : attackProblem(game, unit.id);
-                  return (
-                    <li key={unit.id} className={'gf-slot' + (unit.spent ? ' is-spent' : '')}>
+            {over && (
+              <div className="gf-summary">
+                <h2 className="panel-title" ref={summaryRef} tabIndex={-1}>
+                  {t.summaryTitle}
+                </h2>
+                <p>{t.summaryEnd(game.end)}</p>
+                <dl className="gf-summary-list">
+                  <div>
+                    <dt>{t.summaryFirstUnit}</dt>
+                    <dd>{t.summaryFirstUnitValue(game.firstUnitTurn)}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.summaryWasted}</dt>
+                    <dd>
+                      {game.wasted} $ <span className="hint">({t.summaryWastedHint})</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t.summaryStolen}</dt>
+                    <dd>{game.stolen}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.summaryGigs}</dt>
+                    <dd>{t.summaryGigsValue(game.gigs.length, streetCred(game))}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.summaryPlayed}</dt>
+                    <dd>{game.played.length === 0 ? t.summaryPlayedNone : game.played.map(cardNameText).join(', ')}</dd>
+                  </div>
+                </dl>
+                <div className="gf-buttons">
+                  <button type="button" className="button-primary" onClick={() => begin(lastGoFirst.current)}>
+                    {t.playAgain}
+                  </button>
+                  <button type="button" className="button-secondary" onClick={restart}>
+                    {t.restart}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="gf-areas">
+              <div className="gf-zone gf-legends-panel">
+                <h2 className="panel-title" ref={legendsRef} tabIndex={-1}>
+                  {t.legendsTitle}
+                </h2>
+                {game.legends.length === 0 && <p className="hint">{t.legendsNone}</p>}
+                <ul className="gf-legends">
+                  {game.legends.map((slot, index) => (
+                    <li key={`${index}-${slot.card.key}`} className={'gf-slot' + (slot.spent ? ' is-spent' : '')}>
                       <span className="gf-card">
-                        <Picture card={unit.card} />
+                        {slot.faceUp ? <Picture card={slot.card} /> : <span className="gf-picture gf-back" aria-hidden="true" />}
                       </span>
                       <span className="gf-state">
-                        <span lang="en">
-                          <CardName card={unit.card} />
+                        <span className="gf-state-name" lang={slot.faceUp ? 'en' : undefined}>
+                          {slot.faceUp ? <CardName card={slot.card} /> : t.legendDown}
                         </span>
-                        {' · '}
-                        {t.unitPower(unit.card.power)}
-                        {' · '}
-                        {unit.lag ? t.unitLag : unit.spent ? t.unitSpent : t.unitReady}
+                        <span className="gf-state-meta">{slot.spent ? t.legendSpent : t.legendReady}</span>
                       </span>
-                      {unit.gear.map((gear, gearIndex) => (
+                      {slot.gear.map((gear, gearIndex) => (
                         <span key={gearIndex} className="gf-gear" lang="en">
                           {t.gearOn(cardNameText(gear))}
                         </span>
                       ))}
-                      <button
-                        type="button"
-                        className="button-secondary gf-attack"
-                        disabled={reason !== null}
-                        onClick={() =>
-                          apply(
-                            attack(game, unit.id),
-                            () => t.announceAttack(cardNameText(unit.card), gigsStolen(unit.card.power)),
-                            'field',
-                          )
-                        }
-                      >
-                        {t.attack(gigsStolen(unit.card.power))}
-                      </button>
                     </li>
-                  );
-                })}
-              </ul>
-            )}
+                  ))}
+                </ul>
+              </div>
+
+              <div className="gf-zone gf-field-panel">
+                <h2 className="panel-title" ref={fieldRef} tabIndex={-1}>
+                  {t.fieldTitle}
+                </h2>
+                {game.field.length === 0 ? (
+                  <p className="gf-empty">{t.fieldEmpty}</p>
+                ) : (
+                  <ul className="gf-field">
+                    {game.field.map((unit) => {
+                      const reason = over ? 'wrong-phase' : attackProblem(game, unit.id);
+                      return (
+                        <li key={unit.id} className={'gf-slot' + (unit.spent ? ' is-spent' : '') + (unit.lag ? ' is-lag' : '')}>
+                          <span className="gf-card">
+                            <Picture card={unit.card} />
+                            {unit.lag && (
+                              <span className="gf-badge" aria-hidden="true">
+                                {t.unitLag}
+                              </span>
+                            )}
+                          </span>
+                          <span className="gf-state">
+                            <span className="gf-state-name" lang="en">
+                              <CardName card={unit.card} />
+                            </span>
+                            <span className="gf-state-meta">
+                              {t.unitPower(unit.card.power)}
+                              {' · '}
+                              {unit.lag ? t.unitLag : unit.spent ? t.unitSpent : t.unitReady}
+                            </span>
+                          </span>
+                          {unit.gear.map((gear, gearIndex) => (
+                            <span key={gearIndex} className="gf-gear" lang="en">
+                              {t.gearOn(cardNameText(gear))}
+                            </span>
+                          ))}
+                          <button
+                            type="button"
+                            className="button-secondary button--sm gf-attack"
+                            disabled={reason !== null}
+                            onClick={() =>
+                              apply(
+                                attack(game, unit.id),
+                                () => t.announceAttack(cardNameText(unit.card), gigsStolen(unit.card.power)),
+                                'field',
+                              )
+                            }
+                          >
+                            {t.attack(gigsStolen(unit.card.power))}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+
+              <div className="gf-zone gf-gig">
+                <h2 className="panel-title" ref={gigRef} tabIndex={-1}>
+                  {t.gigTitle}
+                </h2>
+                <div className="gf-dice">
+                  {GIG_DICE.map((die) => {
+                    const rolled = rolledDice.get(die);
+                    const inFixer = game.dice.includes(die);
+                    const state = rolled !== undefined && !inFixer ? 'rolled' : selectable.includes(die) && game.gigPending && !over ? 'ready' : 'waiting';
+                    return (
+                      <button
+                        key={die}
+                        type="button"
+                        className={'gf-die is-' + state + (rolled?.fresh === true ? ' is-fresh' : '')}
+                        aria-label={t.gigRollLabel(die)}
+                        disabled={over || !game.gigPending || !selectable.includes(die)}
+                        onClick={() => apply(chooseGig(game, die, rng), (next) => t.announceGig(die, next.log.at(-1)?.gig?.value ?? 0), 'hand')}
+                      >
+                        <DieShape die={die} value={state === 'rolled' ? (rolled?.value ?? null) : null} />
+                        <span className="gf-die-name" aria-hidden="true">
+                          {t.gigRoll(die)}
+                        </span>
+                        <span className="gf-die-state" aria-hidden="true">
+                          {state === 'rolled' ? t.dieRolled : t.dieInFixer}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="gf-line">{gigLine}</p>
+              </div>
+            </div>
+
+            <div className="gf-lower">
+              <div className="gf-zone gf-hand-zone">
+                <h2 className="panel-title" ref={handRef} tabIndex={-1}>
+                  {t.handTitle(game.hand.length)}
+                </h2>
+                {game.hand.length === 0 ? (
+                  <p className="gf-empty">{t.handEmpty}</p>
+                ) : (
+                  <ul className="gf-hand" aria-label={t.handList(game.hand.length)}>
+                    {game.hand.map((card, index) => (
+                      <li key={`${index}-${card.key}`} className="gf-hand-item">
+                        <button
+                          type="button"
+                          className={'gf-card gf-pick' + (selected === index ? ' is-selected' : '')}
+                          aria-pressed={selected === index}
+                          disabled={over}
+                          onClick={() => setSelected(selected === index ? null : index)}
+                        >
+                          <Picture card={card} />
+                          <span className="visually-hidden">
+                            {t.pickCard}
+                            <CardName card={card} />
+                          </span>
+                          <span className="gf-cap" aria-hidden="true">
+                            {costOf(card)} $ {card.eddiable === true ? '· €$' : ''}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="gf-piles">
+                <div className="gf-pile">
+                  <span className="gf-pile-stack" aria-hidden="true">
+                    {game.library.length}
+                  </span>
+                  <span className="gf-pile-label">
+                    {t.library}
+                    <span className="visually-hidden">: {game.library.length}</span>
+                  </span>
+                </div>
+                <div className="gf-pile gf-pile--trash">
+                  <span className="gf-pile-stack" aria-hidden="true">
+                    {game.trash.length}
+                  </span>
+                  <span className="gf-pile-label">
+                    {t.trash}
+                    <span className="visually-hidden">: {game.trash.length}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          </div>
-
-          <div className="panel">
-            <h2 className="panel-title" ref={handRef} tabIndex={-1}>
-              {t.handTitle(game.hand.length)}
-            </h2>
-            {game.hand.length === 0 ? (
-              <p className="gf-empty">{t.handEmpty}</p>
-            ) : (
-              <ul className="gf-hand" aria-label={t.handList(game.hand.length)}>
-                {game.hand.map((card, index) => (
-                  <li key={`${index}-${card.key}`} className="gf-hand-item">
-                    <button
-                      type="button"
-                      className={'gf-card gf-pick' + (selected === index ? ' is-selected' : '')}
-                      aria-pressed={selected === index}
-                      disabled={over}
-                      onClick={() => setSelected(selected === index ? null : index)}
-                    >
-                      <Picture card={card} />
-                      <span className="visually-hidden">
-                        {t.pickCard}
-                        <CardName card={card} />
-                      </span>
-                      <span className="gf-cap" aria-hidden="true">
-                        {costOf(card)} $ {card.eddiable === true ? '· €$' : ''}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="panel gf-bar">
+          <div className="gf-bar">
             <div className="gf-bar-card">
               {selectedCard === undefined ? (
                 <p className="gf-line">{t.selectedNone}</p>
