@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------------------------------------------------------ */
 .goldfish {
   /* The card width follows the width and the height of the window, so the whole board fits one screen on a desktop. */
-  --gf-card: clamp(5rem, min(8.6vw, 17dvh), 9.5rem);
+  --gf-card: clamp(5rem, min(8.4vw, 16dvh), 9.5rem);
   display: grid;
   gap: var(--space-2);
   min-inline-size: 0;
@@ -29,8 +29,24 @@
   margin: 0;
 }
 
+/* On a desktop the way back and the heading share one row. */
+@media (min-width: 40rem) {
+  .goldfish {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    column-gap: var(--space-6);
+  }
+
+  .goldfish > :not(.editor-crumb):not(h1) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* The heading is compact here: the board needs the height. */
 .goldfish > h1 {
   margin-block: 0;
+  padding-block-end: var(--space-2);
+  font-size: 1.5rem;
 }
 
 @media (max-width: 39.99rem) {
@@ -112,17 +128,26 @@
 
 /* A zone of the table: its own title and a dashed edge, like the areas printed on a play mat. */
 .gf-zone {
+  position: relative;
   display: grid;
   align-content: start;
   gap: var(--space-2);
   min-inline-size: 0;
-  padding: var(--space-2) var(--space-3) var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-2);
   border: 1px dashed color-mix(in srgb, var(--section-accent) 40%, transparent);
   background: color-mix(in srgb, var(--surface-1) 60%, transparent);
 }
 
+/* The title of a zone sits on its top edge like a tag on the mat. */
 .gf-zone > .panel-title {
+  position: absolute;
+  inset-block-start: -0.8rem;
+  inset-inline-start: var(--space-3);
   margin: 0;
+  padding: 0 var(--space-2);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line-accent);
+  line-height: 1.6;
 }
 
 .gf-areas {
@@ -160,9 +185,13 @@
 }
 
 .gf-status > div {
+  position: relative;
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-content: start;
-  gap: 0;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  gap: 0 var(--space-2);
   min-inline-size: 0;
   padding: var(--space-1) var(--space-3) var(--space-2);
   background: var(--surface-2);
@@ -184,9 +213,17 @@
 }
 
 .gf-status dd:first-of-type {
+  justify-self: end;
+}
+
+.gf-status-hint {
+  grid-column: 1 / -1;
+}
+
+.gf-status dd:first-of-type {
   font-family: var(--font-mono);
-  font-size: var(--font-size-display);
-  line-height: 1.1;
+  font-size: 1.75rem;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
   font-weight: var(--font-weight-mono);
 }
@@ -201,9 +238,19 @@
 }
 
 .gf-status-hint {
-  min-block-size: 1.4em;
+  min-block-size: 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-label);
+}
+
+/* The explanations stay in the tooltip and for screen readers; the turn shows its pips and the Gigs their Street Cred. */
+.gf-status > div:not(:first-child):not(.is-gigs) .gf-status-hint {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .gf-pips {
@@ -233,7 +280,12 @@
 
   .gf-status > div {
     position: relative;
+    grid-template-columns: minmax(0, 1fr);
     padding: var(--space-1) var(--space-2);
+  }
+
+  .gf-status dd:first-of-type {
+    justify-self: start;
   }
 
   .gf-status dt {
@@ -288,7 +340,7 @@
 
 @media (min-width: 56rem) {
   .gf-dice {
-    grid-template-columns: repeat(3, 4.5rem);
+    grid-template-columns: repeat(3, 3.25rem);
   }
 }
 
@@ -316,7 +368,7 @@
 
 .gf-die-svg {
   display: block;
-  inline-size: min(100%, 3.75rem);
+  inline-size: min(100%, 2.75rem);
   block-size: auto;
   aspect-ratio: 1;
   overflow: visible;
@@ -348,10 +400,9 @@
   text-transform: uppercase;
 }
 
+/* The shape and the value already tell the state of a die; the word is for the tooltip-less eye on a phone only. */
 .gf-die-state {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-  line-height: 1.2;
+  display: none;
 }
 
 .gf-die.is-ready .gf-die-svg {
@@ -519,7 +570,6 @@
   font-family: var(--font-mono);
   font-size: 0.625rem;
   letter-spacing: 0.22em;
-  writing-mode: vertical-rl;
 }
 
 /* The cost on the card, like a gem in the corner. */
@@ -877,6 +927,43 @@
   min-inline-size: 12rem;
 }
 
+/* A phone: the set choice on its own row (the two names side by side), then the button with the (i), then the readout. */
+@media (max-width: 39.99rem) {
+  .booster-controls > .sealed-set-choice {
+    flex: 1 1 100%;
+  }
+
+  .booster-controls .sealed-set-choice .segmented {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booster-controls .sealed-set-choice .segmented-option {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .booster-controls .sealed-set-choice .segmented-option + .segmented-option {
+    border-block-start: 0;
+    border-inline-start: 2px solid var(--color-border-strong);
+  }
+
+  .booster-open {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+
+  .booster-controls > .info-tip {
+    order: 2;
+  }
+
+  .sealed-single-stats {
+    flex: 1 1 100%;
+    order: 3;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+  }
+}
+
 /* The readout of the opened packs: one mono line, the separator is drawn, not typed. */
 .sealed-single-stats {
   display: flex;
@@ -1007,14 +1094,20 @@
   }
 }
 
-/* Opened pack: the cards in a grid that gives 8 + 4 on 1280 and one row of 12 on 1920. */
+/* Opened pack: the cards in a grid that gives 9 + 3 on 1280 (the whole pack and its controls fit 800 px) and one row of 12 on 1920. */
 .pack-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(8.5rem, 30%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(7.5rem, 30%), 1fr));
   gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+@media (min-width: 100rem) {
+  .pack-grid {
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  }
 }
 
 .pack-slot {
@@ -1056,6 +1149,17 @@
   gap: 0;
   min-block-size: 3.6rem;
   min-inline-size: 0;
+}
+
+.pack-face-rarity {
+  display: block;
+  min-inline-size: 0;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.pack-face-rarity .rarity-symbol {
+  max-inline-size: 100%;
 }
 
 .pack-face-name {

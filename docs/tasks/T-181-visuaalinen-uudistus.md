@@ -173,3 +173,21 @@ Suoraan `test`-haaraan (D-029). Säännöt `src/styles/decks.css`:ssä; `styles.
 4. Muokattu-aika vain päivämääränä (ks. yllä).
 
 Koodikatselmointi: tehty · Pakollisia korjattu 2 (Vie ja jaa -valikon kerros ilman fokusta Safarissa: `:has([aria-expanded])`; 320-taulukon otsikot "Tarvitaan/Omistat" menivät päällekkäin) · Suosituksia 2: (1) `.cost-gem`-viistot ovat nyt kahdessa tiedostossa (cards.css ja decks.css), yhdistettävissä 4b:ssä; (2) `.deck-row`-selektorin `:has` -fokus-z-index voisi olla yleinen `.object--menu`.
+
+## Luovutus: paketti 5a (Koodari, 2026-10-22)
+Testa-osion visuaalinen pelipöytä, suoraan test-haaraan (D-029).
+
+**Toteutus**
+- Goldfish: violetti ruudukkolauta, HUD-nauha (vuoro, $, Eddies, Gigit, varastetut), alueet Legendit, Kenttä, Gig, Käsi sekä Pakka ja Trash -pinot. Kaikki kortit kuvina; spent = kierretty 90 astetta (staattinen), Lag = himmennys ja merkki, gear = chipit kortin alla limittäin, kuvapuoli alas = selkäpuoli (viistetty laatikko ja CYBERDECK-teksti). Noppa-muodot ja silmäluku isona monona hehkulla. Kustannus kortin kulmamerkkinä. Otsikko ja paluulinkki samalla rivillä työpöydällä.
+- Boosterit ja Sealed: ohjausrivi (setti sm-segmentti, painike, mono-tilarivi, (i)-vihje selitteille). Ei paikanpitäjiä, tilalla suljettu pakkaus -objekti (glitch-otsikko staattisena, kulmamerkit). Avattu pakka 9+3 (1280) ja 12 riviin (1920), Epic, Iconic ja Secret saavat foil-kehyksen (staattinen gradientti). Sealed-aloitus: pakkaus ja aloituspainike.
+- Pelaa yksin: pakat objektiriveinä (nimi, värikoodi, korttimäärä, ▶).
+- Säännöt `src/styles/playtest.css`:ään, vanhat Goldfish-, pack-, solo- ja quick-open-säännöt poistettu styles.css:stä (jaettuja decks-head, decks-tabs, export-menu ei kosketa). Pelilogiikkaan ei kosketa, ei uusia riippuvuuksia.
+- Testi: SealedView.test.tsx, avauksen alkutila: 12 tyhjää paikkaa -> suljettu pakkaus ja 0 listaelementtiä (vaatimuksen muutos, ei heikennys).
+
+**Mittaukset (Chrome, tumma ja vaalea)**: vaakaylivuoto 0 ja sisäisiä vieritysalueita 0 kaikissa. 1280x800: Goldfish-lauta ja toimintopalkki mahtuvat (lauta 129-662 px, palkki 765 px), avattu booster 9+3 loppuu 771 px. 1920x1080: lauta ja palkki loppuvat 851 px, loki sivussa, booster 12 riviin 547 px. 320x640: ei ylivuotoa.
+
+**Avoimet**: (1) 320 px:n boosterin ohjausrivi on 172 px: setti, painike+(i) ja tilarivi eli 3 visuaalista riviä (kriteeri enintään 2 ei täyty tilarivin pituuden vuoksi). (2) Noppojen hehku on osion violetti, ei kortin väri (kortin värin sääntö epäselvä). (3) Pakkausten kulmamerkit "CD" ja "TCG" ovat koristetekstiä, tarkista sisältö. (4) Tilarivin teksti on nykyiset merkkijonot (Avattu 1 pakkaus · Osumat: Epic 1, ...), ei kortin esimerkin muotoa.
+
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1: GoldfishView.tsx jaettu osiin (alue-komponentit) myöhemmin.
+
+Testit: npm test vihreä, lint ja build läpi.
