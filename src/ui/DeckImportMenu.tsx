@@ -6,8 +6,8 @@ import { scannerTexts } from './scannerTexts';
 import { deckTexts } from './deckTexts';
 
 /**
- * The deck page's actions on one row (T-117): "+ New deck" and a secondary "Import ▾" menu with the two import
- * sources. The menu closes with Escape (focus returns to the toggle) and with a press outside it.
+ * The deck page's actions on one row (T-117, T-181): "+ New deck" and a secondary "Import ▾" menu with the scanner
+ * and the two import sources. The menu closes with Escape (focus returns to the toggle) and with a press outside it.
  */
 export function DeckActions({
   onCreate,
@@ -56,16 +56,10 @@ export function DeckActions({
         </span>
         {deckTexts.newDeck}
       </button>
-      {cameraSupported() && (
-        <button type="button" className="button-secondary scan-open" onClick={onScan}>
-          <CameraIcon />
-          {scannerTexts.scanNewDeck}
-        </button>
-      )}
       <button
         ref={toggleRef}
         type="button"
-        className="button-secondary"
+        className="button-secondary deck-import-toggle"
         data-focus-id="import-menu"
         aria-expanded={open}
         aria-controls={panelId}
@@ -75,10 +69,23 @@ export function DeckActions({
         <Chevron direction="down" size={12} className="button-caret" />
       </button>
       <div id={panelId} className="export-menu-panel deck-actions-panel" hidden={!open}>
-        <button type="button" className="button-secondary" onClick={() => pick('text')}>
+        {cameraSupported() && (
+          <button
+            type="button"
+            className="button-quiet scan-open"
+            onClick={() => {
+              setOpen(false);
+              onScan();
+            }}
+          >
+            <CameraIcon />
+            {scannerTexts.scanNewDeck}
+          </button>
+        )}
+        <button type="button" className="button-quiet" onClick={() => pick('text')}>
           {deckTexts.importButton}
         </button>
-        <button type="button" className="button-secondary" onClick={() => pick('link')}>
+        <button type="button" className="button-quiet" onClick={() => pick('link')}>
           {deckTexts.fetchNetdeck}
         </button>
       </div>

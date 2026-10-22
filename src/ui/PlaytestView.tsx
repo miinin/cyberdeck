@@ -1,6 +1,10 @@
 import type { Card } from '../domain/card';
 import type { Deck } from '../domain/deck';
+import { colorDistribution, groupDeck, toCardsByKey } from '../domain/deckRules';
 import type { Repositories } from '../storage';
+import { deckColorCode } from './DecksView';
+import { deckTexts } from './deckTexts';
+import { useMemo } from 'react';
 import { BoostersView, SealedView } from './SealedView';
 import { sealedTexts as t } from './sealedTexts';
 import { routeHash } from './useHashRoute';
@@ -13,8 +17,9 @@ function cardCount(deck: Deck): number {
 }
 
 /** Pick one of your own decks to play alone (T-176). The choice opens the solo play (goldfish) of that deck. */
-function SoloPick({ repositories }: { repositories: Repositories }) {
+function SoloPick({ cards, repositories }: { cards: readonly Card[]; repositories: Repositories }) {
   const { phase, decks } = useDecks(repositories.decks);
+  const cardsByKey = useMemo(() => toCardsByKey(cards), [cards]);
   return (
     <section className="solo-pick" aria-labelledby="solo-pick-heading">
       <h2 id="solo-pick-heading">{t.soloHeading}</h2>
@@ -32,14 +37,24 @@ function SoloPick({ repositories }: { repositories: Repositories }) {
       )}
       {phase === 'ready' && decks.length > 0 && (
         <ul className="solo-deck-list" aria-label={t.soloListLabel}>
-          {decks.map((deck) => (
-            <li key={deck.id}>
-              <a className="solo-deck-link" href={routeHash({ name: 'goldfish', id: deck.id })} aria-label={t.soloPlayDeck(deck.name)}>
-                <span className="solo-deck-name">{deck.name}</span>
-                <span className="solo-deck-count">{t.soloCards(cardCount(deck))}</span>
-              </a>
-            </li>
-          ))}
+          {decks.map((deck) => {
+            const colors = deckColorCode(groupDeck(deck, cardsByKey), colorDistribution(deck, cardsByKey));
+            return (
+              <li key={deck.id}>
+                <a className="object solo-deck-link" href={routeHash({ name: 'goldfish', id: deck.id })} aria-label={t.soloPlayDeck(deck.name)}>
+                  <span className="solo-deck-name">{deck.name}</span>
+                  <span className="solo-deck-colors" aria-hidden="true" title={colors.length > 0 ? `${deckTexts.deckColors}: ${colors.join(', ')}` : undefined}>
+                    {colors.map((color, index) => (
+                      <span key={index} className={`deck-color-letter is-${color.toLowerCase()}`}>
+                        {color.charAt(0).toUpperCase()}
+                      </span>
+                    ))}
+                  </span>
+                  <span className="solo-deck-count">{t.soloCards(cardCount(deck))}</span>
+                </a>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>
@@ -66,7 +81,7 @@ export function PlaytestView({ cards, repositories, tab }: { cards: readonly Car
       </nav>
       {tab === 'sealed' && <SealedView cards={cards} repositories={repositories} />}
       {tab === 'boosters' && <BoostersView cards={cards} />}
-      {tab === 'solo' && <SoloPick repositories={repositories} />}
+      {tab === 'solo' && <SoloPick cards={cards} repositories={repositories} />}
     </>
   );
 }

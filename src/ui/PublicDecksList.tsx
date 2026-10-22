@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CloudError } from '../account';
 import { intlLocale } from '../locale';
 import { deckTexts } from './deckTexts';
+import { RefreshIcon } from './icons';
 import { usePublicDecks } from './PublicDecksContext';
 import { cachedPublicDecks, rememberPublicDecks } from './publicDecksCache';
 import type { LoadedPublicDecks as Loaded } from './publicDecksCache';
@@ -96,7 +97,19 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
 
   return (
     <>
-      <p>{deckTexts.publicIntro}</p>
+      <div className="public-head">
+        <p>{deckTexts.publicIntro}</p>
+        <button
+          type="button"
+          className="icon-button public-refresh"
+          disabled={refreshing}
+          aria-label={refreshing ? deckTexts.publicRefreshing : deckTexts.publicRefresh}
+          title={refreshing ? deckTexts.publicRefreshing : deckTexts.publicRefresh}
+          onClick={() => refresh()}
+        >
+          <RefreshIcon />
+        </button>
+      </div>
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {live}
       </div>
@@ -123,7 +136,7 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
             </div>
           )}
           {data.items.length === 0 ? (
-            <div className="empty">
+            <div className="empty empty--row">
               <h2>{deckTexts.publicEmptyTitle}</h2>
               <p>{deckTexts.publicEmpty}</p>
             </div>
@@ -132,30 +145,33 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
               {data.items.map((deck) => (
                 <li key={deck.pubId} className="deck-row public-deck-row">
                   <div className="deck-card-body">
-                    <h2 className="deck-name">{deck.name}</h2>
+                    <h2 className="deck-name">
+                      {/* The whole tile is this button (::after stretches it); no link, as the data is not trusted (SR-37). */}
+                      <button
+                        type="button"
+                        className="deck-link"
+                        data-public-open={deck.pubId}
+                        aria-label={deckTexts.publicOpenLabel(deck.name)}
+                        onClick={() => onOpen(deck.pubId)}
+                      >
+                        {deck.name}
+                      </button>
+                    </h2>
                     <p className="public-deck-legends">
                       <span className="visually-hidden">{deckTexts.publicLegends}: </span>
                       {deck.legends === '' ? deckTexts.publicNoLegends : deck.legends}
                     </p>
-                    <p className="deck-counts">{deckTexts.publicCardCount(deck.cardCount)}</p>
-                    <p className="public-deck-by">
-                      {deckTexts.publicBy}: {deck.nickname ?? deckTexts.publicAnonymous}
+                    <p className="deck-counts">
+                      {deckTexts.publicCardCount(deck.cardCount)}
+                      <span aria-hidden="true"> · </span>
+                      <span className="public-deck-by">
+                        {deckTexts.publicBy}: {deck.nickname ?? deckTexts.publicAnonymous}
+                      </span>
                     </p>
                     <p className="deck-updated">
                       {deckTexts.publicUpdated}{' '}
                       <time dateTime={deck.updatedAt}>{dateFormat.format(new Date(deck.updatedAt))}</time>
                     </p>
-                  </div>
-                  <div className="row-actions">
-                    <button
-                      type="button"
-                      className="button-primary"
-                      data-public-open={deck.pubId}
-                      aria-label={deckTexts.publicOpenLabel(deck.name)}
-                      onClick={() => onOpen(deck.pubId)}
-                    >
-                      {deckTexts.publicOpen}
-                    </button>
                   </div>
                 </li>
               ))}
@@ -167,9 +183,6 @@ export function PublicDecksList({ onOpen }: { onOpen: (pubId: string) => void })
                 {more === 'loading' ? deckTexts.publicMoreLoading : deckTexts.publicMore}
               </button>
             )}
-            <button type="button" className="button-secondary" disabled={refreshing} onClick={() => refresh()}>
-              {refreshing ? deckTexts.publicRefreshing : deckTexts.publicRefresh}
-            </button>
           </div>
           {more === 'error' && (
             <p className="field-error" role="alert">

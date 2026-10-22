@@ -64,7 +64,7 @@ describe('public decks list', () => {
     expect(list).toHaveTextContent('4 korttia');
     // Nothing from the data became markup or a link (SR-37).
     expect(list.querySelector('b, i, a, [href]')).toBeNull();
-    expect(screen.getByRole('link', { name: 'Julkiset pakat' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Julkiset' })).toHaveAttribute('aria-current', 'page');
   });
 
   it('is not indexed by search engines while shown (SR-41)', async () => {
@@ -72,7 +72,7 @@ describe('public decks list', () => {
     await screen.findByRole('heading', { name: 'Ei vielä julkisia pakkoja' });
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', expect.stringContaining('noindex'));
     window.location.hash = '#/pakat';
-    await screen.findByRole('link', { name: 'Omat pakat' });
+    await screen.findByRole('link', { name: 'Omat' });
     await waitFor(() => expect(screen.queryByRole('heading', { name: 'Ei vielä julkisia pakkoja' })).toBeNull());
     expect(document.head.querySelector('meta[name="robots"]')).toBeNull();
   });

@@ -28,7 +28,7 @@ import { AddMissingToWantsButton } from './AddMissingToWants';
 import { DeckBuildView } from './DeckBuildView';
 import { countIn } from './collectionStore';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
-import { PencilIcon, TrashIcon } from './icons';
+import { CopyIcon, PencilIcon, TrashIcon } from './icons';
 import { DeckCardImage } from './DeckList';
 import { DeckImport } from './DeckImport';
 import { DeckActions } from './DeckImportMenu';
@@ -46,10 +46,9 @@ import { useGameLog } from './useGameLog';
 import { useWants } from './useWants';
 import type { WantsHandle } from './useWants';
 
-const dateFormat = new Intl.DateTimeFormat(intlLocale, {
-  dateStyle: 'short',
-  timeStyle: 'short',
-});
+const dateFormat = new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short' });
+/** The full time stays in the tooltip: the tile's foot has room for the date only. */
+const dateTimeFormat = new Intl.DateTimeFormat(intlLocale, { dateStyle: 'short', timeStyle: 'short' });
 
 function errorKind(error: unknown): StorageErrorKind | 'unknown' {
   return error instanceof StorageError ? error.kind : 'unknown';
@@ -93,6 +92,7 @@ function DeckCardSummary({
   ownedOf,
   wants,
   nameAction,
+  actions,
   record,
 }: {
   deck: Deck;
@@ -102,6 +102,8 @@ function DeckCardSummary({
   wants: WantsHandle;
   /** The rename button, shown after the deck name. */
   nameAction: ReactNode;
+  /** Copy, export and delete on the tile's bottom edge (none while the name is edited). */
+  actions: ReactNode;
   /** The deck's game record (T-122), or undefined when no games are logged. */
   record?: Tally;
 }) {
@@ -136,12 +138,13 @@ function DeckCardSummary({
         ))}
       </div>
       <div className="deck-card-body">
-        <h2 className="deck-name">
-          {deck.name}
-          {nameAction}
-        </h2>
-        <div className="deck-card-meta">
-          <p className="deck-counts">{deckTexts.counts(totals.legends, totals.main)}</p>
+        <div className="deck-card-title">
+          <h2 className="deck-name">
+            {/* The whole tile is this link: ::after stretches it over the tile and the buttons sit above it (T-181). */}
+            <a className="deck-link" href={routeHash({ name: 'deck', id: deck.id })} title={deck.name}>
+              {deck.name}
+            </a>
+          </h2>
           {colors.length > 0 && (
             <p className="deck-color-code">
               <span className="visually-hidden">{`${deckTexts.deckColors}: ${colors.join(', ')}`}</span>
@@ -154,6 +157,10 @@ function DeckCardSummary({
               </span>
             </p>
           )}
+          {nameAction}
+        </div>
+        <div className="deck-card-meta">
+          <p className="deck-counts">{deckTexts.counts(totals.legends, totals.main)}</p>
           {record !== undefined && (
             <p className="deck-record">
               <span className="visually-hidden">{gameTexts.recordAria(record.wins, record.losses, record.draws)}</span>
@@ -162,6 +169,7 @@ function DeckCardSummary({
               </span>
             </p>
           )}
+          {deck.publish?.public === true && <p className="deck-public-badge">{deckTexts.publicBadge}</p>}
         </div>
         <progress
           className={`deck-progress is-${mainState}`}
@@ -188,20 +196,26 @@ function DeckCardSummary({
             </>
           )}
         </p>
-        {missingRows.length > 0 && (
-          <div className="missing-add missing-add--quiet">
-            <AddMissingToWantsButton
-              rows={missingRows}
-              wants={wants}
-              className="link-button missing-link"
-              name={deckTexts.forDeck(deckTexts.addMissingToWants, deck.name)}
-            />
-          </div>
-        )}
-        <p className="deck-updated">
-          {deckTexts.updated} <time dateTime={deck.updatedAt}>{dateFormat.format(new Date(deck.updatedAt))}</time>
-        </p>
-        {deck.publish?.public === true && <p className="deck-public-badge">{deckTexts.publicBadge}</p>}
+      </div>
+      <div className="deck-card-foot">
+        <div className="deck-card-foot-text">
+          <p className="deck-updated">
+            {deckTexts.updated} <time dateTime={deck.updatedAt} title={dateTimeFormat.format(new Date(deck.updatedAt))}>
+              {dateFormat.format(new Date(deck.updatedAt))}
+            </time>
+          </p>
+          {missingRows.length > 0 && (
+            <div className="missing-add missing-add--quiet">
+              <AddMissingToWantsButton
+                rows={missingRows}
+                wants={wants}
+                className="link-button missing-link"
+                name={deckTexts.forDeck(deckTexts.addMissingToWants, deck.name)}
+              />
+            </div>
+          )}
+        </div>
+        {actions}
       </div>
     </>
   );
@@ -423,7 +437,7 @@ export function DecksView({
       <div className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {live}
       </div>
-      <nav className="segmented decks-tabs" aria-label={deckTexts.decksTabsLabel}>
+      <nav className="segmented decks-tabs decks-tabs--short" aria-label={deckTexts.decksTabsLabel}>
         <a className="segmented-option" href={routeHash({ name: 'decks' })} aria-current={tab === 'own' ? 'page' : undefined}>
           {deckTexts.tabOwn}
         </a>
@@ -493,7 +507,7 @@ export function DecksView({
                         renamingId === deck.id ? null : (
                           <button
                             type="button"
-                            className="icon-button"
+                            className="icon-button deck-rename-button"
                             data-focus-id={`rename-${deck.id}`}
                             aria-label={deckTexts.forDeck(deckTexts.rename, deck.name)}
                             title={deckTexts.forDeck(deckTexts.rename, deck.name)}
@@ -503,8 +517,37 @@ export function DecksView({
                           </button>
                         )
                       }
+                      actions={
+                        renamingId === deck.id ? null : (
+                          <div className="deck-card-actions">
+                            <button
+                              type="button"
+                              className="icon-button"
+                              aria-label={deckTexts.forDeck(deckTexts.copy, deck.name)}
+                              title={deckTexts.forDeck(deckTexts.copy, deck.name)}
+                              onClick={() => handleCopy(deck)}
+                            >
+                              <CopyIcon />
+                            </button>
+                            {/* Export before delete, so the destructive action is last (T-050). */}
+                            <ExportButtons deck={deck} cardsByKey={cardsByKey} iconToggle />
+                            <button
+                              type="button"
+                              className="icon-button icon-delete"
+                              aria-label={deckTexts.forDeck(deckTexts.removeDeck, deck.name)}
+                              title={deckTexts.forDeck(deckTexts.removeDeck, deck.name)}
+                              onClick={(event) => {
+                                deleteOpenerRef.current = event.currentTarget;
+                                setDeleting(deck);
+                              }}
+                            >
+                              <TrashIcon />
+                            </button>
+                          </div>
+                        )
+                      }
                     />
-                    {renamingId === deck.id ? (
+                    {renamingId === deck.id && (
                       <RenameForm
                         deck={deck}
                         onSave={(name) => void handleRename(deck, name)}
@@ -513,39 +556,6 @@ export function DecksView({
                           focusTarget.current = `rename-${deck.id}`;
                         }}
                       />
-                    ) : (
-                      <div className="row-actions">
-                        <button
-                          type="button"
-                          className="button-primary"
-                          aria-label={deckTexts.forDeck(deckTexts.open, deck.name)}
-                          onClick={() => onOpen(deck.id)}
-                        >
-                          {deckTexts.open}
-                        </button>
-                        <button
-                          type="button"
-                          className="button-secondary button-compact"
-                          aria-label={deckTexts.forDeck(deckTexts.copy, deck.name)}
-                          onClick={() => handleCopy(deck)}
-                        >
-                          {deckTexts.copy}
-                        </button>
-                        {/* Export before delete, so the destructive action is last (T-050). */}
-                        <ExportButtons deck={deck} cardsByKey={cardsByKey} />
-                        <button
-                          type="button"
-                          className="button-secondary icon-delete"
-                          aria-label={deckTexts.forDeck(deckTexts.removeDeck, deck.name)}
-                          title={deckTexts.forDeck(deckTexts.removeDeck, deck.name)}
-                          onClick={(event) => {
-                            deleteOpenerRef.current = event.currentTarget;
-                            setDeleting(deck);
-                          }}
-                        >
-                          <TrashIcon />
-                        </button>
-                      </div>
                     )}
                   </li>
                 ))}

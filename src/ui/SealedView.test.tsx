@@ -112,10 +112,12 @@ describe('Sealed tab (T-173, T-176)', () => {
   it('opens a pack with one click and turns its 12 cards by itself, the rarest last', async () => {
     const { user } = renderView();
     await user.click(await screen.findByRole('button', { name: 'Aloita sealed' }));
-    // Before the opening the slots wait face down.
-    expect(screen.getAllByRole('listitem')).toHaveLength(12);
+    // Before the opening there are no empty slots: the closed pack stands in their place (T-181 package 5a).
+    expect(screen.queryAllByRole('listitem')).toHaveLength(0);
+    expect(document.querySelector('.pack-closed')).not.toBeNull();
     await user.click(screen.getByRole('button', { name: 'Avaa pakkaus' }));
     await waitFor(() => expect(document.querySelectorAll('.pack-face-name')).toHaveLength(12), allTurned);
+    expect(document.querySelector('.pack-closed')).toBeNull();
     const slots = screen.getAllByRole('listitem');
     expect(within(slots[0] as HTMLElement).getByText('Common', { exact: false })).toBeInTheDocument();
   });

@@ -449,8 +449,8 @@ export const deckTextsFi = {
 
   // Public decks (T-098, D-025)
   decksTabsLabel: 'Pakkalistan näkymä',
-  tabOwn: 'Omat pakat',
-  tabPublic: 'Julkiset pakat',
+  tabOwn: 'Omat',
+  tabPublic: 'Julkiset',
   // Deck building tab (T-164)
   tabBuild: 'Kokoaminen',
   buildEmptyTitle: 'Ei pakkoja koottavaksi',

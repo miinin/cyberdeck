@@ -19,6 +19,19 @@ Haara `t-181-2-kortit` testistä. Ei tallennusta, riippuvuuksia eikä workflowta
 Kokoelma: Omat kortit (otsikkorivi, käyttää paketin 2 ruudukkoa), Yleiskuva (mittarikaista, kolme saraketta, saavutuschipit ja kompakti "Seuraavat keikat", lukitut disclosurena), Kansio (aukeama mahtuu ruudulle, reunojen nuolipainikkeet), skanneri- ja kansiosivudialogien visuaali (vain luokat) ja tyhjä tila. Säännöt `src/styles/collection.css`:ään. Tilastojen palkkisiirtymät `prefers-reduced-motion`-ehdon sisään. Hyväksymiskriteerit: B.3, mitataan `capture.mjs`:llä. Testaa-osio on nyt violetti (`data-section='playtest'`), ei vaikuta tähän pakettiin.
 Haara `t-181-3-kokoelma` testistä. Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
+### Paketti 4a (raportin B.4 ja luvun C rivi 4a, PM 2026-10-22)
+Pakat-lista, Kokoaminen, Julkiset ja tuonti raportin B.4:n kohtien 1–6 mukaan: koko pakkakortti on linkki (AVAA pois), ikonirivin toiminnot, kuvakaista 96 px, kortti ≤ 280 px, ruudukko `minmax(18rem, 1fr)`, otsikkorivillä `+ Uusi pakka` ja `Tuo ▾` (skannaus, pakkalista ja Netdeck valikkoon), lyhyet välilehdet, kompakti Kokoaminen ja Julkisten tyhjä tila. Lisäksi T-185:n suositukset: `.deck-row`-laatikot ja Tuo-valikko uusille pinnoille ja viisteille (kuten `.card-box`), pakkalistojen pyöreä cost-gem korttia matkivaksi merkiksi (T-187), ja tilastopalkkien siirtymät `prefers-reduced-motion`-ehdon sisään, jos niitä on näissä näkymissä. Säännöt `src/styles/decks.css`:ään, ja `styles.css`:stä poistetaan vain nämä selektorit. Kriteerit: B.4 (1280×800 kolme pakkaa ilman vieritystä, 1920 ≥ 5 riviä kohden, 320×640 ensimmäinen kortti ≤ 260 px, ei vaakaylivuotoa). Pakkojen toiminnallisuus ja tallennus ennallaan.
+Suoraan `test`-haaraan (D-029). Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
+
+### Paketti 5a (raportin B.6 ja käyttäjän toive, PM 2026-10-22)
+Käyttäjä 2026-10-22: "Nyt se näyttää Unix-pohjaiselta tekstiseikkailulta... Visuaalisuutta peliin!" B.6:n kohdat 1–5 tehdään, ja lisäksi Testaa-osiosta tehdään visuaalinen pelipöytä:
+- **Goldfish on pelilauta, ei paneelilista.** Lautamaton tausta (osion violetti, hienovarainen ruudukko tai piirilevykuvio, staattinen) ja alueet kuten oikeassa pelissä: Legendit, kenttä (Field), Gig-alue, käsi, pakka ja poistopino. Kaikki kortit näytetään **korttikuvina** (`gf-picture`, puuttuvalle kuvalle nykyinen varakuva). Käsi on alareunassa vierekkäin tai kevyesti limittäin, ja kortin klikkaus avaa korttidialogin tai toiminnon kuten nyt.
+- **Tila näkyy kortista:** spent eli käännetty = kortti kierrettynä 90° (staattinen tila, ei animaatiota), lag = himmennys ja merkki, gear = kortin alla limittäin, kuvapuoli alaspäin olevat Legendit = kortin selkäpuoli (viistetty laatikko ja logoteksti, ei uutta kuvaa).
+- **Gig-noppat nopan muotoisina** (d4 kolmio, d6 neliö, d8–d20 monikulmio `clip-path`illa), silmäluku isona monona ja kortin värin hehku. Tilarivi (vuoro, $, gigit 0/7) on pelilaudan yläreunan HUD-nauha monona.
+- **Boosterit ja Sealed:** suljettu pakkaus on viistetty "booster-pakkaus"-objekti (setin nimi glitch-otsikkona ja kulmamerkinnät), ja harvinaiset saavat staattisen foil-kehyksen.
+- Ei uusia animaatioita (D-038, käyttäjän linja). Hover, press ja focus ≤ 150 ms. Koko pelilauta mahtuu 1280×800:aan ilman vieritystä. 320 px:ssä alueet pinoutuvat, eikä niissä ole vaakaylivuotoa tai sisäistä vieritystä. Ruudunlukijan tekstit ja `aria-live` säilyvät.
+Säännöt `src/styles/playtest.css`:ään. Pelilogiikkaan (`domain/goldfish.ts`) ei kosketa. Suoraan `test`-haaraan, ei Digiturvaa.
+
 ## Luovutus: paketti 1 (Koodari, 2026-10-19)
 Haara `t-181-1-design-jarjestelma`.
 
@@ -128,3 +141,53 @@ Haara `t-181-3-kokoelma`. Kokoelman säännöt `src/styles/collection.css`:ssä;
 Koodikatselmointi: tehty · Pakollisia korjattu 2 (testit luki siirrettyjä sääntöjä styles.css:stä; `.missing-add`-ylikirjoitus olisi vuotanut muihin näkymiin, rajattu `.missing-bar`:iin) · Suosituksia 2: (1) kansion `--binder-chrome` on kovakoodattu mitattu luku; (2) `.progress-pct` piilotettu visuaalisesti, jos prosentit halutaan takaisin, ne mahtuvat ≥ 90rem:ssä.
 
 **PM 2026-10-19 (paketti 3):** hyväksytty poikkeama: Omat kortit 320 px:ssä ensimmäinen kortti y = 396 (kriteeri ≤ 330, ennen T-181:tä 488). Sisältörivit ovat tarpeellisia; käyttäjä voi pyytää karsintaa.
+
+## Luovutus: paketti 4a (Koodari, 2026-10-22)
+Suoraan `test`-haaraan (D-029). Säännöt `src/styles/decks.css`:ssä; `styles.css`:stä poistettu vain 4a:n selektorit (85 sääntöä: `.deck-list`, `.deck-row`, `.deck-card-*`, `.deck-actions*`, `.public-deck-*`, `.build-*`, `.deck-record`, `.button-plus/-caret`; postcss-työkalulla). Jaetut `.decks-head`, `.decks-tabs` (Testaa käyttää), `.deck-progress`, `.deck-color-code`, `.export-menu*` (editori) jätetty paikalleen.
+
+**Toteutus**
+- Pakkakortti on objekti: koko kortti on linkki (otsikko `<a>`, `::after` venyttää; julkisissa `<button>`, koska data ei saa olla linkki, SR-37). AVAA poistui. Alareunassa päivämäärä vasemmalla ja ikonirivi (Kopioi, Vie ja jaa, Poista, 32 px, kosketuksella 40/44). Nimen vieressä värikoodi ja Nimeä uudelleen -ikoni. Kuvakaista 96 px, edistymispalkki 4 px. Viiste tehty `::before`-levyllä, jotta Vie ja jaa -valikko ei leikkaudu; fokus näkyy koko kortin ympärillä.
+- Ruudukko `minmax(18rem, 1fr)`. Otsikkorivi `+ Uusi pakka` ja `Tuo ▾` (Skannaa uusi pakka, Tuo pakkalista, Hae Netdeck.gg:stä; valikko uusilla pinnoilla ja viisteellä). Välilehdet `Omat | Kokoaminen | Julkiset` (en: Mine | Build | Public), yksi rivi 320:ssa.
+- Kokoaminen: Pakanvaihto yksi rivi (`select → select`), kooste heti alla sarakkeina, Yhteensopivuus kompakti värikoodattu matriisi (solu 32 px, leveys `--decks`-muuttujasta), Kokoa kaikki listana ilman vieritystä.
+- Julkiset: päivityspainike ikonina otsikkorivillä (nimi "Päivitä lista"), tyhjä tila yhdellä rivillä (`.empty--row`), kortti ilman bannerria.
+- Cost-gem pakkalistoissa (editorin laatat, valitsin, sivupakka, tuonti): tumma neliö ja kortin värinen viiva sivujen keskellä, valkoiset numerot (kuten T-187). Ei koske korttiruudukkoa eikä korttien infolaatikkoa.
+- Muokattu-aika kortilla vain päivämääränä (koko aika `title`issä), jotta alarivi mahtuu.
+- Tilastopalkkien siirtymiä näissä näkymissä ei ole, joten reduced-motion-työtä ei tarvittu.
+- Testit: Omat/Julkiset-linkkien nimet (`Omat`, `Julkiset`), skannauspakkatesti avaa Tuo-valikon ensin. Ei testejä poistettu tai heikennetty.
+
+**Mittaukset (capture-p4a.mjs, tumma ja vaalea, kolme testipakkaa)**
+| Kriteeri | Tulos |
+|---|---|
+| 1280×800 kolme pakkaa ilman vieritystä | kortit y 214–473, sivu 1.0 ruutua (oli 1.03) |
+| Kortin korkeus ≤ 280 | 259 (280 vain 320:ssa, kun tilarivi rivittyy kahdelle riville) |
+| 1920 ≥ 5 per rivi | laskettu: 6 raitaa (1872 px / 18 rem), mitattu vain 3 pakalla, joten 3 riviä; ei mitattu viidellä pakalla |
+| 320×640 ensimmäinen kortti ≤ 260 | alkaa y = 228 (oli 422); otsikko ja painikkeet kaksi riviä (h1 + yksi painikerivi), ei kolmea |
+| Vaakaylivuoto 320 | 0 kaikissa tiloissa; sisäistä vieritystä 0 |
+| Kontrasti (laskettu) | tumma min 6.03, vaalea min 5.12 |
+| Kokoaminen 1280×800 | Pakanvaihto ja Yhteensopivuus näkyvät kokonaan (y 214–692) ilman valintaa; valinnan jälkeen kooste työntää Yhteensopivuuden alas (pitkät kortti­listat), sivu 3 ruutua |
+
+**Poikkeamat ja kysymykset PM:lle**
+1. Kokoaminen valinnan jälkeen: Yhteensopivuus ei mahdu ruudulle, koska "Palauta kansioon" -lista on 17 riviä. Voisi rajata (esim. kolme saraketta kahden rivin listaksi) jos halutaan.
+2. 320: otsikko ja `+ Uusi pakka`/`Tuo` eivät mahdu samalle riville (~17 px liian vähän), joten painikkeet ovat omalla rivillään.
+3. 1920 ≥ 5 per rivi mittaamatta viidellä pakalla.
+4. Muokattu-aika vain päivämääränä (ks. yllä).
+
+Koodikatselmointi: tehty · Pakollisia korjattu 2 (Vie ja jaa -valikon kerros ilman fokusta Safarissa: `:has([aria-expanded])`; 320-taulukon otsikot "Tarvitaan/Omistat" menivät päällekkäin) · Suosituksia 2: (1) `.cost-gem`-viistot ovat nyt kahdessa tiedostossa (cards.css ja decks.css), yhdistettävissä 4b:ssä; (2) `.deck-row`-selektorin `:has` -fokus-z-index voisi olla yleinen `.object--menu`.
+
+## Luovutus: paketti 5a (Koodari, 2026-10-22)
+Testa-osion visuaalinen pelipöytä, suoraan test-haaraan (D-029).
+
+**Toteutus**
+- Goldfish: violetti ruudukkolauta, HUD-nauha (vuoro, $, Eddies, Gigit, varastetut), alueet Legendit, Kenttä, Gig, Käsi sekä Pakka ja Trash -pinot. Kaikki kortit kuvina; spent = kierretty 90 astetta (staattinen), Lag = himmennys ja merkki, gear = chipit kortin alla limittäin, kuvapuoli alas = selkäpuoli (viistetty laatikko ja CYBERDECK-teksti). Noppa-muodot ja silmäluku isona monona hehkulla. Kustannus kortin kulmamerkkinä. Otsikko ja paluulinkki samalla rivillä työpöydällä.
+- Boosterit ja Sealed: ohjausrivi (setti sm-segmentti, painike, mono-tilarivi, (i)-vihje selitteille). Ei paikanpitäjiä, tilalla suljettu pakkaus -objekti (glitch-otsikko staattisena, kulmamerkit). Avattu pakka 9+3 (1280) ja 12 riviin (1920), Epic, Iconic ja Secret saavat foil-kehyksen (staattinen gradientti). Sealed-aloitus: pakkaus ja aloituspainike.
+- Pelaa yksin: pakat objektiriveinä (nimi, värikoodi, korttimäärä, ▶).
+- Säännöt `src/styles/playtest.css`:ään, vanhat Goldfish-, pack-, solo- ja quick-open-säännöt poistettu styles.css:stä (jaettuja decks-head, decks-tabs, export-menu ei kosketa). Pelilogiikkaan ei kosketa, ei uusia riippuvuuksia.
+- Testi: SealedView.test.tsx, avauksen alkutila: 12 tyhjää paikkaa -> suljettu pakkaus ja 0 listaelementtiä (vaatimuksen muutos, ei heikennys).
+
+**Mittaukset (Chrome, tumma ja vaalea)**: vaakaylivuoto 0 ja sisäisiä vieritysalueita 0 kaikissa. 1280x800: Goldfish-lauta ja toimintopalkki mahtuvat (lauta 129-662 px, palkki 765 px), avattu booster 9+3 loppuu 771 px. 1920x1080: lauta ja palkki loppuvat 851 px, loki sivussa, booster 12 riviin 547 px. 320x640: ei ylivuotoa.
+
+**Avoimet**: (1) 320 px:n boosterin ohjausrivi on 172 px: setti, painike+(i) ja tilarivi eli 3 visuaalista riviä (kriteeri enintään 2 ei täyty tilarivin pituuden vuoksi). (2) Noppojen hehku on osion violetti, ei kortin väri (kortin värin sääntö epäselvä). (3) Pakkausten kulmamerkit "CD" ja "TCG" ovat koristetekstiä, tarkista sisältö. (4) Tilarivin teksti on nykyiset merkkijonot (Avattu 1 pakkaus · Osumat: Epic 1, ...), ei kortin esimerkin muotoa.
+
+Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1: GoldfishView.tsx jaettu osiin (alue-komponentit) myöhemmin.
+
+Testit: npm test vihreä, lint ja build läpi.
