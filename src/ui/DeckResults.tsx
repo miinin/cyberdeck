@@ -243,7 +243,8 @@ export function DeckResults({
       {ready && games.length === 0 && <p className="empty results-empty">{gameTexts.emptyResults}</p>}
 
       {ready && games.length > 0 && (
-        <>
+        <div className="results-cols">
+          <div className="results-col">
           <div className="panel results-overview">
             <dl className="kpi-tiles">
               <div>
@@ -301,6 +302,9 @@ export function DeckResults({
             />
           )}
 
+          </div>
+
+          <div className="results-col">
           <div className="panel">
             <h3 className="panel-title">{gameTexts.gamesList}</h3>
             <ul className="game-list">
@@ -366,7 +370,8 @@ export function DeckResults({
               </button>
             )}
           </div>
-        </>
+          </div>
+        </div>
       )}
 
       <GameDialog

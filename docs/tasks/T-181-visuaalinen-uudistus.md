@@ -1,5 +1,5 @@
 # T-181 · Visuaalinen uudistus: tiivis, staattinen Cyberpunk (paketit 0–6)
-**Tila:** Paketit 0–3 Done (tuotannossa 2026-10-19), seuraavaksi paketti 4a (Pakat-lista) · **Omistaja:** Koodari (paketeittain) · **Lähde:** `docs/reports/UX-T181-kokonaiskatselmointi.md`, päätökset D-038 (R1–R9)
+**Tila:** Paketit 0–3, 4a, 4b ja 5a Done, seuraavaksi paketti 5b (Have/Want ja Proxy) · **Omistaja:** Koodari (paketeittain) · **Lähde:** `docs/reports/UX-T181-kokonaiskatselmointi.md`, päätökset D-038 (R1–R9)
 **Katselmoinnit:** PM esikatselusta. Paketti 1: ei riippuvuuksia, tallennusta, sääntöjä eikä workflowta, joten Digiturvaa ei tarvita. Paketti 6 tallentaa pakkoja: dev-testaus (D-029) ja Digiturvan kevyt katselmointi.
 
 ## Määrittely (PM)
@@ -22,6 +22,19 @@ Haara `t-181-3-kokoelma` testistä. Ei tallennusta, riippuvuuksia eikä workflow
 ### Paketti 4a (raportin B.4 ja luvun C rivi 4a, PM 2026-10-22)
 Pakat-lista, Kokoaminen, Julkiset ja tuonti raportin B.4:n kohtien 1–6 mukaan: koko pakkakortti on linkki (AVAA pois), ikonirivin toiminnot, kuvakaista 96 px, kortti ≤ 280 px, ruudukko `minmax(18rem, 1fr)`, otsikkorivillä `+ Uusi pakka` ja `Tuo ▾` (skannaus, pakkalista ja Netdeck valikkoon), lyhyet välilehdet, kompakti Kokoaminen ja Julkisten tyhjä tila. Lisäksi T-185:n suositukset: `.deck-row`-laatikot ja Tuo-valikko uusille pinnoille ja viisteille (kuten `.card-box`), pakkalistojen pyöreä cost-gem korttia matkivaksi merkiksi (T-187), ja tilastopalkkien siirtymät `prefers-reduced-motion`-ehdon sisään, jos niitä on näissä näkymissä. Säännöt `src/styles/decks.css`:ään, ja `styles.css`:stä poistetaan vain nämä selektorit. Kriteerit: B.4 (1280×800 kolme pakkaa ilman vieritystä, 1920 ≥ 5 riviä kohden, 320×640 ensimmäinen kortti ≤ 260 px, ei vaakaylivuotoa). Pakkojen toiminnallisuus ja tallennus ennallaan.
 Suoraan `test`-haaraan (D-029). Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
+
+### Paketti 4b (raportin B.5 ja luvun C rivi 4b, PM 2026-10-23)
+Pakkaeditori raportin B.5:n kohtien 1–6 mukaan (R5: tilastot omalle välilehdelleen):
+- **Otsikkorivi yhdellä rivillä** (≤ 64 px): `← Pakat` (ikoni ja teksti), muokattava nimi h1-koossa, ✓ Tallennettu (mono, muted), oikealla Yksityinen/Julkinen-kytkin, Vie ja jaa -valikko ja Pelaa yksin (`.button-quiet`). Kirjautumisvihje siirtyy kytkimen `InfoTip`iin, ja kirjautumattomalla kytkin on `aria-disabled` selityksen kanssa.
+- **Sarakkeet:** ≥ 90rem kolme saraketta (suodattimet 16rem | haku ja tulokset | pakka 24rem). 64–90rem kaksi saraketta (`Suodattimet ▾` tulosten yläpuolella kuten nyt). Pakkasarakkeessa segmentti `Pakka | Tilastot | Tulokset` (oletus Pakka). Tilastot eivät ole enää pakan alla.
+- **Tulosrivi 44 px yhdellä rivillä:** kuva 28 px, cost-gem, nimi ja alanimi, `Unit · P0 · R2` muted monona, varoitukset ikonina (tooltip ja saavutettava teksti), "Omistat 1" mono-lukuna ennen laskuria, −/+ 32 px (kosketuksella 40/44).
+- **Tilarivi:** `PÄÄPAKKA 40/40–50 ✓ LAILLINEN · LEGENDIT 3/3` ja 4 px:n palkki ilman laatikkoa.
+- **Tilastot-välilehti:** sormukset, kustannuskäyrä, eddit, värit ja tyypit sekä todennäköisyydet 2 × 3 -ruudukossa 1920:ssa ja kahdessa sarakkeessa 1280:ssa. DeckCharts ennallaan, kehykset pois. Palkkisiirtymät `prefers-reduced-motion`-ehdon sisään.
+- **Testikäsi, Kirjaa peli ja Turnauslista:** dialogit A.3:n mukaan, ohjeteksti (i)-vihjeeseen.
+- **4a:n suositukset:** `.cost-gem`-viisteet yhteen paikkaan (cards.css ja decks.css), `.object--menu`-fokuksen z-index yleiseksi, jos se on helppoa.
+- Ei sisäistä vieritystä, ei vaakaylivuotoa 320 px:ssä (mobiilin alapalkki T-190 huomioidaan), AA molemmissa teemoissa, ei uusia animaatioita.
+Kriteerit (B.5): 1280×800 hakukenttä ≤ 140 px, ensimmäinen tulosrivi ≤ 260 px ja Legendit näkyvät ilman vieritystä · 1920×1080 43 kortin pakkasarake (Lista, rivit 36 px) mahtuu ruudulle ja Tilastot ilman vieritystä · 320×640 Pakka-välilehden ensimmäinen pakkarivi ≤ 330 px.
+Säännöt `src/styles/editor.css`:ään, ja `styles.css`:stä poistetaan vain nämä selektorit. Pakan toiminnallisuus, tallennus ja `domain/` ennallaan. Testit päivitetään rakenteen mukaan (`DeckEditor.tabs.test.tsx`), mutta niitä ei heikennetä. Suoraan `test`-haaraan (D-029). Ei tallennusta, riippuvuuksia eikä workflowta → ei Digiturvaa.
 
 ### Paketti 5a (raportin B.6 ja käyttäjän toive, PM 2026-10-22)
 Käyttäjä 2026-10-22: "Nyt se näyttää Unix-pohjaiselta tekstiseikkailulta... Visuaalisuutta peliin!" B.6:n kohdat 1–5 tehdään, ja lisäksi Testaa-osiosta tehdään visuaalinen pelipöytä:
@@ -191,3 +204,44 @@ Testa-osion visuaalinen pelipöytä, suoraan test-haaraan (D-029).
 Koodikatselmointi: tehty · Pakollisia korjattu 0 · Suosituksia 1: GoldfishView.tsx jaettu osiin (alue-komponentit) myöhemmin.
 
 Testit: npm test vihreä, lint ja build läpi.
+
+## Luovutus: paketti 4b (Koodari, 2026-10-23)
+Suoraan `test`-haaraan (D-029), ei pushattu. Säännöt `src/styles/editor.css`:ssä: ensin 434 editorin selektoria siirrettiin `styles.css`:stä postcss-työkalulla (commit ilman visuaalista muutosta), sitten uusi ulkoasu. `styles.css`:ään jätettiin jaetut luokat (`export-menu*`, `deck-head*`, `deck-bar*`, `.panel`, `.is-empty`, `.stat-block`, `ring-center`, `cost-curve-*`), jotta muiden tiedostojen kaskadi ei muutu.
+
+**Toteutus**
+- **Otsikkorivi** yhdellä rivillä (48 px, ≤ 64): `← Pakat` (ikoni + teksti), muokattava nimi, ✓ Tallennettu (mono), Yksityinen/Julkinen-kytkin + (i), Vie ja jaa -ikonipainike ja Pelaa yksin (`.button-quiet`, ikoni + teksti). Kirjautumis- ja yksityisyysvihje on kytkimen `InfoTip`issä; kirjautumattomalla kytkin on `aria-disabled` (ei `disabled`) ja vihje kertoo syyn. Julkaisulomake avautuu otsikon alle omalle rivilleen. Alle 40rem `← Pakat` ja Pelaa yksin ovat ikoneita (sanat saavutettavina nimina).
+- **Sarakkeet**: ≥ 90rem (aiemmin 100rem) suodattimet 16rem | haku ja tulokset | pakka 24rem; 64–90rem kaksi saraketta (`Suodattimet ▾` + skannausikoni haun rivillä, paneeli tulosten yläpuolella). Skannaa-painike on ikonina alle 90rem.
+- **Pakkasarakkeen näkymät** `Pakka | Tilastot | Tulokset` (oletus Pakka). Alle 64rem yksi palkki `Pakka | Lisää | Tilastot | Tulokset` (Lisää = saavutettava nimi "Lisää kortteja"). Tilastot ja Tulokset ovat leveällä ruudulla oma näkymänsä (`.is-wide-pane`: haku ja suodattimet piiloon, näkymä koko leveydelle, välilehtipalkki pysyy oikeassa reunassa), koska 24rem:n sarakkeeseen ei mahdu 2 × 3 -ruudukkoa. Kaikki osat pysyvät mountattuina (hidden), joten haku ja suodattimet säilyvät.
+- **Tulosrivi** 44 px yhdellä rivillä: kuva 28 px, cost-gem, nimi + alanimi, `Unit · P0 · R2` mono (sarakkeet Tyyppi/Power/RAM yhdistetty sarakkeeksi Tiedot, ruudunlukija kuulee värin ja arvot), varoitus ikonina (tooltip + piilotettu teksti), "Omistat N" monona ennen laskuria. Ohjetekstit (klikkaus, haaleat kortit) ovat pick-barin (i)-vihjeessä. Kapealla (container) sarakkeet putoavat pois; 320 px: alanimi vain ruudunlukijalle.
+- **Tilarivi** `PÄÄPAKKA 40/40–50 ✓ LAILLINEN · LEGENDIT 3/3` ja 4 px palkki, ilman laatikkoa. Pakkarivit 36 px (44 kosketuksella), otsikot pieniä label-tekstejä, tyhjän sideboardin selitys (i)-vihjeenä. "Takaisin hakuun" on `focus-reveal`-linkki.
+- **Tilastot**: 3 pylvästä (≥ 90rem), 2 tasapainotettua (64–90rem), 1 kapealla; DeckCharts ennallaan, listat tiivistetty. `rulesNote` ja `Pelaa yksin` siirretty (Pelaa yksin otsikkoon). **Tulokset**: luvut ja taulukot vasemmalla, pelilista oikealla ≥ 64rem.
+- **Testikäsi**: selitykset (i)-vihjeeseen. Kirjaa peli ja Turnauslista: ulkoasu oli jo A.3:n dialogimalli (T-181 aiemmin), ei muutosta; Kirjaa peli -lomakkeen yksityisyysohje jätettiin näkyviin tarkoituksella (GDPR-ohje, ei apuohje).
+- 4a:n suositukset: `.cost-gem`:n perussääntö siirrettiin `decks.css`:ään (cards.css:n `.card-meta`-variantti ja decks.css:n listavariantti ovat nyt samassa kaskadissa; viisteet kahdessa paikassa mutta eri konteksteissa). `.object--menu`-fokuksen yleistämistä ei tehty: luokkaa ei ole, vain `.deck-row:has([aria-expanded])` (4a).
+- Palkki- ja rengassiirtymät (5 kpl) siirretty `prefers-reduced-motion: no-preference` -ehdon sisään. Ei uusia animaatioita.
+- Testit: rakenteen mukaan (Takaisin pakkoihin -> Pakat, Tilastot/Tulokset-välilehti avataan ensin, Tiedot-sarake, aria-disabled-kytkin, CSS-vartijat lukevat editor.css:n, UX-24 "varattu huomautusrivi" -> "kiinteä 44 px:n rivi"). Lisätty 2 välilehtitestiä. Ei testejä poistettu eikä heikennetty.
+
+**Mittaukset** (Chrome, capture-p4b, 3 testipakkaa, 43 kortin pakka = 17 riviä; tumma ja vaalea)
+| Kriteeri | Tulos |
+|---|---|
+| 1280×800 hakukenttä ≤ 140 | 129 (oli 353) |
+| 1280×800 ensimmäinen tulosrivi ≤ 260 | 250 (oli 550) |
+| 1280×800 Legendit ilman vieritystä | pakkarivit alkavat y 300, kolme Legendia loppuvat ~410 |
+| 1920×1080 pakkasarake mahtuu (Lista, 36 px) | sarake 129–1069 (sisältäen sideboardin ja proxy-napit) |
+| 1920×1080 Tilastot ilman vieritystä | kaaviot päättyvät 1051 (3 pylvästä) |
+| 320×640 Pakka-välilehden ensimmäinen pakkarivi ≤ 330 | 320 (oli 782) |
+| Otsikkorivi ≤ 64 | 48 (≥ 1280), 80 kahdella rivillä 320 px:ssä |
+| Vaakaylivuoto, kaikki tilat 320/1280/1920 | 0 |
+| Sisäinen vieritys | 0; poikkeus: Testikäsi-dialogi 320 px:ssä on koko ruudun dialogikerros (aiempi ratkaisu) |
+| Kontrasti (laskettu) | tumma min 6.03, vaalea min 5.12; `.tile-action` mittaus antaa 3.96/3.33, koska mittari ei näe `::before`-täyttöä; oikea suhde teksti/täyttö 15.65 (tumma) ja 18.98 (vaalea) |
+
+**Poikkeamat ja kysymykset PM:lle**
+1. Tilastot ja Tulokset korvaavat haun leveällä ruudulla (oma näkymä), koska raportin 2 × 3 -ruudukko ei mahdu 24rem:n sarakkeeseen. Jos haluat tilastot pakkasarakkeeseen, ruudukko pitää luopua.
+2. "43 kortin pakka" mitattu seed-pakalla, jossa on 43 korttia mutta 17 eri riviä. 43 eri kortin pakka (43 × 36 px) ei mahtuisi 1080:een.
+3. 320 px: tulosrivin nimi rivittyy 2–4 riville (nimi saa ~100 px), rivi kasvaa yli 44 px; alanimi piilotettu. Korjaus vaatisi pakkaoikoteiden tai kuvan piilotusta.
+4. Tilastojen sarakejako on kiinteä (overview+kustannus+värit | eddit+tyypit+pienet | todennäköisyydet+ryhmälaskuri+puuttuvat); eddit-kaavion tyhjä tila on DeckChartsin korkeus (ei muutettu).
+5. Julkaisulomake (nimimerkki, varoitus) otsikon alla tarkistettu vain koodista ja testeistä, ei kuvasta (kirjautuminen puuttui capturesta).
+6. Dev-palvelin pyörii portissa 5231 taustalla (sammuta tarvittaessa).
+
+Koodikatselmointi: tehty · Pakollisia korjattu 3 (nimen `deck-head-*`-luokat kantoivat vanhan 1.25rem-fontin tilariville ja rivi rivittyi; 320 px:n hakukenttä kutistui 81 px:ään kun skannaus ja suodatinpainike veivät tilan; `.editor-head`- ja name-field-säännöt tuplina) · Suosituksia 3: (1) `DeckEditor.tsx` (1300 riviä) kannattaa jakaa osiin (otsikko, pakkapaneeli, hakupaneeli), (2) tilastopaneelien kiinteä sarakejako DeckStatsissa → data-ohjattu, (3) `.object--menu`-fokuksen z-index yleiseksi kun luokka syntyy.
+
+Testit: npm test 2163 läpi, lint ja build läpi.

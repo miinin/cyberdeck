@@ -98,6 +98,44 @@ describe('Deck editor tabs on a narrow screen', { timeout: 20_000 }, () => {
   });
 });
 
+describe('Deck column views (T-181, 4b)', { timeout: 20_000 }, () => {
+  const statsSection = () => document.querySelector('.deck-stats') as HTMLElement;
+  const resultsSection = () => document.querySelector('.deck-results') as HTMLElement;
+
+  it('wide: Pakka is the default, Tilastot and Tulokset replace the picker with a view of their own', async () => {
+    stubWidth(true);
+    const user = userEvent.setup();
+    openEditor(legalCards());
+    const deckTab = await screen.findByRole('button', { name: 'Pakka' });
+    expect(deckTab).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('button', { name: 'Lisää kortteja' })).not.toBeInTheDocument();
+    expect(statsSection()).not.toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Tilastot' }));
+    expect(statsSection()).toBeVisible();
+    expect(pickerSection()).not.toBeVisible();
+    expect(document.querySelector('.editor-layout')).toHaveClass('is-wide-pane');
+    await user.click(screen.getByRole('button', { name: 'Tulokset' }));
+    expect(resultsSection()).toBeVisible();
+    expect(statsSection()).not.toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Pakka' }));
+    expect(pickerSection()).toBeVisible();
+    expect(deckSection()).toBeVisible();
+  });
+
+  it('narrow: the four tabs are one bar and Lisää keeps the name Lisää kortteja', async () => {
+    stubWidth(false);
+    const user = userEvent.setup();
+    openEditor(legalCards());
+    await screen.findByRole('button', { name: 'Pakka' });
+    await user.click(screen.getByRole('button', { name: 'Tilastot' }));
+    expect(statsSection()).toBeVisible();
+    expect(pickerSection()).not.toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Lisää kortteja' }));
+    expect(pickerSection()).toBeVisible();
+    expect(deckSection()).not.toBeVisible();
+  });
+});
+
 describe('Deck editor on a wide screen', () => {
   it('shows every part and no tabs', async () => {
     stubWidth(true);

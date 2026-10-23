@@ -55,3 +55,5 @@ PM tarkisti vain 320 px:n ja tyhjän kokoelman, joten puhelimen (390 px) työkal
 - **Rehellisyys:** välkyntää ei saatu toistettua tällä koneella (headless-selain piirtää ohjelmallisesti, ei näytönohjaimella). Kuvasarjassa ruutu pysyi samana sekä paikallaan että kallistuessa, eikä sivulla ollut käynnissä animaatioita tai skrollauksen reunatapauksia. Korjaus perustuu tunnettuun mekanismiin, ei havaittuun toistoon. Jos välkyntä jatkuu, seuraava epäilty on kortin pysyvä `will-change: transform` -kerros.
 - **Opetus:** `backdrop-filter` ei kuulu pinnalle, jonka päällä tai vieressä on jatkuvasti muuttuva (kallistuva, liikkuva) kerros. Käytä tasaista väriä tai sumenna vain staattisen pinnan takana.
 - **Kuinka pyytää uudelleen:** "Poista sumennus (backdrop-filter) dialogin taustasta ja käytä tasaista väriä, koska ruutu välkkyy, kun kortti kallistuu."
+
+- **2026-10-22 · CI:n Firebase-julkaisu 403 (serviceusage.services.get):** GitHubin palvelutililtä puuttui oikeus tarkistaa Hosting-palvelun tila. Korjaus: palvelutilille rooli Service Usage Consumer dev-projektissa (cyberdeck-tcg-dev). API:n käyttöönotto ei yksin riittänyt.

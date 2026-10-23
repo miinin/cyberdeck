@@ -9,7 +9,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 ## Nyt työn alla
 | Tehtävä | Agentti | Tila | Seuraava askel |
 |---|---|---|---|
-| T-181 visuaalinen uudistus | Koodari | Paketit 0–3 tuotannossa, 4a (Pakat) ja 5a (Testaa-pelilauta) testissä, julkaisu-PR #203 | Paketti 4b (Pakkaeditori), sitten 5b ja 6. Käyttäjä tarkistaa korttidialogin välkynnän (T-188, L-008: korjattu ilman toistoa). T-185:n suositukset: .deck-row-laatikot ja pakkalistojen pyöreä cost-gem (4a/4b). Paketin 3 poikkeama (320 px y = 396) kortissa. Paketin 2 poikkeamat kortissa (korttikoot 8/10.5/15 rem, suodatinrivi ei varaa tilaa). Dependabot #193 (firebase 13: dev ja Digiturva), #192 yhdistetty |
+| T-181 visuaalinen uudistus | Koodari | Paketit 0–3, 4a ja 5a tuotannossa, 4b (Pakkaeditori) tehty 2026-10-23 ja julkaisussa | Paketti 5b (Have/Want ja Proxy), sitten 6. Paketin 4b avoimet (kortissa): tilastot ja tulokset koko leveydellä haun tilalla, 320 px:n tulosrivin nimi rivittyy, julkaisulomaketta ei tarkistettu kirjautuneena. Käyttäjä tarkistaa korttidialogin välkynnän (T-188, L-008: korjattu ilman toistoa). T-185:n suositukset: .deck-row-laatikot ja pakkalistojen pyöreä cost-gem (4a/4b). Paketin 3 poikkeama (320 px y = 396) kortissa. Paketin 2 poikkeamat kortissa (korttikoot 8/10.5/15 rem, suodatinrivi ei varaa tilaa). Dependabot #193 (firebase 13: dev ja Digiturva), #192 yhdistetty |
 
 ## Avoimet
 - `ubuntu-latest` siirtyy Ubuntu 26:een 2026-10-19 alkaen (GitHubin ilmoitus). Tarkista ensimmäinen ajo sen jälkeen.
@@ -20,7 +20,6 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 - Testikäyttäjän ja UX:n katselmointi mobiilista.
 
 ## Blokkerit
-- **CI:n Firebase-julkaisu deviin kaatuu 2026-10-22 alkaen:** `HTTP 403, Permission denied to get service [firebasehosting.googleapis.com]` (serviceusage.services.get, projekti cyberdeck-tcg-dev). Testit ja build menevät läpi, joten virhe on käyttöoikeuksissa. Käyttäjä tarkistaa palvelutilin oikeudet Google Cloud -konsolista.
 - Ei blokkereita. (gh: `"C:/Program Files/GitHub CLI/gh.exe"`.)
 - Paikallinen: vanhat `vite preview` -prosessit lukitsevat node_modulesin ja `.claude/worktrees/t-026`-kansion (poisto epäonnistui). Käyttäjä sulkee prosessit, minkä jälkeen kansion voi poistaa. Worktree t-027 on vielä rekisteröity (valmis, voi poistaa: `git worktree remove .claude/worktrees/t-027`).
 - PM:n kuvakaappausskripti (CDP, 320 px, localStorage) oli istunnon scratchpadissa. Jos sitä tarvitaan, kirjoita uudelleen `scripts/`-kansion ulkopuolelle.
@@ -53,6 +52,7 @@ Työn alla: MVP-1:n loppu. Loppukatselmoinnit tehty 2026-10-17: UX ja testikäyt
 - Testisivustolle vienti on sallittu (D-003).
 
 ## Viimeksi valmistuneet
+- T-181 paketti 4b (Pakkaeditori: yksirivinen otsikko, kolme saraketta, Pakka/Tilastot/Tulokset-välilehdet, 44 px:n tulosrivit, tilastoruudukko) (2026-10-23).
 - T-181 paketti 4a (Pakat-lista, Kokoaminen, Julkiset, Tuo-valikko) ja 5a (Goldfish-pelilauta korttikuvin, muotoillut nopat, suljettu booster ja foil) (2026-10-22).
 - T-190 mobiilin navigointi alapalkiksi (Kortit, Kokoelma, Pakat, Have/Want, Lisää: Testaa ja Proxy), yläpalkki yhdeksi riviksi (2026-10-21).
 - T-191 inforuudun cost, power ja RAM pelkkinä numeroina tunnisteineen, RAM kortin värillä (2026-10-21, PM).

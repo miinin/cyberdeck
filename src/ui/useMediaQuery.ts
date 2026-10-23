@@ -22,8 +22,8 @@ export function useMediaQuery(query: string, fallback: boolean): boolean {
 /** The L breakpoint (docs/tasks/T-050): filters as a side panel from here up. */
 export const WIDE_QUERY = '(min-width: 64rem)';
 
-/** The XL breakpoint (docs/tasks/T-050): the deck editor shows the filters as a side panel from here up. */
-export const EDITOR_WIDE_QUERY = '(min-width: 100rem)';
+/** The XL breakpoint (docs/tasks/T-050): the deck editor shows the filters as a side panel from here up (90rem = 1440 px, T-181 4b). */
+export const EDITOR_WIDE_QUERY = '(min-width: 90rem)';
 
 /** A mouse or a pen: a click on a result row adds a card only there, so scrolling by touch never adds (T-050b). */
 export const FINE_POINTER_QUERY = '(pointer: fine)';

@@ -9,6 +9,7 @@ import type { Rng, TestHandState } from '../domain/testHand';
 import { getCardImage } from '../data/cardImages';
 import { CardName, cardNameText } from './CardName';
 import { deckTexts } from './deckTexts';
+import { InfoTip } from './InfoTip';
 import { texts } from './texts';
 
 /** One card of the hand: the image is the content, so its alt is the card's name (T-053). */
@@ -167,6 +168,13 @@ export function TestHandDialog({
                   <span className="test-hand-warning">{deckTexts.testHandSmallDeck(OPENING_HAND)}</span>
                 </>
               )}
+              {/* The explanations are a tip, so the hand and the buttons stay in view (T-181, 4b). */}
+              <span className="has-info-tip test-hand-tip">
+                <InfoTip>
+                  {state.legends.length > 0 && <span className="info-tip-line">{deckTexts.testHandLegendsHint}</span>}
+                  <span className="info-tip-line">{deckTexts.testHandNote(OPENING_HAND, DRAWS_PER_TURN)}</span>
+                </InfoTip>
+              </span>
             </p>
             <div className="test-hand-actions">
               <button
@@ -215,11 +223,9 @@ export function TestHandDialog({
                       </span>
                     ))}
                   </p>
-                  <p className="hint">{deckTexts.testHandLegendsHint}</p>
                 </>
               )}
             </div>
-            <p className="hint">{deckTexts.testHandNote(OPENING_HAND, DRAWS_PER_TURN)}</p>
           </>
         )}
       </div>

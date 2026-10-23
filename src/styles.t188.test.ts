@@ -5,6 +5,8 @@ import { resolve } from 'node:path';
 const read = (f: string) => readFileSync(resolve(__dirname, f), 'utf8');
 const styles = read('styles.css');
 const cards = read('styles/cards.css');
+/** T-181 package 4b: the deck editor rules (test hand dialog included) moved here. */
+const editor = read('styles/editor.css');
 
 describe('T-188 CSS', () => {
   it('no select rule replaces the field background (it holds the diagonal edge line)', () => {
@@ -14,7 +16,7 @@ describe('T-188 CSS', () => {
   });
 
   it('the dialog veil is flat: no backdrop-filter on a dialog backdrop', () => {
-    const veil = /\.test-hand-dialog::backdrop \{[^}]*\}/.exec(styles)?.[0] ?? '';
+    const veil = /\.test-hand-dialog::backdrop \{[^}]*\}/.exec(editor)?.[0] ?? '';
     expect(veil).toContain('background:');
     expect(veil).not.toMatch(/(^|[^/*])backdrop-filter:/m);
   });

@@ -195,6 +195,7 @@ export const deckTextsFi = {
   // Result picker (T-050b)
   pickHint: 'Napsauta korttia lisätäksesi. Oikea napsautus tai Shift+napsautus poistaa. Näppäimistöllä + ja −.',
   resultsCaption: 'Hakutulokset',
+  colInfo: 'Tiedot',
   colInDeck: 'Pakassa',
   /** A broken limit still lets the card be added, so the mark must not sound like a refusal (UX-045). */
   blockedRam: (ram: number, color: string, limit: number) => `RAM ${ram} > ${color} ${limit}`,
@@ -334,6 +335,10 @@ export const deckTextsFi = {
   editorTabsLabel: 'Pakkaeditorin osio',
   editorTabDeck: 'Pakka',
   editorTabAdd: 'Lisää kortteja',
+  editorTabAddShort: 'Lisää',
+  editorTabStats: 'Tilastot',
+  editorTabResults: 'Tulokset',
+  editorBack: 'Pakat',
   backToSearch: 'Takaisin hakuun',
   distinctLimit: 'Pakkaan mahtuu enintään 500 eri korttia, joten uutta korttia ei voi lisätä.',
 

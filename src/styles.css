@@ -1110,8 +1110,7 @@ main {
  * Small count buttons and the small action button share one 6 px chamfer and a 32 px height (T-118, UX-118-08):
  * the "+ SB" / "→ SB" button (.tile-action) and the −/+ of deck rows and the picker (.step--compact).
  */
-.step--compact,
-.tile-action {
+.step--compact {
   --cut: 0.375rem;
   --cut-inner: calc(var(--cut) - 1px);
   --cut-inner-2: calc(var(--cut) - 2px);
@@ -1855,8 +1854,7 @@ main {
 /* Modal dialogs (T-080): the <dialog> is a transparent, viewport-sized layer that scrolls (the page-level scroll);
    the box inside has its natural height and no scrollbar of its own. A click on the layer outside the box is a backdrop click. */
 .card-dialog,
-.confirm-dialog,
-.test-hand-dialog {
+.confirm-dialog {
   position: fixed;
   inset: 0;
   box-sizing: border-box;
@@ -1873,8 +1871,7 @@ main {
 }
 
 .card-dialog[open],
-.confirm-dialog[open],
-.test-hand-dialog[open] {
+.confirm-dialog[open] {
   display: grid;
 }
 
@@ -1883,8 +1880,7 @@ main {
  * No chamfer on the box: clip-path would cut the shadow and any popover that reaches outside the box.
  */
 .card-dialog-body,
-.confirm-dialog-body,
-.test-hand-body {
+.confirm-dialog-body {
   border: 1px solid var(--line-strong);
   border-block-start: 2px solid var(--section-accent);
   background: var(--surface-3);
@@ -1892,8 +1888,7 @@ main {
 }
 
 .card-dialog::backdrop,
-.confirm-dialog::backdrop,
-.test-hand-dialog::backdrop {
+.confirm-dialog::backdrop {
   /* T-188: a flat veil, no backdrop-filter. The blur sampled the page behind on every frame the tilting card (a 3D layer) repainted, and the part of the screen it re-blurred flickered. */
   background: rgb(5 6 9 / 0.84);
 }
@@ -2441,21 +2436,6 @@ body:has(dialog[open]) {
   outline-offset: 2px;
 }
 
-/* A skip link: out of sight until it gets the focus (UX-044). */
-.focus-reveal:not(:focus) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.focus-reveal {
-  font-weight: var(--font-weight-bold);
-  text-decoration: underline;
-}
-
 .deck-status {
   font-weight: var(--font-weight-bold);
 }
@@ -2575,18 +2555,7 @@ body:has(dialog[open]) {
   margin-block: var(--space-4);
 }
 
-.save-status {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.save-status.is-error {
-  color: var(--color-danger);
-  font-weight: var(--font-weight-bold);
-}
-
-.deck-section h2,
-.editor-add-heading {
+.deck-section h2 {
   font-size: var(--font-size-base);
 }
 
@@ -2603,81 +2572,8 @@ body:has(dialog[open]) {
   color: var(--color-warning);
 }
 
-/*
- * Deck editor layout (T-050b). One column below 64rem. From 64rem the picker and the deck side by side,
- * with the filters above the picker. From 100rem three columns: filters, picker and deck.
- * DOM order = visual order: filters, results, deck.
- */
-.editor-layout {
-  display: grid;
-  gap: var(--space-4);
-  align-items: start;
-}
-
-@media (min-width: 64rem) {
-  .editor-layout {
-    grid-template-columns: minmax(0, 1fr) clamp(24rem, 22vw, 30rem);
-    /* The deck spans both rows; extra height goes to the results row, not between filters and results. */
-    grid-template-rows: auto 1fr;
-    gap: var(--space-3) var(--space-6);
-  }
-
-  .editor-filters {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .editor-search {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .editor-side {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-  }
-}
-
-@media (min-width: 100rem) {
-  .editor-layout {
-    grid-template-columns: 17rem minmax(0, 1fr) clamp(26rem, 26vw, 40rem);
-    grid-template-rows: auto;
-  }
-
-  .editor-search {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .editor-side {
-    grid-column: 3;
-    grid-row: 1;
-  }
-}
-
-.editor-filters,
-.editor-search,
-.editor-side,
 .editor-deck {
   min-width: 0;
-}
-
-.editor-side {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* Compact editor header (T-050): crumb above, then name, save badge and export on one row. */
-.editor-head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin-block-end: var(--space-2);
-}
-
-.editor-head .editor-crumb {
-  margin-block-end: 0;
 }
 
 .editor-crumb {
@@ -2693,85 +2589,6 @@ h3,
   overflow-wrap: anywhere;
 }
 
-.editor-titlebar {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-4);
-}
-
-.editor-titlebar .editor-name-field {
-  flex: 1 1 0;
-  min-width: 0;
-  margin: 0;
-  gap: var(--space-1);
-}
-
-/* The name reads as the page title and turns into a field on hover and focus. */
-.editor-name-field input,
-.editor-name-field textarea {
-  min-width: 0;
-  padding-inline: var(--space-2);
-  border-color: transparent;
-  border-bottom-color: var(--color-border-strong);
-  background: transparent;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--letter-spacing-caps);
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-}
-
-.editor-name-field input:focus-visible,
-.editor-name-field textarea:focus-visible {
-  background: var(--color-surface-raised);
-  text-transform: none;
-}
-
-/* UX-21 (T-174): a one-line field that wraps and grows (autosized in the editor), no ellipsis. */
-.editor-name-field textarea {
-  inline-size: 100%;
-  block-size: auto;
-  min-block-size: var(--target-min);
-  padding-block: var(--space-1);
-  overflow: hidden;
-  line-height: var(--line-height-heading);
-  overflow-wrap: anywhere;
-  resize: none;
-  text-overflow: clip;
-}
-
-.editor-tools {
-  display: flex;
-  flex: none;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-}
-
-.editor-tools .row-actions {
-  margin-block-start: 0;
-}
-
-/* Quiet text, no box (T-114): the save state is not a button-like thing. */
-.save-badge {
-  margin: 0;
-  padding: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
-}
-
-.save-badge.is-saved::before {
-  content: '✓ ' / '';
-  color: var(--color-success);
-}
-
-.editor-head + .notice {
-  margin-block: 0 var(--space-3);
-}
-
 .card-row {
   /* Info on the left, the control always in the right column (T-045). */
   display: grid;
@@ -2782,13 +2599,6 @@ h3,
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-}
-
-/* Dimmed = adding would break a rule. Text stays above 4.5:1 (opacity is not used); the reason is shown as text. */
-.card-row.is-dimmed {
-  border-style: dashed;
-  background: transparent;
-  color: var(--color-text-muted);
 }
 
 .card-row.is-missing {
@@ -2916,20 +2726,6 @@ h3,
   }
 }
 
-/* Deck editor: toast, result view selector and image grid (T-045). */
-.pick-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-4);
-  margin-block-start: var(--space-3);
-}
-
-.pick-bar .status-line {
-  margin: 0;
-}
-
 .toast-slot:empty {
   display: none;
 }
@@ -2946,82 +2742,12 @@ h3,
   background: var(--color-surface-raised);
 }
 
-.pick-images {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-  gap: var(--space-3);
-}
-
-.pick-image {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  min-width: 0;
-  padding: var(--space-2);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  text-align: center;
-}
-
-.pick-image.is-dimmed {
-  border-style: dashed;
-  background: transparent;
-  color: var(--color-text-muted);
-}
-
-.pick-image-button {
-  position: relative;
-  display: block;
-  inline-size: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-
-.pick-image-button .card-image {
-  display: block;
-  inline-size: 100%;
-  block-size: auto;
-}
-
-.pick-image-name {
-  font-size: var(--font-size-sm);
-  overflow-wrap: anywhere;
-}
-
 .name-sub {
   color: var(--color-text-muted);
 }
 
 .deck-card-count-spoken {
   display: contents;
-}
-
-/* Cost curve (T-049): decorative bars, the same data is in a hidden table. */
-
-/* Image grid badge, e.g. "3 pakassa" (T-049). */
-.pick-badge {
-  position: absolute;
-  top: var(--space-1);
-  left: var(--space-1);
-  padding: 0 var(--space-2);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.5;
-  clip-path: var(--shape-chamfer);
-}
-
-.pick-image-name {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 /*
@@ -3040,16 +2766,6 @@ h3,
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-}
-
-.editor-filters {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.editor-filters .card-filters {
-  margin-block-end: 0;
 }
 
 /* The button names the panel below 64rem; the heading is for screen readers there. */
@@ -3178,355 +2894,9 @@ h3,
   }
 }
 
-/* Deck editor filters as a side panel from 100rem, as on the Cards page from 64rem (T-050b). */
-@media (min-width: 100rem) {
-  .editor-filters .filters-heading {
-    position: static;
-    width: auto;
-    height: auto;
-    margin: 0;
-    overflow: visible;
-    clip-path: none;
-    white-space: normal;
-  }
-
-  .editor-filters .field input[type='search'] {
-    max-width: none;
-  }
-
-  .editor-filters .card-filters .fieldsets {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .editor-filters .card-filters fieldset {
-    display: block;
-    margin-block-start: var(--space-4);
-  }
-
-  .editor-filters .card-filters legend {
-    margin-block-end: var(--space-2);
-  }
-}
-
-/*
- * Result picker (T-050b). The picker's own width decides which columns fit (container query), since
- * the deck column takes a share of the screen.
- */
-.editor-search {
-  container: picker / inline-size;
-}
-
-.pick-hint {
-  margin-block: var(--space-2) 0;
-}
-
-/* The hint talks about clicking; devices without a mouse do not need it. */
-@media not all and (pointer: fine) {
-  .pick-hint {
-    display: none;
-  }
-}
-
-/* The explanation of faded cards is needed on touch devices too (T-103). */
-.pick-hint.pick-explain {
-  display: block;
-  margin-block-start: var(--space-1);
-}
-
-.pick-table {
-  inline-size: 100%;
-  margin-block-start: var(--space-3);
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.pick-table th,
-.pick-table td {
-  padding: var(--space-1) var(--space-2);
-  border-bottom: 1px solid var(--color-border);
-  text-align: start;
-  vertical-align: middle;
-}
-
-.pick-table thead th {
-  background: var(--color-surface-raised);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  white-space: nowrap;
-}
-
-/*
- * The header row is sticky only in a tall enough window (as the other sticky parts), and a focused
- * control scrolls clear of it (WCAG 2.4.11, UX-043).
- */
-@media (min-height: 40rem) {
-  .pick-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-
-  .pick-table :is(button, [tabindex]) {
-    scroll-margin-top: 3rem;
-  }
-}
-
-.pick-table .col-image {
-  inline-size: 4rem;
-}
-
-.pick-table .col-cost {
-  inline-size: 3.75rem;
-  text-align: center;
-}
-
-.pick-table .col-type {
-  inline-size: 11rem;
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
-}
-
-.pick-table .col-number {
-  inline-size: 5rem;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  text-align: end;
-}
-
-.pick-table .col-rarity {
-  inline-size: 7.5rem;
-  font-size: var(--font-size-sm);
-}
-
-.pick-table .col-deck {
-  /* −, count, + and "+ SB" side by side need about 10.5rem (T-118, UX-118-04). */
-  inline-size: 11rem;
-}
-
-.pick-table tbody tr:nth-child(even) {
-  background: var(--color-surface);
-}
-
-.pick-table tbody tr:hover {
-  background: var(--color-surface-hover);
-}
-
-@media (pointer: fine) {
-  .pick-table tbody tr {
-    cursor: pointer;
-  }
-}
-
-/* In the deck: an edge stripe and a bold count (the count itself carries the information). */
-.pick-table tr.is-in-deck > :first-child {
-  box-shadow: inset 3px 0 0 var(--color-accent-edge);
-}
-
-.pick-table .deck-card-count,
-.pick-image .deck-card-count {
-  font-weight: var(--font-weight-normal);
-  color: var(--color-text-muted);
-}
-
 .is-in-deck .deck-card-count {
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
-}
-
-.pick-table .col-image .card-image-button,
-.pick-table .col-image .card-image {
-  inline-size: 3rem;
-  block-size: 4.2rem;
-  object-fit: cover;
-  object-position: top;
-}
-
-.pick-table th.col-name {
-  overflow-wrap: anywhere;
-}
-
-.pick-name {
-  font-weight: var(--font-weight-bold);
-}
-
-.pick-subname {
-  display: block;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-}
-
-/* The same values as the hidden columns; only shown when they are hidden. */
-.pick-meta {
-  display: none;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-}
-
-.pick-color {
-  color: var(--color-text-muted);
-}
-
-/* UX-23 (T-174): a fixed badge width, so the colour word starts in the same place in every row. */
-.pick-table .col-type .type-badge {
-  display: inline-block;
-  min-inline-size: 6.25rem;
-  text-align: center;
-}
-
-/* UX-09 (T-174): "Omistat N" on a result: the same size in every row, so nothing moves. */
-.pick-owned {
-  display: block;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-}
-
-.pick-notes {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: var(--space-2);
-  /* One line of 0.875rem text (line-height 1.25) stays reserved, empty or not. */
-  min-block-size: 1.1875rem;
-}
-
-.pick-notes .pick-owned,
-.pick-notes .pick-blocked {
-  display: inline;
-  margin: 0;
-}
-
-.pick-image > .pick-notes {
-  margin-block-start: var(--space-1);
-}
-
-/* Dimmed = adding breaks a rule: only the image and the name fade, buttons and text keep their contrast. */
-.pick-table tr.is-dimmed .col-image,
-.pick-table tr.is-dimmed .pick-name {
-  opacity: 0.6;
-}
-
-/* The reason a dimmed card would make the deck illegal: always visible, in the warning colour, may wrap (T-103). */
-.pick-blocked {
-  display: block;
-  margin-block-start: 2px;
-  color: var(--color-warning);
-  font-size: 0.875rem;
-  font-weight: var(--font-weight-bold);
-  line-height: 1.25;
-  overflow-wrap: anywhere;
-}
-
-.pick-image.is-dimmed .pick-image-button {
-  opacity: 0.55;
-}
-
-.cost-gem {
-  --badge-color: var(--color-border-strong);
-  display: inline-grid;
-  place-items: center;
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
-  border: 2px solid var(--badge-color);
-  border-radius: 50%;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-}
-
-.pick-table .card-row-controls,
-.pick-image .card-row-controls {
-  gap: var(--space-1);
-}
-
-/* Narrow picker: type, Power, RAM and Rarity move under the name. */
-@container picker (max-width: 54rem) {
-  .pick-table .col-type,
-  .pick-table .col-number,
-  .pick-table .col-rarity {
-    display: none;
-  }
-
-  .pick-meta {
-    display: block;
-  }
-}
-
-/* Very narrow (phones): Cost is in the line under the name too. */
-@container picker (max-width: 26rem) {
-  .pick-table .col-cost {
-    display: none;
-  }
-
-  .pick-table .col-image {
-    inline-size: 3.5rem;
-  }
-
-  .pick-table .col-deck {
-    inline-size: 7rem;
-  }
-}
-
-/* Image grid (T-052): Pieni 13rem, Normaali 17rem, Iso 25rem. */
-.pick-images {
-  --card-min: 17rem;
-  display: grid;
-  /* At least two cards side by side, also on a phone. */
-  grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), calc(50% - var(--space-3) / 2)), 1fr));
-  gap: var(--space-3);
-  margin: var(--space-3) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.editor-search[data-image-size='small'] .pick-images {
-  --card-min: 13rem;
-}
-
-/* Iso: one card per row on a phone, so it is bigger than Normaali there too. */
-.editor-search[data-image-size='large'] .pick-images {
-  --card-min: 25rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(var(--card-min), 100%), 1fr));
-}
-
-.pick-image {
-  align-items: stretch;
-  text-align: start;
-}
-
-.pick-image.is-in-deck {
-  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
-}
-
-.pick-image-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-2);
-  min-width: 0;
-}
-
-.pick-image-foot .pick-image-name {
-  display: block;
-  flex: 1 1 5rem;
-  min-width: 0;
-  overflow: hidden;
-  font-weight: var(--font-weight-bold);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pick-image .pick-badge {
-  right: var(--space-1);
-  left: auto;
 }
 
 /* Hover preview (T-050b): one shared image beside the row; never on touch. */
@@ -3567,55 +2937,14 @@ h3,
   }
 }
 
-@media (forced-colors: active) {
-  .cost-gem {
-    border-color: CanvasText;
-  }
-
-  .pick-table tr.is-in-deck > :first-child {
-    border-inline-start: 3px solid Highlight;
-  }
-}
-
 /* Very wide screens: a wider deck column, and the picker table never stretches into wide gaps (T-050c). */
-@media (min-width: 140rem) {
-  .editor-layout {
-    grid-template-columns: 17rem minmax(0, 1fr) clamp(32rem, 26vw, 44rem);
-  }
-}
 
 /*
  * The picker table fills its column (T-052, no empty strip beside it). In a wide picker the fixed
  * columns grow a little and the thumbnail gets bigger, so the extra room is not all one gap after the name.
  */
-@container picker (min-width: 80rem) {
-  .pick-table .col-type {
-    inline-size: 13rem;
-  }
-
-  .pick-table .col-number {
-    inline-size: 6.5rem;
-  }
-
-  .pick-table .col-rarity {
-    inline-size: 10rem;
-  }
-}
-
-/*
- * Deck column (T-050c): sticky head with the main deck progress and legality, Legends as image slots,
- * main deck tiles or stacks, then the statistics.
- */
-.editor-side {
-  gap: var(--space-4);
-}
 
 @media (min-width: 64rem) and (min-height: 40rem) {
-  .editor-side {
-    /* The sticky head must not cover a focused element (WCAG 2.4.11). */
-    scroll-padding-top: 7rem;
-    padding-inline-end: var(--space-1);
-  }
 
   .deck-head {
     position: sticky;
@@ -3734,73 +3063,12 @@ button.legality:focus-visible {
   outline-offset: 2px;
 }
 
-.deck-back {
-  margin: 0;
-}
-
-/* Looks like a link, not like plain text (UX-050). */
-.deck-back .link-button {
-  font-weight: var(--font-weight-bold);
-}
-
-/* Side by side with the results it is a skip link, shown when focused (UX-044). */
-@media (min-width: 64rem) {
-  .deck-back:not(:focus-within) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-
-.deck-issues {
-  padding: var(--space-2) var(--space-3);
-  border-inline-start: 3px solid var(--color-danger);
-  background: var(--color-danger-surface);
-  font-size: var(--font-size-sm);
-}
-
-.deck-issues-title {
-  margin: 0 0 var(--space-1);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-caps);
-}
-
-.deck-issues-title:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.editor-side .deck-section {
-  margin: 0;
-}
-
 .deck-section > h2.deck-section-title,
 .deck-section-title {
   margin: 0 0 var(--space-2);
   padding-block-end: var(--space-1);
   border-block-end: 1px solid var(--color-border);
   font-size: var(--font-size-base);
-}
-
-.deck-section-head {
-  /* The view choice is always on its own row under the title, with or without a warning flag (T-118, UX-118-41). */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin-block-end: var(--space-2);
-  padding-block-end: var(--space-2);
-  border-block-end: 1px solid var(--color-border);
-}
-
-.deck-section-head .deck-section-title {
-  margin: 0;
-  padding: 0;
-  border: 0;
 }
 
 /* Legends: three image slots side by side, an empty slot as a dashed frame. */
@@ -3838,14 +3106,12 @@ button.legality:focus-visible {
   border-color: var(--color-border-strong);
 }
 
-.legend-slot-image:focus-visible,
-.stack-card-button:focus-visible {
+.legend-slot-image:focus-visible {
   outline: var(--focus-ring);
   outline-offset: 2px;
 }
 
-.legend-slot-img,
-.stack-card-img {
+.legend-slot-img {
   display: block;
   inline-size: 100%;
   block-size: 100%;
@@ -3912,22 +3178,11 @@ button.legality:focus-visible {
 }
 
 /* Missing from the collection: quiet text in the warning colour, no box. */
-.legend-slot-missing,
-.deck-tile-missing {
+.legend-slot-missing {
   color: var(--color-warning);
   font-size: 0.875rem;
   font-weight: var(--font-weight-bold);
   white-space: nowrap;
-}
-
-/*
- * Main deck tile: Cost gem, name with "puuttuu N" under it, ×N and −/+. The card art fades in between
- * the name and the count, never under the controls (UX-047).
- */
-.deck-groups {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
 }
 
 .deck-group .deck-group-title {
@@ -3941,39 +3196,6 @@ button.legality:focus-visible {
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.deck-tile {
-  position: relative;
-  isolation: isolate;
-  display: grid;
-  /* One column set for every row (main deck, Legends, sideboard): the count, the −/+ and the move button line up. */
-  grid-template-columns: 2rem minmax(0, 1fr) 2rem auto 3.5rem;
-  grid-template-areas: 'gem name count step move';
-  align-items: center;
-  gap: 0 var(--space-2);
-  min-block-size: 2.75rem;
-  padding: 0 var(--space-1) 0 var(--space-2);
-  overflow: hidden;
-  border-inline-start: 3px solid var(--badge-color, var(--color-border-strong));
-  background: var(--color-surface);
-}
-
-.deck-tile:hover {
-  background: var(--color-surface-hover);
-}
-
-.deck-tile.is-missing,
-.deck-tile.is-problem {
-  grid-template-areas:
-    'gem name count step move'
-    'gem miss count step move';
-  padding-block: 2px;
-}
-
-.deck-tile.is-missing .deck-tile-name,
-.deck-tile.is-problem .deck-tile-name {
-  line-height: 1.25;
 }
 
 .deck-tile-art {
@@ -4015,202 +3237,8 @@ button.legality:focus-visible {
   grid-area: gem;
 }
 
-/* UX-32c (T-174): at least 24 px high (WCAG 2.5.8). */
-.deck-tile-name {
-  grid-area: name;
-  min-block-size: 1.5rem;
-  min-width: 0;
-  overflow: hidden;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-text);
-  font: inherit;
-  font-weight: var(--font-weight-bold);
-  text-align: start;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: zoom-in;
-}
-
-.deck-tile-name .name-sub {
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-normal);
-}
-
-.deck-tile-name:hover {
-  text-decoration: underline;
-}
-
-.deck-tile-name:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.deck-tile-missing {
-  grid-area: miss;
-  font-size: 0.8125rem;
-  line-height: 1.2;
-}
-
-.deck-tile-count {
-  grid-area: count;
-  color: var(--color-count);
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-  text-align: end;
-}
-
-.deck-tile-missing,
-.deck-tile-count {
-  text-shadow:
-    0 0 2px var(--color-surface),
-    0 0 4px var(--color-surface);
-}
-
-.deck-tile .card-row-controls {
-  grid-area: step;
-  gap: 2px;
-}
-
 .deck-card-count-spoken {
   display: contents;
-}
-
-.deck-unknown {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  background: var(--color-surface);
-}
-
-.deck-unknown-key {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  font-family: var(--font-mono);
-}
-
-/* Pinot: each type a column of overlapping cards; only the top of each card shows until hovered. */
-.deck-stacks {
-  display: grid;
-  /* UX-25 (T-174): wide enough for "GREEN · UNIT (33)" on one line, and the groups fill the column. */
-  grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
-  gap: var(--space-4) var(--space-3);
-}
-
-.stack-cards {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.stack-card {
-  position: relative;
-  block-size: 2.25rem;
-}
-
-.stack-card:last-child {
-  block-size: auto;
-}
-
-.stack-card:hover,
-.stack-card:focus-within {
-  z-index: 2;
-}
-
-.stack-card-button {
-  position: relative;
-  display: block;
-  inline-size: 100%;
-  aspect-ratio: 733 / 1024;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface);
-  box-shadow: 0 -0.25rem 0.5rem rgb(0 0 0 / 0.35);
-  color: var(--color-text);
-  font: inherit;
-  cursor: zoom-in;
-}
-
-/* The name is at the bottom of the printed card, so each card in the stack gets a label on top. */
-/* UX-25 (T-174): "→ SB" of an overlapped card sits on its label strip, left of the count. */
-.stack-card > .stack-card-move {
-  position: absolute;
-  top: 2px;
-  right: 2.75rem;
-  z-index: 1;
-  block-size: 1.5rem;
-  min-inline-size: 0;
-  padding-inline: var(--space-1);
-  font-size: 0.75rem;
-}
-
-.stack-card:has(> .stack-card-move) .stack-card-name {
-  padding-inline-end: 5.25rem;
-}
-
-.stack-card-name {
-  position: absolute;
-  inset: 0 0 auto;
-  display: block;
-  /* Solid (T-118, UX-118-05): the card's printed Cost and name never show through the label. */
-  box-sizing: border-box;
-  block-size: 1.75rem;
-  padding: 0.3rem 2.5rem 0 var(--space-2);
-  overflow: hidden;
-  background: #000;
-  color: #f1f1ec;
-  font-size: 0.875rem;
-  font-weight: var(--font-weight-bold);
-  line-height: 1.2;
-  text-align: start;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.stack-card-count {
-  position: absolute;
-  top: var(--space-1);
-  right: var(--space-1);
-  padding: 0 var(--space-2);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.5;
-}
-
-.stack-card.is-missing .stack-card-button {
-  border-color: var(--color-warning);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .stack-card-button {
-    transition: transform var(--ease);
-  }
-
-  .stack-card:hover .stack-card-button,
-  .stack-card:focus-within .stack-card-button {
-    transform: translateY(-0.5rem);
-  }
-}
-
-/* Statistics */
-.deck-stats {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  font-size: var(--font-size-sm);
-}
-
-.deck-stats p {
-  margin: 0;
 }
 
 .color-bars {
@@ -4278,13 +3306,6 @@ button.legality:focus-visible {
   line-height: var(--line-height-tight);
 }
 
-.test-hand-open {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-}
-
 .stat-number {
   font-family: var(--font-mono);
   font-weight: var(--font-weight-mono);
@@ -4310,129 +3331,9 @@ button.legality:focus-visible {
   background: var(--color-surface);
 }
 
-.odds-table .cell-name {
-  min-inline-size: 7rem;
-}
-
-.odds-table thead th {
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
-}
-
-.odds-table tbody tr:nth-child(even) {
-  background: var(--color-surface-raised);
-}
-
-/* Test hand dialog (T-053): wide on big screens, full width on phones, the content scrolls. */
-.test-hand-dialog {
-  --hand-card: clamp(9rem, 10vw, 15rem);
-  /* About 7 cards in a row from 1920 px up; wider on very large screens so the cards stay big. */
-  padding-block: 0;
-}
-
-.test-hand-body {
-  margin: auto;
-  inline-size: min(100%, max(96rem, 70vw));
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4) clamp(var(--space-4), 2vw, var(--space-8)) var(--space-6);
-}
-
-.test-hand-body p {
-  margin: 0;
-}
-
-.test-hand-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.test-hand-header h2 {
-  margin: 0;
-}
-
-.test-hand-status {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
-.test-hand-warning {
-  color: var(--color-warning);
-  font-family: var(--font-sans);
-  font-weight: var(--font-weight-bold);
-}
-
-.test-hand-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.test-hand-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(var(--hand-card), 50% - var(--space-3) / 2), 1fr));
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hand-card {
-  position: relative;
-  min-inline-size: 0;
-}
-
-.hand-card-image {
-  display: block;
-  inline-size: 100%;
-  block-size: auto;
-  aspect-ratio: 733 / 1024;
-  border-radius: 4.5% / 3.2%;
-}
-
-.hand-card-missing {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2);
-  border: 1px dashed var(--color-border-strong);
-  background: var(--color-surface);
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-
-/* The newest drawn card: an accent frame, and "(uusin)" for screen readers. */
-.hand-card.is-newest .hand-card-image {
-  outline: 3px solid var(--color-accent-edge);
-  outline-offset: 3px;
-  box-shadow: var(--glow-accent);
-}
-
-.test-hand-legends {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding-block-start: var(--space-3);
-  border-block-start: 1px solid var(--color-border);
-}
-
-.test-hand-label {
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-bold);
-}
-
 @media (forced-colors: active) {
-  .stat-summary > div,
-  .hand-card-missing {
+  .stat-summary > div {
     border: 1px solid CanvasText;
-  }
-
-  .hand-card.is-newest .hand-card-image {
-    outline-color: Highlight;
   }
 }
 
@@ -4518,8 +3419,7 @@ button.legality:focus-visible {
     background: CanvasText;
   }
 
-  .legend-slot-remove,
-  .stack-card-count {
+  .legend-slot-remove {
     border: 1px solid ButtonText;
   }
 }
@@ -4656,15 +3556,6 @@ button.legality:focus-visible {
   gap: 2px;
 }
 
-.deck-tile.import-tile,
-.deck-tile.import-tile.is-missing {
-  grid-template-columns: 2rem minmax(0, 1fr);
-  grid-template-areas:
-    'gem name'
-    'gem meta';
-  padding-block: var(--space-1);
-}
-
 .import-tile .deck-tile-art {
   inset-inline-end: 0;
 }
@@ -4740,12 +3631,6 @@ button.legality:focus-visible {
   .import-stats {
     grid-area: stats;
   }
-}
-
-/* T-061: missing cards of a deck. */
-.missing-cards ul {
-  margin-block: var(--space-2);
-  padding-inline-start: var(--space-4);
 }
 
 /* T-060: card order selector under the list toolbar. */
@@ -5430,61 +4315,6 @@ section[aria-labelledby='have-heading'] {
   object-fit: contain;
 }
 
-/*
- * Deck editor rows and sideboard (T-092). Main deck and sideboard rows share one shape: the move button is a
- * small fifth column, so a row stays one line high on a phone. "+ SB" in the search results uses the same
- * button. The rule toast floats at the bottom instead of pushing the results down (no jumping page).
- */
-.tile-action {
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  block-size: 2rem;
-  min-inline-size: 2rem;
-  padding: 0 var(--space-2);
-  border: 0;
-  border-radius: 0;
-  background: var(--color-border-strong);
-  color: var(--color-text);
-  font: inherit;
-  font-size: 0.875rem;
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
-  clip-path: var(--shape-chamfer);
-}
-
-.tile-action::before {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  z-index: -1;
-  background: var(--color-surface-raised);
-  clip-path: var(--shape-chamfer-inner);
-}
-
-/* Same hover as the secondary button (UX-14, T-174). */
-.tile-action:hover {
-  background: var(--color-accent-edge);
-}
-
-.tile-action:hover::before {
-  background: var(--color-surface-hover);
-}
-
-.tile-action:focus-visible {
-  clip-path: none;
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-offset);
-}
-
-.deck-tile-move {
-  grid-area: move;
-}
-
 .toast-slot {
   position: fixed;
   z-index: 30;
@@ -5514,140 +4344,6 @@ section[aria-labelledby='have-heading'] {
   padding-block: var(--space-1);
 }
 
-.toast-close {
-  flex: none;
-  display: inline-grid;
-  place-items: center;
-  inline-size: 2rem;
-  block-size: 2rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-  font: inherit;
-  font-size: var(--font-size-lg);
-  line-height: 1;
-  cursor: pointer;
-}
-
-.toast-close:hover {
-  color: var(--color-text);
-}
-
-.toast-close:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-
-/* "+ SB" beside the stepper, not under it (one row height), where there is room; narrow or with large text it wraps (T-023). */
-.pick-table .col-deck .card-row-controls {
-  display: inline-flex;
-  vertical-align: middle;
-}
-
-.pick-table .col-deck .tile-action {
-  margin-inline-start: var(--space-1);
-  vertical-align: middle;
-}
-
-@container picker (min-width: 26.01rem) {
-  .pick-table .col-deck {
-    white-space: nowrap;
-  }
-}
-
-/*
- * Deck statistics (T-093): cards with charts. One column in the deck sidebar and on phones; nothing scrolls
- * inside. Type colours: Unit yellow, Program cyan, Gear magenta, other grey.
- */
-.deck-stats {
-  --seg-unit: #e8e8e2; /* UX-32b (T-174): not yellow, which is a card colour */
-  --seg-program: var(--color-info);
-  --seg-gear: var(--color-accent-2);
-  --seg-other: var(--color-text-muted);
-  display: grid;
-  gap: var(--space-3);
-}
-
-.seg-unit {
-  --seg: var(--seg-unit);
-  --seg-text: #0b0c10;
-}
-
-.seg-program {
-  --seg: var(--seg-program);
-  --seg-text: #0b0c10;
-}
-
-.seg-gear {
-  --seg: var(--seg-gear);
-  --seg-text: #0b0c10;
-}
-
-.seg-other {
-  --seg: var(--seg-other);
-  --seg-text: #0b0c10;
-}
-
-/* Text on a segment keeps 4.5:1 in both themes (T-118, UX-118-26): the light theme's teal and grey are dark fills. */
-:root[data-theme='light'] .seg-program,
-:root[data-theme='light'] .seg-gear,
-:root[data-theme='light'] .seg-other {
-  --seg-text: #f3f0e6;
-}
-
-/* Rings */
-.ring {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  inline-size: 3.5rem;
-  block-size: 3.5rem;
-  --ring: var(--color-text-muted);
-}
-
-.ring--big {
-  inline-size: 7.5rem;
-  block-size: 7.5rem;
-}
-
-.ring svg {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-}
-
-.ring-track {
-  fill: none;
-  stroke: var(--color-border);
-  stroke-width: 9;
-}
-
-.ring-fill {
-  fill: none;
-  stroke: var(--ring);
-  stroke-width: 9;
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--ring) 55%, transparent));
-  transition: stroke-dasharray 0.4s ease;
-}
-
-.ring--ok {
-  --ring: var(--color-success);
-}
-
-.ring--warn {
-  --ring: var(--color-warning);
-}
-
-.ring--bad {
-  --ring: var(--color-danger);
-}
-
-.ring--neutral {
-  --ring: var(--color-text-muted);
-}
-
 .ring-center {
   position: relative;
   display: grid;
@@ -5658,312 +4354,10 @@ section[aria-labelledby='have-heading'] {
   line-height: 1.05;
 }
 
-.ring--big .ring-center strong {
-  font-size: 2.25rem;
-  color: var(--ring);
-}
-
 .ring-center small {
   color: var(--color-text-muted);
   font-size: 0.75rem;
   font-weight: var(--font-weight-normal);
-}
-
-.overview-gauges {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.gauge-main {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-1);
-}
-
-.gauge-label {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--letter-spacing-caps);
-  text-transform: uppercase;
-}
-
-.gauge-minis {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(3.75rem, 1fr));
-  flex: 1;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.gauge-minis li {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-1);
-  text-align: center;
-}
-
-/* Key numbers */
-.kpi-tiles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin: 0;
-}
-
-.kpi-tiles > div {
-  display: grid;
-  align-content: start;
-  gap: 2px;
-  padding: var(--space-2);
-  border-inline-start: 2px solid var(--color-accent);
-  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
-}
-
-.kpi-tiles dt {
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-}
-
-.kpi-tiles dd {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 1.5rem;
-  font-weight: var(--font-weight-bold);
-  line-height: 1.1;
-}
-
-.kpi-tiles .kpi-hint {
-  color: var(--color-text-muted);
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: var(--font-weight-normal);
-  line-height: 1.25;
-}
-
-.stats-overview .test-hand-open button {
-  inline-size: 100%;
-}
-
-/* Cost curve by type */
-.cost-chart {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.cost-chart-plot {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
-  gap: var(--space-1);
-  block-size: 11rem;
-  margin-block-end: 1.5rem;
-  border-block-end: 1px solid var(--color-border-strong);
-}
-
-.cost-col {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  min-inline-size: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-text);
-  font: inherit;
-  cursor: pointer;
-}
-
-.cost-col:disabled {
-  cursor: default;
-}
-
-.cost-col:not(:disabled):hover .cost-col-stack,
-.cost-col.is-selected .cost-col-stack {
-  outline: 2px solid var(--color-text);
-  outline-offset: 2px;
-}
-
-.cost-col:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.cost-col-count {
-  margin-block-end: 2px;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-}
-
-.cost-col.is-empty .cost-col-count {
-  color: var(--color-text-muted);
-}
-
-.cost-col-stack {
-  display: flex;
-  flex-direction: column-reverse;
-  inline-size: min(100%, 2.75rem);
-  min-block-size: 2px;
-  background: var(--color-border);
-  transition: block-size 0.35s ease;
-}
-
-.cost-seg {
-  display: block;
-  min-block-size: 3px;
-  background: var(--seg);
-  box-shadow: inset 0 1px 0 rgb(0 0 0 / 0.35);
-}
-
-.cost-col-label {
-  position: absolute;
-  inset-block-end: -1.5rem;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
-
-.cost-col.is-selected .cost-col-label {
-  color: var(--color-text);
-  font-weight: var(--font-weight-bold);
-}
-
-.cost-avg {
-  position: absolute;
-  inset-block: 0;
-  inline-size: 0;
-  border-inline-start: 2px dashed var(--color-text);
-  opacity: 0.75;
-  pointer-events: none;
-}
-
-.cost-avg-label {
-  position: absolute;
-  inset-block-start: -0.25rem;
-  inset-inline-start: 4px;
-  padding: 0 4px;
-  background: var(--color-bg);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  white-space: nowrap;
-}
-
-.chart-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--font-size-sm);
-}
-
-.chart-legend li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.chart-legend-pct {
-  color: var(--color-text-muted);
-}
-
-.legend-swatch {
-  display: inline-block;
-  flex: none;
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
-  background: var(--seg, var(--badge-color));
-}
-
-.cost-cards {
-  min-block-size: 1.5rem;
-}
-
-.cost-cards-title {
-  margin: 0 0 var(--space-1);
-  font-weight: var(--font-weight-bold);
-}
-
-.cost-cards-list {
-  display: grid;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.card-line {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 2px var(--space-2);
-  background: color-mix(in srgb, var(--color-bg) 50%, transparent);
-  font-size: var(--font-size-sm);
-}
-
-.card-line-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card-line-count {
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-bold);
-}
-
-/* Colours and RAM */
-.color-ram {
-  display: grid;
-  grid-template-columns: 7rem minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.donut {
-  position: relative;
-  display: grid;
-  place-items: center;
-  inline-size: 7rem;
-  block-size: 7rem;
-}
-
-.donut svg {
-  position: absolute;
-  inset: 0;
-}
-
-.donut .ring-track {
-  stroke-width: 14;
-}
-
-.donut-seg {
-  fill: none;
-  stroke: var(--badge-color);
-  stroke-width: 14;
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--badge-color) 50%, transparent));
-}
-
-.donut .ring-center strong {
-  font-size: 1.5rem;
-}
-
-.color-ram-list {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 .color-ram-row {
@@ -5972,511 +4366,8 @@ section[aria-labelledby='have-heading'] {
   gap: 0 var(--space-2);
   align-items: baseline;
 }
-
-.donut-swatch {
-  background: var(--badge-color);
-  align-self: center;
-}
-
-.color-ram-name {
-  font-weight: var(--font-weight-bold);
-}
-
-.color-ram-pct {
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-normal);
-}
-
-.color-ram-fit {
-  grid-column: 2;
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
-  line-height: 1.3;
-}
-
-.ram-ok {
-  color: var(--color-success);
-}
-
-.ram-over {
-  color: var(--color-danger);
-}
-
-/* Types */
-.type-bar-wrap {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.type-bar {
-  display: flex;
-  block-size: 1.75rem;
-  overflow: hidden;
-  background: var(--color-border);
-}
-
-.type-bar-seg {
-  display: grid;
-  place-items: center;
-  min-inline-size: 3px;
-  background: var(--seg);
-  color: var(--seg-text, var(--color-bg));
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-}
-
-.type-bar-seg + .type-bar-seg {
-  border-inline-start: 2px solid var(--color-bg);
-}
-
-/* Draw odds */
-.draw-odds {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.draw-odds .view-select {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.odds-bars {
-  display: grid;
-  gap: var(--space-1);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.odds-bar-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 5.5rem 3rem;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-}
-
-.odds-bar-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.odds-bar-copies {
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-}
-
-.odds-bar {
-  display: block;
-  block-size: 0.625rem;
-  background: var(--color-border);
-}
-
-.odds-bar-fill {
-  display: block;
-  block-size: 100%;
-  background: linear-gradient(90deg, var(--color-info), var(--color-accent));
-  transition: inline-size 0.35s ease;
-}
-
-.odds-bar-pct {
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-bold);
-  text-align: end;
-}
-
-/* Group calculator */
-.group-odds {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.group-odds-table {
-  inline-size: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-}
-
-.group-odds-table th,
-.group-odds-table td {
-  padding: 3px var(--space-1);
-  text-align: start;
-}
-
-.group-odds-table thead th {
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-bold);
-}
-
-.odds-cell {
-  inline-size: 40%;
-}
-
-.odds-cell .odds-bar {
-  display: inline-block;
-  inline-size: calc(100% - 3.5rem);
-  vertical-align: middle;
-}
-
-.odds-cell-pct {
-  display: inline-block;
-  inline-size: 3.25rem;
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-bold);
-  text-align: end;
-}
-
-.stats-small {
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ring-fill,
-  .cost-col-stack,
-  .odds-bar-fill {
-    transition: none;
-  }
-}
-
-.gauge-minis {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.cost-chart-plot {
-  padding-block-start: 1.5rem;
-}
-
-.cost-avg {
-  inset-block-start: 0;
-}
-
-.cost-avg-label {
-  inset-block-start: 0;
-}
-
-.group-odds select {
-  inline-size: 100%;
-  block-size: var(--target-min);
-  padding: 0 var(--space-2);
-  font-size: var(--font-size-base);
-}
-
-/*
- * T-096: chart colours of their own. --color-info and --color-accent-2 are the same cyan in the dark theme,
- * so Program and Gear looked alike. Unit yellow, Program cyan, Gear magenta; darker shades in the light theme.
- */
-.deck-stats {
-  --seg-program: #1fe0ff;
-  --seg-gear: #9d7fd6; /* T-101: muted violet */
-}
-
-:root[data-theme='light'] .deck-stats {
-  --seg-unit: #2f3440;
-  --seg-program: #00728a;
-  --seg-gear: #6d4fb0; /* T-101 */
-}
-
-/* Eddies */
-.eddies {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.eddies-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-3);
-}
-
-.eddies-count {
-  margin: 0;
-}
-
-.eddies-number {
-  font-family: var(--font-mono);
-  font-size: 2rem;
-  line-height: 1;
-}
-
-.eddies-of {
-  color: var(--color-text-muted);
-}
-
-.eddies-verdict {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-}
-
-.tone-ok {
-  color: var(--color-success);
-}
-
-.tone-warn {
-  color: var(--color-warning);
-}
-
-.tone-neutral {
-  color: var(--color-text);
-}
-
-.eddies-meter {
-  position: relative;
-  display: block;
-  block-size: 0.875rem;
-  background: var(--color-border);
-}
-
-.eddies-meter-fill {
-  display: block;
-  block-size: 100%;
-  background: currentColor;
-  transition: inline-size 0.35s ease;
-}
-
-.eddies-meter-mark {
-  position: absolute;
-  inset-block: -0.25rem;
-  inline-size: 3px;
-  margin-inline-start: -1px;
-  background: var(--color-text);
-  box-shadow: 0 0 0 1px var(--color-bg);
-}
-
-.eddies-curve-title {
-  margin: var(--space-2) 0 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-}
-
-.eddies-curve {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  align-items: end;
-  gap: var(--space-2);
-  block-size: 8.5rem;
-  margin: 0;
-  padding: 1.25rem 0 1.5rem;
-  list-style: none;
-  border-block-end: 1px solid var(--color-border-strong);
-}
-
-.eddies-turn {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  block-size: 100%;
-}
-
-.eddies-turn-track {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  inline-size: min(100%, 2.5rem);
-  border: 1px dashed var(--color-border-strong);
-  border-block-end: 0;
-}
-
-.eddies-turn-fill {
-  display: block;
-  inline-size: 100%;
-  background: linear-gradient(0deg, var(--color-brand-yellow), color-mix(in srgb, var(--color-brand-yellow) 60%, var(--color-success)));
-  transition: block-size 0.35s ease;
-}
-
-.eddies-turn.is-target .eddies-turn-track {
-  border-color: var(--color-text);
-  border-style: solid;
-}
-
-.eddies-turn-value {
-  margin-block-end: 2px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: var(--font-weight-bold);
-}
-
-.eddies-turn-label {
-  position: absolute;
-  inset-block-end: -1.5rem;
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-}
-
-.eddies-turn.is-target .eddies-turn-label {
-  color: var(--color-text);
-  font-weight: var(--font-weight-bold);
-}
-
-.eddies-oncurve {
-  margin: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .eddies-meter-fill,
-  .eddies-turn-fill {
-    transition: none;
-  }
-}
-
-/* One quiet row, no box (T-114). */
-.deck-visibility {
-  margin-block: var(--space-2);
-}
-
-.visibility-hint {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
-
-.visibility-switch-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 var(--space-3);
-}
-
-.visibility-switch-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-weight: var(--font-weight-bold);
-}
-
-/* The label of the active side is bright, the other one dimmed. */
-.visibility-switch-label {
-  color: var(--color-text-muted);
-}
-
-.visibility-switch-wrap:not(.is-public) .visibility-switch-private,
-.visibility-switch-wrap.is-public .visibility-switch-public {
-  color: var(--color-text);
-}
-
-/* The visibility switch is an .edit-switch (one switch style, T-115): only its disabled look is added here. */
-.visibility-switch {
-  padding: 0;
-}
-
-.visibility-switch:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.deck-visibility-body {
-  display: grid;
-  gap: var(--space-3);
-  max-inline-size: 44rem;
-  padding-block-start: var(--space-2);
-}
-
-.deck-visibility-body > * {
-  margin: 0;
-}
-
-.visibility-form {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.visibility-warning {
-  margin: 0;
-}
-
-.visibility-check {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-block-size: var(--target-min);
-}
-
-.visibility-check input {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-}
-
-.visibility-nick {
-  display: grid;
-  gap: var(--space-1);
-}
-
-.visibility-nick > * {
-  margin: 0;
-}
-
-.visibility-status {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-/* T-101: rows and sections that break a deck rule. */
-/* Rows without a note line keep the (screen reader only) text in the name cell, so the grid gets no extra columns. */
-.deck-tile-notes {
-  grid-area: name;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 var(--space-2);
-  min-width: 0;
-  text-shadow:
-    0 0 2px var(--color-surface),
-    0 0 4px var(--color-surface);
-}
-.problem-flag {
-  color: var(--color-danger);
-  font-size: 0.8125rem;
-  font-weight: var(--font-weight-bold);
-  line-height: 1.2;
-}
-.deck-headline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 var(--space-2);
-  margin: 0 0 var(--space-2);
-  border-block-end: 1px solid var(--color-border);
-}
-.deck-headline .deck-section-title,
-.deck-section > .deck-headline > h2.deck-section-title {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.deck-section-head .deck-headline {
-  margin: 0;
-  border: 0;
-}
-.problem-flag--section {
-  font-size: var(--font-size-sm);
-}
-.deck-tile.is-missing .deck-tile-notes,
-.deck-tile.is-problem .deck-tile-notes {
-  grid-area: miss;
-}
-.deck-tile.is-problem {
-  border-inline-start-color: var(--color-danger);
-}
-.legend-slot.is-problem .legend-slot-image,
-.stack-card.is-problem .stack-card-button {
+.legend-slot.is-problem .legend-slot-image {
   border-color: var(--color-danger);
-}
-.stack-card .problem-flag {
-  position: absolute;
-  inset: auto 0 0;
-  padding: 0.125rem var(--space-1);
-  background: rgb(0 0 0 / 0.85);
-  color: #ff8a8a;
 }
 .legend-names {
   display: flex;
@@ -6486,12 +4377,6 @@ section[aria-labelledby='have-heading'] {
   padding: 0;
   list-style: none;
   font-size: var(--font-size-sm);
-}
-.stack-card-actions {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  margin-top: var(--space-1);
 }
 
 /* T-101: edition check before the first add of a session. */
@@ -6526,59 +4411,6 @@ section[aria-labelledby='have-heading'] {
 }
 .edition-confirm .row-actions {
   flex-wrap: wrap;
-}
-
-/* Sideboard in the stacks view (T-101): the cards side by side at full height, each with its buttons visible. */
-.deck-stacks--spread {
-  display: block;
-}
-
-.stack-cards--spread {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-  gap: var(--space-3);
-}
-
-.stack-cards--spread .stack-card {
-  block-size: auto;
-}
-
-/* Legends as a section like the main deck (T-103): free slots as dashed placeholder rows. */
-.deck-tile.is-empty {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: none;
-  border-inline-start-style: dashed;
-  background: transparent;
-  color: var(--color-text-muted);
-}
-
-.deck-tile.is-empty:hover {
-  background: transparent;
-}
-
-.deck-tile-empty {
-  font-size: var(--font-size-sm);
-}
-
-.stack-card.is-empty {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 733 / 1024;
-  max-block-size: 9rem;
-  border: 1px dashed var(--color-border-strong);
-  color: var(--color-text-muted);
-  text-align: center;
-}
-
-.stack-card-empty {
-  padding: var(--space-2);
-  font-size: var(--font-size-sm);
-}
-
-/* Stacks by colour and type (T-103): the heading carries the card colour. */
-.deck-group-title--color {
-  padding-inline-start: var(--space-2);
-  border-inline-start: 4px solid var(--badge-color, var(--color-border-strong));
 }
 
 /* Proxy printing (T-102, layout T-104). The sheets are paper: fixed white and black in both themes. */
@@ -7088,56 +4920,6 @@ section[aria-labelledby='have-heading'] {
   }
 }
 
-/* Collection progress (T-105): cards in the style of the deck statistics. */
-
-@media (max-width: 39.99rem) {
-  .overview-gauges {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
-
-/* Deck editor tabs below 64rem (T-110): the deck or the card picker, one at a time. A segmented pair of toggle buttons. */
-.editor-filters[hidden],
-.editor-search[hidden],
-.editor-side[hidden] {
-  display: none;
-}
-
-.editor-tabs {
-  margin-block: var(--space-2);
-}
-
-/* Deck "Cards" view (T-115): whole cards, two side by side on a phone, more on wider screens. */
-.stack-cards--cards {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-@media (min-width: 40rem) {
-  .stack-cards--cards {
-    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-  }
-}
-.stack-cards--cards .stack-card-name,
-.stack-cards--spread .stack-card-name {
-  /* Whole cards (the Cards view, Legends, sideboard) show their own printed name; the label is for overlapped stacks only. */
-  display: none;
-}
-.stack-cards--cards .stack-card-button {
-  transform: none;
-}
-
-/* Spread stacks (sideboard, legends) never widen the page (T-115): columns may shrink, the buttons wrap. */
-.stack-cards--spread:not(.stack-cards--cards) {
-  grid-template-columns: repeat(auto-fill, minmax(min(7rem, 100%), 1fr));
-}
-.stack-cards--spread .stack-card {
-  min-inline-size: 0;
-}
-.stack-card-actions {
-  flex-wrap: wrap;
-  min-inline-size: 0;
-}
-
 /* Card page controls (T-115): one search row, segmented choices like the editor tabs, switches, one rhythm. */
 .search-row {
   display: flex;
@@ -7162,71 +4944,8 @@ section[aria-labelledby='have-heading'] {
     margin-block-end: var(--space-2);
   }
 }
-
-/* On a very narrow phone the save state is only the check mark (the text stays for screen readers), so the name keeps room. */
-@media (max-width: 25.99rem) {
-  .save-badge.is-saved [role='status'] {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-
-/* A card's own buttons never stick out of its column, even with large text (T-115). */
-.stack-card-actions > * {
-  max-inline-size: 100%;
-  min-inline-size: 0;
-}
-.stack-card-actions .tile-action {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.deck-stacks,
-.deck-groups,
 .deck-group {
   min-inline-size: 0;
-}
-
-/* Statistics overview on a narrow phone (T-115): the small rings wrap under the big one instead of overlapping, and the
-   key numbers drop to two columns when three do not fit. */
-.gauge-minis {
-  flex: 1 1 13rem;
-  min-inline-size: 0;
-}
-.gauge-minis li {
-  min-inline-size: 0;
-}
-.gauge-minis .gauge-label {
-  overflow-wrap: anywhere;
-}
-.kpi-tiles {
-  grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
-}
-/* On the Collection page the tiles keep a sensible width instead of stretching over the whole card (T-118, UX-118-25). */
-.kpi-tiles > div {
-  min-inline-size: 0;
-  overflow-wrap: anywhere;
-}
-
-/* Cost chart (T-115): the average label has its own band above the bars, and the bar counts sit on top of the dashed
-   average line, so the line never runs through a number. */
-.cost-chart-plot {
-  padding-block-start: 1.25rem;
-}
-
-.cost-avg {
-  z-index: 0;
-}
-
-.cost-col-count {
-  position: relative;
-  z-index: 1;
-  padding-inline: 2px;
-  background: var(--color-bg);
 }
 
 /* InfoTip (T-116): a small (i) button next to a heading that opens its help as a popover under the heading row. */
@@ -7305,21 +5024,6 @@ section[aria-labelledby='have-heading'] {
   display: none;
 }
 
-/* On a phone the head actions start from the left (T-118, UX-118-09: the same compact scan button as on a desktop, no floating one). */
-
-/* The title of the add-cards part and its Scan button share a row (T-119). */
-.editor-add-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.editor-add-head .scan-open {
-  align-self: center;
-}
-
 /* Decks page (T-117): the title row holds the actions, the cards are tight and quiet. */
 .decks-head {
   align-items: center;
@@ -7366,23 +5070,17 @@ section[aria-labelledby='have-heading'] {
  * stack their buttons full width with the main action on top (the DOM order stays: cancel first).
  */
 @media (max-width: 39.99rem) {
-  .test-hand-dialog,
   .edition-confirm {
     padding: 0;
     background: var(--color-bg);
   }
 
-  .test-hand-body,
   .edition-confirm .confirm-dialog-body {
     box-sizing: border-box;
     inline-size: 100%;
     min-block-size: 100dvh;
     margin: 0;
     border: 0;
-  }
-
-  .test-hand-body {
-    border-block-start: 3px solid var(--color-accent-edge);
   }
 
   .confirm-dialog .row-actions {
@@ -7433,345 +5131,6 @@ section[aria-labelledby='have-heading'] {
   .search-row .filter-toggle {
     padding-inline: var(--space-3);
     font-size: var(--font-size-sm);
-  }
-}
-
-/*
- * Game results (T-122). The section sits in the deck column of the editor, below the statistics. Free text (opponent,
- * event, note) wraps anywhere, so a long word never widens a 320 px view; nothing here scrolls on its own.
- */
-.deck-results {
-  display: grid;
-  gap: var(--space-3);
-  margin-block-start: var(--space-4);
-  min-inline-size: 0;
-}
-
-.results-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-3);
-  padding-block-end: var(--space-1);
-  border-block-end: 1px solid var(--color-border);
-}
-
-.results-head .deck-section-title {
-  flex: 1 1 auto;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.deck-results .toast {
-  margin: 0;
-}
-
-.deck-results p {
-  margin: 0;
-}
-
-.results-empty {
-  padding: var(--space-3);
-  border: 1px dashed var(--color-border-strong);
-}
-
-.deck-results .panel {
-  min-inline-size: 0;
-}
-
-.deck-results .kpi-tiles {
-  grid-template-columns: repeat(auto-fit, minmax(min(6.5rem, 100%), 1fr));
-}
-
-.results-table {
-  inline-size: 100%;
-  border-collapse: collapse;
-}
-
-.results-table th,
-.results-table td {
-  padding: var(--space-1) var(--space-1);
-  border-bottom: 1px solid var(--color-border);
-  text-align: start;
-  vertical-align: middle;
-}
-
-.results-table thead th {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-}
-
-.results-table tbody th {
-  min-inline-size: 0;
-  font-weight: var(--font-weight-normal);
-  overflow-wrap: break-word;
-}
-
-.results-table thead th.results-number {
-  white-space: nowrap;
-}
-
-/* The record already holds the game count: on a phone the name column gets the room (no words cut in the middle). */
-@media (max-width: 479px) {
-  .results-table .results-games {
-    display: none;
-  }
-}
-
-.results-table .results-number {
-  text-align: end;
-}
-
-.results-table td.results-number {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.results-table .deck-color-code {
-  font-size: 1rem;
-}
-
-.result-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-inline-size: 1.75rem;
-  padding: 0 var(--space-1);
-  border: 1px solid currentColor;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.5;
-}
-
-.result-badge.is-win {
-  color: var(--color-code-green);
-}
-
-.result-badge.is-loss {
-  color: var(--color-code-red);
-}
-
-.result-badge.is-draw {
-  color: var(--color-text-muted);
-}
-
-.game-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.game-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-1) var(--space-2);
-  align-items: start;
-  padding-block: var(--space-2);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.game-row-main {
-  display: grid;
-  gap: var(--space-1);
-  min-inline-size: 0;
-}
-
-.game-row-line,
-.game-row-tags {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-2);
-  min-inline-size: 0;
-}
-
-.game-row-day {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
-}
-
-.game-row-opponent {
-  min-inline-size: 0;
-  font-weight: var(--font-weight-bold);
-  overflow-wrap: anywhere;
-}
-
-.game-tag {
-  max-inline-size: 100%;
-  padding: 0 var(--space-1);
-  border: 1px solid var(--color-border-strong);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  overflow-wrap: anywhere;
-}
-
-.game-row-note {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  overflow-wrap: anywhere;
-}
-
-.game-row-actions {
-  display: flex;
-  align-items: center;
-}
-
-.game-row-actions .icon-button {
-  margin-inline-start: 0;
-}
-
-.game-show-all {
-  margin-block-start: var(--space-2);
-}
-
-/* The form of one game. */
-.game-dialog-body {
-  min-inline-size: 0;
-}
-
-.game-form {
-  display: grid;
-  gap: var(--space-3);
-  min-inline-size: 0;
-}
-
-.game-form h2 {
-  margin: 0;
-}
-
-.game-form p {
-  margin: 0;
-}
-
-.game-form .view-select.has-legend legend,
-.game-form .field-label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-caps);
-}
-
-.game-form input[type='text'],
-.game-form input[type='search'],
-.game-form input[type='date'],
-.game-form textarea {
-  box-sizing: border-box;
-  inline-size: 100%;
-  min-inline-size: 0;
-  padding: 0 var(--space-3);
-  border: 1px solid var(--color-border-strong);
-  border-bottom-width: 2px;
-  border-radius: 0;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font: inherit;
-  font-size: var(--font-size-base);
-}
-
-.game-form input[type='text'],
-.game-form input[type='search'],
-.game-form input[type='date'] {
-  block-size: var(--target-min);
-}
-
-.game-form textarea {
-  padding: var(--space-2) var(--space-3);
-  resize: none;
-  overflow: hidden;
-  field-sizing: content;
-  min-block-size: 5rem;
-}
-
-.game-form input:hover,
-.game-form textarea:hover {
-  border-color: var(--color-info);
-}
-
-.game-form input:focus-visible,
-.game-form textarea:focus-visible {
-  border-color: var(--color-info);
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.game-form .segmented--fill {
-  inline-size: 100%;
-}
-
-.game-legends {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.game-chips,
-.game-matches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.game-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  max-inline-size: 100%;
-  min-block-size: var(--target-min);
-  padding: 0 var(--space-3);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font: inherit;
-  cursor: pointer;
-}
-
-.game-chip:hover {
-  border-color: var(--color-info);
-}
-
-.game-chip-name {
-  min-inline-size: 0;
-  overflow-wrap: anywhere;
-  text-align: start;
-}
-
-.game-match {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  max-inline-size: 100%;
-  text-align: start;
-  overflow-wrap: anywhere;
-}
-
-.game-more-body {
-  display: grid;
-  gap: var(--space-3);
-  padding-block-start: var(--space-3);
-}
-
-@media (max-width: 39.99rem) {
-  .game-dialog {
-    padding: 0;
-    background: var(--color-bg);
-  }
-
-  .game-dialog .game-dialog-body {
-    box-sizing: border-box;
-    inline-size: 100%;
-    min-block-size: 100dvh;
-    margin: 0;
-    border: 0;
-    border-block-start: 3px solid var(--color-accent-edge);
   }
 }
 
@@ -8457,39 +5816,6 @@ html[data-gallery='on'] main {
     flex: 1 1 0;
     justify-content: center;
   }
-
-  /* A deck row shows the card name on up to two lines instead of cutting it after a few letters. */
-  .deck-tile-name {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    white-space: normal;
-    line-height: 1.2;
-  }
-
-  /*
-   * UX-05 (T-174): the name gets the whole row (the controls had left it about 60 px, so names broke mid-word); the
-   * count, − / + and the move button sit on a row of their own under it, with the notes on the left.
-   */
-  .deck-tile:not(.is-empty),
-  .deck-tile.is-missing,
-  .deck-tile.is-problem {
-    grid-template-areas:
-      'gem name name name name'
-      'gem miss count step move';
-    padding-block: var(--space-1);
-    row-gap: 2px;
-  }
-
-  .deck-tile .deck-tile-notes {
-    grid-area: miss;
-  }
-
-  .deck-tile-name {
-    overflow-wrap: break-word;
-    word-break: normal;
-  }
 }
 
 /* T-152: the card's tags in its details, as small chips; a button shows every card with the tag. */
@@ -8610,120 +5936,6 @@ button.card-tag:focus-visible {
   box-sizing: border-box;
 }
 
-/* Tournament deck list (T-168): paper, fixed black on white in both themes. */
-.tournament-dialog-body {
-  max-width: 48rem;
-}
-
-.tournament-list {
-  background: #fff;
-  color: #000;
-  padding: 1.5rem;
-  border: 1px solid #888;
-  font-size: 0.95rem;
-  line-height: 1.35;
-}
-
-.tournament-list h3,
-.tournament-list h4 {
-  color: #000;
-  margin: 0;
-}
-
-.tournament-heading {
-  font-size: 1.5rem;
-  margin-bottom: 0.75rem !important;
-}
-
-.tournament-fields {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin: 0 0 0.75rem;
-}
-
-.tournament-fields dt {
-  font-size: 0.8rem;
-}
-
-.tournament-fields dd {
-  margin: 0;
-  height: 1.75rem;
-  border-bottom: 1px solid #000;
-}
-
-.tournament-deck {
-  margin: 0 0 0.75rem;
-}
-
-.tournament-groups {
-  columns: 2 14rem;
-  column-gap: 2rem;
-}
-
-.tournament-group {
-  break-inside: avoid;
-  margin-bottom: 0.75rem;
-}
-
-.tournament-group h4 {
-  font-size: 1rem;
-  border-bottom: 1px solid #000;
-  margin-bottom: 0.25rem;
-}
-
-/* UX-28 (T-174): a long name that wraps stays beside its count (a hanging indent), not under it. */
-.tournament-group li {
-  display: grid;
-  grid-template-columns: 1.75rem minmax(0, 1fr);
-  column-gap: 0.25rem;
-}
-
-.tournament-group ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.tournament-count {
-  display: inline-block;
-  min-width: 1.5rem;
-  font-weight: 700;
-}
-
-.tournament-totals {
-  margin: 0.75rem 0 0;
-  font-weight: 700;
-}
-
-@media print {
-  /* The dialog is a direct child of body (portal), so the rest of the page leaves the layout: no blank pages. */
-  body.is-tournament-list > :not(.tournament-dialog) {
-    display: none !important;
-  }
-
-  body.is-tournament-list .tournament-screen {
-    display: none !important;
-  }
-
-  body.is-tournament-list .tournament-dialog,
-  body.is-tournament-list .tournament-dialog-body {
-    position: static;
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: #fff;
-    box-shadow: none;
-    overflow: visible;
-  }
-
-  body.is-tournament-list .tournament-list {
-    border: 0;
-    padding: 0;
-  }
-}
-
 /* Ask whether cards added to the collection come off the Want list (T-169). Wraps so 320 px never overflows. */
 .toast-slot .toast.want-cleanup {
   flex-wrap: wrap;
@@ -8734,11 +5946,6 @@ button.card-tag:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-}
-
-/* Deck view choice on top of the deck column (T-171): nothing above it changes height when the view changes. */
-.deck-view-choice {
-  margin-block-end: var(--space-3);
 }
 
 /*

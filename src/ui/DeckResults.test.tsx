@@ -38,6 +38,8 @@ async function openEditor(games: GameInput[] = []) {
   window.location.hash = '#/pakat/a';
   render(<App cards={testCards} repositories={repositories} />);
   await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+  // The results are a view of the deck column (T-181, 4b).
+  await userEvent.setup().click(await screen.findByRole('button', { name: 'Tulokset' }));
   await screen.findByRole('heading', { level: 2, name: 'Tulokset' });
   return repositories;
 }
@@ -263,6 +265,7 @@ describe('Results section of the deck editor', () => {
     });
     window.location.hash = '#/pakat/a';
     render(<App cards={testCards} repositories={store} />);
+    await user.click(await screen.findByRole('button', { name: 'Tulokset' }));
     await user.click(await screen.findByRole('button', { name: '+ Kirjaa peli' }));
     const form = within(dialog());
     await user.click(form.getByRole('radio', { name: 'Voitto' }));

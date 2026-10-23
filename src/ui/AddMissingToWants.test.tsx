@@ -129,6 +129,7 @@ describe('Add missing to wants in the editor (T-066)', () => {
         },
       }),
     );
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Tilastot' }));
     await screen.findByText('Kokoelmasta puuttuu 2 korttia.');
     const button = screen.getByRole('button', { name: 'Lisää puuttuvat wantiin' });
     expect(button.closest('details')).toBeNull();

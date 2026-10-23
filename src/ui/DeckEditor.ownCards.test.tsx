@@ -14,6 +14,7 @@ describe('Deck editor: a copy with own cards (T-121)', () => {
     });
     renderRoute('#/pakat/a', repositories);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
+    await user.click(await screen.findByRole('button', { name: 'Tilastot' }));
     expect(await screen.findByText('Omilla korteilla 1 / 3 · korvaajilla 3 / 3')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Tee kopio omilla korteilla' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Oma pakka (omat kortit)' })).toBeInTheDocument();
