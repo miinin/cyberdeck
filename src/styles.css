@@ -2899,21 +2899,6 @@ h3,
   color: var(--color-text);
 }
 
-.cost-gem {
-  --badge-color: var(--color-border-strong);
-  display: inline-grid;
-  place-items: center;
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
-  border: 2px solid var(--badge-color);
-  border-radius: 50%;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-}
-
 /* Hover preview (T-050b): one shared image beside the row; never on touch. */
 .card-hover-preview {
   position: fixed;
@@ -2949,12 +2934,6 @@ h3,
 @keyframes preview-in {
   from {
     opacity: 0;
-  }
-}
-
-@media (forced-colors: active) {
-  .cost-gem {
-    border-color: CanvasText;
   }
 }
 

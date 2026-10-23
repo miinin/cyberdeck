@@ -509,6 +509,28 @@ button.deck-link {
  * Cost in deck lists: the same quiet dark box as on the cards (T-187): dark base, the card colour only on the middle of each
  * side, white digits. Not on the card grid and the card info box, which style their own.
  * ------------------------------------------------------------------------------------------------------------------ */
+/* The round base (T-050b): every cost gem starts here; the card grid and info box (cards.css) and the deck lists below restyle it. */
+.cost-gem {
+  --badge-color: var(--color-border-strong);
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border: 2px solid var(--badge-color);
+  border-radius: 50%;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+@media (forced-colors: active) {
+  .cost-gem {
+    border-color: CanvasText;
+  }
+}
+
 .cost-gem:not(.card-strip *, .card-meta *) {
   --gem-bright: var(--color-text);
   position: relative;

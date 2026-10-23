@@ -785,7 +785,6 @@
   stroke: var(--ring);
   stroke-width: 9;
   filter: drop-shadow(0 0 3px color-mix(in srgb, var(--ring) 55%, transparent));
-  transition: stroke-dasharray 0.4s ease;
 }
 .ring--ok {
   --ring: var(--color-success);
@@ -928,7 +927,6 @@
   inline-size: min(100%, 2.75rem);
   min-block-size: 2px;
   background: var(--color-border);
-  transition: block-size 0.35s ease;
 }
 .cost-seg {
   display: block;
@@ -1146,7 +1144,6 @@
   display: block;
   block-size: 100%;
   background: linear-gradient(90deg, var(--color-info), var(--color-accent));
-  transition: inline-size 0.35s ease;
 }
 .odds-bar-pct {
   font-family: var(--font-mono);
@@ -1277,7 +1274,6 @@
   display: block;
   block-size: 100%;
   background: currentColor;
-  transition: inline-size 0.35s ease;
 }
 .eddies-meter-mark {
   position: absolute;
@@ -1325,7 +1321,6 @@
   display: block;
   inline-size: 100%;
   background: linear-gradient(0deg, var(--color-brand-yellow), color-mix(in srgb, var(--color-brand-yellow) 60%, var(--color-success)));
-  transition: block-size 0.35s ease;
 }
 .eddies-turn.is-target .eddies-turn-track {
   border-color: var(--color-text);
@@ -2253,8 +2248,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1) var(--space-3);
-  min-block-size: 3.5rem;
-  margin-block-end: var(--space-2);
+  min-block-size: 3rem;
+  margin-block-end: 0;
 }
 
 .editor-back {
@@ -2273,26 +2268,6 @@
   min-width: 0;
   margin: 0;
   gap: var(--space-1);
-}
-
-.editor-name-field input,
-.editor-name-field textarea {
-  min-width: 0;
-  padding-inline: var(--space-2);
-  border-color: transparent;
-  border-bottom-color: var(--color-border-strong);
-  background: transparent;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--letter-spacing-caps);
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-}
-
-.editor-name-field input:focus-visible,
-.editor-name-field textarea:focus-visible {
-  background: var(--color-surface-raised);
-  text-transform: none;
 }
 
 .editor-head .save-badge {
@@ -2566,7 +2541,7 @@
 }
 
 .pick-table .col-rarity {
-  inline-size: 6rem;
+  inline-size: 8.5rem;
   font-size: var(--font-size-label);
 }
 
@@ -2777,11 +2752,6 @@ main:has(.editor-layout) {
   padding-block-start: var(--space-2);
 }
 
-.editor-head {
-  min-block-size: 3rem;
-  margin-block-end: 0;
-}
-
 .editor-status-line {
   letter-spacing: 0.02em;
 }
@@ -2796,13 +2766,6 @@ main:has(.editor-layout) {
   white-space: nowrap;
 }
 
-.pick-table .col-rarity {
-  inline-size: 8.5rem;
-}
-
-.pick-table .col-deck {
-  inline-size: 17rem;
-}
 
 .editor-pane .deck-tiles {
   gap: 0;
@@ -3004,5 +2967,138 @@ main:has(.editor-layout) {
 @media (min-width: 64rem) {
   .results-cols {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+/* Transitions only for people who have not asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .ring-fill {
+    transition: stroke-dasharray 0.4s ease;
+  }
+
+  .cost-col-stack {
+    transition: block-size 0.35s ease;
+  }
+
+  .odds-bar-fill {
+    transition: inline-size 0.35s ease;
+  }
+
+  .eddies-meter-fill {
+    transition: inline-size 0.35s ease;
+  }
+
+  .eddies-turn-fill {
+    transition: block-size 0.35s ease;
+  }
+}
+
+@media (max-width: 39.99rem) {
+  .editor-status-sep {
+    display: none;
+  }
+}
+
+/* A phone: the search field has its own row, the filter button and the scan button share the row under it. */
+@media (max-width: 39.99rem) {
+  .editor-filters .search-row {
+    flex-wrap: wrap;
+  }
+
+  .editor-filters .search-row .search-field {
+    flex: 1 1 100%;
+  }
+
+  .editor-filters .search-row .filter-toggle {
+    flex: 1 1 auto;
+  }
+
+  .editor-add-head {
+    inset-block-start: calc(var(--control-h) + var(--space-2));
+  }
+}
+
+@media (max-width: 25.99rem) {
+  .pick-bar {
+    gap: var(--space-1) var(--space-2);
+  }
+
+  .pick-bar .segmented-option {
+    padding-inline: var(--space-2);
+  }
+}
+
+/* A narrow picker lets a name use two lines instead of cutting it after a few letters. */
+@container picker (max-width: 26rem) {
+  .pick-table th.col-name {
+    display: table-cell;
+    overflow: hidden;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
+  .pick-table th.col-name .pick-name,
+  .pick-table th.col-name .pick-subname {
+    display: block;
+  }
+
+  .pick-subname::before {
+    content: none;
+  }
+}
+
+@media (max-width: 39.99rem) {
+  .editor-filters:has(.scan-open) .search-row {
+    padding-inline-end: 0;
+  }
+
+  .editor-filters:has(.scan-open) .search-row .filter-toggle {
+    margin-inline-end: calc(var(--control-h) + var(--space-2));
+  }
+}
+
+@media (max-width: 25.99rem) {
+  .pick-bar .status-line {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  .pick-bar .pick-tip {
+    margin-inline-start: 0;
+  }
+}
+
+@container picker (max-width: 26rem) {
+  .pick-table th.col-name .pick-name,
+  .pick-table th.col-name .pick-subname {
+    display: inline;
+  }
+
+  .pick-table th.col-name {
+    display: table-cell;
+    max-block-size: 2.75rem;
+  }
+
+  .pick-subname::before {
+    content: ', ' / '';
+  }
+}
+
+/* At phone width the subname is read, not shown (the picture and the card dialog carry it). */
+@container picker (max-width: 26rem) {
+  .pick-table th.col-name .pick-subname {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .pick-table .col-deck {
+    inline-size: 8rem;
   }
 }
