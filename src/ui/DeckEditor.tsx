@@ -1154,150 +1154,150 @@ export function DeckEditor({
         <section className="editor-side" aria-labelledby="deck-heading" ref={sideRef} hidden={deckHidden}>
           {!tabbed && tabsBar}
           <div className="editor-pane" hidden={view !== 'deck'}>
-          <div className="editor-status">
-            <h2 id="deck-heading" className="visually-hidden" ref={deckHeadingRef} tabIndex={-1}>
-              {deckTexts.sectionLabel(content.name)}
-            </h2>
-            <p className="editor-status-line">
-              <span>{deckTexts.mainProgress(totals.main)}</span>
-              {issues.length === 0 ? (
-                legalityMark
-              ) : (
-                <button type="button" className="legality is-issues" onClick={showIssues}>
-                  <span aria-hidden="true">⚠</span>
-                  {deckTexts.issuesCount(issues.length)}
+            <div className="editor-status">
+              <h2 id="deck-heading" className="visually-hidden" ref={deckHeadingRef} tabIndex={-1}>
+                {deckTexts.sectionLabel(content.name)}
+              </h2>
+              <p className="editor-status-line">
+                <span>{deckTexts.mainProgress(totals.main)}</span>
+                {issues.length === 0 ? (
+                  legalityMark
+                ) : (
+                  <button type="button" className="legality is-issues" onClick={showIssues}>
+                    <span aria-hidden="true">⚠</span>
+                    {deckTexts.issuesCount(issues.length)}
+                  </button>
+                )}
+                <span className="editor-status-sep" aria-hidden="true">
+                  ·
+                </span>
+                <span className="editor-status-sub">{deckTexts.legendsProgress(legendsCount)}</span>
+              </p>
+              <progress
+                className={`editor-meter is-${mainState}`}
+                max={MAX_MAIN_DECK}
+                value={Math.min(totals.main, MAX_MAIN_DECK)}
+                aria-label={deckTexts.mainProgress(totals.main)}
+              />
+              {!tabbed && (
+                <button type="button" className="link-button focus-reveal deck-back" onClick={() => searchInputRef.current?.focus()}>
+                  <span aria-hidden="true">← </span>
+                  {deckTexts.backToSearch}
                 </button>
               )}
-              <span className="editor-status-sep" aria-hidden="true">
-                ·
-              </span>
-              <span className="editor-status-sub">{deckTexts.legendsProgress(legendsCount)}</span>
-            </p>
-            <progress
-              className={`editor-meter is-${mainState}`}
-              max={MAX_MAIN_DECK}
-              value={Math.min(totals.main, MAX_MAIN_DECK)}
-              aria-label={deckTexts.mainProgress(totals.main)}
-            />
-            {!tabbed && (
-              <button type="button" className="link-button focus-reveal deck-back" onClick={() => searchInputRef.current?.focus()}>
-                <span aria-hidden="true">← </span>
-                {deckTexts.backToSearch}
-              </button>
-            )}
-          </div>
+            </div>
 
-          <div aria-live="polite" aria-atomic="true">
-            {issues.length === 0 ? (
-              <p className="visually-hidden">{deckTexts.allGood}</p>
-            ) : (
-              <div className="deck-issues">
-                <h3 ref={issuesHeadingRef} tabIndex={-1} className="deck-issues-title">
-                  {deckTexts.issuesHeading}
-                </h3>
-                <ul className="issue-list">
-                  {issues.map((issue) => (
-                    <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
-                      {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
-                      {issue.message}
+            <div aria-live="polite" aria-atomic="true">
+              {issues.length === 0 ? (
+                <p className="visually-hidden">{deckTexts.allGood}</p>
+              ) : (
+                <div className="deck-issues">
+                  <h3 ref={issuesHeadingRef} tabIndex={-1} className="deck-issues-title">
+                    {deckTexts.issuesHeading}
+                  </h3>
+                  <ul className="issue-list">
+                    {issues.map((issue) => (
+                      <li key={issue.type + issue.cards.join(',')} className={issue.severity === 'warning' ? 'is-warning' : undefined}>
+                        {issue.severity === 'warning' ? deckTexts.warningPrefix : ''}
+                        {issue.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+            {notice !== null && (
+              <p className="field-error" role="alert">
+                {notice}
+              </p>
+            )}
+
+            <DeckList
+              grouped={grouped}
+              view={deckView}
+              onViewChange={handleDeckView}
+              mainCount={totals.main}
+              legendsCount={legendsCount}
+              ownedOf={(card) => (collectionReady ? countIn(collection, card.key) : null)}
+              onChange={setCount}
+              onOpenImage={openImage}
+              hoverProps={preview.bind}
+              onMoveToSideboard={(card) => moveCopy(card, true)}
+              problems={problems}
+            />
+            <Sideboard
+              rows={sideRows}
+              size={sideboardSize(content)}
+              view={deckView}
+              problems={problems}
+              onChange={setSideCount}
+              onMoveToMain={(card) => moveCopy(card, false)}
+              onOpenImage={openImage}
+              headingRef={sideHeadingRef}
+              hoverProps={preview.bind}
+            />
+            {grouped.unknown.length > 0 && (
+              <div className="deck-section">
+                <h3 className="deck-group-title">{deckTexts.unknownHeading}</h3>
+                <ul className="deck-tiles">
+                  {grouped.unknown.map(({ key, count }) => (
+                    <li key={key} className="deck-unknown">
+                      <span className="deck-unknown-key">{key}</span>
+                      <button
+                        type="button"
+                        className="button-secondary"
+                        onClick={() => schedule(withDeckCount(contentRef.current, key, 0))}
+                      >
+                        {deckTexts.removeUnknown(key, count)}
+                      </button>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
-          </div>
-          {notice !== null && (
-            <p className="field-error" role="alert">
-              {notice}
-            </p>
-          )}
 
-          <DeckList
-            grouped={grouped}
-            view={deckView}
-            onViewChange={handleDeckView}
-            mainCount={totals.main}
-            legendsCount={legendsCount}
-            ownedOf={(card) => (collectionReady ? countIn(collection, card.key) : null)}
-            onChange={setCount}
-            onOpenImage={openImage}
-            hoverProps={preview.bind}
-            onMoveToSideboard={(card) => moveCopy(card, true)}
-            problems={problems}
-          />
-          <Sideboard
-            rows={sideRows}
-            size={sideboardSize(content)}
-            view={deckView}
-            problems={problems}
-            onChange={setSideCount}
-            onMoveToMain={(card) => moveCopy(card, false)}
-            onOpenImage={openImage}
-            headingRef={sideHeadingRef}
-            hoverProps={preview.bind}
-          />
-          {grouped.unknown.length > 0 && (
-            <div className="deck-section">
-              <h3 className="deck-group-title">{deckTexts.unknownHeading}</h3>
-              <ul className="deck-tiles">
-                {grouped.unknown.map(({ key, count }) => (
-                  <li key={key} className="deck-unknown">
-                    <span className="deck-unknown-key">{key}</span>
-                    <button
-                      type="button"
-                      className="button-secondary"
-                      onClick={() => schedule(withDeckCount(contentRef.current, key, 0))}
-                    >
-                      {deckTexts.removeUnknown(key, count)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="missing-add proxy-send">
-            <SendToProxyButton
-              rows={[...allCounts].filter(([key]) => cardsByKey.has(key)).map(([card, count]) => ({ card, count }))}
-              queue={proxyQueue}
-              label={proxyTexts.sendDeck}
-            />
-            {collectionReady && missingCards.length > 0 && (
+            <div className="missing-add proxy-send">
               <SendToProxyButton
-                rows={missingCards.map((row) => ({ card: row.card.key, count: row.missing }))}
+                rows={[...allCounts].filter(([key]) => cardsByKey.has(key)).map(([card, count]) => ({ card, count }))}
                 queue={proxyQueue}
-                label={proxyTexts.printMissing}
+                label={proxyTexts.sendDeck}
               />
-            )}
-          </div>
+              {collectionReady && missingCards.length > 0 && (
+                <SendToProxyButton
+                  rows={missingCards.map((row) => ({ card: row.card.key, count: row.missing }))}
+                  queue={proxyQueue}
+                  label={proxyTexts.printMissing}
+                />
+              )}
+            </div>
           </div>
 
           <div className="editor-pane" hidden={view !== 'stats'}>
-          <DeckStats
-            deck={content}
-            cardsByKey={cardsByKey}
-            curve={curve}
-            colors={colors}
-            groups={grouped.groups}
-            mainCount={totals.main}
-            ramLimitsText={
-              limits.size === 0
-                ? deckTexts.ramLimitsNone
-                : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`
-            }
-            missingCards={collectionReady ? missingCards : undefined}
-            wants={wants}
-            substitutes={substitutes}
-            playability={playability}
-            onCopyWithOwn={canCopyWithOwn && onOpenDeck !== undefined ? () => void handleCopyWithOwn() : undefined}
-            missingText={
-              collectionReady
-                ? deckTexts.missingFromCollection(missingCopies)
-                : collection.phase === 'loading'
-                  ? ''
-                  : deckTexts.collectionNotReady
-            }
-          />
+            <DeckStats
+              deck={content}
+              cardsByKey={cardsByKey}
+              curve={curve}
+              colors={colors}
+              groups={grouped.groups}
+              mainCount={totals.main}
+              ramLimitsText={
+                limits.size === 0
+                  ? deckTexts.ramLimitsNone
+                  : `${deckTexts.ramLimitsLabel}: ${[...limits].map(([color, limit]) => deckTexts.ramLimit(color, limit)).join(' · ')}`
+              }
+              missingCards={collectionReady ? missingCards : undefined}
+              wants={wants}
+              substitutes={substitutes}
+              playability={playability}
+              onCopyWithOwn={canCopyWithOwn && onOpenDeck !== undefined ? () => void handleCopyWithOwn() : undefined}
+              missingText={
+                collectionReady
+                  ? deckTexts.missingFromCollection(missingCopies)
+                  : collection.phase === 'loading'
+                    ? ''
+                    : deckTexts.collectionNotReady
+              }
+            />
 
           </div>
 

@@ -143,186 +143,186 @@ export function DeckStats({
       </h2>
 
       <div className="stats-grid">
-      <div className="stats-col">
-      <div className="panel stats-overview">
-        <h3 className="visually-hidden">{deckTexts.statsOverview}</h3>
-        <div className="overview-gauges">
-          <div className="gauge-main">
-            <Ring value={mainCount} max={MAX_MAIN_DECK} tone={mainTone} size="big">
-              <strong aria-hidden="true">{mainCount}</strong>
-              <small aria-hidden="true">
-                /{MIN_MAIN_DECK}–{MAX_MAIN_DECK}
-              </small>
-            </Ring>
-            <span className="gauge-label" aria-hidden="true">
-              {deckTexts.gaugeMain}
-            </span>
-            <span className="visually-hidden">{deckTexts.gaugeMainSpoken(mainCount, MIN_MAIN_DECK, MAX_MAIN_DECK)}</span>
-          </div>
-          <ul className="gauge-minis">
-            <li>
-              <Ring value={stats.legends} max={LEGEND_COUNT} tone={stats.legends === LEGEND_COUNT ? 'ok' : 'warn'}>
-                {stats.legends}/{LEGEND_COUNT}
-              </Ring>
-              <span className="gauge-label">{deckTexts.gaugeLegends}</span>
-            </li>
-            <li>
-              <Ring
-                value={stats.sideboard}
-                max={SIDEBOARD_SIZE}
-                tone={stats.sideboard === 0 ? 'neutral' : stats.sideboard === SIDEBOARD_SIZE ? 'ok' : 'warn'}
-              >
-                {stats.sideboard}/{SIDEBOARD_SIZE}
-              </Ring>
-              <span className="gauge-label">{deckTexts.gaugeSideboard}</span>
-            </li>
-            {owned !== null && (
-              <li>
-                <Ring value={owned} max={1} tone={owned >= 1 ? 'ok' : 'warn'}>
-                  <span aria-hidden="true">{formatPercent(owned)}</span>
+        <div className="stats-col">
+          <div className="panel stats-overview">
+            <h3 className="visually-hidden">{deckTexts.statsOverview}</h3>
+            <div className="overview-gauges">
+              <div className="gauge-main">
+                <Ring value={mainCount} max={MAX_MAIN_DECK} tone={mainTone} size="big">
+                  <strong aria-hidden="true">{mainCount}</strong>
+                  <small aria-hidden="true">
+                    /{MIN_MAIN_DECK}–{MAX_MAIN_DECK}
+                  </small>
                 </Ring>
                 <span className="gauge-label" aria-hidden="true">
-                  {deckTexts.gaugeOwned}
+                  {deckTexts.gaugeMain}
                 </span>
-                <span className="visually-hidden">{deckTexts.gaugeOwnedSpoken(formatPercent(owned))}</span>
-              </li>
-            )}
-          </ul>
+                <span className="visually-hidden">{deckTexts.gaugeMainSpoken(mainCount, MIN_MAIN_DECK, MAX_MAIN_DECK)}</span>
+              </div>
+              <ul className="gauge-minis">
+                <li>
+                  <Ring value={stats.legends} max={LEGEND_COUNT} tone={stats.legends === LEGEND_COUNT ? 'ok' : 'warn'}>
+                    {stats.legends}/{LEGEND_COUNT}
+                  </Ring>
+                  <span className="gauge-label">{deckTexts.gaugeLegends}</span>
+                </li>
+                <li>
+                  <Ring
+                    value={stats.sideboard}
+                    max={SIDEBOARD_SIZE}
+                    tone={stats.sideboard === 0 ? 'neutral' : stats.sideboard === SIDEBOARD_SIZE ? 'ok' : 'warn'}
+                  >
+                    {stats.sideboard}/{SIDEBOARD_SIZE}
+                  </Ring>
+                  <span className="gauge-label">{deckTexts.gaugeSideboard}</span>
+                </li>
+                {owned !== null && (
+                  <li>
+                    <Ring value={owned} max={1} tone={owned >= 1 ? 'ok' : 'warn'}>
+                      <span aria-hidden="true">{formatPercent(owned)}</span>
+                    </Ring>
+                    <span className="gauge-label" aria-hidden="true">
+                      {deckTexts.gaugeOwned}
+                    </span>
+                    <span className="visually-hidden">{deckTexts.gaugeOwnedSpoken(formatPercent(owned))}</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+            <dl className="kpi-tiles">
+              <div>
+                <dt>{deckTexts.avgCost}</dt>
+                <dd>
+                  <Average value={stats.avgCost} />
+                </dd>
+                <dd className="kpi-hint">{deckTexts.avgCostHint}</dd>
+              </div>
+              <div>
+                <dt>{deckTexts.avgPower}</dt>
+                <dd>
+                  <Average value={stats.avgPower} />
+                </dd>
+                <dd className="kpi-hint">{deckTexts.avgPowerHint}</dd>
+              </div>
+              <div>
+                <dt>{deckTexts.cheapShort}</dt>
+                <dd>{mainCount > 0 ? formatPercent(stats.cheap) : <Average value={null} />}</dd>
+                <dd className="kpi-hint">{deckTexts.cheapHint(CHEAP_COST)}</dd>
+              </div>
+            </dl>
+            <div className="test-hand-open">
+              <button
+                ref={openerRef}
+                type="button"
+                className="button-primary"
+                aria-haspopup="dialog"
+                disabled={mainCount === 0}
+                aria-describedby={mainCount === 0 ? 'test-hand-empty' : undefined}
+                onClick={() => setHandOpen(true)}
+              >
+                {deckTexts.testHandOpen}
+              </button>
+              {mainCount === 0 && (
+                <p id="test-hand-empty" className="hint">
+                  {deckTexts.testHandEmpty}
+                </p>
+              )}
+            </div>
         </div>
-        <dl className="kpi-tiles">
-          <div>
-            <dt>{deckTexts.avgCost}</dt>
-            <dd>
-              <Average value={stats.avgCost} />
-            </dd>
-            <dd className="kpi-hint">{deckTexts.avgCostHint}</dd>
+
+        {mainCount > 0 && (
+          <div className="panel">
+            <h3 className="panel-title">{deckTexts.curveHeading}</h3>
+            <CostChart buckets={stats.buckets} average={stats.avgCost} last={COST_CURVE_LAST} />
           </div>
-          <div>
-            <dt>{deckTexts.avgPower}</dt>
-            <dd>
-              <Average value={stats.avgPower} />
-            </dd>
-            <dd className="kpi-hint">{deckTexts.avgPowerHint}</dd>
+        )}
+
+        {(colors.length > 0 || stats.fits.length > 0) && (
+          <div className="panel">
+            <h3 className="panel-title">{deckTexts.colorsRamHeading}</h3>
+            <ColorRam colors={colors} mainCount={mainCount} fits={stats.fits} />
           </div>
-          <div>
-            <dt>{deckTexts.cheapShort}</dt>
-            <dd>{mainCount > 0 ? formatPercent(stats.cheap) : <Average value={null} />}</dd>
-            <dd className="kpi-hint">{deckTexts.cheapHint(CHEAP_COST)}</dd>
-          </div>
-        </dl>
-        <div className="test-hand-open">
-          <button
-            ref={openerRef}
-            type="button"
-            className="button-primary"
-            aria-haspopup="dialog"
-            disabled={mainCount === 0}
-            aria-describedby={mainCount === 0 ? 'test-hand-empty' : undefined}
-            onClick={() => setHandOpen(true)}
-          >
-            {deckTexts.testHandOpen}
-          </button>
-          {mainCount === 0 && (
-            <p id="test-hand-empty" className="hint">
-              {deckTexts.testHandEmpty}
-            </p>
-          )}
-        </div>
-      </div>
+        )}
 
-      {mainCount > 0 && (
-        <div className="panel">
-          <h3 className="panel-title">{deckTexts.curveHeading}</h3>
-          <CostChart buckets={stats.buckets} average={stats.avgCost} last={COST_CURVE_LAST} />
         </div>
-      )}
-
-      {(colors.length > 0 || stats.fits.length > 0) && (
-        <div className="panel">
-          <h3 className="panel-title">{deckTexts.colorsRamHeading}</h3>
-          <ColorRam colors={colors} mainCount={mainCount} fits={stats.fits} />
-        </div>
-      )}
-
-      </div>
-      <div className="stats-col">
-      {mainCount > 0 && (
-        <div className="panel">
-          <h3 className="panel-title">{deckTexts.eddiesHeading}</h3>
-          <EddiesPanel summary={stats.eddies} />
-        </div>
-      )}
-
-      {typeCounts.length > 0 && (
-        <div className="panel">
-          <h3 className="panel-title">{deckTexts.typesHeading}</h3>
-          <TypeBar counts={typeCounts} />
-          {hasPower && (
-            <ValueCurve
-              title={deckTexts.powerHeading}
-              caption={deckTexts.powerCaption}
-              valueHeading={deckTexts.powerValue}
-              values={stats.power}
-              last={POWER_CURVE_LAST}
-            />
-          )}
-        </div>
-      )}
-
-      {(stats.ram.length > 0 || stats.rarities.length > 0) && (
-        <div className="panel stats-small">
-          {stats.ram.length > 0 && (
-            <div className="stat-block">
-              <h3 className="panel-title">{deckTexts.ramDistLabel}</h3>
-              <p>{stats.ram.map(({ value, count }) => deckTexts.ramShare(value, count)).join(' · ')}</p>
+        <div className="stats-col">
+          {mainCount > 0 && (
+            <div className="panel">
+              <h3 className="panel-title">{deckTexts.eddiesHeading}</h3>
+              <EddiesPanel summary={stats.eddies} />
             </div>
           )}
-          {stats.rarities.length > 0 && (
-            <div className="stat-block">
-              <h3 className="panel-title">{deckTexts.raritiesLabel}</h3>
-              <p>
-                {stats.rarities.map(({ rarity, count }, index) => (
-                  <span key={rarity ?? ''}>
-                    {index > 0 && ' · '}
-                    {rarity === null ? (
-                      deckTexts.raritiesShare(deckTexts.rarityUnknown, count)
-                    ) : (
-                      <>
-                        <RaritySymbol rarity={rarity} showName /> {count}
-                      </>
-                    )}
-                  </span>
-                ))}
-              </p>
+
+          {typeCounts.length > 0 && (
+            <div className="panel">
+              <h3 className="panel-title">{deckTexts.typesHeading}</h3>
+              <TypeBar counts={typeCounts} />
+              {hasPower && (
+                <ValueCurve
+                  title={deckTexts.powerHeading}
+                  caption={deckTexts.powerCaption}
+                  valueHeading={deckTexts.powerValue}
+                  values={stats.power}
+                  last={POWER_CURVE_LAST}
+                />
+              )}
             </div>
           )}
-        </div>
-      )}
-        <p className="hint">{deckTexts.rulesNote}</p>
-      </div>
-      <div className="stats-col">
-      {stats.odds.length > 0 && (
-        <div className="panel">
-          <h3 className="panel-title">{deckTexts.oddsHeading}</h3>
-          <DrawOdds rows={stats.odds} moments={[deckTexts.drawOpening, ...DRAW_TURNS.map(deckTexts.drawTurnShort)]} />
-          <p className="hint">{deckTexts.oddsNote(OPENING_HAND, DRAWS_PER_TURN)}</p>
-        </div>
-      )}
 
-      {mainCount > 0 && (
-        <div className="panel">
-          <GroupOdds deck={deck} cardsByKey={cardsByKey} />
+          {(stats.ram.length > 0 || stats.rarities.length > 0) && (
+            <div className="panel stats-small">
+              {stats.ram.length > 0 && (
+                <div className="stat-block">
+                  <h3 className="panel-title">{deckTexts.ramDistLabel}</h3>
+                  <p>{stats.ram.map(({ value, count }) => deckTexts.ramShare(value, count)).join(' · ')}</p>
+                </div>
+              )}
+              {stats.rarities.length > 0 && (
+                <div className="stat-block">
+                  <h3 className="panel-title">{deckTexts.raritiesLabel}</h3>
+                  <p>
+                    {stats.rarities.map(({ rarity, count }, index) => (
+                      <span key={rarity ?? ''}>
+                        {index > 0 && ' · '}
+                        {rarity === null ? (
+                          deckTexts.raritiesShare(deckTexts.rarityUnknown, count)
+                        ) : (
+                          <>
+                            <RaritySymbol rarity={rarity} showName /> {count}
+                          </>
+                        )}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          <p className="hint">{deckTexts.rulesNote}</p>
         </div>
-      )}
+        <div className="stats-col">
+          {stats.odds.length > 0 && (
+            <div className="panel">
+              <h3 className="panel-title">{deckTexts.oddsHeading}</h3>
+              <DrawOdds rows={stats.odds} moments={[deckTexts.drawOpening, ...DRAW_TURNS.map(deckTexts.drawTurnShort)]} />
+              <p className="hint">{deckTexts.oddsNote(OPENING_HAND, DRAWS_PER_TURN)}</p>
+            </div>
+          )}
 
-      {(missingText !== '' || (missingCards?.length ?? 0) > 0) && (
-        <div className="panel">
-          {missingText !== '' && <p>{missingText}</p>}
-          <MissingCards rows={missingCards ?? []} deckName={deck.name} wants={wants} substitutes={substitutes} playability={playability} onCopyWithOwn={onCopyWithOwn} />
+          {mainCount > 0 && (
+            <div className="panel">
+              <GroupOdds deck={deck} cardsByKey={cardsByKey} />
+            </div>
+          )}
+
+          {(missingText !== '' || (missingCards?.length ?? 0) > 0) && (
+            <div className="panel">
+              {missingText !== '' && <p>{missingText}</p>}
+              <MissingCards rows={missingCards ?? []} deckName={deck.name} wants={wants} substitutes={substitutes} playability={playability} onCopyWithOwn={onCopyWithOwn} />
+            </div>
+          )}
+
         </div>
-      )}
-
-      </div>
       </div>
       <TestHandDialog
         open={handOpen}

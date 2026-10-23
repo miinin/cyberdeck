@@ -9,6 +9,8 @@ const css = readFileSync(resolve(__dirname, 'styles.css'), 'utf8');
 /** T-181 package 2: the card box rules moved to their own file. */
 /** T-181 package 3: the Collection rules (overview, achievements, binder, scanner) moved too. */
 const collectionCss = readFileSync(resolve(__dirname, 'styles/collection.css'), 'utf8');
+/** T-181 package 4b: the deck editor rules moved too. */
+const editorCss = readFileSync(resolve(__dirname, 'styles/editor.css'), 'utf8');
 const cardsCss = readFileSync(resolve(__dirname, 'styles/cards.css'), 'utf8');
 
 /** The declarations of the first rule that starts with `selector` (alone, or last in a selector list). */
@@ -58,7 +60,7 @@ describe('T-174 style rules', () => {
     const hover = rule('.button-secondary:hover');
     expect(hover).toMatch(/translateY\(-1px\)/);
     expect(hover).not.toMatch(/underline|--color-info/);
-    expect(rule('.tile-action:hover')).not.toMatch(/underline|--color-info/);
+    expect(rule('.tile-action:hover', editorCss)).not.toMatch(/underline|--color-info/);
   });
 
   it('UX-15: the primary hover is clearly darker in the light theme', () => {
@@ -75,8 +77,8 @@ describe('T-174 style rules', () => {
     expect(rule('.card-foot .card-collection,\n.card-foot .count-control', cardsCss)).toMatch(/justify-content:\s*center/);
   });
 
-  it('UX-24: a note line is reserved in every search result', () => {
-    expect(rule('.pick-notes')).toMatch(/min-block-size/);
+  it('UX-24: every search result row has the same fixed height, so a warning does not move the rows (T-181, 4b)', () => {
+    expect(rule('.pick-table tbody tr', editorCss)).toMatch(/block-size: 2.75rem/);
   });
 
   it('T-181-0: the scanner dialog keeps its width on a phone despite the container query', () => {

@@ -171,11 +171,7 @@ export function TestHandDialog({
               {/* The explanations are a tip, so the hand and the buttons stay in view (T-181, 4b). */}
               <span className="has-info-tip test-hand-tip">
                 <InfoTip>
-                  {state.legends.length > 0 && (
-                    <>
-                      <span className="info-tip-line">{deckTexts.testHandLegendsHint}</span>
-                    </>
-                  )}
+                  {state.legends.length > 0 && <span className="info-tip-line">{deckTexts.testHandLegendsHint}</span>}
                   <span className="info-tip-line">{deckTexts.testHandNote(OPENING_HAND, DRAWS_PER_TURN)}</span>
                 </InfoTip>
               </span>

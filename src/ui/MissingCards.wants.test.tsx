@@ -26,6 +26,8 @@ async function openEditor(extra: Record<string, string>) {
       initial: { ...storedDecks([{ id: 'a', name: 'Oma pakka', cards: [['u0', 3], ['u1', 1]] }]), ...extra },
     }),
   );
+  // The statistics are their own view of the deck column (T-181, 4b).
+  await user.click(await screen.findByRole('button', { name: 'Tilastot' }));
   await screen.findByText('Kokoelmasta puuttuu 2 korttia.');
   await user.click(screen.getByText('Näytä puuttuvat kortit'));
   return { user, repositories };
