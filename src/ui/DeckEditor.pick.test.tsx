@@ -32,7 +32,7 @@ describe('Deck editor result picker', () => {
   it('shows the results as a table with one card per row and the game columns', async () => {
     await openEditor([]);
     const headers = within(table()).getAllByRole('columnheader').map((th) => th.textContent);
-    expect(headers).toEqual(['Kuva', 'Cost', 'Nimi', 'Tyyppi', 'Power', 'RAM', 'Harvinaisuus', 'Pakassa']);
+    expect(headers).toEqual(['Kuva', 'Cost', 'Nimi', 'Tiedot', 'Harvinaisuus', 'Pakassa']);
     expect(within(rowOf('Unit 3')).getByRole('rowheader')).toHaveTextContent('Unit 3');
     expect(within(screen.getByRole('group', { name: 'Näkymä' })).getByRole('radio', { name: 'Lista' })).toBeChecked();
     expect(screen.getByText(/Oikea napsautus tai Shift\+napsautus poistaa/)).toBeInTheDocument();

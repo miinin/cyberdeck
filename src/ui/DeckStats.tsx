@@ -43,7 +43,6 @@ import { ColorRam, CostChart, DrawOdds, EddiesPanel, Ring, TypeBar } from './Dec
 import { eddieSummary } from '../domain/eddies';
 import type { Tone } from './DeckCharts';
 import { TestHandDialog } from './TestHandDialog';
-import { goldfishTexts } from './goldfishTexts';
 import { ValueCurve } from './ValueCurve';
 import { deckTexts, formatDecimal, formatPercent } from './deckTexts';
 
@@ -81,7 +80,6 @@ export function DeckStats({
   playability,
   onCopyWithOwn,
   rng = Math.random,
-  goldfishHref,
 }: {
   deck: DeckContent;
   cardsByKey: CardsByKey;
@@ -105,8 +103,6 @@ export function DeckStats({
   onCopyWithOwn?: () => void;
   /** Random source of the test hand; tests pass a seeded one. */
   rng?: Rng;
-  /** Link of the solo play view of this deck (T-172); without it the button is not shown. */
-  goldfishHref?: string;
 }) {
   const stats = useMemo(
     () => ({
@@ -142,10 +138,12 @@ export function DeckStats({
 
   return (
     <section className="deck-stats" aria-labelledby="stats-heading">
-      <h2 id="stats-heading" className="deck-section-title">
+      <h2 id="stats-heading" className="deck-section-title visually-hidden">
         {deckTexts.statsHeading}
       </h2>
 
+      <div className="stats-grid">
+      <div className="stats-col">
       <div className="panel stats-overview">
         <h3 className="visually-hidden">{deckTexts.statsOverview}</h3>
         <div className="overview-gauges">
@@ -224,11 +222,6 @@ export function DeckStats({
           >
             {deckTexts.testHandOpen}
           </button>
-          {goldfishHref !== undefined && mainCount > 0 && (
-            <a className="button-secondary" href={goldfishHref}>
-              {goldfishTexts.open}
-            </a>
-          )}
           {mainCount === 0 && (
             <p id="test-hand-empty" className="hint">
               {deckTexts.testHandEmpty}
@@ -244,17 +237,19 @@ export function DeckStats({
         </div>
       )}
 
-      {mainCount > 0 && (
-        <div className="panel">
-          <h3 className="panel-title">{deckTexts.eddiesHeading}</h3>
-          <EddiesPanel summary={stats.eddies} />
-        </div>
-      )}
-
       {(colors.length > 0 || stats.fits.length > 0) && (
         <div className="panel">
           <h3 className="panel-title">{deckTexts.colorsRamHeading}</h3>
           <ColorRam colors={colors} mainCount={mainCount} fits={stats.fits} />
+        </div>
+      )}
+
+      </div>
+      <div className="stats-col">
+      {mainCount > 0 && (
+        <div className="panel">
+          <h3 className="panel-title">{deckTexts.eddiesHeading}</h3>
+          <EddiesPanel summary={stats.eddies} />
         </div>
       )}
 
@@ -271,27 +266,6 @@ export function DeckStats({
               last={POWER_CURVE_LAST}
             />
           )}
-        </div>
-      )}
-
-      {stats.odds.length > 0 && (
-        <div className="panel">
-          <h3 className="panel-title">{deckTexts.oddsHeading}</h3>
-          <DrawOdds rows={stats.odds} moments={[deckTexts.drawOpening, ...DRAW_TURNS.map(deckTexts.drawTurnShort)]} />
-          <p className="hint">{deckTexts.oddsNote(OPENING_HAND, DRAWS_PER_TURN)}</p>
-        </div>
-      )}
-
-      {mainCount > 0 && (
-        <div className="panel">
-          <GroupOdds deck={deck} cardsByKey={cardsByKey} />
-        </div>
-      )}
-
-      {(missingText !== '' || (missingCards?.length ?? 0) > 0) && (
-        <div className="panel">
-          {missingText !== '' && <p>{missingText}</p>}
-          <MissingCards rows={missingCards ?? []} deckName={deck.name} wants={wants} substitutes={substitutes} playability={playability} onCopyWithOwn={onCopyWithOwn} />
         </div>
       )}
 
@@ -324,7 +298,32 @@ export function DeckStats({
           )}
         </div>
       )}
-      <p className="hint">{deckTexts.rulesNote}</p>
+        <p className="hint">{deckTexts.rulesNote}</p>
+      </div>
+      <div className="stats-col">
+      {stats.odds.length > 0 && (
+        <div className="panel">
+          <h3 className="panel-title">{deckTexts.oddsHeading}</h3>
+          <DrawOdds rows={stats.odds} moments={[deckTexts.drawOpening, ...DRAW_TURNS.map(deckTexts.drawTurnShort)]} />
+          <p className="hint">{deckTexts.oddsNote(OPENING_HAND, DRAWS_PER_TURN)}</p>
+        </div>
+      )}
+
+      {mainCount > 0 && (
+        <div className="panel">
+          <GroupOdds deck={deck} cardsByKey={cardsByKey} />
+        </div>
+      )}
+
+      {(missingText !== '' || (missingCards?.length ?? 0) > 0) && (
+        <div className="panel">
+          {missingText !== '' && <p>{missingText}</p>}
+          <MissingCards rows={missingCards ?? []} deckName={deck.name} wants={wants} substitutes={substitutes} playability={playability} onCopyWithOwn={onCopyWithOwn} />
+        </div>
+      )}
+
+      </div>
+      </div>
       <TestHandDialog
         open={handOpen}
         deck={deck}

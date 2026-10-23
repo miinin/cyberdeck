@@ -179,14 +179,15 @@ describe('visibility in the deck editor', () => {
     return screen.findByRole('switch', { name: 'Julkinen' });
   };
 
-  it('is private by default and disables "Julkinen" with a sign-in hint when signed out', async () => {
+  it('is private by default and marks "Julkinen" aria-disabled with a sign-in hint when signed out', async () => {
     const memory = createMemoryPublicDecks();
     renderApp({ initial: storedDecks([DECK]), memory });
     await open();
     expect(screen.getByText('Vain sinä näet pakan.')).toBeInTheDocument();
     const publicSwitch = screen.getByRole('switch', { name: 'Julkinen' });
     expect(publicSwitch).toHaveAttribute('aria-checked', 'false');
-    expect(publicSwitch).toBeDisabled();
+    // Not disabled but aria-disabled: it stays focusable and the tip says why (T-181, 4b).
+    expect(publicSwitch).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText('Kirjaudu sisään Googlella, jos haluat julkaista pakan.')).toBeInTheDocument();
     expect(memory.docs.size).toBe(0);
   });

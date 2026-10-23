@@ -1,6 +1,6 @@
 import type { Card } from '../domain/card';
 import { RaritySymbol } from './RaritySymbol';
-import { CardColor, typeBadgeClass, typeColorClass } from './CardColor';
+import { typeColorClass } from './CardColor';
 import { CardImage } from './CardImage';
 import type { HoverPreviewProps } from './CardHoverPreview';
 import { Value } from './CardTable';
@@ -27,6 +27,18 @@ export function cardMeta(card: Card): string {
   ]
     .filter((part) => part !== null)
     .join(' · ');
+}
+
+/** "Unit · P2 · R1": the type, Power and RAM of a card as short mono text (T-181, 4b); the colour is named for screen readers. */
+export function pickInfo(card: Card): { short: string; spoken: string } {
+  const power = card.power === null ? null : `P${card.power}`;
+  const ram = card.ram === null ? null : `R${card.ram}`;
+  return {
+    short: [card.type, power, ram].filter((part) => part !== null).join(' · '),
+    spoken: [card.type, card.color, card.power === null ? null : `Power ${card.power}`, card.ram === null ? null : `RAM ${card.ram}`]
+      .filter((part) => part !== null)
+      .join(', '),
+  };
 }
 
 /** Cost as a round gem with the card colour on its edge (T-050b). */
@@ -75,14 +87,8 @@ export function DeckPickTable({
           <th scope="col" className="col-name">
             {texts.columnName}
           </th>
-          <th scope="col" className="col-type">
-            {texts.columnType}
-          </th>
-          <th scope="col" className="col-number col-power">
-            {texts.columnPower}
-          </th>
-          <th scope="col" className="col-number col-ram">
-            {texts.columnRam}
+          <th scope="col" className="col-info">
+            {deckTexts.colInfo}
           </th>
           <th scope="col" className="col-rarity">
             {texts.columnRarity}
@@ -121,35 +127,21 @@ export function DeckPickTable({
                     <span lang="en">{card.subname}</span>
                   </span>
                 )}
-                <span className="pick-meta">{cardMeta(card)}</span>
-                {/* One line is always reserved, so a blocked mark does not make the row grow (UX-24, T-174). */}
-                <span className="pick-notes">
-                  {ownedOf?.(card) != null && <span className="pick-owned">{deckTexts.ownedBadge(ownedOf(card) ?? 0)}</span>}
-                  {blocker !== null && (
-                    <span className="pick-blocked" aria-hidden="true" title={blocker.reason}>
-                      ⚠ {blocker.short}
-                    </span>
-                  )}
-                </span>
               </th>
-              <td className="col-type">
-                <span className={typeBadgeClass(card.color)} lang="en">
-                  {card.type}
-                </span>{' '}
-                <span className="pick-color">
-                  <CardColor color={card.color} />
-                </span>
-              </td>
-              <td className="col-number col-power">
-                <Value value={card.power} missing={texts.noPower} />
-              </td>
-              <td className="col-number col-ram">
-                <Value value={card.ram} missing={texts.noRam} />
+              <td className="col-info" lang="en">
+                <span aria-hidden="true">{pickInfo(card).short}</span>
+                <span className="visually-hidden">{pickInfo(card).spoken}</span>
               </td>
               <td className="col-rarity" lang="en">
                 {card.rarity === null ? <Value value={null} missing={texts.noRarity} /> : <RaritySymbol rarity={card.rarity} />}
               </td>
               <td className="col-deck">
+                {ownedOf?.(card) != null && <span className="pick-owned">{deckTexts.ownedBadge(ownedOf(card) ?? 0)}</span>}
+                {blocker !== null && (
+                  <span className="pick-blocked" aria-hidden="true" title={blocker.reason}>
+                    <span className="pick-blocked-mark">⚠</span> <span className="pick-blocked-short">{blocker.short}</span>
+                  </span>
+                )}
                 <Stepper
                   name={card.displayName}
                   count={count}

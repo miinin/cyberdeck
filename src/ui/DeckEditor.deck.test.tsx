@@ -16,6 +16,12 @@ const deckRegion = () => screen.getByRole('region', { name: /pakan kortit/ });
 const savedCards = async (repositories: ReturnType<typeof openEditor>) =>
   (await repositories.decks.get('a'))?.sections.flatMap((section) => section.cards);
 
+/** The statistics are their own view of the deck column (T-181, 4b): open it first. */
+async function openStats() {
+  await userEvent.setup().click(await screen.findByRole('button', { name: 'Tilastot' }));
+  return screen.findByRole('region', { name: 'Tilastot' });
+}
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -132,7 +138,7 @@ describe('Deck column', () => {
 
   it('shows colours, types, RAM limits and missing cards under "Tilastot"', async () => {
     openEditor([['l1', 1], ['u0', 3], ['u1', 1]], storedCollection([]));
-    const stats = await screen.findByRole('region', { name: 'Tilastot' });
+    const stats = await openStats();
     // T-093: colours with their RAM, types as a bar with a legend.
     const red = stats.querySelector('.color-ram-row') as HTMLElement;
     expect(red).toHaveTextContent('Red 4 · 100 %');
@@ -143,7 +149,7 @@ describe('Deck column', () => {
 
   it('lists the missing cards with their counts (T-061)', async () => {
     openEditor([['l1', 1], ['u0', 3], ['u1', 1]], storedCollection([]));
-    const stats = await screen.findByRole('region', { name: 'Tilastot' });
+    const stats = await openStats();
     expect(within(stats).getByText('Näytä puuttuvat kortit')).toBeInTheDocument();
     const list = stats.querySelector('.missing-cards') as HTMLElement;
     expect(within(list).getAllByRole('listitem', { hidden: true }).map((item) => item.textContent?.split(' puuttuu ')[1])).toEqual(['1', '3', '1']);

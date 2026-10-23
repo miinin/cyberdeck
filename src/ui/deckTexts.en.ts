@@ -186,6 +186,7 @@ export const deckTextsEn: typeof deckTextsFi = {
   pickViewImages: 'Images',
   pickHint: 'Click a card to add it. Right-click or Shift+click removes it. On the keyboard, + and −.',
   resultsCaption: 'Search results',
+  colInfo: 'Info',
   colInDeck: 'In deck',
   blockedRam: (ram: number, color: string, limit: number) => `RAM ${ram} > ${color} ${limit}`,
   blockedCopies: (max: number) => `At most ${max} copies`,
@@ -320,6 +321,10 @@ export const deckTextsEn: typeof deckTextsFi = {
   editorTabsLabel: 'Deck editor section',
   editorTabDeck: 'Deck',
   editorTabAdd: 'Add cards',
+  editorTabAddShort: 'Add',
+  editorTabStats: 'Stats',
+  editorTabResults: 'Results',
+  editorBack: 'Decks',
   backToSearch: 'Back to search',
   distinctLimit: 'A deck holds at most 500 distinct cards, so a new card cannot be added.',
 

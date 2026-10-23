@@ -48,10 +48,31 @@ import { openCardPage } from './cardRoute';
 import { cardNameText } from './CardName';
 import { DeckPickImage } from './DeckPickImage';
 import { DeckVisibility } from './DeckVisibility';
+import { InfoTip } from './InfoTip';
+import { goldfishTexts } from './goldfishTexts';
 import type { PublishResult } from './DeckVisibility';
 import { usePublicDecks } from './PublicDecksContext';
 import { forgetPublicDecks } from './publicDecksCache';
 import type { PublishState } from '../account';
+
+/** A left arrow for the back button of the header. */
+function BackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 12H5" />
+      <path d="M11 6l-6 6 6 6" />
+    </svg>
+  );
+}
+
+/** A play triangle for the solo play button of the header. */
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="currentColor">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}
 
 /** A constant, so useSyncExternalStore sees an unchanged snapshot. */
 const PICK_VIEW_OPTIONS = [
@@ -104,6 +125,9 @@ interface AddBlock {
   text: string;
   notice: boolean;
 }
+
+/** The parts of the editor: the deck, the card picker (a tab only on a narrow screen), the statistics and the results. */
+type EditorTab = 'deck' | 'add' | 'stats' | 'results';
 
 type SaveState = 'saved' | 'dirty' | 'saving' | 'error';
 type SaveErrorKind = StorageErrorKind | 'unknown';
@@ -765,16 +789,21 @@ export function DeckEditor({
   // T-110: below 64rem the editor shows the deck or the card picker, one at a time. The default is chosen once, when
   // the deck has loaded: the deck, or the picker for an empty deck. Both parts stay mounted, so filters and search persist.
   const tabbed = useMediaQuery(EDITOR_TABS_QUERY, false);
-  const [tab, setTab] = useState<'deck' | 'add' | null>(null);
-  if (phase === 'ready' && tab === null) setTab(totals.main + totals.legends === 0 ? 'add' : 'deck');
+  // T-181 (4b): the deck column holds three views (deck, statistics, results); below 64rem "add cards" is a fourth tab.
+  const [tab, setTab] = useState<EditorTab | null>(null);
+  if (phase === 'ready' && tab === null) setTab(totals.main + totals.legends === 0 && tabbed ? 'add' : 'deck');
   const tabsRef = useRef<HTMLDivElement>(null);
-  const tabFocus = useRef<'deck' | 'add' | null>(null);
+  const tabFocus = useRef<EditorTab | null>(null);
   const [tabRequest, setTabRequest] = useState(0);
-  const deckHidden = tabbed && tab === 'add';
-  const pickerHidden = tabbed && tab === 'deck';
+  // Wide: the picker is always shown and "add" means the deck view; narrow: one part at a time.
+  const view: EditorTab = tab === 'add' && !tabbed ? 'deck' : (tab ?? 'deck');
+  const deckHidden = tabbed && view === 'add';
+  // Statistics and results take the whole width on a wide screen: they are views of their own, not a part under the deck.
+  const widePane = !tabbed && (view === 'stats' || view === 'results');
+  const pickerHidden = tabbed ? view !== 'add' : widePane;
 
   // `focus` is false when the tab button itself was used (it keeps the focus); otherwise the focus follows to the new part.
-  const selectTab = (next: 'deck' | 'add', focus: boolean) => {
+  const selectTab = (next: EditorTab, focus: boolean) => {
     setTab(next);
     tabFocus.current = focus ? next : null;
     setTabRequest((count) => count + 1);
@@ -785,8 +814,8 @@ export function DeckEditor({
     tabsRef.current?.scrollIntoView?.({ block: 'start' });
     const target = tabFocus.current;
     tabFocus.current = null;
-    if (target === 'deck') deckHeadingRef.current?.focus({ preventScroll: true });
-    else if (target === 'add') searchInputRef.current?.focus({ preventScroll: true });
+    if (target === 'add') searchInputRef.current?.focus({ preventScroll: true });
+    else if (target === 'deck') deckHeadingRef.current?.focus({ preventScroll: true });
   }, [tabRequest]);
 
   if (phase !== 'ready') {
@@ -810,75 +839,106 @@ export function DeckEditor({
     );
   }
 
+  const tabsBar = (
+    <div ref={tabsRef} className="segmented segmented--fill editor-tabs" role="group" aria-label={deckTexts.editorTabsLabel}>
+      {tabbed ? (
+        <>
+          <button type="button" className="segmented-option" aria-pressed={view === 'deck'} onClick={() => selectTab('deck', false)}>
+            {deckTexts.editorTabDeck}
+          </button>
+          <button
+            type="button"
+            className="segmented-option"
+            aria-label={deckTexts.editorTabAdd}
+            aria-pressed={view === 'add'}
+            onClick={() => selectTab('add', false)}
+          >
+            {deckTexts.editorTabAddShort}
+          </button>
+        </>
+      ) : (
+        <button type="button" className="segmented-option" aria-pressed={view === 'deck'} onClick={() => selectTab('deck', false)}>
+          {deckTexts.editorTabDeck}
+        </button>
+      )}
+      <button type="button" className="segmented-option" aria-pressed={view === 'stats'} onClick={() => selectTab('stats', false)}>
+        {deckTexts.editorTabStats}
+      </button>
+      <button type="button" className="segmented-option" aria-pressed={view === 'results'} onClick={() => selectTab('results', false)}>
+        {deckTexts.editorTabResults}
+      </button>
+    </div>
+  );
+
   return (
     <>
       <WantCleanupBar cleanup={wantCleanup} />
-      {/* One compact header row (T-050): back link, the name as an editable title, save badge, export. */}
+      {/* One header row (T-181, 4b): back, the name as an editable title, save state, visibility, export and solo play. */}
       <div className="editor-head">
-        <p className="editor-crumb">
-          <button type="button" className="link-button" onClick={onBack}>
-            <span aria-hidden="true">← </span>
-            {deckTexts.backToList}
-          </button>
-        </p>
+        <button type="button" className="button-quiet editor-back" onClick={onBack}>
+          <BackIcon />
+          <span className="editor-back-label">{deckTexts.editorBack}</span>
+        </button>
         <h1 ref={headingRef} tabIndex={-1} className="editor-name visually-hidden">
           {content.name}
         </h1>
-        <div className="editor-titlebar">
-          <div className="deck-name-field editor-name-field">
-            <label htmlFor="deck-name" className="visually-hidden">
-              {deckTexts.nameLabel}
-            </label>
-            <textarea
-              id="deck-name"
-              ref={nameFieldRef}
-              rows={1}
-              spellCheck={false}
-              maxLength={MAX_DECK_NAME_LENGTH}
-              value={nameText}
-              aria-invalid={nameError !== null ? 'true' : undefined}
-              aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
-              onChange={(event) => handleName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') event.preventDefault();
-              }}
-            />
-            <p id="deck-name-hint" className="visually-hidden">
-              {deckTexts.nameHint}
+        <div className="deck-name-field editor-name-field">
+          <label htmlFor="deck-name" className="visually-hidden">
+            {deckTexts.nameLabel}
+          </label>
+          <textarea
+            id="deck-name"
+            ref={nameFieldRef}
+            rows={1}
+            spellCheck={false}
+            maxLength={MAX_DECK_NAME_LENGTH}
+            value={nameText}
+            aria-invalid={nameError !== null ? 'true' : undefined}
+            aria-describedby={nameError !== null ? 'deck-name-error' : 'deck-name-hint'}
+            onChange={(event) => handleName(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') event.preventDefault();
+            }}
+          />
+          <p id="deck-name-hint" className="visually-hidden">
+            {deckTexts.nameHint}
+          </p>
+          {nameError !== null && (
+            <p id="deck-name-error" className="field-error">
+              {nameError}
             </p>
-            {nameError !== null && (
-              <p id="deck-name-error" className="field-error">
-                {nameError}
-              </p>
+          )}
+        </div>
+        {saveState !== 'error' && (
+          // Only "Tallennettu" is spoken (T-050b): the in-between states are shown but would talk over the change message.
+          <p className={`save-status save-badge${saveState === 'saved' ? ' is-saved' : ''}`}>
+            <span role="status">{saveState === 'saved' ? deckTexts.saveSaved : ''}</span>
+            {saveState !== 'saved' && (
+              <span aria-hidden="true">{saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}</span>
             )}
-          </div>
-          <div className="editor-tools">
-            {saveState !== 'error' && (
-              // Only "Tallennettu" is spoken (T-050b): the in-between states are shown but would talk over the change message.
-              <p className={`save-status save-badge${saveState === 'saved' ? ' is-saved' : ''}`}>
-                <span role="status">{saveState === 'saved' ? deckTexts.saveSaved : ''}</span>
-                {saveState !== 'saved' && (
-                  <span aria-hidden="true">{saveState === 'saving' ? deckTexts.saveSaving : deckTexts.saveDirty}</span>
-                )}
-              </p>
-            )}
-            <div className="row-actions">
-              <ExportButtons deck={content} cardsByKey={cardsByKey} />
-            </div>
-          </div>
+          </p>
+        )}
+        <DeckVisibility
+          publish={publish}
+          signedIn={publisher !== null}
+          signInAvailable={signInAvailable}
+          state={publishState}
+          onPublish={handlePublish}
+          onMakePrivate={handleMakePrivate}
+          onRetry={handleRetryPublic}
+        />
+        <div className="editor-tools">
+          <ExportButtons deck={content} cardsByKey={cardsByKey} iconToggle />
+          {totals.main > 0 && (
+            <a className="button-quiet editor-play" href={`#/pakat/${deckId}/goldfish`}>
+              <PlayIcon />
+              <span className="editor-play-label">{goldfishTexts.open}</span>
+            </a>
+          )}
         </div>
       </div>
 
-      {tabbed && (
-        <div ref={tabsRef} className="segmented segmented--fill editor-tabs" role="group" aria-label={deckTexts.editorTabsLabel}>
-          <button type="button" className="segmented-option" aria-pressed={tab === 'deck'} onClick={() => selectTab('deck', false)}>
-            {deckTexts.editorTabDeck}
-          </button>
-          <button type="button" className="segmented-option" aria-pressed={tab === 'add'} onClick={() => selectTab('add', false)}>
-            {deckTexts.editorTabAdd}
-          </button>
-        </div>
-      )}
+      {tabbed && tabsBar}
 
       {saveState === 'error' && saveError === 'conflict' && (
         <div className="notice notice-danger" role="alert">
@@ -902,25 +962,15 @@ export function DeckEditor({
         </div>
       )}
 
-      <DeckVisibility
-        publish={publish}
-        signedIn={publisher !== null}
-        signInAvailable={signInAvailable}
-        state={publishState}
-        onPublish={handlePublish}
-        onMakePrivate={handleMakePrivate}
-        onRetry={handleRetryPublic}
-      />
-
       <p className="visually-hidden" aria-live="polite" aria-atomic="true">
         {changeText}
       </p>
 
-      <div className="editor-layout">
+      <div className={`editor-layout${widePane ? ' is-wide-pane' : ''}`}>
         <section className="editor-filters" aria-labelledby="filters-heading" hidden={pickerHidden}>
           {/* The title of the whole "add cards" part sits above the search row (T-118, UX-118-23); the results region is named by it. */}
           <div className="editor-add-head">
-            <h2 id="search-heading" className="editor-add-heading">
+            <h2 id="search-heading" className="editor-add-heading visually-hidden">
               {deckTexts.searchHeading}
             </h2>
             {cameraSupported() && (
@@ -980,6 +1030,11 @@ export function DeckEditor({
               onChange={handlePickView}
             />
             <ImageSizeSelect name="deck-image-size" value={imageSize} onChange={setImageSize} disabled={pickView !== 'images'} />
+            <span className="has-info-tip pick-tip">
+              <InfoTip>
+                <span className="pick-hint">{deckTexts.pickHint}</span> <span className="pick-hint pick-explain">{deckTexts.blockedExplain}</span>
+              </InfoTip>
+            </span>
           </div>
           <ActiveFilters
             filters={[
@@ -1002,8 +1057,6 @@ export function DeckEditor({
             }}
             searchInputRef={searchInputRef}
           />
-          <p className="hint pick-hint">{deckTexts.pickHint}</p>
-          <p className="hint pick-hint pick-explain">{deckTexts.blockedExplain}</p>
           <div role="status" className="toast-slot">
             {toast !== null && (
               <p className="toast">
@@ -1087,7 +1140,7 @@ export function DeckEditor({
           )}
         </section>
 
-        <div className="deck-bar" hidden={tabbed ? tab !== 'add' : deckInView}>
+        <div className="deck-bar" hidden={tabbed ? view !== 'add' : deckInView}>
           <p className="deck-bar-text">
             <span className="deck-bar-part">{deckTexts.mobileBarMain(totals.main)}</span>
             <span aria-hidden="true">·</span>
@@ -1099,12 +1152,14 @@ export function DeckEditor({
         </div>
 
         <section className="editor-side" aria-labelledby="deck-heading" ref={sideRef} hidden={deckHidden}>
-          <div className="deck-head">
+          {!tabbed && tabsBar}
+          <div className="editor-pane" hidden={view !== 'deck'}>
+          <div className="editor-status">
             <h2 id="deck-heading" className="visually-hidden" ref={deckHeadingRef} tabIndex={-1}>
               {deckTexts.sectionLabel(content.name)}
             </h2>
-            <div className="deck-head-row">
-              <p className="deck-head-main">{deckTexts.mainProgress(totals.main)}</p>
+            <p className="editor-status-line">
+              <span>{deckTexts.mainProgress(totals.main)}</span>
               {issues.length === 0 ? (
                 legalityMark
               ) : (
@@ -1113,21 +1168,22 @@ export function DeckEditor({
                   {deckTexts.issuesCount(issues.length)}
                 </button>
               )}
-            </div>
+              <span className="editor-status-sep" aria-hidden="true">
+                ·
+              </span>
+              <span className="editor-status-sub">{deckTexts.legendsProgress(legendsCount)}</span>
+            </p>
             <progress
-              className={`deck-progress is-${mainState}`}
+              className={`editor-meter is-${mainState}`}
               max={MAX_MAIN_DECK}
               value={Math.min(totals.main, MAX_MAIN_DECK)}
               aria-label={deckTexts.mainProgress(totals.main)}
             />
-            <p className="deck-head-sub">{deckTexts.legendsProgress(legendsCount)}</p>
             {!tabbed && (
-              <p className="deck-back">
-                <button type="button" className="link-button" onClick={() => searchInputRef.current?.focus()}>
-                  <span aria-hidden="true">← </span>
-                  {deckTexts.backToSearch}
-                </button>
-              </p>
+              <button type="button" className="link-button focus-reveal deck-back" onClick={() => searchInputRef.current?.focus()}>
+                <span aria-hidden="true">← </span>
+                {deckTexts.backToSearch}
+              </button>
             )}
           </div>
 
@@ -1214,7 +1270,9 @@ export function DeckEditor({
               />
             )}
           </div>
+          </div>
 
+          <div className="editor-pane" hidden={view !== 'stats'}>
           <DeckStats
             deck={content}
             cardsByKey={cardsByKey}
@@ -1231,7 +1289,6 @@ export function DeckEditor({
             wants={wants}
             substitutes={substitutes}
             playability={playability}
-            goldfishHref={`#/pakat/${deckId}/goldfish`}
             onCopyWithOwn={canCopyWithOwn && onOpenDeck !== undefined ? () => void handleCopyWithOwn() : undefined}
             missingText={
               collectionReady
@@ -1242,7 +1299,11 @@ export function DeckEditor({
             }
           />
 
-          <DeckResults deckId={deckId} repository={repositories.games} cards={cards} cardsByKey={cardsByKey} />
+          </div>
+
+          <div className="editor-pane" hidden={view !== 'results'}>
+            <DeckResults deckId={deckId} repository={repositories.games} cards={cards} cardsByKey={cardsByKey} />
+          </div>
         </section>
       </div>
 

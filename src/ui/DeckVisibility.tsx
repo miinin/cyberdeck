@@ -5,6 +5,7 @@ import type { DeckPublish } from '../domain/deck';
 import { cleanNickname } from '../domain/validate';
 import { intlLocale } from '../locale';
 import { deckTexts } from './deckTexts';
+import { InfoTip } from './InfoTip';
 
 export type PublishResult = 'ok' | 'empty' | 'too-large' | 'failed';
 
@@ -94,6 +95,8 @@ export function DeckVisibility({
   };
 
   const toggle = () => {
+    // Signed out: the switch stays focusable and explains itself in the tip (aria-disabled), but does nothing.
+    if (!signedIn && !formOpen) return;
     if (formOpen) void selectPrivate();
     else selectPublic();
   };
@@ -140,7 +143,8 @@ export function DeckVisibility({
             aria-checked={formOpen}
             aria-labelledby={`${id}-public`}
             aria-describedby={signedIn ? `${id}-hint` : `${id}-signin`}
-            disabled={busy || !signedIn}
+            aria-disabled={!signedIn && !formOpen ? 'true' : undefined}
+            disabled={busy}
             onClick={toggle}
           >
             <span className="edit-switch-track" aria-hidden="true">
@@ -151,16 +155,23 @@ export function DeckVisibility({
             {deckTexts.visPublic}
           </span>
         </div>
-        <p id={`${id}-hint`} className="hint visibility-hint">
-          {formOpen ? deckTexts.visPublicHint : deckTexts.visPrivateHint}
-        </p>
+        <span className="has-info-tip visibility-tip">
+          <InfoTip>
+            <span id={`${id}-hint`} className="visibility-hint">
+              {formOpen ? deckTexts.visPublicHint : deckTexts.visPrivateHint}
+            </span>
+            {!signedIn && (
+              <>
+                {' '}
+                <span id={`${id}-signin`} className="visibility-hint">
+                  {signInAvailable ? deckTexts.visNeedSignIn : deckTexts.visSignInUnavailable}
+                </span>
+              </>
+            )}
+          </InfoTip>
+        </span>
       </div>
       <div className="deck-visibility-body">
-        {!signedIn && (
-          <p id={`${id}-signin`} className="hint">
-            {signInAvailable ? deckTexts.visNeedSignIn : deckTexts.visSignInUnavailable}
-          </p>
-        )}
 
         {formOpen && (
           <form className="visibility-form" onSubmit={(event) => void submit(event)} noValidate>

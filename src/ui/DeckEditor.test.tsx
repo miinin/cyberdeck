@@ -95,6 +95,7 @@ describe('Deck editor', () => {
   // T-093: each Cost bar is a button named with its count; it lists its cards.
   it('names the cost curve bars for screen readers', async () => {
     openEditor([['l1', 1], ['u0', 3], ['u1', 2]]);
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Tilastot' }));
     expect(await screen.findByRole('button', { name: 'Cost 1: 5 korttia' })).toBeEnabled();
   });
 
@@ -148,7 +149,7 @@ describe('Deck editor', () => {
     const repositories = openEditor([]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     await user.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: Unit 3' }));
-    await user.click(screen.getByRole('button', { name: 'Takaisin pakkoihin' }));
+    await user.click(screen.getByRole('button', { name: 'Pakat' }));
     await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'u3', count: 1 }]));
     expect(await screen.findByRole('heading', { level: 1, name: 'Pakat' })).toBeInTheDocument();
   });
@@ -158,7 +159,7 @@ describe('Deck editor', () => {
     const repositories = openEditor([['u3', 1]]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     await user.click(within(searchList()).getByRole('button', { name: 'Lisää pakkaan: Unit 3' }));
-    await user.click(screen.getByRole('button', { name: 'Takaisin pakkoihin' }));
+    await user.click(screen.getByRole('button', { name: 'Pakat' }));
     await screen.findByRole('heading', { level: 1, name: 'Pakat' });
     expect(await screen.findByText(/Oma pakka/)).toBeInTheDocument();
     await waitFor(async () => expect(await savedCards(repositories)).toEqual([{ card: 'u3', count: 2 }]));
@@ -214,7 +215,9 @@ describe('Deck editor', () => {
     openEditor([]);
     await screen.findByRole('heading', { level: 1, name: 'Oma pakka' });
     const row = within(searchList()).getByText('Unit 3').closest('tr') as HTMLElement;
-    expect(row).toHaveTextContent('Unit · Red · Cost 1 · Power 1 · RAM 1 · Common');
+    expect(row).toHaveTextContent('Unit · P1 · R1');
+    expect(row).toHaveTextContent('Unit, Red, Power 1, RAM 1');
+    expect(row).toHaveTextContent('Common');
   });
 
   it('switches the results to an image grid, adds with the image and remembers the choice', async () => {

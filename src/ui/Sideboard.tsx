@@ -12,6 +12,7 @@ import { ProblemFlag, SectionFlag } from './DeckProblems';
 import type { DeckProblems } from './DeckProblems';
 import { deckTexts } from './deckTexts';
 import { pickGestures } from './pickGestures';
+import { InfoTip } from './InfoTip';
 import { Stepper } from './Stepper';
 import { texts } from './texts';
 
@@ -149,10 +150,14 @@ export function Sideboard({
           {deckTexts.sideboardHeading(size, SIDEBOARD_SIZE)}
         </h2>
         <SectionFlag problem={problems?.sideSection ?? null} />
+        {rows.length === 0 && (
+          // The explanation of an empty sideboard is a tip next to the heading, so the column stays short (T-181, 4b).
+          <span className="has-info-tip">
+            <InfoTip>{deckTexts.sideboardEmpty(SIDEBOARD_SIZE)}</InfoTip>
+          </span>
+        )}
       </div>
-      {rows.length === 0 ? (
-        <p className="hint">{deckTexts.sideboardEmpty(SIDEBOARD_SIZE)}</p>
-      ) : view !== 'list' ? (
+      {rows.length === 0 ? null : view !== 'list' ? (
         // At most 7 cards, each with its own buttons: side by side, not overlapping (T-101), or the buttons hide under the next card.
         <div className="deck-stacks deck-stacks--spread">
           <div className="deck-group">
