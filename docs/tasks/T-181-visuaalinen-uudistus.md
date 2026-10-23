@@ -1,5 +1,5 @@
 # T-181 · Visuaalinen uudistus: tiivis, staattinen Cyberpunk (paketit 0–6)
-**Tila:** Paketit 0–3 Done (tuotannossa 2026-10-19), seuraavaksi paketti 4a (Pakat-lista) · **Omistaja:** Koodari (paketeittain) · **Lähde:** `docs/reports/UX-T181-kokonaiskatselmointi.md`, päätökset D-038 (R1–R9)
+**Tila:** Paketit 0–3, 4a, 4b ja 5a Done, seuraavaksi paketti 5b (Have/Want ja Proxy) · **Omistaja:** Koodari (paketeittain) · **Lähde:** `docs/reports/UX-T181-kokonaiskatselmointi.md`, päätökset D-038 (R1–R9)
 **Katselmoinnit:** PM esikatselusta. Paketti 1: ei riippuvuuksia, tallennusta, sääntöjä eikä workflowta, joten Digiturvaa ei tarvita. Paketti 6 tallentaa pakkoja: dev-testaus (D-029) ja Digiturvan kevyt katselmointi.
 
 ## Määrittely (PM)
